@@ -6,9 +6,8 @@
 
 jest.mock('crypto', () => ({ randomBytes: jest.fn() }));
 
-import { first } from 'rxjs/operators';
-import { loggingServiceMock, coreMock } from '../../../../src/core/server/mocks';
-import { createConfig$, ConfigSchema } from './config';
+import { loggingServiceMock } from '../../../../src/core/server/mocks';
+import { createConfig, ConfigSchema } from './config';
 
 describe('config schema', () => {
   it('generates proper defaults', () => {
@@ -25,9 +24,22 @@ describe('config schema', () => {
               "apikey",
             ],
           },
-          "providers": Array [
-            "basic",
-          ],
+          "providers": Object {
+            "basic": Object {
+              "basic": Object {
+                "description": undefined,
+                "enabled": true,
+                "order": 0,
+                "showInSelector": true,
+              },
+            },
+            "kerberos": undefined,
+            "oidc": undefined,
+            "pki": undefined,
+            "saml": undefined,
+            "token": undefined,
+          },
+          "selector": Object {},
         },
         "cookieName": "sid",
         "enabled": true,
@@ -54,9 +66,22 @@ describe('config schema', () => {
               "apikey",
             ],
           },
-          "providers": Array [
-            "basic",
-          ],
+          "providers": Object {
+            "basic": Object {
+              "basic": Object {
+                "description": undefined,
+                "enabled": true,
+                "order": 0,
+                "showInSelector": true,
+              },
+            },
+            "kerberos": undefined,
+            "oidc": undefined,
+            "pki": undefined,
+            "saml": undefined,
+            "token": undefined,
+          },
+          "selector": Object {},
         },
         "cookieName": "sid",
         "enabled": true,
@@ -83,9 +108,22 @@ describe('config schema', () => {
               "apikey",
             ],
           },
-          "providers": Array [
-            "basic",
-          ],
+          "providers": Object {
+            "basic": Object {
+              "basic": Object {
+                "description": undefined,
+                "enabled": true,
+                "order": 0,
+                "showInSelector": true,
+              },
+            },
+            "kerberos": undefined,
+            "oidc": undefined,
+            "pki": undefined,
+            "saml": undefined,
+            "token": undefined,
+          },
+          "selector": Object {},
         },
         "cookieName": "sid",
         "enabled": true,
@@ -148,6 +186,7 @@ describe('config schema', () => {
           "providers": Array [
             "oidc",
           ],
+          "selector": Object {},
         }
       `);
     });
@@ -181,6 +220,7 @@ describe('config schema', () => {
             "oidc",
             "basic",
           ],
+          "selector": Object {},
         }
       `);
     });
@@ -228,6 +268,7 @@ describe('config schema', () => {
             },
             "realm": "realm-1",
           },
+          "selector": Object {},
         }
       `);
     });
@@ -307,25 +348,18 @@ describe('config schema', () => {
   });
 });
 
-describe('createConfig$()', () => {
-  const mockAndCreateConfig = async (isTLSEnabled: boolean, value = {}, context?: any) => {
-    const contextMock = coreMock.createPluginInitializerContext(
-      // we must use validate to avoid errors in `createConfig$`
-      ConfigSchema.validate(value, context)
-    );
-    return await createConfig$(contextMock, isTLSEnabled)
-      .pipe(first())
-      .toPromise()
-      .then(config => ({ contextMock, config }));
-  };
+describe('createConfig()', () => {
   it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
-    const { contextMock, config } = await mockAndCreateConfig(true, {}, { dist: true });
+    const logger = loggingServiceMock.create().get();
+    const config = createConfig(ConfigSchema.validate({}, { dist: true }), logger, {
+      isTLSEnabled: true,
+    });
     expect(config.encryptionKey).toEqual('ab'.repeat(16));
 
-    expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml",
@@ -335,10 +369,11 @@ describe('createConfig$()', () => {
   });
 
   it('should log a warning if SSL is not configured', async () => {
-    const { contextMock, config } = await mockAndCreateConfig(false, {});
+    const logger = loggingServiceMock.create().get();
+    const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: false });
     expect(config.secureCookies).toEqual(false);
 
-    expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Session cookies will be transmitted over insecure connections. This is not recommended.",
@@ -348,10 +383,13 @@ describe('createConfig$()', () => {
   });
 
   it('should log a warning if SSL is not configured yet secure cookies are being used', async () => {
-    const { contextMock, config } = await mockAndCreateConfig(false, { secureCookies: true });
+    const logger = loggingServiceMock.create().get();
+    const config = createConfig(ConfigSchema.validate({ secureCookies: true }), logger, {
+      isTLSEnabled: false,
+    });
     expect(config.secureCookies).toEqual(true);
 
-    expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to function properly.",
@@ -361,9 +399,10 @@ describe('createConfig$()', () => {
   });
 
   it('should set xpack.security.secureCookies if SSL is configured', async () => {
-    const { contextMock, config } = await mockAndCreateConfig(true, {});
+    const logger = loggingServiceMock.create().get();
+    const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: true });
     expect(config.secureCookies).toEqual(true);
 
-    expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);
+    expect(loggingServiceMock.collect(logger).warn).toEqual([]);
   });
 });

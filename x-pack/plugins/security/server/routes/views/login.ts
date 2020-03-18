@@ -64,11 +64,17 @@ export function defineLoginRoutes({
         allowLogin,
         layout,
         requiresSecureConnection: config.secureCookies,
-        showLoginForm: sortedProviders.some(({ type }) => type === 'basic' || type === 'token'),
+        showLoginForm: sortedProviders.some(
+          ({ type, options: { showInSelector } }) =>
+            showInSelector && (type === 'basic' || type === 'token')
+        ),
         selector: {
           enabled: selector.enabled,
           providers: selector.enabled
-            ? sortedProviders.filter(({ type }) => type !== 'basic' && type !== 'token')
+            ? sortedProviders.filter(
+                ({ type, options: { showInSelector } }) =>
+                  showInSelector && type !== 'basic' && type !== 'token'
+              )
             : [],
         },
       };

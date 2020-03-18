@@ -5,50 +5,90 @@
  */
 
 import crypto from 'crypto';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
+import { Logger } from '../../../../src/core/server';
 
-export type ConfigType = ReturnType<typeof createConfig$> extends Observable<infer P>
-  ? P
-  : ReturnType<typeof createConfig$>;
+export type ConfigType = ReturnType<typeof createConfig>;
 
-function getCommonProviderSchemaProperties(providerType: string) {
+const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =>
+  schema.conditional(
+    schema.siblingRef('providers'),
+    schema.arrayOf(schema.string(), {
+      validate: providers => (!providers.includes(providerType) ? 'error' : undefined),
+    }),
+    optionsSchema,
+    schema.never()
+  );
+
+type ProvidersCommonConfigType = Record<
+  'enabled' | 'showInSelector' | 'order' | 'description',
+  Type<any>
+>;
+function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonConfigType> = {}) {
   return {
     enabled: schema.boolean({ defaultValue: true }),
+    showInSelector: schema.boolean({ defaultValue: true }),
     order: schema.number({ min: 0 }),
-    description: schema.string({ defaultValue: providerType }),
+    description: schema.maybe(schema.string()),
+    ...overrides,
   };
 }
 
-function getUniqueProviderSchema(providerType: string) {
+function getUniqueProviderSchema(
+  providerType: string,
+  overrides?: Partial<ProvidersCommonConfigType>
+) {
   return schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object(getCommonProviderSchemaProperties(providerType)),
-      {
-        validate(config) {
-          if (Object.values(config).filter(provider => provider.enabled).length > 1) {
-            return `Only one "${providerType}" provider can be configured.`;
-          }
-        },
-      }
-    )
+    schema.recordOf(schema.string(), schema.object(getCommonProviderSchemaProperties(overrides)), {
+      validate(config) {
+        if (Object.values(config).filter(provider => provider.enabled).length > 1) {
+          return `Only one "${providerType}" provider can be configured.`;
+        }
+      },
+    })
   );
 }
 
+type ProvidersConfigType = TypeOf<typeof providersConfigSchema>;
 const providersConfigSchema = schema.object(
   {
-    basic: getUniqueProviderSchema('basic'),
-    token: getUniqueProviderSchema('token'),
+    basic: getUniqueProviderSchema('basic', {
+      description: schema.maybe(
+        schema.any({
+          validate: () => '`basic` provider does not support custom description.',
+        })
+      ),
+      showInSelector: schema.boolean({
+        defaultValue: true,
+        validate: value => {
+          if (!value) {
+            return '`basic` provider only supports `true` in `showInSelector`.';
+          }
+        },
+      }),
+    }),
+    token: getUniqueProviderSchema('token', {
+      description: schema.maybe(
+        schema.any({
+          validate: () => '`token` provider does not support custom description.',
+        })
+      ),
+      showInSelector: schema.boolean({
+        defaultValue: true,
+        validate: value => {
+          if (!value) {
+            return '`token` provider only supports `true` in `showInSelector`.';
+          }
+        },
+      }),
+    }),
     kerberos: getUniqueProviderSchema('kerberos'),
     pki: getUniqueProviderSchema('pki'),
     saml: schema.maybe(
       schema.recordOf(
         schema.string(),
         schema.object({
-          ...getCommonProviderSchemaProperties('saml'),
+          ...getCommonProviderSchemaProperties(),
           realm: schema.string(),
           maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
         })
@@ -57,19 +97,11 @@ const providersConfigSchema = schema.object(
     oidc: schema.maybe(
       schema.recordOf(
         schema.string(),
-        schema.object({ ...getCommonProviderSchemaProperties('oidc'), realm: schema.string() })
+        schema.object({ ...getCommonProviderSchemaProperties(), realm: schema.string() })
       )
     ),
   },
   {
-    defaultValue: {
-      basic: { basic: { enabled: true, order: 0, description: 'basic' } },
-      token: undefined,
-      saml: undefined,
-      oidc: undefined,
-      pki: undefined,
-      kerberos: undefined,
-    },
     validate(config) {
       const checks = { sameOrder: new Map<number, string>(), sameName: new Map<string, string>() };
       for (const [providerType, providerGroup] of Object.entries(config)) {
@@ -112,8 +144,25 @@ export const ConfigSchema = schema.object({
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
   authc: schema.object({
-    selector: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    providers: providersConfigSchema,
+    selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
+    providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
+      defaultValue: {
+        basic: { basic: { enabled: true, showInSelector: true, order: 0, description: undefined } },
+        token: undefined,
+        saml: undefined,
+        oidc: undefined,
+        pki: undefined,
+        kerberos: undefined,
+      },
+    }),
+    oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
+    saml: providerOptionsSchema(
+      'saml',
+      schema.object({
+        realm: schema.string(),
+        maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+      })
+    ),
     http: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       autoSchemesEnabled: schema.boolean({ defaultValue: true }),
@@ -125,63 +174,96 @@ export const ConfigSchema = schema.object({
   }),
 });
 
-export function createConfig$(context: PluginInitializerContext, isTLSEnabled: boolean) {
-  return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
-    map(config => {
-      const logger = context.logger.get('config');
+export function createConfig(
+  config: TypeOf<typeof ConfigSchema>,
+  logger: Logger,
+  { isTLSEnabled }: { isTLSEnabled: boolean }
+) {
+  let encryptionKey = config.encryptionKey;
+  if (encryptionKey === undefined) {
+    logger.warn(
+      'Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on ' +
+        'restart, please set xpack.security.encryptionKey in kibana.yml'
+    );
 
-      let encryptionKey = config.encryptionKey;
-      if (encryptionKey === undefined) {
-        logger.warn(
-          'Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on ' +
-            'restart, please set xpack.security.encryptionKey in kibana.yml'
-        );
+    encryptionKey = crypto.randomBytes(16).toString('hex');
+  }
 
-        encryptionKey = crypto.randomBytes(16).toString('hex');
-      }
-
-      let secureCookies = config.secureCookies;
-      if (!isTLSEnabled) {
-        if (secureCookies) {
-          logger.warn(
-            'Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to ' +
-              'function properly.'
-          );
-        } else {
-          logger.warn(
-            'Session cookies will be transmitted over insecure connections. This is not recommended.'
-          );
-        }
-      } else if (!secureCookies) {
-        secureCookies = true;
-      }
-
-      // Remove disabled providers and sort the rest.
-      const sortedProviders: Array<{
-        type: keyof TypeOf<typeof providersConfigSchema>;
-        name: string;
-        options: { order: number; description: string };
-      }> = [];
-      for (const [type, providerGroup] of Object.entries(config.authc.providers)) {
-        for (const [name, { enabled, order, description }] of Object.entries(providerGroup ?? {})) {
-          if (!enabled) {
-            delete providerGroup![name];
-          } else {
-            sortedProviders.push({ type: type as any, name, options: { order, description } });
-          }
-        }
-      }
-
-      sortedProviders.sort(({ options: { order: orderA } }, { options: { order: orderB } }) =>
-        orderA < orderB ? -1 : orderA > orderB ? 1 : 0
+  let secureCookies = config.secureCookies;
+  if (!isTLSEnabled) {
+    if (secureCookies) {
+      logger.warn(
+        'Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to ' +
+          'function properly.'
       );
+    } else {
+      logger.warn(
+        'Session cookies will be transmitted over insecure connections. This is not recommended.'
+      );
+    }
+  } else if (!secureCookies) {
+    secureCookies = true;
+  }
 
-      return {
-        ...config,
-        authc: { ...config.authc, sortedProviders: Object.freeze(sortedProviders) },
-        encryptionKey,
-        secureCookies,
-      };
-    })
+  const isUsingLegacyProvidersFormat = Array.isArray(config.authc.providers);
+  const providers = (isUsingLegacyProvidersFormat
+    ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
+        (legacyProviders, providerType, order) => {
+          legacyProviders[providerType] = {
+            [providerType]:
+              providerType === 'saml' || providerType === 'oidc'
+                ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
+                : { enabled: true, showInSelector: true, order },
+          };
+          return legacyProviders;
+        },
+        {} as Record<string, unknown>
+      )
+    : config.authc.providers) as ProvidersConfigType;
+
+  // Remove disabled providers and sort the rest.
+  const sortedProviders: Array<{
+    type: keyof ProvidersConfigType;
+    name: string;
+    options: { order: number; showInSelector: boolean; description?: string };
+  }> = [];
+  for (const [type, providerGroup] of Object.entries(providers)) {
+    for (const [name, { enabled, showInSelector, order, description }] of Object.entries(
+      providerGroup ?? {}
+    )) {
+      if (!enabled) {
+        delete providerGroup![name];
+      } else {
+        sortedProviders.push({
+          type: type as any,
+          name,
+          options: { order, showInSelector, description },
+        });
+      }
+    }
+  }
+
+  sortedProviders.sort(({ options: { order: orderA } }, { options: { order: orderB } }) =>
+    orderA < orderB ? -1 : orderA > orderB ? 1 : 0
   );
+
+  // We enable Login Selector by default if a) it's not explicitly disabled, b) new config
+  // format of providers is used and c) we have more than one provider enabled.
+  const isLoginSelectorEnabled =
+    typeof config.authc.selector.enabled === 'boolean'
+      ? config.authc.selector.enabled
+      : !isUsingLegacyProvidersFormat &&
+        sortedProviders.filter(provider => provider.options.showInSelector).length > 1;
+
+  return {
+    ...config,
+    authc: {
+      ...config.authc,
+      selector: { ...config.authc.selector, enabled: isLoginSelectorEnabled },
+      providers,
+      sortedProviders: Object.freeze(sortedProviders),
+    },
+    encryptionKey,
+    secureCookies,
+  };
 }

@@ -36,7 +36,7 @@ describe('OIDCAuthenticationProvider', () => {
   let provider: OIDCAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
-    mockOptions = mockAuthenticationProviderOptions();
+    mockOptions = mockAuthenticationProviderOptions({ name: 'oidc' });
     provider = new OIDCAuthenticationProvider(mockOptions, { realm: 'oidc1' });
   });
 
@@ -84,7 +84,14 @@ describe('OIDCAuthenticationProvider', () => {
             '&state=statevalue' +
             '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
             '&login_hint=loginhint',
-          { state: { state: 'statevalue', nonce: 'noncevalue', nextURL: '/base-path/' } }
+          {
+            state: {
+              state: 'statevalue',
+              nonce: 'noncevalue',
+              nextURL: '/mock-server-basepath/',
+              realm: 'oidc1',
+            },
+          }
         )
       );
 
@@ -113,10 +120,15 @@ describe('OIDCAuthenticationProvider', () => {
             state: 'statevalue',
             nonce: 'noncevalue',
             nextURL: '/base-path/some-path',
+            realm: 'oidc1',
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo('/base-path/some-path', {
-            state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
+            state: {
+              accessToken: 'some-token',
+              refreshToken: 'some-refresh-token',
+              realm: 'oidc1',
+            },
           })
         );
 
@@ -137,7 +149,7 @@ describe('OIDCAuthenticationProvider', () => {
         const { request, attempt } = getMocks();
 
         await expect(
-          provider.login(request, attempt, { nextURL: '/base-path/some-path' })
+          provider.login(request, attempt, { nextURL: '/base-path/some-path', realm: 'oidc1' })
         ).resolves.toEqual(
           AuthenticationResult.failed(
             Boom.badRequest(
@@ -153,7 +165,11 @@ describe('OIDCAuthenticationProvider', () => {
         const { request, attempt } = getMocks();
 
         await expect(
-          provider.login(request, attempt, { state: 'statevalue', nonce: 'noncevalue' })
+          provider.login(request, attempt, {
+            state: 'statevalue',
+            nonce: 'noncevalue',
+            realm: 'oidc1',
+          })
         ).resolves.toEqual(
           AuthenticationResult.failed(
             Boom.badRequest(
@@ -168,7 +184,7 @@ describe('OIDCAuthenticationProvider', () => {
       it('fails if session state is not presented.', async () => {
         const { request, attempt } = getMocks();
 
-        await expect(provider.login(request, attempt, {})).resolves.toEqual(
+        await expect(provider.login(request, attempt, {} as any)).resolves.toEqual(
           AuthenticationResult.failed(
             Boom.badRequest(
               'Response session state does not have corresponding state or nonce parameters or redirect URL.'
@@ -192,6 +208,7 @@ describe('OIDCAuthenticationProvider', () => {
             state: 'statevalue',
             nonce: 'noncevalue',
             nextURL: '/base-path/some-path',
+            realm: 'oidc1',
           })
         ).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
@@ -272,6 +289,7 @@ describe('OIDCAuthenticationProvider', () => {
               state: 'statevalue',
               nonce: 'noncevalue',
               nextURL: '/base-path/s/foo/some-path',
+              realm: 'oidc1',
             },
           }
         )
@@ -310,7 +328,9 @@ describe('OIDCAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+      await expect(
+        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+      ).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: 'oidc' },
           { authHeaders: { authorization } }
@@ -344,6 +364,7 @@ describe('OIDCAuthenticationProvider', () => {
         provider.authenticate(request, {
           accessToken: 'some-valid-token',
           refreshToken: 'some-valid-refresh-token',
+          realm: 'oidc1',
         })
       ).resolves.toEqual(AuthenticationResult.notHandled());
 
@@ -364,9 +385,9 @@ describe('OIDCAuthenticationProvider', () => {
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(failureReason)
-      );
+      await expect(
+        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+      ).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
       expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
@@ -401,12 +422,18 @@ describe('OIDCAuthenticationProvider', () => {
         refreshToken: 'new-refresh-token',
       });
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+      await expect(
+        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+      ).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: 'oidc' },
           {
             authHeaders: { authorization: 'Bearer new-access-token' },
-            state: { accessToken: 'new-access-token', refreshToken: 'new-refresh-token' },
+            state: {
+              accessToken: 'new-access-token',
+              refreshToken: 'new-refresh-token',
+              realm: 'oidc1',
+            },
           }
         )
       );
@@ -434,9 +461,9 @@ describe('OIDCAuthenticationProvider', () => {
       };
       mockOptions.tokens.refresh.mockRejectedValue(refreshFailureReason);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(refreshFailureReason as any)
-      );
+      await expect(
+        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+      ).resolves.toEqual(AuthenticationResult.failed(refreshFailureReason as any));
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
@@ -470,7 +497,9 @@ describe('OIDCAuthenticationProvider', () => {
 
       mockOptions.tokens.refresh.mockResolvedValue(null);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+      await expect(
+        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+      ).resolves.toEqual(
         AuthenticationResult.redirectTo(
           'https://op-host/path/login?response_type=code' +
             '&scope=openid%20profile%20email' +
@@ -482,6 +511,7 @@ describe('OIDCAuthenticationProvider', () => {
               state: 'statevalue',
               nonce: 'noncevalue',
               nextURL: '/base-path/s/foo/some-path',
+              realm: 'oidc1',
             },
           }
         )
@@ -515,7 +545,9 @@ describe('OIDCAuthenticationProvider', () => {
 
       mockOptions.tokens.refresh.mockResolvedValue(null);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+      await expect(
+        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+      ).resolves.toEqual(
         AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
       );
 
@@ -538,11 +570,11 @@ describe('OIDCAuthenticationProvider', () => {
         DeauthenticationResult.notHandled()
       );
 
-      await expect(provider.logout(request, {})).resolves.toEqual(
+      await expect(provider.logout(request, {} as any)).resolves.toEqual(
         DeauthenticationResult.notHandled()
       );
 
-      await expect(provider.logout(request, { nonce: 'x' })).resolves.toEqual(
+      await expect(provider.logout(request, { nonce: 'x', realm: 'oidc1' })).resolves.toEqual(
         DeauthenticationResult.notHandled()
       );
 
@@ -557,9 +589,9 @@ describe('OIDCAuthenticationProvider', () => {
       const failureReason = new Error('Realm is misconfigured!');
       mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
-      await expect(provider.logout(request, { accessToken, refreshToken })).resolves.toEqual(
-        DeauthenticationResult.failed(failureReason)
-      );
+      await expect(
+        provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })
+      ).resolves.toEqual(DeauthenticationResult.failed(failureReason));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcLogout', {
@@ -574,7 +606,9 @@ describe('OIDCAuthenticationProvider', () => {
 
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
-      await expect(provider.logout(request, { accessToken, refreshToken })).resolves.toEqual(
+      await expect(
+        provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })
+      ).resolves.toEqual(
         DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
       );
 
@@ -593,7 +627,9 @@ describe('OIDCAuthenticationProvider', () => {
         redirect: 'http://fake-idp/logout&id_token_hint=thehint',
       });
 
-      await expect(provider.logout(request, { accessToken, refreshToken })).resolves.toEqual(
+      await expect(
+        provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })
+      ).resolves.toEqual(
         DeauthenticationResult.redirectTo('http://fake-idp/logout&id_token_hint=thehint')
       );
 

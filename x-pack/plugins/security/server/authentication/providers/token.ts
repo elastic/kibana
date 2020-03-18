@@ -27,6 +27,16 @@ interface ProviderLoginAttempt {
 type ProviderState = TokenPair;
 
 /**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication and client
+  // can be redirected to the login page where they can enter username and password.
+  return canRedirectRequest(request) && request.route.options.authRequired === true;
+}
+
+/**
  * Provider that supports token-based request authentication.
  */
 export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
@@ -100,7 +110,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
 
     // finally, if authentication still can not be handled for this
     // request/state combination, redirect to the login page if appropriate
-    if (authenticationResult.notHandled() && canRedirectRequest(request)) {
+    if (authenticationResult.notHandled() && canStartNewSession(request)) {
       this.logger.debug('Redirecting request to Login page.');
       authenticationResult = AuthenticationResult.redirectTo(this.getLoginPageURL(request));
     }
@@ -187,7 +197,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     // If refresh token is no longer valid, then we should clear session and redirect user to the
     // login page to re-authenticate, or fail if redirect isn't possible.
     if (refreshedTokenPair === null) {
-      if (canRedirectRequest(request)) {
+      if (canStartNewSession(request)) {
         this.logger.debug('Clearing session since both access and refresh tokens are expired.');
 
         // Set state to `null` to let `Authenticator` know that we want to clear current session.

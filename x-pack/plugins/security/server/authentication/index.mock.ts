@@ -10,7 +10,7 @@ export const authenticationMock = {
   create: (): jest.Mocked<Authentication> => ({
     login: jest.fn(),
     logout: jest.fn(),
-    isProviderEnabled: jest.fn(),
+    isProviderTypeEnabled: jest.fn(),
     createAPIKey: jest.fn(),
     getCurrentUser: jest.fn(),
     invalidateAPIKey: jest.fn(),

@@ -26,6 +26,7 @@ describe('Security Plugin', () => {
           lifespan: null,
         },
         authc: {
+          selector: { enabled: false },
           providers: ['saml', 'token'],
           saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
           http: { enabled: true, autoSchemesEnabled: true, schemes: ['apikey'] },
@@ -49,9 +50,6 @@ describe('Security Plugin', () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
                 "__legacyCompat": Object {
-                  "config": Object {
-                    "secureCookies": true,
-                  },
                   "license": Object {
                     "features$": Observable {
                       "_isScalar": false,
@@ -76,7 +74,7 @@ describe('Security Plugin', () => {
                   "getSessionInfo": [Function],
                   "invalidateAPIKey": [Function],
                   "isAuthenticated": [Function],
-                  "isProviderEnabled": [Function],
+                  "isProviderTypeEnabled": [Function],
                   "login": [Function],
                   "logout": [Function],
                 },

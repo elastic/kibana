@@ -36,7 +36,7 @@ describe('KerberosAuthenticationProvider', () => {
   let provider: KerberosAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
-    mockOptions = mockAuthenticationProviderOptions();
+    mockOptions = mockAuthenticationProviderOptions({ name: 'kerberos' });
     provider = new KerberosAuthenticationProvider(mockOptions);
   });
 

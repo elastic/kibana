@@ -29,7 +29,9 @@ describe('View routes', () => {
 
   it('registers Login routes if `basic` provider is enabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create();
-    routeParamsMock.authc.isProviderTypeEnabled.mockImplementation(provider => provider !== 'token');
+    routeParamsMock.authc.isProviderTypeEnabled.mockImplementation(
+      provider => provider !== 'token'
+    );
 
     defineViewRoutes(routeParamsMock);
 
@@ -47,7 +49,29 @@ describe('View routes', () => {
 
   it('registers Login routes if `token` provider is enabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create();
-    routeParamsMock.authc.isProviderTypeEnabled.mockImplementation(provider => provider !== 'basic');
+    routeParamsMock.authc.isProviderTypeEnabled.mockImplementation(
+      provider => provider !== 'basic'
+    );
+
+    defineViewRoutes(routeParamsMock);
+
+    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
+      Array [
+        "/login",
+        "/internal/security/login_state",
+        "/security/account",
+        "/security/logged_out",
+        "/logout",
+        "/security/overwritten_session",
+      ]
+    `);
+  });
+
+  it('registers Login routes if Login Selector is enabled even if both `token` and `basic` providers are not enabled', () => {
+    const routeParamsMock = routeDefinitionParamsMock.create({
+      authc: { selector: { enabled: true } },
+    });
+    routeParamsMock.authc.isProviderTypeEnabled.mockReturnValue(false);
 
     defineViewRoutes(routeParamsMock);
 

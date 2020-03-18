@@ -29,6 +29,15 @@ interface ProviderState {
 }
 
 /**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication.
+  return request.route.options.authRequired === true;
+}
+
+/**
  * Provider that supports PKI request authentication.
  */
 export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
@@ -64,12 +73,12 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       authenticationResult = await this.authenticateViaState(request, state);
 
       // If access token expired or doesn't match to the certificate fingerprint we should try to get
-      // a new one in exchange to peer certificate chain.
-      if (
+      // a new one in exchange to peer certificate chain assuming request can initiate new session.
+      const invalidAccessToken =
         authenticationResult.notHandled() ||
         (authenticationResult.failed() &&
-          Tokens.isAccessTokenExpiredError(authenticationResult.error))
-      ) {
+          Tokens.isAccessTokenExpiredError(authenticationResult.error));
+      if (invalidAccessToken && canStartNewSession(request)) {
         authenticationResult = await this.authenticateViaPeerCertificate(request);
         // If we have an active session that we couldn't use to authenticate user and at the same time
         // we couldn't use peer's certificate to establish a new one, then we should respond with 401
@@ -77,12 +86,15 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
         if (authenticationResult.notHandled()) {
           return AuthenticationResult.failed(Boom.unauthorized());
         }
+      } else if (invalidAccessToken) {
+        return AuthenticationResult.notHandled();
       }
     }
 
     // If we couldn't authenticate by means of all methods above, let's try to check if we can authenticate
     // request using its peer certificate chain, otherwise just return authentication result we have.
-    return authenticationResult.notHandled()
+    // We shouldn't establish new session if authentication isn't required for this particular request.
+    return authenticationResult.notHandled() && canStartNewSession(request)
       ? await this.authenticateViaPeerCertificate(request)
       : authenticationResult;
   }

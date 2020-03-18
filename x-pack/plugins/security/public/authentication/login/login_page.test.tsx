@@ -7,8 +7,9 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from '@testing-library/react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { nextTick } from 'test_utils/enzyme_helpers';
-import { LoginState } from './login_state';
+import { LoginState } from '../../../common/login_state';
 import { LoginPage } from './login_page';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { DisabledLoginForm, BasicLoginForm } from './components';
@@ -17,6 +18,9 @@ const createLoginState = (options?: Partial<LoginState>) => {
   return {
     allowLogin: true,
     layout: 'form',
+    requiresSecureConnection: false,
+    showLoginForm: true,
+    selector: { enabled: false, providers: [] },
     ...options,
   } as LoginState;
 };
@@ -55,9 +59,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -74,14 +78,14 @@ describe('LoginPage', () => {
   describe('disabled form states', () => {
     it('renders as expected when secure connection is required but not present', async () => {
       const coreStartMock = coreMock.createStart();
-      httpMock.get.mockResolvedValue(createLoginState());
+      httpMock.get.mockResolvedValue(createLoginState({ requiresSecureConnection: true }));
 
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={true}
         />
       );
 
@@ -100,9 +104,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -121,9 +125,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -144,9 +148,30 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+    });
+
+    it('renders as expected when login is not enabled', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState({ showLoginForm: false }));
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
         />
       );
 
@@ -167,9 +192,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -190,9 +215,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -212,9 +237,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage="This is an *important* message"
-          requiresSecureConnection={false}
         />
       );
 
@@ -228,6 +253,73 @@ describe('LoginPage', () => {
     });
   });
 
+  describe('login selector', () => {
+    it('renders as expected with login form', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(
+        createLoginState({
+          selector: {
+            enabled: true,
+            providers: [
+              { type: 'saml', name: 'saml1', options: { description: 'Login w/SAML', order: 0 } },
+              { type: 'pki', name: 'pki1', options: { description: 'Login w/PKI', order: 1 } },
+            ],
+          },
+        })
+      );
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      });
+
+      expect(wrapper.find(EuiFlexGroup)).toMatchSnapshot();
+    });
+
+    it('renders as expected without login form', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(
+        createLoginState({
+          showLoginForm: false,
+          selector: {
+            enabled: true,
+            providers: [
+              { type: 'saml', name: 'saml1', options: { description: 'Login w/SAML', order: 0 } },
+              { type: 'pki', name: 'pki1', options: { description: 'Login w/PKI', order: 1 } },
+            ],
+          },
+        })
+      );
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      });
+
+      expect(wrapper.find(EuiFlexGroup)).toMatchSnapshot();
+    });
+  });
+
   describe('API calls', () => {
     it('GET login_state success', async () => {
       const coreStartMock = coreMock.createStart();
@@ -236,9 +328,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -261,9 +353,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 

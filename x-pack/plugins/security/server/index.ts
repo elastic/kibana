@@ -34,43 +34,26 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   deprecations: ({ rename, unused }) => [
     rename('sessionTimeout', 'session.idleTimeout'),
     unused('authorization.legacyFallback.enabled'),
-    // Deprecation transformation for the old array-based format of `xpack.security.authc.providers`.
+    // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.
     (settings, fromPath, log) => {
-      const authcConfig = settings?.xpack?.security?.authc;
-      if (!Array.isArray(authcConfig?.providers)) {
-        return settings;
-      }
-
-      log(
-        'Defining `xpack.security.authc.providers` as an array of provider types is deprecated. Use extended `object` format.'
-      );
-
-      const providerTypes = new Set(authcConfig.providers as string[]);
-      authcConfig.providers = {};
-
-      let order = 0;
-      for (const providerType of providerTypes) {
-        const isProviderWithAdditionalConfig = providerType === 'saml' || providerType === 'oidc';
-        authcConfig.providers[providerType] = {
-          [providerType]: isProviderWithAdditionalConfig
-            ? { enabled: true, order, ...authcConfig[providerType] }
-            : { enabled: true, order },
-        };
-
-        if (isProviderWithAdditionalConfig) {
-          delete authcConfig[providerType];
-        }
-
-        order++;
+      if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
+        log(
+          'Defining `xpack.security.authc.providers` as an array of provider types is deprecated. Use extended `object` format instead.'
+        );
       }
 
       return settings;
     },
     (settings, fromPath, log) => {
       const hasProviderType = (providerType: string) => {
-        return Object.values(
-          settings?.xpack?.security?.authc?.providers?.[providerType] || {}
-        ).some(provider => (provider as { enabled: boolean | undefined })?.enabled !== false);
+        const providers = settings?.xpack?.security?.authc?.providers;
+        if (Array.isArray(providers)) {
+          return providers.includes(providerType);
+        }
+
+        return Object.values(providers?.[providerType] || {}).some(
+          provider => (provider as { enabled: boolean | undefined })?.enabled !== false
+        );
       };
 
       if (hasProviderType('basic') && hasProviderType('token')) {

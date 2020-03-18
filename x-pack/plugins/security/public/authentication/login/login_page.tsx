@@ -9,15 +9,30 @@ import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import { BehaviorSubject } from 'rxjs';
 import { parse } from 'url';
-import { EuiButton, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, FatalErrorsStart, HttpStart } from 'src/core/public';
+import {
+  CoreStart,
+  FatalErrorsStart,
+  HttpStart,
+  IHttpFetchError,
+  NotificationsStart,
+} from 'src/core/public';
 import { LoginState } from '../../../common/login_state';
 import { BasicLoginForm, DisabledLoginForm } from './components';
 
 interface Props {
   http: HttpStart;
+  notifications: NotificationsStart;
   fatalErrors: FatalErrorsStart;
   loginAssistanceMessage: string;
 }
@@ -42,7 +57,7 @@ const infoMessageMap = new Map([
 ]);
 
 export class LoginPage extends Component<Props, State> {
-  state = { loginState: null };
+  state = { loginState: null } as State;
 
   public async componentDidMount() {
     const loadingCount$ = new BehaviorSubject(1);
@@ -106,7 +121,9 @@ export class LoginPage extends Component<Props, State> {
           </div>
         </header>
         <div className={contentBodyClasses}>
-          {this.getLoginForm({ ...loginState, isSecureConnection })}
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem>{this.getLoginForm({ ...loginState, isSecureConnection })}</EuiFlexItem>
+          </EuiFlexGroup>
         </div>
       </div>
     );
@@ -225,7 +242,7 @@ export class LoginPage extends Component<Props, State> {
           fullWidth={true}
           onClick={() => this.login(provider.type, provider.name)}
         >
-          {provider.options.description}
+          {provider.options.description ?? `${provider.type}/${provider.name}`}
         </EuiButton>
       ));
 
@@ -257,17 +274,22 @@ export class LoginPage extends Component<Props, State> {
     );
   };
 
-  private login = (providerType: string, providerName: string) => {
-    const query = parse(window.location.href, true).query;
-    const next =
-      Array.isArray(query.next) && query.next.length > 0 ? query.next[0] : (query.next as string);
-    const queryString = next ? `?next=${encodeURIComponent(next)}${window.location.hash}` : '';
+  private login = async (providerType: string, providerName: string) => {
+    try {
+      const { location } = await this.props.http.post<{ location: string }>(
+        `${this.props.http.basePath.serverBasePath}/internal/security/login_with`,
+        { body: JSON.stringify({ providerType, providerName, currentURL: window.location.href }) }
+      );
 
-    window.location.href = `${
-      this.props.http.basePath.serverBasePath
-    }/internal/security/login/${encodeURIComponent(providerType)}/${encodeURIComponent(
-      providerName
-    )}${queryString}`;
+      window.location.href = location;
+    } catch (err) {
+      this.props.notifications.toasts.addDanger(
+        i18n.translate('xpack.security.loginPage.loginSelectorErrorMessage', {
+          defaultMessage: 'Could not perform login: {message}. Contact your system administrator.',
+          values: { message: (err as IHttpFetchError).message },
+        })
+      );
+    }
   };
 }
 

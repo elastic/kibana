@@ -52,18 +52,13 @@ export enum SAMLLogin {
    * Login or IdP initiated Login).
    */
   LoginWithSAMLResponse = 'login-saml-response',
-  /**
-   * The login flow when we've captured user URL fragment and ready to start SAML handshake.
-   */
-  LoginWithRedirectURLFragmentCaptured = 'login-redirect-url-fragment-captured',
 }
 
 /**
  * Describes the parameters that are required by the provider to process the initial login request.
  */
 type ProviderLoginAttempt =
-  | { type: SAMLLogin.LoginInitiatedByUser; redirectURL?: string }
-  | { type: SAMLLogin.LoginWithRedirectURLFragmentCaptured; redirectURLFragment: string }
+  | { type: SAMLLogin.LoginInitiatedByUser; redirectURLPath?: string; redirectURLFragment?: string }
   | { type: SAMLLogin.LoginWithSAMLResponse; samlResponse: string };
 
 /**
@@ -72,6 +67,16 @@ type ProviderLoginAttempt =
  */
 function isSAMLRequestQuery(query: any): query is { SAMLRequest: string } {
   return query && query.SAMLRequest;
+}
+
+/**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication and client
+  // can be redirected to the Identity Provider where they can authenticate.
+  return canRedirectRequest(request) && request.route.options.authRequired === true;
 }
 
 /**
@@ -132,35 +137,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.failed(Boom.unauthorized(message));
     }
 
-    if (attempt.type === SAMLLogin.LoginWithRedirectURLFragmentCaptured) {
-      if (!state || !state.redirectURL) {
-        const message = 'State does not include URL path to redirect to.';
+    if (attempt.type === SAMLLogin.LoginInitiatedByUser) {
+      const redirectURLPath = attempt.redirectURLPath || state?.redirectURL;
+      if (!redirectURLPath) {
+        const message = 'State or login attempt does not include URL path to redirect to.';
         this.logger.debug(message);
         return AuthenticationResult.failed(Boom.badRequest(message));
       }
 
-      let redirectURLFragment = attempt.redirectURLFragment;
-      if (redirectURLFragment.length > 0 && !redirectURLFragment.startsWith('#')) {
-        this.logger.warn('Redirect URL fragment does not start with `#`.');
-        redirectURLFragment = `#${redirectURLFragment}`;
-      }
-
-      let redirectURL = `${state.redirectURL}${redirectURLFragment}`;
-      const redirectURLSize = new ByteSizeValue(Buffer.byteLength(redirectURL));
-      if (this.maxRedirectURLSize.isLessThan(redirectURLSize)) {
-        this.logger.warn(
-          `Max URL size should not exceed ${this.maxRedirectURLSize.toString()} but it was ${redirectURLSize.toString()}. Only URL path is captured.`
-        );
-        redirectURL = state.redirectURL;
-      } else {
-        this.logger.debug('Captured redirect URL.');
-      }
-
-      return this.authenticateViaHandshake(request, redirectURL);
-    }
-
-    if (attempt.type === SAMLLogin.LoginInitiatedByUser) {
-      return this.captureRedirectURL(request, attempt.redirectURL);
+      return this.captureRedirectURL(request, redirectURLPath, attempt.redirectURLFragment);
     }
 
     const { samlResponse } = attempt;
@@ -230,7 +215,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If we couldn't authenticate by means of all methods above, let's try to capture user URL and
     // initiate SAML handshake, otherwise just return authentication result we have.
-    return authenticationResult.notHandled() && canRedirectRequest(request)
+    return authenticationResult.notHandled() && canStartNewSession(request)
       ? this.captureRedirectURL(request)
       : authenticationResult;
   }
@@ -478,7 +463,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
     // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
     if (refreshedTokenPair === null) {
-      if (canRedirectRequest(request)) {
+      if (canStartNewSession(request)) {
         this.logger.debug(
           'Both access and refresh tokens are expired. Capturing redirect URL and re-initiating SAML handshake.'
         );
@@ -514,12 +499,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private async authenticateViaHandshake(request: KibanaRequest, redirectURL: string) {
     this.logger.debug('Trying to initiate SAML handshake.');
-
-    // If client can't handle redirect response, we shouldn't initiate SAML handshake.
-    if (!canRedirectRequest(request)) {
-      this.logger.debug('SAML handshake can not be initiated by AJAX requests.');
-      return AuthenticationResult.notHandled();
-    }
 
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
@@ -586,20 +565,23 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Redirects user to the client-side page that will grab URL fragment and redirect user back to Kibana
-   * to initiate SAML handshake.
+   * Tries to capture full redirect URL (both path and fragment) and initiate SAML handshake.
    * @param request Request instance.
-   * @param [redirectURL] Optional URL user is supposed to be redirected to after successful login.
-   * If not provided the URL of the specified request is used.
+   * @param [redirectURLPath] Optional URL path user is supposed to be redirected to after successful
+   * login. If not provided the URL path of the specified request is used.
+   * @param [redirectURLFragment] Optional URL fragment of the URL user is supposed to be redirected
+   * to after successful login. If not provided user will be redirected to the client-side page that
+   * will grab it and redirect user back to Kibana to initiate SAML handshake.
    */
   private captureRedirectURL(
     request: KibanaRequest,
-    redirectURL = `${this.options.basePath.get(request)}${request.url.path}`
+    redirectURLPath = `${this.options.basePath.get(request)}${request.url.path}`,
+    redirectURLFragment?: string
   ) {
     // If the size of the path already exceeds the maximum allowed size of the URL to store in the
     // session there is no reason to try to capture URL fragment and we start handshake immediately.
     // In this case user will be redirected to the Kibana home/root after successful login.
-    const redirectURLSize = new ByteSizeValue(Buffer.byteLength(redirectURL));
+    let redirectURLSize = new ByteSizeValue(Buffer.byteLength(redirectURLPath));
     if (this.maxRedirectURLSize.isLessThan(redirectURLSize)) {
       this.logger.warn(
         `Max URL path size should not exceed ${this.maxRedirectURLSize.toString()} but it was ${redirectURLSize.toString()}. URL is not captured.`
@@ -607,9 +589,30 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return this.authenticateViaHandshake(request, '');
     }
 
-    return AuthenticationResult.redirectTo(
-      `${this.options.basePath.serverBasePath}/internal/security/saml/capture-url-fragment`,
-      { state: { redirectURL, realm: this.realm } }
-    );
+    // If URL fragment wasn't specified at all, let's try to capture it.
+    if (redirectURLFragment === undefined) {
+      return AuthenticationResult.redirectTo(
+        `${this.options.basePath.serverBasePath}/internal/security/saml/capture-url-fragment`,
+        { state: { redirectURL: redirectURLPath, realm: this.realm } }
+      );
+    }
+
+    if (redirectURLFragment.length > 0 && !redirectURLFragment.startsWith('#')) {
+      this.logger.warn('Redirect URL fragment does not start with `#`.');
+      redirectURLFragment = `#${redirectURLFragment}`;
+    }
+
+    let redirectURL = `${redirectURLPath}${redirectURLFragment}`;
+    redirectURLSize = new ByteSizeValue(Buffer.byteLength(redirectURL));
+    if (this.maxRedirectURLSize.isLessThan(redirectURLSize)) {
+      this.logger.warn(
+        `Max URL size should not exceed ${this.maxRedirectURLSize.toString()} but it was ${redirectURLSize.toString()}. Only URL path is captured.`
+      );
+      redirectURL = redirectURLPath;
+    } else {
+      this.logger.debug('Captured redirect URL.');
+    }
+
+    return this.authenticateViaHandshake(request, redirectURL);
   }
 }

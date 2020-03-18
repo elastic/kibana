@@ -78,7 +78,7 @@ describe('PKIAuthenticationProvider', () => {
   let provider: PKIAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
-    mockOptions = mockAuthenticationProviderOptions();
+    mockOptions = mockAuthenticationProviderOptions({ name: 'pki' });
     provider = new PKIAuthenticationProvider(mockOptions);
   });
 

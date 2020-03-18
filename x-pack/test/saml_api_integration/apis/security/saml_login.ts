@@ -206,9 +206,8 @@ export default function({ getService }: FtrProviderContext) {
 
       it('AJAX requests should not initiate handshake', async () => {
         const ajaxResponse = await supertest
-          .get(initiateHandshakeURL)
+          .get('/abc/xyz/handshake?one=two three')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', captureURLCookie.cookieString())
           .expect(401);
 
         expect(ajaxResponse.headers['set-cookie']).to.be(undefined);

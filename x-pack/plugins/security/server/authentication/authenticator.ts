@@ -508,7 +508,7 @@ export class Authenticator {
     // If for some reason we have a session stored for the provider that is not available
     // (e.g. when user was logged in with one provider, but then configuration has changed
     // and that provider is no longer available), then we should clear session entirely.
-    const sessionProvider = sessionValue && this.providers.get(sessionValue.provider.name);
+    const sessionProvider = sessionValue && this.providers.get(sessionValue.provider?.name);
     if (
       sessionValue &&
       (!sessionProvider || sessionProvider.type !== sessionValue?.provider.type)

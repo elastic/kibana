@@ -38,6 +38,25 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
 />
 `;
 
+exports[`LoginPage disabled form states renders as expected when login is not enabled 1`] = `
+<DisabledLoginForm
+  message={
+    <FormattedMessage
+      defaultMessage="Contact your system administrator."
+      id="xpack.security.loginPage.noLoginMethodsAvailableMessage"
+      values={Object {}}
+    />
+  }
+  title={
+    <FormattedMessage
+      defaultMessage="Login is disabled."
+      id="xpack.security.loginPage.noLoginMethodsAvailableTitle"
+      values={Object {}}
+    />
+  }
+/>
+`;
+
 exports[`LoginPage disabled form states renders as expected when secure connection is required but not present 1`] = `
 <DisabledLoginForm
   message={
@@ -112,6 +131,85 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
   infoMessage="Your session has timed out. Please log in again."
   loginAssistanceMessage="This is an *important* message"
 />
+`;
+
+exports[`LoginPage login selector renders as expected with login form 1`] = `
+<EuiFlexGroup
+  gutterSize="l"
+>
+  <EuiFlexItem>
+    <EuiButton
+      className="loginWelcome__selectorButton"
+      fullWidth={true}
+      iconType="user"
+      key="0"
+      onClick={[Function]}
+    >
+      Login w/SAML
+    </EuiButton>
+    <EuiButton
+      className="loginWelcome__selectorButton"
+      fullWidth={true}
+      iconType="user"
+      key="1"
+      onClick={[Function]}
+    >
+      Login w/PKI
+    </EuiButton>
+    <EuiText
+      color="subdued"
+      textAlign="center"
+    >
+      ―――  
+      <FormattedMessage
+        defaultMessage="OR"
+        id="xpack.security.loginPage.loginSelectorOR"
+        values={Object {}}
+      />
+        ―――
+    </EuiText>
+    <EuiSpacer
+      size="m"
+    />
+    <BasicLoginForm
+      http={
+        Object {
+          "addLoadingCountSource": [MockFunction],
+          "get": [MockFunction],
+        }
+      }
+      infoMessage="Your session has timed out. Please log in again."
+      loginAssistanceMessage=""
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`LoginPage login selector renders as expected without login form 1`] = `
+<EuiFlexGroup
+  gutterSize="l"
+>
+  <EuiFlexItem>
+    <EuiButton
+      className="loginWelcome__selectorButton"
+      fullWidth={true}
+      iconType="user"
+      key="0"
+      onClick={[Function]}
+    >
+      Login w/SAML
+    </EuiButton>
+    <EuiButton
+      className="loginWelcome__selectorButton"
+      fullWidth={true}
+      iconType="user"
+      key="1"
+      onClick={[Function]}
+    >
+      Login w/PKI
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;
 
 exports[`LoginPage page renders as expected 1`] = `

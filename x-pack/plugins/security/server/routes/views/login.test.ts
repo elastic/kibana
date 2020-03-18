@@ -13,19 +13,16 @@ import {
   IRouter,
 } from '../../../../../../src/core/server';
 import { SecurityLicense } from '../../../common/licensing';
-import { Authentication } from '../../authentication';
 import { defineLoginRoutes } from './login';
 
 import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Login view routes', () => {
-  let authc: jest.Mocked<Authentication>;
   let router: jest.Mocked<IRouter>;
   let license: jest.Mocked<SecurityLicense>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
-    authc = routeParamsMock.authc;
     router = routeParamsMock.router;
     license = routeParamsMock.license;
 
@@ -45,7 +42,7 @@ describe('Login view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.options).toEqual({ authRequired: 'optional' });
 
       expect(routeConfig.validate).toEqual({
         body: undefined,
@@ -73,7 +70,7 @@ describe('Login view routes', () => {
       );
     });
 
-    it('redirects user to the root page if they have a session already or login is disabled.', async () => {
+    it('redirects user to the root page if they are authenticated or login is disabled.', async () => {
       for (const { query, expectedLocation } of [
         { query: {}, expectedLocation: '/mock-server-basepath/' },
         {
@@ -85,27 +82,27 @@ describe('Login view routes', () => {
           expectedLocation: '/mock-server-basepath/',
         },
       ]) {
-        const request = httpServerMock.createKibanaRequest({ query });
+        // Redirect if user is authenticated even if `showLogin` is `true`.
+        let request = httpServerMock.createKibanaRequest({
+          query,
+          auth: { isAuthenticated: true },
+        });
         (request as any).url = new URL(
           `${request.url.path}${request.url.search}`,
           'https://kibana.co'
         );
-
-        // Redirect if user has an active session even if `showLogin` is `true`.
-        authc.getSessionInfo.mockResolvedValue({
-          provider: 'basic',
-          now: 0,
-          idleTimeoutExpiration: null,
-          lifespanExpiration: null,
-        });
         license.getFeatures.mockReturnValue({ showLogin: true } as any);
         await expect(routeHandler({} as any, request, kibanaResponseFactory)).resolves.toEqual({
           options: { headers: { location: `${expectedLocation}` } },
           status: 302,
         });
 
-        // Redirect if `showLogin` is `false` even if user doesn't have an active session even.
-        authc.getSessionInfo.mockResolvedValue(null);
+        // Redirect if `showLogin` is `false` even if user is not authenticated.
+        request = httpServerMock.createKibanaRequest({ query, auth: { isAuthenticated: false } });
+        (request as any).url = new URL(
+          `${request.url.path}${request.url.search}`,
+          'https://kibana.co'
+        );
         license.getFeatures.mockReturnValue({ showLogin: false } as any);
         await expect(routeHandler({} as any, request, kibanaResponseFactory)).resolves.toEqual({
           options: { headers: { location: `${expectedLocation}` } },
@@ -114,11 +111,10 @@ describe('Login view routes', () => {
       }
     });
 
-    it('renders view if user does not have an active session and login page can be shown.', async () => {
-      authc.getSessionInfo.mockResolvedValue(null);
+    it('renders view if user is not authenticated and login page can be shown.', async () => {
       license.getFeatures.mockReturnValue({ showLogin: true } as any);
 
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ auth: { isAuthenticated: false } });
       const contextMock = coreMock.createRequestHandlerContext();
 
       await expect(
@@ -133,7 +129,6 @@ describe('Login view routes', () => {
         status: 200,
       });
 
-      expect(authc.getSessionInfo).toHaveBeenCalledWith(request);
       expect(contextMock.rendering.render).toHaveBeenCalledWith({ includeUserSettings: false });
     });
   });
@@ -170,11 +165,18 @@ describe('Login view routes', () => {
       const request = httpServerMock.createKibanaRequest();
       const contextMock = coreMock.createRequestHandlerContext();
 
+      const expectedPayload = {
+        allowLogin: true,
+        layout: 'error-es-unavailable',
+        showLoginForm: true,
+        requiresSecureConnection: false,
+        selector: { enabled: false, providers: [] },
+      };
       await expect(
         routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
       ).resolves.toEqual({
-        options: { body: { allowLogin: true, layout: 'error-es-unavailable', showLogin: true } },
-        payload: { allowLogin: true, layout: 'error-es-unavailable', showLogin: true },
+        options: { body: expectedPayload },
+        payload: expectedPayload,
         status: 200,
       });
     });
@@ -185,11 +187,18 @@ describe('Login view routes', () => {
       const request = httpServerMock.createKibanaRequest();
       const contextMock = coreMock.createRequestHandlerContext();
 
+      const expectedPayload = {
+        allowLogin: true,
+        layout: 'form',
+        showLoginForm: true,
+        requiresSecureConnection: false,
+        selector: { enabled: false, providers: [] },
+      };
       await expect(
         routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
       ).resolves.toEqual({
-        options: { body: { allowLogin: true, layout: 'form', showLogin: true } },
-        payload: { allowLogin: true, layout: 'form', showLogin: true },
+        options: { body: expectedPayload },
+        payload: expectedPayload,
         status: 200,
       });
     });

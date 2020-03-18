@@ -108,7 +108,7 @@ describe('Basic authentication routes', () => {
       expect(response.status).toBe(500);
       expect(response.payload).toEqual(unhandledException);
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'basic',
+        provider: { type: 'basic' },
         value: { username: 'user', password: 'password' },
       });
     });
@@ -122,7 +122,7 @@ describe('Basic authentication routes', () => {
       expect(response.status).toBe(401);
       expect(response.payload).toEqual(failureReason);
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'basic',
+        provider: { type: 'basic' },
         value: { username: 'user', password: 'password' },
       });
     });
@@ -135,7 +135,7 @@ describe('Basic authentication routes', () => {
       expect(response.status).toBe(401);
       expect(response.payload).toEqual('Unauthorized');
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'basic',
+        provider: { type: 'basic' },
         value: { username: 'user', password: 'password' },
       });
     });
@@ -149,7 +149,7 @@ describe('Basic authentication routes', () => {
         expect(response.status).toBe(204);
         expect(response.payload).toBeUndefined();
         expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-          provider: 'basic',
+          provider: { type: 'basic' },
           value: { username: 'user', password: 'password' },
         });
       });
@@ -165,7 +165,7 @@ describe('Basic authentication routes', () => {
         expect(response.status).toBe(204);
         expect(response.payload).toBeUndefined();
         expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-          provider: 'token',
+          provider: { type: 'token' },
           value: { username: 'user', password: 'password' },
         });
       });

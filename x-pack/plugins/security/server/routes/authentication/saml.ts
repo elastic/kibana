@@ -71,7 +71,7 @@ export function defineSAMLRoutes({ router, logger, authc, csp, basePath }: Route
         const authenticationResult = await authc.login(request, {
           provider: { type: SAMLAuthenticationProvider.type },
           value: {
-            type: SAMLLogin.LoginWithRedirectURLFragmentCaptured,
+            type: SAMLLogin.LoginInitiatedByUser,
             redirectURLFragment: request.query.redirectURLFragment,
           },
         });

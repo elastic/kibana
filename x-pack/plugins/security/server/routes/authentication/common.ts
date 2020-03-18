@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { parseNext } from '../../../common/parse_next';
 import { canRedirectRequest, OIDCLogin, SAMLLogin } from '../../authentication';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -12,7 +13,6 @@ import {
   OIDCAuthenticationProvider,
   SAMLAuthenticationProvider,
 } from '../../authentication/providers';
-import { parseNext } from '../../../common/parse_next';
 import { RouteDefinitionParams } from '..';
 
 /**
@@ -77,52 +77,61 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
     );
   }
 
-  function getLoginAttemptForProviderType(providerType: string, next: string) {
+  function getLoginAttemptForProviderType(providerType: string, redirectURL: string) {
+    const [redirectURLPath] = redirectURL.split('#');
+    const redirectURLFragment =
+      redirectURL.length > redirectURLPath.length
+        ? redirectURL.substring(redirectURLPath.length)
+        : '';
+
     if (providerType === SAMLAuthenticationProvider.type) {
-      return { type: SAMLLogin.LoginInitiatedByUser, redirectURL: next };
+      return { type: SAMLLogin.LoginInitiatedByUser, redirectURLPath, redirectURLFragment };
     }
 
     if (providerType === OIDCAuthenticationProvider.type) {
-      return { type: OIDCLogin.LoginInitiatedByUser, redirectURL: next };
+      return { type: OIDCLogin.LoginInitiatedByUser, redirectURLPath };
     }
 
     return undefined;
   }
 
-  router.get(
+  router.post(
     {
-      path: '/internal/security/login/{providerType}/{providerName}',
+      path: '/internal/security/login_with',
       validate: {
-        params: schema.object({
+        body: schema.object({
           providerType: schema.string(),
           providerName: schema.string(),
+          currentURL: schema.string(),
         }),
-        query: schema.object({ next: schema.maybe(schema.string()) }),
       },
       options: { authRequired: false },
     },
-    async (context, request, response) => {
-      const { providerType, providerName } = request.params;
-      logger.info(`Logging in in with provider "${providerName}" (${providerType})`);
+    createLicensedRouteHandler(async (context, request, response) => {
+      const { providerType, providerName, currentURL } = request.body;
+      logger.info(`Logging in with provider "${providerName}" (${providerType})`);
 
+      const redirectURL = parseNext(currentURL ?? '', basePath.serverBasePath);
       try {
         const authenticationResult = await authc.login(request, {
           provider: { name: providerName },
-          value: getLoginAttemptForProviderType(
-            providerType,
-            parseNext(request.url?.href ?? '', basePath.serverBasePath)
-          ),
+          value: getLoginAttemptForProviderType(providerType, redirectURL),
         });
 
-        if (authenticationResult.redirected()) {
-          return response.redirected({ headers: { location: authenticationResult.redirectURL! } });
+        if (authenticationResult.redirected() || authenticationResult.succeeded()) {
+          return response.ok({
+            body: { location: authenticationResult.redirectURL || redirectURL },
+          });
         }
 
-        return response.unauthorized();
+        return response.unauthorized({
+          body: authenticationResult.error,
+          headers: authenticationResult.authResponseHeaders,
+        });
       } catch (err) {
         logger.error(err);
         return response.internalError();
       }
-    }
+    })
   );
 }

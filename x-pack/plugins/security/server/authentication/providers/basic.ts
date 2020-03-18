@@ -32,6 +32,16 @@ interface ProviderState {
 }
 
 /**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication and client
+  // can be redirected to the login page where they can enter username and password.
+  return canRedirectRequest(request) && request.route.options.authRequired === true;
+}
+
+/**
  * Provider that supports request authentication via Basic HTTP Authentication.
  */
 export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
@@ -86,7 +96,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     // If state isn't present let's redirect user to the login page.
-    if (canRedirectRequest(request)) {
+    if (canStartNewSession(request)) {
       this.logger.debug('Redirecting request to Login page.');
       const basePath = this.options.basePath.get(request);
       return AuthenticationResult.redirectTo(
