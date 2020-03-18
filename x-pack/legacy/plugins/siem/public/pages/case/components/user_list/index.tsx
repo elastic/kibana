@@ -68,11 +68,14 @@ const renderUsers = (
 };
 
 export const UserList = React.memo(({ email, headline, users }: UserListProps) => {
-  const handleSendEmail = useCallback((emailAddress: string | undefined | null) => {
-    if (emailAddress && emailAddress != null) {
-      window.open(`mailto:${emailAddress}?subject=${email.subject}&body=${email.body}`, '_blank');
-    }
-  }, []);
+  const handleSendEmail = useCallback(
+    (emailAddress: string | undefined | null) => {
+      if (emailAddress && emailAddress != null) {
+        window.open(`mailto:${emailAddress}?subject=${email.subject}&body=${email.body}`, '_blank');
+      }
+    },
+    [email.subject]
+  );
   return (
     <EuiText>
       <h4>{headline}</h4>
