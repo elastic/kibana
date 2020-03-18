@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 jest.mock('ui/new_platform');
+jest.mock('../../../kibana_services');
 
 import { ESSearchSource } from './es_search_source';
 import { VectorLayer } from '../../vector_layer';
@@ -18,6 +19,11 @@ const descriptor: ESSearchSourceDescriptor = {
 };
 
 describe('ES Search Source', () => {
+  beforeEach(() => {
+    require('../../../kibana_services').getUiSettings = () => ({
+      get: jest.fn(),
+    });
+  });
   it('should create a vector layer', () => {
     const source = new ESSearchSource(descriptor, null);
     const layer = source.createDefaultLayer();

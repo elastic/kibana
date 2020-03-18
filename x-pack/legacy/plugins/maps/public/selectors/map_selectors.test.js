@@ -14,15 +14,15 @@ jest.mock('../../../../../plugins/maps/public/reducers/non_serializable_instance
     return {};
   },
 }));
-jest.mock('ui/timefilter', () => ({
-  timefilter: {
+jest.mock('../kibana_services', () => ({
+  getTimeFilter: () => ({
     getTime: () => {
       return {
         to: 'now',
         from: 'now-15m',
       };
     },
-  },
+  }),
 }));
 
 import { getTimeFilters } from './map_selectors';
