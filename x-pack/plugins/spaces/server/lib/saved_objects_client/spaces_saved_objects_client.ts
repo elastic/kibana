@@ -228,7 +228,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     namespaces: string[],
     options: SavedObjectsAddNamespacesOptions = {}
   ) {
-    return await this.client.addNamespaces(type, id, namespaces, options);
+    throwErrorIfNamespaceSpecified(options);
+
+    return await this.client.addNamespaces(type, id, namespaces, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
   }
 
   /**
@@ -245,7 +250,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     namespaces: string[],
     options: SavedObjectsRemoveNamespacesOptions = {}
   ) {
-    return await this.client.removeNamespaces(type, id, namespaces, options);
+    throwErrorIfNamespaceSpecified(options);
+
+    return await this.client.removeNamespaces(type, id, namespaces, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
   }
 
   /**

@@ -254,10 +254,10 @@ describe('SavedObjectsRepository', () => {
   describe('#addNamespaces', () => {
     const id = 'some-id';
     const type = MULTI_NAMESPACE_TYPE;
-    const currentNs1 = 'foo-namespace';
-    const currentNs2 = 'bar-namespace';
-    const newNs1 = 'baz-namespace';
-    const newNs2 = 'qux-namespace';
+    const currentNs1 = 'default';
+    const currentNs2 = 'foo-namespace';
+    const newNs1 = 'bar-namespace';
+    const newNs2 = 'baz-namespace';
 
     const mockGetResponse = (type, id) => {
       // mock a document that exists in two namespaces
@@ -313,9 +313,9 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const expectNotFoundError = async (type, id, namespaces) => {
+      const expectNotFoundError = async (type, id, namespaces, options) => {
         await expect(
-          savedObjectsRepository.addNamespaces(type, id, namespaces)
+          savedObjectsRepository.addNamespaces(type, id, namespaces, options)
         ).rejects.toThrowError(createGenericNotFoundError(type, id));
       };
       const expectBadRequestError = async (type, id, namespaces, message) => {
@@ -370,6 +370,14 @@ describe('SavedObjectsRepository', () => {
         expect(callAdminCluster).toHaveBeenCalledTimes(1);
       });
 
+      it(`throws when the document exists, but not in this namespace`, async () => {
+        mockGetResponse(type, id); // this._callCluster('get', ...)
+        await expectNotFoundError(type, id, [newNs1, newNs2], {
+          namespace: 'some-other-namespace',
+        });
+        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      });
+
       it(`throws when the document already exists in one or more of the targeted namespaces`, async () => {
         mockGetResponse(type, id); // this._callCluster('get', ...)
         const namespaces = [newNs1, currentNs1, newNs2, currentNs2];
@@ -389,24 +397,6 @@ describe('SavedObjectsRepository', () => {
         callAdminCluster.mockResolvedValue({ status: 404 }); // this._writeToCluster('update', ...)
         await expectNotFoundError(type, id, [newNs1, newNs2]);
         expect(callAdminCluster).toHaveBeenCalledTimes(2);
-      });
-
-      it(`throws when validateExistingNamespaces fails`, async () => {
-        mockGetResponse(type, id); // this._callCluster('get', ...)
-        const error = new Error('validation error');
-        const validateExistingNamespaces = jest.fn();
-        validateExistingNamespaces.mockImplementation(async () => {
-          throw error;
-        });
-
-        await expect(
-          savedObjectsRepository.addNamespaces(type, id, [newNs1, newNs2], {
-            validateExistingNamespaces,
-          })
-        ).rejects.toThrowError(error);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
-        expect(validateExistingNamespaces).toHaveBeenCalledTimes(1);
-        expect(validateExistingNamespaces).toHaveBeenCalledWith([currentNs1, currentNs2]);
       });
     });
 
@@ -2556,9 +2546,9 @@ describe('SavedObjectsRepository', () => {
   describe('#removeNamespaces', () => {
     const id = 'some-id';
     const type = MULTI_NAMESPACE_TYPE;
-    const namespace1 = 'foo-namespace';
-    const namespace2 = 'bar-namespace';
-    const namespace3 = 'baz-namespace';
+    const namespace1 = 'default';
+    const namespace2 = 'foo-namespace';
+    const namespace3 = 'bar-namespace';
 
     const mockGetResponse = (type, id, namespaces) => {
       // mock a document that exists in two namespaces
@@ -2693,9 +2683,9 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const expectNotFoundError = async (type, id, namespaces) => {
+      const expectNotFoundError = async (type, id, namespaces, options) => {
         await expect(
-          savedObjectsRepository.removeNamespaces(type, id, namespaces)
+          savedObjectsRepository.removeNamespaces(type, id, namespaces, options)
         ).rejects.toThrowError(createGenericNotFoundError(type, id));
       };
       const expectBadRequestError = async (type, id, namespaces, message) => {
@@ -2747,6 +2737,12 @@ describe('SavedObjectsRepository', () => {
       it(`throws when ES is unable to find the index during get`, async () => {
         callAdminCluster.mockResolvedValue({ status: 404 }); // this._callCluster('get', ...)
         await expectNotFoundError(type, id, [namespace1, namespace2]);
+        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      });
+
+      it(`throws when the document exists, but not in this namespace`, async () => {
+        mockGetResponse(type, id, [namespace1]); // this._callCluster('get', ...)
+        await expectNotFoundError(type, id, [namespace1], { namespace: 'some-other-namespace' });
         expect(callAdminCluster).toHaveBeenCalledTimes(1);
       });
 

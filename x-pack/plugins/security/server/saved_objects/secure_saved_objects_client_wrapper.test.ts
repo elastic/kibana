@@ -27,6 +27,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
   const errors = ({
     decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
     decorateGeneralError: jest.fn().mockReturnValue(generalError),
+    isNotFoundError: jest.fn().mockReturnValue(false),
   } as unknown) as jest.Mocked<SavedObjectsClientContract['errors']>;
   const getSpacesService = jest.fn().mockReturnValue(true);
 
@@ -260,18 +261,13 @@ describe('#addNamespaces', () => {
   const newNs2 = 'bar-namespace';
   const namespaces = [newNs1, newNs2];
   const existingNs = 'baz-namespace';
+  const existingVersion = Symbol('existing-version');
   const privilege1 = `mock-saved_object:${type}/create`;
   const privilege2 = `mock-saved_object:${type}/update`;
-  const apiCallReturnValue = Symbol();
 
   beforeEach(() => {
-    clientOpts.baseClient.addNamespaces.mockImplementation(
-      async (...args: Parameters<typeof clientOpts.baseClient.addNamespaces>) => {
-        const { validateExistingNamespaces } = args[3]!;
-        await validateExistingNamespaces!([existingNs]);
-        return apiCallReturnValue;
-      }
-    );
+    const apiCallReturnValue = { namespaces: [existingNs], version: existingVersion };
+    clientOpts.baseClient.get.mockReturnValue(apiCallReturnValue as any);
   });
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
@@ -298,6 +294,37 @@ describe('#addNamespaces', () => {
       { id, type, namespaces, options: {} }
     );
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+  });
+
+  test(`throws decorated ForbiddenError when preflight check fails with a 404 error and unauthorized to update in current space`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
+      getMockCheckPrivilegesSuccess // create
+    );
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+      getMockCheckPrivilegesFailure // update
+    );
+    const rejection = new Error('An actual error would happen here');
+    clientOpts.baseClient.get.mockRejectedValue(rejection);
+    clientOpts.errors.isNotFoundError.mockReturnValue(true);
+
+    await expect(client.addNamespaces(type, id, namespaces)).rejects.toThrowError(
+      clientOpts.forbiddenError
+    );
+
+    expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
+    expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
+  });
+
+  test(`throws error without decoration when preflight check fails with a 404 error and authorized to update in current space`, async () => {
+    const rejection = new Error('An actual error would happen here');
+    clientOpts.baseClient.get.mockRejectedValue(rejection);
+    clientOpts.errors.isNotFoundError.mockReturnValue(true);
+
+    await expect(client.addNamespaces(type, id, namespaces)).rejects.toThrowError(rejection);
+
+    expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(2);
+    expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
   });
 
   test(`throws decorated ForbiddenError when unauthorized to update in existing space`, async () => {
@@ -327,7 +354,33 @@ describe('#addNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
   });
 
+  test(`calls baseClient.get with type and id`, async () => {
+    await client.addNamespaces(type, id, namespaces);
+    expect(clientOpts.baseClient.get).toHaveBeenCalledTimes(1);
+    expect(clientOpts.baseClient.get).toHaveBeenCalledWith(type, id, { namespace: undefined });
+  });
+
+  test(`defaults to version of the existing document`, async () => {
+    await client.addNamespaces(type, id, namespaces);
+    expect(clientOpts.baseClient.addNamespaces).toHaveBeenCalledTimes(1);
+    expect(clientOpts.baseClient.addNamespaces).toHaveBeenCalledWith(type, id, namespaces, {
+      version: existingVersion,
+    });
+  });
+
+  test(`accepts version`, async () => {
+    const version = Symbol('specified-version') as any;
+    await client.addNamespaces(type, id, namespaces, { version });
+    expect(clientOpts.baseClient.addNamespaces).toHaveBeenCalledTimes(1);
+    expect(clientOpts.baseClient.addNamespaces).toHaveBeenCalledWith(type, id, namespaces, {
+      version,
+    });
+  });
+
   test(`returns result of baseClient.addNamespaces when authorized`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.addNamespaces.mockReturnValue(apiCallReturnValue as any);
+
     const result = await client.addNamespaces(type, id, namespaces);
     expect(result).toBe(apiCallReturnValue);
 

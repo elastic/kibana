@@ -942,26 +942,13 @@ export class SavedObjectsRepository {
       );
     }
 
-    const { version, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { version, namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const rawId = this._serializer.generateRawId(undefined, type, id);
-    const getResponse = await this._callCluster('get', {
-      id: rawId,
-      index: this.getIndexForType(type),
-      ignore: [404],
-    });
+    const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
+    const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
 
-    const getDocNotFound = getResponse.found === false;
-    const getIndexNotFound = getResponse.status === 404;
-    if (getDocNotFound || getIndexNotFound) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-
-    const existingNamespaces = (getResponse?._source?.namespaces || []) as string[];
-    if (options.validateExistingNamespaces) {
-      await options.validateExistingNamespaces(existingNamespaces);
-    }
-    if (existingNamespaces.length) {
+    if (existingNamespaces?.length) {
       // there should never be a case where a multi-namespace object does not have any existing namespaces
       // however, it is a possibility if someone manually modifies the document in Elasticsearch
       const intersection = existingNamespaces.filter(x => namespaces.includes(x));
@@ -982,7 +969,7 @@ export class SavedObjectsRepository {
     const updateResponse = await this._writeToCluster('update', {
       id: rawId,
       index: this.getIndexForType(type),
-      ...getExpectedVersionProperties(version, getResponse),
+      ...getExpectedVersionProperties(version, preflightResult),
       refresh,
       ignore: [404],
       body: {
@@ -1018,22 +1005,12 @@ export class SavedObjectsRepository {
       );
     }
 
-    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const rawId = this._serializer.generateRawId(undefined, type, id);
-    const getResponse = await this._callCluster('get', {
-      id: rawId,
-      index: this.getIndexForType(type),
-      ignore: [404],
-    });
+    const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
+    const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
 
-    const getDocNotFound = getResponse.found === false;
-    const getIndexNotFound = getResponse.status === 404;
-    if (getDocNotFound || getIndexNotFound) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-
-    const existingNamespaces = getResponse._source.namespaces as string[] | undefined;
     if (existingNamespaces) {
       // if there are somehow no existing namespaces, don't treat this as a missing namespace --
       // instead, allow the operation to proceed and delete this saved object
@@ -1044,11 +1021,9 @@ export class SavedObjectsRepository {
         );
       }
     }
-    const remainingNamespaces = existingNamespaces
-      ? existingNamespaces.filter(x => !namespaces.includes(x))
-      : [];
+    const remainingNamespaces = existingNamespaces?.filter(x => !namespaces.includes(x));
 
-    if (remainingNamespaces.length) {
+    if (remainingNamespaces?.length) {
       // if there is 1 or more namespace remaining, update the saved object
       const time = this._getCurrentTime();
 
@@ -1060,7 +1035,7 @@ export class SavedObjectsRepository {
       const updateResponse = await this._writeToCluster('update', {
         id: rawId,
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(undefined, getResponse),
+        ...getExpectedVersionProperties(undefined, preflightResult),
         refresh,
         ignore: [404],
         body: {
@@ -1078,7 +1053,7 @@ export class SavedObjectsRepository {
       const deleteResponse = await this._writeToCluster('delete', {
         id: this._serializer.generateRawId(undefined, type, id),
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(undefined, getResponse),
+        ...getExpectedVersionProperties(undefined, preflightResult),
         refresh,
         ignore: [404],
       });

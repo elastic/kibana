@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsRemoveNamespacesOptions 
+export interface SavedObjectsRemoveNamespacesOptions extends SavedObjectsBaseOptions 
 ```
 
 ## Properties

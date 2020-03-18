@@ -1648,9 +1648,8 @@ export interface SavedObjectReference {
 }
 
 // @public (undocumented)
-export interface SavedObjectsAddNamespacesOptions {
+export interface SavedObjectsAddNamespacesOptions extends SavedObjectsBaseOptions {
     refresh?: MutatingOperationRefreshSetting;
-    validateExistingNamespaces?: (existingNamespaces: string[]) => Promise<void>;
     version?: string;
 }
 
@@ -2092,7 +2091,7 @@ export interface SavedObjectsRawDoc {
 }
 
 // @public (undocumented)
-export interface SavedObjectsRemoveNamespacesOptions {
+export interface SavedObjectsRemoveNamespacesOptions extends SavedObjectsBaseOptions {
     refresh?: MutatingOperationRefreshSetting;
 }
 

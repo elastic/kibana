@@ -23,39 +23,68 @@ const {
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 const { fail404 } = testCaseFailures;
-const fail400 = (param: string, condition?: boolean): { failure?: 400; fail400Param?: string } =>
-  condition !== false ? { failure: 400, fail400Param: param } : {};
 
 const createTestCases = (spaceId: string) => {
-  const _fail400 = (condition?: boolean) => fail400(spaceId, condition);
+  const fail400 = (condition?: boolean): { failure?: 400; fail400Param?: string } =>
+    condition !== false ? { failure: 400, fail400Param: spaceId } : {};
   const namespaces = [spaceId];
   return [
     // Test cases to check adding the target namespace to different saved objects
-    { ...CASES.DEFAULT_SPACE_ONLY, namespaces, ..._fail400(spaceId === DEFAULT_SPACE_ID) },
-    { ...CASES.SPACE_1_ONLY, namespaces, ..._fail400(spaceId === SPACE_1_ID) },
-    { ...CASES.SPACE_2_ONLY, namespaces, ..._fail400(spaceId === SPACE_2_ID) },
-    { ...CASES.DEFAULT_AND_SPACE_1, namespaces, ..._fail400(spaceId !== SPACE_2_ID) },
-    { ...CASES.DEFAULT_AND_SPACE_2, namespaces, ..._fail400(spaceId !== SPACE_1_ID) },
-    { ...CASES.SPACE_1_AND_SPACE_2, namespaces, ..._fail400(spaceId !== DEFAULT_SPACE_ID) },
-    { ...CASES.ALL_SPACES, namespaces, ..._fail400() },
+    {
+      ...CASES.DEFAULT_SPACE_ONLY,
+      namespaces,
+      ...fail400(spaceId === DEFAULT_SPACE_ID),
+      ...fail404(spaceId !== DEFAULT_SPACE_ID),
+    },
+    {
+      ...CASES.SPACE_1_ONLY,
+      namespaces,
+      ...fail400(spaceId === SPACE_1_ID),
+      ...fail404(spaceId !== SPACE_1_ID),
+    },
+    {
+      ...CASES.SPACE_2_ONLY,
+      namespaces,
+      ...fail400(spaceId === SPACE_2_ID),
+      ...fail404(spaceId !== SPACE_2_ID),
+    },
+    {
+      ...CASES.DEFAULT_AND_SPACE_1,
+      namespaces,
+      ...fail400(spaceId !== SPACE_2_ID),
+      ...fail404(spaceId === SPACE_2_ID),
+    },
+    {
+      ...CASES.DEFAULT_AND_SPACE_2,
+      namespaces,
+      ...fail400(spaceId !== SPACE_1_ID),
+      ...fail404(spaceId === SPACE_1_ID),
+    },
+    {
+      ...CASES.SPACE_1_AND_SPACE_2,
+      namespaces,
+      ...fail400(spaceId !== DEFAULT_SPACE_ID),
+      ...fail404(spaceId === DEFAULT_SPACE_ID),
+    },
+    { ...CASES.ALL_SPACES, namespaces, ...fail400() },
     { ...CASES.DOES_NOT_EXIST, namespaces, ...fail404() },
-    // Test cases to check adding namespaces to different saved objects that exist in one space
+    // Test cases to check adding multiple namespaces to different saved objects that exist in one space
     // These are non-exhaustive, they only check cases for adding two additional namespaces to a saved object
     // More permutations are covered in the corresponding spaces_only test suite
     {
       ...CASES.DEFAULT_SPACE_ONLY,
       namespaces: [SPACE_1_ID, SPACE_2_ID],
-      ..._fail400(spaceId !== DEFAULT_SPACE_ID), // fail if we already added this space in the test case above
+      ...fail404(spaceId !== DEFAULT_SPACE_ID),
     },
     {
       ...CASES.SPACE_1_ONLY,
       namespaces: [DEFAULT_SPACE_ID, SPACE_2_ID],
-      ..._fail400(spaceId !== SPACE_1_ID), // fail if we already added this space in the test case above
+      ...fail404(spaceId !== SPACE_1_ID),
     },
     {
       ...CASES.SPACE_2_ONLY,
       namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID],
-      ..._fail400(spaceId !== SPACE_2_ID), // fail if we already added this space in the test case above
+      ...fail404(spaceId !== SPACE_2_ID),
     },
   ];
 };
@@ -66,10 +95,10 @@ const calculateSingleSpaceAuthZ = (
   const targetsOtherSpace = testCases.filter(
     x => !x.namespaces.includes(spaceId) || x.namespaces.length > 1
   );
-  const tmp = testCases.filter(x => x.namespaces === [spaceId]); // doesn't target other space
-  const doesntExistInSpace = tmp.filter(x => !x.existingNamespaces.includes(spaceId));
+  const tmp = testCases.filter(x => !targetsOtherSpace.includes(x)); // doesn't target other space
+  const doesntExistInThisSpace = tmp.filter(x => !x.existingNamespaces.includes(spaceId));
   const existsInThisSpace = tmp.filter(x => x.existingNamespaces.includes(spaceId));
-  return { targetsOtherSpace, doesntExistInSpace, existsInThisSpace };
+  return { targetsOtherSpace, doesntExistInThisSpace, existsInThisSpace };
 };
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: TestInvoker) {
@@ -86,12 +115,15 @@ export default function({ getService }: TestInvoker) {
       unauthorized: createTestDefinitions(testCases, true, { fail403Param: 'create' }),
       authorizedInSpace: [
         createTestDefinitions(thisSpace.targetsOtherSpace, true, { fail403Param: 'create' }),
-        createTestDefinitions(thisSpace.doesntExistInSpace, true, { fail403Param: 'update' }),
+        createTestDefinitions(thisSpace.doesntExistInThisSpace, false),
         createTestDefinitions(thisSpace.existsInThisSpace, false),
       ].flat(),
       authorizedInOtherSpace: [
         createTestDefinitions(otherSpace.targetsOtherSpace, true, { fail403Param: 'create' }),
-        createTestDefinitions(otherSpace.doesntExistInSpace, true, { fail403Param: 'update' }),
+        // If the preflight GET request fails, it will return a 404 error; users who are authorized to create saved objects in the target
+        // space(s) but are not authorized to update saved objects in this space will see a 403 error instead of 404. This is a safeguard to
+        // prevent potential information disclosure of the spaces that a given saved object may exist in.
+        createTestDefinitions(otherSpace.doesntExistInThisSpace, true, { fail403Param: 'update' }),
         createTestDefinitions(otherSpace.existsInThisSpace, false),
       ].flat(),
       authorized: createTestDefinitions(testCases, false),

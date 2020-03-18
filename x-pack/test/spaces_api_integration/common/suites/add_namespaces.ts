@@ -11,7 +11,6 @@ import { SPACES } from '../lib/spaces';
 import {
   expectResponses,
   getUrlPrefix,
-  getTestTitle,
 } from '../../../saved_object_api_integration/common/lib/space_test_utils';
 import {
   DescribeFn,
@@ -33,10 +32,12 @@ export interface AddNamespacesTestCase {
 }
 
 const TYPE = 'sharedtype';
-export const createRequest = ({ id, namespaces }: AddNamespacesTestCase) => ({
+const createRequest = ({ id, namespaces }: AddNamespacesTestCase) => ({
   spaces: namespaces,
   object: { type: TYPE, id },
 });
+const getTestTitle = ({ id, namespaces }: AddNamespacesTestCase) =>
+  `{id: ${id}, namespaces: [${namespaces.join(',')}]}`;
 
 export function addNamespacesTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectResponseBody = (testCase: AddNamespacesTestCase): ExpectResponseBody => async (
@@ -76,7 +77,7 @@ export function addNamespacesTestSuiteFactory(esArchiver: any, supertest: SuperT
       cases = cases.map(x => ({ ...x, failure: 403, fail403Param: options?.fail403Param }));
     }
     return cases.map(x => ({
-      title: getTestTitle({ ...x, type: TYPE }),
+      title: getTestTitle(x),
       responseStatusCode: x.failure ?? 204,
       request: createRequest(x),
       responseBody: options?.responseBodyOverride || expectResponseBody(x),

@@ -111,20 +111,18 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface SavedObjectsAddNamespacesOptions {
+export interface SavedObjectsAddNamespacesOptions extends SavedObjectsBaseOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
-  /** A callback to validate the existing namespaces of this saved object. Can be used for implementing authorization checks. */
-  validateExistingNamespaces?: (existingNamespaces: string[]) => Promise<void>;
 }
 
 /**
  *
  * @public
  */
-export interface SavedObjectsRemoveNamespacesOptions {
+export interface SavedObjectsRemoveNamespacesOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }

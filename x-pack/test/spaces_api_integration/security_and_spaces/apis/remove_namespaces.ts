@@ -14,6 +14,7 @@ import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../../common/l
 import { TestInvoker } from '../../common/lib/types';
 import {
   removeNamespacesTestSuiteFactory,
+  RemoveNamespacesTestCase,
   RemoveNamespacesTestDefinition,
 } from '../../common/suites/remove_namespaces';
 
@@ -27,33 +28,45 @@ const fail400 = (param: string, condition?: boolean): { failure?: 400; fail400Pa
   condition !== false ? { failure: 400, fail400Param: param } : {};
 
 const createTestCases = (spaceId: string) => {
-  const _fail400 = (condition?: boolean) => fail400(spaceId, condition);
-  const namespaces = [spaceId];
+  // Test cases to check removing all three namespaces from different saved objects that exist in two spaces
+  // These are non-exhaustive, they only check some cases that should result in 400 or 404 errors
+  // More permutations are covered in the corresponding spaces_only test suite
+  let namespaces = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
+  const multipleSpaces = [
+    {
+      id: CASES.DEFAULT_AND_SPACE_1.id,
+      namespaces,
+      ...fail400(SPACE_2_ID, spaceId !== SPACE_2_ID),
+      ...fail404(spaceId === SPACE_2_ID),
+    },
+    {
+      id: CASES.DEFAULT_AND_SPACE_2.id,
+      namespaces,
+      ...fail400(SPACE_1_ID, spaceId !== SPACE_1_ID),
+      ...fail404(spaceId === SPACE_1_ID),
+    },
+    {
+      id: CASES.SPACE_1_AND_SPACE_2.id,
+      namespaces,
+      ...fail400(DEFAULT_SPACE_ID, spaceId !== DEFAULT_SPACE_ID),
+      ...fail404(spaceId === DEFAULT_SPACE_ID),
+    },
+  ] as RemoveNamespacesTestCase[];
+
   // Test cases to check removing the target namespace from different saved objects
+  namespaces = [spaceId];
   const singleSpace = [
-    { id: CASES.DEFAULT_SPACE_ONLY.id, namespaces, ..._fail400(spaceId !== DEFAULT_SPACE_ID) },
-    { id: CASES.SPACE_1_ONLY.id, namespaces, ..._fail400(spaceId !== SPACE_1_ID) },
-    { id: CASES.SPACE_2_ONLY.id, namespaces, ..._fail400(spaceId !== SPACE_2_ID) },
-    { id: CASES.DEFAULT_AND_SPACE_1.id, namespaces, ..._fail400(spaceId === SPACE_2_ID) },
-    { id: CASES.DEFAULT_AND_SPACE_2.id, namespaces, ..._fail400(spaceId === SPACE_1_ID) },
-    { id: CASES.SPACE_1_AND_SPACE_2.id, namespaces, ..._fail400(spaceId === DEFAULT_SPACE_ID) },
+    { id: CASES.DEFAULT_SPACE_ONLY.id, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
+    { id: CASES.SPACE_1_ONLY.id, namespaces, ...fail404(spaceId !== SPACE_1_ID) },
+    { id: CASES.SPACE_2_ONLY.id, namespaces, ...fail404(spaceId !== SPACE_2_ID) },
+    { id: CASES.DEFAULT_AND_SPACE_1.id, namespaces, ...fail404(spaceId === SPACE_2_ID) },
+    { id: CASES.DEFAULT_AND_SPACE_2.id, namespaces, ...fail404(spaceId === SPACE_1_ID) },
+    { id: CASES.SPACE_1_AND_SPACE_2.id, namespaces, ...fail404(spaceId === DEFAULT_SPACE_ID) },
     { id: CASES.ALL_SPACES.id, namespaces },
     { id: CASES.DOES_NOT_EXIST.id, namespaces, ...fail404() },
-  ];
-  // Test cases to check removing all existing namespaces from different saved objects that exist in multiple spaces
-  // These are non-exhaustive, they only check cases for removing all namespaces from a saved object
-  // More permutations are covered in the corresponding spaces_only test suite
-  const multipleSpaces = [
-    { ...CASES.DEFAULT_AND_SPACE_1, ...fail400(spaceId, spaceId !== SPACE_2_ID) },
-    { ...CASES.DEFAULT_AND_SPACE_2, ...fail400(spaceId, spaceId !== SPACE_1_ID) },
-    { ...CASES.SPACE_1_AND_SPACE_2, ...fail400(spaceId, spaceId !== DEFAULT_SPACE_ID) },
-    { ...CASES.ALL_SPACES, ...fail400(spaceId) },
-  ].map(({ id, existingNamespaces, failure }) => ({
-    id,
-    namespaces: existingNamespaces, // attempt to remove all of the existing namespaces
-    failure, // if this was not forbidden, each of these was already removed from the target space in the above test cases
-  }));
-  const allCases = singleSpace.concat(multipleSpaces);
+  ] as RemoveNamespacesTestCase[];
+
+  const allCases = multipleSpaces.concat(singleSpace);
   return { singleSpace, multipleSpaces, allCases };
 };
 

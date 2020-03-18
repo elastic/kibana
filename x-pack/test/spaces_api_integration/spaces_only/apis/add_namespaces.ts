@@ -27,18 +27,15 @@ const fail400 = (param: string, condition?: boolean): { failure?: 400; fail400Pa
  * @param spaceId the namespace to add to each saved object
  */
 const createSingleTestCases = (spaceId: string) => {
-  const nonExistentSpaceId = 'does_not_exist'; // space that doesn't exist
-  const _fail400 = (condition?: boolean) => fail400(spaceId, condition);
-  const namespaces = [spaceId];
+  const namespaces = ['some-space-id'];
   return [
-    { ...CASES.DEFAULT_SPACE_ONLY, namespaces, ..._fail400(spaceId === DEFAULT_SPACE_ID) },
-    { ...CASES.SPACE_1_ONLY, namespaces, ..._fail400(spaceId === SPACE_1_ID) },
-    { ...CASES.SPACE_2_ONLY, namespaces, ..._fail400(spaceId === SPACE_2_ID) },
-    { ...CASES.DEFAULT_AND_SPACE_1, namespaces, ..._fail400(spaceId !== SPACE_2_ID) },
-    { ...CASES.DEFAULT_AND_SPACE_2, namespaces, ..._fail400(spaceId !== SPACE_1_ID) },
-    { ...CASES.SPACE_1_AND_SPACE_2, namespaces, ..._fail400(spaceId !== DEFAULT_SPACE_ID) },
-    { ...CASES.ALL_SPACES, namespaces, ..._fail400() },
-    { ...CASES.ALL_SPACES, namespaces: [nonExistentSpaceId] }, // yes, we allow adding non-existent namespaces
+    { ...CASES.DEFAULT_SPACE_ONLY, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
+    { ...CASES.SPACE_1_ONLY, namespaces, ...fail404(spaceId !== SPACE_1_ID) },
+    { ...CASES.SPACE_2_ONLY, namespaces, ...fail404(spaceId !== SPACE_2_ID) },
+    { ...CASES.DEFAULT_AND_SPACE_1, namespaces, ...fail404(spaceId === SPACE_2_ID) },
+    { ...CASES.DEFAULT_AND_SPACE_2, namespaces, ...fail404(spaceId === SPACE_1_ID) },
+    { ...CASES.SPACE_1_AND_SPACE_2, namespaces, ...fail404(spaceId === DEFAULT_SPACE_ID) },
+    { ...CASES.ALL_SPACES, namespaces },
     { ...CASES.DOES_NOT_EXIST, namespaces, ...fail404() },
   ];
 };

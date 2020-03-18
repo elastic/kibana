@@ -147,13 +147,27 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const args = { type, id, namespaces, options };
     // to share an object, the user must have the "create" permission in all of the destination namespaces
     await this.ensureAuthorized(type, 'create', namespaces, args, 'addNamespacesCreate');
+    let existingVersion: string | undefined;
+    const { namespace } = options;
+    try {
+      // to share an object, the user must also have the "update" permission in one or more of the source namespaces
+      const preflightResult = await this.baseClient.get(type, id, { namespace });
+      existingVersion = preflightResult.version;
+      const _namespaces = preflightResult.namespaces || [];
+      await this.ensureAuthorized(type, 'update', _namespaces, args, 'addNamespacesUpdate', false);
+    } catch (error) {
+      if (this.errors.isNotFoundError(error)) {
+        // if the preflight request did not find a saved object, check the user's privileges at the current namespace; this will instead
+        // throw a 403 error for unauthorized users, to prevent possible information disclosure of the saved object's existing namespace(s)
+        // otherwise, if the user is authorized to update saved objects in the current namespace, they will see the actual 404 error
+        await this.ensureAuthorized(type, 'update', namespace, args, 'addNamespacesUpdate', false);
+      }
+      throw error;
+    }
 
     return await this.baseClient.addNamespaces(type, id, namespaces, {
       ...options,
-      validateExistingNamespaces: async (existing: string[]) => {
-        // to share an object, the user must also have the "update" permission in one or more of the source namespaces
-        await this.ensureAuthorized(type, 'update', existing, args, 'addNamespacesUpdate', false);
-      },
+      version: options.version || existingVersion,
     });
   }
 

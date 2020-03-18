@@ -51,7 +51,7 @@ export const getTestTitle = (
 ) => {
   const testCases = Array.isArray(testCaseOrCases) ? testCaseOrCases : [testCaseOrCases];
   const stringify = (array: TestCase[]) => array.map(x => `${x.type}/${x.id}`).join();
-  if (bulkStatusCode === 403 || (testCases.length === 1 && testCases[0].failure === 403 )) {
+  if (bulkStatusCode === 403 || (testCases.length === 1 && testCases[0].failure === 403)) {
     return `forbidden [${stringify(testCases)}]`;
   }
   if (testCases.find(x => x.failure === 403)) {
@@ -75,16 +75,10 @@ export const getTestTitle = (
 
 export const testCaseFailures = {
   // test suites need explicit return types for number primitives
-  fail400: (condition?: boolean): { failure?: 400 } => ({
-    failure: condition !== false ? 400 : undefined,
-  }),
-  fail404: (condition?: boolean): { failure?: 404 } => ({
-    failure: condition !== false ? 404 : undefined,
-  }),
-  fail409: (condition?: boolean): { failure?: 409 } => ({
-    failure: condition !== false ? 409 : undefined,
-  }),
-};
+  fail400: (condition?: boolean): { failure?: 400 } => (condition !== false ? { failure: 400 } : {}),
+  fail404: (condition?: boolean): { failure?: 404 } => (condition !== false ? { failure: 404 } : {}),
+  fail409: (condition?: boolean): { failure?: 409 } => (condition !== false ? { failure: 409 } : {}),
+}
 
 /**
  * Test cases have additional properties that we don't want to send in HTTP Requests
@@ -130,7 +124,7 @@ export const expectResponses = {
         // ignore the error.message, because it can vary for decorated non-bulk errors (e.g., conflict)
       }
     } else if (expectSuccess) {
-      expect(object).to.eql(expectSuccess)
+      expect(object).to.eql(expectSuccess);
     } else {
       // fall back to default behavior of testing the success outcome
       expect(object.type).to.eql(type);
@@ -176,8 +170,8 @@ export const expectResponses = {
       }
     }
     return savedObject;
-  }
-}
+  },
+};
 
 /**
  * Get test scenarios for each type of suite.

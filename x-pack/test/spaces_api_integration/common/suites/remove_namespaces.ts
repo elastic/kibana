@@ -32,7 +32,7 @@ export interface RemoveNamespacesTestCase {
 }
 
 const TYPE = 'sharedtype';
-export const createRequest = ({ id, namespaces }: RemoveNamespacesTestCase) => ({
+const createRequest = ({ id, namespaces }: RemoveNamespacesTestCase) => ({
   spaces: namespaces,
   object: { type: TYPE, id },
 });

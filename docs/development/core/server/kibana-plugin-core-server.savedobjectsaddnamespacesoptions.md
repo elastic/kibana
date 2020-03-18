@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsAddNamespacesOptions 
+export interface SavedObjectsAddNamespacesOptions extends SavedObjectsBaseOptions 
 ```
 
 ## Properties
@@ -16,6 +16,5 @@ export interface SavedObjectsAddNamespacesOptions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [refresh](./kibana-plugin-core-server.savedobjectsaddnamespacesoptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
-|  [validateExistingNamespaces](./kibana-plugin-core-server.savedobjectsaddnamespacesoptions.validateexistingnamespaces.md) | <code>(existingNamespaces: string[]) =&gt; Promise&lt;void&gt;</code> | A callback to validate the existing namespaces of this saved object. Can be used for implementing authorization checks. |
 |  [version](./kibana-plugin-core-server.savedobjectsaddnamespacesoptions.version.md) | <code>string</code> | An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. |
 
