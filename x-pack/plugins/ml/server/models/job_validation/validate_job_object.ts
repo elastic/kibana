@@ -6,9 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { AnomalyDetectionJob } from '../../routes/schemas/anomaly_detectors_schema';
 
-export function validateJobObject(job: AnomalyDetectionJob | CombinedJob | null) {
+export function validateJobObject(job: CombinedJob | null) {
   if (job === null || typeof job !== 'object') {
     throw new Error(
       i18n.translate('xpack.ml.models.jobValidation.validateJobObject.jobIsNotObjectErrorMessage', {

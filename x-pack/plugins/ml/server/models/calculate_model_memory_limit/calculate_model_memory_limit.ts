@@ -5,12 +5,9 @@
  */
 
 import numeral from '@elastic/numeral';
-import { TypeOf } from '@kbn/config-schema';
 import { APICaller } from 'kibana/server';
-import { analysisConfigSchema } from '../../routes/schemas/anomaly_detectors_schema';
+import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
-
-type AnalysisConfig = TypeOf<typeof analysisConfigSchema>;
 
 interface ModelMemoryEstimationResult {
   /**

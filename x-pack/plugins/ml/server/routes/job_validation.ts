@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { RequestHandlerContext } from 'kibana/server';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { AnalysisConfig } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -32,7 +33,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
     const { analysisConfig, indexPattern, query, timeFieldName, earliestMs, latestMs } = payload;
 
     return calculateModelMemoryLimitProvider(context.ml!.mlClient.callAsCurrentUser)(
-      analysisConfig,
+      analysisConfig as AnalysisConfig,
       indexPattern,
       query,
       timeFieldName,

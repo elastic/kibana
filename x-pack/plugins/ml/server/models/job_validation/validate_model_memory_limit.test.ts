@@ -5,7 +5,7 @@
  */
 
 import { APICaller } from 'kibana/server';
-import { AnomalyDetectionJob } from '../../routes/schemas/anomaly_detectors_schema';
+import { CombinedJob, Detector } from '../../../common/types/anomaly_detection_jobs';
 import { ModelMemoryEstimate } from '../calculate_model_memory_limit/calculate_model_memory_limit';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 
@@ -98,10 +98,7 @@ describe('ML - validateModelMemoryLimit', () => {
       return Promise.resolve(response);
     }) as APICaller;
 
-  function getJobConfig(
-    influencers: string[] = [],
-    detectors: AnomalyDetectionJob['analysis_config']['detectors'] = []
-  ) {
+  function getJobConfig(influencers: string[] = [], detectors: Detector[] = []) {
     return ({
       analysis_config: { detectors, influencers },
       data_description: { time_field: '@timestamp' },
@@ -111,13 +108,11 @@ describe('ML - validateModelMemoryLimit', () => {
       analysis_limits: {
         model_memory_limit: '20mb',
       },
-    } as unknown) as AnomalyDetectionJob;
+    } as unknown) as CombinedJob;
   }
 
   // create a specified number of mock detectors
-  function createDetectors(
-    numberOfDetectors: number
-  ): AnomalyDetectionJob['analysis_config']['detectors'] {
+  function createDetectors(numberOfDetectors: number): Detector[] {
     const dtrs = [];
     for (let i = 0; i < numberOfDetectors; i++) {
       dtrs.push({
@@ -126,7 +121,7 @@ describe('ML - validateModelMemoryLimit', () => {
         partition_field_name: 'instance',
       });
     }
-    return dtrs as AnomalyDetectionJob['analysis_config']['detectors'];
+    return dtrs as Detector[];
   }
 
   it('Called with no duration or split and mml within limit', () => {

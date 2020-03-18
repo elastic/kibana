@@ -6,7 +6,7 @@
 
 import numeral from '@elastic/numeral';
 import { APICaller } from 'kibana/server';
-import { AnomalyDetectionJob } from '../../routes/schemas/anomaly_detectors_schema';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
 import { ALLOWED_DATA_UNITS } from '../../../common/constants/validation';
@@ -16,7 +16,7 @@ const MODEL_MEMORY_LIMIT_MINIMUM_BYTES = 1048576;
 
 export async function validateModelMemoryLimit(
   callWithRequest: APICaller,
-  job: AnomalyDetectionJob,
+  job: CombinedJob,
   duration?: { start?: number; end?: number }
 ) {
   validateJobObject(job);
