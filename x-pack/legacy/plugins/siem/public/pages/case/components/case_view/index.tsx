@@ -159,6 +159,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
   if (isDeleted) {
     return <Redirect to={`/${SiemPageName.case}`} />;
   }
+  const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
 
   return (
     <>
@@ -217,7 +218,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                     onChange={toggleStatusCase}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} data-test-subj="case-view-actions">
                   <PropertyActions propertyActions={propertyActions} />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -252,7 +253,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
         </MyWrapper>
       </WhitePageWrapper>
       {confirmDeleteModal}
-      <SpyRoute state={{ caseTitle: caseData.title }} />
+      <SpyRoute state={spyState} />
     </>
   );
 });

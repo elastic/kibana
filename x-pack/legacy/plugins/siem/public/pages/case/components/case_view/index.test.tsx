@@ -5,18 +5,53 @@
  */
 
 import React from 'react';
+import { Router } from 'react-router-dom';
 import { mount } from 'enzyme';
 import { CaseComponent } from './';
-import * as apiHook from '../../../../containers/case/use_update_case';
+import * as updateHook from '../../../../containers/case/use_update_case';
+import * as deleteHook from '../../../../containers/case/use_delete_cases';
 import { caseProps, data } from './__mock__';
 import { TestProviders } from '../../../../mock';
-
+type Action = 'PUSH' | 'POP' | 'REPLACE';
+const pop: Action = 'POP';
+const location = {
+  pathname: '/network',
+  search: '',
+  state: '',
+  hash: '',
+};
+const mockHistory = {
+  length: 2,
+  location,
+  action: pop,
+  push: jest.fn(),
+  replace: jest.fn(),
+  go: jest.fn(),
+  goBack: jest.fn(),
+  goForward: jest.fn(),
+  block: jest.fn(),
+  createHref: jest.fn(),
+  listen: jest.fn(),
+};
 describe('CaseView ', () => {
+  const handleOnDeleteConfirm = jest.fn();
+  const handleToggleModal = jest.fn();
+  const dispatchResetIsDeleted = jest.fn();
   const updateCaseProperty = jest.fn();
+  /* eslint-disable no-console */
+  // Silence until enzyme fixed to use ReactTestUtils.act()
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+  afterAll(() => {
+    console.error = originalError;
+  });
+  /* eslint-enable no-console */
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue({
+    jest.spyOn(updateHook, 'useUpdateCase').mockReturnValue({
       caseData: data,
       isLoading: false,
       isError: false,
@@ -28,7 +63,9 @@ describe('CaseView ', () => {
   it('should render CaseComponent', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseComponent {...caseProps} />
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
       </TestProviders>
     );
     expect(
@@ -72,7 +109,9 @@ describe('CaseView ', () => {
   it('should dispatch update state when button is toggled', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseComponent {...caseProps} />
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
       </TestProviders>
     );
 
@@ -89,7 +128,9 @@ describe('CaseView ', () => {
   it('should render comments', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseComponent {...caseProps} />
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
       </TestProviders>
     );
     expect(
@@ -118,5 +159,51 @@ describe('CaseView ', () => {
         .first()
         .prop('source')
     ).toEqual(data.comments[0].comment);
+  });
+
+  it('toggle delete modal and cancel', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
+
+    wrapper
+      .find(
+        '[data-test-subj="case-view-actions"] button[data-test-subj="property-actions-ellipses"]'
+      )
+      .first()
+      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
+    wrapper.find('button[data-test-subj="confirmModalCancelButton"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
+  });
+
+  it('toggle delete modal and confirm', () => {
+    jest.spyOn(deleteHook, 'useDeleteCases').mockReturnValue({
+      dispatchResetIsDeleted,
+      handleToggleModal,
+      handleOnDeleteConfirm,
+      isLoading: false,
+      isError: false,
+      isDeleted: false,
+      isDisplayConfirmDeleteModal: true,
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    expect(handleOnDeleteConfirm.mock.calls[0][0]).toEqual([caseProps.caseId]);
   });
 });

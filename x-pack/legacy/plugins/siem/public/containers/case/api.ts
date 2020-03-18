@@ -100,7 +100,7 @@ export const getCases = async ({
 };
 
 export const postCase = async (newCase: CaseRequest): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(CASES_URL, {
     method: 'POST',
     body: JSON.stringify(newCase),
   });
@@ -112,7 +112,7 @@ export const patchCase = async (
   updatedCase: Partial<CaseRequest>,
   version: string
 ): Promise<Case[]> => {
-  const response = await KibanaServices.get().http.fetch<CasesResponse>(`${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases: [{ ...updatedCase, id: caseId, version }] }),
   });
@@ -120,7 +120,7 @@ export const patchCase = async (
 };
 
 export const patchCasesStatus = async (cases: BulkUpdateStatus[]): Promise<Case[]> => {
-  const response = await KibanaServices.get().http.fetch<CasesResponse>(`${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases }),
   });
@@ -155,7 +155,7 @@ export const patchComment = async (
 };
 
 export const deleteCases = async (caseIds: string[]): Promise<boolean> => {
-  const response = await KibanaServices.get().http.fetch<string>(`${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch<string>(CASES_URL, {
     method: 'DELETE',
     query: { ids: JSON.stringify(caseIds) },
   });

@@ -143,21 +143,15 @@ export const AllCases = React.memo(() => {
     [deleteBulk, deleteThisCase, isDisplayConfirmDeleteModal]
   );
 
-  const toggleDeleteModal = useCallback(
-    (deleteCase: Case) => {
-      handleToggleModal();
-      setDeleteThisCase(deleteCase);
-    },
-    [isDisplayConfirmDeleteModal]
-  );
+  const toggleDeleteModal = useCallback((deleteCase: Case) => {
+    handleToggleModal();
+    setDeleteThisCase(deleteCase);
+  }, []);
 
-  const toggleBulkDeleteModal = useCallback(
-    (deleteCases: string[]) => {
-      handleToggleModal();
-      setDeleteBulk(deleteCases);
-    },
-    [isDisplayConfirmDeleteModal]
-  );
+  const toggleBulkDeleteModal = useCallback((deleteCases: string[]) => {
+    handleToggleModal();
+    setDeleteBulk(deleteCases);
+  }, []);
 
   const handleUpdateCaseStatus = useCallback(
     (status: string) => {
@@ -247,10 +241,7 @@ export const AllCases = React.memo(() => {
     sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
   };
   const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
-    () => ({
-      selectable: (item: Case) => true,
-      onSelectionChange: setSelectedCases,
-    }),
+    () => ({ onSelectionChange: setSelectedCases }),
     [selectedCases]
   );
   const isCasesLoading = useMemo(

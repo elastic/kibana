@@ -17,21 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import es from './es';
 
-const KNOWN_APIS = ['es_6_0'];
-
-export function resolveApi(senseVersion, apis) {
-  const result = {};
-  _.each(apis, function(name) {
-    {
-      if (KNOWN_APIS.includes(name)) {
-        // for now we ignore sense_version. might add it in the api name later
-        const api = require('./' + name); // eslint-disable-line import/no-dynamic-require
-        result[name] = api.asJson();
-      }
-    }
-  });
-
-  return result;
+export function resolveApi() {
+  return {
+    es: es.asJson(),
+  };
 }

@@ -2380,7 +2380,6 @@
     "visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel": "凡例を切り替える",
     "visTypeVislib.vislib.legend.toggleLegendButtonTitle": "凡例を切り替える",
     "visTypeVislib.vislib.legend.toggleOptionsButtonAriaLabel": "{legendDataLabel}、トグルオプション",
-    "kibana-react.exitFullScreenButton.exitFullScreenModeButtonLabel": "全画面を終了",
     "kibana-react.exitFullScreenButton.fullScreenModeDescription": "ESC キーで全画面モードを終了します。",
     "newsfeed.emptyPrompt.noNewsText": "Kibanaインスタンスがインターネットにアクセスできない場合、管理者にこの機能を無効にするように依頼してください。そうでない場合は、ニュースを取り込み続けます。",
     "newsfeed.emptyPrompt.noNewsTitle": "ニュースがない場合",

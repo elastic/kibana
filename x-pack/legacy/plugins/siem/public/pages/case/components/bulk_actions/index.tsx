@@ -53,6 +53,7 @@ export const getBulkItems = ({
       data-test-subj="cases-bulk-delete-button"
       key={i18n.BULK_ACTION_DELETE_SELECTED}
       icon="trash"
+      disabled={selectedCaseIds.length === 0}
       onClick={() => {
         closePopover();
         deleteCasesAction(selectedCaseIds);
