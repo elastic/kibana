@@ -47,14 +47,14 @@ export function registerSubUrlHooks(angularModule, internals) {
     }
 
     $rootScope.$on('$locationChangeStart', (e, newUrl) => {
+      const getHash = url => url.split('#')[1] || '';
+
       // This handler fixes issue #31238 where browser back navigation
       // fails due to angular 1.6 parsing url encoded params wrong.
-      const parsedAbsUrl = url.parse($location.absUrl());
-      const absUrlHash = parsedAbsUrl.hash ? parsedAbsUrl.hash.slice(1) : '';
+      const absUrlHash = getHash($location.absUrl());
       const decodedAbsUrlHash = decodeURIComponent(absUrlHash);
 
-      const parsedNewUrl = url.parse(newUrl);
-      const newHash = parsedNewUrl.hash ? parsedNewUrl.hash.slice(1) : '';
+      const newHash = getHash(newUrl);
       const decodedHash = decodeURIComponent(newHash);
 
       if (absUrlHash !== newHash && decodedHash === decodedAbsUrlHash) {
