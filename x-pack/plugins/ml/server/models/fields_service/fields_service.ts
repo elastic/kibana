@@ -251,7 +251,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     }
 
     return aggregatableFields.reduce((obj, field) => {
-      obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value;
+      obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
       return obj;
     }, {} as { [field: string]: number });
   }
