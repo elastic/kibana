@@ -135,6 +135,14 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                         return null;
                       }
 
+                      if (uri.startsWith('ui/assets')) {
+                        return Path.resolve(
+                          worker.repoRoot,
+                          'src/core/server/core_app/',
+                          uri.replace('ui/', '')
+                        );
+                      }
+
                       // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
                       if (uri.startsWith('ui/') && parseDirPath(base).dirs.includes('legacy')) {
                         return Path.resolve(

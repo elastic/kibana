@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import Path from 'path';
 import { fromRoot } from '../../../core/server/utils';
 
 import { InternalCoreSetup } from '../internal_types';
@@ -53,7 +54,7 @@ export class CoreApp {
     );
   }
   private registerStaticDirs(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerStaticDir('/ui/{path*}', fromRoot('src/legacy/ui/public/assets'));
+    coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
 
     coreSetup.http.registerStaticDir(
       '/node_modules/@kbn/ui-framework/dist/{path*}',
