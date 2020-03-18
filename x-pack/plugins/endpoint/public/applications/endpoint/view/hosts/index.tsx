@@ -10,28 +10,29 @@ import { useHistory } from 'react-router-dom';
 import {
   EuiPage,
   EuiPageBody,
+  EuiPageHeader,
   EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiHorizontalRule,
   EuiTitle,
   EuiBasicTable,
-  EuiTextColor,
+  EuiText,
   EuiLink,
+  EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
-import { ManagementDetails } from './details';
-import * as selectors from '../../store/managing/selectors';
-import { ManagementAction } from '../../store/managing/action';
-import { useManagementListSelector } from './hooks';
+import { HostDetailsFlyout } from './details';
+import * as selectors from '../../store/hosts/selectors';
+import { HostAction } from '../../store/hosts/action';
+import { useHostListSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
-export const ManagementList = () => {
-  const dispatch = useDispatch<(a: ManagementAction) => void>();
+export const HostList = () => {
+  const dispatch = useDispatch<(a: HostAction) => void>();
   const history = useHistory();
   const {
     listData,
@@ -41,7 +42,7 @@ export const ManagementList = () => {
     isLoading,
     uiQueryParams: queryParams,
     hasSelectedHost,
-  } = useManagementListSelector(selector);
+  } = useHostListSelector(selector);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -57,7 +58,7 @@ export const ManagementList = () => {
     ({ page }: { page: { index: number; size: number } }) => {
       const { index, size } = page;
       dispatch({
-        type: 'userPaginatedManagementList',
+        type: 'userPaginatedHostList',
         payload: { pageIndex: index, pageSize: size },
       });
     },
@@ -68,7 +69,7 @@ export const ManagementList = () => {
     return [
       {
         field: '',
-        name: i18n.translate('xpack.endpoint.management.list.host', {
+        name: i18n.translate('xpack.endpoint.host.list.hostname', {
           defaultMessage: 'Hostname',
         }),
         render: ({ host: { hostname, id } }: { host: { hostname: string; id: string } }) => {
@@ -89,7 +90,7 @@ export const ManagementList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.endpoint.management.list.policy', {
+        name: i18n.translate('xpack.endpoint.host.list.policy', {
           defaultMessage: 'Policy',
         }),
         render: () => {
@@ -98,37 +99,38 @@ export const ManagementList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.endpoint.management.list.policyStatus', {
+        name: i18n.translate('xpack.endpoint.host.list.policyStatus', {
           defaultMessage: 'Policy Status',
         }),
         render: () => {
-          return 'Policy Status';
+          return <EuiHealth color="success">Policy Status</EuiHealth>;
         },
       },
       {
         field: '',
-        name: i18n.translate('xpack.endpoint.management.list.alerts', {
+        name: i18n.translate('xpack.endpoint.host.list.alerts', {
           defaultMessage: 'Alerts',
         }),
+        dataType: 'number',
         render: () => {
           return '0';
         },
       },
       {
         field: 'host.os.name',
-        name: i18n.translate('xpack.endpoint.management.list.os', {
+        name: i18n.translate('xpack.endpoint.host.list.os', {
           defaultMessage: 'Operating System',
         }),
       },
       {
         field: 'host.ip',
-        name: i18n.translate('xpack.endpoint.management.list.ip', {
+        name: i18n.translate('xpack.endpoint.host.list.ip', {
           defaultMessage: 'IP Address',
         }),
       },
       {
         field: '',
-        name: i18n.translate('xpack.endpoint.management.list.sensorVersion', {
+        name: i18n.translate('xpack.endpoint.host.list.sensorVersion', {
           defaultMessage: 'Sensor Version',
         }),
         render: () => {
@@ -137,9 +139,10 @@ export const ManagementList = () => {
       },
       {
         field: '',
-        name: i18n.translate('xpack.endpoint.management.list.lastActive', {
+        name: i18n.translate('xpack.endpoint.host.list.lastActive', {
           defaultMessage: 'Last Active',
         }),
+        dataType: 'date',
         render: () => {
           return 'xxxx';
         },
@@ -148,45 +151,59 @@ export const ManagementList = () => {
   }, [queryParams, history]);
 
   return (
-    <>
-      {hasSelectedHost && <ManagementDetails />}
-      <EuiPage>
+    <HostPage>
+      {hasSelectedHost && <HostDetailsFlyout />}
+      <EuiPage className="hostPage">
         <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle>
-                  <h2 data-test-subj="managementViewTitle">
-                    <FormattedMessage
-                      id="xpack.endpoint.managementList.hosts"
-                      defaultMessage="Hosts"
-                    />
-                  </h2>
-                </EuiTitle>
-                <h4>
-                  <EuiTextColor color="subdued">
-                    <FormattedMessage
-                      id="xpack.endpoint.managementList.totalCount"
-                      defaultMessage="{totalItemCount} Hosts"
-                      values={{ totalItemCount }}
-                    />
-                  </EuiTextColor>
-                </h4>
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
-            <EuiPageContentBody>
-              <EuiBasicTable
-                data-test-subj="managementListTable"
-                items={listData}
-                columns={columns}
-                loading={isLoading}
-                pagination={paginationSetup}
-                onChange={onTableChange}
+          <EuiPageHeader className="hostHeader">
+            <EuiTitle size="l">
+              <h1 data-test-subj="hostListTitle">
+                <FormattedMessage id="xpack.endpoint.host.hosts" defaultMessage="Hosts" />
+              </h1>
+            </EuiTitle>
+          </EuiPageHeader>
+
+          <EuiPageContent className="hostPageContent">
+            <EuiText color="subdued" size="xs">
+              <FormattedMessage
+                id="xpack.endpoint.host.list.totalCount"
+                defaultMessage="Showing: {totalItemCount, plural, one {# Host} other {# Hosts}}"
+                values={{ totalItemCount }}
               />
-            </EuiPageContentBody>
+            </EuiText>
+            <EuiHorizontalRule margin="xs" />
+            <EuiBasicTable
+              data-test-subj="hostListTable"
+              items={listData}
+              columns={columns}
+              loading={isLoading}
+              pagination={paginationSetup}
+              onChange={onTableChange}
+            />
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
-    </>
+    </HostPage>
   );
 };
+
+const HostPage = styled.div`
+  .hostPage {
+    padding: 0;
+  }
+  .hostHeader {
+    background-color: ${props => props.theme.eui.euiColorLightestShade};
+    border-bottom: ${props => props.theme.eui.euiBorderThin};
+    padding: ${props =>
+      props.theme.eui.euiSizeXL +
+      ' ' +
+      0 +
+      props.theme.eui.euiSizeXL +
+      ' ' +
+      props.theme.eui.euiSizeL};
+    margin-bottom: 0;
+  }
+  .hostPageContent {
+    border: none;
+  }
+`;
