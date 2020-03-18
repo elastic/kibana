@@ -22,7 +22,5 @@ import { SearchSource as SearchSourceClass, ISearchSource } from '../../../../pl
 
 export { SearchSourceFields } from '../../../../plugins/data/public';
 
-export { ValidatedDualRange } from 'ui/validated_range';
-
 export type SearchSource = Class<ISearchSource>;
 export const SearchSource = SearchSourceClass;
