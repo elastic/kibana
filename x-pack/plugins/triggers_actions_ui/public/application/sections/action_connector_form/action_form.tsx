@@ -290,7 +290,6 @@ export const ActionForm = ({
                           <EuiIconTip
                             type="alert"
                             color="danger"
-                            label="Beta"
                             content={i18n.translate(
                               'xpack.triggersActionsUI.sections.alertForm.actionDisabledTitle',
                               {
