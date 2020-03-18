@@ -50,6 +50,7 @@ export function createFieldChooserDirective($location) {
       $scope.showFilter = false;
       $scope.toggleShowFilter = () => ($scope.showFilter = !$scope.showFilter);
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
+      const config = getServices().uiSettings;
 
       const filter = ($scope.filter = {
         props: ['type', 'aggregatable', 'searchable', 'missing', 'name'],
@@ -157,9 +158,7 @@ export function createFieldChooserDirective($location) {
             groups.unpopular = groups.unpopular || [];
 
             // move excess popular fields to un-popular list
-            const extras = groups.popular.splice(
-              getServices().uiSettings.get('fields:popularLimit')
-            );
+            const extras = groups.popular.splice(config.get('fields:popularLimit'));
             groups.unpopular = extras.concat(groups.unpopular);
           })
           .each(function(group, name) {
@@ -216,7 +215,7 @@ export function createFieldChooserDirective($location) {
             schema: 'segment',
             params: {
               field: field.name,
-              size: parseInt(getServices().uiSettings.get('discover:aggs:terms:size'), 10),
+              size: parseInt(config.get('discover:aggs:terms:size'), 10),
               orderBy: '2',
             },
           };

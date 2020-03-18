@@ -64,7 +64,7 @@ const {
   share,
   timefilter,
   toastNotifications,
-  uiSettings,
+  uiSettings: config,
   visualizations,
 } = getServices();
 
@@ -131,7 +131,7 @@ app.config($routeProvider => {
                *
                *  @type {State}
                */
-              const id = getIndexPatternId(index, indexPatternList, uiSettings.get('defaultIndex'));
+              const id = getIndexPatternId(index, indexPatternList, config.get('defaultIndex'));
               return Promise.props({
                 list: indexPatternList,
                 loaded: indexPatterns.get(id),
@@ -211,7 +211,7 @@ function discoverController(
     getPreviousAppState,
   } = getState({
     defaultAppState: getStateDefaults(),
-    storeInSessionStorage: getServices().uiSettings.get('state:storeInSessionStorage'),
+    storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
@@ -536,7 +536,7 @@ function discoverController(
     const { searchFields, selectFields } = await getSharingDataFields(
       $scope.state.columns,
       $scope.indexPattern.timeFieldName,
-      uiSettings.get('doc_table:hideTimeColumn')
+      config.get('doc_table:hideTimeColumn')
     );
     searchSource.setField('fields', searchFields);
     searchSource.setField(
@@ -544,7 +544,7 @@ function discoverController(
       getSortForSearchSource(
         $scope.state.sort,
         $scope.indexPattern,
-        uiSettings.get('discover:sort:defaultOrder')
+        config.get('discover:sort:defaultOrder')
       )
     );
     searchSource.setField('highlight', null);
@@ -571,15 +571,13 @@ function discoverController(
     const query =
       $scope.searchSource.getField('query') ||
       getDefaultQuery(
-        localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage')
+        localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
       );
     return {
       query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
       columns:
-        savedSearch.columns.length > 0
-          ? savedSearch.columns
-          : uiSettings.get('defaultColumns').slice(),
+        savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
@@ -609,7 +607,7 @@ function discoverController(
 
   $scope.opts = {
     // number of records to fetch, then paginate through
-    sampleSize: uiSettings.get('discover:sampleSize'),
+    sampleSize: config.get('discover:sampleSize'),
     timefield: getTimeField(),
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
@@ -619,7 +617,7 @@ function discoverController(
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
-      uiSettings.get('discover:searchOnPageLoad') ||
+      config.get('discover:searchOnPageLoad') ||
       savedSearch.id !== undefined ||
       timefilter.getRefreshInterval().pause === false
     );
@@ -829,7 +827,7 @@ function discoverController(
       const state = {
         ...appStateContainer.getState(),
         query: getDefaultQuery(
-          localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage')
+          localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
         ),
         filters: [],
       };
@@ -919,7 +917,7 @@ function discoverController(
   };
 
   $scope.toMoment = function(datetime) {
-    return moment(datetime).format(uiSettings.get('dateFormat'));
+    return moment(datetime).format(config.get('dateFormat'));
   };
 
   $scope.resetQuery = function() {
@@ -940,7 +938,7 @@ function discoverController(
         getSortForSearchSource(
           $scope.state.sort,
           indexPattern,
-          uiSettings.get('discover:sort:defaultOrder')
+          config.get('discover:sort:defaultOrder')
         )
       )
       .setField('query', $scope.state.query || null)

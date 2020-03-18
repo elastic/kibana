@@ -20,6 +20,8 @@ import { TableHeader } from './table_header/table_header';
 import { wrapInI18nContext, getServices } from '../../../../kibana_services';
 
 export function createTableHeaderDirective(reactDirective: any) {
+  const { uiSettings: config } = getServices();
+
   return reactDirective(
     wrapInI18nContext(TableHeader),
     [
@@ -34,9 +36,9 @@ export function createTableHeaderDirective(reactDirective: any) {
     ],
     { restrict: 'A' },
     {
-      hideTimeColumn: getServices().uiSettings.get('doc_table:hideTimeColumn'),
-      isShortDots: getServices().uiSettings.get('shortDots:enable'),
-      defaultSortOrder: getServices().uiSettings.get('discover:sort:defaultOrder'),
+      hideTimeColumn: config.get('doc_table:hideTimeColumn'),
+      isShortDots: config.get('shortDots:enable'),
+      defaultSortOrder: config.get('discover:sort:defaultOrder'),
     }
   );
 }

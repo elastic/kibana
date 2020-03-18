@@ -207,12 +207,6 @@ describe('Doc Table', function() {
         maxLength: 50,
       });
 
-      /**
-      sinon
-        .stub(config, 'get')
-        .withArgs('metaFields')
-        .returns(['_id']); **/
-
       // Open the row
       $scope.toggleRow();
       $scope.$digest();
