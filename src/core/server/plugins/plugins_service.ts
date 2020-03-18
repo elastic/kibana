@@ -107,6 +107,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       this.log.info('Plugin initialization disabled.');
     } else {
       contracts = await this.pluginsSystem.setupPlugins(deps);
+      this.registerPluginStaticDirs(deps);
     }
 
     const uiPlugins = this.pluginsSystem.uiPlugins();
@@ -217,6 +218,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           if (plugin.includesUiPlugin) {
             this.uiPluginInternalInfo.set(plugin.name, {
               publicTargetDir: Path.resolve(plugin.path, 'target/public'),
+              publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
             });
           }
 
@@ -255,5 +257,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
         )
     );
+  }
+
+  private registerPluginStaticDirs(deps: PluginsServiceSetupDeps) {
+    for (const [pluginName, pluginInfo] of this.uiPluginInternalInfo) {
+      deps.http.registerStaticDir(
+        `/plugins/${pluginName}/assets/{path*}`,
+        pluginInfo.publicAssetsDir
+      );
+    }
   }
 }
