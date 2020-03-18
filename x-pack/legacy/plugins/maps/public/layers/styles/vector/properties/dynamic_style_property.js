@@ -332,9 +332,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
     if (this.isOrdinal()) {
-      if (this.isOrdinalRanged()) {
-        return this._renderRangeLegend();
-      } else if (this.hasOrdinalBreaks()) {
+      if (this.isOrdinalRanged() || this.hasOrdinalBreaks()) {
         return this._renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId });
       } else {
         return null;

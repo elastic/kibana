@@ -7,7 +7,11 @@
 import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
 import { getComputedFieldName, getOtherCategoryLabel } from '../style_util';
-import { getOrdinalColorRampStops, getColorPalette } from '../../color_utils';
+import {
+  getOrdinalMbColorRampStops,
+  getColorPalette,
+  getHexColorRangeStrings,
+} from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
 import {
@@ -131,7 +135,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       ];
     }
 
-    const colorStops = getOrdinalColorRampStops(this._options.color);
+    const colorStops = getOrdinalMbColorRampStops(this._options.color);
     if (!colorStops) {
       return null;
     }
@@ -231,16 +235,35 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
   }
 
-  _getColorRampStops() {
-    return this._options.useCustomColorRamp && this._options.customColorRamp
-      ? this._options.customColorRamp
-      : [];
+  _getColorRampStopsForLegend() {
+    if (this._options.useCustomColorRamp && this._options.customColorRamp) {
+      return this._options.customColorRamp;
+    }
+
+    if (!this._options.color) {
+      return [];
+    }
+
+    const rangeFieldMeta = this.getRangeFieldMeta();
+    if (!rangeFieldMeta) {
+      return [];
+    }
+
+    const numberOfLegendColors = 5;
+    const colors = getHexColorRangeStrings(this._options.color, numberOfLegendColors);
+
+    return colors.map((color, index) => {
+      return {
+        color,
+        stop: rangeFieldMeta.min + rangeFieldMeta.delta * (index / numberOfLegendColors),
+      };
+    });
   }
 
   _getColorStops() {
     if (this.isOrdinal()) {
       return {
-        stops: this._getColorRampStops(),
+        stops: this._getColorRampStopsForLegend(),
         defaultColor: null,
       };
     } else if (this.isCategorical()) {
@@ -253,6 +276,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly, symbolId }) {
     const categories = [];
     const { stops, defaultColor } = this._getColorStops();
+
     stops.map(({ stop, color }) => {
       categories.push(
         <Category
