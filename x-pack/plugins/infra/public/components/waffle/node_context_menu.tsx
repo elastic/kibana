@@ -148,7 +148,6 @@ export const NodeContextMenu: React.FC<Props> = ({
   const alertMenuItem: SectionLinkProps = {
     label: i18n.translate('xpack.infra.nodeContextMenu.createAlertLink', {
       defaultMessage: 'Create Alert',
-      values: { inventoryName: inventoryModel.singularDisplayName },
     }),
     onClick: () => {
       setFlyoutVisible(true);
