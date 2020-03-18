@@ -33,6 +33,7 @@ import { MonitorPageLink } from './monitor_page_link';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListDrawer } from '../../connected';
+import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -43,6 +44,8 @@ interface MonitorListProps {
   hasActiveFilters: boolean;
   successColor: string;
   linkParameters?: string;
+  pageSize: number;
+  setPageSize: (size: number) => void;
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
@@ -199,6 +202,9 @@ export const MonitorListComponent = (props: Props) => {
               direction="next"
               pagination={nextPagePagination}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <MonitorListPageSizeSelect size={props.pageSize} setSize={props.setPageSize} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
