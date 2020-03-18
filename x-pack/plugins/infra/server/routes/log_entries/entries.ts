@@ -22,7 +22,7 @@ import {
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { LogEntriesParams } from '../../lib/domains/log_entries_domain';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs) => {
   framework.registerRoute(
