@@ -38,7 +38,7 @@ describe('security call out', () => {
     });
 
     expect(component?.is(Fragment)).toBeTruthy();
-    expect(component?.children()).toHaveLength(0);
+    expect(component?.html()).toBe('');
   });
 
   test('renders nothing if keys are enabled', async () => {
@@ -52,7 +52,7 @@ describe('security call out', () => {
     });
 
     expect(component?.is(Fragment)).toBeTruthy();
-    expect(component?.children()).toHaveLength(0);
+    expect(component?.html()).toBe('');
   });
 
   test('renders the callout if keys are disabled', async () => {
