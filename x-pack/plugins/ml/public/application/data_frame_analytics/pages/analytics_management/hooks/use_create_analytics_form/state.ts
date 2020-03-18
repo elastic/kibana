@@ -5,7 +5,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { DeepPartial } from '../../../../../../../common/types/common';
+import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
@@ -91,7 +91,7 @@ export interface State {
   jobIds: DataFrameAnalyticsId[];
   requestMessages: FormMessage[];
   estimatedModelMemoryLimit: string;
-  cloneJob?: DataFrameAnalyticsConfig;
+  cloneJob?: DeepReadonly<DataFrameAnalyticsConfig>;
 }
 
 export const getInitialState = (): State => ({
@@ -195,7 +195,7 @@ export const getJobConfigFromFormState = (
  * For cloning we keep job id and destination index empty.
  */
 export function getCloneFormStateFromJobConfig(
-  analyticsJobConfig: CloneDataFrameAnalyticsConfig
+  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>
 ): Partial<State['form']> {
   const jobType = Object.keys(analyticsJobConfig.analysis)[0] as ANALYSIS_CONFIG_TYPE;
 
