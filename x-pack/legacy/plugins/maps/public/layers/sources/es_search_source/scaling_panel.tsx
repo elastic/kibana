@@ -15,9 +15,9 @@ import {
   EuiHorizontalRule,
   EuiRadioGroup,
 } from '@elastic/eui';
-// @ ts-ignore
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+// @ts-ignore
 import { SingleFieldSelect } from '../../../components/single_field_select';
 
 // @ts-ignore
