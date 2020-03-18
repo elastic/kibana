@@ -58,7 +58,6 @@ describe('actions_connectors_list component empty', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -155,7 +154,6 @@ describe('actions_connectors_list component with items', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -239,7 +237,6 @@ describe('actions_connectors_list component empty with show only capability', ()
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -328,7 +325,6 @@ describe('actions_connectors_list with show only capability', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {

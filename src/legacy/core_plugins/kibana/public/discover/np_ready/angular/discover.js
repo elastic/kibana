@@ -50,6 +50,7 @@ import {
   tabifyAggResponse,
   getAngularModule,
   ensureDefaultIndexPattern,
+  redirectWhenMissing,
 } from '../../kibana_services';
 
 const {
@@ -57,6 +58,7 @@ const {
   chrome,
   data,
   docTitle,
+  history,
   indexPatterns,
   filterManager,
   share,
@@ -113,10 +115,10 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function(redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
+      savedObjects: function($route, Promise) {
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
-          const { appStateContainer } = getState({});
+        return ensureDefaultIndexPattern(core, data, history).then(() => {
+          const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
             ip: indexPatterns.getCache().then(indexPatternList => {
@@ -151,9 +153,13 @@ app.config($routeProvider => {
               })
               .catch(
                 redirectWhenMissing({
-                  search: '/discover',
-                  'index-pattern':
-                    '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                  history,
+                  mapping: {
+                    search: '/discover',
+                    'index-pattern':
+                      '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                  },
+                  toastNotifications,
                 })
               ),
           });
@@ -207,6 +213,7 @@ function discoverController(
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
+    history,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
