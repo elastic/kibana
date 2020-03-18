@@ -18,20 +18,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
 
-  async function createAlert(alertTypeId?: string, name?: string, params?: any) {
+  async function createAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
       .post(`/api/alert`)
       .set('kbn-xsrf', 'foo')
       .send({
         enabled: true,
-        name: name ?? generateUniqueKey(),
+        name: generateUniqueKey(),
         tags: ['foo', 'bar'],
-        alertTypeId: alertTypeId ?? 'test.noop',
+        alertTypeId: 'test.noop',
         consumer: 'test',
         schedule: { interval: '1m' },
         throttle: '1m',
         actions: [],
-        params: params ?? {},
+        params: {},
+        ...overwrites,
       })
       .expect(200);
     return createdAlert;
@@ -98,6 +99,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
+    it('should display alerts in alphabetical order', async () => {
+      const uniqueKey = generateUniqueKey();
+      await createAlert({ name: 'b', tags: [uniqueKey] });
+      await createAlert({ name: 'c', tags: [uniqueKey] });
+      await createAlert({ name: 'a', tags: [uniqueKey] });
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(uniqueKey);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.have.length(3);
+      expect(searchResults[0].name).to.eql('a');
+      expect(searchResults[1].name).to.eql('b');
+      expect(searchResults[2].name).to.eql('c');
+    });
+
     it('should search for alert', async () => {
       const createdAlert = await createAlert();
       await pageObjects.common.navigateToApp('triggersActions');
@@ -115,16 +132,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should edit an alert', async () => {
-      const createdAlert = await createAlert('.index-threshold', 'new alert', {
-        aggType: 'count',
-        termSize: 5,
-        thresholdComparator: '>',
-        timeWindowSize: 5,
-        timeWindowUnit: 'm',
-        groupBy: 'all',
-        threshold: [1000, 5000],
-        index: ['.kibana_1'],
-        timeField: 'alert',
+      const createdAlert = await createAlert({
+        alertTypeId: '.index-threshold',
+        name: 'new alert',
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        },
       });
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
