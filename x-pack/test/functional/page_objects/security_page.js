@@ -233,7 +233,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         const usernameElement = await user.find('userRowUserName');
         const emailElement = await user.find('userRowEmail');
         const rolesElement = await user.find('userRowRoles');
-        // findAllByCssSelector is substantially faster than `find.descendantExistsByCssSelector for negative cases
+        // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
         const isUserReserved = (await user.findAll('userReserved', 1)).length > 0;
 
         return {
@@ -251,9 +251,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       return mapAsync(users, async role => {
         const [rolename, reserved, deprecated] = await Promise.all([
           role.find('roleRowName').then(el => el.getVisibleText()),
-          // findAllByCssSelector is substantially faster than `find.descendantExistsByCssSelector for negative cases
+          // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
           role.findAll('roleReserved', 1).then(el => el.length > 0),
-          // findAllByCssSelector is substantially faster than `find.descendantExistsByCssSelector for negative cases
+          // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
           role.findAll('roleDeprecated', 1).then(el => el.length > 0),
         ]);
 

@@ -278,7 +278,7 @@ export default function({ getService, getPageObjects }) {
       it('should suppress zoom warning if suppress warnings button clicked', async () => {
         last = true;
         await PageObjects.visChart.waitForVisualization();
-        await testSubjects.find('suppressZoomWarnings');
+        await testSubjects.click('suppressZoomWarnings');
         await PageObjects.tileMap.clickMapZoomOut(waitForLoading);
         await testSubjects.waitForDeleted('suppressZoomWarnings');
         await PageObjects.tileMap.clickMapZoomIn(waitForLoading);
