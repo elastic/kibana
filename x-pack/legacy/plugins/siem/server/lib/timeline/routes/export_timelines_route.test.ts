@@ -87,7 +87,7 @@ describe('export timelines', () => {
       const request = requestMock.create({
         method: 'get',
         path: TIMELINE_EXPORT_URL,
-        body: { id: ['someId'] },
+        body: { id: 'someId' },
       });
       const result = server.validate(request);
 

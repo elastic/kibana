@@ -127,21 +127,18 @@ const getTimelinesFromObjects = async (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   request: ExportTimelineRequest
 ): Promise<ExportedTimelines[]> => {
-  const timelines: TimelineSavedObject[] = await getTimelines(
-    savedObjectsClient,
-    request.body.objects
-  );
+  const timelines: TimelineSavedObject[] = await getTimelines(savedObjectsClient, request.body.ids);
   // To Do for feature freeze
-  // if (timelines.length !== request.body.objects.length) {
+  // if (timelines.length !== request.body.ids.length) {
   //   //figure out which is missing to tell user
   // }
 
   const [notes, pinnedEventIds] = await Promise.all([
     Promise.all(
-      request.body.objects.map(timelineId => getNotesByTimelineId(savedObjectsClient, timelineId))
+      request.body.ids.map(timelineId => getNotesByTimelineId(savedObjectsClient, timelineId))
     ),
     Promise.all(
-      request.body.objects.map(timelineId =>
+      request.body.ids.map(timelineId =>
         getPinnedEventsByTimelineId(savedObjectsClient, timelineId)
       )
     ),
@@ -157,7 +154,7 @@ const getTimelinesFromObjects = async (
     []
   );
 
-  const myResponse = request.body.objects.reduce<ExportedTimelines[]>((acc, timelineId) => {
+  const myResponse = request.body.ids.reduce<ExportedTimelines[]>((acc, timelineId) => {
     const myTimeline = timelines.find(t => t.savedObjectId === timelineId);
     if (myTimeline != null) {
       const timelineNotes = myNotes.filter(n => n.timelineId === timelineId);

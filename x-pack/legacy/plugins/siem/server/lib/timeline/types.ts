@@ -205,7 +205,7 @@ export interface AllTimelineSavedObject
   extends runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType> {}
 
 export interface ExportTimelineRequestParams {
-  body: { objects: string[] };
+  body: { ids: string[] };
   query: {
     file_name: string;
     exclude_export_details: boolean;

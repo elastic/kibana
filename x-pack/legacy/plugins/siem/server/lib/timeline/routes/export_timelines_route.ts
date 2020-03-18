@@ -42,7 +42,7 @@ export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['co
         const siemResponse = buildSiemResponse(response);
         const savedObjectsClient = context.core.savedObjects.client;
         const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
-        if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
+        if (request.body?.ids != null && request.body.ids.length > exportSizeLimit) {
           return siemResponse.error({
             statusCode: 400,
             body: `Can't export more than ${exportSizeLimit} timelines`,
