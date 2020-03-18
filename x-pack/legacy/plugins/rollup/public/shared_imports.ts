@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AggTypeFilters } from 'ui/agg_types';
-export { AggTypeFieldFilters } from 'ui/agg_types';
+export { indices } from '../../../../../src/plugins/es_ui_shared/public';
