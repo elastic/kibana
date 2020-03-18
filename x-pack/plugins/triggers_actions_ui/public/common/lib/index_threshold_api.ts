@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { HttpSetup } from 'kibana/public';
-import { TimeSeriesResult } from '../types';
-export { TimeSeriesResult } from '../types';
+import { TimeSeriesResult } from '../../../../alerting_builtins/common/alert_types/index_threshold';
 
 const INDEX_THRESHOLD_API_ROOT = '/api/alerting_builtins/index_threshold';
 
