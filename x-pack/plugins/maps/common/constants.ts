@@ -68,7 +68,7 @@ export enum FIELD_ORIGIN {
   JOIN = 'join',
 }
 
-export const SOURCE_DATA_ID_ORIGIN = 'source';
+export const SOURCE_DATA_ID_ORIGIN = FIELD_ORIGIN.SOURCE;
 export const META_ID_ORIGIN_SUFFIX = 'meta';
 export const SOURCE_META_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${META_ID_ORIGIN_SUFFIX}`;
 export const FORMATTERS_ID_ORIGIN_SUFFIX = 'formatters';
