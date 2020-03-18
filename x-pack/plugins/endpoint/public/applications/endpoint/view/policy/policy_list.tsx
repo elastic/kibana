@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useMemo } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -16,16 +16,13 @@ import {
   EuiBasicTable,
   EuiText,
   EuiTableFieldDataColumnType,
-  EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { usePageId } from '../use_page_id';
-import { FormattedDateAndTime } from '../formatted_date_time';
 import {
   selectIsLoading,
   selectPageIndex,
@@ -36,20 +33,11 @@ import {
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../../store/policy_list';
 import { PolicyData } from '../../types';
-import { TruncateText } from '../../components/truncate_text';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
 }
-
-const TruncateTooltipText = styled(TruncateText)`
-  .euiToolTipAnchor {
-    display: block;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-`;
 
 const PolicyLink: React.FC<{ name: string; route: string }> = ({ name, route }) => {
   const history = useHistory();
@@ -70,22 +58,10 @@ const renderPolicyNameLink = (value: string, _item: PolicyData) => {
   return <PolicyLink name={value} route={`/policy/${_item.id}`} />;
 };
 
-const renderDate = (date: string, _item: PolicyData) => (
-  <TruncateTooltipText>
-    <EuiToolTip content={date}>
-      <FormattedDateAndTime date={new Date(date)} />
-    </EuiToolTip>
-  </TruncateTooltipText>
-);
-
-const renderFormattedNumber = (value: number, _item: PolicyData) => (
-  <TruncateText>
-    <FormattedNumber value={value} />
-  </TruncateText>
-);
-
 export const PolicyList = React.memo(() => {
   usePageId('policyListPage');
+
+  const { services } = useKibana();
 
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
   const policyItems = usePolicyListSelector(selectPolicyItems);
@@ -128,67 +104,52 @@ export const PolicyList = React.memo(() => {
         truncateText: true,
       },
       {
-        field: 'total',
-        name: i18n.translate('xpack.endpoint.policyList.totalField', {
-          defaultMessage: 'Total',
+        field: 'revision',
+        name: i18n.translate('xpack.endpoint.policyList.revisionField', {
+          defaultMessage: 'Revision',
         }),
-        render: renderFormattedNumber,
         dataType: 'number',
-        truncateText: true,
-        width: '15ch',
       },
       {
-        field: 'pending',
-        name: i18n.translate('xpack.endpoint.policyList.pendingField', {
-          defaultMessage: 'Pending',
+        field: 'package',
+        name: i18n.translate('xpack.endpoint.policyList.versionField', {
+          defaultMessage: 'Version',
         }),
-        render: renderFormattedNumber,
-        dataType: 'number',
-        truncateText: true,
-        width: '15ch',
+        render(pkg) {
+          return `${pkg.title}  v${pkg.version}`;
+        },
       },
       {
-        field: 'failed',
-        name: i18n.translate('xpack.endpoint.policyList.failedField', {
-          defaultMessage: 'Failed',
-        }),
-        render: renderFormattedNumber,
-        dataType: 'number',
-        truncateText: true,
-        width: '15ch',
-      },
-      {
-        field: 'created_by',
-        name: i18n.translate('xpack.endpoint.policyList.createdByField', {
-          defaultMessage: 'Created By',
+        field: 'description',
+        name: i18n.translate('xpack.endpoint.policyList.descriptionField', {
+          defaultMessage: 'Description',
         }),
         truncateText: true,
       },
       {
-        field: 'created',
-        name: i18n.translate('xpack.endpoint.policyList.createdField', {
-          defaultMessage: 'Created',
+        field: 'config_id',
+        name: i18n.translate('xpack.endpoint.policyList.agentConfigField', {
+          defaultMessage: 'Agent Configuration',
         }),
-        render: renderDate,
-        truncateText: true,
-      },
-      {
-        field: 'updated_by',
-        name: i18n.translate('xpack.endpoint.policyList.updatedByField', {
-          defaultMessage: 'Last Updated By',
-        }),
-        truncateText: true,
-      },
-      {
-        field: 'updated',
-        name: i18n.translate('xpack.endpoint.policyList.updatedField', {
-          defaultMessage: 'Last Updated',
-        }),
-        render: renderDate,
-        truncateText: true,
+        render(version: string) {
+          return (
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiLink
+              href={`${services.application.getUrlForApp('ingestManager')}#/configs/${version}`}
+              onClick={(ev: SyntheticEvent) => {
+                ev.preventDefault();
+                services.application.navigateToApp('ingestManager', {
+                  path: `#/configs/${version}`,
+                });
+              }}
+            >
+              {version}
+            </EuiLink>
+          );
+        },
       },
     ],
-    []
+    [services.application]
   );
 
   return (
