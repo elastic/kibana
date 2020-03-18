@@ -72,16 +72,14 @@ export class AdvancedUiActionsPublicPlugin
       dateFormat,
       commonlyUsedRanges,
     });
-    uiActions.registerAction(timeRangeAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, timeRangeAction);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, timeRangeAction);
 
     const timeRangeBadge = new CustomTimeRangeBadge({
       openModal,
       dateFormat,
       commonlyUsedRanges,
     });
-    uiActions.registerAction(timeRangeBadge);
-    uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
+    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     return {
       ...uiActions,

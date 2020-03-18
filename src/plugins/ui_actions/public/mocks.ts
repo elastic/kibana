@@ -28,21 +28,22 @@ export type Start = jest.Mocked<UiActionsStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
+    addTriggerAction: jest.fn(),
     attachAction: jest.fn(),
     detachAction: jest.fn(),
     registerAction: jest.fn(),
-    registerTrigger: jest.fn(),
     registerActionFactory: jest.fn(),
+    registerTrigger: jest.fn(),
+    unregisterAction: jest.fn(),
   };
   return setupContract;
 };
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    __attachAction: jest.fn(),
+    attachAction: jest.fn(),
     unregisterAction: jest.fn(),
     addTriggerAction: jest.fn(),
-    attachAction: jest.fn(),
     clear: jest.fn(),
     detachAction: jest.fn(),
     executeTriggerActions: jest.fn(),
@@ -56,7 +57,6 @@ const createStartContract = (): Start => {
     registerAction: jest.fn(),
     registerActionFactory: jest.fn(),
     registerTrigger: jest.fn(),
-    removeTriggerAction: jest.fn(),
   };
 
   return startContract;

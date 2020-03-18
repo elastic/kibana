@@ -18,7 +18,13 @@
  */
 
 import { UiActionsService } from './ui_actions_service';
-import { Action, ActionInternal, createAction } from '../actions';
+import {
+  Action,
+  ActionInternal,
+  createAction,
+  ActionFactoryDefinition,
+  ActionFactory,
+} from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { ActionRegistry, TriggerRegistry, TriggerId, ActionType } from '../types';
 import { Trigger } from '../triggers';
@@ -103,7 +109,20 @@ describe('UiActionsService', () => {
       });
     });
 
-    test.todo('return action instance');
+    test('return action instance', () => {
+      const service = new UiActionsService();
+      const action = service.registerAction({
+        id: 'test',
+        execute: async () => {},
+        getDisplayName: () => 'test',
+        getIconType: () => '',
+        isCompatible: async () => true,
+        type: 'test' as ActionType,
+      });
+
+      expect(action).toBeInstanceOf(ActionInternal);
+      expect(action.id).toBe('test');
+    });
   });
 
   describe('.getTriggerActions()', () => {
@@ -141,14 +160,14 @@ describe('UiActionsService', () => {
 
       expect(list0).toHaveLength(0);
 
-      service.attachAction(FOO_TRIGGER, action1);
+      service.addTriggerAction(FOO_TRIGGER, action1);
       const list1 = service.getTriggerActions(FOO_TRIGGER);
 
       expect(list1).toHaveLength(1);
       expect(list1[0]).toBeInstanceOf(ActionInternal);
       expect(list1[0].id).toBe(action1.id);
 
-      service.attachAction(FOO_TRIGGER, action2);
+      service.addTriggerAction(FOO_TRIGGER, action2);
       const list2 = service.getTriggerActions(FOO_TRIGGER);
 
       expect(list2).toHaveLength(2);
@@ -181,7 +200,7 @@ describe('UiActionsService', () => {
         title: 'My trigger',
       };
       service.registerTrigger(testTrigger);
-      service.attachAction(MY_TRIGGER, helloWorldAction);
+      service.addTriggerAction(MY_TRIGGER, helloWorldAction);
 
       const compatibleActions = await service.getTriggerCompatibleActions(MY_TRIGGER, {
         hi: 'there',
@@ -207,7 +226,7 @@ describe('UiActionsService', () => {
       };
 
       service.registerTrigger(testTrigger);
-      service.attachAction(testTrigger.id, action);
+      service.addTriggerAction(testTrigger.id, action);
 
       const compatibleActions1 = await service.getTriggerCompatibleActions(testTrigger.id, {
         accept: true,
@@ -291,7 +310,7 @@ describe('UiActionsService', () => {
         id: FOO_TRIGGER,
       });
       service1.registerAction(testAction1);
-      service1.attachAction(FOO_TRIGGER, testAction1);
+      service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
@@ -312,14 +331,14 @@ describe('UiActionsService', () => {
       });
       service1.registerAction(testAction1);
       service1.registerAction(testAction2);
-      service1.attachAction(FOO_TRIGGER, testAction1);
+      service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
-      service2.attachAction(FOO_TRIGGER, testAction2);
+      service2.addTriggerAction(FOO_TRIGGER, testAction2);
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
@@ -333,14 +352,14 @@ describe('UiActionsService', () => {
       });
       service1.registerAction(testAction1);
       service1.registerAction(testAction2);
-      service1.attachAction(FOO_TRIGGER, testAction1);
+      service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
-      service1.attachAction(FOO_TRIGGER, testAction2);
+      service1.addTriggerAction(FOO_TRIGGER, testAction2);
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
@@ -395,7 +414,7 @@ describe('UiActionsService', () => {
       } as any;
 
       service.registerTrigger(trigger);
-      service.attachAction(MY_TRIGGER, action);
+      service.addTriggerAction(MY_TRIGGER, action);
 
       const actions = service.getTriggerActions(trigger.id);
 
@@ -403,7 +422,7 @@ describe('UiActionsService', () => {
       expect(actions[0].id).toBe(ACTION_HELLO_WORLD);
     });
 
-    test('can detach an action to a trigger', () => {
+    test('can detach an action from a trigger', () => {
       const service = new UiActionsService();
 
       const trigger: Trigger = {
@@ -416,7 +435,7 @@ describe('UiActionsService', () => {
 
       service.registerTrigger(trigger);
       service.registerAction(action);
-      service.attachAction(trigger.id, action);
+      service.addTriggerAction(trigger.id, action);
       service.detachAction(trigger.id, action.id);
 
       const actions2 = service.getTriggerActions(trigger.id);
@@ -448,7 +467,7 @@ describe('UiActionsService', () => {
       } as any;
 
       service.registerAction(action);
-      expect(() => service.attachAction('i do not exist' as TriggerId, action)).toThrowError(
+      expect(() => service.addTriggerAction('i do not exist' as TriggerId, action)).toThrowError(
         'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });
@@ -480,10 +499,62 @@ describe('UiActionsService', () => {
   });
 
   describe('action factories', () => {
-    test.todo('.getActionFactories() returns empty array if no action factories registered');
-    test.todo('can register an action factory');
-    test.todo('can retrieve all action factories');
-    test.todo('can retrieve action factory by ID');
-    test.todo('throws when retrieving action factory that does not exist');
+    const factoryDefinition1: ActionFactoryDefinition = {
+      id: 'test-factory-1',
+      CollectConfig: {} as any,
+      createConfig: () => ({}),
+      isConfigValid: (() => true) as any,
+      create: () => ({} as any),
+    };
+    const factoryDefinition2: ActionFactoryDefinition = {
+      id: 'test-factory-2',
+      CollectConfig: {} as any,
+      createConfig: () => ({}),
+      isConfigValid: (() => true) as any,
+      create: () => ({} as any),
+    };
+
+    test('.getActionFactories() returns empty array if no action factories registered', () => {
+      const service = new UiActionsService();
+
+      const factories = service.getActionFactories();
+
+      expect(factories).toEqual([]);
+    });
+
+    test('can register and retrieve an action factory', () => {
+      const service = new UiActionsService();
+
+      service.registerActionFactory(factoryDefinition1);
+
+      const factory = service.getActionFactory(factoryDefinition1.id);
+
+      expect(factory).toBeInstanceOf(ActionFactory);
+      expect(factory.id).toBe(factoryDefinition1.id);
+    });
+
+    test('can retrieve all action factories', () => {
+      const service = new UiActionsService();
+
+      service.registerActionFactory(factoryDefinition1);
+      service.registerActionFactory(factoryDefinition2);
+
+      const factories = service.getActionFactories();
+      const factoriesSorted = [...factories].sort((f1, f2) => (f1.id > f2.id ? 1 : -1));
+
+      expect(factoriesSorted.length).toBe(2);
+      expect(factoriesSorted[0].id).toBe(factoryDefinition1.id);
+      expect(factoriesSorted[1].id).toBe(factoryDefinition2.id);
+    });
+
+    test('throws when retrieving action factory that does not exist', () => {
+      const service = new UiActionsService();
+
+      service.registerActionFactory(factoryDefinition1);
+
+      expect(() => service.getActionFactory('UNKNOWN_ID')).toThrowError(
+        'Action factory [actionFactoryId = UNKNOWN_ID] does not exist.'
+      );
+    });
   });
 });

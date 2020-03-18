@@ -33,5 +33,4 @@ export const createSamplePanelLink = (): Action =>
   });
 
 const action = createSamplePanelLink();
-npStart.plugins.uiActions.registerAction(action);
-npStart.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);
+npStart.plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
