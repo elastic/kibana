@@ -52,7 +52,6 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
   index: ['auditbeat-*'],
   type: 'query',
   query: 'user.name: root or user.name: admin',
-  language: 'kuery',
 });
 
 export const getSignalStatus = () => ({
