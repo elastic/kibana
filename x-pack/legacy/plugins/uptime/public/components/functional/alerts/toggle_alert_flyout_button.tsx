@@ -7,6 +7,7 @@
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
@@ -21,6 +22,9 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
     <EuiPopover
       button={
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.uptime.alertsPopover.toggleButton.ariaLabel', {
+            defaultMessage: 'Open alert context menu',
+          })}
           data-test-subj="xpack.uptime.alertsPopover.toggleButton"
           iconType="arrowDown"
           iconSide="right"
@@ -39,6 +43,9 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
       <EuiContextMenuPanel
         items={[
           <EuiContextMenuItem
+            aria-label={i18n.translate('xpack.uptime.toggleAlertFlyout.ariaLabel', {
+              defaultMessage: 'Open add alert flyout',
+            })}
             data-test-subj="xpack.uptime.toggleAlertFlyout"
             key="create-alert"
             icon="plusInCircle"
@@ -50,6 +57,9 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
             />
           </EuiContextMenuItem>,
           <EuiContextMenuItem
+            aria-label={i18n.translate('xpack.uptime.navigateToAlertingUi', {
+              defaultMessage: 'Leave Uptime and go to Alerting Management page',
+            })}
             data-test-subj="xpack.uptime.navigateToAlertingUi"
             icon="gear"
             key="navigate-to-alerting"

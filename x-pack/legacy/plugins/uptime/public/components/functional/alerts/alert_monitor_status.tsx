@@ -22,6 +22,7 @@ import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { KueryBar } from '../../connected/kuerybar/kuery_bar_container';
 
 interface AlertFieldNumberProps {
+  'aria-label': string;
   'data-test-subj': string;
   disabled: boolean;
   fieldValue: number;
@@ -44,6 +45,7 @@ export const handleAlertFieldNumberChange = (
 };
 
 export const AlertFieldNumber = ({
+  'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
   disabled,
   fieldValue,
@@ -53,6 +55,7 @@ export const AlertFieldNumber = ({
 
   return (
     <EuiFieldNumber
+      aria-label={ariaLabel}
       compressed
       data-test-subj={dataTestSubj}
       min={1}
@@ -65,6 +68,7 @@ export const AlertFieldNumber = ({
 };
 
 interface AlertExpressionPopoverProps {
+  'aria-label': string;
   content: React.ReactElement;
   description: string;
   'data-test-subj': string;
@@ -73,6 +77,7 @@ interface AlertExpressionPopoverProps {
 }
 
 const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
+  'aria-label': ariaLabel,
   content,
   'data-test-subj': dataTestSubj,
   description,
@@ -86,6 +91,7 @@ const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
       anchorPosition="downLeft"
       button={
         <EuiExpression
+          aria-label={ariaLabel}
           color={isOpen ? 'primary' : 'secondary'}
           data-test-subj={dataTestSubj}
           description={description}
@@ -137,12 +143,24 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
   // locations is an array of `Option[]`, but that type doesn't seem to be exported by EUI
   const [selectedLocations, setSelectedLocations] = useState<any[]>(
     locations.map(location => ({
+      'aria-label': i18n.translate('xpack.uptime.alerts.locationSelectionItem.ariaLabel', {
+        defaultMessage: 'Location selection item for "{location}"',
+        values: {
+          location,
+        },
+      }),
       disabled: allLabels,
       label: location,
     }))
   );
   const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<any[]>([
     {
+      'aria-label': i18n.translate(
+        'xpack.uptime.alerts.timerangeUnitSelectable.secondsOption.ariaLabel',
+        {
+          defaultMessage: '"Seconds" time range select item',
+        }
+      ),
       'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.secondsOption',
       key: 's',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.seconds', {
@@ -150,6 +168,12 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       }),
     },
     {
+      'aria-label': i18n.translate(
+        'xpack.uptime.alerts.timerangeUnitSelectable.minutesOption.ariaLabel',
+        {
+          defaultMessage: '"Minutes" time range select item',
+        }
+      ),
       'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.minutesOption',
       checked: 'on',
       key: 'm',
@@ -158,6 +182,12 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       }),
     },
     {
+      'aria-label': i18n.translate(
+        'xpack.uptime.alerts.timerangeUnitSelectable.hoursOption.ariaLabel',
+        {
+          defaultMessage: '"Hours" time range select item',
+        }
+      ),
       'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.hoursOption',
       key: 'h',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.hours', {
@@ -165,6 +195,12 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       }),
     },
     {
+      'aria-label': i18n.translate(
+        'xpack.uptime.alerts.timerangeUnitSelectable.daysOption.ariaLabel',
+        {
+          defaultMessage: '"Days" time range select item',
+        }
+      ),
       'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.daysOption',
       key: 'd',
       label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.days', {
@@ -203,13 +239,28 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
     <>
       <EuiSpacer size="m" />
       <KueryBar
+        aria-label={i18n.translate('xpack.uptime.alerts.monitorStatus.filterBar.ariaLabel', {
+          defaultMessage: 'Input that allows filtering criteria for the monitor status alert',
+        })}
         autocomplete={props.autocomplete}
         data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
       />
       <EuiSpacer size="s" />
       <AlertExpressionPopover
+        aria-label={i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.numTimesExpression.ariaLabel',
+          {
+            defaultMessage: 'Open the popover for down count input',
+          }
+        )}
         content={
           <AlertFieldNumber
+            aria-label={i18n.translate(
+              'xpack.uptime.alerts.monitorStatus.numTimesField.ariaLabel',
+              {
+                defaultMessage: 'Enter number of down counts required to trigger the alert',
+              }
+            )}
             data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesField"
             disabled={false}
             fieldValue={numTimes}
@@ -225,8 +276,20 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <AlertExpressionPopover
+            aria-label={i18n.translate(
+              'xpack.uptime.alerts.monitorStatus.timerangeValueExpression.ariaLabel',
+              {
+                defaultMessage: 'Open the popover for time range value field',
+              }
+            )}
             content={
               <AlertFieldNumber
+                aria-label={i18n.translate(
+                  'xpack.uptime.alerts.monitorStatus.timerangeValueField.ariaLabel',
+                  {
+                    defaultMessage: `Enter the number of time units for the alert's range`,
+                  }
+                )}
                 data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeValueField"
                 disabled={false}
                 fieldValue={numMins}
@@ -241,6 +304,12 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertExpressionPopover
+            aria-label={i18n.translate(
+              'xpack.uptime.alerts.monitorStatus.timerangeUnitExpression.ariaLabel',
+              {
+                defaultMessage: 'Open the popover for time range unit select field',
+              }
+            )}
             content={
               <>
                 <EuiTitle size="xxs">
@@ -252,6 +321,12 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
                   </h5>
                 </EuiTitle>
                 <EuiSelectable
+                  aria-label={i18n.translate(
+                    'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable',
+                    {
+                      defaultMessage: 'Selectable field for the time range units alerts should use',
+                    }
+                  )}
                   data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable"
                   options={timerangeUnitOptions}
                   onChange={newOptions => {
@@ -290,10 +365,22 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       )}
       {selectedLocations.length > 0 && (
         <AlertExpressionPopover
+          aria-label={i18n.translate(
+            'xpack.uptime.alerts.monitorStatus.locationsSelectionExpression.ariaLabel',
+            {
+              defaultMessage: 'Open the popover to select locations the alert should trigger',
+            }
+          )}
           content={
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 <EuiSwitch
+                  aria-label={i18n.translate(
+                    'xpack.uptime.alerts.monitorStatus.locationSelectionSwitch.ariaLabel',
+                    {
+                      defaultMessage: 'Select the locations the alert should trigger',
+                    }
+                  )}
                   data-test-subj="xpack.uptime.alerts.monitorStatus.locationsSelectionSwitch"
                   label="Check all locations"
                   checked={allLabels}
@@ -301,6 +388,15 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
                     setAllLabels(!allLabels);
                     setSelectedLocations(
                       selectedLocations.map((l: any) => ({
+                        'aria-label': i18n.translate(
+                          'xpack.uptime.alerts.monitorStatus.locationSelection',
+                          {
+                            defaultMessage: 'Select the location {location}',
+                            values: {
+                              location: l,
+                            },
+                          }
+                        ),
                         ...l,
                         'data-test-subj': `xpack.uptime.alerts.monitorStatus.locationSelection.${l.label}LocationOption`,
                         disabled: !allLabels,
