@@ -34,14 +34,14 @@ import { ChromeNavLinks, NavLinksService } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { NavControlsService, ChromeNavControls } from './nav_controls';
 import { DocTitleService, ChromeDocTitle } from './doc_title';
-import { LoadingIndicator, HeaderWrapper as Header } from './ui';
+import { LoadingIndicator, Header } from './ui';
 import { DocLinksStart } from '../doc_links';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { IUiSettingsClient } from '../ui_settings';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
-const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
+const IS_LOCKED_KEY = 'core.chrome.isLocked';
 
 /** @public */
 export interface ChromeBadge {
@@ -146,17 +146,24 @@ export class ChromeService {
 
     const appTitle$ = new BehaviorSubject<string>('Kibana');
     const brand$ = new BehaviorSubject<ChromeBrand>({});
-    const isCollapsed$ = new BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
+    const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
+
+    const setIsNavDrawerLocked = (isLocked: boolean) => {
+      isNavDrawerLocked$.next(isLocked);
+      localStorage.setItem(IS_LOCKED_KEY, `${isLocked}`);
+    };
+
+    const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -193,6 +200,8 @@ export class ChromeService {
             recentlyAccessed$={recentlyAccessed.get$()}
             navControlsLeft$={navControls.getLeft$()}
             navControlsRight$={navControls.getRight$()}
+            onIsLockedUpdate={setIsNavDrawerLocked}
+            isLocked$={getIsNavDrawerLocked$}
           />
         </React.Fragment>
       ),
@@ -213,17 +222,6 @@ export class ChromeService {
       getIsVisible$: () => this.isVisible$,
 
       setIsVisible: (isVisible: boolean) => this.toggleHidden$.next(!isVisible),
-
-      getIsCollapsed$: () => isCollapsed$.pipe(takeUntil(this.stop$)),
-
-      setIsCollapsed: (isCollapsed: boolean) => {
-        isCollapsed$.next(isCollapsed);
-        if (isCollapsed) {
-          localStorage.setItem(IS_COLLAPSED_KEY, 'true');
-        } else {
-          localStorage.removeItem(IS_COLLAPSED_KEY);
-        }
-      },
 
       getApplicationClasses$: () =>
         applicationClasses$.pipe(
@@ -262,6 +260,8 @@ export class ChromeService {
       },
 
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
+
+      getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
     };
   }
 
@@ -354,16 +354,6 @@ export interface ChromeStart {
   setIsVisible(isVisible: boolean): void;
 
   /**
-   * Get an observable of the current collapsed state of the chrome.
-   */
-  getIsCollapsed$(): Observable<boolean>;
-
-  /**
-   * Set the collapsed state of the chrome navigation.
-   */
-  setIsCollapsed(isCollapsed: boolean): void;
-
-  /**
    * Get the current set of classNames that will be set on the application container.
    */
   getApplicationClasses$(): Observable<string[]>;
@@ -413,6 +403,11 @@ export interface ChromeStart {
    * @param url The updated support URL
    */
   setHelpSupportUrl(url: string): void;
+
+  /**
+   * Get an observable of the current locked state of the nav drawer.
+   */
+  getIsNavDrawerLocked$(): Observable<boolean>;
 }
 
 /** @internal */
