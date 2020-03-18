@@ -15,6 +15,8 @@ import React, {
   useRef,
   useState
 } from 'react';
+import { EuiBetaBadge } from '@elastic/eui';
+import styled from 'styled-components';
 import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/service_map';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceMapAPIResponse } from '../../../../../../../plugins/apm/server/lib/service_map/get_service_map';
@@ -56,7 +58,12 @@ ${theme.euiColorLightShade}`,
   margin: `-${theme.gutterTypes.gutterLarge}`,
   marginTop: 0
 };
-
+const BetaBadgeContainer = styled.div`
+  right: ${theme.gutterTypes.gutterMedium};
+  position: absolute;
+  top: ${theme.gutterTypes.gutterSmall};
+  z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
+`;
 const MAX_REQUESTS = 5;
 
 export function ServiceMap({ serviceName }: ServiceMapProps) {
@@ -184,6 +191,20 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         <Controls />
         {serviceName && <EmptyBanner />}
         <Popover focusedServiceName={serviceName} />
+        <BetaBadgeContainer>
+          <EuiBetaBadge
+            label={i18n.translate('xpack.apm.serviceMap.betaBadge', {
+              defaultMessage: 'Beta'
+            })}
+            tooltipContent={i18n.translate(
+              'xpack.apm.serviceMap.betaTooltipMessage',
+              {
+                defaultMessage:
+                  'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.'
+              }
+            )}
+          />
+        </BetaBadgeContainer>
       </Cytoscape>
     </div>
   ) : (
