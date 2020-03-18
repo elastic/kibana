@@ -82,7 +82,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertCreateIndexPatternCheckboxValue(expectedValue: boolean) {
-      const isChecked = await testSubjects.isChecked('mlFileDataVistCreateIndexPatternCheckbox');
+      const isChecked = await testSubjects.isChecked('mlFileDataVisCreateIndexPatternCheckbox');
       expect(isChecked).to.eql(
         expectedValue,
         `Expected create index pattern checkbox to be ${expectedValue ? 'checked' : 'unchecked'}`
@@ -90,7 +90,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async setCreateIndexPatternCheckboxState(newState: boolean) {
-      const isChecked = await testSubjects.isChecked('mlFileDataVistCreateIndexPatternCheckbox');
+      const isChecked = await testSubjects.isChecked('mlFileDataVisCreateIndexPatternCheckbox');
       if (isChecked !== newState) {
         // this checkbox can't be clicked directly, instead click the corresponding label
         const panel = await testSubjects.find('mlFileDataVisImportSettingsPanel');

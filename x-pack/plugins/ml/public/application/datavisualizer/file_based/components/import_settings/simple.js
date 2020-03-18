@@ -64,7 +64,7 @@ export const SimpleSettings = ({
         checked={createIndexPattern === true}
         disabled={initialized === true}
         onChange={onCreateIndexPatternChange}
-        data-test-subj="mlFileDataVistCreateIndexPatternCheckbox"
+        data-test-subj="mlFileDataVisCreateIndexPatternCheckbox"
       />
     </React.Fragment>
   );
