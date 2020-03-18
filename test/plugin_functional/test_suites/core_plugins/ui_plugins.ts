@@ -25,6 +25,7 @@ import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
+  const supertest = getService('supertest');
 
   describe('ui plugins', function() {
     describe('loading', function describeIndexTests() {
@@ -95,6 +96,46 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
             window.__coreProvider.start.plugins.core_plugin_b.sendSystemRequest(false).then(cb);
           })
         ).to.be('/core_plugin_b/system_request says: "System request? false"');
+      });
+    });
+
+    describe('Static assets', function() {
+      describe('Platform assets', function() {
+        it('exposes static assets', async () => {
+          await supertest.get('/ui/favicons/favicon.ico').expect(200);
+        });
+
+        it('returns 404 if not found', async function() {
+          await supertest.get('/ui/favicons/not-a-favicon.ico').expect(404);
+        });
+
+        it('does not expose folder content', async function() {
+          await supertest.get('/ui/favicons/').expect(403);
+        });
+
+        it('does not allow file tree traversing', async function() {
+          await supertest.get('/ui/../../../../../README.md').expect(404);
+        });
+      });
+
+      describe('Plugin assets', function() {
+        it('exposes static assets from "public/assets" folder', async () => {
+          await supertest.get('/plugins/corePluginStaticAssets/assets/chart.svg').expect(200);
+        });
+
+        it('returns 404 if not found', async function() {
+          await supertest.get('/plugins/corePluginStaticAssets/assets/not-a-chart.svg').expect(404);
+        });
+
+        it('does not expose folder content', async function() {
+          await supertest.get('/plugins/corePluginStaticAssets/assets/').expect(403);
+        });
+
+        it('does not allow file tree traversing', async function() {
+          await supertest
+            .get('/plugins/corePluginStaticAssets/assets/../../kibana.json')
+            .expect(404);
+        });
       });
     });
   });
