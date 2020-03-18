@@ -2381,7 +2381,6 @@
     "visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel": "切换图例",
     "visTypeVislib.vislib.legend.toggleLegendButtonTitle": "切换图例",
     "visTypeVislib.vislib.legend.toggleOptionsButtonAriaLabel": "{legendDataLabel}切换选项",
-    "kibana-react.exitFullScreenButton.exitFullScreenModeButtonLabel": "退出全屏",
     "kibana-react.exitFullScreenButton.fullScreenModeDescription": "在全屏模式下，按 ESC 键可退出。",
     "newsfeed.emptyPrompt.noNewsText": "如果您的 Kibana 实例没有 Internet 连接，请让您的管理员禁用此功能。否则，我们将不断尝试获取新闻。",
     "newsfeed.emptyPrompt.noNewsTitle": "无新闻？",
