@@ -25,7 +25,7 @@ export const configSchema = schema.object(
     graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
   },
   // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
+  { unknowns: 'allow' }
 );
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

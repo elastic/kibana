@@ -90,6 +90,7 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
         }
       )}
       paddingSize="l"
+      data-test-subj="alertDetailsSourceProcessAccordion"
     >
       <EuiDescriptionList type="column" listItems={columns} />
     </EuiAccordion>

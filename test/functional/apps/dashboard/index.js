@@ -23,6 +23,7 @@ export default function({ getService, loadTestFile }) {
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
+    await esArchiver.unload('logstash_functional');
     await esArchiver.loadIfNeeded('dashboard/current/data');
   }
 
