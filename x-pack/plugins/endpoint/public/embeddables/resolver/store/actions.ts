@@ -5,7 +5,7 @@
  */
 import { CameraAction } from './camera';
 import { DataAction } from './data';
-import { LegacyEndpointEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/types';
 
 /**
  * When the user wants to bring a process node front-and-center on the map.
@@ -16,7 +16,7 @@ interface UserBroughtProcessIntoView {
     /**
      * Used to identify the process node that should be brought into view.
      */
-    readonly process: LegacyEndpointEvent;
+    readonly process: ResolverEvent;
     /**
      * The time (since epoch in milliseconds) when the action was dispatched.
      */
@@ -33,7 +33,7 @@ interface UserChangedSelectedEvent {
     /**
      * Optional because they could have unselected the event.
      */
-    selectedEvent?: LegacyEndpointEvent;
+    readonly selectedEvent?: ResolverEvent;
   };
 }
 
