@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../constants/new_job';
 
 export type CategoryId = number;
@@ -53,3 +54,49 @@ export interface FieldExampleCheck {
   valid: CATEGORY_EXAMPLES_VALIDATION_STATUS;
   message: string;
 }
+
+export const VALIDATION_CHECK_DESCRIPTION = {
+  [VALIDATION_RESULT.TOKEN_COUNT]: i18n.translate(
+    'xpack.ml.models.jobService.categorization.messages.validTokenLength',
+    {
+      defaultMessage:
+        'More than 3 tokens per example were found in over 75% of the examples loaded',
+    }
+  ),
+  [VALIDATION_RESULT.MEDIAN_LINE_LENGTH]: i18n.translate(
+    'xpack.ml.models.jobService.categorization.messages.validMedianLineLength',
+    {
+      defaultMessage: 'The median line length of the examples loaded was less than 400 characters.',
+    }
+  ),
+  [VALIDATION_RESULT.NULL_VALUES]: i18n.translate(
+    'xpack.ml.models.jobService.categorization.messages.validNullValues',
+    {
+      defaultMessage: 'Less than 25% of the examples loaded were null',
+    }
+  ),
+  [VALIDATION_RESULT.NO_EXAMPLES]: i18n.translate(
+    'xpack.ml.models.jobService.categorization.messages.validNoDataFound',
+    {
+      defaultMessage: 'Examples were successfully loaded.',
+    }
+  ),
+  [VALIDATION_RESULT.TOO_MANY_TOKENS]: i18n.translate(
+    'xpack.ml.models.jobService.categorization.messages.validTooManyTokens',
+    {
+      defaultMessage: 'Less than 10000 tokens where found in total in the examples loaded.',
+    }
+  ),
+  [VALIDATION_RESULT.FAILED_TO_TOKENIZE]: i18n.translate(
+    'xpack.ml.models.jobService.categorization.messages.validFailureToGetTokens',
+    {
+      defaultMessage: 'The examples loaded were tokenized successfully.',
+    }
+  ),
+  [VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES]: i18n.translate(
+    'xpack.ml.models.jobService.categorization.messages.validUserPrivileges',
+    {
+      defaultMessage: 'The user has sufficient privileges to perform the checks.',
+    }
+  ),
+};

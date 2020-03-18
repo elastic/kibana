@@ -187,7 +187,6 @@ export class ValidationResults {
         valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
         message,
       });
-      return;
     }
   }
 
