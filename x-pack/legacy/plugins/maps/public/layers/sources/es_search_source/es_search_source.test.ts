@@ -7,7 +7,7 @@ jest.mock('ui/new_platform');
 
 import { ESSearchSource } from './es_search_source';
 import { VectorLayer } from '../../vector_layer';
-import { ES_SEARCH } from '../../../../common/constants';
+import { ES_SEARCH, SCALING_TYPES } from '../../../../common/constants';
 import { ESSearchSourceDescriptor } from '../../../../common/descriptor_types';
 
 const descriptor: ESSearchSourceDescriptor = {
@@ -15,6 +15,7 @@ const descriptor: ESSearchSourceDescriptor = {
   id: '1234',
   indexPatternId: 'myIndexPattern',
   geoField: 'myLocation',
+  scalingType: SCALING_TYPES.LIMIT,
 };
 
 describe('ES Search Source', () => {
