@@ -236,16 +236,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
-  _getMbOrdinalColorStops() {
-    if (this._options.useCustomColorRamp) {
-      return this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
-        return [...accumulatedStops, nextStop.stop, nextStop.color];
-      }, []);
-    } else {
-      return getOrdinalColorRampStops(this._options.color);
-    }
-  }
-
   renderRangeLegendHeader() {
     if (this._options.color) {
       return <ColorGradient colorRampName={this._options.color} />;

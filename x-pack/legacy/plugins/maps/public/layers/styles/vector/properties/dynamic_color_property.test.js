@@ -265,7 +265,7 @@ describe('get mapbox color expression', () => {
         expect(colorProperty._getMbColor()).toBeNull();
       });
 
-      test('Should set the correct mapbox style', async () => {
+      test('Should call .syncCircleColorWthMb correctly', async () => {
         const colorStyle = makeProperty({
           color: 'Blues',
           type: undefined,
