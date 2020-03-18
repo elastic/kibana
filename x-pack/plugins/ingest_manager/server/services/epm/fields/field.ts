@@ -113,9 +113,11 @@ function dedupFields(fields: Fields): Fields {
         found.fields = dedupFields(found.fields.concat(field.fields));
       } else {
         // only 'group' fields can be merged in this way
-        throw new Error(
-          "Can't merge fields " + JSON.stringify(found) + ' and ' + JSON.stringify(field)
-        );
+        // XXX: don't abort on error for now
+        // see discussion in https://github.com/elastic/kibana/pull/59894
+        // throw new Error(
+        //   "Can't merge fields " + JSON.stringify(found) + ' and ' + JSON.stringify(field)
+        // );
       }
     } else {
       if (field.fields) {
