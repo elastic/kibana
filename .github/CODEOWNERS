@@ -131,6 +131,7 @@
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
 /src/legacy/server/status/ @elastic/kibana-platform
 /src/plugins/status_page/ @elastic/kibana-platform
+/src/plugins/so_management/ @elastic/kibana-platform
 /src/dev/run_check_published_api_changes.ts @elastic/kibana-platform
 
 # Security
