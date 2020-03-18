@@ -19,9 +19,7 @@
 
 const _ = require('lodash');
 
-const BOOLEAN = {
-  __one_of: [true, false],
-};
+import { BOOLEAN } from './shared';
 
 export default function(api) {
   api.addEndpointDescription('put_mapping', {
