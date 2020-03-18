@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema} from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { AckEventSchema, AgentEventSchema, AgentTypeSchema, NewAgentActionSchema } from '../models';
 
 export const GetAgentsRequestSchema = {
