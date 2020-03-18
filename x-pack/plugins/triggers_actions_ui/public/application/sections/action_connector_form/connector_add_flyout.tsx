@@ -104,6 +104,7 @@ export const ConnectorAddFlyout = ({
         dispatch={dispatch}
         errors={errors}
         actionTypeRegistry={actionTypeRegistry}
+        http={http}
       />
     );
   }

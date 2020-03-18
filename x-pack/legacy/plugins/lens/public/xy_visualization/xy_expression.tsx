@@ -238,6 +238,8 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
           index
         ) => {
           if (
+            !xAccessor ||
+            !accessors.length ||
             !data.tables[layerId] ||
             data.tables[layerId].rows.length === 0 ||
             data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
@@ -246,7 +248,7 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
           }
 
           const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
-          const splitAccessorLabel = columnToLabelMap[splitAccessor];
+          const splitAccessorLabel = splitAccessor ? columnToLabelMap[splitAccessor] : '';
           const yAccessors = accessors.map(accessor => columnToLabelMap[accessor] || accessor);
           const idForLegend = splitAccessorLabel || yAccessors;
           const sanitized = sanitizeRows({

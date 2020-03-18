@@ -48,6 +48,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
         }
       )}
       paddingSize="l"
+      data-test-subj="alertDetailsHostAccordion"
     >
       <EuiDescriptionList type="column" listItems={columns} />
     </EuiAccordion>

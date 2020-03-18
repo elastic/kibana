@@ -29,7 +29,7 @@ export function NewJobButton() {
     >
       <FormattedMessage
         id="xpack.ml.jobsList.createNewJobButtonLabel"
-        defaultMessage="Create new job"
+        defaultMessage="Create job"
       />
     </EuiButton>
   );
