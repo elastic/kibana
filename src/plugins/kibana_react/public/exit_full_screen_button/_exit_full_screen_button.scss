@@ -6,19 +6,38 @@
 .dshExitFullScreenButton {
   @include euiBottomShadow;
 
-  left: $euiSize;
-  bottom: $euiSize;
+  left: $euiSizeS;
+  bottom: $euiSizeS;
   position: fixed;
   display: block;
   padding: 0;
   border: none;
   background: none;
   z-index: 5;
-  background: $euiColorEmptyShade;
-  padding: $euiSizeS;
+  background: $euiColorFullShade;
+  padding: $euiSizeXS;
   border-radius: $euiBorderRadius;
   text-align: left;
+
+  &:hover {
+    background: $euiColorFullShade;
+
+    .dshExitFullScreenButton__icon {
+      color: $euiColorEmptyShade;
+    }
+  }
 }
-/**
- * 1. Calc made to allow caret in text to peek out / animate.
- */
+
+.dshExitFullScreenButton__title {
+  line-height: 1.2;
+  color: $euiColorEmptyShade;
+}
+
+.dshExitFullScreenButton__text {
+  line-height: 1.2;
+  color: makeHighContrastColor($euiColorMediumShade, $euiColorFullShade);
+}
+
+.dshExitFullScreenButton__icon {
+  color: makeHighContrastColor($euiColorMediumShade, $euiColorFullShade);
+}

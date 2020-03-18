@@ -36,12 +36,12 @@ exports[`is rendered 1`] = `
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <EuiIcon
-                  size="xl"
+                  size="l"
                   type="logoElastic"
                 >
                   <div
                     data-euiicon-type="logoElastic"
-                    size="xl"
+                    size="l"
                   />
                 </EuiIcon>
               </div>
@@ -54,36 +54,30 @@ exports[`is rendered 1`] = `
                 className="euiFlexItem euiFlexItem--flexGrowZero"
                 data-test-subj="exitFullScreenModeText"
               >
-                <EuiText
-                  color="subdued"
-                  size="xs"
-                >
-                  <div
-                    className="euiText euiText--extraSmall"
+                <div>
+                  <EuiTitle
+                    className="dshExitFullScreenButton__title"
+                    size="xxxs"
                   >
-                    <EuiTextColor
-                      color="subdued"
-                      component="div"
+                    <p
+                      className="euiTitle euiTitle--xxxsmall dshExitFullScreenButton__title"
                     >
-                      <div
-                        className="euiTextColor euiTextColor--subdued"
-                      >
-                        <p>
-                          Powered by
-                        </p>
-                      </div>
-                    </EuiTextColor>
-                  </div>
-                </EuiText>
-                <EuiTitle
-                  size="xxs"
-                >
-                  <p
-                    className="euiTitle euiTitle--xxsmall"
+                      Elastic Kibana
+                    </p>
+                  </EuiTitle>
+                  <EuiText
+                    className="dshExitFullScreenButton__text"
+                    size="xs"
                   >
-                    Elastic Kibana
-                  </p>
-                </EuiTitle>
+                    <div
+                      className="euiText euiText--extraSmall dshExitFullScreenButton__text"
+                    >
+                      <p>
+                        Exit full screen
+                      </p>
+                    </div>
+                  </EuiText>
+                </div>
               </div>
             </EuiFlexItem>
             <EuiFlexItem
@@ -93,10 +87,12 @@ exports[`is rendered 1`] = `
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <EuiIcon
-                  type="cross"
+                  className="dshExitFullScreenButton__icon"
+                  type="fullScreen"
                 >
                   <div
-                    data-euiicon-type="cross"
+                    className="dshExitFullScreenButton__icon"
+                    data-euiicon-type="fullScreen"
                   />
                 </EuiIcon>
               </div>
