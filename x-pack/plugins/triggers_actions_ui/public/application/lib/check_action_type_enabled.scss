@@ -1,3 +1,9 @@
 .actCheckActionTypeEnabled__disabledActionWarningCard {
   background-color: $euiColorLightestShade;
 }
+
+.actAccordionActionForm {
+  .euiCard {
+    box-shadow: none;
+  }
+}

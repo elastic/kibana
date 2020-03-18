@@ -39,6 +39,7 @@ export function checkActionTypeEnabled(
       ),
       messageCard: (
         <EuiCard
+          titleSize="xs"
           title={i18n.translate(
             'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseMessageTitle',
             {

@@ -15,7 +15,7 @@ import {
   EuiTitle,
   EuiLink,
   EuiLoadingSpinner,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -159,12 +159,14 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         return checkEnabledResult.isEnabled ? (
           link
         ) : (
-          <EuiToolTip position="top" content={checkEnabledResult.message}>
-            <Fragment>
-              {link}
-              <EuiIcon type="questionInCircle" />
-            </Fragment>
-          </EuiToolTip>
+          <Fragment>
+            {link}
+            <EuiIconTip
+              type="questionInCircle"
+              content={checkEnabledResult.message}
+              position="right"
+            />
+          </Fragment>
         );
       },
     },

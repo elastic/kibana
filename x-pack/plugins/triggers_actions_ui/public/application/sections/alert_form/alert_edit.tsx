@@ -147,6 +147,7 @@ export const AlertEdit = ({
           {hasActionsDisabled && (
             <Fragment>
               <EuiCallOut
+                size="s"
                 color="danger"
                 iconType="alert"
                 title={i18n.translate(

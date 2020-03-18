@@ -271,7 +271,6 @@ const upgradeYourLicenseCallOut = (
       'xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerTitle',
       { defaultMessage: 'Upgrade your plan to access more connector types' }
     )}
-    iconType="starEmptySpace"
   >
     <FormattedMessage
       id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerMessage"
