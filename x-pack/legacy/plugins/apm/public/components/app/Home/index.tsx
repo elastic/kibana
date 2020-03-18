@@ -27,7 +27,7 @@ import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
 
 function getHomeTabs({
-  serviceMapEnabled = false
+  serviceMapEnabled = true
 }: {
   serviceMapEnabled: boolean;
 }) {

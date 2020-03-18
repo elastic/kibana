@@ -128,3 +128,4 @@ export const success_count = PositiveInteger;
 export const rules_custom_installed = PositiveInteger;
 export const rules_not_installed = PositiveInteger;
 export const rules_not_updated = PositiveInteger;
+export const note = t.string;

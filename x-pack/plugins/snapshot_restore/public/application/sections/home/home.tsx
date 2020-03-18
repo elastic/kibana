@@ -41,7 +41,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
-  const { slmUi } = useConfig();
+  const { slm_ui: slmUi } = useConfig();
 
   const tabs: Array<{
     id: Section;

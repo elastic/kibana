@@ -18,7 +18,6 @@ import { OrientationEditor } from './orientation/orientation_editor';
 import {
   getDefaultDynamicProperties,
   getDefaultStaticProperties,
-  LABEL_BORDER_SIZES,
   VECTOR_STYLES,
 } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
@@ -26,13 +25,18 @@ import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import {
+  CATEGORICAL_DATA_TYPES,
+  ORDINAL_DATA_TYPES,
+  LABEL_BORDER_SIZES,
+} from '../../../../../common/constants';
 
 export class VectorStyleEditor extends Component {
   state = {
     dateFields: [],
     numberFields: [],
-    categoricalFields: [],
     fields: [],
+    ordinalAndCategoricalFields: [],
     defaultDynamicProperties: getDefaultDynamicProperties(),
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
@@ -64,33 +68,24 @@ export class VectorStyleEditor extends Component {
       };
     };
 
-    const dateFields = await this.props.layer.getDateFields();
-    const dateFieldPromises = dateFields.map(getFieldMeta);
-    const dateFieldsArray = await Promise.all(dateFieldPromises);
-    if (this._isMounted && !_.isEqual(dateFieldsArray, this.state.dateFields)) {
-      this.setState({ dateFields: dateFieldsArray });
-    }
-
-    const numberFields = await this.props.layer.getNumberFields();
-    const numberFieldPromises = numberFields.map(getFieldMeta);
-    const numberFieldsArray = await Promise.all(numberFieldPromises);
-    if (this._isMounted && !_.isEqual(numberFieldsArray, this.state.numberFields)) {
-      this.setState({ numberFields: numberFieldsArray });
-    }
-
-    const categoricalFields = await this.props.layer.getCategoricalFields();
-    const categoricalFieldMeta = categoricalFields.map(getFieldMeta);
-    const categoricalFieldsArray = await Promise.all(categoricalFieldMeta);
-    if (this._isMounted && !_.isEqual(categoricalFieldsArray, this.state.categoricalFields)) {
-      this.setState({ categoricalFields: categoricalFieldsArray });
-    }
-
+    //These are all fields (only used for text labeling)
     const fields = await this.props.layer.getFields();
     const fieldPromises = fields.map(getFieldMeta);
-    const fieldsArray = await Promise.all(fieldPromises);
-    if (this._isMounted && !_.isEqual(fieldsArray, this.state.fields)) {
-      this.setState({ fields: fieldsArray });
+    const fieldsArrayAll = await Promise.all(fieldPromises);
+    if (!this._isMounted || _.isEqual(fieldsArrayAll, this.state.fields)) {
+      return;
     }
+
+    this.setState({
+      fields: fieldsArrayAll,
+      ordinalAndCategoricalFields: fieldsArrayAll.filter(field => {
+        return (
+          CATEGORICAL_DATA_TYPES.includes(field.type) || ORDINAL_DATA_TYPES.includes(field.type)
+        );
+      }),
+      dateFields: fieldsArrayAll.filter(field => field.type === 'date'),
+      numberFields: fieldsArrayAll.filter(field => field.type === 'number'),
+    });
   }
 
   async _loadSupportedFeatures() {
@@ -116,10 +111,6 @@ export class VectorStyleEditor extends Component {
 
   _getOrdinalFields() {
     return [...this.state.dateFields, ...this.state.numberFields];
-  }
-
-  _getOrdinalAndCategoricalFields() {
-    return [...this.state.dateFields, ...this.state.numberFields, ...this.state.categoricalFields];
   }
 
   _handleSelectedFeatureChange = selectedFeature => {
@@ -172,7 +163,7 @@ export class VectorStyleEditor extends Component {
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties[VECTOR_STYLES.FILL_COLOR]}
-        fields={this._getOrdinalAndCategoricalFields()}
+        fields={this.state.ordinalAndCategoricalFields}
         defaultStaticStyleOptions={
           this.state.defaultStaticProperties[VECTOR_STYLES.FILL_COLOR].options
         }
@@ -193,7 +184,7 @@ export class VectorStyleEditor extends Component {
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties[VECTOR_STYLES.LINE_COLOR]}
-        fields={this._getOrdinalAndCategoricalFields()}
+        fields={this.state.ordinalAndCategoricalFields}
         defaultStaticStyleOptions={
           this.state.defaultStaticProperties[VECTOR_STYLES.LINE_COLOR].options
         }
@@ -249,7 +240,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_COLOR]}
-          fields={this._getOrdinalAndCategoricalFields()}
+          fields={this.state.ordinalAndCategoricalFields}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_COLOR].options
           }
@@ -282,7 +273,7 @@ export class VectorStyleEditor extends Component {
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_COLOR]}
-          fields={this._getOrdinalAndCategoricalFields()}
+          fields={this.state.ordinalAndCategoricalFields}
           defaultStaticStyleOptions={
             this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_BORDER_COLOR].options
           }
@@ -335,7 +326,7 @@ export class VectorStyleEditor extends Component {
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
             styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON]}
-            fields={this.state.categoricalFields}
+            fields={this.state.ordinalAndCategoricalFields}
             defaultStaticStyleOptions={
               this.state.defaultStaticProperties[VECTOR_STYLES.ICON].options
             }

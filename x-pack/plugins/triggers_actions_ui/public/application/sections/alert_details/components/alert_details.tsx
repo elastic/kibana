@@ -68,8 +68,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle size="m">
-                <h1 data-test-subj="alertDetailsTitle">
-                  {alert.name}
+                <h1>
+                  <span data-test-subj="alertDetailsTitle">{alert.name}</span>
                   &emsp;
                   <EuiBetaBadge
                     label="Beta"

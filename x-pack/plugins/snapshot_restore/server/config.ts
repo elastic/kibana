@@ -8,7 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  slmUi: schema.object({
+  slm_ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
 });

@@ -37,6 +37,7 @@ export const createRules = ({
   to,
   type,
   references,
+  note,
   version,
 }: CreateRuleParams): Promise<Alert> => {
   return alertsClient.create({
@@ -67,6 +68,7 @@ export const createRules = ({
         to,
         type,
         references,
+        note,
         version,
       },
       schedule: { interval },

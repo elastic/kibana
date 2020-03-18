@@ -24,6 +24,7 @@ export interface ThreatParams {
 
 export interface RuleAlertParams {
   description: string;
+  note: string | undefined | null;
   enabled: boolean;
   falsePositives: string[];
   filters: PartialFilter[] | undefined | null;
@@ -49,6 +50,7 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
+  throttle?: string;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;

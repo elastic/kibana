@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SavedObjectsManagement, SavedObjectsManagementDefinition } from './management';
+export { SavedObjectsManagement } from './management';

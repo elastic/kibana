@@ -32,6 +32,41 @@ export function getAlertType(service: Service): AlertType {
     }
   );
 
+  const actionVariableContextGroupLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextGroupLabel',
+    {
+      defaultMessage: 'The group that exceeded the threshold.',
+    }
+  );
+
+  const actionVariableContextDateLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextDateLabel',
+    {
+      defaultMessage: 'The date the alert exceeded the threshold.',
+    }
+  );
+
+  const actionVariableContextValueLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextValueLabel',
+    {
+      defaultMessage: 'The value that exceeded the threshold.',
+    }
+  );
+
+  const actionVariableContextMessageLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextMessageLabel',
+    {
+      defaultMessage: 'A pre-constructed message for the alert.',
+    }
+  );
+
+  const actionVariableContextTitleLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextTitleLabel',
+    {
+      defaultMessage: 'A pre-constructed title for the alert.',
+    }
+  );
+
   return {
     id: ID,
     name: alertTypeName,
@@ -39,6 +74,15 @@ export function getAlertType(service: Service): AlertType {
     defaultActionGroupId: ActionGroupId,
     validate: {
       params: ParamsSchema,
+    },
+    actionVariables: {
+      context: [
+        { name: 'message', description: actionVariableContextMessageLabel },
+        { name: 'title', description: actionVariableContextTitleLabel },
+        { name: 'group', description: actionVariableContextGroupLabel },
+        { name: 'date', description: actionVariableContextDateLabel },
+        { name: 'value', description: actionVariableContextValueLabel },
+      ],
     },
     executor,
   };
@@ -85,15 +129,11 @@ export function getAlertType(service: Service): AlertType {
       if (!met) continue;
 
       const baseContext: BaseActionContext = {
-        name,
-        spaceId: options.spaceId,
-        namespace: options.namespace,
-        tags: options.tags,
         date,
         group: instanceId,
         value,
       };
-      const actionContext = addMessages(baseContext, params);
+      const actionContext = addMessages(options, baseContext, params);
       const alertInstance = options.services.alertInstanceFactory(instanceId);
       alertInstance.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);

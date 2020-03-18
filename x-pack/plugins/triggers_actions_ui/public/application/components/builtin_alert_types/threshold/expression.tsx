@@ -20,13 +20,16 @@ import {
   EuiComboBoxOptionOption,
   EuiFormRow,
   EuiCallOut,
+  EuiEmptyPrompt,
+  EuiText,
 } from '@elastic/eui';
-import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import {
-  getMatchingIndicesForThresholdAlertType,
-  getThresholdAlertTypeFields,
-  loadIndexPatterns,
-} from './lib/api';
+  firstFieldOption,
+  getIndexPatterns,
+  getIndexOptions,
+  getFields,
+} from '../../../../common/index_controls';
+import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
 import { ThresholdVisualization } from './visualization';
 import { WhenExpression } from '../../../../common';
@@ -39,6 +42,7 @@ import {
 import { builtInAggregationTypes } from '../../../../common/constants';
 import { IndexThresholdAlertParams } from './types';
 import { AlertsContextValue } from '../../../context/alerts_context';
+import './expression.scss';
 
 const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
@@ -92,15 +96,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     timeWindowUnit,
   } = alertParams;
 
-  const firstFieldOption = {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.timeFieldOptionLabel',
-      {
-        defaultMessage: 'Select a field',
-      }
-    ),
-    value: '',
-  };
   const { http } = alertsContext;
 
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
@@ -120,12 +115,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   const canShowVizualization = !!Object.keys(errors).find(
     errorKey => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
-
-  const getIndexPatterns = async () => {
-    const indexPatternObjects = await loadIndexPatterns();
-    const titles = indexPatternObjects.map((indexPattern: any) => indexPattern.attributes.title);
-    setIndexPatterns(titles);
-  };
 
   const expressionErrorMessage = i18n.translate(
     'xpack.triggersActionsUI.sections.alertAdd.threshold.fixErrorInExpressionBelowValidationMessage',
@@ -147,7 +136,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     });
 
     if (index && index.length > 0) {
-      const currentEsFields = await getFields(index);
+      const currentEsFields = await getFields(http, index);
       const timeFields = getTimeFieldOptions(currentEsFields as any);
 
       setEsFields(currentEsFields);
@@ -155,72 +144,17 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     }
   };
 
-  const getFields = async (indexes: string[]) => {
-    return await getThresholdAlertTypeFields({ indexes, http });
-  };
-
   useEffect(() => {
-    getIndexPatterns();
+    const indexPatternsFunction = async () => {
+      setIndexPatterns(await getIndexPatterns());
+    };
+    indexPatternsFunction();
   }, []);
 
   useEffect(() => {
     setDefaultExpressionValues();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  interface IOption {
-    label: string;
-    options: Array<{ value: string; label: string }>;
-  }
-
-  const getIndexOptions = async (pattern: string, indexPatternsParam: string[]) => {
-    const options: IOption[] = [];
-
-    if (!pattern) {
-      return options;
-    }
-
-    const matchingIndices = (await getMatchingIndicesForThresholdAlertType({
-      pattern,
-      http,
-    })) as string[];
-    const matchingIndexPatterns = indexPatternsParam.filter(anIndexPattern => {
-      return anIndexPattern.includes(pattern);
-    }) as string[];
-
-    if (matchingIndices.length || matchingIndexPatterns.length) {
-      const matchingOptions = _.uniq([...matchingIndices, ...matchingIndexPatterns]);
-
-      options.push({
-        label: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertAdd.threshold.indicesAndIndexPatternsLabel',
-          {
-            defaultMessage: 'Based on your indices and index patterns',
-          }
-        ),
-        options: matchingOptions.map(match => {
-          return {
-            label: match,
-            value: match,
-          };
-        }),
-      });
-    }
-
-    options.push({
-      label: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.threshold.chooseLabel', {
-        defaultMessage: 'Choose…',
-      }),
-      options: [
-        {
-          value: pattern,
-          label: pattern,
-        },
-      ],
-    });
-
-    return options;
-  };
 
   const indexPopover = (
     <Fragment>
@@ -282,7 +216,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                   });
                   return;
                 }
-                const currentEsFields = await getFields(indices);
+                const currentEsFields = await getFields(http, indices);
                 const timeFields = getTimeFieldOptions(currentEsFields as any);
 
                 setEsFields(currentEsFields);
@@ -290,7 +224,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
               }}
               onSearchChange={async search => {
                 setIsIndiciesLoading(true);
-                setIndexOptions(await getIndexOptions(search, indexPatterns));
+                setIndexOptions(await getIndexOptions(http, search, indexPatterns));
                 setIsIndiciesLoading(false);
               }}
               onBlur={() => {
@@ -453,6 +387,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
             threshold={threshold}
             errors={errors}
+            popupPosition={'upLeft'}
             onChangeSelectedThreshold={selectedThresholds =>
               setAlertParams('threshold', selectedThresholds)
             }
@@ -463,6 +398,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ForLastExpression
+            popupPosition={'upLeft'}
             timeWindowSize={timeWindowSize || 1}
             timeWindowUnit={timeWindowUnit || ''}
             errors={errors}
@@ -475,17 +411,35 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {canShowVizualization ? null : (
-        <Fragment>
-          <ThresholdVisualization
-            alertParams={alertParams}
-            alertInterval={alertInterval}
-            aggregationTypes={builtInAggregationTypes}
-            comparators={builtInComparators}
-            alertsContext={alertsContext}
-          />
-        </Fragment>
-      )}
+      <EuiSpacer size="l" />
+      <div className="actAlertVisualization__chart">
+        {canShowVizualization ? (
+          <Fragment>
+            <EuiSpacer size="xl" />
+            <EuiEmptyPrompt
+              iconType="visBarVertical"
+              body={
+                <EuiText color="subdued">
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertAdd.previewAlertVisualizationDescription"
+                    defaultMessage="Complete the expression above to generate a preview"
+                  />
+                </EuiText>
+              }
+            />
+          </Fragment>
+        ) : (
+          <Fragment>
+            <ThresholdVisualization
+              alertParams={alertParams}
+              alertInterval={alertInterval}
+              aggregationTypes={builtInAggregationTypes}
+              comparators={builtInComparators}
+              alertsContext={alertsContext}
+            />
+          </Fragment>
+        )}
+      </div>
     </Fragment>
   );
 };

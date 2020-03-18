@@ -61,7 +61,7 @@ module.exports = function(grunt) {
     'run:apiIntegrationTests',
   ]);
 
-  grunt.registerTask('test:karmaDebug', ['checkPlugins', 'run:karmaDebugServer', 'karma:dev']);
+  grunt.registerTask('test:karmaDebug', ['checkPlugins', 'run:karmaTestDebugServer', 'karma:dev']);
   grunt.registerTask('test:mochaCoverage', ['run:mochaCoverage']);
 
   grunt.registerTask('test', subTask => {
@@ -72,7 +72,7 @@ module.exports = function(grunt) {
         !grunt.option('quick') && 'run:eslint',
         !grunt.option('quick') && 'run:sasslint',
         !grunt.option('quick') && 'run:checkTsProjects',
-        !grunt.option('quick') && 'run:checkCoreApiChanges',
+        !grunt.option('quick') && 'run:checkDocApiChanges',
         !grunt.option('quick') && 'run:typeCheck',
         !grunt.option('quick') && 'run:i18nCheck',
         'run:checkFileCasing',

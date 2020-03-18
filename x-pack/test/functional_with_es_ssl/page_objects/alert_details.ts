@@ -54,6 +54,12 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
           };
         });
     },
+    async getAlertInstanceDurationEpoch(): Promise<number> {
+      const alertInstancesDurationEpoch = await find.byCssSelector(
+        'input[data-test-subj="alertInstancesDurationEpoch"]'
+      );
+      return parseInt(await alertInstancesDurationEpoch.getAttribute('value'), 10);
+    },
     async clickAlertInstanceMuteButton(instance: string) {
       const muteAlertInstanceButton = await testSubjects.find(
         `muteAlertInstanceButton_${instance}`

@@ -29,7 +29,7 @@ import {
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
-import { GetEmbeddableFactory } from '../types';
+import { EmbeddableStart } from '../../plugin';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -49,7 +49,7 @@ export abstract class Container<
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
-    protected readonly getFactory: GetEmbeddableFactory,
+    protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: Container
   ) {
     super(input, output, parent);

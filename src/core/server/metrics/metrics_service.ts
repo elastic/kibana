@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ReplaySubject } from 'rxjs';
-import { first, shareReplay } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -37,7 +37,7 @@ export class MetricsService
   private readonly logger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
-  private metrics$ = new ReplaySubject<OpsMetrics>(1);
+  private metrics$ = new Subject<OpsMetrics>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics');
@@ -46,7 +46,7 @@ export class MetricsService
   public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
     this.metricsCollector = new OpsMetricsCollector(http.server);
 
-    const metricsObservable = this.metrics$.pipe(shareReplay(1));
+    const metricsObservable = this.metrics$.asObservable();
 
     return {
       getOpsMetrics$: () => metricsObservable,
@@ -74,6 +74,7 @@ export class MetricsService
   private async refreshMetrics() {
     this.logger.debug('Refreshing metrics');
     const metrics = await this.metricsCollector!.collect();
+    this.metricsCollector!.reset();
     this.metrics$.next(metrics);
   }
 

@@ -147,6 +147,7 @@ const RulesPageComponent: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="create-new-rule"
                 fill
                 href={getCreateRuleUrl()}
                 iconType="plusInCircle"

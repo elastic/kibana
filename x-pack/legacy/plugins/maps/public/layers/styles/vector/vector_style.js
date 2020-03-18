@@ -508,7 +508,7 @@ export class VectorStyle extends AbstractStyle {
         const name = dynamicStyleProp.getField().getName();
         const computedName = getComputedFieldName(dynamicStyleProp.getStyleName(), name);
         const styleValue = dynamicStyleProp.getMbValue(feature.properties[name]);
-        if (dynamicStyleProp.supportsFeatureState()) {
+        if (dynamicStyleProp.supportsMbFeatureState()) {
           tmpFeatureState[computedName] = styleValue;
         } else {
           feature.properties[computedName] = styleValue;
@@ -523,7 +523,7 @@ export class VectorStyle extends AbstractStyle {
     //this return-value is used in an optimization for style-updates with mapbox-gl.
     //`true` indicates the entire data needs to reset on the source (otherwise the style-rules will not be reapplied)
     //`false` indicates the data does not need to be reset on the store, because styles are re-evaluated if they use featureState
-    return dynamicStyleProps.some(dynamicStyleProp => !dynamicStyleProp.supportsFeatureState());
+    return dynamicStyleProps.some(dynamicStyleProp => !dynamicStyleProp.supportsMbFeatureState());
   }
 
   arePointsSymbolizedAsCircles() {

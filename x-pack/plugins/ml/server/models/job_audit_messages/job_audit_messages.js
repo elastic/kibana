@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../../../legacy/plugins/ml/common/constants/index_patterns';
+import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import moment from 'moment';
 
 const SIZE = 1000;

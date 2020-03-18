@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -20,7 +20,7 @@ import {
   topCategoriesSchema,
   updateGroupsSchema,
 } from './schemas/job_service_schema';
-// @ts-ignore no declaration module
+
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
 
@@ -209,8 +209,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobsWithTimerange } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
-        const { dateFormatTz } = request.body;
-        const resp = await jobsWithTimerange(dateFormatTz);
+        const resp = await jobsWithTimerange();
 
         return response.ok({
           body: resp,
@@ -420,10 +419,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
           splitFieldValue,
         } = request.body;
 
-        const { newJobLineChart } = jobServiceProvider(
-          context.ml!.mlClient.callAsCurrentUser,
-          request
-        );
+        const { newJobLineChart } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const resp = await newJobLineChart(
           indexPatternTitle,
           timeField,

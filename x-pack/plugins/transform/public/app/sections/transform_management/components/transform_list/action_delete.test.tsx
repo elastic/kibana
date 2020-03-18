@@ -7,15 +7,13 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { Providers } from '../../../../app_dependencies.mock';
-
 import { TransformListRow } from '../../../../common';
 import { DeleteAction } from './action_delete';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: Transform List Actions <DeleteAction />', () => {
   test('Minimal initialization', () => {
@@ -26,14 +24,7 @@ describe('Transform: Transform List Actions <DeleteAction />', () => {
       deleteTransform(d: TransformListRow) {},
     };
 
-    const wrapper = shallow(
-      <Providers>
-        <DeleteAction {...props} />
-      </Providers>
-    )
-      .find(DeleteAction)
-      .shallow();
-
+    const wrapper = shallow(<DeleteAction {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

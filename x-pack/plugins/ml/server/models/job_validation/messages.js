@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JOB_ID_MAX_LENGTH } from '../../../../../legacy/plugins/ml/common/constants/validation';
+import { JOB_ID_MAX_LENGTH } from '../../../common/constants/validation';
 
 let messages;
 

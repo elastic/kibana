@@ -285,6 +285,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
   ],
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
+  note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
 });
@@ -370,6 +371,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
   updated_by: 'elastic',
+  note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
 });
