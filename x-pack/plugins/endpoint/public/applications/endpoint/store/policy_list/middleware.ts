@@ -5,11 +5,10 @@
  */
 
 import { MiddlewareFactory, PolicyListState } from '../../types';
+import { sendGetEndpoingDatasources } from '../../services/ingest';
 
 export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
   const http = coreStart.http;
-  const INGEST_API_ROOT = `/api/ingest_manager`;
-  const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 
   return ({ getState, dispatch }) => next => async action => {
     next(action);
@@ -30,9 +29,8 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
         pageIndex = state.pageIndex;
       }
 
-      const { items: policyItems, total, success } = await http.get(INGEST_API_DATASOURCES, {
+      const { items: policyItems, total, success } = await sendGetEndpoingDatasources(http, {
         query: {
-          kuery: 'datasources.package.name: endpoint',
           perPage: pageSize,
           page: pageIndex + 1,
         },

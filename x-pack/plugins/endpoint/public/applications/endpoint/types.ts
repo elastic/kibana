@@ -16,6 +16,7 @@ import {
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
+import { Datasource } from '../../../../ingest_manager/common/types/models';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -50,18 +51,10 @@ export interface ServerApiError {
   message: string;
 }
 
-// REFACTOR to use Types from Ingest Manager - see: https://github.com/elastic/endpoint-app-team/issues/150
-export interface PolicyData {
-  name: string;
-  total: number;
-  pending: number;
-  failed: number;
-  id: string;
-  created_by: string;
-  created: string;
-  updated_by: string;
-  updated: string;
-}
+/**
+ * An Endpoint Policy.
+ */
+export type PolicyData = Datasource;
 
 /**
  * Policy list store state
