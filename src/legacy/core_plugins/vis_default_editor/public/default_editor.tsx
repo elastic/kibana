@@ -36,10 +36,8 @@ function DefaultEditor({
   optionTabs,
   query,
   embeddableHandler,
-  reloadVisualization,
-  unlinkFromSavedSearch,
-  setDirty,
-  updateEditorObservable,
+  eventEmitter,
+  linked,
   savedSearch,
 }: DefaultEditorControllerState & Omit<EditorRenderProps, 'data' | 'core'>) {
   const visRef = useRef<HTMLDivElement>(null);
@@ -56,11 +54,11 @@ function DefaultEditor({
 
     embeddableHandler.render(visRef.current);
     setTimeout(() => {
-      setDirty(false);
+      eventEmitter.emit('dirtyStateChange', false);
     });
 
     return () => embeddableHandler.destroy();
-  }, [embeddableHandler, setDirty]);
+  }, [embeddableHandler, eventEmitter]);
 
   useEffect(() => {
     embeddableHandler.updateInput({
@@ -94,11 +92,9 @@ function DefaultEditor({
           onClickCollapse={onClickCollapse}
           optionTabs={optionTabs}
           vis={vis}
+          isLinkedSearch={linked}
           savedSearch={savedSearch}
-          unlinkFromSavedSearch={unlinkFromSavedSearch}
-          reloadVisualization={reloadVisualization}
-          updateEditorObservable={updateEditorObservable}
-          notifyDirty={setDirty}
+          eventEmitter={eventEmitter}
         />
       </Panel>
     </PanelsContainer>

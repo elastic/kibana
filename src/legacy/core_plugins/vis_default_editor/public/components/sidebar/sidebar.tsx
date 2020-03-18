@@ -20,8 +20,8 @@
 import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
 import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EventEmitter } from 'events';
 
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { AggGroupNames } from '../../legacy_imports';
@@ -38,10 +38,8 @@ interface DefaultEditorSideBarProps {
   onClickCollapse: () => void;
   optionTabs: OptionTab[];
   vis: Vis;
-  unlinkFromSavedSearch: any;
-  reloadVisualization: any;
-  notifyDirty: any;
-  updateEditorObservable: Observable<any>;
+  isLinkedSearch: boolean;
+  eventEmitter: EventEmitter;
   savedSearch?: SavedSearch;
 }
 
@@ -50,29 +48,14 @@ function DefaultEditorSideBar({
   onClickCollapse,
   optionTabs,
   vis,
-  unlinkFromSavedSearch,
-  reloadVisualization,
-  notifyDirty,
-  updateEditorObservable,
+  isLinkedSearch,
+  eventEmitter,
   savedSearch,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
-
+  const [state, dispatch] = useEditorReducer(vis, eventEmitter);
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
-
-  const dirtyStateChange = useCallback(
-    ({ isDirty: dirty }: { isDirty: boolean }) => {
-      setDirty(dirty);
-      notifyDirty(dirty);
-      if (!dirty) {
-        resetValidity();
-      }
-    },
-    [setDirty, notifyDirty, resetValidity]
-  );
-
-  const [state, dispatch] = useEditorReducer(vis, dirtyStateChange);
 
   const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
     state.data.aggs,
@@ -117,10 +100,8 @@ function DefaultEditorSideBar({
       params: state.params,
       data: { aggs: state.data.aggs ? (state.data.aggs.aggs.map(agg => agg.toJSON()) as any) : [] },
     });
-    dirtyStateChange({ isDirty: false });
-    reloadVisualization();
     setTouched(false);
-  }, [reloadVisualization, state, formState.invalid, setTouched, dirtyStateChange, isDirty, vis]);
+  }, [vis, state, formState.invalid, setTouched, isDirty]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     event => {
@@ -135,11 +116,29 @@ function DefaultEditorSideBar({
   );
 
   useEffect(() => {
-    const resetHandler = () => dispatch(discardChanges(vis));
-    const subscription = updateEditorObservable.subscribe(resetHandler);
+    const changeHandler = ({ isDirty: dirty }: { isDirty: boolean }) => {
+      setDirty(dirty);
 
-    return () => subscription.unsubscribe();
-  }, [dispatch, vis, updateEditorObservable]);
+      if (!dirty) {
+        resetValidity();
+      }
+    };
+    eventEmitter.on('dirtyStateChange', changeHandler);
+
+    return () => {
+      eventEmitter.off('dirtyStateChange', changeHandler);
+    };
+  }, [resetValidity, eventEmitter]);
+
+  // subscribe on external vis changes using browser history, for example press back button
+  useEffect(() => {
+    const resetHandler = () => dispatch(discardChanges(vis));
+    eventEmitter.on('updateEditor', resetHandler);
+
+    return () => {
+      eventEmitter.off('updateEditor', resetHandler);
+    };
+  }, [dispatch, vis, eventEmitter]);
 
   const dataTabProps = {
     dispatch,
@@ -179,9 +178,10 @@ function DefaultEditorSideBar({
           >
             {vis.type.requiresSearch && (
               <SidebarTitle
-                vis={vis}
-                unlinkFromSavedSearch={unlinkFromSavedSearch}
+                isLinkedSearch={isLinkedSearch}
                 savedSearch={savedSearch}
+                vis={vis}
+                eventEmitter={eventEmitter}
               />
             )}
 

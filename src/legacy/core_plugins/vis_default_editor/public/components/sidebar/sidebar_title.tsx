@@ -18,6 +18,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { EventEmitter } from 'events';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -40,23 +41,24 @@ import { SavedSearch } from '../../../../../../plugins/discover/public';
 interface LinkedSearchProps {
   savedSearch: SavedSearch;
   vis: Vis;
-  unlinkFromSavedSearch: any;
+  eventEmitter: EventEmitter;
 }
 
 interface SidebarTitleProps {
-  unlinkFromSavedSearch: any;
+  isLinkedSearch: boolean;
   savedSearch?: SavedSearch;
   vis: Vis;
+  eventEmitter: EventEmitter;
 }
 
-export function LinkedSearch({ vis, savedSearch, unlinkFromSavedSearch }: LinkedSearchProps) {
+export function LinkedSearch({ vis, savedSearch, eventEmitter }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
   const closePopover = useCallback(() => setShowPopover(false), []);
   const onClickButtonLink = useCallback(() => setShowPopover(v => !v), []);
   const onClickUnlikFromSavedSearch = useCallback(() => {
     setShowPopover(false);
-    unlinkFromSavedSearch();
-  }, [unlinkFromSavedSearch]);
+    eventEmitter.emit('unlinkFromSavedSearch');
+  }, [eventEmitter]);
 
   const linkButtonAriaLabel = i18n.translate(
     'visDefaultEditor.sidebar.savedSearch.linkButtonAriaLabel',
@@ -117,11 +119,7 @@ export function LinkedSearch({ vis, savedSearch, unlinkFromSavedSearch }: Linked
           <div style={{ width: 260 }}>
             <EuiText size="s">
               <p>
-                <EuiButtonEmpty
-                  flush="left"
-                  href={`#/discover/${vis.data.savedSearchId}`}
-                  size="xs"
-                >
+                <EuiButtonEmpty flush="left" href={`#/discover/${savedSearch.id}`} size="xs">
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.goToDiscoverButtonText"
                     defaultMessage="View this search in Discover"
@@ -156,13 +154,9 @@ export function LinkedSearch({ vis, savedSearch, unlinkFromSavedSearch }: Linked
   );
 }
 
-function SidebarTitle({ vis, savedSearch, unlinkFromSavedSearch }: SidebarTitleProps) {
-  return vis.data.savedSearchId ? (
-    <LinkedSearch
-      vis={vis}
-      savedSearch={savedSearch || ({} as any)}
-      unlinkFromSavedSearch={unlinkFromSavedSearch}
-    />
+function SidebarTitle({ savedSearch, vis, isLinkedSearch, eventEmitter }: SidebarTitleProps) {
+  return isLinkedSearch && savedSearch ? (
+    <LinkedSearch savedSearch={savedSearch} vis={vis} eventEmitter={eventEmitter} />
   ) : vis.type.options.showIndexSelection ? (
     <EuiTitle size="xs" className="visEditorSidebar__titleContainer eui-textTruncate">
       <h2

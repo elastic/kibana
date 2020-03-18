@@ -29,21 +29,15 @@ export function initVisEditorDirective(app, deps) {
         query: '=',
         savedSearch: '=',
         embeddableHandler: '=',
-        reloadVisualization: '=',
-        unlinkFromSavedSearch: '=',
-        updateEditorObservable: '=',
-        setDirty: '=',
+        eventEmitter: '=',
       },
       link: function($scope, element) {
         const Editor = $scope.vis.type.editor || deps.DefaultVisualizationEditor;
         const editor = new Editor(
           element[0],
           $scope.vis,
-          $scope.embeddableHandler,
-          $scope.reloadVisualization,
-          $scope.unlinkFromSavedSearch,
-          $scope.updateEditorObservable,
-          $scope.setDirty
+          $scope.eventEmitter,
+          $scope.embeddableHandler
         );
 
         $scope.renderFunction = () => {
@@ -55,6 +49,7 @@ export function initVisEditorDirective(app, deps) {
             timeRange: $scope.timeRange,
             filters: $scope.filters,
             query: $scope.query,
+            linked: !!$scope.vis.data.savedSearchId,
             savedSearch: $scope.savedSearch,
           });
         };

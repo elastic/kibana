@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
+import { EventEmitter } from 'events';
 
 import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
 import { Vis } from 'src/legacy/core_plugins/visualizations/public/';
@@ -34,10 +34,7 @@ const localStorage = new Storage(window.localStorage);
 
 export interface DefaultEditorControllerState {
   vis: Vis;
-  reloadVisualization: any;
-  unlinkFromSavedSearch: any;
-  updateEditorObservable: Observable<any>;
-  setDirty: any;
+  eventEmitter: EventEmitter;
   embeddableHandler: any;
   optionTabs: OptionTab[];
 }
@@ -46,15 +43,7 @@ class DefaultEditorController {
   private el: HTMLElement;
   private state: DefaultEditorControllerState;
 
-  constructor(
-    el: HTMLElement,
-    vis: Vis,
-    embeddableHandler: any,
-    reloadVisualization: any,
-    unlinkFromSavedSearch: any,
-    updateEditorObservable: Observable<any>,
-    setDirty: any
-  ) {
+  constructor(el: HTMLElement, vis: Vis, eventEmitter: EventEmitter, embeddableHandler: any) {
     this.el = el;
     const { type: visType } = vis;
 
@@ -87,11 +76,8 @@ class DefaultEditorController {
     this.state = {
       vis,
       optionTabs,
+      eventEmitter,
       embeddableHandler,
-      reloadVisualization,
-      unlinkFromSavedSearch,
-      updateEditorObservable,
-      setDirty,
     };
   }
 

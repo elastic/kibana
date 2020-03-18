@@ -17,31 +17,48 @@
  * under the License.
  */
 
-import { useReducer, useCallback } from 'react';
+import { useEffect, useReducer, useCallback } from 'react';
+import { isEqual } from 'lodash';
+import { EventEmitter } from 'events';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { editorStateReducer, EditorVisState, initEditorState } from './reducers';
+import { Vis, VisParams } from 'src/legacy/core_plugins/visualizations/public';
+import { editorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
-import { EditorAction } from './actions';
+import { EditorAction, updateStateParams } from './actions';
 
 export * from './editor_form_state';
 export * from './actions';
 
 export function useEditorReducer(
   vis: Vis,
-  dirtyStateChange: any
+  eventEmitter: EventEmitter
 ): [EditorVisState, React.Dispatch<EditorAction>] {
   const [state, dispatch] = useReducer(editorStateReducer, vis, initEditorState);
+
+  useEffect(() => {
+    const handleVisUpdate = (params: VisParams) => {
+      if (!isEqual(params, state.params)) {
+        dispatch(updateStateParams(params));
+      }
+    };
+
+    // fires when visualization state changes, and we need to copy changes to editorState
+    eventEmitter.on('updateEditorStateParams', handleVisUpdate);
+
+    return () => {
+      eventEmitter.off('updateEditorStateParams', handleVisUpdate);
+    };
+  }, [eventEmitter, state.params]);
 
   const wrappedDispatch = useCallback(
     (action: EditorAction) => {
       dispatch(action);
 
-      dirtyStateChange({
+      eventEmitter.emit('dirtyStateChange', {
         isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
       });
     },
-    [dirtyStateChange]
+    [eventEmitter]
   );
 
   return [state, wrappedDispatch];

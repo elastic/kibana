@@ -19,9 +19,10 @@
 
 import angular from 'angular';
 import _ from 'lodash';
-import { Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { EventEmitter } from 'events';
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -109,7 +110,12 @@ function VisualizeAppController(
 
   // Retrieve the resolved SavedVis instance.
   const { vis, savedVis, savedSearch, embeddableHandler } = $route.current.locals.resolved;
-
+  $scope.eventEmitter = new EventEmitter();
+  const _applyVis = () => {
+    $scope.$apply();
+  };
+  // This will trigger a digest cycle. This is needed when vis is updated from a global angular like in visualize_embeddable.js.
+  $scope.eventEmitter.on('apply', _applyVis);
   // vis is instance of src/legacy/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const searchSource = vis.data.searchSource;
@@ -121,15 +127,10 @@ function VisualizeAppController(
     dirty: !savedVis.id,
   };
 
-  $scope.dirty = false;
-  $scope.setDirty = value => {
-    $timeout(() => {
-      $scope.dirty = value;
-    });
-  };
-
-  const updateEditor = new Subject();
-  $scope.updateEditorObservable = updateEditor.asObservable();
+  $scope.eventEmitter.on('dirtyStateChange', ({ isDirty }) => {
+    $scope.dirty = isDirty;
+    $scope.$digest();
+  });
 
   $scope.embeddableHandler = embeddableHandler;
 
@@ -408,11 +409,9 @@ function VisualizeAppController(
         savedVis.savedSearchId = savedSearch.id;
         vis.data.savedSearchId = savedSearch.id;
         searchSource.setParent(savedSearch.searchSource);
-        updateEditor.next();
       } else if (!linked && savedVis.savedSearchId) {
         delete savedVis.savedSearchId;
         delete vis.data.savedSearchId;
-        updateEditor.next();
       }
     };
 
@@ -471,7 +470,7 @@ function VisualizeAppController(
             searchSource: vis.data.searchSource,
           },
         });
-        updateEditor.next();
+        $scope.eventEmitter.emit('updateEditor');
       }
 
       $appStatus.dirty = true;
@@ -559,6 +558,8 @@ function VisualizeAppController(
       }
       savedVis.destroy();
       subscriptions.unsubscribe();
+      $scope.eventEmitter.off('apply', _applyVis);
+
       unsubscribePersisted();
       unsubscribeStateUpdates();
 
@@ -710,8 +711,8 @@ function VisualizeAppController(
     );
   }
 
-  $scope.unlinkFromSavedSearch = () => {
-    const searchSourceParent = searchSource.getParent();
+  const unlinkFromSavedSearch = () => {
+    const searchSourceParent = savedSearch.searchSource;
     const searchSourceGrandparent = searchSourceParent.getParent();
     const currentIndex = searchSourceParent.getField('index');
 
@@ -726,8 +727,6 @@ function VisualizeAppController(
       parentFilters: searchSourceParent.getOwnField('filter'),
     });
 
-    updateEditor.next();
-
     toastNotifications.addSuccess(
       i18n.translate('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {
         defaultMessage: `Unlinked from saved search '{searchTitle}'`,
@@ -736,11 +735,6 @@ function VisualizeAppController(
         },
       })
     );
-  };
-
-  $scope.reloadVisualization = () => {
-    stateContainer.transitions.updateVisState(visStateToEditorState().vis);
-    embeddableHandler.reload();
   };
 
   $scope.getAdditionalMessage = () => {
@@ -753,6 +747,8 @@ function VisualizeAppController(
       vis.type.feedbackMessage
     );
   };
+
+  $scope.eventEmitter.on('unlinkFromSavedSearch', unlinkFromSavedSearch);
 
   addHelpMenuToAppChrome(chrome, docLinks);
 
