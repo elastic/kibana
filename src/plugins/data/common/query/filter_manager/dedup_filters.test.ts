@@ -18,14 +18,8 @@
  */
 
 import { dedupFilters } from './dedup_filters';
-import {
-  Filter,
-  IIndexPattern,
-  IFieldType,
-  buildRangeFilter,
-  buildQueryFilter,
-  FilterStateStore,
-} from '../../../../common';
+import { Filter, buildRangeFilter, buildQueryFilter, FilterStateStore } from '../../es_query';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 describe('filter manager utilities', () => {
   let indexPattern: IIndexPattern;

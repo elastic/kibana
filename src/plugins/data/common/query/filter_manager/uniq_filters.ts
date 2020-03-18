@@ -16,34 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { filter, find } from 'lodash';
-import { compareFilters, FilterCompareOptions } from './compare_filters';
-import { Filter } from '../../../../common';
+import { each, union } from 'lodash';
+import { Filter } from '../../es_query';
+import { dedupFilters } from './dedup_filters';
 
 /**
- * Combine 2 filter collections, removing duplicates
+ * Remove duplicate filters from an array of filters
  *
- * @param {object} existingFilters - The filters to compare to
- * @param {object} filters - The filters being added
+ * @param {array} filters The filters to remove duplicates from
  * @param {object} comparatorOptions - Parameters to use for comparison
- *
- * @returns {object} An array of filters that were not in existing
- */
-export const dedupFilters = (
-  existingFilters: Filter[],
-  filters: Filter[],
-  comparatorOptions: FilterCompareOptions = {}
-) => {
-  if (!Array.isArray(filters)) {
-    filters = [filters];
-  }
 
-  return filter(
-    filters,
-    (f: Filter) =>
-      !find(existingFilters, (existingFilter: Filter) =>
-        compareFilters(existingFilter, f, comparatorOptions)
-      )
-  );
+ * @returns {object} The original filters array with duplicates removed
+ */
+export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
+  let results: Filter[] = [];
+
+  each(filters, (filter: Filter) => {
+    results = union(results, dedupFilters(results, [filter]), comparatorOptions);
+  });
+
+  return results;
 };
