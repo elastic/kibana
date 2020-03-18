@@ -24,7 +24,7 @@ import { painlessContextOptions } from '../../common/constants';
 import { useAppContext } from '../../context';
 
 export const ContextTab: FunctionComponent = () => {
-  const { state, setState } = useAppContext();
+  const { state, updateState } = useAppContext();
   const { context, document, index, query } = state;
 
   return (
@@ -63,7 +63,7 @@ export const ContextTab: FunctionComponent = () => {
         <EuiSuperSelect
           options={painlessContextOptions}
           valueOfSelected={context}
-          onChange={nextContext => setState(s => ({ ...s, context: nextContext }))}
+          onChange={nextContext => updateState(() => ({ context: nextContext }))}
           itemLayoutAlign="top"
           hasDividers
           fullWidth
@@ -90,7 +90,10 @@ export const ContextTab: FunctionComponent = () => {
           <EuiFieldText
             fullWidth
             value={index || ''}
-            onChange={e => setState(s => ({ ...s, index: e.target.value }))}
+            onChange={e => {
+              const nextIndex = e.target.value;
+              updateState(() => ({ index: nextIndex }));
+            }}
           />
         </EuiFormRow>
       )}
@@ -129,7 +132,7 @@ export const ContextTab: FunctionComponent = () => {
               languageId="json"
               height={150}
               value={query}
-              onChange={nextQuery => setState(s => ({ ...s, query: nextQuery }))}
+              onChange={nextQuery => updateState(() => ({ query: nextQuery }))}
               options={{
                 fontSize: 12,
                 minimap: {
@@ -168,7 +171,7 @@ export const ContextTab: FunctionComponent = () => {
               languageId="json"
               height={400}
               value={document}
-              onChange={nextDocument => setState(s => ({ ...s, document: nextDocument }))}
+              onChange={nextDocument => updateState(() => ({ document: nextDocument }))}
               options={{
                 fontSize: 12,
                 minimap: {

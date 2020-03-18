@@ -21,7 +21,7 @@ import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public
 import { useAppContext } from '../../context';
 
 export const ParametersTab: FunctionComponent = () => {
-  const { state, setState } = useAppContext();
+  const { state, updateState } = useAppContext();
   return (
     <>
       <EuiSpacer size="m" />
@@ -63,7 +63,7 @@ export const ParametersTab: FunctionComponent = () => {
             languageId="json"
             height={600}
             value={state.parameters}
-            onChange={nextParams => setState(s => ({ ...s, params: nextParams }))}
+            onChange={nextParams => updateState(() => ({ parameters: nextParams }))}
             options={{
               fontSize: 12,
               minimap: {

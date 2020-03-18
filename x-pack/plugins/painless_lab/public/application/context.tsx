@@ -11,7 +11,7 @@ import { PAINLESS_LAB_KEY } from './constants';
 
 interface ContextValue {
   state: Store;
-  setState: (nextState: (s: Store) => Store) => void;
+  updateState: (nextState: (s: Store) => Partial<Store>) => void;
 }
 
 const AppContext = createContext<ContextValue>(undefined as any);
@@ -22,15 +22,17 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     ...JSON.parse(localStorage.getItem(PAINLESS_LAB_KEY) || '{}'),
   }));
 
-  const wrappedSetState = (nextState: (s: Store) => Store): void => {
-    localStorage.setItem(PAINLESS_LAB_KEY, JSON.stringify(state));
-    setState(() => nextState(state));
+  const updateState = (getNextState: (s: Store) => Partial<Store>): void => {
+    const update = getNextState(state);
+    const nextState = {
+      ...state,
+      ...update,
+    };
+    localStorage.setItem(PAINLESS_LAB_KEY, JSON.stringify(nextState));
+    setState(() => nextState);
   };
-  return (
-    <AppContext.Provider value={{ setState: wrappedSetState, state }}>
-      {children}
-    </AppContext.Provider>
-  );
+
+  return <AppContext.Provider value={{ updateState, state }}>{children}</AppContext.Provider>;
 };
 
 export const useAppContext = () => {

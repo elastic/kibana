@@ -23,7 +23,7 @@ interface Props {
 }
 
 export const Main: FunctionComponent<Props> = ({ http }) => {
-  const { state, setState } = useAppContext();
+  const { state, updateState } = useAppContext();
 
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
   const { inProgress, response, submit } = useSubmitCode(http);
@@ -51,7 +51,7 @@ export const Main: FunctionComponent<Props> = ({ http }) => {
 
           <Editor
             code={state.code}
-            onChange={nextCode => setState(s => ({ ...s, code: nextCode }))}
+            onChange={nextCode => updateState(() => ({ code: nextCode }))}
           />
         </EuiFlexItem>
 
@@ -64,7 +64,7 @@ export const Main: FunctionComponent<Props> = ({ http }) => {
         isLoading={inProgress}
         toggleRequestFlyout={toggleRequestFlyout}
         isRequestFlyoutOpen={isRequestFlyoutOpen}
-        reset={() => setState(s => ({ ...s, code: exampleScript }))}
+        reset={() => updateState(() => ({ code: exampleScript }))}
       />
 
       {isRequestFlyoutOpen && (
