@@ -23,7 +23,7 @@ import {
 import moment from 'moment-timezone';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getThresholdAlertVisualizationData } from './lib/api';
+import { getThresholdAlertVisualizationData } from '../../../../common/lib/index_threshold_api';
 import { AggregationType, Comparator } from '../../../../common/types';
 import { AlertsContextValue } from '../../../context/alerts_context';
 import { IndexThresholdAlertParams } from './types';

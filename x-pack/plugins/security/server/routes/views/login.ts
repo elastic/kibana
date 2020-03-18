@@ -29,7 +29,7 @@ export function defineLoginRoutes({
             next: schema.maybe(schema.string()),
             msg: schema.maybe(schema.string()),
           },
-          { allowUnknowns: true }
+          { unknowns: 'allow' }
         ),
       },
       options: { authRequired: 'optional' },

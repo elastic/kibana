@@ -26,7 +26,7 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
         path,
         // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
         // set of query string parameters (e.g. SAML/OIDC logout request parameters).
-        validate: { query: schema.object({}, { allowUnknowns: true }) },
+        validate: { query: schema.object({}, { unknowns: 'allow' }) },
         options: { authRequired: false },
       },
       async (context, request, response) => {
