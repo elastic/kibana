@@ -5,8 +5,26 @@
  */
 
 export class BasicHTTPAuthorizationHeaderCredentials {
-  constructor(public username: string, public password: string) {}
+  /**
+   * Username, referred to as the `user-id` in https://tools.ietf.org/html/rfc7617.
+   */
+  readonly username: string;
 
+  /**
+   * Password use to authenticate
+   */
+  readonly password: string;
+
+  constructor(username: string, password: string) {
+    this.username = username;
+    this.password = password;
+  }
+
+  /**
+   * Parses the username and password from the credentials included in a HTTP Authorization header
+   * for the Basic scheme https://tools.ietf.org/html/rfc7617
+   * @param credentials The credentials extracted from the HTTP Authorization header
+   */
   static parseFromCredentials(credentials: string) {
     const decoded = Buffer.from(credentials, 'base64').toString();
     if (decoded.indexOf(':') === -1) {

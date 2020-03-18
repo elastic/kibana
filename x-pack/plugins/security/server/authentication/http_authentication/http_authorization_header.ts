@@ -7,8 +7,26 @@
 import { KibanaRequest } from '../../../../../../src/core/server';
 
 export class HTTPAuthorizationHeader {
-  constructor(public readonly scheme: string, public readonly credentials: string) {}
+  /**
+   * The authentication scheme. Should be consumed in a case-insensitive manner.
+   * https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml#authschemes
+   */
+  readonly scheme: string;
 
+  /**
+   * The authentication credentials for the scheme.
+   */
+  readonly credentials: string;
+
+  constructor(scheme: string, credentials: string) {
+    this.scheme = scheme;
+    this.credentials = credentials;
+  }
+
+  /**
+   * Parses request's `Authorization` HTTP header if present.
+   * @param request Request instance to extract the authorization header from.
+   */
   static parseFromRequest(request: KibanaRequest) {
     const authorizationHeaderValue = request.headers.authorization;
     if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
