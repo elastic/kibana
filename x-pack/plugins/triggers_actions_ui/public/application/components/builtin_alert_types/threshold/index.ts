@@ -89,7 +89,7 @@ export function getAlertType(): AlertTypeModel {
           )
         );
       }
-      if (!threshold || threshold.length === 0 || (threshold.length === 1 && !threshold[0])) {
+      if (!threshold || threshold.length === 0) {
         errors.threshold0.push(
           i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold0Text', {
             defaultMessage: 'Threshold0, is required.',
@@ -110,9 +110,12 @@ export function getAlertType(): AlertTypeModel {
       }
       if (threshold && threshold.length === 2 && threshold[0] > threshold[1]) {
         errors.threshold1.push(
-          i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold1Text', {
-            defaultMessage: 'Threshold1 should be > Threshold0.',
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.addAlert.error.greaterThenThreshold0Text',
+            {
+              defaultMessage: 'Threshold1 should be > Threshold0.',
+            }
+          )
         );
       }
       return validationResult;

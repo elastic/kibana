@@ -105,10 +105,10 @@ export const ThresholdExpression = ({
               value={thresholdComparator}
               onChange={e => {
                 onChangeSelectedThresholdComparator(e.target.value);
-                const thresholdValues: number[] | undefined = [];
-                Array.from(Array(comparators[e.target.value].requiredValues)).map((_notUsed, i) => {
-                  thresholdValues.push(threshold[i] ?? 0);
-                });
+                const thresholdValues = threshold.slice(
+                  0,
+                  comparators[e.target.value].requiredValues
+                );
                 onChangeSelectedThreshold(thresholdValues);
               }}
               options={Object.values(comparators).map(({ text, value }) => {
