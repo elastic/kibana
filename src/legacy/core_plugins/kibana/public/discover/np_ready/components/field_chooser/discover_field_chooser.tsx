@@ -19,11 +19,11 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Field } from './discover_field_details';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { IIndexPattern } from '../../../../../../../../plugins/data/common/index_patterns';
+import { Field } from './types';
 
 export interface Props {
   fields: Field[];
@@ -106,7 +106,7 @@ export function DiscoverFieldChooser({
       defaultMessage: 'Index and fields',
     }
   );
-
+  const popularFields = groupedFields?.popular?.filter(isFieldFilteredAndNotDisplayed) || [];
   return (
     <section className="sidebar-list" aria-label={indexAndFieldsAriaLabel}>
       <DiscoverIndexPattern
@@ -182,7 +182,7 @@ export function DiscoverFieldChooser({
             </div>
           </>
         )}
-        {groupedFields && groupedFields.popular.length > 0 && (
+        {popularFields.length > 0 && (
           <ul
             className={`list-unstyled sidebar-well dscFieldList--popular ${
               showFields ? 'hidden-sm' : 'hidden-xs'
@@ -196,23 +196,21 @@ export function DiscoverFieldChooser({
                 />
               </h6>
             </li>
-            {groupedFields.popular
-              .filter(isFieldFilteredAndNotDisplayed)
-              .map((field: Field, idx: number) => {
-                return (
-                  <li key={`field${idx}`}>
-                    <DiscoverField
-                      field={field}
-                      onAddField={onAddField}
-                      onRemoveField={onRemoveField}
-                      onAddFilter={onAddFilter}
-                      onShowDetails={onShowDetails}
-                      getDetails={getDetails}
-                      showDetails={openFieldMap.get(field.name) || false}
-                    />
-                  </li>
-                );
-              })}
+            {popularFields.map((field: Field, idx: number) => {
+              return (
+                <li key={`field${idx}`}>
+                  <DiscoverField
+                    field={field}
+                    onAddField={onAddField}
+                    onRemoveField={onRemoveField}
+                    onAddFilter={onAddFilter}
+                    onShowDetails={onShowDetails}
+                    getDetails={getDetails}
+                    showDetails={openFieldMap.get(field.name) || false}
+                  />
+                </li>
+              );
+            })}
           </ul>
         )}
 

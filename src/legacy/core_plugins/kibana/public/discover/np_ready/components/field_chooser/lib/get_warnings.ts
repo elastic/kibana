@@ -17,7 +17,7 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { Field } from '../discover_field_details';
+import { Field } from '../types';
 
 export function getWarnings(field: Field) {
   let warnings = [];

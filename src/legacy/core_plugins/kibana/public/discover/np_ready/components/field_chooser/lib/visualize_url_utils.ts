@@ -17,15 +17,16 @@
  * under the License.
  */
 import uuid from 'uuid/v4';
-// @ts-ignore
 import rison from 'rison-node';
 import {
   IFieldType,
   IIndexPattern,
   KBN_FIELD_TYPES,
 } from '../../../../../../../../../plugins/data/public';
-import { AppState } from '../../../angular/context_state';
+import { AppState } from '../../../angular/discover_state';
 import { getServices } from '../../../../kibana_services';
+
+import { Field } from '../types';
 
 function getMapsAppBaseUrl() {
   const mapsAppVisAlias = getServices()
@@ -105,4 +106,77 @@ export function getMapsAppUrl(
   );
 
   return getServices().addBasePath(`${getMapsAppBaseUrl()}?${mapAppParams.toString()}`);
+}
+
+export function getVisualizeUrl(
+  field: Field,
+  indexPattern: IIndexPattern,
+  state: AppState,
+  columns: string[],
+  aggsTermSize: string,
+  urlParams: Record<string, string>
+) {
+  if (!state) {
+    return '';
+  }
+
+  if (
+    (field.type === KBN_FIELD_TYPES.GEO_POINT || field.type === KBN_FIELD_TYPES.GEO_SHAPE) &&
+    isMapsAppRegistered()
+  ) {
+    return getMapsAppUrl(field, indexPattern, state, columns);
+  }
+
+  let agg;
+  const isGeoPoint = field.type === KBN_FIELD_TYPES.GEO_POINT;
+  const type = isGeoPoint ? 'tile_map' : 'histogram';
+  // If we're visualizing a date field, and our index is time based (and thus has a time filter),
+  // then run a date histogram
+  if (field.type === 'date' && indexPattern.timeFieldName === field.name) {
+    agg = {
+      type: 'date_histogram',
+      schema: 'segment',
+      params: {
+        field: field.name,
+        interval: 'auto',
+      },
+    };
+  } else if (isGeoPoint) {
+    agg = {
+      type: 'geohash_grid',
+      schema: 'segment',
+      params: {
+        field: field.name,
+        precision: 3,
+      },
+    };
+  } else {
+    agg = {
+      type: 'terms',
+      schema: 'segment',
+      params: {
+        field: field.name,
+        size: parseInt(aggsTermSize, 10),
+        orderBy: '2',
+      },
+    };
+  }
+  const linkUrlParams = {
+    ...urlParams,
+    ...{
+      indexPattern: state.index!,
+      type,
+      _a: rison.encode({
+        filters: state.filters || [],
+        query: state.query || undefined,
+        vis: {
+          type,
+          aggs: [{ schema: 'metric', type: 'count', id: '2' }, agg],
+        },
+      } as any),
+    },
+  };
+  const mapAppParams = new URLSearchParams(linkUrlParams);
+
+  return '#/visualize/create?' + mapAppParams.toString();
 }

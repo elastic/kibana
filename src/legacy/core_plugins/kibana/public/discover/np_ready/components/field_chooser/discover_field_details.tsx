@@ -21,35 +21,11 @@ import { EuiLink, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
-
-export interface Field {
-  details: {
-    error: string;
-    exists: number;
-    total: boolean;
-    buckets: any;
-    visualizeUrl: string;
-  };
-  indexPattern: {
-    metaFields: string[];
-  };
-  scripted: boolean;
-  name: string;
-  filterable: boolean;
-  visualizable: boolean;
-  aggregatable: boolean;
-  searchable: boolean;
-  rowCount: number;
-  type: string;
-  /**
-   * determines if a field is selected and displayed in the doc table
-   */
-  display: boolean;
-}
+import { Bucket, Field, FieldDetails } from './types';
 
 interface Props {
   field: Field;
-  details: any;
+  details: FieldDetails;
   onAddFilter: (field: Field | string, value: string, type: '+' | '-') => void;
 }
 
@@ -87,7 +63,7 @@ export function DiscoverFieldDetails({ field, details, onAddFilter }: Props) {
       )}
       {!details.error && (
         <div style={{ marginTop: '4px' }}>
-          {details.buckets.map((bucket: any, idx: number) => (
+          {details.buckets.map((bucket: Bucket, idx: number) => (
             <DiscoverFieldBucket
               key={`bucket${idx}`}
               bucket={bucket}

@@ -16,16 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
-import $ from 'jquery';
-import rison from 'rison-node';
+import { chain, sortBy, indexOf, union, pluck, map, difference } from 'lodash';
 import { fieldCalculator } from './lib/field_calculator';
 import fieldChooserTemplate from './field_chooser.html';
-import {
-  IndexPatternFieldList,
-  KBN_FIELD_TYPES,
-} from '../../../../../../../../plugins/data/public';
-import { getMapsAppUrl, isFieldVisualizable, isMapsAppRegistered } from './lib/visualize_url_utils';
+import { IndexPatternFieldList } from '../../../../../../../../plugins/data/public';
+import { isFieldVisualizable, getVisualizeUrl } from './lib/visualize_url_utils';
 import { getServices } from '../../../kibana_services';
 
 export function createFieldChooserDirective($location, config) {
@@ -44,7 +39,7 @@ export function createFieldChooserDirective($location, config) {
     },
     template: fieldChooserTemplate,
     link: function($scope) {
-      $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
+      $scope.indexPatternList = sortBy($scope.indexPatternList, o => o.get('title'));
 
       const filter = ($scope.filter = {
         props: ['type', 'aggregatable', 'searchable', 'missing', 'name'],
@@ -59,7 +54,7 @@ export function createFieldChooserDirective($location, config) {
           { label: 'no', value: false },
         ],
         reset: function() {
-          filter.vals = _.clone(filter.defaults);
+          filter.vals = { ...filter.defaults };
         },
       });
 
@@ -75,20 +70,20 @@ export function createFieldChooserDirective($location, config) {
         const newHits = cur[2] !== prev[2];
         let fields = $scope.fields;
         const columns = $scope.columns || [];
-        const fieldCounts = $scope.fieldCounts;
+        const hits = $scope.hits;
 
         if (!fields || newHits) {
-          $scope.fields = fields = getFields();
+          $scope.fields = fields = getFields($scope.indexPattern, hits, $scope.fieldCounts);
         }
 
         if (!fields) return;
 
         // group the fields into popular and up-popular lists
-        _.chain(fields)
+        chain(fields)
           .each(function(field) {
-            field.displayOrder = _.indexOf(columns, field.name) + 1;
+            field.displayOrder = indexOf(columns, field.name) + 1;
             field.display = !!field.displayOrder;
-            field.rowCount = fieldCounts[field.name];
+            field.rowCount = $scope.fieldCounts[field.name];
           })
           .sortBy(function(field) {
             return (field.count || 0) * -1;
@@ -98,7 +93,7 @@ export function createFieldChooserDirective($location, config) {
             return field.count > 0 ? 'popular' : 'unpopular';
           })
           .tap(function(groups) {
-            groups.selected = _.sortBy(groups.selected || [], 'displayOrder');
+            groups.selected = sortBy(groups.selected || [], 'displayOrder');
 
             groups.popular = groups.popular || [];
             groups.unpopular = groups.unpopular || [];
@@ -108,86 +103,24 @@ export function createFieldChooserDirective($location, config) {
             groups.unpopular = extras.concat(groups.unpopular);
             $scope.groupedFields = groups;
           })
-          .each(function(group, name) {
-            $scope[name + 'Fields'] = _.sortBy(group, name === 'selected' ? 'display' : 'name');
-          })
           .commit();
 
         // include undefined so the user can clear the filter
-        $scope.fieldTypes = _.union(['any'], _.pluck(fields, 'type'));
+        $scope.fieldTypes = union(['any'], pluck(fields, 'type'));
       });
-
-      function getVisualizeUrl(field) {
-        if (!$scope.state) {
-          return '';
-        }
-
-        if (
-          (field.type === KBN_FIELD_TYPES.GEO_POINT || field.type === KBN_FIELD_TYPES.GEO_SHAPE) &&
-          isMapsAppRegistered()
-        ) {
-          return getMapsAppUrl(field, $scope.indexPattern, $scope.state, $scope.columns);
-        }
-
-        let agg = {};
-        const isGeoPoint = field.type === KBN_FIELD_TYPES.GEO_POINT;
-        const type = isGeoPoint ? 'tile_map' : 'histogram';
-        // If we're visualizing a date field, and our index is time based (and thus has a time filter),
-        // then run a date histogram
-        if (field.type === 'date' && $scope.indexPattern.timeFieldName === field.name) {
-          agg = {
-            type: 'date_histogram',
-            schema: 'segment',
-            params: {
-              field: field.name,
-              interval: 'auto',
-            },
-          };
-        } else if (isGeoPoint) {
-          agg = {
-            type: 'geohash_grid',
-            schema: 'segment',
-            params: {
-              field: field.name,
-              precision: 3,
-            },
-          };
-        } else {
-          agg = {
-            type: 'terms',
-            schema: 'segment',
-            params: {
-              field: field.name,
-              size: parseInt(config.get('discover:aggs:terms:size'), 10),
-              orderBy: '2',
-            },
-          };
-        }
-
-        return (
-          '#/visualize/create?' +
-          $.param(
-            _.assign(_.clone($location.search()), {
-              indexPattern: $scope.state.index,
-              type: type,
-              _a: rison.encode({
-                filters: $scope.state.filters || [],
-                query: $scope.state.query || undefined,
-                vis: {
-                  type: type,
-                  aggs: [{ schema: 'metric', type: 'count', id: '2' }, agg],
-                },
-              }),
-            })
-          )
-        );
-      }
 
       $scope.getDetails = field => {
         const details = {
           visualizeUrl:
             getServices().capabilities.visualize.show && isFieldVisualizable(field)
-              ? getVisualizeUrl(field)
+              ? getVisualizeUrl(
+                  field,
+                  $scope.indexPattern,
+                  $scope.state,
+                  $scope.columns,
+                  config.get('discover:aggs:terms:size'),
+                  $location.search()
+                )
               : null,
           ...fieldCalculator.getFieldValueCounts({
             hits: $scope.hits,
@@ -196,26 +129,22 @@ export function createFieldChooserDirective($location, config) {
             grouped: false,
           }),
         };
-        _.each(details.buckets, bucket => {
-          bucket.display = field.format.convert(bucket.value);
-        });
+        if (details.buckets) {
+          for (const bucket of details.buckets) {
+            bucket.display = field.format.convert(bucket.value);
+          }
+        }
         return details;
       };
 
-      function getFields() {
-        const indexPattern = $scope.indexPattern;
-        const hits = $scope.hits;
-        const fieldCounts = $scope.fieldCounts;
-
+      function getFields(indexPattern, hits, fieldCounts) {
         if (!indexPattern || !hits || !fieldCounts) return;
 
         const fieldSpecs = indexPattern.fields.slice(0);
-        const fieldNamesInDocs = _.keys(fieldCounts);
-        const fieldNamesInIndexPattern = _.map(indexPattern.fields, 'name');
+        const fieldNamesInDocs = Object.keys(fieldCounts);
+        const fieldNamesInIndexPattern = map(indexPattern.fields, 'name');
 
-        _.difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach(function(
-          unknownFieldName
-        ) {
+        difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach(function(unknownFieldName) {
           fieldSpecs.push({
             name: unknownFieldName,
             type: 'unknown',

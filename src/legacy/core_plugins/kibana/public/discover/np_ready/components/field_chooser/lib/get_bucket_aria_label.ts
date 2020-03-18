@@ -17,8 +17,9 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
+import { Bucket } from '../types';
 
-export function getBucketAriaLabel(bucket: any) {
+export function getBucketAriaLabel(bucket: Bucket) {
   const value =
     bucket.display === ''
       ? i18n.translate('kbn.discover.fieldChooser.discoverField.emptyStringText', {

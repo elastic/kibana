@@ -19,17 +19,18 @@
 import React from 'react';
 import { EuiButton, EuiToolTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DiscoverFieldDetails, Field } from './discover_field_details';
+import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon } from '../../../../../../../../plugins/kibana_react/public';
+import { Field, FieldDetails } from './types';
 
 export interface Props {
   field: Field;
-  onAddField: any;
-  onAddFilter: any;
-  onRemoveField: any;
-  onShowDetails: any;
+  onAddField: (fieldName: string) => void;
+  onAddFilter: (field: Field | string, value: string, type: '+' | '-') => void;
+  onRemoveField: (fieldName: string) => void;
+  onShowDetails: (show: boolean, field: Field) => void;
   showDetails: boolean;
-  getDetails: any;
+  getDetails: (field: Field) => FieldDetails;
 }
 
 export function DiscoverField({
@@ -64,8 +65,8 @@ export function DiscoverField({
           showDetails ? 'dscSidebarItem--active' : ''
         }`}
         tabIndex={0}
-        onClick={() => onShowDetails(!showDetails, field, true)}
-        onKeyPress={() => onShowDetails(!showDetails, field, true)}
+        onClick={() => onShowDetails(!showDetails, field)}
+        onKeyPress={() => onShowDetails(!showDetails, field)}
       >
         <span className="dscSidebarField__fieldIcon">
           <FieldIcon type={field.type} label={field.name} />
@@ -114,7 +115,7 @@ export function DiscoverField({
           )}
         </span>
       </div>
-      {showDetails && (
+      {showDetails && details && (
         <DiscoverFieldDetails field={field} details={details} onAddFilter={onAddFilter} />
       )}
     </div>

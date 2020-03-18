@@ -21,3 +21,37 @@ export interface IndexPatternRef {
   id: string;
   title: string;
 }
+
+export interface Field {
+  details: FieldDetails;
+  indexPattern: {
+    metaFields: string[];
+  };
+  scripted: boolean;
+  name: string;
+  filterable: boolean;
+  visualizable: boolean;
+  aggregatable: boolean;
+  searchable: boolean;
+  rowCount: number;
+  type: string;
+  /**
+   * determines if a field is selected and displayed in the doc table
+   */
+  display: boolean;
+}
+
+export interface FieldDetails {
+  error: string;
+  exists: number;
+  total: boolean;
+  buckets: Bucket[];
+  visualizeUrl: string;
+}
+
+export interface Bucket {
+  display: string;
+  value: string;
+  percent: number;
+  count: number;
+}
