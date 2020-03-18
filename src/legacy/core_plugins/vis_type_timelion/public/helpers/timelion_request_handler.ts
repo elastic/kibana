@@ -21,8 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
 import { VisParams } from 'src/legacy/core_plugins/visualizations/public';
 import { TimeRange, Filter, esQuery, Query } from '../../../../../plugins/data/public';
-import { timezoneProvider } from '../legacy_imports';
 import { TimelionVisDependencies } from '../plugin';
+import { getTimezone } from '../../../timelion/public/lib/get_timezone';
 
 interface Stats {
   cacheCount: number;
@@ -66,7 +66,7 @@ export function getTimelionRequestHandler({
   http,
   timefilter,
 }: TimelionVisDependencies) {
-  const timezone = timezoneProvider(uiSettings)();
+  const timezone = getTimezone(uiSettings);
 
   return async function({
     timeRange,
