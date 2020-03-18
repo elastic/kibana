@@ -436,7 +436,7 @@ export const DataSourceStrings = {
       }),
     getLabelAppend: () =>
       i18n.translate('xpack.canvas.uis.dataSources.essql.queryTitleAppend', {
-        defaultMessage: 'Learn {elasticsearch} {sql} query syntax',
+        defaultMessage: 'Learn {elasticsearchShort} {sql} query syntax',
         values: {
           elasticsearchShort: ELASTICSEARCH_SHORT,
           sql: SQL,
