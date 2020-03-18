@@ -251,8 +251,8 @@ export const Expressions: React.FC<Props> = props => {
           onClick={addExpression}
         >
           <FormattedMessage
-            id={'xpack.infra.metrics.alertFlyout.addCondition'}
-            defaultMessage={'Add condition'}
+            id="xpack.infra.metrics.alertFlyout.addCondition"
+            defaultMessage="Add condition"
           />
         </EuiButtonEmpty>
       </div>
