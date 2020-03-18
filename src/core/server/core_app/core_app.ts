@@ -53,11 +53,7 @@ export class CoreApp {
     );
   }
   private registerStaticDirs(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerStaticDir(
-      '/ui/{path*}',
-      // TODO move to NP and update other consumers
-      fromRoot('src/legacy/ui/public/assets')
-    );
+    coreSetup.http.registerStaticDir('/ui/{path*}', fromRoot('src/legacy/ui/public/assets'));
 
     coreSetup.http.registerStaticDir(
       '/node_modules/@kbn/ui-framework/dist/{path*}',
