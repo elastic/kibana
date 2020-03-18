@@ -162,6 +162,7 @@ export function XYChart({
   args,
   formatFactory,
   timeZone,
+  chartTheme,
   handlers,
 }: XYChartRenderProps & {
   handlers: IInterpreterRenderHandlers;
