@@ -6,8 +6,7 @@
 import {
   convertFiltersToArray,
   convertFiltersToObject,
-  getSelectOptions,
-  filterSelectOptions
+  getSelectOptions
 } from '../CustomLinkFlyout/helper';
 import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 
