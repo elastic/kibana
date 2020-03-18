@@ -107,7 +107,8 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
       return (await viewInAppButton.getAttribute('disabled')) !== 'disabled';
     },
     async clickViewInAppEnabled() {
-      return await testSubjects.click(`alertDetails-viewInApp`);
+      const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+      return viewInAppButton.click();
     },
     async getNoOpAppTitle() {
       return await testSubjects.getVisibleText('noop-title');
