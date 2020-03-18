@@ -37,10 +37,11 @@ import {
   getUseField,
   UseField,
   useForm,
+  FormSchema,
 } from '../../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
-import { filterRuleFieldsForType } from '../../create/helpers';
+import { filterRuleFieldsForType, RuleFields } from '../../create/helpers';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -169,7 +170,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <StepRuleDescription
         columns={descriptionColumns}
         indexPatterns={indexPatternQueryBar as IIndexPattern}
-        schema={filterRuleFieldsForType(schema, myStepData.ruleType)}
+        schema={filterRuleFieldsForType(schema as FormSchema & RuleFields, myStepData.ruleType)}
         data={filterRuleFieldsForType(myStepData, myStepData.ruleType)}
       />
     </StepContentWrapper>

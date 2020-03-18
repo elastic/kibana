@@ -39,7 +39,7 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
   return timeObj;
 };
 
-interface RuleFields {
+export interface RuleFields {
   anomalyThreshold: unknown;
   machineLearningJobId: unknown;
   queryBar: unknown;
