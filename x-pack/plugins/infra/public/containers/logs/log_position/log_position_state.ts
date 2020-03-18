@@ -163,15 +163,14 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
       return;
     }
 
-    // User is close to the bottom edge of the scroll. The value of
-    // `pagesAfterEnd` changes on live stream as well.
-    if (pagesAfterEnd <= DESIRED_BUFFER_PAGES) {
+    // User is close to the bottom edge of the scroll.
+    if (visiblePositions.pagesAfterEnd <= DESIRED_BUFFER_PAGES) {
       setDateRange({
         endTimestamp: datemathToEpochMillis(dateRange.endDateExpression, 'up')!,
         timestampsLastUpdate: Date.now(),
       });
     }
-  }, [dateRange.endDateExpression, pagesAfterEnd, setDateRange]);
+  }, [dateRange.endDateExpression, visiblePositions, setDateRange]);
 
   const state = {
     isInitialized,
