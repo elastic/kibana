@@ -24,6 +24,7 @@ Array [
           class="euiPopover__anchor"
         >
           <button
+            aria-label="Open alert context menu"
             class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
             data-test-subj="xpack.uptime.alertsPopover.toggleButton"
             type="button"
@@ -39,7 +40,7 @@ Array [
               <span
                 class="euiButtonEmpty__text"
               >
-                Alerting
+                Alerts
               </span>
             </span>
           </button>
@@ -172,6 +173,7 @@ Array [
           class="euiPopover__anchor"
         >
           <button
+            aria-label="Open alert context menu"
             class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
             data-test-subj="xpack.uptime.alertsPopover.toggleButton"
             type="button"
@@ -187,7 +189,7 @@ Array [
               <span
                 class="euiButtonEmpty__text"
               >
-                Alerting
+                Alerts
               </span>
             </span>
           </button>
