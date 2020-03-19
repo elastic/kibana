@@ -36,7 +36,7 @@ export function createAgentAction(createdAt: Date, newAgentAction: NewAgentActio
     created_at: createdAt.toISOString(),
   };
 
-  return Object.assign(agentAction, newAgentAction) as AgentAction;
+  return Object.assign(agentAction, newAgentAction);
 }
 
 export interface ActionsService {
