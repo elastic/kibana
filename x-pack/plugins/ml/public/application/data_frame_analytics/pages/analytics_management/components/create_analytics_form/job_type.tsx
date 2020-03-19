@@ -8,8 +8,9 @@ import React, { Fragment, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common';
 
-import { AnalyticsJobType, JOB_TYPES } from '../../hooks/use_create_analytics_form/state';
+import { AnalyticsJobType } from '../../hooks/use_create_analytics_form/state';
 
 interface Props {
   type: AnalyticsJobType;
@@ -42,9 +43,9 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
   );
 
   const helpText = {
-    outlier_detection: outlierHelpText,
-    regression: regressionHelpText,
-    classification: classificationHelpText,
+    [ANALYSIS_CONFIG_TYPE.REGRESSION]: regressionHelpText,
+    [ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION]: outlierHelpText,
+    [ANALYSIS_CONFIG_TYPE.CLASSIFICATION]: classificationHelpText,
   };
 
   return (
@@ -56,7 +57,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
         helpText={type !== undefined ? helpText[type] : ''}
       >
         <EuiSelect
-          options={Object.values(JOB_TYPES).map(jobType => ({
+          options={Object.values(ANALYSIS_CONFIG_TYPE).map(jobType => ({
             value: jobType,
             text: jobType.replace(/_/g, ' '),
           }))}

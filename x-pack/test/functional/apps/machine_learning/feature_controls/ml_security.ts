@@ -13,7 +13,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'security']);
 
   describe('security', function() {
-    this.tags(['james']);
     before(async () => {
       await esArchiver.load('empty_kibana');
 

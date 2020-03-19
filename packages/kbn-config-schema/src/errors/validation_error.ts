@@ -44,5 +44,8 @@ export class ValidationError extends SchemaError {
 
   constructor(error: SchemaTypeError, namespace?: string) {
     super(ValidationError.extractMessage(error, namespace), error);
+
+    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, ValidationError.prototype);
   }
 }

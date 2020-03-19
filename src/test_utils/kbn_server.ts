@@ -50,6 +50,7 @@ const DEFAULTS_SETTINGS = {
   logging: { silent: true },
   plugins: {},
   optimize: { enabled: false },
+  migrations: { skip: true },
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {

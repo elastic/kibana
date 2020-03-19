@@ -49,6 +49,8 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
 };
 const initialData: Case = {
   id: '',
+  closedAt: null,
+  closedBy: null,
   createdAt: '',
   comments: [],
   commentIds: [],
@@ -59,7 +61,8 @@ const initialData: Case = {
   status: '',
   tags: [],
   title: '',
-  updatedAt: '',
+  updatedAt: null,
+  updatedBy: null,
   version: '',
 };
 

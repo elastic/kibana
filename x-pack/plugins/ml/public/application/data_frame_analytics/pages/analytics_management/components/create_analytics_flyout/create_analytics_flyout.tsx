@@ -26,17 +26,22 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
   state,
 }) => {
   const { closeModal, createAnalyticsJob, startAnalyticsJob } = actions;
-  const { isJobCreated, isJobStarted, isModalButtonDisabled, isValid } = state;
+  const { isJobCreated, isJobStarted, isModalButtonDisabled, isValid, cloneJob } = state;
+
+  const headerText = !!cloneJob
+    ? i18n.translate('xpack.ml.dataframe.analytics.clone.flyoutHeaderTitle', {
+        defaultMessage: 'Clone job from {job_id}',
+        values: { job_id: cloneJob.id },
+      })
+    : i18n.translate('xpack.ml.dataframe.analytics.create.flyoutHeaderTitle', {
+        defaultMessage: 'Create analytics job',
+      });
 
   return (
     <EuiFlyout size="m" onClose={closeModal} data-test-subj="mlAnalyticsCreateJobFlyout">
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2 data-test-subj="mlDataFrameAnalyticsFlyoutHeaderTitle">
-            {i18n.translate('xpack.ml.dataframe.analytics.create.flyoutHeaderTitle', {
-              defaultMessage: 'Create analytics job',
-            })}
-          </h2>
+          <h2 data-test-subj="mlDataFrameAnalyticsFlyoutHeaderTitle">{headerText}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{children}</EuiFlyoutBody>

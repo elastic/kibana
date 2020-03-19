@@ -5,6 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -354,6 +355,27 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end: `${Date.now()}` });
       await this.waitForDatafeedState(datafeedConfig.datafeed_id, DATAFEED_STATE.STOPPED);
       await this.waitForJobState(jobConfig.job_id, JOB_STATE.CLOSED);
+    },
+
+    async getDataFrameAnalyticsJob(analyticsId: string) {
+      return await esSupertest.get(`/_ml/data_frame/analytics/${analyticsId}`).expect(200);
+    },
+
+    async createDataFrameAnalyticsJob(jobConfig: DataFrameAnalyticsConfig) {
+      const { id: analyticsId, ...analyticsConfig } = jobConfig;
+      log.debug(`Creating data frame analytic job with id '${analyticsId}'...`);
+      await esSupertest
+        .put(`/_ml/data_frame/analytics/${analyticsId}`)
+        .send(analyticsConfig)
+        .expect(200);
+
+      await retry.waitForWithTimeout(`'${analyticsId}' to be created`, 5 * 1000, async () => {
+        if (await this.getDataFrameAnalyticsJob(analyticsId)) {
+          return true;
+        } else {
+          throw new Error(`expected data frame analytics job '${analyticsId}' to be created`);
+        }
+      });
     },
   };
 }

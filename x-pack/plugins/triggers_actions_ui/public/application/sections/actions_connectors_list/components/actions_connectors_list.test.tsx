@@ -13,6 +13,7 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { alertingPluginMock } from '../../../../../../alerting/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -49,7 +50,7 @@ describe('actions_connectors_list component empty', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -57,10 +58,11 @@ describe('actions_connectors_list component empty', () => {
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
@@ -146,7 +148,7 @@ describe('actions_connectors_list component with items', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -154,10 +156,11 @@ describe('actions_connectors_list component with items', () => {
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
@@ -230,7 +233,7 @@ describe('actions_connectors_list component empty with show only capability', ()
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -238,10 +241,11 @@ describe('actions_connectors_list component empty with show only capability', ()
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {
@@ -319,7 +323,7 @@ describe('actions_connectors_list with show only capability', () => {
       {
         chrome,
         docLinks,
-        application: { capabilities },
+        application: { capabilities, navigateToApp },
       },
     ] = await mockes.getStartServices();
     const deps = {
@@ -327,10 +331,11 @@ describe('actions_connectors_list with show only capability', () => {
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
+      navigateToApp,
       capabilities: {
         ...capabilities,
         siem: {

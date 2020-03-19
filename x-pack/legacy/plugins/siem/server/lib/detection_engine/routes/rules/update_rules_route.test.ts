@@ -16,10 +16,19 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('update_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -115,7 +124,7 @@ describe('update_rules', () => {
       const result = await server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'child "type" fails because ["type" must be one of [query, saved_query]]'
+        'child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]'
       );
     });
   });

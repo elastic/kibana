@@ -11,12 +11,15 @@ export interface Comment {
   createdAt: string;
   createdBy: ElasticUser;
   comment: string;
-  updatedAt: string;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
   version: string;
 }
 
 export interface Case {
   id: string;
+  closedAt: string | null;
+  closedBy: ElasticUser | null;
   comments: Comment[];
   commentIds: string[];
   createdAt: string;
@@ -25,7 +28,8 @@ export interface Case {
   status: string;
   tags: string[];
   title: string;
-  updatedAt: string;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
   version: string;
 }
 
@@ -57,15 +61,20 @@ export interface AllCases extends CasesStatus {
 
 export enum SortFieldCase {
   createdAt = 'createdAt',
-  updatedAt = 'updatedAt',
+  closedAt = 'closedAt',
 }
 
 export interface ElasticUser {
-  readonly username: string;
+  readonly email?: string | null;
   readonly fullName?: string | null;
+  readonly username: string;
 }
 
 export interface FetchCasesProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+}
+
+export interface ApiProps {
+  signal: AbortSignal;
 }

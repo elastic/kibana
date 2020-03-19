@@ -19,25 +19,36 @@ export type IndexName = string;
 export type IndexPattern = string;
 export type DataFrameAnalyticsId = string;
 
+export enum ANALYSIS_CONFIG_TYPE {
+  OUTLIER_DETECTION = 'outlier_detection',
+  REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
+}
+
 interface OutlierAnalysis {
+  [key: string]: {};
   outlier_detection: {};
 }
 
-interface RegressionAnalysis {
-  regression: {
-    dependent_variable: string;
-    training_percent?: number;
-    prediction_field_name?: string;
-  };
+interface Regression {
+  dependent_variable: string;
+  training_percent?: number;
+  prediction_field_name?: string;
+}
+export interface RegressionAnalysis {
+  [key: string]: Regression;
+  regression: Regression;
 }
 
-interface ClassificationAnalysis {
-  classification: {
-    dependent_variable: string;
-    training_percent?: number;
-    num_top_classes?: string;
-    prediction_field_name?: string;
-  };
+interface Classification {
+  dependent_variable: string;
+  training_percent?: number;
+  num_top_classes?: string;
+  prediction_field_name?: string;
+}
+export interface ClassificationAnalysis {
+  [key: string]: Classification;
+  classification: Classification;
 }
 
 export interface LoadExploreDataArg {
@@ -136,13 +147,6 @@ type AnalysisConfig =
   | ClassificationAnalysis
   | GenericAnalysis;
 
-export enum ANALYSIS_CONFIG_TYPE {
-  OUTLIER_DETECTION = 'outlier_detection',
-  REGRESSION = 'regression',
-  CLASSIFICATION = 'classification',
-  UNKNOWN = 'unknown',
-}
-
 export const getAnalysisType = (analysis: AnalysisConfig) => {
   const keys = Object.keys(analysis);
 
@@ -150,7 +154,7 @@ export const getAnalysisType = (analysis: AnalysisConfig) => {
     return keys[0];
   }
 
-  return ANALYSIS_CONFIG_TYPE.UNKNOWN;
+  return 'unknown';
 };
 
 export const getDependentVar = (analysis: AnalysisConfig) => {
@@ -245,6 +249,7 @@ export interface DataFrameAnalyticsConfig {
   };
   source: {
     index: IndexName | IndexName[];
+    query?: any;
   };
   analysis: AnalysisConfig;
   analyzed_fields: {
@@ -254,6 +259,7 @@ export interface DataFrameAnalyticsConfig {
   model_memory_limit: string;
   create_time: number;
   version: string;
+  allow_lazy_start?: boolean;
 }
 
 export enum REFRESH_ANALYTICS_LIST_STATE {

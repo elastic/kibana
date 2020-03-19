@@ -11,9 +11,9 @@ export const templateSchema = schema.object({
   indexPatterns: schema.arrayOf(schema.string()),
   version: schema.maybe(schema.number()),
   order: schema.maybe(schema.number()),
-  settings: schema.maybe(schema.object({}, { allowUnknowns: true })),
-  aliases: schema.maybe(schema.object({}, { allowUnknowns: true })),
-  mappings: schema.maybe(schema.object({}, { allowUnknowns: true })),
+  settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  aliases: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  mappings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   ilmPolicy: schema.maybe(
     schema.object({
       name: schema.maybe(schema.string()),

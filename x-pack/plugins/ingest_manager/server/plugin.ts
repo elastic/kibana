@@ -11,7 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
-} from 'kibana/server';
+} from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
