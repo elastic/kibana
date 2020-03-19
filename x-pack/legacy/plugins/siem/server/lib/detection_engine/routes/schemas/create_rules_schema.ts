@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
 import {
+  anomaly_threshold,
   enabled,
   description,
   false_positives,
@@ -34,12 +35,18 @@ import {
   references,
   note,
   version,
+  machine_learning_job_id,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 
 export const createRulesSchema = Joi.object({
+  anomaly_threshold: anomaly_threshold.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   description: description.required(),
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
@@ -48,8 +55,16 @@ export const createRulesSchema = Joi.object({
   rule_id,
   index,
   interval: interval.default('5m'),
-  query: query.allow('').default(''),
-  language: language.default('kuery'),
+  query: query.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: query.allow('').default(''),
+  }),
+  language: language.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: language.default('kuery'),
+  }),
   output_index,
   saved_id: saved_id.when('type', {
     is: 'saved_query',
@@ -59,6 +74,11 @@ export const createRulesSchema = Joi.object({
   timeline_id,
   timeline_title,
   meta,
+  machine_learning_job_id: machine_learning_job_id.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   risk_score: risk_score.required(),
   max_signals: max_signals.default(DEFAULT_MAX_SIGNALS),
   name: name.required(),
