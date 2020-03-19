@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { performance } from 'perf_hooks';
 import { Logger } from 'src/core/server';
 import {
   SIGNALS_ID,
@@ -92,7 +93,6 @@ export const signalRulesAlertType = ({
       const updatedAt = savedObject.updated_at ?? '';
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
-
       await writeGapErrorToSavedObject({
         alertId,
         logger,
@@ -253,6 +253,9 @@ export const signalRulesAlertType = ({
           await writeCurrentStatusSucceeded({
             services,
             currentStatusSavedObject,
+            bulkCreateTimes,
+            searchAfterTimes: [Number(end - start).toFixed(2), ...searchAfterTimes],
+            lastLookBackDate: lastLookBackDate?.toISOString(),
           });
         } else {
             await writeSignalRuleExceptionToSavedObject({
@@ -264,6 +267,9 @@ export const signalRulesAlertType = ({
               services,
               ruleStatusSavedObjects,
               ruleId: ruleId ?? '(unknown rule id)',
+              bulkCreateTimes,
+              searchAfterTimes: [Number(end - start).toFixed(2), ...searchAfterTimes],
+              lastLookBackDate: lastLookBackDate?.toISOString(),
             });
           }
         } catch (err) {

@@ -109,7 +109,7 @@ export const useRulesStatuses = (rules: Rule[]): ReturnRulesStatuses => {
         setLoading(false);
       }
     };
-    if (rules.length > 0) {
+    if (rules) {
       fetchData(rules.map(r => r.id));
     }
     return () => {

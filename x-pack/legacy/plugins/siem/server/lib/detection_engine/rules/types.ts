@@ -60,7 +60,7 @@ export interface IRuleStatusAttributes extends Record<string, any> {
   lastSuccessAt: string | null | undefined;
   lastSuccessMessage: string | null | undefined;
   status: RuleStatusString | null | undefined;
-  lastLookBackDate: Date | null | undefined;
+  lastLookBackDate: string | null | undefined;
   gap: string | null | undefined;
   bulkCreateTimeDurations: string[] | null | undefined;
   searchAfterTimeDurations: string[] | null | undefined;

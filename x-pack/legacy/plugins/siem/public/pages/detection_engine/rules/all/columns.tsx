@@ -231,11 +231,11 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
     {
       field: 'current_status.last_look_back_date',
       name: 'last look back date',
-      render: (value: RuleStatus) => {
-        return (
-          <EuiText data-test-subj="lastLookBack" size="s">
-            {value}
-          </EuiText>
+      render: (value: RuleStatus['current_status']['last_look_back_date']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <FormattedDate value={value} fieldName={'last look back date'} />
         );
       },
       truncateText: true,

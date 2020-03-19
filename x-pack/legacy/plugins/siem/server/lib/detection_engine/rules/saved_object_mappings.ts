@@ -34,7 +34,7 @@ export const ruleStatusSavedObjectMappings = {
         type: 'date',
       },
       gap: {
-        type: 'float',
+        type: 'text',
       },
       bulkCreateTimeDurations: {
         type: 'float',
