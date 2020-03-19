@@ -24,6 +24,7 @@ import { createHashHistory } from 'history';
 import {
   createKbnUrlStateStorage,
   redirectWhenMissing,
+  ensureDefaultIndexPattern,
 } from '../../../../../../plugins/kibana_utils/public';
 
 import editorTemplate from './editor/editor.html';
@@ -32,7 +33,6 @@ import visualizeListingTemplate from './listing/visualize_listing.html';
 import { initVisualizeAppDirective } from './visualize_app';
 import { VisualizeConstants } from './visualize_constants';
 import { VisualizeListingController } from './listing/visualize_listing';
-import { ensureDefaultIndexPattern } from '../legacy_imports';
 
 import {
   getLandingBreadcrumbs,
@@ -83,8 +83,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => false,
-          hasDefaultIndex: ($rootScope, kbnUrl) =>
-            ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl),
+          hasDefaultIndex: history => ensureDefaultIndexPattern(deps.core, deps.data, history),
         },
       })
       .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -95,8 +94,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => true,
-          hasDefaultIndex: ($rootScope, kbnUrl) =>
-            ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl),
+          hasDefaultIndex: history => ensureDefaultIndexPattern(deps.core, deps.data, history),
         },
       })
       .when(VisualizeConstants.CREATE_PATH, {
@@ -104,7 +102,7 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
-          resolved: function($route, $rootScope, kbnUrl, history) {
+          resolved: function($route, history) {
             const { core, data, savedVisualizations, visualizations, toastNotifications } = deps;
             const visTypes = visualizations.all();
             const visType = find(visTypes, { name: $route.current.params.type });
@@ -124,7 +122,7 @@ export function initVisualizeApp(app, deps) {
 
             const results = {};
 
-            return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
+            return ensureDefaultIndexPattern(core, data, history)
               .then(() => savedVisualizations.get($route.current.params))
               .then(savedObj => {
                 results.savedVis = savedObj;
@@ -178,7 +176,7 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
-          resolved: function($route, $rootScope, kbnUrl, history) {
+          resolved: function($route, history) {
             const {
               chrome,
               core,
@@ -190,7 +188,7 @@ export function initVisualizeApp(app, deps) {
 
             const results = {};
 
-            return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
+            return ensureDefaultIndexPattern(core, data, history)
               .then(() => savedVisualizations.get($route.current.params.id))
               .then(savedVis => {
                 chrome.recentlyAccessed.add(savedVis.getFullPath(), savedVis.title, savedVis.id);

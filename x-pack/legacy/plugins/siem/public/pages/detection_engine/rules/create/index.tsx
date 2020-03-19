@@ -98,7 +98,6 @@ const CreateRulePageComponent: React.FC = () => {
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {
       stepsData.current[step] = { ...stepsData.current[step], data, isValid };
@@ -138,12 +137,10 @@ const CreateRulePageComponent: React.FC = () => {
     [isStepRuleInReadOnlyView, openAccordionId, stepsData.current, setRule]
   );
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setStepsForm = useCallback((step: RuleStep, form: FormHook<FormData>) => {
     stepsForm.current[step] = form;
   }, []);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const getAccordionType = useCallback(
     (accordionId: RuleStep) => {
       if (accordionId === openAccordionId) {
@@ -286,7 +283,7 @@ const CreateRulePageComponent: React.FC = () => {
               isLoading={isLoading || loading}
               setForm={setStepsForm}
               setStepData={setStepData}
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
             />
           </StepDefineRuleAccordion>
         </MyEuiPanel>
@@ -315,7 +312,7 @@ const CreateRulePageComponent: React.FC = () => {
             <StepAboutRule
               addPadding={true}
               defaultValues={(stepsData.current[RuleStep.aboutRule].data as AboutStepRule) ?? null}
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
@@ -350,7 +347,7 @@ const CreateRulePageComponent: React.FC = () => {
               defaultValues={
                 (stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule) ?? null
               }
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
