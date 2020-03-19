@@ -29,4 +29,5 @@ export const aggParamCommonPropsMock = {
   metricAggs: [] as IAggConfig[],
   state: {} as VisState,
   showValidation: false,
+  schemas: [],
 };

@@ -7,6 +7,8 @@
   - [JSON layout](#json-layout)
 - [Configuration](#configuration)
 - [Usage](#usage)
+- [Logging config migration](#logging-config-migration)
+- [Log record format changes](#log-record-format-changes)
 
 The way logging works in Kibana is inspired by `log4j 2` logging framework used by [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html#logging).
 The main idea is to have consistent logging behaviour (configuration, log format etc.) across the entire Elastic Stack 
@@ -321,3 +323,23 @@ Define a custom logger for a specific context.
 
 #### logging.filter
 TBD
+
+### Log record format changes
+
+| Parameter       | Platform log record in **pattern** format  | Legacy Platform log record **text** format |
+| --------------- | ------------------------------------------ | ------------------------------------------ |
+| @timestamp      | ISO8601 `2012-01-31T23:33:22.011Z`         | Absolute `23:33:22.011`                    |
+| context         | `parent.child`                             | `['parent', 'child']`                      |
+| level           | `DEBUG`                                    | `['debug']`                                |
+| meta            | stringified JSON object `{"to": "v8"}`     | N/A                                        |
+| pid             | can be configured as `%pid`                | N/A                                        |
+
+| Parameter       | Platform log record in **json** format     | Legacy Platform log record **json** format   |
+| --------------- | ------------------------------------------ | -------------------------------------------- |
+| @timestamp      | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`           |
+| context         | `context: parent.child`                    | `tags: ['parent', 'child']`                  |
+| level           | `level: DEBUG`                             | `tags: ['debug']`                            |
+| meta            | separate property `"meta": {"to": "v8"}`   | merged in log record  `{... "to": "v8"}`     |
+| pid             | `pid: 12345`                               | `pid: 12345`                                 |
+| type            | N/A                                        | `type: log`                                  |
+| error           | `{ message, name, stack }`                 | `{ message, name, stack, code, signal }`     |

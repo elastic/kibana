@@ -5,3 +5,5 @@
  */
 
 export { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
+export { setup as visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
+export { VisualizationsSetup } from '../../../../../src/legacy/core_plugins/visualizations/public';

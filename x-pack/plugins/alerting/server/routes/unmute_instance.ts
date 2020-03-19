@@ -37,6 +37,9 @@ export const unmuteAlertInstanceRoute = (router: IRouter, licenseState: LicenseS
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
+      if (!context.alerting) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+      }
       const alertsClient = context.alerting.getAlertsClient();
       const { alertId, alertInstanceId } = req.params;
       await alertsClient.unmuteInstance({ alertId, alertInstanceId });

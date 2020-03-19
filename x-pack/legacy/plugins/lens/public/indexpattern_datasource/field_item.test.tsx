@@ -16,8 +16,6 @@ import { IndexPattern } from './types';
 
 jest.mock('ui/new_platform');
 
-const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
-
 describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
   let indexPattern: IndexPattern;
@@ -96,7 +94,10 @@ describe('IndexPattern Field Item', () => {
       return Promise.resolve({});
     });
     const wrapper = mountWithIntl(<FieldItem {...defaultProps} />);
-    wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
+
+    await act(async () => {
+      wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
+    });
 
     expect(core.http.post).toHaveBeenCalledWith(
       '/api/lens/index_stats/my-fake-index-pattern/field',
@@ -150,19 +151,20 @@ describe('IndexPattern Field Item', () => {
 
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
-    resolveFunction!({
-      totalDocuments: 4633,
-      sampledDocuments: 4633,
-      sampledValues: 4633,
-      histogram: {
-        buckets: [{ count: 705, key: 0 }],
-      },
-      topValues: {
-        buckets: [{ count: 147, key: 0 }],
-      },
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 4633,
+        sampledDocuments: 4633,
+        sampledValues: 4633,
+        histogram: {
+          buckets: [{ count: 705, key: 0 }],
+        },
+        topValues: {
+          buckets: [{ count: 147, key: 0 }],
+        },
+      });
     });
 
-    await waitForPromises();
     wrapper.update();
 
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);

@@ -17,13 +17,14 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
   EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
-import { AlertAdd } from '../../alert_add';
+import { AlertAdd, AlertEdit } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
@@ -51,7 +52,6 @@ export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
   const {
     http,
-    injectedMetadata,
     toastNotifications,
     capabilities,
     alertTypeRegistry,
@@ -62,7 +62,6 @@ export const AlertsList: React.FunctionComponent = () => {
   } = useAppDependencies();
   const canDelete = hasDeleteAlertsCapability(capabilities);
   const canSave = hasSaveAlertsCapability(capabilities);
-  const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -83,6 +82,8 @@ export const AlertsList: React.FunctionComponent = () => {
     data: [],
     totalItemCount: 0,
   });
+  const [editedAlertItem, setEditedAlertItem] = useState<AlertTableItem | undefined>(undefined);
+  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
 
   useEffect(() => {
     loadAlertsData();
@@ -157,6 +158,11 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
+  async function editItem(alertTableItem: AlertTableItem) {
+    setEditedAlertItem(alertTableItem);
+    setEditFlyoutVisibility(true);
+  }
+
   const alertsTableColumns = [
     {
       field: 'name',
@@ -210,6 +216,33 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-interval',
     },
     {
+      field: '',
+      name: '',
+      width: '50px',
+      actions: canSave
+        ? [
+            {
+              render: (item: AlertTableItem) => {
+                return alertTypeRegistry.has(item.alertTypeId) ? (
+                  <EuiLink
+                    data-test-subj="alertsTableCell-editLink"
+                    color="primary"
+                    onClick={() => editItem(item)}
+                  >
+                    <FormattedMessage
+                      defaultMessage="Edit"
+                      id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editLinkTitle"
+                    />
+                  </EuiLink>
+                ) : (
+                  <></>
+                );
+              },
+            },
+          ]
+        : [],
+    },
+    {
       name: '',
       width: '40px',
       render(item: AlertTableItem) {
@@ -238,7 +271,7 @@ export const AlertsList: React.FunctionComponent = () => {
     />,
   ];
 
-  if (canSave && createAlertUiEnabled) {
+  if (canSave) {
     toolsRight.push(
       <EuiButton
         key="create-alert"
@@ -389,11 +422,12 @@ export const AlertsList: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
       {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length !== 0 && table}
       {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length === 0 &&
+        !alertTypesState.isLoading &&
+        !alertsState.isLoading &&
         emptyPrompt}
+      {(alertTypesState.isLoading || alertsState.isLoading) && <EuiLoadingSpinner size="xl" />}
       <AlertsContextProvider
         value={{
-          addFlyoutVisible: alertFlyoutVisible,
-          setAddFlyoutVisibility: setAlertFlyoutVisibility,
           reloadAlerts: loadAlertsData,
           http,
           actionTypeRegistry,
@@ -404,7 +438,19 @@ export const AlertsList: React.FunctionComponent = () => {
           dataFieldsFormats: dataPlugin.fieldFormats,
         }}
       >
-        <AlertAdd consumer={'alerting'} />
+        <AlertAdd
+          consumer={'alerting'}
+          addFlyoutVisible={alertFlyoutVisible}
+          setAddFlyoutVisibility={setAlertFlyoutVisibility}
+        />
+        {editFlyoutVisible && editedAlertItem ? (
+          <AlertEdit
+            key={editedAlertItem.id}
+            initialAlert={editedAlertItem}
+            editFlyoutVisible={editFlyoutVisible}
+            setEditFlyoutVisibility={setEditFlyoutVisibility}
+          />
+        ) : null}
       </AlertsContextProvider>
     </section>
   );

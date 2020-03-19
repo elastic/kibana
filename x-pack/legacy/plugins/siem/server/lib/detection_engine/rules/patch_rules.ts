@@ -42,7 +42,10 @@ export const patchRules = async ({
   to,
   type,
   references,
+  note,
   version,
+  throttle,
+  lists,
 }: PatchRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -73,6 +76,9 @@ export const patchRules = async ({
     type,
     references,
     version,
+    throttle,
+    note,
+    lists,
   });
 
   const nextParams = defaults(
@@ -100,7 +106,9 @@ export const patchRules = async ({
       to,
       type,
       references,
+      note,
       version: calculatedVersion,
+      lists,
     }
   );
 
@@ -108,6 +116,7 @@ export const patchRules = async ({
     id: rule.id,
     data: {
       tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
+      throttle: throttle ?? rule.throttle ?? null,
       name: calculateName({ updatedName: name, originalName: rule.name }),
       schedule: {
         interval: calculateInterval(interval, rule.schedule.interval),

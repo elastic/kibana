@@ -8,9 +8,18 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType } from '../../../../types';
-import { EuiTitle, EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiSwitch } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiBadge,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiSwitch,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import { times, random } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { ViewInApp } from './view_in_app';
 
 jest.mock('../../../app_context', () => ({
   useAppDependencies: jest.fn(() => ({
@@ -45,7 +54,8 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     expect(
@@ -53,7 +63,19 @@ describe('alert_details', () => {
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
       ).containsMatchingElement(
         <EuiTitle size="m">
-          <h1>{alert.name}</h1>
+          <h1>
+            <span>{alert.name}</span>
+            &emsp;
+            <EuiBetaBadge
+              label="Beta"
+              tooltipContent={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
+                {
+                  defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                }
+              )}
+            />
+          </h1>
         </EuiTitle>
       )
     ).toBeTruthy();
@@ -65,7 +87,8 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     expect(
@@ -92,7 +115,8 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: [],
+        actionVariables: { context: [], state: [] },
+        defaultActionGroupId: 'default',
       };
 
       const actionTypes: ActionType[] = [
@@ -141,7 +165,8 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: [],
+        actionVariables: { context: [], state: [] },
+        defaultActionGroupId: 'default',
       };
       const actionTypes: ActionType[] = [
         {
@@ -191,7 +216,8 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: [],
+        actionVariables: { context: [], state: [] },
+        defaultActionGroupId: 'default',
       };
 
       expect(
@@ -215,20 +241,14 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: [],
+        actionVariables: { context: [], state: [] },
+        defaultActionGroupId: 'default',
       };
 
       expect(
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(
-          <EuiButtonEmpty disabled={true} iconType="popout">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-              defaultMessage="View in app"
-            />
-          </EuiButtonEmpty>
-        )
+        ).containsMatchingElement(<ViewInApp alert={alert} />)
       ).toBeTruthy();
     });
 
@@ -239,7 +259,8 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: [],
+        actionVariables: { context: [], state: [] },
+        defaultActionGroupId: 'default',
       };
 
       expect(
@@ -268,7 +289,8 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     const enableButton = shallow(
@@ -293,7 +315,8 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     const enableButton = shallow(
@@ -318,7 +341,8 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     const disableAlert = jest.fn();
@@ -352,7 +376,8 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     const enableAlert = jest.fn();
@@ -389,7 +414,8 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     const enableButton = shallow(
@@ -415,7 +441,8 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     const enableButton = shallow(
@@ -441,7 +468,8 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     const muteAlert = jest.fn();
@@ -476,7 +504,8 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     const unmuteAlert = jest.fn();
@@ -511,7 +540,8 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
-      actionVariables: [],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
     };
 
     const enableButton = shallow(

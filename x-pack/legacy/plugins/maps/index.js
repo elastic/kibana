@@ -52,7 +52,6 @@ export function maps(kibana) {
         };
       },
       embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
-      inspectorViews: ['plugins/maps/inspector/views/register_views'],
       home: ['plugins/maps/legacy_register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
@@ -78,7 +77,7 @@ export function maps(kibana) {
       },
       mappings,
       migrations,
-      visTypes: ['plugins/maps/register_vis_type_alias'],
+      hacks: ['plugins/maps/register_vis_type_alias'],
     },
     config(Joi) {
       return Joi.object({

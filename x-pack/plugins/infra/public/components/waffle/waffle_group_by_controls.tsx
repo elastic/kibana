@@ -104,6 +104,7 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
         title: i18n.translate('xpack.infra.waffle.customGroupByPanelTitle', {
           defaultMessage: 'Group By Custom Field',
         }),
+        width: 685,
         content: (
           <CustomFieldPanel
             currentOptions={this.props.customOptions}

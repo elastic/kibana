@@ -12,6 +12,7 @@ import {
 import { authenticationMock } from '../authentication/index.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { ConfigSchema } from '../config';
+import { licenseMock } from '../../common/licensing/index.mock';
 
 export const routeDefinitionParamsMock = {
   create: () => ({
@@ -23,5 +24,6 @@ export const routeDefinitionParamsMock = {
     config: { ...ConfigSchema.validate({}), encryptionKey: 'some-enc-key' },
     authc: authenticationMock.create(),
     authz: authorizationMock.create(),
+    license: licenseMock.create(),
   }),
 };

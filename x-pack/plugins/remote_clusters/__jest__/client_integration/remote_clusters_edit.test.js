@@ -6,21 +6,27 @@
 
 jest.mock('ui/new_platform');
 import { RemoteClusterForm } from '../../public/application/sections/components/remote_cluster_form';
-import { pageHelpers, setupEnvironment, nextTick } from './helpers';
+// import { pageHelpers, setupEnvironment, nextTick } from './helpers';
+import { pageHelpers, nextTick } from './helpers';
 import { REMOTE_CLUSTER_EDIT, REMOTE_CLUSTER_EDIT_NAME } from './helpers/constants';
 
-const { setup } = pageHelpers.remoteClustersEdit;
+// const { setup } = pageHelpers.remoteClustersEdit;
 const { setup: setupRemoteClustersAdd } = pageHelpers.remoteClustersAdd;
 
 // FLAKY: https://github.com/elastic/kibana/issues/57762
 // FLAKY: https://github.com/elastic/kibana/issues/57997
 // FLAKY: https://github.com/elastic/kibana/issues/57998
 describe.skip('Edit Remote cluster', () => {
-  let server;
-  let httpRequestsMockHelpers;
+  // let server;
+  // let httpRequestsMockHelpers;
   let component;
   let find;
   let exists;
+
+  /**
+   *
+   * commented out due to hooks being called regardless of skip
+   * https://github.com/facebook/jest/issues/8379
 
   beforeAll(() => {
     ({ server, httpRequestsMockHelpers } = setupEnvironment());
@@ -37,6 +43,8 @@ describe.skip('Edit Remote cluster', () => {
     await nextTick(100); // We need to wait next tick for the mock server response to kick in
     component.update();
   });
+
+  */
 
   test('should have the title of the page set correctly', () => {
     expect(exists('remoteClusterPageTitle')).toBe(true);

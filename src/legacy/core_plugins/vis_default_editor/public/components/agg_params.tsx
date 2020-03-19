@@ -40,6 +40,7 @@ import {
 } from './agg_params_state';
 import { DefaultEditorCommonProps } from './agg_common_props';
 import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
+import { Schema, getSchemaByName } from '../schemas';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -57,6 +58,9 @@ export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
   indexPattern: IndexPattern;
   setValidity: (isValid: boolean) => void;
   setTouched: (isTouched: boolean) => void;
+  schemas: Schema[];
+  allowedAggs?: string[];
+  hideCustomLabel?: boolean;
 }
 
 function DefaultEditorAggParams({
@@ -75,16 +79,22 @@ function DefaultEditorAggParams({
   onAggTypeChange,
   setTouched,
   setValidity,
+  schemas,
+  allowedAggs = [],
+  hideCustomLabel = false,
 }: DefaultEditorAggParamsProps) {
-  const groupedAggTypeOptions = useMemo(() => getAggTypeOptions(agg, indexPattern, groupName), [
-    agg,
-    indexPattern,
-    groupName,
-  ]);
+  const schema = getSchemaByName(schemas, agg.schema);
+  const { title } = schema;
+  const aggFilter = [...allowedAggs, ...(schema.aggFilter || [])];
+  const groupedAggTypeOptions = useMemo(
+    () => getAggTypeOptions(agg, indexPattern, groupName, aggFilter),
+    [agg, indexPattern, groupName, aggFilter]
+  );
+
   const error = aggIsTooLow
     ? i18n.translate('visDefaultEditor.aggParams.errors.aggWrongRunOrderErrorMessage', {
         defaultMessage: '"{schema}" aggs must run before all other buckets!',
-        values: { schema: agg.schema.title },
+        values: { schema: title },
       })
     : '';
   const aggTypeName = agg.type?.name;
@@ -94,12 +104,10 @@ function DefaultEditorAggParams({
     aggTypeName,
     fieldName,
   ]);
-  const params = useMemo(() => getAggParamsToRender({ agg, editorConfig, metricAggs, state }), [
-    agg,
-    editorConfig,
-    metricAggs,
-    state,
-  ]);
+  const params = useMemo(
+    () => getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas, hideCustomLabel }),
+    [agg, editorConfig, metricAggs, state, schemas, hideCustomLabel]
+  );
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(
     aggParamsReducer,

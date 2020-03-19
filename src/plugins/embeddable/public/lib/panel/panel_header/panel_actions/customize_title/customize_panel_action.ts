@@ -22,7 +22,7 @@ import { Action } from 'src/plugins/ui_actions/public';
 import { ViewMode } from '../../../../types';
 import { IEmbeddable } from '../../../../embeddables';
 
-const CUSTOMIZE_PANEL_ACTION_ID = 'CUSTOMIZE_PANEL_ACTION_ID';
+export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 
 type GetUserData = (context: ActionContext) => Promise<{ title: string | undefined }>;
 
@@ -31,8 +31,8 @@ interface ActionContext {
 }
 
 export class CustomizePanelTitleAction implements Action<ActionContext> {
-  public readonly type = CUSTOMIZE_PANEL_ACTION_ID;
-  public id = CUSTOMIZE_PANEL_ACTION_ID;
+  public readonly type = ACTION_CUSTOMIZE_PANEL;
+  public id = ACTION_CUSTOMIZE_PANEL;
   public order = 10;
 
   constructor(private readonly getDataFromUser: GetUserData) {

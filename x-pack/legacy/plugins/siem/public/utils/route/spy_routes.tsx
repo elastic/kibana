@@ -5,7 +5,6 @@
  */
 
 import * as H from 'history';
-import { isEqual } from 'lodash/fp';
 import { memo, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
@@ -35,7 +34,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
       }
     }, [search]);
     useEffect(() => {
-      if (pageName && !isEqual(route.pathName, pathname)) {
+      if (pageName && !deepEqual(route.pathName, pathname)) {
         if (isInitializing && detailName == null) {
           dispatch({
             type: 'updateRouteWithOutSearch',

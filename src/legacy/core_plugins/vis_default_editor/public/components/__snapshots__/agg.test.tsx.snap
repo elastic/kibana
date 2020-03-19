@@ -2,11 +2,11 @@
 
 exports[`DefaultEditorAgg component should init with the default set of props 1`] = `
 <EuiAccordion
-  aria-label="Toggle Schema name editor"
+  aria-label="Toggle metric editor"
   buttonClassName="eui-textTruncate"
   buttonContent={
     <React.Fragment>
-      Schema name
+      metric
        
     </React.Fragment>
   }
@@ -45,9 +45,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
         "getIndexPattern": [Function],
         "id": "1",
         "params": Object {},
-        "schema": Object {
-          "title": "Schema name",
-        },
+        "schema": "metric",
         "title": "Metrics",
       }
     }
@@ -58,10 +56,21 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
     indexPattern={Object {}}
     metricAggs={Array []}
     onAggTypeChange={[Function]}
+    schemas={
+      Array [
+        Object {
+          "name": "metric",
+        },
+      ]
+    }
     setAggParamValue={[MockFunction]}
     setTouched={[Function]}
     setValidity={[Function]}
-    state={Object {}}
+    state={
+      Object {
+        "params": Object {},
+      }
+    }
   />
 </EuiAccordion>
 `;

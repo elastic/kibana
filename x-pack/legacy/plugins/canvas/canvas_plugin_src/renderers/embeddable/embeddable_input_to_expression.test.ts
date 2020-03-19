@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('ui/new_platform');
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { SavedMapInput } from '../../functions/common/saved_map';
 import { EmbeddableTypes } from '../../expression_types';

@@ -5,6 +5,7 @@
  */
 
 import { first, map } from 'rxjs/operators';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -35,6 +36,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
 import { createExecuteFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
+import { registerActionsUsageCollector } from './usage';
 
 import { getActionsConfigurationUtilities } from './actions_config';
 
@@ -49,6 +51,7 @@ import {
 } from './routes';
 import { LicenseState } from './lib/license_state';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -71,6 +74,7 @@ export interface ActionsPluginsSetup {
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
   eventLog: IEventLogService;
+  usageCollection?: UsageCollectionSetup;
 }
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -91,6 +95,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private spaces?: SpacesServiceSetup;
   private eventLogger?: IEventLogger;
   private isESOUsingEphemeralEncryptionKey?: boolean;
+  private readonly telemetryLogger: Logger;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config
@@ -106,6 +111,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       .toPromise();
 
     this.logger = initContext.logger.get('actions');
+    this.telemetryLogger = initContext.logger.get('telemetry');
   }
 
   public async setup(core: CoreSetup, plugins: ActionsPluginsSetup): Promise<PluginSetupContract> {
@@ -140,6 +146,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     const actionExecutor = new ActionExecutor({
       isESOUsingEphemeralEncryptionKey: this.isESOUsingEphemeralEncryptionKey,
     });
+
+    // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
     const actionsConfigUtils = getActionsConfigurationUtilities(
       (await this.config) as ActionsConfig
@@ -161,6 +169,20 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       actionTypeRegistry,
       actionsConfigUtils,
     });
+
+    const usageCollection = plugins.usageCollection;
+    if (usageCollection) {
+      core.getStartServices().then(async ([coreStart, startPlugins]: [CoreStart, any]) => {
+        registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
+
+        initializeActionsTelemetry(
+          this.telemetryLogger,
+          plugins.taskManager,
+          core,
+          await this.kibanaIndex
+        );
+      });
+    }
 
     core.http.registerRouteHandlerContext(
       'actions',
@@ -211,6 +233,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
     });
 
+    scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+
     return {
       execute: createExecuteFunction({
         taskManager: plugins.taskManager,
@@ -258,7 +282,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             );
           }
           return new ActionsClient({
-            savedObjectsClient: context.core!.savedObjects.client,
+            savedObjectsClient: context.core.savedObjects.client,
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
             scopedClusterClient: adminClient!.asScoped(request),

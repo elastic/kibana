@@ -28,6 +28,8 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SIGNALS_INDEX_KEY,
+  IP_REPUTATION_LINKS_SETTING,
+  IP_REPUTATION_LINKS_SETTING_DEFAULT,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
@@ -38,7 +40,7 @@ export const siem = (kibana: any) => {
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
+    require: ['kibana', 'elasticsearch', 'alerting', 'actions', 'triggers_actions_ui'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {
@@ -140,6 +142,19 @@ export const siem = (kibana: any) => {
           value: NEWS_FEED_URL_SETTING_DEFAULT,
           description: i18n.translate('xpack.siem.uiSettings.newsFeedUrlDescription', {
             defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [IP_REPUTATION_LINKS_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.ipReputationLinks', {
+            defaultMessage: 'IP Reputation Links',
+          }),
+          value: IP_REPUTATION_LINKS_SETTING_DEFAULT,
+          type: 'json',
+          description: i18n.translate('xpack.siem.uiSettings.ipReputationLinksDescription', {
+            defaultMessage:
+              'Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.',
           }),
           category: ['siem'],
           requiresPageReload: true,

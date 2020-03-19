@@ -17,8 +17,15 @@
  * under the License.
  */
 
+import { scopedHistoryMock } from '../../../../core/public/mocks';
+
 export const setRootControllerMock = jest.fn();
 
 jest.doMock('ui/chrome', () => ({
   setRootController: setRootControllerMock,
+}));
+
+export const historyMock = scopedHistoryMock.create();
+jest.doMock('../../../../core/public', () => ({
+  ScopedHistory: jest.fn(() => historyMock),
 }));

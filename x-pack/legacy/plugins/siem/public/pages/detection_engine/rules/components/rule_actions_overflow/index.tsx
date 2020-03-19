@@ -48,7 +48,7 @@ const RuleActionsOverflowComponent = ({
   userHasNoPermissions,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [rulesToExport, setRulesToExport] = useState<Rule[] | undefined>(undefined);
+  const [rulesToExport, setRulesToExport] = useState<string[]>([]);
   const history = useHistory();
   const [, dispatchToaster] = useStateToaster();
 
@@ -66,7 +66,7 @@ const RuleActionsOverflowComponent = ({
               disabled={userHasNoPermissions}
               onClick={async () => {
                 setIsPopoverOpen(false);
-                await duplicateRulesAction([rule], noop, dispatchToaster);
+                await duplicateRulesAction([rule], [rule.id], noop, dispatchToaster);
               }}
             >
               {i18nActions.DUPLICATE_RULE}
@@ -75,9 +75,9 @@ const RuleActionsOverflowComponent = ({
               key={i18nActions.EXPORT_RULE}
               icon="indexEdit"
               disabled={userHasNoPermissions || rule.immutable}
-              onClick={async () => {
+              onClick={() => {
                 setIsPopoverOpen(false);
-                setRulesToExport([rule]);
+                setRulesToExport([rule.id]);
               }}
             >
               {i18nActions.EXPORT_RULE}
@@ -131,7 +131,7 @@ const RuleActionsOverflowComponent = ({
       </EuiPopover>
       <RuleDownloader
         filename={`${i18nActions.EXPORT_FILENAME}.ndjson`}
-        rules={rulesToExport}
+        ruleIds={rulesToExport}
         onExportComplete={exportCount => {
           displaySuccessToast(
             i18nActions.SUCCESSFULLY_EXPORTED_RULES(exportCount),

@@ -26,6 +26,7 @@ export default function(kibana: any) {
     require: ['kibana'],
     uiExports: {
       app: {
+        id: 'core_legacy_compat',
         title: 'Core Legacy Compat',
         description: 'This is a sample plugin to test core to legacy compatibility',
         main: 'plugins/core_plugin_legacy/index',

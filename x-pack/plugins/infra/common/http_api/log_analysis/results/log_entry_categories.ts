@@ -72,9 +72,16 @@ export const logEntryCategoryHistogramRT = rt.type({
 
 export type LogEntryCategoryHistogram = rt.TypeOf<typeof logEntryCategoryHistogramRT>;
 
+export const logEntryCategoryDatasetRT = rt.type({
+  name: rt.string,
+  maximumAnomalyScore: rt.number,
+});
+
+export type LogEntryCategoryDataset = rt.TypeOf<typeof logEntryCategoryDatasetRT>;
+
 export const logEntryCategoryRT = rt.type({
   categoryId: rt.number,
-  datasets: rt.array(rt.string),
+  datasets: rt.array(logEntryCategoryDatasetRT),
   histograms: rt.array(logEntryCategoryHistogramRT),
   logEntryCount: rt.number,
   maximumAnomalyScore: rt.number,

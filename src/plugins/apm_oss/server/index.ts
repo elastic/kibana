@@ -38,4 +38,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export type APMOSSConfig = TypeOf<typeof config.schema>;
 
-export { APMOSSPlugin as Plugin };
+export { APMOSSPluginSetup } from './plugin';

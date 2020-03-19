@@ -6,5 +6,5 @@
 
 export function paginate({ size, index }, data) {
   const start = index * size;
-  return data.slice(start, Math.min(data.length, start + size));
+  return data.slice(start, start + size);
 }

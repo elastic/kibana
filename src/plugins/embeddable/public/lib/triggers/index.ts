@@ -17,8 +17,4 @@
  * under the License.
  */
 
-export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
-export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
-export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
-export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
-export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
+export * from './triggers';

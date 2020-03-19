@@ -8,7 +8,16 @@ import { i18n } from '@kbn/i18n';
 import { findInventoryModel, findInventoryFields } from '../../../common/inventory_models/index';
 import { InfraSnapshotRequestOptions } from './types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
-import { SnapshotModelRT, SnapshotModel } from '../../../common/inventory_models/types';
+import {
+  SnapshotModelRT,
+  SnapshotModel,
+  InventoryItemType,
+} from '../../../common/inventory_models/types';
+import {
+  SnapshotMetricInput,
+  SnapshotCustomMetricInputRT,
+} from '../../../common/http_api/snapshot_api';
+import { networkTraffic } from '../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 
 interface GroupBySource {
   [id: string]: {
@@ -45,9 +54,25 @@ export const getMetricsSources = (options: InfraSnapshotRequestOptions) => {
   return [{ id: { terms: { field: fields.id } } }];
 };
 
+export const metricToAggregation = (nodeType: InventoryItemType, metric: SnapshotMetricInput) => {
+  const inventoryModel = findInventoryModel(nodeType);
+  if (SnapshotCustomMetricInputRT.is(metric)) {
+    if (metric.aggregation === 'rate') {
+      return networkTraffic(metric.type, metric.field);
+    }
+    return {
+      custom: {
+        [metric.aggregation]: {
+          field: metric.field,
+        },
+      },
+    };
+  }
+  return inventoryModel.metrics.snapshot?.[metric.type];
+};
+
 export const getMetricsAggregations = (options: InfraSnapshotRequestOptions): SnapshotModel => {
-  const inventoryModel = findInventoryModel(options.nodeType);
-  const aggregation = inventoryModel.metrics.snapshot?.[options.metric.type];
+  const aggregation = metricToAggregation(options.nodeType, options.metric);
   if (!SnapshotModelRT.is(aggregation)) {
     throw new Error(
       i18n.translate('xpack.infra.snapshot.missingSnapshotMetricError', {

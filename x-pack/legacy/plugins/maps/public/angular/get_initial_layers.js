@@ -9,7 +9,7 @@ import { EMSTMSSource } from '../layers/sources/ems_tms_source';
 import chrome from 'ui/chrome';
 import { getKibanaTileMap } from '../meta';
 
-export function getInitialLayers(layerListJSON) {
+export function getInitialLayers(layerListJSON, initialLayers = []) {
   if (layerListJSON) {
     return JSON.parse(layerListJSON);
   }
@@ -19,7 +19,7 @@ export function getInitialLayers(layerListJSON) {
     const sourceDescriptor = KibanaTilemapSource.createDescriptor();
     const source = new KibanaTilemapSource(sourceDescriptor);
     const layer = source.createDefaultLayer();
-    return [layer.toLayerDescriptor()];
+    return [layer.toLayerDescriptor(), ...initialLayers];
   }
 
   const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
@@ -27,8 +27,8 @@ export function getInitialLayers(layerListJSON) {
     const descriptor = EMSTMSSource.createDescriptor({ isAutoSelect: true });
     const source = new EMSTMSSource(descriptor);
     const layer = source.createDefaultLayer();
-    return [layer.toLayerDescriptor()];
+    return [layer.toLayerDescriptor(), ...initialLayers];
   }
 
-  return [];
+  return initialLayers;
 }

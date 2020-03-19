@@ -8,10 +8,11 @@ import React from 'react';
 import { MetricsExplorerChartContextMenu, createNodeDetailLink, Props } from './chart_context_menu';
 import { ReactWrapper, mount } from 'enzyme';
 import { options, source, timeRange, chartOptions } from '../../utils/fixtures/metrics_explorer';
-import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { coreMock } from 'src/core/public/mocks';
 
+const coreStartMock = coreMock.createStart();
 const series = { id: 'exmaple-01', rows: [], columns: [] };
 const uiCapabilities: Capabilities = {
   navLinks: { show: false },
@@ -25,17 +26,8 @@ const getTestSubject = (component: ReactWrapper, name: string) => {
 };
 
 const mountComponentWithProviders = (props: Props): ReactWrapper => {
-  const services = {
-    http: {
-      fetch: jest.fn(),
-    },
-    application: {
-      getUrlForApp: jest.fn(),
-    },
-  };
-
   return mount(
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider services={{ ...coreStartMock }}>
       <MetricsExplorerChartContextMenu {...props} />
     </KibanaContextProvider>
   );
@@ -159,10 +151,12 @@ describe('MetricsExplorerChartContextMenu', () => {
     test('createNodeDetailLink()', () => {
       const fromDateStrig = '2019-01-01T11:00:00Z';
       const toDateStrig = '2019-01-01T12:00:00Z';
-      const to = DateMath.parse(toDateStrig, { roundUp: true })!;
-      const from = DateMath.parse(fromDateStrig)!;
       const link = createNodeDetailLink('host', 'example-01', fromDateStrig, toDateStrig);
-      expect(link).toBe(`link-to/host-detail/example-01?to=${to.valueOf()}&from=${from.valueOf()}`);
+      expect(link).toStrictEqual({
+        app: 'metrics',
+        pathname: 'link-to/host-detail/example-01',
+        search: { from: '1546340400000', to: '1546344000000' },
+      });
     });
   });
 });

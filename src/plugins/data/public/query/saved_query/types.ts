@@ -46,7 +46,7 @@ export interface SavedQueryService {
     searchText?: string,
     perPage?: number,
     activePage?: number
-  ) => Promise<SavedQuery[]>;
+  ) => Promise<{ total: number; queries: SavedQuery[] }>;
   getSavedQuery: (id: string) => Promise<SavedQuery>;
   deleteSavedQuery: (id: string) => Promise<{}>;
   getSavedQueryCount: () => Promise<number>;

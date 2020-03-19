@@ -66,12 +66,17 @@ exports.runStorybookCli = config => {
           // storybook never completes, so neither will this promise
           const configDir = join(__dirname, 'storybook_config');
           log.debug('Config dir:', configDir);
-          await storybook({
+
+          const config = {
             mode: flags.site ? 'static' : 'dev',
             port: 9001,
             configDir,
-            outputDir: flags.site ? join(ASSET_DIR, name) : undefined,
-          });
+          };
+          if (flags.site) {
+            config.outputDir = join(ASSET_DIR, name);
+          }
+
+          await storybook(config);
 
           // Line is only reached when building the static version
           if (flags.site) process.exit();

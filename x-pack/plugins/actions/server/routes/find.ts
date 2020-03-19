@@ -26,6 +26,7 @@ const querySchema = schema.object({
   }),
   search_fields: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
   sort_field: schema.maybe(schema.string()),
+  sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   has_reference: schema.maybe(
     // use nullable as maybe is currently broken
     // in config-schema
@@ -57,6 +58,9 @@ export const findActionRoute = (router: IRouter, licenseState: LicenseState) => 
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
       const actionsClient = context.actions.getActionsClient();
       const query = req.query;
       const options: FindOptions['options'] = {
@@ -67,6 +71,7 @@ export const findActionRoute = (router: IRouter, licenseState: LicenseState) => 
         sortField: query.sort_field,
         fields: query.fields,
         filter: query.filter,
+        sortOrder: query.sort_order,
       };
 
       if (query.search_fields) {

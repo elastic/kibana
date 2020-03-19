@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { AbstractESSource } from './es_source';
-import { ESAggMetricField } from '../fields/es_agg_field';
-import { ESDocField } from '../fields/es_doc_field';
+import { esAggFieldsFactory } from '../fields/es_agg_field';
+
 import {
-  METRIC_TYPE,
-  COUNT_AGG_TYPE,
+  AGG_TYPE,
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
   FIELD_ORIGIN,
@@ -18,39 +18,16 @@ import {
 export const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {
-  static METRIC_SCHEMA_CONFIG = {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: [
-      METRIC_TYPE.AVG,
-      METRIC_TYPE.COUNT,
-      METRIC_TYPE.MAX,
-      METRIC_TYPE.MIN,
-      METRIC_TYPE.SUM,
-      METRIC_TYPE.UNIQUE_COUNT,
-    ],
-    defaults: [{ schema: 'metric', type: METRIC_TYPE.COUNT }],
-  };
-
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
-    this._metricFields = this._descriptor.metrics
-      ? this._descriptor.metrics.map(metric => {
-          const esDocField = metric.field
-            ? new ESDocField({ fieldName: metric.field, source: this })
-            : null;
-          return new ESAggMetricField({
-            label: metric.label,
-            esDocField: esDocField,
-            aggType: metric.type,
-            source: this,
-            origin: this.getOriginForField(),
-          });
-        })
-      : [];
+    this._metricFields = [];
+    if (this._descriptor.metrics) {
+      this._descriptor.metrics.forEach(aggDescriptor => {
+        this._metricFields.push(
+          ...esAggFieldsFactory(aggDescriptor, this, this.getOriginForField())
+        );
+      });
+    }
   }
 
   getFieldByName(name) {
@@ -78,32 +55,42 @@ export class AbstractESAggSource extends AbstractESSource {
 
   getMetricFields() {
     const metrics = this._metricFields.filter(esAggField => esAggField.isValid());
-    if (metrics.length === 0) {
-      metrics.push(
-        new ESAggMetricField({
-          aggType: COUNT_AGG_TYPE,
-          source: this,
-          origin: this.getOriginForField(),
-        })
-      );
+    return metrics.length === 0
+      ? esAggFieldsFactory({ type: AGG_TYPE.COUNT }, this, this.getOriginForField())
+      : metrics;
+  }
+
+  getAggKey(aggType, fieldName) {
+    return aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
+  }
+
+  getAggLabel(aggType, fieldName) {
+    switch (aggType) {
+      case AGG_TYPE.COUNT:
+        return COUNT_PROP_LABEL;
+      case AGG_TYPE.TERMS:
+        return i18n.translate('xpack.maps.source.esAggSource.topTermLabel', {
+          defaultMessage: `Top {fieldName}`,
+          values: { fieldName },
+        });
+      default:
+        return `${aggType} ${fieldName}`;
     }
-    return metrics;
   }
 
-  formatMetricKey(aggType, fieldName) {
-    return aggType !== COUNT_AGG_TYPE ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
-  }
-
-  formatMetricLabel(aggType, fieldName) {
-    return aggType !== COUNT_AGG_TYPE ? `${aggType} of ${fieldName}` : COUNT_PROP_LABEL;
-  }
-
-  createMetricAggConfigs() {
-    return this.getMetricFields().map(esAggMetric => esAggMetric.makeMetricAggConfig());
-  }
-
-  async getNumberFields() {
+  async getFields() {
     return this.getMetricFields();
+  }
+
+  getValueAggsDsl(indexPattern) {
+    const valueAggsDsl = {};
+    this.getMetricFields().forEach(esAggMetric => {
+      const aggDsl = esAggMetric.getValueAggDsl(indexPattern);
+      if (aggDsl) {
+        valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
+      }
+    });
+    return valueAggsDsl;
   }
 
   async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
