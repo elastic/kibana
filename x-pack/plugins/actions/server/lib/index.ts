@@ -10,4 +10,8 @@ export { TaskRunnerFactory } from './task_runner_factory';
 export { ActionExecutor, ActionExecutorContract } from './action_executor';
 export { ILicenseState, LicenseState } from './license_state';
 export { verifyApiAccess } from './verify_api_access';
-export { ActionTypeDisabledError, ActionTypeDisabledReason } from './errors';
+export {
+  ActionTypeDisabledError,
+  ActionTypeDisabledReason,
+  isErrorThatHandlesItsOwnResponse,
+} from './errors';

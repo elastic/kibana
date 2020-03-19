@@ -11,7 +11,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { ILicenseState, verifyApiAccess, ActionTypeDisabledError } from '../lib';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 
 import { ActionExecutorContract } from '../lib';
 import { ActionTypeExecutorResult } from '../types';
@@ -60,7 +60,7 @@ export const executeActionRoute = (
             })
           : res.noContent();
       } catch (e) {
-        if (e instanceof ActionTypeDisabledError) {
+        if (isErrorThatHandlesItsOwnResponse(e)) {
           return e.sendResponse(res);
         }
         throw e;

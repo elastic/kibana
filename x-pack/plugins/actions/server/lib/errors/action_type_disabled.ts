@@ -5,6 +5,7 @@
  */
 
 import { KibanaResponseFactory } from '../../../../../../src/core/server';
+import { ErrorThatHandlesItsOwnResponse } from './types';
 
 export type ActionTypeDisabledReason =
   | 'config'
@@ -12,7 +13,7 @@ export type ActionTypeDisabledReason =
   | 'license_invalid'
   | 'license_expired';
 
-export class ActionTypeDisabledError extends Error {
+export class ActionTypeDisabledError extends Error implements ErrorThatHandlesItsOwnResponse {
   public readonly reason: ActionTypeDisabledReason;
 
   constructor(message: string, reason: ActionTypeDisabledReason) {

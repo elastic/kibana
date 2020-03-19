@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { ActionTypeDisabledError, ILicenseState, verifyApiAccess } from '../lib';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -57,7 +57,7 @@ export const updateActionRoute = (router: IRouter, licenseState: ILicenseState) 
           }),
         });
       } catch (e) {
-        if (e instanceof ActionTypeDisabledError) {
+        if (isErrorThatHandlesItsOwnResponse(e)) {
           return e.sendResponse(res);
         }
         throw e;

@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ErrorThatHandlesItsOwnResponse } from './types';
+
+export function isErrorThatHandlesItsOwnResponse(
+  e: ErrorThatHandlesItsOwnResponse
+): e is ErrorThatHandlesItsOwnResponse {
+  return typeof (e as ErrorThatHandlesItsOwnResponse).sendResponse === 'function';
+}
+
 export { ActionTypeDisabledError, ActionTypeDisabledReason } from './action_type_disabled';
