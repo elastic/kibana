@@ -18,8 +18,6 @@ export default function({ getService }) {
         return typeof uuid === 'string' && uuid.length === 36;
       }
 
-      supertestNoAuth.auth(null, null);
-
       describe('no auth', () => {
         // depends on kibana.yml setting status.allowAnonymous
         // skip this test when running against a remote host, as we can't
@@ -27,7 +25,10 @@ export default function({ getService }) {
         const host = config.get('servers.kibana.hostname');
         const ifLocalhost = host.includes('localhost') ? it : it.skip;
         ifLocalhost('should return 200 and stats for no extended', async () => {
-          const { body } = await supertestNoAuth.get('/api/stats').expect(200);
+          const { body } = await supertestNoAuth
+            .get('/api/stats')
+            .auth(null, null)
+            .expect(200);
           expect(isUUID(body.kibana.uuid)).to.be.ok();
           expect(body.process.uptime_ms).to.be.greaterThan(0);
           expect(body.os.uptime_ms).to.be.greaterThan(0);
@@ -35,7 +36,10 @@ export default function({ getService }) {
         });
 
         it('should return 401 for extended', async () => {
-          await supertestNoAuth.get('/api/stats?extended').expect(401);
+          await supertestNoAuth
+            .get('/api/stats?extended')
+            .auth(null, null)
+            .expect(401);
         });
       });
 
