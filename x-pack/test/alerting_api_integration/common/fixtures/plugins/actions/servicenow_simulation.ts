@@ -9,92 +9,69 @@ import Hapi from 'hapi';
 
 interface ServiceNowRequest extends Hapi.Request {
   payload: {
-    caseId: string;
-    title?: string;
+    short_description: string;
     description?: string;
-    comments?: Array<{ commentId: string; version: string; comment: string }>;
+    comments?: string;
   };
 }
 export function initPlugin(server: Hapi.Server, path: string) {
   server.route({
     method: 'POST',
-    path,
-    options: {
-      auth: false,
-      validate: {
-        options: { abortEarly: false },
-        payload: Joi.object().keys({
-          caseId: Joi.string(),
-          title: Joi.string(),
-          description: Joi.string(),
-          comments: Joi.array().items(
-            Joi.object({
-              commentId: Joi.string(),
-              version: Joi.string(),
-              comment: Joi.string(),
-            })
-          ),
-        }),
-      },
-    },
-    handler: servicenowHandler,
-  });
-
-  server.route({
-    method: 'POST',
     path: `${path}/api/now/v2/table/incident`,
     options: {
       auth: false,
-      validate: {
-        options: { abortEarly: false },
-        payload: Joi.object().keys({
-          caseId: Joi.string(),
-          title: Joi.string(),
-          description: Joi.string(),
-          comments: Joi.array().items(
-            Joi.object({
-              commentId: Joi.string(),
-              version: Joi.string(),
-              comment: Joi.string(),
-            })
-          ),
-        }),
-      },
     },
-    handler: servicenowHandler,
+    handler: createHandler,
   });
 
   server.route({
     method: 'PATCH',
-    path: `${path}/api/now/v2/table/incident`,
+    path: `${path}/api/now/v2/table/incident/{id}`,
     options: {
       auth: false,
       validate: {
-        options: { abortEarly: false },
-        payload: Joi.object().keys({
-          caseId: Joi.string(),
-          title: Joi.string(),
-          description: Joi.string(),
-          comments: Joi.array().items(
-            Joi.object({
-              commentId: Joi.string(),
-              version: Joi.string(),
-              comment: Joi.string(),
-            })
-          ),
+        params: Joi.object({
+          id: Joi.string(),
         }),
       },
     },
-    handler: servicenowHandler,
+    handler: updateHandler,
+  });
+
+  server.route({
+    method: 'GET',
+    path: `${path}/api/now/v2/table/incident`,
+    options: {
+      auth: false,
+    },
+    handler: getHandler,
   });
 }
+
 // ServiceNow simulator: create a servicenow action pointing here, and you can get
 // different responses based on the message posted. See the README.md for
 // more info.
-
-function servicenowHandler(request: ServiceNowRequest, h: any) {
+function createHandler(request: ServiceNowRequest, h: any) {
   return jsonResponse(h, 200, {
     result: { sys_id: '123', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' },
+  });
+}
+
+function updateHandler(request: ServiceNowRequest, h: any) {
+  return jsonResponse(h, 200, {
+    result: { sys_id: '123', number: 'INC01', sys_updated_on: '2020-03-10 12:24:20' },
+  });
+}
+
+function getHandler(request: ServiceNowRequest, h: any) {
+  return jsonResponse(h, 200, {
+    result: {
+      sys_id: '123',
+      number: 'INC01',
+      sys_created_on: '2020-03-10 12:24:20',
+      short_description: 'title',
+      description: 'description',
+    },
   });
 }
 

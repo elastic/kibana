@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { fatalError } from 'ui/notify';
 
 import {
@@ -30,6 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { indices } from '../../../../../../../../src/plugins/es_ui_shared/public';
 import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
 import routing from '../../services/routing';
 import { loadIndices } from '../../services/api';
@@ -47,7 +47,7 @@ import { RemoteClustersFormField } from '../remote_clusters_form_field';
 
 import { FollowerIndexRequestFlyout } from './follower_index_request_flyout';
 
-const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexNameIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const fieldToValidatorMap = advancedSettingsFields.reduce(
   (map, advancedSetting) => {
