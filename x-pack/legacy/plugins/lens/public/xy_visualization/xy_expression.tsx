@@ -211,6 +211,7 @@ export function XYChart({
   return (
     <Chart>
       <Settings
+        data-test-subj="lnsChart-xyExpression-settings"
         showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}
@@ -228,6 +229,10 @@ export function XYChart({
           const layer = layers.find(l =>
             series.seriesKeys.some(key => l.accessors.includes(key as string))
           )!;
+          if (!layer) {
+            return;
+          }
+
           const table = data.tables[layer.layerId];
 
           const points = [

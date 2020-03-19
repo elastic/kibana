@@ -5,7 +5,9 @@ exports[`xy_expression XYChart component it renders area 1`] = `
   renderer="canvas"
 >
   <Connect(spec)
+    data-test-subj="lnsChart-xyExpression-settings"
     legendPosition="top"
+    onElementClick={[Function]}
     rotation={0}
     showLegend={false}
     showLegendDisplayValue={false}
@@ -26,26 +28,25 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     title=""
   />
   <Connect(spec)
+    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="a,b"
     key="0"
     splitSeriesAccessors={
       Array [
@@ -58,8 +59,8 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -72,7 +73,9 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
   renderer="canvas"
 >
   <Connect(spec)
+    data-test-subj="lnsChart-xyExpression-settings"
     legendPosition="top"
+    onElementClick={[Function]}
     rotation={0}
     showLegend={false}
     showLegendDisplayValue={false}
@@ -93,26 +96,25 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     title=""
   />
   <Connect(spec)
+    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="a,b"
     key="0"
     splitSeriesAccessors={
       Array [
@@ -125,8 +127,8 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -139,7 +141,9 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
   renderer="canvas"
 >
   <Connect(spec)
+    data-test-subj="lnsChart-xyExpression-settings"
     legendPosition="top"
+    onElementClick={[Function]}
     rotation={90}
     showLegend={false}
     showLegendDisplayValue={false}
@@ -160,26 +164,25 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     title=""
   />
   <Connect(spec)
+    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="a,b"
     key="0"
     splitSeriesAccessors={
       Array [
@@ -192,8 +195,8 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -206,7 +209,9 @@ exports[`xy_expression XYChart component it renders line 1`] = `
   renderer="canvas"
 >
   <Connect(spec)
+    data-test-subj="lnsChart-xyExpression-settings"
     legendPosition="top"
+    onElementClick={[Function]}
     rotation={0}
     showLegend={false}
     showLegendDisplayValue={false}
@@ -227,26 +232,25 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     title=""
   />
   <Connect(spec)
+    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="a,b"
     key="0"
     splitSeriesAccessors={
       Array [
@@ -259,8 +263,8 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -273,7 +277,9 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
   renderer="canvas"
 >
   <Connect(spec)
+    data-test-subj="lnsChart-xyExpression-settings"
     legendPosition="top"
+    onElementClick={[Function]}
     rotation={0}
     showLegend={false}
     showLegendDisplayValue={false}
@@ -294,26 +300,25 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     title=""
   />
   <Connect(spec)
+    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="a,b"
     key="0"
     splitSeriesAccessors={
       Array [
@@ -330,8 +335,8 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -344,7 +349,9 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
   renderer="canvas"
 >
   <Connect(spec)
+    data-test-subj="lnsChart-xyExpression-settings"
     legendPosition="top"
+    onElementClick={[Function]}
     rotation={0}
     showLegend={false}
     showLegendDisplayValue={false}
@@ -365,26 +372,25 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     title=""
   />
   <Connect(spec)
+    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="a,b"
     key="0"
     splitSeriesAccessors={
       Array [
@@ -401,8 +407,8 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -415,7 +421,9 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
   renderer="canvas"
 >
   <Connect(spec)
+    data-test-subj="lnsChart-xyExpression-settings"
     legendPosition="top"
+    onElementClick={[Function]}
     rotation={90}
     showLegend={false}
     showLegendDisplayValue={false}
@@ -436,26 +444,25 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     title=""
   />
   <Connect(spec)
+    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="a,b"
     key="0"
     splitSeriesAccessors={
       Array [
@@ -472,8 +479,8 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
