@@ -5,9 +5,8 @@
  */
 
 import './styles/_index.scss';
-import { PluginInitializerContext } from 'src/core/public';
 import { PainlessLabUIPlugin } from './plugin';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new PainlessLabUIPlugin(ctx);
+export function plugin() {
+  return new PainlessLabUIPlugin();
 }
