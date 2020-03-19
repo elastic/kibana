@@ -70,6 +70,7 @@ describe('removeLayer', () => {
     expect(newState.visualization.state).toEqual(['vis_clear_layer1']);
     expect(newState.datasourceStates.ds1.state).toEqual(['ds1_clear_layer1']);
     expect(newState.datasourceStates.ds2.state).toEqual([]);
+    expect(newState.stagedPreview).not.toBeDefined();
     expect(trackUiEvent).toHaveBeenCalledWith('layer_cleared');
   });
 

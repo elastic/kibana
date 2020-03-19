@@ -50,6 +50,7 @@ export function removeLayer(opts: RemoveLayerOptions): EditorFrameState {
           ? activeVisualization.clearLayer(state.visualization.state, layerId)
           : activeVisualization.removeLayer(state.visualization.state, layerId),
     },
+    stagedPreview: undefined,
   };
 }
 
