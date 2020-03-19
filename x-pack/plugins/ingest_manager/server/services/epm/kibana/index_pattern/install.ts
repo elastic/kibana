@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
 import * as Registry from '../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
@@ -95,10 +95,7 @@ export async function installIndexPatterns(
     // if this is an update because a package is being unisntalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
     if (!pkgkey && installedPackages.length === 0) {
       try {
-        await savedObjectsClient.delete(
-          INDEX_PATTERN_SAVED_OBJECT_TYPE,
-          `epm-ip-${indexPatternType}`
-        );
+        await savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, `${indexPatternType}-*`);
       } catch (err) {
         // index pattern was probably deleted by the user already
       }
@@ -111,7 +108,7 @@ export async function installIndexPatterns(
     const kibanaIndexPattern = createIndexPattern(indexPatternType, fields);
     // create or overwrite the index pattern
     await savedObjectsClient.create(INDEX_PATTERN_SAVED_OBJECT_TYPE, kibanaIndexPattern, {
-      id: `epm-ip-${indexPatternType}`,
+      id: `${indexPatternType}-*`,
       overwrite: true,
     });
   });

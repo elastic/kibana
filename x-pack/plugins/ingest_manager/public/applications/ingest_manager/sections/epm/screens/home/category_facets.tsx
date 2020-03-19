@@ -5,30 +5,37 @@
  */
 import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
 import React from 'react';
+import { Loading } from '../../../../components';
 import { CategorySummaryItem, CategorySummaryList } from '../../../../types';
 
 export function CategoryFacets({
+  isLoading,
   categories,
   selectedCategory,
   onCategoryChange,
 }: {
+  isLoading?: boolean;
   categories: CategorySummaryList;
   selectedCategory: string;
   onCategoryChange: (category: CategorySummaryItem) => unknown;
 }) {
   const controls = (
     <EuiFacetGroup>
-      {categories.map(category => (
-        <EuiFacetButton
-          isSelected={category.id === selectedCategory}
-          key={category.id}
-          id={category.id}
-          quantity={category.count}
-          onClick={() => onCategoryChange(category)}
-        >
-          {category.title}
-        </EuiFacetButton>
-      ))}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        categories.map(category => (
+          <EuiFacetButton
+            isSelected={category.id === selectedCategory}
+            key={category.id}
+            id={category.id}
+            quantity={category.count}
+            onClick={() => onCategoryChange(category)}
+          >
+            {category.title}
+          </EuiFacetButton>
+        ))
+      )}
     </EuiFacetGroup>
   );
 

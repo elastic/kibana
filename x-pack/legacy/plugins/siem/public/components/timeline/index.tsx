@@ -28,8 +28,8 @@ import { Timeline } from './timeline';
 
 export interface OwnProps {
   id: string;
-  flyoutHeaderHeight: number;
-  flyoutHeight: number;
+  onClose: () => void;
+  usersViewing: string[];
 }
 
 type Props = OwnProps & PropsFromRedux;
@@ -42,14 +42,13 @@ const StatefulTimelineComponent = React.memo<Props>(
     eventType,
     end,
     filters,
-    flyoutHeaderHeight,
-    flyoutHeight,
     id,
     isLive,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
     kqlQueryExpression,
+    onClose,
     onDataProviderEdited,
     removeColumn,
     removeProvider,
@@ -63,6 +62,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     updateHighlightedDropAndProviderId,
     updateItemsPerPage,
     upsertColumn,
+    usersViewing,
   }) => {
     const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
 
@@ -173,8 +173,6 @@ const StatefulTimelineComponent = React.memo<Props>(
             end={end}
             eventType={eventType}
             filters={filters}
-            flyoutHeaderHeight={flyoutHeaderHeight}
-            flyoutHeight={flyoutHeight}
             id={id}
             indexPattern={indexPattern}
             indexToAdd={indexToAdd}
@@ -187,6 +185,7 @@ const StatefulTimelineComponent = React.memo<Props>(
             onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onChangeItemsPerPage={onChangeItemsPerPage}
+            onClose={onClose}
             onDataProviderEdited={onDataProviderEditedLocal}
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
@@ -196,6 +195,7 @@ const StatefulTimelineComponent = React.memo<Props>(
             sort={sort!}
             start={start}
             toggleColumn={toggleColumn}
+            usersViewing={usersViewing}
           />
         )}
       </WithSource>
@@ -205,8 +205,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     return (
       prevProps.eventType === nextProps.eventType &&
       prevProps.end === nextProps.end &&
-      prevProps.flyoutHeaderHeight === nextProps.flyoutHeaderHeight &&
-      prevProps.flyoutHeight === nextProps.flyoutHeight &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
@@ -219,7 +217,8 @@ const StatefulTimelineComponent = React.memo<Props>(
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.filters, nextProps.filters) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
-      deepEqual(prevProps.sort, nextProps.sort)
+      deepEqual(prevProps.sort, nextProps.sort) &&
+      deepEqual(prevProps.usersViewing, nextProps.usersViewing)
     );
   }
 );

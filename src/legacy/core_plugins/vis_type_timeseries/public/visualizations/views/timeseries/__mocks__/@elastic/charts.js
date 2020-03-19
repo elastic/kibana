@@ -40,3 +40,5 @@ export const ScaleType = {
 
 export const BarSeries = () => null;
 export const AreaSeries = () => null;
+
+export { LIGHT_THEME, DARK_THEME } from '@elastic/charts';

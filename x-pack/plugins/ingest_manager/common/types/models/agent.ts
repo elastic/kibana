@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from '../../../../../../src/core/public';
+import { SavedObjectAttributes } from 'src/core/public';
 import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
 
 export type AgentType =
@@ -56,8 +56,9 @@ interface AgentBase {
   access_api_key_id?: string;
   default_api_key?: string;
   config_id?: string;
+  config_revision?: number;
+  config_newest_revision?: number;
   last_checkin?: string;
-  config_updated_at?: string;
   actions: AgentAction[];
 }
 
