@@ -80,16 +80,17 @@ const getGlobalEventNotesByTimelineId = (currentNotes: NoteSavedObject[]): Expor
 
   return (
     currentNotes.reduce((acc, note) => {
-      if (note.eventId == null)
+      if (note.eventId == null) {
         return {
           ...acc,
           globalNotes: [...acc.globalNotes, note],
         };
-      else
+      } else {
         return {
           ...acc,
           eventNotes: [...acc.eventNotes, note],
         };
+      }
     }, initialNotes) ?? initialNotes
   );
 };

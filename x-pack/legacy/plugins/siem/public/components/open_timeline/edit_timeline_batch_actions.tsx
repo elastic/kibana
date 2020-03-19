@@ -74,7 +74,7 @@ export const useEditTimelinBatchActions = ({
             title={
               selectedItems?.length !== 1
                 ? i18n.SELECTED_TIMELINES(selectedItems?.length ?? 0)
-                : `"${selectedItems[0]?.title}"`
+                : selectedItems[0]?.title ?? ''
             }
           />
 

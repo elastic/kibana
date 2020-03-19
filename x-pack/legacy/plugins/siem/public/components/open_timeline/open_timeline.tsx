@@ -104,7 +104,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}
           isEnableDownloader={isEnableDownloader}
           onComplete={onCompleteEditTimelineAction}
-          title={actionItem?.title ?? i18n.SELECTED_TIMELINES(1)}
+          title={actionItem?.title ?? i18n.UNTITLED_TIMELINE}
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>

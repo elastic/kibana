@@ -6,51 +6,50 @@
 
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
+import { isEmpty } from 'lodash/fp';
 
 import * as i18n from '../translations';
 
 interface Props {
-  title?: string | JSX.Element | null;
+  title?: string | null;
   onDelete: () => void;
   closeModal: () => void;
 }
 
 export const DELETE_TIMELINE_MODAL_WIDTH = 600; // px
 
-const getDeletedTitles = (title: string | JSX.Element | null | undefined) => {
-  if (title != null && React.isValidElement(title)) {
-    return title;
-  } else if (title != null && typeof title === 'string' && title.trim().length > 0) {
-    return title.trim();
-  }
-  return `"${i18n.UNTITLED_TIMELINE}"`;
-};
-
 /**
  * Renders a modal that confirms deletion of a timeline
  */
-export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDelete }) => (
-  <EuiConfirmModal
-    buttonColor="danger"
-    cancelButtonText={i18n.CANCEL}
-    confirmButtonText={i18n.DELETE}
-    defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-    onCancel={closeModal}
-    onConfirm={onDelete}
-    title={
+export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDelete }) => {
+  const getTitle = useCallback(() => {
+    const trimmedTitle = title != null ? title.trim() : '';
+    const titleResult = !isEmpty(trimmedTitle) ? trimmedTitle : i18n.UNTITLED_TIMELINE;
+    return (
       <FormattedMessage
         id="xpack.siem.open.timeline.deleteTimelineModalTitle"
+        defaultMessage={'Delete "{title}"?'}
         data-test-subj="title"
-        defaultMessage="Delete {title}?"
         values={{
-          title: getDeletedTitles(title),
+          title: titleResult,
         }}
       />
-    }
-  >
-    <div data-test-subj="warning">{i18n.DELETE_WARNING}</div>
-  </EuiConfirmModal>
-));
+    );
+  }, [title]);
+  return (
+    <EuiConfirmModal
+      buttonColor="danger"
+      cancelButtonText={i18n.CANCEL}
+      confirmButtonText={i18n.DELETE}
+      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+      onCancel={closeModal}
+      onConfirm={onDelete}
+      title={getTitle()}
+    >
+      <div data-test-subj="warning">{i18n.DELETE_WARNING}</div>
+    </EuiConfirmModal>
+  );
+});
 
 DeleteTimelineModal.displayName = 'DeleteTimelineModal';

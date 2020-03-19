@@ -21,7 +21,7 @@ interface Props {
   onComplete?: () => void;
   isModalOpen: boolean;
   savedObjectIds: string[];
-  title: string | JSX.Element | null;
+  title: string | null;
 }
 /**
  * Renders a button that when clicked, displays the `Delete Timeline` modal
