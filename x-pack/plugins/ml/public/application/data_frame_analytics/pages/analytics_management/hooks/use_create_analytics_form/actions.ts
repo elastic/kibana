@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 import { FormMessage, State, SourceIndexMap } from './state';
 
@@ -64,7 +65,7 @@ export type Action =
   | { type: ACTION.SET_JOB_CONFIG; payload: State['jobConfig'] }
   | { type: ACTION.SET_JOB_IDS; jobIds: State['jobIds'] }
   | { type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT; value: State['estimatedModelMemoryLimit'] }
-  | { type: ACTION.SET_JOB_CLONE; cloneJob: DataFrameAnalyticsConfig };
+  | { type: ACTION.SET_JOB_CLONE; cloneJob: DeepReadonly<DataFrameAnalyticsConfig> };
 
 // Actions wrapping the dispatcher exposed by the custom hook
 export interface ActionDispatchers {
@@ -79,5 +80,5 @@ export interface ActionDispatchers {
   startAnalyticsJob: () => void;
   switchToAdvancedEditor: () => void;
   setEstimatedModelMemoryLimit: (value: State['estimatedModelMemoryLimit']) => void;
-  setJobClone: (cloneJob: DataFrameAnalyticsConfig) => Promise<void>;
+  setJobClone: (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => Promise<void>;
 }

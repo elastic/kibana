@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import { DeleteDatasourcesResponse, packageToConfigDatasource } from '../../common';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';

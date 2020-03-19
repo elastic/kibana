@@ -141,4 +141,4 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
   }
 };
 
-export const escapeHatch = schema.object({}, { allowUnknowns: true });
+export const escapeHatch = schema.object({}, { unknowns: 'allow' });

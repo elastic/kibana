@@ -10,6 +10,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
@@ -47,6 +48,7 @@ export const LAYER_TYPE = {
   VECTOR: 'VECTOR',
   VECTOR_TILE: 'VECTOR_TILE',
   HEATMAP: 'HEATMAP',
+  BLENDED_VECTOR: 'BLENDED_VECTOR',
 };
 
 export enum SORT_ORDER {
@@ -120,6 +122,7 @@ export const EMPTY_FEATURE_COLLECTION = {
 
 export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
+  DISTANCE: 'DISTANCE',
   POLYGON: 'POLYGON',
 };
 
@@ -186,3 +189,9 @@ export enum LABEL_BORDER_SIZES {
 }
 
 export const DEFAULT_ICON = 'airfield';
+
+export enum SCALING_TYPES {
+  LIMIT = 'LIMIT',
+  CLUSTERS = 'CLUSTERS',
+  TOP_HITS = 'TOP_HITS',
+}

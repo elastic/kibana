@@ -9,5 +9,5 @@ Gets the metadata about all uiSettings, including the type, default value, and u
 <b>Signature:</b>
 
 ```typescript
-getAll: () => Readonly<Record<string, UiSettingsParams & UserProvidedValues>>;
+getAll: () => Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
 ```

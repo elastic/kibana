@@ -67,9 +67,9 @@
 |  Type Alias | Description |
 |  --- | --- |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-server.fieldformatsgetconfigfn.md) |  |
-|  [ICancel](./kibana-plugin-plugins-data-server.icancel.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [ISearch](./kibana-plugin-plugins-data-server.isearch.md) |  |
+|  [ISearchCancel](./kibana-plugin-plugins-data-server.isearchcancel.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
 |  [TSearchStrategyProvider](./kibana-plugin-plugins-data-server.tsearchstrategyprovider.md) | Search strategy provider creates an instance of a search strategy with the request handler context bound to it. This way every search strategy can use whatever information they require from the request context. |
 
