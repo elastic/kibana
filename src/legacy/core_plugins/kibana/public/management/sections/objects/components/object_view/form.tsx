@@ -44,12 +44,13 @@ interface FormProps {
   service: SavedObjectLoader;
   savedObjectsClient: SavedObjectsClientContract;
   editionEnabled: boolean;
-  onSave: (form: SubmittedFormData) => void;
+  onSave: (form: SubmittedFormData) => Promise<void>;
 }
 
 interface FormState {
   fields: ObjectField[];
   fieldStates: Record<string, FieldState>;
+  submitting: boolean;
 }
 
 export class Form extends Component<FormProps, FormState> {
@@ -58,6 +59,7 @@ export class Form extends Component<FormProps, FormState> {
     this.state = {
       fields: [],
       fieldStates: {},
+      submitting: false,
     };
   }
 
@@ -73,7 +75,7 @@ export class Form extends Component<FormProps, FormState> {
 
   render() {
     const { editionEnabled, service } = this.props;
-    const { fields, fieldStates } = this.state;
+    const { fields, fieldStates, submitting } = this.state;
     const isValid = this.isFormValid();
     return (
       <EuiForm data-test-subj="savedObjectEditForm" role="form">
@@ -101,7 +103,7 @@ export class Form extends Component<FormProps, FormState> {
                   },
                 })}
                 onClick={this.onSubmit}
-                disabled={!isValid}
+                disabled={!isValid || submitting}
                 data-test-subj="savedObjectEditSave"
               >
                 <FormattedMessage
@@ -158,6 +160,10 @@ export class Form extends Component<FormProps, FormState> {
       return;
     }
 
+    this.setState({
+      submitting: true,
+    });
+
     const source = cloneDeep(object.attributes as any);
     fields.forEach(field => {
       let value = fieldStates[field.name]?.value ?? field.value;
@@ -171,6 +177,10 @@ export class Form extends Component<FormProps, FormState> {
 
     const { references, ...attributes } = source;
 
-    onSave({ attributes, references });
+    await onSave({ attributes, references });
+
+    this.setState({
+      submitting: false,
+    });
   };
 }
