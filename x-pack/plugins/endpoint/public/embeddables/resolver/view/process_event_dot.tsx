@@ -14,6 +14,7 @@ import { SymbolIds, NamedColors, PaintServerIds } from './defs';
 import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../../common/models/event';
+import * as processModel from '../models/process_event';
 
 const nodeAssets = {
   runningProcessCube: {
@@ -125,29 +126,35 @@ export const ProcessEventDot = styled(
           }
         : {};
 
-      const nodeType = ((nodeData: any) => {
-        // TODO FIX
-        if (nodeData?.event_subtype_full === 'already_running') {
-          return typeof nodeData?.attack_references === 'undefined'
-            ? 'runningProcessCube'
-            : 'runningTriggerCube';
-        } else {
-          return typeof nodeData?.attack_references === 'undefined'
-            ? 'terminatedProcessCube'
-            : 'terminatedTriggerCube';
+      const flowToAttribute = adjacentNodeMap?.next
+        ? {
+            'aria-flowto': adjacentNodeMap.next,
+          }
+        : {};
+
+      const nodeType = ((processEvent: ResolverEvent) => {
+        const processType = processModel.eventType(processEvent);
+        const processTypeToCube = {
+          processCreated: 'terminatedProcessCube',
+          processRan: 'runningProcessCube',
+          processTerminated: 'terminatedProcessCube',
+          unknownProcessEvent: 'runningProcessCube',
+          processCausedAlert: 'runningTriggerCube',
+          unknownEvent: 'runningProcessCube',
+        };
+        if (processType in processTypeToCube) {
+          return processTypeToCube[processType];
         }
-      })(event?.process);
+        return 'runningProcessCube';
+      })(event) as keyof typeof nodeAssets;
 
       const clickTargetRef: { current: SVGAnimationElement | null } = React.createRef();
       const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[nodeType];
       const resolverNodeIdGenerator = htmlIdGenerator('resolverNode');
       const [nodeId, labelId, descriptionId] = [
         !!selfId ? resolverNodeIdGenerator(String(selfId)) : resolverNodeIdGenerator(),
-        ...(function*() {
-          for (let n = 2; n--; ) {
-            yield resolverNodeIdGenerator();
-          }
-        })(),
+        resolverNodeIdGenerator(),
+        resolverNodeIdGenerator(),
       ] as string[];
 
       const dispatch = useResolverDispatch();
@@ -169,10 +176,10 @@ export const ProcessEventDot = styled(
             preserveAspectRatio="xMidYMid meet"
             role="treeitem"
             {...levelAttribute}
+            {...flowToAttribute}
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
-            data-down={adjacentNodeMap?.down}
             style={nodeViewportStyle}
             id={nodeId}
             onClick={(clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
