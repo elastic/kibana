@@ -12,6 +12,7 @@ import {
   LineSeries,
   Settings,
   ScaleType,
+  SeriesNameFn,
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
@@ -379,12 +380,19 @@ describe('xy_expression', () => {
           chartTheme={{}}
         />
       );
-      const nameFn = component.find(LineSeries).prop('name');
+      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
 
       expect(
-        nameFn({
-          seriesKeys: ['a', 'b', 'c', 'd'],
-        })
+        nameFn(
+          {
+            seriesKeys: ['a', 'b', 'c', 'd'],
+            key: '',
+            specId: 'a',
+            yAccessor: '',
+            splitAccessors: new Map(),
+          },
+          false
+        )
       ).toEqual('Label A - Label B - c - Label D');
     });
 
@@ -408,12 +416,19 @@ describe('xy_expression', () => {
           chartTheme={{}}
         />
       );
-      const nameFn = component.find(LineSeries).prop('name');
+      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
 
       expect(
-        nameFn({
-          seriesKeys: ['a', 'b', 'c', 'd'],
-        })
+        nameFn(
+          {
+            seriesKeys: ['a', 'b', 'c', 'd'],
+            key: '',
+            specId: 'a',
+            yAccessor: '',
+            splitAccessors: new Map(),
+          },
+          false
+        )
       ).toEqual('Label A');
     });
 

@@ -18,7 +18,6 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
-  KibanaDatatable,
   IInterpreterRenderHandlers,
   ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
@@ -37,12 +36,6 @@ type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof BarSeries> &
   InferPropType<typeof AreaSeries>;
-
-// interface XYChartSeriesIdentifier {
-//   yAccessor: string | number;
-//   splitAccessors: Map<string | number, string | number>; // does the map have a size vs making it optional
-//   seriesKeys: Array<string | number>;
-// }
 
 export interface XYChartProps {
   data: LensMultiTable;
