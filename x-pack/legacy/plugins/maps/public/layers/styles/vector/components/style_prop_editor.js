@@ -70,11 +70,7 @@ export class StylePropEditor extends Component {
     return (
       <EuiSelect
         options={options}
-        value={
-          this.props.styleProperty.isDynamic()
-            ? STYLE_TYPE.DYNAMIC
-            : STYLE_TYPE.STATIC
-        }
+        value={this.props.styleProperty.isDynamic() ? STYLE_TYPE.DYNAMIC : STYLE_TYPE.STATIC}
         onChange={this._onTypeToggle}
         disabled={this.props.disabled || this.props.fields.length === 0}
         aria-label={i18n.translate('xpack.maps.styles.staticDynamicSelect.ariaLabel', {
