@@ -6,7 +6,7 @@
 
 import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
-import { getComputedFieldName, getOtherCategoryLabel } from '../style_util';
+import { getComputedFieldName, getOtherCategoryLabel, dynamicRound } from '../style_util';
 import {
   getOrdinalMbColorRampStops,
   getColorPalette,
@@ -235,7 +235,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
   }
 
-  _getColorRampStopsForLegend() {
+  _getColorRampStops() {
     if (this._options.useCustomColorRamp && this._options.customColorRamp) {
       return this._options.customColorRamp;
     }
@@ -253,9 +253,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     const colors = getHexColorRangeStrings(this._options.color, numberOfLegendColors);
 
     return colors.map((color, index) => {
+      const rawStopValue =
+        rangeFieldMeta.min + rangeFieldMeta.delta * (index / numberOfLegendColors);
       return {
         color,
-        stop: rangeFieldMeta.min + rangeFieldMeta.delta * (index / numberOfLegendColors),
+        stop: dynamicRound(rawStopValue),
       };
     });
   }
@@ -263,7 +265,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   _getColorStops() {
     if (this.isOrdinal()) {
       return {
-        stops: this._getColorRampStopsForLegend(),
+        stops: this._getColorRampStops(),
         defaultColor: null,
       };
     } else if (this.isCategorical()) {
