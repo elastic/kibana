@@ -118,7 +118,7 @@ export const flattenCaseSavedObject = (
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
-  totalComment: 0,
+  totalComment,
   ...savedObject.attributes,
 });
 
