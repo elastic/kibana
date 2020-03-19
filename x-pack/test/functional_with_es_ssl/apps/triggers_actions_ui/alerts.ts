@@ -280,10 +280,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('deleteAlert');
-      const emptyPrompt = await find.byCssSelector(
-        '[data-test-subj="createFirstAlertEmptyPrompt"]'
-      );
-      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
+
+      expect(await pageObjects.triggersActionsUI.isAnEmptyAlertsListDisplayed()).to.be(true);
     });
 
     it('should mute all selection', async () => {
@@ -393,10 +391,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('deleteAll');
 
-      const emptyPrompt = await find.byCssSelector(
-        '[data-test-subj="createFirstAlertEmptyPrompt"]'
-      );
-      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
+      expect(await pageObjects.triggersActionsUI.isAnEmptyAlertsListDisplayed()).to.be(true);
     });
   });
 };
