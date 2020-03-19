@@ -17,8 +17,11 @@
  * under the License.
  */
 
-export default function(api) {
-  api.addEndpointDescription('reindex', {
+import { SpecDefinitionsService } from '../../../services';
+
+/* eslint-disable @typescript-eslint/camelcase */
+export const reindex = (specService: SpecDefinitionsService) => {
+  specService.addEndpointDescription('reindex', {
     methods: ['POST'],
     patterns: ['_reindex'],
     data_autocomplete_rules: {
@@ -62,4 +65,4 @@ export default function(api) {
       script: { __scope_link: 'GLOBAL.script' },
     },
   });
-}
+};

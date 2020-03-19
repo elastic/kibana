@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { SpecDefinitionsService } from '../../../services';
 import { BOOLEAN } from './shared';
 
-export default function(api) {
-  api.addEndpointDescription('put_settings', {
+/* eslint-disable @typescript-eslint/camelcase */
+export const settings = (specService: SpecDefinitionsService) => {
+  specService.addEndpointDescription('put_settings', {
     data_autocomplete_rules: {
       refresh_interval: '1s',
       number_of_shards: 1,
@@ -71,4 +72,4 @@ export default function(api) {
       },
     },
   });
-}
+};

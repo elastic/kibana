@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SpecDefinitionsService } from '../../../services';
 
-/*eslint camelcase: 0*/
+/* eslint-disable @typescript-eslint/camelcase */
 const significantTermsArgs = {
   __template: {
     field: '',
@@ -77,7 +78,7 @@ const simple_pipeline = {
   },
   buckets_path: '',
   format: '',
-  gap_policy: gap_policy,
+  gap_policy,
 };
 const rules = {
   '*': {
@@ -461,7 +462,7 @@ const rules = {
       },
       buckets_path: '',
       format: '',
-      gap_policy: gap_policy,
+      gap_policy,
       window: 5,
       model: { __one_of: ['simple', 'linear', 'ewma', 'holt', 'holt_winters'] },
       settings: {
@@ -485,7 +486,7 @@ const rules = {
         lag: 7,
       },
       lag: 7,
-      gap_policy: gap_policy,
+      gap_policy,
       buckets_path: '',
       format: '',
     },
@@ -496,7 +497,7 @@ const rules = {
       },
       buckets_path: {},
       format: '',
-      gap_policy: gap_policy,
+      gap_policy,
       script: '',
     },
     bucket_selector: {
@@ -505,7 +506,7 @@ const rules = {
         script: '',
       },
       buckets_path: {},
-      gap_policy: gap_policy,
+      gap_policy,
       script: '',
     },
     bucket_sort: {
@@ -515,7 +516,7 @@ const rules = {
       sort: ['{field}'],
       from: 0,
       size: 0,
-      gap_policy: gap_policy,
+      gap_policy,
     },
     matrix_stats: {
       __template: {
@@ -526,8 +527,11 @@ const rules = {
   },
 };
 const { terms, histogram, date_histogram } = rules['*'];
-export default function(api) {
-  api.addGlobalAutocompleteRules('aggregations', rules);
-  api.addGlobalAutocompleteRules('aggs', rules);
-  api.addGlobalAutocompleteRules('groupByAggs', { '*': { terms, histogram, date_histogram } });
-}
+
+export const aggs = (specService: SpecDefinitionsService) => {
+  specService.addGlobalAutocompleteRules('aggregations', rules);
+  specService.addGlobalAutocompleteRules('aggs', rules);
+  specService.addGlobalAutocompleteRules('groupByAggs', {
+    '*': { terms, histogram, date_histogram },
+  });
+};

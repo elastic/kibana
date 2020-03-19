@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export const BOOLEAN = Object.freeze({
-  __one_of: [true, false],
-});
+export { jsSpecLoaders } from './js';
