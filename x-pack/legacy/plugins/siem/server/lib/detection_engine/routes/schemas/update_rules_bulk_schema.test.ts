@@ -6,11 +6,20 @@
 
 import { updateRulesBulkSchema } from './update_rules_bulk_schema';
 import { UpdateRuleAlertParamsRest } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 // only the basics of testing are here.
 // see: update_rules_schema.test.ts for the bulk of the validation tests
 // this just wraps updateRulesSchema in an array
 describe('update_rules_bulk_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('can take an empty array and validate it', () => {
     expect(
       updateRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([]).error
