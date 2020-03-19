@@ -15,21 +15,24 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { Links } from '../../links';
+
 interface Props {
   toggleRequestFlyout: () => void;
   isRequestFlyoutOpen: boolean;
   isLoading: boolean;
   reset: () => void;
+  links: Links;
 }
 
-export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset }: Props) {
+export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, links }: Props) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const items = [
     <EuiContextMenuItem
       key="walkthrough"
       icon="popout"
-      href="https://www.elastic.co/guide/en/elasticsearch/painless/7.5/painless-walkthrough.html"
+      href={links.painlessWalkthrough}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
     >
@@ -41,7 +44,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset }
     <EuiContextMenuItem
       key="api"
       icon="popout"
-      href="https://www.elastic.co/guide/en/elasticsearch/painless/current/painless-api-reference.html"
+      href={links.painlessAPIReference}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
     >
@@ -53,7 +56,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset }
     <EuiContextMenuItem
       key="languageSpec"
       icon="popout"
-      href="https://www.elastic.co/guide/en/elasticsearch/painless/current/painless-lang-spec.html"
+      href={links.painlessLangSpec}
       target="_blank"
       onClick={() => setIsHelpOpen(false)}
     >

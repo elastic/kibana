@@ -24,7 +24,7 @@ import { painlessContextOptions } from '../../common/constants';
 import { useAppContext } from '../../context';
 
 export const ContextTab: FunctionComponent = () => {
-  const { state, updateState } = useAppContext();
+  const { state, updateState, links } = useAppContext();
   const { context, document, index, query } = state;
 
   return (
@@ -48,10 +48,7 @@ export const ContextTab: FunctionComponent = () => {
         }
         labelAppend={
           <EuiText size="xs">
-            <EuiLink
-              href="https://www.elastic.co/guide/en/elasticsearch/painless/current/painless-execute-api.html"
-              target="_blank"
-            >
+            <EuiLink href={links.painlessExecuteAPI} target="_blank">
               {i18n.translate('xpack.painlessLab.contextFieldDocLinkText', {
                 defaultMessage: 'Context docs',
               })}
@@ -115,10 +112,7 @@ export const ContextTab: FunctionComponent = () => {
           }
           labelAppend={
             <EuiText size="xs">
-              <EuiLink
-                href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html"
-                target="_blank"
-              >
+              <EuiLink href={links.esQueryDSL} target="_blank">
                 {i18n.translate('xpack.painlessLab.queryFieldDocLinkText', {
                   defaultMessage: 'Query DSL docs',
                 })}
