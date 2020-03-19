@@ -75,6 +75,12 @@ export interface ReindexService {
   findReindexOperation(indexName: string): Promise<ReindexSavedObject | null>;
 
   /**
+   * Delete reindex operations for completed indices with deprecations.
+   * @param indexNames
+   */
+  cleanupReindexOperations(indexNames: Array<string | undefined>): Promise<void> | null;
+
+  /**
    * Process the reindex operation through one step of the state machine and resolves
    * to the updated reindex operation.
    * @param reindexOp
@@ -582,6 +588,25 @@ export const reindexServiceFactory = (
       }
 
       return findResponse.saved_objects[0];
+    },
+
+    async cleanupReindexOperations(indexNames: Array<string | undefined>) {
+      const performCleanup = async (indexName: string | undefined) => {
+        if (indexName) {
+          const existingReindexOps = await actions.findReindexOperations(indexName);
+
+          if (existingReindexOps && existingReindexOps.total !== 0) {
+            const existingOp = existingReindexOps.saved_objects[0];
+            if (existingOp.attributes.status === ReindexStatus.completed) {
+              // Delete the existing one if its status is completed, but still contains deprecation warnings
+              // example scenario: index was upgraded, but then deleted and restored with an old snapshot
+              await actions.deleteReindexOp(existingOp);
+            }
+          }
+        }
+      };
+
+      await Promise.all(indexNames.map(performCleanup));
     },
 
     findAllByStatus: actions.findAllByStatus,
