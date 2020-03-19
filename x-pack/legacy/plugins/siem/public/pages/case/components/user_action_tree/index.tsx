@@ -28,7 +28,6 @@ export const UserActionTree = React.memo(
     const { comments, isLoadingIds, updateComment, addPostedComment } = useUpdateComment(
       caseData.comments
     );
-    // const currentUser = 'something';
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
 
