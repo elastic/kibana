@@ -256,8 +256,4 @@ export const ProcessEventDot = styled(
   padding: 4px;
   white-space: nowrap;
   will-change: left, top, width, height;
-
-  svg {
-    outline: 1px solid red;
-  }
 `;
