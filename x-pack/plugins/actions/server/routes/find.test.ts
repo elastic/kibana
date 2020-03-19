@@ -81,6 +81,7 @@ describe('findActionRoute', () => {
             "perPage": 1,
             "search": undefined,
             "sortField": undefined,
+            "sortOrder": undefined,
           },
         },
       ]

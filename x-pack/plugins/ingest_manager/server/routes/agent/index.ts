@@ -9,7 +9,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from 'src/core/server';
 import { PLUGIN_ID, AGENT_API_ROUTES } from '../../constants';
 import {
   GetAgentsRequestSchema,

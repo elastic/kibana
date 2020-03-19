@@ -12,7 +12,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  describe('jobs cloning supported by UI form', function() {
+
+  // failing test, see https://github.com/elastic/kibana/issues/60389
+  describe.skip('jobs cloning supported by UI form', function() {
     this.tags(['smoke']);
 
     const testDataList: Array<{

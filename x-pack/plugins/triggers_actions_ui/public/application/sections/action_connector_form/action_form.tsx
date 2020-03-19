@@ -129,16 +129,14 @@ export const ActionForm = ({
       const actionsResponse = await loadAllActions({ http });
       setConnectors(actionsResponse.data);
     } catch (e) {
-      if (toastNotifications) {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
-            {
-              defaultMessage: 'Unable to load connectors',
-            }
-          ),
-        });
-      }
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
+          {
+            defaultMessage: 'Unable to load connectors',
+          }
+        ),
+      });
     }
   }
 

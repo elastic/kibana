@@ -5,7 +5,8 @@
  */
 
 import supertestAsPromised from 'supertest-as-promised';
-import url from 'url';
+import { Client } from '@elastic/elasticsearch';
+import { format as formatUrl } from 'url';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -15,7 +16,19 @@ export function getSupertestWithoutAuth({ getService }: FtrProviderContext) {
   kibanaUrl.auth = null;
   kibanaUrl.password = null;
 
-  return supertestAsPromised(url.format(kibanaUrl));
+  return supertestAsPromised(formatUrl(kibanaUrl));
+}
+
+export function getEsClientForAPIKey({ getService }: FtrProviderContext, esApiKey: string) {
+  const config = getService('config');
+  const url = formatUrl({ ...config.get('servers.elasticsearch'), auth: false });
+  return new Client({
+    nodes: [url],
+    auth: {
+      apiKey: esApiKey,
+    },
+    requestTimeout: config.get('timeouts.esRequestTimeout'),
+  });
 }
 
 export function setupIngest({ getService }: FtrProviderContext) {

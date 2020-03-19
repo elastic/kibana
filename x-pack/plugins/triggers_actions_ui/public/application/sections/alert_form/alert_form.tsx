@@ -162,6 +162,7 @@ export const AlertForm = ({
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
           setAlertTypeModel(item);
+          setAlertProperty('params', {});
           if (alertTypesIndex && alertTypesIndex[item.id]) {
             setDefaultActionGroupId(alertTypesIndex[item.id].defaultActionGroupId);
           }
@@ -201,6 +202,7 @@ export const AlertForm = ({
               onClick={() => {
                 setAlertProperty('alertTypeId', null);
                 setAlertTypeModel(null);
+                setAlertProperty('params', {});
               }}
             />
           </EuiFlexItem>

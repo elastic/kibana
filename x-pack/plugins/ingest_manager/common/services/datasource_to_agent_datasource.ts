@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { safeLoad } from 'js-yaml';
 import { Datasource, NewDatasource, FullAgentConfigDatasource } from '../types';
 import { DEFAULT_OUTPUT } from '../constants';
 
@@ -23,12 +24,26 @@ export const storedDatasourceToAgentDatasource = (
           if (stream.config) {
             const fullStream = {
               ...stream,
-              ...Object.entries(stream.config).reduce((acc, [configName, configValue]) => {
-                if (configValue !== undefined) {
-                  acc[configName] = configValue;
-                }
-                return acc;
-              }, {} as { [key: string]: any }),
+              ...Object.entries(stream.config).reduce(
+                (acc, [configName, { type: configType, value: configValue }]) => {
+                  if (configValue !== undefined) {
+                    if (configType === 'yaml') {
+                      try {
+                        const yamlValue = safeLoad(configValue);
+                        if (yamlValue) {
+                          acc[configName] = yamlValue;
+                        }
+                      } catch (e) {
+                        // Silently swallow parsing error
+                      }
+                    } else {
+                      acc[configName] = configValue;
+                    }
+                  }
+                  return acc;
+                },
+                {} as { [key: string]: any }
+              ),
             };
             delete fullStream.config;
             return fullStream;
