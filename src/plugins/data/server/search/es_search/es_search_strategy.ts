@@ -31,6 +31,13 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
     search: async (request, options) => {
       const config = await context.config$.pipe(first()).toPromise();
       const defaultParams = getDefaultSearchParams(config);
+
+      // Only default index pattern type is supported here.
+      // See data_enhanced for other type support.
+      if (!!request.indexType) {
+        throw new Error(`Unsupported index pattern type ${request.indexType}`);
+      }
+
       const params = {
         ...defaultParams,
         ...request.params,

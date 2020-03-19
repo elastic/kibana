@@ -21,7 +21,12 @@ import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/serv
 
 import { readLegacyEsConfig } from '../../../legacy/core_plugins/console_legacy';
 
-import { ProxyConfigCollection, addExtensionSpecFilePath, addProcessorDefinition } from './lib';
+import {
+  ProxyConfigCollection,
+  addExtensionSpecFilePath,
+  addProcessorDefinition,
+  loadSpec,
+} from './lib';
 import { ConfigType } from './config';
 import { registerProxyRoute } from './routes/api/console/proxy';
 import { registerSpecDefinitionsRoute } from './routes/api/console/spec_definitions';
@@ -75,5 +80,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup> {
     };
   }
 
-  start() {}
+  start() {
+    loadSpec();
+  }
 }

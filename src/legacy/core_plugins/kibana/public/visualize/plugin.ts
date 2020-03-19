@@ -36,7 +36,7 @@ import {
   DataPublicPluginSetup,
   esFilters,
 } from '../../../../../plugins/data/public';
-import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import {
@@ -55,7 +55,7 @@ import { DefaultEditorController } from '../../../vis_default_editor/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
@@ -71,7 +71,7 @@ export interface VisualizePluginSetupDependencies {
 export class VisualizePlugin implements Plugin {
   private startDependencies: {
     data: DataPublicPluginStart;
-    embeddable: IEmbeddableStart;
+    embeddable: EmbeddableStart;
     navigation: NavigationStart;
     savedObjectsClient: SavedObjectsClientContract;
     share: SharePluginStart;

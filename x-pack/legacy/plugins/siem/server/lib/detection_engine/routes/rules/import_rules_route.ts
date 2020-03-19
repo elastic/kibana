@@ -111,6 +111,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     return null;
                   }
                   const {
+                    anomaly_threshold: anomalyThreshold,
                     description,
                     enabled,
                     false_positives: falsePositives,
@@ -118,6 +119,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     immutable,
                     query,
                     language,
+                    machine_learning_job_id: machineLearningJobId,
                     output_index: outputIndex,
                     saved_id: savedId,
                     meta,
@@ -134,10 +136,13 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     to,
                     type,
                     references,
+                    note,
                     timeline_id: timelineId,
                     timeline_title: timelineTitle,
                     version,
+                    lists,
                   } = parsedRule;
+
                   try {
                     const signalsIndex = siemClient.signalsIndex;
                     const indexExists = await getIndexExists(
@@ -158,6 +163,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                       await createRules({
                         alertsClient,
                         actionsClient,
+                        anomalyThreshold,
                         description,
                         enabled,
                         falsePositives,
@@ -165,6 +171,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         immutable,
                         query,
                         language,
+                        machineLearningJobId,
                         outputIndex: signalsIndex,
                         savedId,
                         timelineId,
@@ -183,7 +190,9 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         type,
                         threat,
                         references,
+                        note,
                         version,
+                        lists,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
                     } else if (rule != null && request.query.overwrite) {
@@ -217,6 +226,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         type,
                         threat,
                         references,
+                        note,
                         version,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });

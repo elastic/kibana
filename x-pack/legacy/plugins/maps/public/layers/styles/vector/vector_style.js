@@ -123,7 +123,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  _getAllStyleProperties() {
+  getAllStyleProperties() {
     return [
       this._symbolizeAsStyleProperty,
       this._iconStyleProperty,
@@ -164,7 +164,7 @@ export class VectorStyle extends AbstractStyle {
     });
 
     const styleProperties = {};
-    this._getAllStyleProperties().forEach(styleProperty => {
+    this.getAllStyleProperties().forEach(styleProperty => {
       styleProperties[styleProperty.getStyleName()] = styleProperty;
     });
 
@@ -339,7 +339,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getDynamicPropertiesArray() {
-    const styleProperties = this._getAllStyleProperties();
+    const styleProperties = this.getAllStyleProperties();
     return styleProperties.filter(
       styleProperty => styleProperty.isDynamic() && styleProperty.isComplete()
     );
@@ -390,7 +390,7 @@ export class VectorStyle extends AbstractStyle {
       return null;
     }
 
-    const formattersDataRequest = this._layer.findDataRequestById(dataRequestId);
+    const formattersDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!formattersDataRequest || !formattersDataRequest.hasData()) {
       return null;
     }
@@ -508,7 +508,7 @@ export class VectorStyle extends AbstractStyle {
         const name = dynamicStyleProp.getField().getName();
         const computedName = getComputedFieldName(dynamicStyleProp.getStyleName(), name);
         const styleValue = dynamicStyleProp.getMbValue(feature.properties[name]);
-        if (dynamicStyleProp.supportsFeatureState()) {
+        if (dynamicStyleProp.supportsMbFeatureState()) {
           tmpFeatureState[computedName] = styleValue;
         } else {
           feature.properties[computedName] = styleValue;
@@ -523,7 +523,7 @@ export class VectorStyle extends AbstractStyle {
     //this return-value is used in an optimization for style-updates with mapbox-gl.
     //`true` indicates the entire data needs to reset on the source (otherwise the style-rules will not be reapplied)
     //`false` indicates the data does not need to be reset on the store, because styles are re-evaluated if they use featureState
-    return dynamicStyleProps.some(dynamicStyleProp => !dynamicStyleProp.supportsFeatureState());
+    return dynamicStyleProps.some(dynamicStyleProp => !dynamicStyleProp.supportsMbFeatureState());
   }
 
   arePointsSymbolizedAsCircles() {

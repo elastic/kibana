@@ -20,6 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import { fatalError } from 'ui/notify/fatal_error';
 
 import { uiModules } from '../../modules';
 import template from './kbn_chrome.html';
@@ -30,7 +31,7 @@ import {
   chromeHeaderNavControlsRegistry,
   NavControlSide,
 } from '../../registry/chrome_header_nav_controls';
-import { subscribeWithScope } from '../../utils/subscribe_with_scope';
+import { subscribeWithScope } from '../../../../../plugins/kibana_legacy/public';
 
 export function kbnChromeProvider(chrome, internals) {
   uiModules.get('kibana').directive('kbnChrome', () => {
@@ -84,11 +85,16 @@ export function kbnChromeProvider(chrome, internals) {
           );
         }
 
-        const chromeVisibility = subscribeWithScope($scope, chrome.visible$, {
-          next: () => {
-            // just makes sure change detection is triggered when chrome visibility changes
+        const chromeVisibility = subscribeWithScope(
+          $scope,
+          chrome.visible$,
+          {
+            next: () => {
+              // just makes sure change detection is triggered when chrome visibility changes
+            },
           },
-        });
+          fatalError
+        );
         $scope.$on('$destroy', () => {
           chromeVisibility.unsubscribe();
         });

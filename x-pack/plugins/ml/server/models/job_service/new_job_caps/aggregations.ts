@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Aggregation,
-  METRIC_AGG_TYPE,
-} from '../../../../../../legacy/plugins/ml/common/types/fields';
+import { Aggregation, METRIC_AGG_TYPE } from '../../../../common/types/fields';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,
   ES_AGGREGATION,
-} from '../../../../../../legacy/plugins/ml/common/constants/aggregation_types';
+} from '../../../../common/constants/aggregation_types';
 
 // aggregation object missing id, title and fields and has null for kibana and dsl aggregation names.
 // this is used as the basis for the ML only aggregations

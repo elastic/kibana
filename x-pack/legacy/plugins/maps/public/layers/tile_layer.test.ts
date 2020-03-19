@@ -17,7 +17,7 @@ const sourceDescriptor: XYZTMSSourceDescriptor = {
 };
 
 class MockTileSource implements ITMSSource {
-  private _descriptor: XYZTMSSourceDescriptor;
+  private readonly _descriptor: XYZTMSSourceDescriptor;
   constructor(descriptor: XYZTMSSourceDescriptor) {
     this._descriptor = descriptor;
   }
@@ -31,6 +31,14 @@ class MockTileSource implements ITMSSource {
 
   async getUrlTemplate(): Promise<string> {
     return 'template/{x}/{y}/{z}.png';
+  }
+
+  destroy(): void {
+    // no-op
+  }
+
+  getInspectorAdapters(): object {
+    return {};
   }
 }
 

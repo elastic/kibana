@@ -14,6 +14,14 @@ export const CANCEL = i18n.translate('xpack.siem.case.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
+export const DELETE_CASE = i18n.translate('xpack.siem.case.confirmDeleteCase.deleteCase', {
+  defaultMessage: 'Delete case',
+});
+
+export const DELETE_CASES = i18n.translate('xpack.siem.case.confirmDeleteCase.deleteCases', {
+  defaultMessage: 'Delete cases',
+});
+
 export const NAME = i18n.translate('xpack.siem.case.caseView.name', {
   defaultMessage: 'Name',
 });
@@ -64,24 +72,8 @@ export const OPTIONAL = i18n.translate('xpack.siem.case.caseView.optional', {
   defaultMessage: 'Optional',
 });
 
-export const LAST_UPDATED = i18n.translate('xpack.siem.case.caseView.updatedAt', {
-  defaultMessage: 'Last updated',
-});
-
-export const PAGE_SUBTITLE = i18n.translate('xpack.siem.case.caseView.pageSubtitle', {
-  defaultMessage: 'Cases within the Elastic SIEM',
-});
-
 export const PAGE_TITLE = i18n.translate('xpack.siem.case.pageTitle', {
   defaultMessage: 'Cases',
-});
-
-export const STATE = i18n.translate('xpack.siem.case.caseView.state', {
-  defaultMessage: 'State',
-});
-
-export const SUBMIT = i18n.translate('xpack.siem.case.caseView.submit', {
-  defaultMessage: 'Submit',
 });
 
 export const CREATE_CASE = i18n.translate('xpack.siem.case.caseView.createCase', {
@@ -128,7 +120,7 @@ export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate(
 );
 
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.siem.case.configureCasesButton', {
-  defaultMessage: 'Configure cases',
+  defaultMessage: 'Edit third-party connection',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.siem.case.caseView.comment.addComment', {

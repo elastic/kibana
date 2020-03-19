@@ -18,7 +18,7 @@
  */
 
 import { VisState, VisParams } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggType, IAggConfig, AggGroupNames } from '../legacy_imports';
+import { IAggType, IAggConfig, IAggGroupNames } from '../legacy_imports';
 import { Schema } from '../schemas';
 
 type AggId = IAggConfig['id'];
@@ -29,7 +29,7 @@ export type ReorderAggs = (sourceAgg: IAggConfig, destinationAgg: IAggConfig) =>
 
 export interface DefaultEditorCommonProps {
   formIsTouched: boolean;
-  groupName: AggGroupNames;
+  groupName: IAggGroupNames;
   metricAggs: IAggConfig[];
   state: VisState;
   setAggParamValue: <T extends keyof AggParams>(
