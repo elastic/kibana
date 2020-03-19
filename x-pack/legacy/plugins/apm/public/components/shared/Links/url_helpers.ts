@@ -18,12 +18,7 @@ export function fromQuery(query: Record<string, any>) {
     encodeURIComponent(value).replace(/%3A/g, ':')
   );
 
-  return stringify(encodedQuery, {
-    sort: false,
-    encode: false,
-    skipNull: true,
-    arrayFormat: 'comma'
-  });
+  return stringify(encodedQuery, { sort: false, encode: false });
 }
 
 export type APMQueryParams = {
