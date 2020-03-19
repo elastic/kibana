@@ -2,7 +2,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "index-pattern:logstash-*",
     "source": {
       "index-pattern": {
@@ -23,7 +22,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
       "visualization": {
@@ -46,7 +44,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "dashboard:i-exist",
     "source": {
       "dashboard": {
@@ -71,7 +68,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "config:6.0.0",
     "source": {
       "config": {
