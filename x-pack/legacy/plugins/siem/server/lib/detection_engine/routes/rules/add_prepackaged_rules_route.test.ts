@@ -14,6 +14,7 @@ import {
 import { requestContextMock, serverMock } from '../__mocks__';
 import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
 import { PrepackagedRules } from '../../types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -43,6 +44,14 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
 describe('add_prepackaged_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
 
   beforeEach(() => {
     server = serverMock.create();
