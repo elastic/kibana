@@ -17,7 +17,7 @@ def call(Map params, Closure closure) {
 
   if (!hasMatch && params.startsWith) {
     print "Checking PR for changes that start with: ${params.startsWith}"
-    hasMatch = !!files.find { file -> file =~ file.startsWith(params.startsWith) }
+    hasMatch = !!files.find { file -> file.startsWith(params.startsWith) }
   }
 
   if (hasMatch) {
