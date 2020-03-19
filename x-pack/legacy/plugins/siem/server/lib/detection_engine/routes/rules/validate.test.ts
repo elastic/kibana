@@ -16,6 +16,7 @@ import { getResult } from '../__mocks__/request_responses';
 import { FindResult } from '../../../../../../../../plugins/alerting/server';
 import { RulesSchema } from '../schemas/response/rules_schema';
 import { BulkError } from '../utils';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 export const ruleOutput: RulesSchema = {
   created_at: '2019-12-13T16:40:33.400Z',
@@ -68,6 +69,32 @@ export const ruleOutput: RulesSchema = {
       },
     },
   ],
+  lists: [
+    {
+      field: 'source.ip',
+      boolean_operator: 'and',
+      values: [
+        {
+          name: '127.0.0.1',
+          type: 'value',
+        },
+      ],
+    },
+    {
+      field: 'host.name',
+      boolean_operator: 'and not',
+      values: [
+        {
+          name: 'rock01',
+          type: 'value',
+        },
+        {
+          name: 'mothra',
+          type: 'value',
+        },
+      ],
+    },
+  ],
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   meta: {
     someMeta: 'someField',
@@ -78,6 +105,14 @@ export const ruleOutput: RulesSchema = {
 };
 
 describe('validate', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   describe('validate', () => {
     test('it should do a validation correctly', () => {
       const schema = t.exact(t.type({ a: t.number }));
