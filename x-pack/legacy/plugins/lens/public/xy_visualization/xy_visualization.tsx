@@ -25,6 +25,11 @@ const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
 function getVisualizationType(state: State): VisualizationType | 'mixed' {
+  if (!state.layers.length) {
+    return (
+      visualizationTypes.find(t => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
+    );
+  }
   const visualizationType = visualizationTypes.find(t => t.id === state.layers[0].seriesType);
   const seriesTypes = _.unique(state.layers.map(l => l.seriesType));
 
