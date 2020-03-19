@@ -560,8 +560,10 @@ export interface EnvironmentMode {
     prod: boolean;
 }
 
+// Warning: (ae-forgotten-export) The symbol "ToastOptions" needs to be exported by the entry point index.d.ts
+//
 // @public
-export interface ErrorToastOptions {
+export interface ErrorToastOptions extends ToastOptions {
     title: string;
     toastMessage?: string;
 }
@@ -1276,12 +1278,15 @@ export class ToastsApi implements IToasts {
         uiSettings: IUiSettingsClient;
     });
     add(toastOrTitle: ToastInput): Toast;
-    addDanger(toastOrTitle: ToastInput): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ToastOptions"
+    addDanger(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
     addError(error: Error, options: ErrorToastOptions): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "number"
-    addInfo(toastOrTitle: ToastInput, toastLifeTimeMs?: number): Toast;
-    addSuccess(toastOrTitle: ToastInput): Toast;
-    addWarning(toastOrTitle: ToastInput): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ToastOptions"
+    addInfo(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ToastOptions"
+    addSuccess(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ToastOptions"
+    addWarning(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
     get$(): Rx.Observable<Toast[]>;
     remove(toastOrId: Toast | string): void;
     // @internal (undocumented)

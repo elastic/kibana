@@ -9,7 +9,7 @@ Adds a new toast pre-configured with the info color and info icon.
 <b>Signature:</b>
 
 ```typescript
-addInfo(toastOrTitle: ToastInput, toastLifeTimeMs?: number): Toast;
+addInfo(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ addInfo(toastOrTitle: ToastInput, toastLifeTimeMs?: number): Toast;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  toastOrTitle | <code>ToastInput</code> | a [ToastInput](./kibana-plugin-core-public.toastinput.md) |
-|  toastLifeTimeMs | <code>number</code> | a  |
+|  options | <code>ToastOptions</code> | a  |
 
 <b>Returns:</b>
 
