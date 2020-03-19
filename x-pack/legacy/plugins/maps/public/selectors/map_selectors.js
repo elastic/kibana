@@ -10,6 +10,7 @@ import { TileLayer } from '../layers/tile_layer';
 import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
+import { BlendedVectorLayer } from '../layers/blended_vector_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
 import { getTimeFilter } from '../kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -40,6 +41,8 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
       return new VectorTileLayer({ layerDescriptor, source });
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source });
+    case BlendedVectorLayer.type:
+      return new BlendedVectorLayer({ layerDescriptor, source });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
