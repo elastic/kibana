@@ -319,6 +319,45 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
       });
+      test('should return mapbox expression for color ramp', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.ORDINAL,
+          color: 'Blues',
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toEqual([
+          'interpolate',
+          ['linear'],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['feature-state', 'foobar'], null],
+              -1,
+              ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 0],
+            ],
+            -1,
+          ],
+          -1,
+          'rgba(0,0,0,0)',
+          0,
+          '#f7faff',
+          12.5,
+          '#ddeaf7',
+          25,
+          '#c5daee',
+          37.5,
+          '#9dc9e0',
+          50,
+          '#6aadd5',
+          62.5,
+          '#4191c5',
+          75,
+          '#2070b4',
+          87.5,
+          '#072f6b',
+        ]);
+      });
     });
 
     describe('custom color ramp', () => {
