@@ -44,7 +44,6 @@ function FieldParamEditor({
   customError,
   customLabel,
   indexedFields = [],
-  showValidation,
   value,
   setTouched,
   setValidity,
@@ -104,7 +103,8 @@ function FieldParamEditor({
   return (
     <EuiFormRow
       label={customLabel || label}
-      isInvalid={showValidation ? !isValid : false}
+      // we show an error message right away if there is no compatible fields
+      isInvalid={!indexedFields.length ? !isValid : false}
       fullWidth={true}
       error={errors}
       compressed
@@ -119,7 +119,7 @@ function FieldParamEditor({
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
         isClearable={false}
-        isInvalid={showValidation ? !isValid : false}
+        isInvalid={!indexedFields.length ? !isValid : false}
         onChange={onChange}
         onBlur={setTouched}
         onSearchChange={onSearchChange}
