@@ -154,8 +154,9 @@ describe('#addInfo()', () => {
 
   it('returns the created toast', async () => {
     const toasts = new ToastsApi(toastDeps());
-    const toast = toasts.addInfo({});
+    const toast = toasts.addInfo({}, { toastLifeTimeMs: 1 });
     const currentToasts = await getCurrentToasts(toasts);
+    expect(currentToasts[0].toastLifeTimeMs).toBe(1);
     expect(currentToasts[0]).toBe(toast);
   });
 });
