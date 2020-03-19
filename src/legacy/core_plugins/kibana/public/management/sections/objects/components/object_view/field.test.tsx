@@ -70,6 +70,14 @@ describe('Field component', () => {
     expect(mounted.exists('EuiSwitch')).toEqual(true);
   });
 
+  it('display correct label for boolean type depending on value', () => {
+    let mounted = mountField({ ...defaultProps, type: 'boolean', value: true });
+    expect(mounted.find('EuiSwitch').text()).toMatchInlineSnapshot(`"On"`);
+
+    mounted = mountField({ ...defaultProps, type: 'boolean', value: false });
+    expect(mounted.find('EuiSwitch').text()).toMatchInlineSnapshot(`"Off"`);
+  });
+
   it('renders a EuiFieldNumber for number type', () => {
     const mounted = mountField({ ...defaultProps, type: 'number' });
     expect(mounted.exists('EuiFieldNumber')).toEqual(true);
@@ -81,7 +89,7 @@ describe('Field component', () => {
   });
 
   it('renders a EuiFieldText as fallback', () => {
-    const mounted = mountField({ ...defaultProps, type: 'unkown' as any });
+    const mounted = mountField({ ...defaultProps, type: 'unknown-type' as any });
     expect(mounted.exists('EuiFieldText')).toEqual(true);
   });
 });

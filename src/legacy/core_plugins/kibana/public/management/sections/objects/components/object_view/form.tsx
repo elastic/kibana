@@ -26,26 +26,18 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
-import {
-  forOwn,
-  indexBy,
-  cloneDeep,
-  isNumber,
-  isBoolean,
-  isPlainObject,
-  isString,
-  set,
-} from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SimpleSavedObject,
   SavedObjectsClientContract,
 } from '../../../../../../../../../core/public';
-import { castEsToKbnFieldTypeName } from '../../../../../../../../../plugins/data/public';
+
 import { SavedObjectLoader } from '../../../../../../../../../plugins/saved_objects/public';
 import { Field } from './field';
 import { ObjectField, FieldState, SubmittedFormData } from '../../types';
+import { createFieldList } from '../../lib/create_field_list';
 
 interface FormProps {
   object: SimpleSavedObject;
@@ -72,15 +64,7 @@ export class Form extends Component<FormProps, FormState> {
   componentDidMount() {
     const { object, service } = this.props;
 
-    const fields = Object.entries(object.attributes as Record<string, any>).reduce(
-      (objFields, [key, value]) => {
-        return [...objFields, ...recursiveCreateFields(key, value)];
-      },
-      [] as ObjectField[]
-    );
-    if ((service as any).Class) {
-      addFieldsFromClass((service as any).Class, fields);
-    }
+    const fields = createFieldList(object, service);
 
     this.setState({
       fields,
@@ -190,91 +174,3 @@ export class Form extends Component<FormProps, FormState> {
     onSave({ attributes, references });
   };
 }
-
-/**
- * Creates a field definition and pushes it to the memo stack. This function
- * is designed to be used in conjunction with _.reduce(). If the
- * values is plain object it will recurse through all the keys till it hits
- * a string, number or an array.
- *
- * @param {string} key The key of the field
- * @param {mixed} value The value of the field
- * @param {array} parents The parent keys to the field
- * @returns {array}
- */
-const recursiveCreateFields = (key: string, value: any, parents: string[] = []): ObjectField[] => {
-  const path = [...parents, key];
-
-  const field: ObjectField = { type: 'text', name: path.join('.'), value };
-  let fields: ObjectField[] = [field];
-
-  if (isString(field.value)) {
-    try {
-      field.value = JSON.stringify(JSON.parse(field.value), undefined, 2);
-      field.type = 'json';
-    } catch (err) {
-      field.type = 'text';
-    }
-  } else if (isNumber(field.value)) {
-    field.type = 'number';
-  } else if (Array.isArray(field.value)) {
-    field.type = 'array';
-    field.value = JSON.stringify(field.value, undefined, 2);
-  } else if (isBoolean(field.value)) {
-    field.type = 'boolean';
-  } else if (isPlainObject(field.value)) {
-    forOwn(field.value, (childValue, childKey) => {
-      fields = [...recursiveCreateFields(childKey as string, childValue, path)];
-    });
-  }
-
-  return fields;
-};
-
-const addFieldsFromClass = function(
-  Class: { mapping: Record<string, string>; searchSource: any },
-  fields: ObjectField[]
-) {
-  const fieldMap = indexBy(fields, 'name');
-
-  _.forOwn(Class.mapping, (esType, name) => {
-    if (!name || fieldMap[name]) {
-      return;
-    }
-
-    const getFieldTypeFromEsType = () => {
-      switch (castEsToKbnFieldTypeName(esType)) {
-        case 'string':
-          return 'text';
-        case 'number':
-          return 'number';
-        case 'boolean':
-          return 'boolean';
-        default:
-          return 'json';
-      }
-    };
-
-    fields.push({
-      name,
-      type: getFieldTypeFromEsType(),
-      value: undefined,
-    });
-  });
-
-  if (Class.searchSource && !fieldMap['kibanaSavedObjectMeta.searchSourceJSON']) {
-    fields.push({
-      name: 'kibanaSavedObjectMeta.searchSourceJSON',
-      type: 'json',
-      value: '{}',
-    });
-  }
-
-  if (!fieldMap.references) {
-    fields.push({
-      name: 'references',
-      type: 'array',
-      value: '[]',
-    });
-  }
-};
