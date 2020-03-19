@@ -22,8 +22,8 @@ exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/
       },
     }
   }
-  curve={9}
   color="rgb(0, 156, 224)"
+  curve={9}
   data={
     Array [
       Array [
