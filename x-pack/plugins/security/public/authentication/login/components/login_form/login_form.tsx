@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
+import { UserValidator, UserValidationResult } from '../../../../lib/validate_user';
 import { parseNext } from '../../../../../common/parse_next';
 import { LoginSelector } from '../../../../../common/login_state';
 
@@ -40,6 +41,7 @@ interface State {
   message:
     | { type: MessageType.None }
     | { type: MessageType.Danger | MessageType.Info; content: string };
+  formError: UserValidationResult | null;
 }
 
 enum LoadingStateType {
@@ -55,14 +57,21 @@ enum MessageType {
 }
 
 export class LoginForm extends Component<Props, State> {
-  public state: State = {
-    loadingState: { type: LoadingStateType.None },
-    username: '',
-    password: '',
-    message: this.props.infoMessage
-      ? { type: MessageType.Info, content: this.props.infoMessage }
-      : { type: MessageType.None },
-  };
+  private readonly validator: UserValidator;
+
+  constructor(props: Props) {
+    super(props);
+    this.validator = new UserValidator({ shouldValidate: false });
+    this.state = {
+      loadingState: { type: LoadingStateType.None },
+      username: '',
+      password: '',
+      message: this.props.infoMessage
+        ? { type: MessageType.Info, content: this.props.infoMessage }
+        : { type: MessageType.None },
+      formError: null,
+    };
+  }
 
   public render() {
     return (
@@ -90,6 +99,7 @@ export class LoginForm extends Component<Props, State> {
                 defaultMessage="Username"
               />
             }
+            {...this.validator.validateUsername(this.state.username)}
           >
             <EuiFieldText
               id="username"
@@ -111,6 +121,7 @@ export class LoginForm extends Component<Props, State> {
                 defaultMessage="Password"
               />
             }
+            {...this.validator.validatePassword(this.state.password)}
           >
             <EuiFieldText
               autoComplete="off"
@@ -248,12 +259,6 @@ export class LoginForm extends Component<Props, State> {
     }
   }
 
-  private isFormValid = () => {
-    const { username, password } = this.state;
-
-    return username && password;
-  };
-
   private onUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       username: e.target.value,
@@ -271,8 +276,15 @@ export class LoginForm extends Component<Props, State> {
   ) => {
     e.preventDefault();
 
-    if (!this.isFormValid()) {
+    this.validator.enableValidation();
+
+    const { username, password } = this.state;
+    const result = this.validator.validateForLogin(username, password);
+    if (result.isInvalid) {
+      this.setState({ formError: result });
       return;
+    } else {
+      this.setState({ formError: null });
     }
 
     this.setState({
@@ -281,7 +293,6 @@ export class LoginForm extends Component<Props, State> {
     });
 
     const { http } = this.props;
-    const { username, password } = this.state;
 
     try {
       await http.post('/internal/security/login', { body: JSON.stringify({ username, password }) });

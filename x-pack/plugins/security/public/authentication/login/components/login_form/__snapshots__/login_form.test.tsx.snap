@@ -51,6 +51,7 @@ exports[`LoginForm login selector renders as expected with login form 1`] = `
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        isInvalid={false}
         label={
           <FormattedMessage
             defaultMessage="Username"
@@ -78,6 +79,7 @@ exports[`LoginForm login selector renders as expected with login form 1`] = `
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        isInvalid={false}
         label={
           <FormattedMessage
             defaultMessage="Password"
@@ -170,6 +172,7 @@ exports[`LoginForm renders as expected 1`] = `
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        isInvalid={false}
         label={
           <FormattedMessage
             defaultMessage="Username"
@@ -197,6 +200,7 @@ exports[`LoginForm renders as expected 1`] = `
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        isInvalid={false}
         label={
           <FormattedMessage
             defaultMessage="Password"
