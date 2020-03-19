@@ -10,7 +10,7 @@ import { AsyncInitialState } from './types';
 
 export function handleAsyncAction<ReducerState, Payload>(
   storeKey: string,
-  asyncAction: AsyncAction
+  asyncAction: AsyncAction<any, any>
 ) {
   return {
     [String(asyncAction.get)]: (state: ReducerState) => ({

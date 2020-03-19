@@ -13,7 +13,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormRow,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -68,16 +67,14 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose }: Props) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiFormRow>
-              <EuiButton
-                onClick={() => onClickCreate()}
-                fill
-                isLoading={isCreatingJob}
-                disabled={isCreatingJob || isLoadingMLJob || !hasPlatinumLicense}
-              >
-                {labels.CREATE_NEW_JOB}
-              </EuiButton>
-            </EuiFormRow>
+            <EuiButton
+              onClick={() => onClickCreate()}
+              fill
+              isLoading={isCreatingJob}
+              disabled={isCreatingJob || isLoadingMLJob || !hasPlatinumLicense}
+            >
+              {labels.CREATE_NEW_JOB}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

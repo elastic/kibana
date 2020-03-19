@@ -6,7 +6,7 @@
 
 import { takeLatest } from 'redux-saga/effects';
 import {
-  getMLJobAction,
+  getExistingMLJobAction,
   createMLJobAction,
   getAnomalyRecordsAction,
   deleteMLJobAction,
@@ -16,8 +16,8 @@ import { getExistingJobs, createMLJob, fetchAnomalyRecords, deleteMLJob } from '
 
 export function* fetchMLJobEffect() {
   yield takeLatest(
-    getMLJobAction.get,
-    fetchEffectFactory(getExistingJobs, getMLJobAction.success, getMLJobAction.fail)
+    getExistingMLJobAction.get,
+    fetchEffectFactory(getExistingJobs, getExistingMLJobAction.success, getExistingMLJobAction.fail)
   );
   yield takeLatest(
     createMLJobAction.get,

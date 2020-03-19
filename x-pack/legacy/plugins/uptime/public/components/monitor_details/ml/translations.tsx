@@ -100,3 +100,18 @@ export const CREAT_ML_JOB_DESC = i18n.translate(
     will show the expected bounds and annotate the graph with anomalies.`,
   }
 );
+
+export const START_TRAIL = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.startTrial',
+  {
+    defaultMessage: 'Start free 14-day trial',
+  }
+);
+
+export const START_TRAIL_DESC = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.startTrialDesc',
+  {
+    defaultMessage:
+      'In order to access duration anomaly detection, you have to be subscribed to an Elastic Platinum license.',
+  }
+);

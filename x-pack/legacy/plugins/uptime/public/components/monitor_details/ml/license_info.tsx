@@ -6,6 +6,7 @@
 import React, { useContext } from 'react';
 import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import { UptimeSettingsContext } from '../../../contexts';
+import * as labels from './translations';
 
 export const ShowLicenseInfo = () => {
   const { basePath } = useContext(UptimeSettingsContext);
@@ -13,20 +14,17 @@ export const ShowLicenseInfo = () => {
     <>
       <EuiCallOut
         className="license-info-trial"
-        title="Start free 14-day Platinum license trial"
+        title={labels.START_TRAIL}
         color="primary"
         iconType="help"
       >
-        <p>
-          In order to access duration anomaly detection, you have to be subscribed to an Elastic
-          Platinum license.
-        </p>
+        <p>{labels.START_TRAIL_DESC}</p>
         <EuiButton
           color="primary"
           href={basePath + `/app/kibana#/management/elasticsearch/license_management/home`}
           target="_blank"
         >
-          Start free 14-day trial
+          {labels.START_TRAIL}
         </EuiButton>
       </EuiCallOut>
       <EuiSpacer />

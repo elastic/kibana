@@ -10,7 +10,6 @@ import { MLFlyoutView } from '../ml_flyout';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 import { License } from '../../../../../../../../plugins/licensing/common/license';
-import { ShowLicenseInfo } from '../license_info';
 
 const expiredLicense = new License({
   signature: 'test signature',

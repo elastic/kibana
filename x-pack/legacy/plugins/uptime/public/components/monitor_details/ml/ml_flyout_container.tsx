@@ -8,7 +8,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { hasNewMLJobSelector, isMLJobCreatingSelector } from '../../../state/selectors';
-import { createMLJobAction, getMLJobAction } from '../../../state/actions';
+import { createMLJobAction, getExistingMLJobAction } from '../../../state/actions';
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
 import {
@@ -64,7 +64,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
 
-  const createMLJob = () => dispatch(createMLJobAction.get({ monitorId }));
+  const createMLJob = () => dispatch(createMLJobAction.get({ monitorId: monitorId as string }));
 
   const [isCreatingJob, setIsCreatingJob] = useState(false);
 
@@ -73,7 +73,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
       if (hasMLJob) {
         showMLJobNotification(notifications, monitorId as string, basePath, true);
         const loadMLJob = (jobId: string) =>
-          dispatch(getMLJobAction.get({ jobId: `${monitorId}_${jobId}` }));
+          dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
 
         loadMLJob(ML_JOB_ID);
       } else {

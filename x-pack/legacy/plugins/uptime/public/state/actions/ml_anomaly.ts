@@ -4,21 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createAction } from 'redux-actions';
 import { createAsyncAction } from './utils';
 
-export const getMLJobAction = createAsyncAction<{ monitorId: string }>('GET_ML_JOB');
+export const resetMLState = createAction('RESET_ML_STATE');
 
-export const createMLJobAction = createAsyncAction<any>('CREATE_ML_JOB');
+export const getExistingMLJobAction = createAsyncAction<{ monitorId: string }, any>(
+  'GET_EXISTING_ML_JOB'
+);
 
-export const deleteMLJobAction = createAsyncAction<any>('DELETE_ML_JOB');
+export const createMLJobAction = createAsyncAction<any, any>('CREATE_ML_JOB');
+
+export const deleteMLJobAction = createAsyncAction<any, any>('DELETE_ML_JOB');
 
 export interface AnomalyRecordsParams {
-  dateStart: string;
-  dateEnd: string;
+  dateStart: number;
+  dateEnd: number;
   listOfMonitorIds: string[];
   anomalyThreshold?: number;
 }
 
-export const getAnomalyRecordsAction = createAsyncAction<AnomalyRecordsParams>(
+export const getAnomalyRecordsAction = createAsyncAction<AnomalyRecordsParams, any>(
   'GET_ANOMALY_RECORDS'
 );

@@ -15,8 +15,7 @@ import {
   isMLJobDeletedSelector,
   isMLJobDeletingSelector,
 } from '../../../state/selectors';
-import { deleteMLJobAction, getMLJobAction } from '../../../state/actions';
-import { ML_JOB_ID } from '../../../../common/constants';
+import { deleteMLJobAction, getExistingMLJobAction, resetMLState } from '../../../state/actions';
 import { ConfirmJobDeletion } from './confirm_delete';
 import { UptimeRefreshContext } from '../../../contexts';
 import { getMLJobId } from '../../../state/api/ml_anomaly';
@@ -46,17 +45,19 @@ export const MLIntegrationComponent = () => {
   const { data: jobDeletionSuccess } = useSelector(isMLJobDeletedSelector);
 
   useEffect(() => {
-    dispatch(getMLJobAction.get({ jobId: `${monitorId}_${ML_JOB_ID}` }));
+    dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
   }, [dispatch, monitorId]);
 
   useEffect(() => {
-    if (isConfirmDeleteJobOpen && jobDeletionSuccess?.[`${monitorId}_${ML_JOB_ID}`]?.deleted) {
+    if (isConfirmDeleteJobOpen && jobDeletionSuccess?.[getMLJobId(monitorId as string)]?.deleted) {
       setIsConfirmDeleteJobOpen(false);
       notifications.toasts.success({
         title: <p>{labels.JOB_DELETION}</p>,
         body: <p>{labels.JOB_DELETION_SUCCESS}</p>,
         toastLifeTimeMs: 3000,
       });
+      dispatch(resetMLState());
+
       // wait a couple seconds to make sure, job is deleted
       setTimeout(() => {
         refreshApp();
@@ -69,10 +70,11 @@ export const MLIntegrationComponent = () => {
     monitorId,
     refreshApp,
     notifications.toasts,
+    dispatch,
   ]);
 
   useEffect(() => {
-    dispatch(getMLJobAction.get({ jobId: `${monitorId}_${ML_JOB_ID}` }));
+    dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
   }, [dispatch, lastRefresh, monitorId]);
 
   const onButtonClick = () => {

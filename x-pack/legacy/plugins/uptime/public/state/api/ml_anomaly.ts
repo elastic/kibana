@@ -11,7 +11,6 @@ import { apiService } from './utils';
 export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`;
 
 export const getExistingJobs = async () => {
-  const ers = await apiService.get('/api/ml/ml_capabilities');
   return await apiService.get(API_URLS.ML_MODULE_JOBS + ML_MODULE_ID);
 };
 

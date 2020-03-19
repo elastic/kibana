@@ -56,23 +56,14 @@ exports[`ML Flyout component renders without errors 1`] = `
       <EuiFlexItem
         grow={false}
       >
-        <EuiFormRow
-          describedByIds={Array []}
-          display="row"
-          fullWidth={false}
-          hasChildLabel={true}
-          hasEmptyLabelSpace={false}
-          labelType="label"
+        <EuiButton
+          disabled={true}
+          fill={true}
+          isLoading={false}
+          onClick={[Function]}
         >
-          <EuiButton
-            disabled={true}
-            fill={true}
-            isLoading={false}
-            onClick={[Function]}
-          >
-            Create new job
-          </EuiButton>
-        </EuiFormRow>
+          Create new job
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutFooter>
@@ -214,31 +205,21 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <div
-              class="euiFormRow"
-              id="upn5l7yn-row"
+            <button
+              class="euiButton euiButton--primary euiButton--fill"
+              disabled=""
+              type="button"
             >
-              <div
-                class="euiFormRow__fieldWrapper"
+              <span
+                class="euiButton__content"
               >
-                <button
-                  class="euiButton euiButton--primary euiButton--fill"
-                  disabled=""
-                  id="upn5l7yn"
-                  type="button"
+                <span
+                  class="euiButton__text"
                 >
-                  <span
-                    class="euiButton__content"
-                  >
-                    <span
-                      class="euiButton__text"
-                    >
-                      Create new job
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
+                  Create new job
+                </span>
+              </span>
+            </button>
           </div>
         </div>
       </div>
