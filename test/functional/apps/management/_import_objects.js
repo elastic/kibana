@@ -208,12 +208,13 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('.json file', () => {
+    describe('.json file', () => {
       beforeEach(async function() {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await esArchiver.load('management');
+        await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function() {
@@ -296,8 +297,6 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
 
-        // await PageObjects.settings.navigateTo();
-        // await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
         );
@@ -310,8 +309,6 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should not import saved objects linked to saved searches when saved search does not exist', async function() {
-        // await PageObjects.settings.navigateTo();
-        // await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
         );
@@ -342,8 +339,6 @@ export default function({ getService, getPageObjects }) {
 
         // Last, import a saved object connected to the saved search
         // This should NOT show the conflicts
-        // await PageObjects.settings.navigateTo();
-        // await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
         );
@@ -379,7 +374,6 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.clickSavedObjectsDelete();
 
         // Then, import the objects
-        // await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')
         );
