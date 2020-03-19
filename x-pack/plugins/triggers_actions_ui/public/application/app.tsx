@@ -30,7 +30,6 @@ export interface AppDeps {
   chrome: ChromeStart;
   docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;
-  injectedMetadata: any;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
