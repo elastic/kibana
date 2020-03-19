@@ -19,7 +19,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .send({
           name: 'An index action',
           actionTypeId: '.index',
-          config: {},
+          config: {
+            index: 'foo',
+          },
           secrets: {},
         })
         .expect(200);
