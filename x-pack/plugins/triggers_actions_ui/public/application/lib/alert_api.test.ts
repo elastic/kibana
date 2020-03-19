@@ -170,6 +170,8 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": undefined,
             "search_fields": undefined,
+            "sort_field": "name.keyword",
+            "sort_order": "asc",
           },
         },
       ]
@@ -188,20 +190,22 @@ describe('loadAlerts', () => {
     const result = await loadAlerts({ http, searchText: 'apples', page: { index: 0, size: 10 } });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "/api/alert/_find",
-            Object {
-              "query": Object {
-                "default_search_operator": "AND",
-                "filter": undefined,
-                "page": 1,
-                "per_page": 10,
-                "search": "apples",
-                "search_fields": "[\\"name\\",\\"tags\\"]",
-              },
-            },
-          ]
-        `);
+      Array [
+        "/api/alert/_find",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": undefined,
+            "page": 1,
+            "per_page": 10,
+            "search": "apples",
+            "search_fields": "[\\"name\\",\\"tags\\"]",
+            "sort_field": "name.keyword",
+            "sort_order": "asc",
+          },
+        },
+      ]
+    `);
   });
 
   test('should call find API with actionTypesFilter', async () => {
@@ -220,20 +224,22 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "/api/alert/_find",
-            Object {
-              "query": Object {
-                "default_search_operator": "AND",
-                "filter": undefined,
-                "page": 1,
-                "per_page": 10,
-                "search": "foo",
-                "search_fields": "[\\"name\\",\\"tags\\"]",
-              },
-            },
-          ]
-        `);
+      Array [
+        "/api/alert/_find",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": undefined,
+            "page": 1,
+            "per_page": 10,
+            "search": "foo",
+            "search_fields": "[\\"name\\",\\"tags\\"]",
+            "sort_field": "name.keyword",
+            "sort_order": "asc",
+          },
+        },
+      ]
+    `);
   });
 
   test('should call find API with typesFilter', async () => {
@@ -252,20 +258,22 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "/api/alert/_find",
-            Object {
-              "query": Object {
-                "default_search_operator": "AND",
-                "filter": "alert.attributes.alertTypeId:(foo or bar)",
-                "page": 1,
-                "per_page": 10,
-                "search": undefined,
-                "search_fields": undefined,
-              },
-            },
-          ]
-        `);
+      Array [
+        "/api/alert/_find",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.alertTypeId:(foo or bar)",
+            "page": 1,
+            "per_page": 10,
+            "search": undefined,
+            "search_fields": undefined,
+            "sort_field": "name.keyword",
+            "sort_order": "asc",
+          },
+        },
+      ]
+    `);
   });
 
   test('should call find API with actionTypesFilter and typesFilter', async () => {
@@ -285,20 +293,22 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "/api/alert/_find",
-            Object {
-              "query": Object {
-                "default_search_operator": "AND",
-                "filter": "alert.attributes.alertTypeId:(foo or bar)",
-                "page": 1,
-                "per_page": 10,
-                "search": "baz",
-                "search_fields": "[\\"name\\",\\"tags\\"]",
-              },
-            },
-          ]
-        `);
+      Array [
+        "/api/alert/_find",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.alertTypeId:(foo or bar)",
+            "page": 1,
+            "per_page": 10,
+            "search": "baz",
+            "search_fields": "[\\"name\\",\\"tags\\"]",
+            "sort_field": "name.keyword",
+            "sort_order": "asc",
+          },
+        },
+      ]
+    `);
   });
 
   test('should call find API with searchText and tagsFilter and typesFilter', async () => {
@@ -318,20 +328,22 @@ describe('loadAlerts', () => {
     });
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "/api/alert/_find",
-            Object {
-              "query": Object {
-                "default_search_operator": "AND",
-                "filter": "alert.attributes.alertTypeId:(foo or bar)",
-                "page": 1,
-                "per_page": 10,
-                "search": "apples, foo, baz",
-                "search_fields": "[\\"name\\",\\"tags\\"]",
-              },
-            },
-          ]
-        `);
+      Array [
+        "/api/alert/_find",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.alertTypeId:(foo or bar)",
+            "page": 1,
+            "per_page": 10,
+            "search": "apples, foo, baz",
+            "search_fields": "[\\"name\\",\\"tags\\"]",
+            "sort_field": "name.keyword",
+            "sort_order": "asc",
+          },
+        },
+      ]
+    `);
   });
 });
 

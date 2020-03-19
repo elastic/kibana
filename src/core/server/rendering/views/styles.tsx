@@ -53,7 +53,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
 
           .kbnWelcomeView {
             line-height: 1.5;
-            background-color: #FFF;
+            background-color: ${darkMode ? '#1D1E24' : '#FFF'};
             height: 100%;
             display: -webkit-box;
             display: -webkit-flex;
@@ -97,6 +97,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             line-height: 40px !important;
             height: 40px !important;
             color: #98a2b3;
+            color: ${darkMode ? '#98A2B3' : '#69707D'};
           }
 
           .kbnLoaderWrap {
@@ -128,7 +129,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             width: 32px;
             height: 4px;
             overflow: hidden;
-            background-color: #D3DAE6;
+            background-color: ${darkMode ? '#25262E' : '#F5F7FA'};
             line-height: 1;
           }
 
@@ -142,7 +143,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             left: 0;
             transform: scaleX(0) translateX(0%);
             animation: kbnProgress 1s cubic-bezier(.694, .0482, .335, 1) infinite;
-            background-color: #006DE4;
+            background-color: ${darkMode ? '#1BA9F5' : '#006DE4'};
           }
 
           @keyframes kbnProgress {
