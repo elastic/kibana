@@ -78,7 +78,10 @@ export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiR
   return stream;
 };
 
-export const getOutputRuleAlertForRest = (): OutputRuleAlertRest => ({
+export const getOutputRuleAlertForRest = (): Omit<
+  OutputRuleAlertRest,
+  'machine_learning_job_id' | 'anomaly_threshold'
+> => ({
   created_by: 'elastic',
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',
