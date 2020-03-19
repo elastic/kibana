@@ -7,20 +7,13 @@
 import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiSpacer, EuiSwitch, EuiCallOut } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { indexPatternService } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { kfetch } from 'ui/kfetch';
-import {
-  ES_GEO_FIELD_TYPE,
-  GIS_API_PATH,
-  DEFAULT_MAX_RESULT_WINDOW,
-  SCALING_TYPES,
-} from '../../../../common/constants';
+import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 import { ScalingForm } from './scaling_form';
@@ -49,12 +42,10 @@ function isGeoFieldAggregatable(indexPattern, geoFieldName) {
 
 const RESET_INDEX_PATTERN_STATE = {
   indexPattern: undefined,
-  geoFieldName: undefined,
-  showFilterByBoundsSwitch: false,
-  showScalingPanel: false,
   geoFields: undefined,
 
   // ES search source descriptor state
+  geoFieldName: undefined,
   filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
   scalingType: SCALING_TYPES.CLUSTERS, // turn on clusting by default
   topHitsSplitField: undefined,
@@ -99,16 +90,6 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _loadIndexDocCount = async indexPatternTitle => {
-    const { count } = await kfetch({
-      pathname: `../${GIS_API_PATH}/indexCount`,
-      query: {
-        index: indexPatternTitle,
-      },
-    });
-    return count;
-  };
-
   _debouncedLoad = _.debounce(async indexPatternId => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
@@ -120,15 +101,6 @@ export class CreateSourceEditor extends Component {
     } catch (err) {
       // index pattern no longer exists
       return;
-    }
-
-    let indexHasSmallDocCount = false;
-    try {
-      const indexDocCount = await this._loadIndexDocCount(indexPattern.title);
-      indexHasSmallDocCount = indexDocCount <= DEFAULT_MAX_RESULT_WINDOW;
-    } catch (error) {
-      // retrieving index count is a nice to have and is not essential
-      // do not interrupt user flow if unable to retrieve count
     }
 
     if (!this._isMounted) {
@@ -145,9 +117,6 @@ export class CreateSourceEditor extends Component {
     this.setState({
       isLoadingIndexPattern: false,
       indexPattern: indexPattern,
-      filterByMapBounds: !indexHasSmallDocCount, // Turn off filterByMapBounds when index contains a limited number of documents
-      showFilterByBoundsSwitch: indexHasSmallDocCount,
-      showScalingPanel: !indexHasSmallDocCount,
       geoFields,
     });
 
@@ -174,15 +143,6 @@ export class CreateSourceEditor extends Component {
       {
         geoFieldName,
         scalingType,
-      },
-      this._previewLayer
-    );
-  };
-
-  _onFilterByMapBoundsChange = event => {
-    this.setState(
-      {
-        filterByMapBounds: event.target.checked,
       },
       this._previewLayer
     );
@@ -248,52 +208,8 @@ export class CreateSourceEditor extends Component {
     );
   }
 
-  _renderFilterByMapBounds() {
-    if (!this.state.showFilterByBoundsSwitch) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <EuiCallOut
-          title={i18n.translate('xpack.maps.source.esSearch.disableFilterByMapBoundsTitle', {
-            defaultMessage: `Dynamic data filter disabled`,
-          })}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.maps.source.esSearch.disableFilterByMapBoundsExplainMsg"
-              defaultMessage="Index '{indexPatternTitle}' has a small number of documents and does not require dynamic filtering."
-              values={{
-                indexPatternTitle: this.state.indexPattern
-                  ? this.state.indexPattern.title
-                  : this.state.indexPatternId,
-              }}
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.maps.source.esSearch.disableFilterByMapBoundsTurnOnMsg"
-              defaultMessage="Turn on dynamic filtering if you expect the number of documents to increase."
-            />
-          </p>
-        </EuiCallOut>
-        <EuiSpacer size="s" />
-        <EuiFormRow>
-          <EuiSwitch
-            label={i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
-              defaultMessage: `Dynamically filter for data in the visible map area`,
-            })}
-            checked={this.state.filterByMapBounds}
-            onChange={this._onFilterByMapBoundsChange}
-          />
-        </EuiFormRow>
-      </Fragment>
-    );
-  }
-
   _renderScalingPanel() {
-    if (!this.state.indexPattern || !this.state.geoFieldName || !this.state.showScalingPanel) {
+    if (!this.state.indexPattern || !this.state.geoFieldName) {
       return null;
     }
 
@@ -358,8 +274,6 @@ export class CreateSourceEditor extends Component {
         {this._renderGeoSelect()}
 
         {this._renderScalingPanel()}
-
-        {this._renderFilterByMapBounds()}
       </Fragment>
     );
   }
