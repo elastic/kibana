@@ -26,8 +26,6 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
-import { KbnUrlProvider } from 'ui/url';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -61,7 +59,6 @@ import { createRenderCompleteDirective } from './np_ready/angular/directives/ren
 import {
   initAngularBootstrap,
   configureAppAngularModule,
-  IPrivate,
   KbnAccessibleClickProvider,
   PrivateProvider,
   PromiseServiceCreator,
@@ -109,7 +106,6 @@ export function initializeInnerAngularModule(
     createLocalPrivateModule();
     createLocalPromiseModule();
     createLocalConfigModule(core.uiSettings);
-    createLocalKbnUrlModule();
     createLocalTopNavModule(navigation);
     createLocalStorageModule();
     createElasticSearchModule(data);
@@ -168,12 +164,6 @@ export function initializeInnerAngularModule(
     .directive('discoverField', createDiscoverFieldDirective)
     .directive('discFieldChooser', createFieldChooserDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
-}
-
-function createLocalKbnUrlModule() {
-  angular
-    .module('discoverKbnUrl', ['discoverPrivate', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
 }
 
 function createLocalConfigModule(uiSettings: IUiSettingsClient) {
@@ -242,12 +232,7 @@ function createPagerFactoryModule() {
 
 function createDocTableModule() {
   angular
-    .module('discoverDocTable', [
-      'discoverKbnUrl',
-      'discoverConfig',
-      'discoverPagerFactory',
-      'react',
-    ])
+    .module('discoverDocTable', ['discoverConfig', 'discoverPagerFactory', 'react'])
     .directive('docTable', createDocTableDirective)
     .directive('kbnTableHeader', createTableHeaderDirective)
     .directive('toolBarPagerText', createToolBarPagerTextDirective)

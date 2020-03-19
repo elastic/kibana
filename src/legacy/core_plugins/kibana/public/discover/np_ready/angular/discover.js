@@ -185,7 +185,6 @@ function discoverController(
   $window,
   Promise,
   config,
-  kbnUrl,
   localStorage,
   uiCapabilities
 ) {
@@ -324,7 +323,7 @@ function discoverController(
       }),
       run: function() {
         $scope.$evalAsync(() => {
-          kbnUrl.change('/discover');
+          history.push('/discover');
         });
       },
       testId: 'discoverNewButton',
@@ -392,9 +391,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: searchId => {
-            return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
-          },
+          makeUrl: searchId => `#/discover/${searchId}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -752,7 +749,7 @@ function discoverController(
           });
 
           if (savedSearch.id !== $route.current.params.id) {
-            kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+            history.push(`/discover/${savedSearch.id}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
@@ -922,11 +919,11 @@ function discoverController(
   };
 
   $scope.resetQuery = function() {
-    kbnUrl.change('/discover/{{id}}', { id: $route.current.params.id });
+    history.push(`/discover/${$route.current.params.id}`);
   };
 
   $scope.newQuery = function() {
-    kbnUrl.change('/discover');
+    history.push('/discover');
   };
 
   $scope.updateDataSource = () => {

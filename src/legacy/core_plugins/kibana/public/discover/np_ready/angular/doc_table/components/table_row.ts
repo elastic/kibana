@@ -45,7 +45,6 @@ interface LazyScope extends ng.IScope {
 export function createTableRowDirective(
   $compile: ng.ICompileService,
   $httpParamSerializer: any,
-  kbnUrl: any,
   config: IUiSettingsClient
 ) {
   const cellTemplate = _.template(noWhiteSpace(cellTemplateHtml));
@@ -112,10 +111,7 @@ export function createTableRowDirective(
       };
 
       $scope.getContextAppHref = () => {
-        const path = kbnUrl.eval('#/discover/context/{{ indexPattern }}/{{ anchorId }}', {
-          anchorId: $scope.row._id,
-          indexPattern: $scope.indexPattern.id,
-        });
+        const path = `#/discover/context/${$scope.indexPattern.id}/${$scope.row._id}`;
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
         const hash = $httpParamSerializer({
