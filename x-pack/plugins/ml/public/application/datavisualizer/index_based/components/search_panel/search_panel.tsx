@@ -22,6 +22,8 @@ import {
   QueryStringInput,
 } from '../../../../../../../../../src/plugins/data/public';
 
+import { getToastNotifications } from '../../../../util/dependency_cache';
+
 interface Props {
   indexPattern: IndexPattern;
   searchString: Query['query'];
@@ -54,6 +56,20 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map(v => {
   };
 });
 
+const kqlSyntaxErrorMessage = i18n.translate(
+  'xpack.ml.datavisualizer.invalidKqlSyntaxErrorMessage',
+  {
+    defaultMessage:
+      'Invalid syntax in search bar. The input must be valid Kibana Query Language (KQL)',
+  }
+);
+const luceneSyntaxErrorMessage = i18n.translate(
+  'xpack.ml.datavisualizer.invalidLuceneSyntaxErrorMessage',
+  {
+    defaultMessage: 'Invalid syntax in search bar. The input must be valid Lucene',
+  }
+);
+
 export const SearchPanel: FC<Props> = ({
   indexPattern,
   searchString,
@@ -74,20 +90,30 @@ export const SearchPanel: FC<Props> = ({
 
   const searchHandler = (query: Query) => {
     let filterQuery;
-    if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
-      filterQuery = esKuery.toElasticsearchQuery(
-        esKuery.fromKueryExpression(query.query),
-        indexPattern
-      );
-    } else if (query.language === SEARCH_QUERY_LANGUAGE.LUCENE) {
-      filterQuery = esQuery.luceneStringToDsl(query.query);
-    } else {
-      filterQuery = {};
-    }
+    try {
+      if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+        filterQuery = esKuery.toElasticsearchQuery(
+          esKuery.fromKueryExpression(query.query),
+          indexPattern
+        );
+      } else if (query.language === SEARCH_QUERY_LANGUAGE.LUCENE) {
+        filterQuery = esQuery.luceneStringToDsl(query.query);
+      } else {
+        filterQuery = {};
+      }
 
-    setSearchQuery(filterQuery);
-    setSearchString(query.query);
-    setSearchQueryLanguage(query.language);
+      setSearchQuery(filterQuery);
+      setSearchString(query.query);
+      setSearchQueryLanguage(query.language);
+    } catch (e) {
+      console.log('Invalid syntax', e); // eslint-disable-line no-console
+      const toastNotifications = getToastNotifications();
+      const notification =
+        query.language === SEARCH_QUERY_LANGUAGE.KUERY
+          ? kqlSyntaxErrorMessage
+          : luceneSyntaxErrorMessage;
+      toastNotifications.addDanger(notification);
+    }
   };
   const searchChangeHandler = (query: Query) => setSearchInput(query);
 
