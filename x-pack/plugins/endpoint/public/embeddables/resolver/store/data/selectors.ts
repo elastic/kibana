@@ -411,6 +411,7 @@ export const processAdjacencies = createSelector(
         down: null,
         previous: null,
         next: null,
+        level: 1,
       };
       processToAdjacencyMap.set(graphableProcess, adjacencyMap);
     }
