@@ -108,7 +108,7 @@ export const ContextTab: FunctionComponent = () => {
               })}
             >
               <span>
-                <FormattedMessage id="xpack.painlessLab.indexFieldLabel" defaultMessage="Query" />{' '}
+                <FormattedMessage id="xpack.painlessLab.queryFieldLabel" defaultMessage="Query" />{' '}
                 <EuiIcon type="questionInCircle" color="subdued" />
               </span>
             </EuiToolTip>
