@@ -158,12 +158,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         [name]: { type: '', settings: {} },
       };
       const mockEsSnapshotResponse = {
-        responses: [
-          {
-            repository: name,
-            snapshots: [{}, {}],
-          },
-        ],
+        snapshots: [{}, {}],
       };
 
       router.callAsCurrentUserResponses = [
