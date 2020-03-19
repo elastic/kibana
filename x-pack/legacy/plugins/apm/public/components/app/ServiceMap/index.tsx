@@ -7,7 +7,7 @@
 import { EuiBetaBadge } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { default as React, default as React, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/service_map';
 import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
@@ -53,7 +53,6 @@ const BetaBadgeContainer = styled.div`
   top: ${theme.gutterTypes.gutterSmall};
   z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
-const MAX_REQUESTS = 5;
 
 export function ServiceMap({ serviceName }: ServiceMapProps) {
   const license = useLicense();
