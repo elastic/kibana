@@ -19,11 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppDependencies } from '../../../app_context';
-import { loadAllActions, loadActionTypes } from '../../../lib/action_connector_api';
+import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
 import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
-import { DeleteConnectorsModal } from '../../../components/delete_connectors_modal';
+import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
 import './actions_connectors_list.scss';
 
@@ -346,8 +346,8 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   return (
     <section data-test-subj="actionsList">
-      <DeleteConnectorsModal
-        callback={(deleted?: string[]) => {
+      <DeleteModalConfirmation
+        callback={async (deleted?: string[]) => {
           if (deleted) {
             if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
               const updatedActions = actions.filter(
@@ -363,12 +363,15 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                 ),
               });
               // Refresh the actions from the server, some actions may have beend deleted
-              loadActions();
+              await loadActions();
             }
           }
           setConnectorsToDelete([]);
         }}
-        connectorsToDelete={connectorsToDelete}
+        apiDeleteCall={deleteActions}
+        idsToDelete={connectorsToDelete}
+        singleTitle={'connector'}
+        multiplyTitle={'connectors'}
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
