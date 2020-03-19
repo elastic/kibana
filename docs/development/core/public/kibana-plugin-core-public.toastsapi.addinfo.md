@@ -17,7 +17,7 @@ addInfo(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  toastOrTitle | <code>ToastInput</code> | a [ToastInput](./kibana-plugin-core-public.toastinput.md) |
-|  options | <code>ToastOptions</code> | a  |
+|  options | <code>ToastOptions</code> | a [ToastOptions](./kibana-plugin-core-public.toastoptions.md) |
 
 <b>Returns:</b>
 
