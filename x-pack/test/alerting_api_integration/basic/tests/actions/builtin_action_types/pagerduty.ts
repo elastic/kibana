@@ -6,26 +6,11 @@
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import {
-  getExternalServiceSimulatorPath,
-  ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions';
-
 // eslint-disable-next-line import/no-default-export
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
 
   describe('pagerduty action', () => {
-    let pagerdutySimulatorURL: string = '<could not determine kibana url>';
-
-    // need to wait for kibanaServer to settle ...
-    before(() => {
-      pagerdutySimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
-      );
-    });
-
     it('should return 403 when creating a pagerduty action', async () => {
       await supertest
         .post('/api/action')
@@ -34,7 +19,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           name: 'A pagerduty action',
           actionTypeId: '.pagerduty',
           config: {
-            apiUrl: pagerdutySimulatorURL,
+            apiUrl: 'http://localhost',
           },
           secrets: {
             routingKey: 'pager-duty-routing-key',
