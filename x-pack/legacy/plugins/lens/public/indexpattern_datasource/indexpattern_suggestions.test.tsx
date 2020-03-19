@@ -784,7 +784,7 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table.columns[0].operation.isBucketed).toBeFalsy();
       });
 
-      it('prepends a terms column on string field', () => {
+      it('appends a terms column on string field', () => {
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'dest',
@@ -799,7 +799,7 @@ describe('IndexPattern Data Source suggestions', () => {
               layers: {
                 previousLayer: initialState.layers.previousLayer,
                 currentLayer: expect.objectContaining({
-                  columnOrder: ['id1', 'cola', 'colb'],
+                  columnOrder: ['cola', 'id1', 'colb'],
                   columns: {
                     ...initialState.layers.currentLayer.columns,
                     id1: expect.objectContaining({
@@ -814,7 +814,7 @@ describe('IndexPattern Data Source suggestions', () => {
         );
       });
 
-      it('appends a metric column on a number field', () => {
+      it('replaces a metric column on a number field if only one other metric is already set', () => {
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'memory',
@@ -826,28 +826,47 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions).toContainEqual(
           expect.objectContaining({
             state: expect.objectContaining({
-              layers: {
-                previousLayer: initialState.layers.previousLayer,
+              layers: expect.objectContaining({
                 currentLayer: expect.objectContaining({
-                  columnOrder: ['cola', 'colb', 'id1'],
+                  columnOrder: ['cola', 'id1'],
                   columns: {
-                    ...initialState.layers.currentLayer.columns,
+                    cola: initialState.layers.currentLayer.columns.cola,
                     id1: expect.objectContaining({
                       operationType: 'avg',
                       sourceField: 'memory',
                     }),
                   },
                 }),
-              },
+              }),
             }),
           })
         );
       });
 
-      it('appends a metric column with a different operation on a number field if field is already in use', () => {
+      it('adds a metric column on a number field if 2 or more other metric', () => {
         const initialState = stateWithNonEmptyTables();
-        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
-          name: 'bytes',
+        const modifiedState: IndexPatternPrivateState = {
+          ...initialState,
+          layers: {
+            ...initialState.layers,
+            currentLayer: {
+              ...initialState.layers.currentLayer,
+              columns: {
+                ...initialState.layers.currentLayer.columns,
+                colc: {
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'dest',
+                  label: 'Unique count of dest',
+                  operationType: 'cardinality',
+                },
+              },
+              columnOrder: ['cola', 'colb', 'colc'],
+            },
+          },
+        };
+        const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', {
+          name: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -857,14 +876,14 @@ describe('IndexPattern Data Source suggestions', () => {
           expect.objectContaining({
             state: expect.objectContaining({
               layers: {
-                previousLayer: initialState.layers.previousLayer,
+                previousLayer: modifiedState.layers.previousLayer,
                 currentLayer: expect.objectContaining({
-                  columnOrder: ['cola', 'colb', 'id1'],
+                  columnOrder: ['cola', 'colb', 'colc', 'id1'],
                   columns: {
-                    ...initialState.layers.currentLayer.columns,
+                    ...modifiedState.layers.currentLayer.columns,
                     id1: expect.objectContaining({
-                      operationType: 'sum',
-                      sourceField: 'bytes',
+                      operationType: 'avg',
+                      sourceField: 'memory',
                     }),
                   },
                 }),
