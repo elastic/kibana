@@ -103,7 +103,10 @@ exports[`MonitorList component renders a no items message when no data is provid
       <EuiFlexItem
         grow={false}
       >
-        <MonitorListPageSizeSelect />
+        <MonitorListPageSizeSelect
+          setSize={[MockFunction]}
+          size={25}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
@@ -640,7 +643,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               <span
                 class="euiButtonEmpty__text"
               >
-                Rows per page: 
+                Rows per page: 25
               </span>
             </span>
           </button>
@@ -816,7 +819,10 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
       <EuiFlexItem
         grow={false}
       >
-        <MonitorListPageSizeSelect />
+        <MonitorListPageSizeSelect
+          setSize={[MockFunction]}
+          size={25}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

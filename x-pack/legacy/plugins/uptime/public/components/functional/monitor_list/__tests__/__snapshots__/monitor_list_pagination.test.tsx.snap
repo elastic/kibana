@@ -103,7 +103,10 @@ exports[`MonitorListPagination component renders a no items message when no data
       <EuiFlexItem
         grow={false}
       >
-        <MonitorListPageSizeSelect />
+        <MonitorListPageSizeSelect
+          setSize={[MockFunction]}
+          size={25}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
@@ -275,7 +278,10 @@ exports[`MonitorListPagination component renders the monitor list 1`] = `
       <EuiFlexItem
         grow={false}
       >
-        <MonitorListPageSizeSelect />
+        <MonitorListPageSizeSelect
+          setSize={[MockFunction]}
+          size={25}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
