@@ -56,12 +56,14 @@ export const createRulesBulkRoute = (router: IRouter) => {
           .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
           .map(async payloadRule => {
             const {
+              anomaly_threshold: anomalyThreshold,
               description,
               enabled,
               false_positives: falsePositives,
               from,
               query,
               language,
+              machine_learning_job_id: machineLearningJobId,
               output_index: outputIndex,
               saved_id: savedId,
               meta,
@@ -82,6 +84,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               timeline_id: timelineId,
               timeline_title: timelineTitle,
               version,
+              lists,
             } = payloadRule;
             const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
@@ -107,6 +110,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               const createdRule = await createRules({
                 alertsClient,
                 actionsClient,
+                anomalyThreshold,
                 description,
                 enabled,
                 falsePositives,
@@ -114,6 +118,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 immutable: false,
                 query,
                 language,
+                machineLearningJobId,
                 outputIndex: finalIndex,
                 savedId,
                 timelineId,
@@ -134,6 +139,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 references,
                 note,
                 version,
+                lists,
               });
               return transformValidateBulkError(ruleIdOrUuid, createdRule);
             } catch (err) {
