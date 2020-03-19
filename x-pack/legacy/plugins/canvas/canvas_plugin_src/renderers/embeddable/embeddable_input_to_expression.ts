@@ -6,6 +6,7 @@
 
 import { EmbeddableTypes, EmbeddableInput } from '../../expression_types';
 import { SavedMapInput } from '../../functions/common/saved_map';
+import { SavedLensInput } from '../../functions/common/saved_lens';
 
 /*
   Take the input from an embeddable and the type of embeddable and convert it into an expression
@@ -43,6 +44,24 @@ export function embeddableInputToExpression(
       for (const layerId of mapInput.hiddenLayers) {
         expressionParts.push(`hideLayer="${layerId}"`);
       }
+    }
+  }
+
+  if (embeddableType === EmbeddableTypes.lens) {
+    const lensInput = input as SavedLensInput;
+
+    expressionParts.push('savedLens');
+
+    expressionParts.push(`id="${input.id}"`);
+
+    if (input.title) {
+      expressionParts.push(`title="${input.title}"`);
+    }
+
+    if (lensInput.timeRange) {
+      expressionParts.push(
+        `timerange={timerange from="${lensInput.timeRange.from}" to="${lensInput.timeRange.to}"}`
+      );
     }
   }
 

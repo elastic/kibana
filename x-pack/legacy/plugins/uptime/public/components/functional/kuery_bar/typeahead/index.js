@@ -158,8 +158,9 @@ export class Typeahead extends Component {
   render() {
     return (
       <ClickOutside onClickOutside={this.onClickOutside} style={{ position: 'relative' }}>
-        <div data-test-subj="xpack.uptime.filterBar" style={{ position: 'relative' }}>
+        <div data-test-subj={this.props['data-test-subj']} style={{ position: 'relative' }}>
           <EuiFieldSearch
+            aria-label={this.props['aria-label']}
             fullWidth
             style={{
               backgroundImage: 'none',
