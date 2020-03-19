@@ -90,11 +90,20 @@ export class SpecDefinitionsService {
     this.endpoints._processor!.data_autocomplete_rules.__one_of.push(processor);
   }
 
+  public setup() {
+    return {
+      addExtensionSpecFilePath: this.addExtensionSpecFilePath.bind(this),
+    };
+  }
+
   public start() {
     if (!this.hasLoadedSpec) {
       this.loadJsonSpec();
       this.loadJSSpec();
       this.hasLoadedSpec = true;
+      return {
+        addProcessorDefinition: this.addProcessorDefinition.bind(this),
+      };
     } else {
       throw new Error('Service has already started!');
     }

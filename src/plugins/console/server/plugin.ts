@@ -76,18 +76,13 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     });
 
     return {
-      addExtensionSpecFilePath: this.specDefinitionsService.addExtensionSpecFilePath.bind(
-        this.specDefinitionsService
-      ),
+      ...this.specDefinitionsService.setup(),
     };
   }
 
   start() {
-    this.specDefinitionsService.start();
     return {
-      addProcessorDefinition: this.specDefinitionsService.addProcessorDefinition.bind(
-        this.specDefinitionsService
-      ),
+      ...this.specDefinitionsService.start(),
     };
   }
 }

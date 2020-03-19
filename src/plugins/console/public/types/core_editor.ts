@@ -267,5 +267,5 @@ export interface CoreEditor {
    * Register a completions function that will be called when the editor
    * detects a change
    */
-  registerAutocompleter(getCompletions: AutoCompleterFunction): void;
+  registerAutocompleter(autocompleter: AutoCompleterFunction): void;
 }

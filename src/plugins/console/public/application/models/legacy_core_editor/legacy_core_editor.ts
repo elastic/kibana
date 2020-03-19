@@ -363,7 +363,7 @@ export class LegacyCoreEditor implements CoreEditor {
     }
   }
 
-  registerAutocompleter(getCompletions: AutoCompleterFunction): void {
+  registerAutocompleter(autocompleter: AutoCompleterFunction): void {
     // Hook into Ace
 
     // disable standard context based autocompletion.
@@ -401,7 +401,7 @@ export class LegacyCoreEditor implements CoreEditor {
             lineNumber: pos.row + 1,
             column: pos.column + 1,
           };
-          getCompletions(position, prefix, callback);
+          autocompleter(position, prefix, callback);
         },
       },
     ]);
