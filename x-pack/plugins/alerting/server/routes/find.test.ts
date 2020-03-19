@@ -82,6 +82,7 @@ describe('findAlertRoute', () => {
             "perPage": 1,
             "search": undefined,
             "sortField": undefined,
+            "sortOrder": undefined,
           },
         },
       ]
