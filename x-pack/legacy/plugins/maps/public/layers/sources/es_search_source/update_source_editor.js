@@ -17,7 +17,7 @@ import { SORT_ORDER } from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
-import { ScalingPanel } from './scaling_panel';
+import { ScalingForm } from './scaling_form';
 
 export class UpdateSourceEditor extends Component {
   static propTypes = {
@@ -192,16 +192,10 @@ export class UpdateSourceEditor extends Component {
     );
   }
 
-  render() {
+  _renderScalingPanel() {
     return (
-      <Fragment>
-        {this._renderTooltipsPanel()}
-        <EuiSpacer size="s" />
-
-        {this._renderSortPanel()}
-        <EuiSpacer size="s" />
-
-        <ScalingPanel
+      <EuiPanel>
+        <ScalingForm
           filterByMapBounds={this.props.filterByMapBounds}
           indexPatternId={this.props.indexPatternId}
           onChange={this.props.onChange}
@@ -211,6 +205,20 @@ export class UpdateSourceEditor extends Component {
           topHitsSplitField={this.props.topHitsSplitField}
           topHitsSize={this.props.topHitsSize}
         />
+      </EuiPanel>
+    );
+  }
+
+  render() {
+    return (
+      <Fragment>
+        {this._renderTooltipsPanel()}
+        <EuiSpacer size="s" />
+
+        {this._renderSortPanel()}
+        <EuiSpacer size="s" />
+
+        {this._renderScalingPanel()}
         <EuiSpacer size="s" />
       </Fragment>
     );

@@ -10,7 +10,6 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiTitle,
-  EuiPanel,
   EuiSpacer,
   EuiHorizontalRule,
   EuiRadioGroup,
@@ -54,7 +53,7 @@ interface State {
   maxResultWindow: number;
 }
 
-export class ScalingPanel extends Component<Props, State> {
+export class ScalingForm extends Component<Props, State> {
   private _isMounted: boolean;
   state = {
     maxInnerResultWindow: DEFAULT_MAX_INNER_RESULT_WINDOW,
@@ -206,7 +205,7 @@ export class ScalingPanel extends Component<Props, State> {
     }
 
     return (
-      <EuiPanel>
+      <Fragment>
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage id="xpack.maps.esSearch.scaleTitle" defaultMessage="Scaling" />
@@ -226,7 +225,7 @@ export class ScalingPanel extends Component<Props, State> {
         {filterByBoundsSwitch}
 
         {scalingForm}
-      </EuiPanel>
+      </Fragment>
     );
   }
 }
