@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as monaco from 'monaco-editor';
+// It is important that we use this specific monaco instance so that
+// editor settings are registered against the instance our React component
+// uses.
+import { monaco } from '@kbn/ui-shared-deps/monaco';
+
 // @ts-ignore
 import workerSrc from 'raw-loader!monaco-editor/min/vs/base/worker/workerMain.js';
 
@@ -19,11 +23,8 @@ export class LanguageService {
   private originalMonacoEnvironment: any;
 
   public setup() {
-    // TODO: Referring to `window.monaco` is a temporary fix for the imported `monaco`  module not
-    // being the same one in use by the editor.
-    const _monaco = (window as any).monaco as typeof monaco;
-    _monaco.languages.register({ id: LANGUAGE_ID });
-    _monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, monacoPainlessLang);
+    monaco.languages.register({ id: LANGUAGE_ID });
+    monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, monacoPainlessLang);
 
     if (CAN_CREATE_WORKER) {
       this.originalMonacoEnvironment = (window as any).MonacoEnvironment;
