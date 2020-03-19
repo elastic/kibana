@@ -31,6 +31,8 @@ export const searchSetupMock = {
 
 export const searchStartMock: jest.Mocked<ISearchStart> = {
   aggs: searchAggsStartMock(),
+  enableAsync: jest.fn(),
+  isAsyncEnabled: jest.fn(),
   search: jest.fn(),
   cancel: jest.fn(),
   getPendingCount$: jest.fn(),

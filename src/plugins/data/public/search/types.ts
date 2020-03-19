@@ -87,6 +87,8 @@ export interface ISearchSetup {
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
+  enableAsync: () => void;
+  isAsyncEnabled: () => boolean;
   cancel: () => void;
   getPendingCount$: () => Observable<number>;
   runBeyondTimeout: () => void;

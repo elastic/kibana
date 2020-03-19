@@ -45,5 +45,6 @@ export class DataEnhancedPlugin implements Plugin {
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
+    plugins.data.search.enableAsync();
   }
 }

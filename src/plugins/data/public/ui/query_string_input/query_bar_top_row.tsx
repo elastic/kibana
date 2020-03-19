@@ -19,7 +19,7 @@
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -34,12 +34,20 @@ import {
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
+import { CoreStart, Toast } from 'src/core/public';
+import {
+  IDataPluginServices,
+  IIndexPattern,
+  TimeRange,
+  TimeHistoryContract,
+  Query,
+  DataPublicPluginStart,
+} from '../..';
 import { useKibana, toMountPoint } from '../../../../kibana_react/public';
 import { QueryStringInput } from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
+import { LongQueryNotification } from './long_query_notification';
 
 interface Props {
   query?: Query;
@@ -65,11 +73,47 @@ interface Props {
   timeHistory?: TimeHistoryContract;
 }
 
+function showNotification(
+  notifications?: CoreStart['notifications'],
+  data?: DataPublicPluginStart
+) {
+  return notifications!.toasts.addInfo(
+    {
+      title: i18n.translate('data.query.queryBar.longQuery', {
+        defaultMessage: 'Your query is taking a while',
+      }),
+      text: toMountPoint(<LongQueryNotification data={data} />),
+    },
+    { toastLifeTimeMs: 100000 }
+  );
+}
+
 export function QueryBarTopRow(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { uiSettings, notifications, storage, appName, docLinks } = kibana.services;
+  const { uiSettings, notifications, storage, appName, docLinks, data } = kibana.services;
+  useEffect(() => {
+    let timer: any;
+    let toast: Toast;
+    const searchObservable = data.search.getPendingCount$();
+    const subscription = searchObservable?.subscribe((count: number) => {
+      if (count > 0) {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+          if (toast) notifications.toasts.remove(toast);
+          toast = showNotification(notifications, data);
+        }, 1000);
+      } else {
+        if (timer) clearTimeout(timer);
+        if (toast) notifications.toasts.remove(toast);
+      }
+    });
+
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
+  }, [data, data.search, notifications]);
 
   const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
