@@ -17,5 +17,5 @@ jobs:
               { "label": "Feature:Lens", "projectNumber": 32, "columnName": "In progress" },
               { "label": "Team:Canvas", "projectNumber": 38, "columnName": "Review in progress" }            
             ]
-          ghToken: ${{ secrets.GITHUB_TOKEN }}
+          ghToken: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
 
