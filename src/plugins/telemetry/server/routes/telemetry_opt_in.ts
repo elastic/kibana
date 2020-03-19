@@ -61,6 +61,13 @@ export function registerTelemetryOptInRoutes({
       };
       const config = await config$.pipe(take(1)).toPromise();
       const telemetrySavedObject = await getTelemetrySavedObject(context.core.savedObjects.client);
+
+      if (telemetrySavedObject === false) {
+        // If we get false, we couldn't get the saved object due to lack of permissions
+        // so we can assume the user won't be able to update it either
+        return res.forbidden();
+      }
+
       const configTelemetryAllowChangingOptInStatus = config.allowChangingOptInStatus;
       const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
         telemetrySavedObject,
