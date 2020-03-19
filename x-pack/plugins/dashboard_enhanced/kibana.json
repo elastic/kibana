@@ -1,7 +1,7 @@
 {
   "id": "dashboardEnhanced",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": ["uiActions", "embeddable", "drilldowns"]
 }
