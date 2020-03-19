@@ -197,17 +197,16 @@ export class BasePathProxyServer {
           agent: this.httpsAgent,
           passThrough: true,
           xforward: true,
-          mapUri: (request: Request) =>
-            Promise.resolve({
-              uri: Url.format({
-                hostname: request.server.info.host,
-                port: this.devConfig.basePathProxyTargetPort,
-                protocol: request.server.info.protocol,
-                pathname: `${this.httpConfig.basePath}/${request.params.kbnPath}`,
-                query: request.query,
-              }),
-              headers: request.headers,
+          mapUri: async (request: Request) => ({
+            uri: Url.format({
+              hostname: request.server.info.host,
+              port: this.devConfig.basePathProxyTargetPort,
+              protocol: request.server.info.protocol,
+              pathname: `${this.httpConfig.basePath}/${request.params.kbnPath}`,
+              query: request.query,
             }),
+            headers: request.headers,
+          }),
         },
       },
       method: '*',

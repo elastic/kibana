@@ -135,7 +135,10 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                         return null;
                       }
 
-                      if (uri.startsWith('ui/assets')) {
+                      if (
+                        uri.startsWith('ui/assets') &&
+                        parseDirPath(base).dirs.includes('legacy')
+                      ) {
                         return Path.resolve(
                           worker.repoRoot,
                           'src/core/server/core_app/',
