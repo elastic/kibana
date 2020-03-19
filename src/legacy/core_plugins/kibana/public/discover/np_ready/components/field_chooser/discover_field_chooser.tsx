@@ -153,15 +153,14 @@ export function DiscoverFieldChooser({
               })}
             </ul>
             <div className="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium">
-              <h3
-                className="euiFlexItem euiTitle euiTitle--xxxsmall sidebar-list-header-heading"
-                tabIndex={0}
-              >
-                <FormattedMessage
-                  id="kbn.discover.fieldChooser.filter.availableFieldsTitle"
-                  defaultMessage="Available fields"
-                />
-              </h3>
+              <EuiTitle size="xxxs" id="available_fields" className="euiFlexItem">
+                <h3>
+                  <FormattedMessage
+                    id="kbn.discover.fieldChooser.filter.availableFieldsTitle"
+                    defaultMessage="Available fields"
+                  />
+                </h3>
+              </EuiTitle>
               <div className="euiFlexItem euiFlexItem--flexGrowZero">
                 <EuiButtonIcon
                   className={'visible-xs visible-sm dscFieldChooser__toggle'}
@@ -190,8 +189,9 @@ export function DiscoverFieldChooser({
         {popularFields.length > 0 && (
           <ul
             className={`list-unstyled sidebar-well dscFieldList--popular ${
-              showFields ? 'hidden-sm' : 'hidden-xs'
+              !showFields ? 'hidden-sm hidden-xs' : ''
             }`}
+            aria-labelledby="available_fields"
           >
             <li className="sidebar-item sidebar-list-header">
               <h6>
@@ -223,6 +223,7 @@ export function DiscoverFieldChooser({
           className={`list-unstyled dscFieldList--unpopular ${
             !showFields ? 'hidden-sm hidden-xs' : ''
           }`}
+          aria-labelledby="available_fields"
         >
           {groupedFields &&
             groupedFields.unpopular
