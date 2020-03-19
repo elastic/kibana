@@ -30,7 +30,6 @@ export interface EmbeddableInput {
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
-  isEmptyState?: boolean;
 
   /**
    * Reserved key for `ui_actions` events.
