@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mapValues, isEmpty } from 'lodash';
+import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
