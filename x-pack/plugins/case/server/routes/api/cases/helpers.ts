@@ -8,6 +8,13 @@ import { difference, get } from 'lodash';
 
 import { CaseAttributes, CasePatchRequest } from '../../../../common/api';
 
+export const isTwoArraysDifference = (origVal: unknown, updatedVal: unknown) =>
+  origVal != null &&
+  updatedVal != null &&
+  Array.isArray(updatedVal) &&
+  Array.isArray(origVal) &&
+  difference(origVal, updatedVal).length !== 0;
+
 export const getCaseToUpdate = (
   currentCase: CaseAttributes,
   queryCase: CasePatchRequest
@@ -15,12 +22,7 @@ export const getCaseToUpdate = (
   Object.entries(queryCase).reduce(
     (acc, [key, value]) => {
       const currentValue = get(currentCase, key);
-      if (
-        currentValue != null &&
-        Array.isArray(value) &&
-        Array.isArray(currentValue) &&
-        difference(value, currentValue).length !== 0
-      ) {
+      if (isTwoArraysDifference(value, currentValue)) {
         return {
           ...acc,
           [key]: value,

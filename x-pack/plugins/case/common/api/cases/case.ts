@@ -20,20 +20,32 @@ const CaseBasicRt = rt.type({
   title: rt.string,
 });
 
+const CasePushBasicRt = rt.type({
+  at: rt.union([rt.string, rt.null]),
+  by: rt.union([UserRT, rt.null]),
+  connector_id: rt.union([rt.string, rt.null]),
+  connector_name: rt.union([rt.string, rt.null]),
+  external_id: rt.union([rt.string, rt.null]),
+  external_title: rt.union([rt.string, rt.null]),
+  external_url: rt.union([rt.string, rt.null]),
+});
+
 export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
   rt.type({
-    comment_ids: rt.array(rt.string),
     closed_at: rt.union([rt.string, rt.null]),
     closed_by: rt.union([UserRT, rt.null]),
     created_at: rt.string,
     created_by: UserRT,
+    pushed: rt.union([CasePushBasicRt, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRT, rt.null]),
   }),
 ]);
 
 export const CaseRequestRt = CaseBasicRt;
+
+export const CasePushRequestRt = CasePushBasicRt;
 
 export const CasesFindRequestRt = rt.partial({
   tags: rt.union([rt.array(rt.string), rt.string]),
@@ -53,6 +65,7 @@ export const CaseResponseRt = rt.intersection([
   CaseAttributesRt,
   rt.type({
     id: rt.string,
+    totalComment: rt.number,
     version: rt.string,
   }),
   rt.partial({
@@ -85,3 +98,4 @@ export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
+export type CasePushRequest = rt.TypeOf<typeof CasePushRequestRt>;

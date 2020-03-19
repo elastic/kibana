@@ -6,7 +6,7 @@
 
 import { IRouter } from 'kibana/server';
 import { loggingServiceMock, httpServiceMock } from '../../../../../../../src/core/server/mocks';
-import { CaseService, CaseConfigureService } from '../../../services';
+import { CaseService, CaseConfigureService, CaseUserActionService } from '../../../services';
 import { authenticationMock } from '../__fixtures__';
 import { RouteDeps } from '../types';
 
@@ -22,16 +22,19 @@ export const createRoute = async (
 
   const caseServicePlugin = new CaseService(log);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
+  const userActionServicePlugin = new CaseUserActionService(log);
 
   const caseService = await caseServicePlugin.setup({
     authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
   });
   const caseConfigureService = await caseConfigureServicePlugin.setup();
+  const userActionService = await userActionServicePlugin.setup();
 
   api({
     caseConfigureService,
     caseService,
     router,
+    userActionService,
   });
 
   return router[method].mock.calls[0][1];

@@ -5,10 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
+import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 
-export function initDeleteAllCommentsApi({ caseService, router }: RouteDeps) {
+export function initDeleteAllCommentsApi({ caseService, router, userActionService }: RouteDeps) {
   router.delete(
     {
       path: '/api/cases/{case_id}/comments',
@@ -21,6 +23,8 @@ export function initDeleteAllCommentsApi({ caseService, router }: RouteDeps) {
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
+        const deletedBy = await caseService.getUser({ request, response });
+        const deleteDate = new Date().toISOString();
 
         const comments = await caseService.getAllCaseComments({
           client: context.core.savedObjects.client,
@@ -35,15 +39,18 @@ export function initDeleteAllCommentsApi({ caseService, router }: RouteDeps) {
           )
         );
 
-        const updateCase = {
-          comment_ids: [],
-        };
-        await caseService.patchCase({
-          client: context.core.savedObjects.client,
-          caseId: request.params.case_id,
-          updatedAttributes: {
-            ...updateCase,
-          },
+        await userActionService.postUserActions({
+          client,
+          actions: comments.saved_objects.map(comment =>
+            buildCommentUserActionItem({
+              action: 'delete',
+              actionAt: deleteDate,
+              actionBy: deletedBy,
+              caseId: request.params.case_id,
+              commentId: comment.id,
+              fields: ['comment'],
+            })
+          ),
         });
 
         return response.ok({ body: 'true' });

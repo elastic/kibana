@@ -12,12 +12,18 @@ import { SecurityPluginSetup } from '../../security/server';
 
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
+<<<<<<< HEAD
 import {
   caseSavedObjectType,
   caseConfigureSavedObjectType,
   caseCommentSavedObjectType,
 } from './saved_object_types';
 import { CaseConfigureService, CaseService } from './services';
+=======
+import { caseSavedObjectType, caseCommentSavedObjectType } from './saved_object_types';
+import { CaseService } from './services';
+import { CaseUserActionService } from './services/user_actions';
+>>>>>>>  modify API to get the total comments in _find + Add user action to track what user are doing + create _pushed api to know when case have been pushed
 
 function createConfig$(context: PluginInitializerContext) {
   return context.config.create<ConfigType>().pipe(map(config => config));
@@ -49,6 +55,7 @@ export class CasePlugin {
 
     const caseServicePlugin = new CaseService(this.log);
     const caseConfigureServicePlugin = new CaseConfigureService(this.log);
+    const userActionServicePlugin = new CaseUserActionService(this.log);
 
     this.log.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
@@ -60,11 +67,13 @@ export class CasePlugin {
       authentication: plugins.security.authc,
     });
     const caseConfigureService = await caseConfigureServicePlugin.setup();
+    const userActionService = await userActionServicePlugin.setup();
 
     const router = core.http.createRouter();
     initCaseApi({
       caseConfigureService,
       caseService,
+      userActionService,
       router,
     });
   }
