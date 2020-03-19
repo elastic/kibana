@@ -9,9 +9,9 @@ experimental[] Create sets of {kib} saved objects from a file created by the exp
 [[saved-objects-api-import-request]]
 ==== Request
 
-`POST /api/saved_objects/_import`
+`POST <kibana host>:port/api/saved_objects/_import`
 
-`POST /s/<space_id>/api/saved_objects/_import`
+`POST <kibana host>:port/s/<space_id>/api/saved_objects/_import`
 
 [[saved-objects-api-import-path-params]]
 ==== Path parameters
@@ -59,6 +59,7 @@ Import an index pattern and dashboard:
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
+// KIBANA
 
 The `file.ndjson` file contains the following:
 
@@ -84,6 +85,7 @@ Import an index pattern and dashboard that includes a conflict on the index patt
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
+// KIBANA
 
 The `file.ndjson` file contains the following:
 
@@ -119,6 +121,7 @@ Import a visualization and dashboard with an index pattern for the visualization
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
+// KIBANA
 
 The `file.ndjson` file contains the following:
 

@@ -17,9 +17,9 @@ To resolve errors, you can:
 [[saved-objects-api-resolve-import-errors-request]]
 ==== Request
 
-`POST /api/saved_objects/_resolve_import_errors`
+`POST <kibana host>:port/api/saved_objects/_resolve_import_errors`
 
-`POST /s/<space_id>/api/saved_objects/_resolve_import_errors`
+`POST <kibana host>:port/s/<space_id>/api/saved_objects/_resolve_import_errors`
 
 [[saved-objects-api-resolve-import-errors-path-params]]
 ==== Path parameters
@@ -65,6 +65,7 @@ Retry a dashboard import:
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
+// KIBANA
 
 The `file.ndjson` file contains the following:
 
@@ -89,6 +90,7 @@ Resolve errors for a dashboard and overwrite the existing saved object:
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"dashboard","id":"my-dashboard","overwrite":true}]'
 --------------------------------------------------
+// KIBANA
 
 The `file.ndjson` file contains the following:
 
@@ -114,6 +116,7 @@ Resolve errors for a visualization by replacing the index pattern with another:
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"missing","to":"existing"}]}]'
 --------------------------------------------------
+// KIBANA
 
 The `file.ndjson` file contains the following:
 
