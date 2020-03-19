@@ -460,7 +460,7 @@
     "multistream": "^2.1.1",
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
-    "nock": "10.0.6",
+    "nock": "12.0.3",
     "node-sass": "^4.13.1",
     "normalize-path": "^3.0.0",
     "nyc": "^14.1.1",
