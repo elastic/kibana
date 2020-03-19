@@ -11,8 +11,6 @@ import { initLoadingIndicator } from './lib/loading_indicator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
 // @ts-ignore untyped local
-import { datasourceSpecs } from './expression_types/datasources';
-// @ts-ignore untyped local
 import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
 import { legacyRegistries } from './legacy_plugin_support';
@@ -90,7 +88,6 @@ export class CanvasPlugin
 
     // Register core canvas stuff
     canvasApi.addFunctions(initFunctions({ typesRegistry: plugins.expressions.__LEGACY.types }));
-    canvasApi.addDatasourceUIs(datasourceSpecs);
     canvasApi.addArgumentUIs(argTypeSpecs);
     canvasApi.addTransitions(transitions);
 
