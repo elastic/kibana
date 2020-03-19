@@ -25,7 +25,6 @@ interface UserBroughtProcessIntoView {
 }
 
 /**
-<<<<<<< HEAD
  * Used when the alert list selects an alert and the flyout shows resolver.
  */
 interface UserChangedSelectedEvent {
@@ -44,8 +43,7 @@ interface UserChangedSelectedEvent {
 interface AppRequestedResolverData {
   readonly type: 'appRequestedResolverData';
 }
-
-=======
+/**
  * When the user switches the active descendent of the Resolver.
  */
 interface UserFocusedOnResolverNode {
@@ -58,14 +56,10 @@ interface UserFocusedOnResolverNode {
   };
 }
 
->>>>>>> cube, animation and a11y changes to 25% nodes
 export type ResolverAction =
   | CameraAction
   | DataAction
   | UserBroughtProcessIntoView
-<<<<<<< HEAD
   | UserChangedSelectedEvent
-  | AppRequestedResolverData;
-=======
+  | AppRequestedResolverData
   | UserFocusedOnResolverNode;
->>>>>>> cube, animation and a11y changes to 25% nodes

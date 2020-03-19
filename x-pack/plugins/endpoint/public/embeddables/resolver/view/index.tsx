@@ -14,9 +14,9 @@ import { Panel } from './panel';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
+import { SymbolDefinitions, NamedColors } from './defs';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../../common/types';
-import { SymbolDefinitions, NamedColors } from './defs';
 
 const StyledPanel = styled(Panel)`
   position: absolute;
@@ -54,12 +54,9 @@ export const Resolver = styled(
       selectors.processNodePositionsAndEdgeLineSegments
     );
 
-<<<<<<< HEAD
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
-=======
     const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
 
->>>>>>> cube, animation and a11y changes to 25% nodes
     const { projectionMatrix, ref, onMouseDown } = useCamera();
     const isLoading = useSelector(selectors.isLoading);
 
@@ -71,31 +68,37 @@ export const Resolver = styled(
     }, [dispatch, selectedEvent]);
     return (
       <div data-test-subj="resolverEmbeddable" className={className}>
-        <StyledResolverContainer
-          className="resolver-graph kbn-resetFocusState"
-          onMouseDown={onMouseDown}
-          ref={ref}
-          role="tree"
-          tabIndex={0}
-        >
-          {edgeLineSegments.map(([startPosition, endPosition], index) => (
-            <EdgeLine
-              key={index}
-              startPosition={startPosition}
-              endPosition={endPosition}
-              projectionMatrix={projectionMatrix}
-            />
-          ))}
-          {Array.from(processNodePositions).map(([processEvent, position], index) => (
-            <ProcessEventDot
-              key={index}
-              position={position}
-              projectionMatrix={projectionMatrix}
-              event={processEvent}
-              adjacentNodeMap={processToAdjacencyMap.get(processEvent)}
-            />
-          ))}
-        </StyledResolverContainer>
+        {isLoading ? (
+          <div className="loading-container">
+            <EuiLoadingSpinner size="xl" />
+          </div>
+        ) : (
+          <StyledResolverContainer
+            className="resolver-graph kbn-resetFocusState"
+            onMouseDown={onMouseDown}
+            ref={ref}
+            role="tree"
+            tabIndex={0}
+          >
+            {edgeLineSegments.map(([startPosition, endPosition], index) => (
+              <EdgeLine
+                key={index}
+                startPosition={startPosition}
+                endPosition={endPosition}
+                projectionMatrix={projectionMatrix}
+              />
+            ))}
+            {Array.from(processNodePositions).map(([processEvent, position], index) => (
+              <ProcessEventDot
+                key={index}
+                position={position}
+                projectionMatrix={projectionMatrix}
+                event={processEvent}
+                adjacentNodeMap={processToAdjacencyMap.get(processEvent)}
+              />
+            ))}
+          </StyledResolverContainer>
+        )}
         <StyledPanel />
         <StyledGraphControls />
         <SymbolDefinitions />

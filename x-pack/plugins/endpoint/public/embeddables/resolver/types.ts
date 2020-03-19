@@ -199,11 +199,11 @@ export interface ProcessEvent {
  * directions in two axes: up/down and previous/next.
  */
 export interface AdjacentProcessMap {
-  readonly self: number;
-  up: number | null;
-  down: number | null;
-  previous: number | null;
-  next: number | null;
+  readonly self: string;
+  up: string | null;
+  down: string | null;
+  previous: string | null;
+  next: string | null;
 }
 
 /**
@@ -217,15 +217,11 @@ export interface IndexedProcessTree {
   /**
    * Map of ID to process
    */
-<<<<<<< HEAD
   idToProcess: Map<string, ResolverEvent>;
-=======
-  idToProcess: Map<number, ProcessEvent>;
   /**
    * Map of ID to adjacent processes
    */
-  idToAdjacent: Map<number, AdjacentProcessMap>;
->>>>>>> cube, animation and a11y changes to 25% nodes
+  idToAdjacent: Map<string, AdjacentProcessMap>;
 }
 
 /**

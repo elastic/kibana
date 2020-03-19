@@ -9,9 +9,11 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiKeyboardAccessible } from '@elastic/eui';
 import { applyMatrix3 } from '../lib/vector2';
-import { Vector2, ProcessEvent, Matrix3, AdjacentProcessMap } from '../types';
+import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
 import { SymbolIds, NamedColors, PaintServerIds } from './defs';
+import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
+import * as eventModel from '../../../../common/models/event';
 
 const nodeAssets = {
   runningProcessCube: {
@@ -118,16 +120,17 @@ export const ProcessEventDot = styled(
       };
 
       const nodeType = ((nodeData: any) => {
-        if (nodeData.event_subtype_full === 'already_running') {
-          return typeof nodeData.attack_references === 'undefined'
+        // TODO FIX
+        if (nodeData?.event_subtype_full === 'already_running') {
+          return typeof nodeData?.attack_references === 'undefined'
             ? 'runningProcessCube'
             : 'runningTriggerCube';
         } else {
-          return typeof nodeData.attack_references === 'undefined'
+          return typeof nodeData?.attack_references === 'undefined'
             ? 'terminatedProcessCube'
             : 'terminatedTriggerCube';
         }
-      })(event?.endgame);
+      })(event?.process);
 
       const clickTargetRef: { current: SVGAnimationElement | null } = React.createRef();
       const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[nodeType];
@@ -152,69 +155,14 @@ export const ProcessEventDot = styled(
         focusEvent.currentTarget.setAttribute('aria-current', 'true');
       };
 
-      console.log('rendering')
-
       return (
-<<<<<<< HEAD
-        <svg
-          className={className}
-          style={nodeViewportStyle}
-          viewBox="-15 -15 90 30"
-          preserveAspectRatio="xMidYMid meet"
-          role="treeitem"
-          aria-level={event.endgame.depth}
-        >
-          <use
-            role="presentation"
-            xlinkHref={cubeSymbol}
-            x={markerPositionOffset(magFactorX)}
-            y={markerPositionOffset(magFactorX)}
-            width={markerSize(magFactorX)}
-            height={markerSize(magFactorX)}
-            opacity="1"
-          />
-          <use
-            role="presentation"
-            xlinkHref={`#${SymbolIds.processNode}`}
-            x={markerPositionOffset(magFactorX) + markerSize(magFactorX) - 0.5}
-            y={labelYOffset(magFactorX)}
-            width={(markerSize(magFactorX) / 1.7647) * 5}
-            height={markerSize(magFactorX) / 1.7647}
-            opacity="1"
-            fill={labelFill}
-          />
-          <text
-            x={markerPositionOffset(magFactorX) + 0.7 * markerSize(magFactorX) + 50 / 2}
-            y={labelYOffset(magFactorX) + labelYHeight(magFactorX) / 2}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize="3.75"
-            fontWeight="bold"
-            fill={NamedColors.empty}
-            paintOrder="stroke"
-            tabIndex={-1}
-            style={{ letterSpacing: '-0.02px' }}
-          >
-            {event?.endgame?.process_name}
-          </text>
-          <text
-            x={markerPositionOffset(magFactorX) + markerSize(magFactorX)}
-            y={labelYOffset(magFactorX) - 1}
-            textAnchor="start"
-            dominantBaseline="middle"
-            fontSize="2.67"
-            fill={descriptionFill}
-            paintOrder="stroke"
-            fontWeight="bold"
-            style={{ textTransform: 'uppercase', letterSpacing: '-0.01px' }}
-=======
         <EuiKeyboardAccessible>
           <svg
             className={className}
             viewBox="-15 -15 90 30"
             preserveAspectRatio="xMidYMid meet"
             role="treeitem"
-            aria-level={event.data_buffer.depth}
+            aria-level={0 /** TODO FIX */}
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
@@ -228,7 +176,6 @@ export const ProcessEventDot = styled(
             }}
             onFocus={handleFocus}
             tabIndex={-1}
->>>>>>> cube, animation and a11y changes to 25% nodes
           >
             <g>
               <use
@@ -276,7 +223,7 @@ export const ProcessEventDot = styled(
                 style={{ letterSpacing: '-0.02px' }}
                 id={labelId}
               >
-                {event?.data_buffer?.process_name}
+                {eventModel.eventName(event)}
               </text>
               <text
                 x={markerPositionOffset(magFactorX) + markerSize(magFactorX)}

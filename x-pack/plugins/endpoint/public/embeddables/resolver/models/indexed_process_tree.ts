@@ -5,16 +5,17 @@
  */
 
 import { uniquePidForProcess, uniqueParentPidForProcess } from './process_event';
-import { IndexedProcessTree, ProcessEvent, AdjacentProcessMap } from '../types';
+import { IndexedProcessTree, AdjacentProcessMap } from '../types';
+import { ResolverEvent } from '../../../../common/types';
 import { levelOrder as baseLevelOrder } from '../lib/tree_sequencers';
 
 /**
  * Create a new IndexedProcessTree from an array of ProcessEvents
  */
-export function factory(processes: ProcessEvent[]): IndexedProcessTree {
-  const idToChildren = new Map<number | undefined, ProcessEvent[]>();
-  const idToValue = new Map<number, ProcessEvent>();
-  const idToAdjacent = new Map<number, AdjacentProcessMap>();
+export function factory(processes: ResolverEvent[]): IndexedProcessTree {
+  const idToChildren = new Map<string | undefined, ResolverEvent[]>();
+  const idToValue = new Map<string, ResolverEvent>();
+  const idToAdjacent = new Map<string, AdjacentProcessMap>();
 
   for (const process of processes) {
     const uniqueProcessPid = uniquePidForProcess(process);
