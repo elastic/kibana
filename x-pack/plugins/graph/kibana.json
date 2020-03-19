@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["licensing"],
+  "requiredPlugins": ["licensing", "data", "navigation"],
   "optionalPlugins": ["home"],
   "configPath": ["xpack", "graph"]
 }

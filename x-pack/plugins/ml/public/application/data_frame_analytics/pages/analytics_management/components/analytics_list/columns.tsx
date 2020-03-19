@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
+import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
   isDataFrameAnalyticsFailed,
@@ -42,13 +43,13 @@ enum TASK_STATE_COLOR {
 
 export const getTaskStateBadge = (
   state: DataFrameAnalyticsStats['state'],
-  reason?: DataFrameAnalyticsStats['reason']
+  failureReason?: DataFrameAnalyticsStats['failure_reason']
 ) => {
   const color = TASK_STATE_COLOR[state];
 
-  if (isDataFrameAnalyticsFailed(state) && reason !== undefined) {
+  if (isDataFrameAnalyticsFailed(state) && failureReason !== undefined) {
     return (
-      <EuiToolTip content={reason}>
+      <EuiToolTip content={failureReason}>
         <EuiBadge className="mlTaskStateBadge" color={color}>
           {state}
         </EuiBadge>
@@ -125,9 +126,11 @@ export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
-  isMlEnabledInSpace: boolean = true
+  isMlEnabledInSpace: boolean = true,
+  createAnalyticsForm?: CreateAnalyticsFormProps
 ) => {
-  const actions = isManagementTable === true ? [AnalyticsViewAction] : getActions();
+  const actions =
+    isManagementTable === true ? [AnalyticsViewAction] : getActions(createAnalyticsForm!);
 
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -226,7 +229,7 @@ export const getColumns = (
       sortable: (item: DataFrameAnalyticsListRow) => item.stats.state,
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
-        return getTaskStateBadge(item.stats.state, item.stats.reason);
+        return getTaskStateBadge(item.stats.state, item.stats.failure_reason);
       },
       width: '100px',
       'data-test-subj': 'mlAnalyticsTableColumnStatus',

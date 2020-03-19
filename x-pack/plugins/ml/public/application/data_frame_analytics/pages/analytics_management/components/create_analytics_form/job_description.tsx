@@ -22,10 +22,10 @@ export const JobDescriptionInput: FC<Props> = ({ description, setFormState }) =>
     label={i18n.translate('xpack.ml.dataframe.analytics.create.jobDescription.label', {
       defaultMessage: 'Job description',
     })}
-    helpText={helpText}
   >
     <EuiTextArea
       value={description}
+      placeholder={helpText}
       rows={2}
       onChange={e => {
         const value = e.target.value;

@@ -10,10 +10,11 @@ import { BarText } from './styles';
 
 export interface UtilityBarTextProps {
   children: string;
+  dataTestSubj?: string;
 }
 
-export const UtilityBarText = React.memo<UtilityBarTextProps>(({ children }) => (
-  <BarText>{children}</BarText>
+export const UtilityBarText = React.memo<UtilityBarTextProps>(({ children, dataTestSubj }) => (
+  <BarText data-test-subj={dataTestSubj}>{children}</BarText>
 ));
 
 UtilityBarText.displayName = 'UtilityBarText';

@@ -148,7 +148,7 @@ describe('#batchSet', () => {
       '*',
       {
         status: 400,
-        body: 'invalid',
+        body: { message: 'invalid' },
       },
       {
         overwriteRoutes: false,

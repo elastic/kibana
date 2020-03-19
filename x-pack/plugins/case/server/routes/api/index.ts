@@ -26,7 +26,6 @@ import { initGetTagsApi } from './cases/tags/get_tags';
 
 import { RouteDeps } from './types';
 import { initCaseConfigureGetActionConnector } from './cases/configure/get_connectors';
-import { initCaseConfigurePatchActionConnector } from './cases/configure/patch_connector';
 import { initGetCaseConfigure } from './cases/configure/get_configure';
 import { initPatchCaseConfigure } from './cases/configure/patch_configure';
 import { initPostCaseConfigure } from './cases/configure/post_configure';
@@ -48,7 +47,6 @@ export function initCaseApi(deps: RouteDeps) {
   initPostCommentApi(deps);
   // Cases Configure
   initCaseConfigureGetActionConnector(deps);
-  initCaseConfigurePatchActionConnector(deps);
   initGetCaseConfigure(deps);
   initPatchCaseConfigure(deps);
   initPostCaseConfigure(deps);

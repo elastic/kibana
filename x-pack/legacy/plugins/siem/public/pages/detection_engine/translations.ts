@@ -19,7 +19,7 @@ export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSign
 });
 
 export const SIGNAL = i18n.translate('xpack.siem.detectionEngine.signalTitle', {
-  defaultMessage: 'Signals (SIEM Detections)',
+  defaultMessage: 'Detected signals',
 });
 
 export const ALERT = i18n.translate('xpack.siem.detectionEngine.alertTitle', {
