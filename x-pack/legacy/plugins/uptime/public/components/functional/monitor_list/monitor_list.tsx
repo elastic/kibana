@@ -188,23 +188,27 @@ export const MonitorListComponent = (props: Props) => {
           columns={columns}
         />
         <EuiSpacer size="m" />
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false}>
-            <OverviewPageLink
-              dataTestSubj="xpack.uptime.monitorList.prevButton"
-              direction="prev"
-              pagination={prevPagePagination}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <OverviewPageLink
-              dataTestSubj="xpack.uptime.monitorList.nextButton"
-              direction="next"
-              pagination={nextPagePagination}
-            />
-          </EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <MonitorListPageSizeSelect size={props.pageSize} setSize={props.setPageSize} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow={false}>
+                <OverviewPageLink
+                  dataTestSubj="xpack.uptime.monitorList.prevButton"
+                  direction="prev"
+                  pagination={prevPagePagination}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <OverviewPageLink
+                  dataTestSubj="xpack.uptime.monitorList.nextButton"
+                  direction="next"
+                  pagination={nextPagePagination}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
