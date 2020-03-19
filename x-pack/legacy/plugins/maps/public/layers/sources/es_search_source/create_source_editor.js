@@ -151,9 +151,15 @@ export class CreateSourceEditor extends Component {
       geoFields,
     });
 
-    // make default selection
-    if (geoFields[0]) {
-      this._onGeoFieldSelect(geoFields[0].name);
+    if (geoFields.length) {
+      // make default selection, prefer aggregatable field over the first available
+      const firstAggregatableGeoField = geoFields.find(geoField => {
+        return geoField.aggregatable;
+      });
+      const defaultGeoFieldName = firstAggregatableGeoField
+        ? firstAggregatableGeoField
+        : geoFields[0];
+      this._onGeoFieldSelect(defaultGeoFieldName.name);
     }
   }, 300);
 
