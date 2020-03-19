@@ -81,7 +81,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public async start({
+  public start({
     http,
     overlays,
     application,
@@ -91,22 +91,22 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       throw Error('Telemetry plugin failed to initialize properly.');
     }
 
-    const telemetrySavedObject = await this.getTelemetrySavedObject(savedObjects.client);
-    const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
-    this.telemetryService.config = updatedConfig;
-
-    const telemetryBanner = updatedConfig.banner;
-
     this.telemetryNotifications = new TelemetryNotifications({
       overlays,
       telemetryService: this.telemetryService,
     });
 
-    application.currentAppId$.subscribe(appId => {
+    application.currentAppId$.subscribe(async () => {
       const isUnauthenticated = this.getIsUnauthenticated(http);
       if (isUnauthenticated) {
         return;
       }
+
+      const telemetrySavedObject = await this.getTelemetrySavedObject(savedObjects.client);
+      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
+      this.telemetryService!.config = updatedConfig;
+
+      const telemetryBanner = updatedConfig.banner;
 
       this.maybeStartTelemetryPoller();
       if (telemetryBanner) {
