@@ -14,7 +14,7 @@ interface UpdatedActions {
 }
 
 describe('test agent actions services', () => {
-  it('should update agent current action with new action', async () => {
+  it('should update agent current actions with new action', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
     const newAgentAction: NewAgentAction = {
       type: 'CONFIG_CHANGE',
@@ -41,6 +41,7 @@ describe('test agent actions services', () => {
 
     const updatedAgentActions = (mockSavedObjectsClient.update.mock
       .calls[0][2] as unknown) as UpdatedActions;
+    expect(updatedAgentActions.actions.length).toEqual(2);
     const actualAgentAction = updatedAgentActions.actions.find(action => action?.data === 'data');
     expect(actualAgentAction?.type).toEqual(newAgentAction.type);
     expect(actualAgentAction?.data).toEqual(newAgentAction.data);

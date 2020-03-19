@@ -20,10 +20,13 @@ export async function updateAgentActions(
   newAgentAction: NewAgentAction
 ): Promise<AgentAction> {
   const agentAction = createAgentAction(new Date(), newAgentAction);
+
   agent.actions.push(agentAction);
+
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
     actions: agent.actions,
   });
+
   return agentAction;
 }
 

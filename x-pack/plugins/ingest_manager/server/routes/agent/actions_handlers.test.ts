@@ -18,7 +18,7 @@ import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
 
 describe('test actions handlers schema', () => {
-  it('validate that agent schema is valid', async () => {
+  it('validate that new agent actions schema is valid', async () => {
     expect(
       NewAgentActionSchema.validate({
         type: 'CONFIG_CHANGE',
@@ -28,7 +28,7 @@ describe('test actions handlers schema', () => {
     ).toBeTruthy();
   });
 
-  it('validate that agent schema is invalid when required properties are not provided', async () => {
+  it('validate that new agent actions schema is invalid when required properties are not provided', async () => {
     expect(() => {
       NewAgentActionSchema.validate({
         data: 'data',

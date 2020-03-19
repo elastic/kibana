@@ -23,9 +23,13 @@ export const postNewAgentActionHandlerBuilder = function(
 > {
   return async (context, request, response) => {
     const soClient = actionsService.getSavedObjectsClientContract(request);
+
     const res = APIKeyService.parseApiKey(request.headers);
+
     const agent = await actionsService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId as string);
+
     const newAgentAction = request.body.action as NewAgentAction;
+
     const savedAgentAction = await actionsService.updateAgentActions(
       soClient,
       agent,
