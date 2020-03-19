@@ -127,9 +127,40 @@ function VisualizeAppController(
     dirty: !savedVis.id,
   };
 
+  const defaultQuery = {
+    query: '',
+    language:
+      localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
+  };
+
+  const visStateToEditorState = () => {
+    const savedVisState = visualizations.convertFromSerializedVis(vis.serialize());
+    return {
+      uiState: vis.uiState.getChanges(),
+      query: vis.data.searchSource.getOwnField('query') || defaultQuery,
+      filters: vis.data.searchSource.getOwnField('filter') || [],
+      vis: { ...savedVisState.visState, title: vis.title },
+      linked: !!savedVis.savedSearchId,
+    };
+  };
+
+  const stateDefaults = visStateToEditorState();
+
+  const { stateContainer, stopStateSync } = useVisualizeAppState({
+    stateDefaults,
+    kbnUrlStateStorage,
+  });
+
   $scope.eventEmitter.on('dirtyStateChange', ({ isDirty }) => {
+    if (!isDirty) {
+      stateContainer.transitions.updateVisState(visStateToEditorState().vis);
+    }
     $scope.dirty = isDirty;
     $scope.$digest();
+  });
+
+  $scope.eventEmitter.on('updateVis', () => {
+    embeddableHandler.reload();
   });
 
   $scope.embeddableHandler = embeddableHandler;
@@ -281,30 +312,6 @@ function VisualizeAppController(
   if (savedVis.id) {
     chrome.docTitle.change(savedVis.title);
   }
-
-  const defaultQuery = {
-    query: '',
-    language:
-      localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
-  };
-
-  const visStateToEditorState = () => {
-    const savedVisState = visualizations.convertFromSerializedVis(vis.serialize());
-    return {
-      uiState: vis.uiState.getChanges(),
-      query: vis.data.searchSource.getOwnField('query') || defaultQuery,
-      filters: vis.data.searchSource.getOwnField('filter') || [],
-      vis: { ...savedVisState.visState, title: vis.title },
-      linked: !!savedVis.savedSearchId,
-    };
-  };
-
-  const stateDefaults = visStateToEditorState();
-
-  const { stateContainer, stopStateSync } = useVisualizeAppState({
-    stateDefaults,
-    kbnUrlStateStorage,
-  });
 
   // sync initial app filters from state to filterManager
   filterManager.setAppFilters(_.cloneDeep(stateContainer.getState().filters));
@@ -461,7 +468,13 @@ function VisualizeAppController(
 
       // if the browser history was changed manually we need to reflect changes in the editor
       if (
-        !_.isEqual(visualizations.convertFromSerializedVis(vis.serialize()).visState, state.vis)
+        !_.isEqual(
+          {
+            ...visualizations.convertFromSerializedVis(vis.serialize()).visState,
+            title: vis.title,
+          },
+          state.vis
+        )
       ) {
         vis.setState({
           type: state.vis.type,
@@ -473,6 +486,7 @@ function VisualizeAppController(
             searchSource: vis.data.searchSource,
           },
         });
+        embeddableHandler.reload();
         $scope.eventEmitter.emit('updateEditor');
       }
 
@@ -683,6 +697,8 @@ function VisualizeAppController(
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));
+              savedVis.vis.title = savedVis.title;
+              savedVis.vis.description = savedVis.description;
             } else {
               history.replace({
                 ...history.location,

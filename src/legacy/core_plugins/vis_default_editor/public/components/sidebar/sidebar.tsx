@@ -100,8 +100,12 @@ function DefaultEditorSideBar({
       params: state.params,
       data: { aggs: state.data.aggs ? (state.data.aggs.aggs.map(agg => agg.toJSON()) as any) : [] },
     });
+    eventEmitter.emit('updateVis');
+    eventEmitter.emit('dirtyStateChange', {
+      isDirty: false,
+    });
     setTouched(false);
-  }, [vis, state, formState.invalid, setTouched, isDirty]);
+  }, [vis, state, formState.invalid, setTouched, isDirty, eventEmitter]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     event => {
