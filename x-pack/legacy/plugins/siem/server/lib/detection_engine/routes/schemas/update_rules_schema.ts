@@ -36,6 +36,8 @@ import {
   note,
   version,
   lists,
+  anomaly_threshold,
+  machine_learning_job_id,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
@@ -50,6 +52,11 @@ import { hasListsFeature } from '../../feature_flags';
  *   - id is on here because you can pass in an id to update using it instead of rule_id.
  */
 export const updateRulesSchema = Joi.object({
+  anomaly_threshold: anomaly_threshold.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   description: description.required(),
   enabled: enabled.default(true),
   id,
@@ -59,8 +66,21 @@ export const updateRulesSchema = Joi.object({
   rule_id,
   index,
   interval: interval.default('5m'),
-  query: query.allow('').default(''),
-  language: language.default('kuery'),
+  query: query.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: query.allow('').default(''),
+  }),
+  language: language.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: language.default('kuery'),
+  }),
+  machine_learning_job_id: machine_learning_job_id.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   output_index,
   saved_id: saved_id.when('type', {
     is: 'saved_query',

@@ -13,6 +13,7 @@ import { hasListsFeature } from '../feature_flags';
 export const createRules = ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
+  anomalyThreshold,
   description,
   enabled,
   falsePositives,
@@ -23,6 +24,7 @@ export const createRules = ({
   timelineId,
   timelineTitle,
   meta,
+  machineLearningJobId,
   filters,
   ruleId,
   immutable,
@@ -51,6 +53,7 @@ export const createRules = ({
       alertTypeId: SIGNALS_ID,
       consumer: APP_ID,
       params: {
+        anomalyThreshold,
         description,
         ruleId,
         index,
@@ -64,6 +67,7 @@ export const createRules = ({
         timelineId,
         timelineTitle,
         meta,
+        machineLearningJobId,
         filters,
         maxSignals,
         riskScore,

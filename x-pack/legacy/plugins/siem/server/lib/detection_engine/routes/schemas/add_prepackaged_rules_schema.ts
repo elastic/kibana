@@ -35,6 +35,8 @@ import {
   note,
   version,
   lists,
+  anomaly_threshold,
+  machine_learning_job_id,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
@@ -51,6 +53,11 @@ import { hasListsFeature } from '../../feature_flags';
  *  - index is a required field that must exist
  */
 export const addPrepackagedRulesSchema = Joi.object({
+  anomaly_threshold: anomaly_threshold.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   description: description.required(),
   enabled: enabled.default(false),
   false_positives: false_positives.default([]),
@@ -63,8 +70,21 @@ export const addPrepackagedRulesSchema = Joi.object({
     .valid(true),
   index: index.required(),
   interval: interval.default('5m'),
-  query: query.allow('').default(''),
-  language: language.default('kuery'),
+  query: query.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: query.allow('').default(''),
+  }),
+  language: language.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: language.default('kuery'),
+  }),
+  machine_learning_job_id: machine_learning_job_id.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   saved_id: saved_id.when('type', {
     is: 'saved_query',
     then: Joi.required(),
