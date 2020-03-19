@@ -34,8 +34,8 @@ export interface IStyleProperty {
 }
 
 export class AbstractStyleProperty implements IStyleProperty {
-  private _options: StylePropertyOptions;
-  private _styleName: string;
+  private readonly _options: StylePropertyOptions;
+  private readonly _styleName: string;
 
   constructor(options: StylePropertyOptions, styleName: string) {
     this._options = options;
