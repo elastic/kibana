@@ -400,7 +400,7 @@ export const processAdjacencies = createSelector(
     graphableProcesses
     /* eslint-enable no-shadow */
   ) {
-    const processToAdjacencyMap = new Map<LegacyEndpointEvent, AdjacentProcessMap>();
+    const processToAdjacencyMap = new Map<ResolverEvent, AdjacentProcessMap>();
     const { idToAdjacent } = indexedProcessTreeFactory(graphableProcesses);
 
     for (const graphableProcess of graphableProcesses) {
