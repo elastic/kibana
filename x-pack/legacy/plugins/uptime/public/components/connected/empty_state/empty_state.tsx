@@ -16,7 +16,7 @@ export const EmptyState: React.FC = ({ children }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(indexStatusAction.get());
+    dispatch(indexStatusAction.get(''));
   }, [dispatch]);
 
   return (

@@ -8,7 +8,7 @@ import { Action } from 'redux-actions';
 import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 
 export interface AsyncAction<Payload, SuccessPayload> {
-  get: (payload?: Payload) => Action<Payload>;
+  get: (payload: Payload) => Action<Payload>;
   success: (payload: SuccessPayload) => Action<SuccessPayload>;
   fail: (payload: IHttpFetchError) => Action<IHttpFetchError>;
 }
