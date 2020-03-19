@@ -10,7 +10,7 @@ import { ErrorRateAlertTrigger } from '.';
 
 storiesOf('app/ErrorRateAlertTrigger', module).add('example', props => {
   const params = {
-    rate: 2,
+    threshold: 2,
     window: '5m'
   };
 

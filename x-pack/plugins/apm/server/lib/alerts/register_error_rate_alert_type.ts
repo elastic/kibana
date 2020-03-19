@@ -27,7 +27,8 @@ interface RegisterAlertParams {
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
-  window: schema.string(),
+  windowSize: schema.number(),
+  windowUnit: schema.string(),
   threshold: schema.number()
 });
 
@@ -66,7 +67,7 @@ export function registerErrorRateAlertType({
                 {
                   range: {
                     '@timestamp': {
-                      gte: `now-${alertParams.window}`
+                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`
                     }
                   }
                 },

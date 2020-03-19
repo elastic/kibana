@@ -6,12 +6,14 @@
 import React from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ForLastExpression } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG } from '../../../../../../../plugins/apm/common/alert_types';
-import { DurationField } from '../ServiceAlertTrigger/DurationField';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
+import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 
 export interface ErrorRateAlertTriggerParams {
-  window: string;
+  windowSize: number;
+  windowUnit: string;
   threshold: number;
 }
 
@@ -26,41 +28,48 @@ export function ErrorRateAlertTrigger(props: Props) {
 
   const defaults = {
     threshold: 2,
-    window: '5m'
+    windowSize: 5,
+    windowUnit: 'm'
+  };
+
+  const params = {
+    ...defaults,
+    ...alertParams
   };
 
   const fields = [
-    {
-      name: 'threshold',
-      title: i18n.translate('xpack.apm.errorRateAlertTrigger.setThreshold', {
-        defaultMessage: 'Set threshold'
-      }),
-      field: (
-        <EuiFieldNumber
-          value={alertParams.threshold ?? ''}
-          step={0}
-          onChange={e =>
-            setAlertParams('threshold', parseInt(e.target.value, 10))
-          }
-          compressed
-          append={i18n.translate('xpack.apm.errorRateAlertTrigger.errors', {
-            defaultMessage: 'errors'
-          })}
-        />
-      )
-    },
-    {
-      name: 'window',
-      title: i18n.translate('xpack.apm.errorRateAlertTrigger.setWindow', {
-        defaultMessage: 'Set window'
-      }),
-      field: (
-        <DurationField
-          duration={alertParams.window}
-          onChange={duration => setAlertParams('window', duration)}
-        />
-      )
-    }
+    <PopoverExpression
+      title={i18n.translate('xpack.apm.errorRateAlertTrigger.isAbove', {
+        defaultMessage: 'is above'
+      })}
+      value={params.threshold.toString()}
+    >
+      <EuiFieldNumber
+        value={alertParams.threshold ?? ''}
+        step={0}
+        onChange={e =>
+          setAlertParams('threshold', parseInt(e.target.value, 10))
+        }
+        compressed
+        append={i18n.translate('xpack.apm.errorRateAlertTrigger.errors', {
+          defaultMessage: 'errors'
+        })}
+      />
+    </PopoverExpression>,
+    <ForLastExpression
+      onChangeWindowSize={windowSize =>
+        setAlertParams('windowSize', windowSize)
+      }
+      onChangeWindowUnit={windowUnit =>
+        setAlertParams('windowUnit', windowUnit)
+      }
+      timeWindowSize={params.windowSize}
+      timeWindowUnit={params.windowUnit}
+      errors={{
+        timeWindowSize: [],
+        timeWindowUnit: []
+      }}
+    />
   ];
 
   return (

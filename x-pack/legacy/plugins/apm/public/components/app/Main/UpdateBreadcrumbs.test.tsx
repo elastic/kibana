@@ -8,12 +8,12 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
-import {
-  mockApmPluginContextValue,
-  MockApmPluginContextWrapper
-} from '../../../utils/testHelpers';
 import { routes } from './route_config';
 import { UpdateBreadcrumbs } from './UpdateBreadcrumbs';
+import {
+  MockApmPluginContextWrapper,
+  mockApmPluginContextValue
+} from '../../../context/ApmPluginContext/MockApmPluginContext';
 
 const setBreadcrumbs = jest.fn();
 

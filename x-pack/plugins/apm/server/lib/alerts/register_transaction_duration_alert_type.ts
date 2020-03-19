@@ -27,7 +27,8 @@ interface RegisterAlertParams {
 const paramsSchema = schema.object({
   serviceName: schema.string(),
   transactionType: schema.string(),
-  window: schema.string(),
+  windowSize: schema.number(),
+  windowUnit: schema.string(),
   threshold: schema.number(),
   aggregationType: schema.oneOf([
     schema.literal('avg'),
@@ -71,7 +72,7 @@ export function registerTransactionDurationAlertType({
                 {
                   range: {
                     '@timestamp': {
-                      gte: `now-${alertParams.window}`
+                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`
                     }
                   }
                 },
