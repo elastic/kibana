@@ -7,6 +7,7 @@
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, chunk, get, pick } from 'lodash/fp';
 import React, { memo, useState } from 'react';
+import styled from 'styled-components';
 
 import {
   IIndexPattern,
@@ -28,18 +29,28 @@ import {
   buildThreatDescription,
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
+  buildNoteDescription,
 } from './helpers';
 
+const DescriptionListContainer = styled(EuiDescriptionList)`
+  &.euiDescriptionList--column .euiDescriptionList__title {
+    width: 30%;
+  }
+  &.euiDescriptionList--column .euiDescriptionList__description {
+    width: 70%;
+  }
+`;
+
 interface StepRuleDescriptionProps {
-  direction?: 'row' | 'column';
+  columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: IIndexPattern;
   schema: FormSchema;
 }
 
-const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
+export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
   data,
-  direction = 'row',
+  columns = 'multi',
   indexPatterns,
   schema,
 }) => {
@@ -55,11 +66,14 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
     []
   );
 
-  if (direction === 'row') {
+  if (columns === 'multi') {
     return (
       <EuiFlexGroup>
         {chunk(Math.ceil(listItems.length / 2), listItems).map((chunkListItems, index) => (
-          <EuiFlexItem key={`description-step-rule-${index}`}>
+          <EuiFlexItem
+            data-test-subj="listItemColumnStepRuleDescription"
+            key={`description-step-rule-${index}`}
+          >
             <EuiDescriptionList listItems={chunkListItems} />
           </EuiFlexItem>
         ))}
@@ -69,8 +83,16 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem data-test-subj="definition" key={`description-step-rule`}>
-        <EuiDescriptionList listItems={listItems} />
+      <EuiFlexItem data-test-subj="listItemColumnStepRuleDescription">
+        {columns === 'single' ? (
+          <EuiDescriptionList listItems={listItems} />
+        ) : (
+          <DescriptionListContainer
+            data-test-subj="singleSplitStepRuleDescriptionList"
+            type="column"
+            listItems={listItems}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -78,7 +100,7 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
 
 export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
-const buildListItems = (
+export const buildListItems = (
   data: unknown,
   schema: FormSchema,
   filterManager: FilterManager,
@@ -108,7 +130,7 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
-const getDescriptionItem = (
+export const getDescriptionItem = (
   field: string,
   label: string,
   value: unknown,
@@ -132,13 +154,6 @@ const getDescriptionItem = (
       (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
     );
     return buildThreatDescription({ label, threat });
-  } else if (field === 'description') {
-    return [
-      {
-        title: label,
-        description: get(field, value),
-      },
-    ];
   } else if (field === 'references') {
     const urls: string[] = get(field, value);
     return buildUrlsDescription(label, urls);
@@ -166,14 +181,9 @@ const getDescriptionItem = (
         description: timeline.title ?? DEFAULT_TIMELINE_TITLE,
       },
     ];
-  } else if (field === 'riskScore') {
-    const description: string = get(field, value);
-    return [
-      {
-        title: label,
-        description,
-      },
-    ];
+  } else if (field === 'note') {
+    const val: string = get(field, value);
+    return buildNoteDescription(label, val);
   }
   const description: string = get(field, value);
   if (!isEmpty(description)) {

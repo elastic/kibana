@@ -173,16 +173,6 @@ export class AlertingPlugin {
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
 
-    alertTypeRegistry.register({
-      id: 'test',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroupId: 'default',
-      name: 'Test',
-      executor: async options => {
-        return { status: 'ok' };
-      },
-    });
-
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
     };

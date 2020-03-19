@@ -72,7 +72,7 @@ export function getStatsBarData(jobsList: any) {
   const jobStats = {
     activeNodes: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
-        defaultMessage: 'Active ML Nodes',
+        defaultMessage: 'Active ML nodes',
       }),
       value: 0,
       show: true,
