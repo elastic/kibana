@@ -46,10 +46,7 @@ function keys<O extends object>(obj: O): Array<keyof O> {
 }
 
 export interface ActionsService {
-  getAgentByAccessAPIKeyId: (
-    soClient: SavedObjectsClientContract,
-    accessAPIKeyId: string
-  ) => Promise<Agent>;
+  getAgent: (soClient: SavedObjectsClientContract, agentId: string) => Promise<Agent>;
 
   getSavedObjectsClientContract: (kibanaRequest: KibanaRequest) => SavedObjectsClientContract;
 

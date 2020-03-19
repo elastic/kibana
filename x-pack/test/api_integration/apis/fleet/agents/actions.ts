@@ -5,68 +5,26 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getSupertestWithoutAuth } from './services';
 
 export default function(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
-  const esClient = getService('es');
-
-  const supertest = getSupertestWithoutAuth(providerContext);
-  let apiKey: { id: string; api_key: string };
+  const supertest = getService('supertest');
 
   describe('fleet_agents_actions', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
-
-      const { body: apiKeyBody } = await esClient.security.createApiKey({
-        body: {
-          name: `test access api key: ${uuid.v4()}`,
-        },
-      });
-      apiKey = apiKeyBody;
-      const {
-        body: { _source: agentDoc },
-      } = await esClient.get({
-        index: '.kibana',
-        id: 'agents:agent1',
-      });
-      agentDoc.agents.access_api_key_id = apiKey.id;
-      await esClient.update({
-        index: '.kibana',
-        id: 'agents:agent1',
-        refresh: 'true',
-        body: {
-          doc: agentDoc,
-        },
-      });
     });
     after(async () => {
       await esArchiver.unload('fleet/agents');
-    });
-
-    it('should return a 401 if this a not a valid actions access', async () => {
-      await supertest
-        .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
-        .set('kbn-xsrf', 'xx')
-        .set('Authorization', 'ApiKey NOT_A_VALID_TOKEN')
-        .send({
-          action_ids: [],
-        })
-        .expect(401);
     });
 
     it('should return a 200 if this a valid actions request', async () => {
       const { body: apiResponse } = await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
         .set('kbn-xsrf', 'xx')
-        .set(
-          'Authorization',
-          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
-        )
         .send({
           action: {
             type: 'CONFIG_CHANGE',
@@ -83,10 +41,6 @@ export default function(providerContext: FtrProviderContext) {
       const { body: agentResponse } = await supertest
         .get(`/api/ingest_manager/fleet/agents/agent1`)
         .set('kbn-xsrf', 'xx')
-        .set(
-          'Authorization',
-          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
-        )
         .expect(200);
 
       const updatedAction = agentResponse.item.actions.find(
@@ -102,10 +56,6 @@ export default function(providerContext: FtrProviderContext) {
       const { body: apiResponse } = await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
         .set('kbn-xsrf', 'xx')
-        .set(
-          'Authorization',
-          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
-        )
         .send({
           action: {
             data: 'action_data',
@@ -116,6 +66,21 @@ export default function(providerContext: FtrProviderContext) {
       expect(apiResponse.message).to.eql(
         '[request body.action.type]: expected at least one defined value but got [undefined]'
       );
+    });
+
+    it('should return a 404 when agent does not exist', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent100/actions`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          action: {
+            type: 'CONFIG_CHANGE',
+            data: 'action_data',
+            sent_at: '2020-03-18T19:45:02.620Z',
+          },
+        })
+        .expect(404);
+      expect(apiResponse.message).to.eql('Saved object [agents/agent100] not found');
     });
   });
 }

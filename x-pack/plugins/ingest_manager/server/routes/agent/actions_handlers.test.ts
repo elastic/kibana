@@ -49,15 +49,15 @@ describe('test actions handlers', () => {
 
   it('should succeed on valid new agent action', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
-      headers: {
-        authorization: 'ApiKey TmVqTDBIQUJsRkw1em52R1ZIUF86NS1NaTItdHFUTHFHbThmQW1Fb0ljUQ==',
-      },
       body: {
         action: {
           type: 'CONFIG_CHANGE',
           data: 'data',
           sent_at: '2020-03-14T19:45:02.620Z',
         },
+      },
+      params: {
+        agentId: 'id',
       },
     });
 
@@ -70,7 +70,7 @@ describe('test actions handlers', () => {
     } as unknown) as AgentAction;
 
     const actionsService: ActionsService = {
-      getAgentByAccessAPIKeyId: jest.fn().mockReturnValueOnce({
+      getAgent: jest.fn().mockReturnValueOnce({
         id: 'agent',
       }),
       getSavedObjectsClientContract: jest.fn().mockReturnValueOnce(mockSavedObjectsClient),

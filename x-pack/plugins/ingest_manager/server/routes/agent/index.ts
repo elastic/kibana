@@ -118,10 +118,10 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.ACTIONS_PATTERN,
       validate: PostNewAgentActionRequestSchema,
-      options: { tags: [] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     postNewAgentActionHandlerBuilder({
-      getAgentByAccessAPIKeyId: AgentService.getAgentByAccessAPIKeyId,
+      getAgent: AgentService.getAgent,
       getSavedObjectsClientContract: getInternalUserSOClient,
       updateAgentActions: AgentService.updateAgentActions,
     })
