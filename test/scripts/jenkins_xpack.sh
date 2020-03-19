@@ -11,7 +11,11 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
 
   echo " -> Running jest tests"
   cd "$XPACK_DIR"
-  checks-reporter-with-killswitch "X-Pack Jest" node --max-old-space-size=6144 scripts/jest --ci --verbose --detectOpenHandles
+  for i in {1..20}
+  do
+    checks-reporter-with-killswitch "X-Pack Jest" node --max-old-space-size=6144 scripts/jest --ci --verbose --detectOpenHandles
+    echo " -> Jest iteration $i done"
+  done
   echo ""
   echo ""
 
