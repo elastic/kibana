@@ -9,13 +9,12 @@ import { AreaSeries, BarSeries, Position, LineSeries, Settings, ScaleType } from
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount, shallow } from 'enzyme';
+import { mount, shallow, ReactWrapper } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
 import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
-import { npStart } from 'ui/new_platform';
 
 jest.mock('ui/new_platform');
+import { npStart } from 'ui/new_platform';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -243,10 +242,17 @@ describe('xy_expression', () => {
     });
 
     test('onElementClick returns correct context data', () => {
-      npStart.plugins.uiActions.executeTriggerActions = jest.fn(() => {});
+      const geometry = { x: 5, y: 1, accessor: 'y1' };
+      const series = {
+        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+        specId: 'd',
+        yAccessor: 'd',
+        splitAccessors: {},
+        seriesKeys: [2, 'd'],
+      };
 
       const { args, data } = sampleArgs();
-      const wrapper = mount(
+      const wrapper: ReactWrapper = mount(
         <XYChart
           data={data}
           args={{
@@ -271,15 +277,8 @@ describe('xy_expression', () => {
         />
       );
 
-      const geometry = { x: 5, y: 1, accessor: 'y1' };
-      const series = {
-        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
-        specId: 'd',
-        yAccessor: 'd',
-        splitAccessors: {},
-        seriesKeys: [2, 'd'],
-      };
-
+      // TODO: fix it
+      // @ts-ignore
       wrapper
         .find('[data-test-subj="lnsChart-xyExpression-settings"]')
         .first()
