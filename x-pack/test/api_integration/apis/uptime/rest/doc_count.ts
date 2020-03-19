@@ -5,14 +5,14 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { expectFixtureEql } from '../graphql/helpers/expect_fixture_eql';
-import { REST_API_URLS } from '../../../../../legacy/plugins/uptime/common/constants';
+import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export default function({ getService }: FtrProviderContext) {
   describe('docCount query', () => {
     const supertest = getService('supertest');
 
     it(`will fetch the index's count`, async () => {
-      const apiResponse = await supertest.get(REST_API_URLS.INDEX_STATUS);
+      const apiResponse = await supertest.get(API_URLS.INDEX_STATUS);
       const data = apiResponse.body;
       expectFixtureEql(data, 'doc_count');
     });
