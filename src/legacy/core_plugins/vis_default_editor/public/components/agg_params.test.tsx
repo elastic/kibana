@@ -117,12 +117,6 @@ describe('DefaultEditorAggParams component', () => {
     };
   });
 
-  it('should init with the default set of params', () => {
-    const comp = shallow(<DefaultEditorAggParams {...defaultProps} />);
-
-    expect(comp).toMatchSnapshot();
-  });
-
   it('should reset the validity to true when destroyed', () => {
     const comp = mount(<DefaultEditorAggParams {...defaultProps} aggIsTooLow={true} />);
 
