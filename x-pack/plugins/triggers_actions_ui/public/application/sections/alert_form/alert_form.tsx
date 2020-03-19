@@ -24,6 +24,10 @@ import {
   EuiButtonIcon,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import {
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+} from '../../../../../alerting/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { actionVariablesFromAlertType } from '../../lib/action_variables';
 import { AlertReducerAction } from './alert_reducer';
@@ -82,20 +86,16 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
 
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
-    alert.schedule.interval
-      ? parseInt(alert.schedule.interval.replace(/^[A-Za-z]+$/, ''), 0)
-      : undefined
+    alert.schedule.interval ? getDurationNumberInItsUnit(alert.schedule.interval) : undefined
   );
   const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>(
-    alert.schedule.interval
-      ? alert.schedule.interval.replace((alertInterval ?? '').toString(), '')
-      : 'm'
+    alert.schedule.interval ? getDurationUnitValue(alert.schedule.interval) : 'm'
   );
   const [alertThrottle, setAlertThrottle] = useState<number | null>(
-    alert.throttle ? parseInt(alert.throttle.replace(/^[A-Za-z]+$/, ''), 0) : null
+    alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null
   );
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>(
-    alert.throttle ? alert.throttle.replace((alertThrottle ?? '').toString(), '') : 'm'
+    alert.throttle ? getDurationUnitValue(alert.throttle) : 'm'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 

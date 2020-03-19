@@ -62,12 +62,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await fieldOptions[1].click();
       // need this two out of popup clicks to close them
       await nameInput.click();
-      const intervalInput = await testSubjects.find('intervalInput');
-      await intervalInput.click();
-      await intervalInput.clearValue();
-      const validationError = await find.byCssSelector(`.euiFormErrorText`);
-      expect(validationError.isDisplayed).to.be(true);
-      await intervalInput.type(1);
 
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
