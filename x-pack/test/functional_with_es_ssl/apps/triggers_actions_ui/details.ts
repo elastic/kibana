@@ -148,7 +148,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('View In App', function() {
+    describe('View In App', function() {
       const testRunUuid = uuid.v4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
