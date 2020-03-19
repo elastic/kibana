@@ -14,15 +14,16 @@ export type AgentType =
 
 export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
 
-export interface AgentAction extends SavedObjectAttributes {
+export interface NewAgentAction {
   type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
-  id: string;
-  created_at: string;
   data?: string;
   sent_at?: string;
 }
 
-export type NewAgentAction = Pick<AgentAction, 'type' | 'data' | 'sent_at'>;
+export interface AgentAction extends NewAgentAction, SavedObjectAttributes {
+  id: string;
+  created_at: string;
+}
 
 export interface AgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';

@@ -31,18 +31,12 @@ export async function updateAgentActions(
 }
 
 export function createAgentAction(createdAt: Date, newAgentAction: NewAgentAction): AgentAction {
-  const agentAction: object = {
+  const agentAction = {
     id: uuid.v4(),
     created_at: createdAt.toISOString(),
   };
 
-  Object.assign(agentAction, ...keys(newAgentAction).map(key => ({ [key]: newAgentAction[key] })));
-
-  return agentAction as AgentAction;
-}
-
-function keys<O extends object>(obj: O): Array<keyof O> {
-  return Object.keys(obj) as Array<keyof O>;
+  return Object.assign(agentAction, newAgentAction) as AgentAction;
 }
 
 export interface ActionsService {

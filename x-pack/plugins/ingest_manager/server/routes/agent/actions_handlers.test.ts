@@ -15,7 +15,10 @@ import { httpServerMock } from '../../../../../../src/core/server/http/http_serv
 import { ActionsService } from '../../services/agents';
 import { AgentAction } from '../../../common/types/models';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
-import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
+import {
+  PostNewAgentActionRequest,
+  PostNewAgentActionResponse,
+} from '../../../common/types/rest_spec';
 
 describe('test actions handlers schema', () => {
   it('validate that new agent actions schema is valid', async () => {
@@ -48,7 +51,7 @@ describe('test actions handlers', () => {
   });
 
   it('should succeed on valid new agent action', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({
+    const mockRequest = httpServerMock.createKibanaRequest(({
       body: {
         action: {
           type: 'CONFIG_CHANGE',
@@ -59,7 +62,7 @@ describe('test actions handlers', () => {
       params: {
         agentId: 'id',
       },
-    });
+    } as unknown) as PostNewAgentActionRequest);
 
     const agentAction = ({
       type: 'CONFIG_CHANGE',
