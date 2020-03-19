@@ -223,7 +223,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 component={QueryBarDefineRule}
                 componentProps={{
                   browserFields,
-                  loading: indexPatternLoadingQueryBar,
                   idAria: 'detectionEngineStepDefineRuleQueryBar',
                   indexPattern: indexPatternQueryBar,
                   isDisabled: isLoading,
