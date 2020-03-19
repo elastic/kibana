@@ -17,11 +17,23 @@
  * under the License.
  */
 
-/*
+import { i18n } from '@kbn/i18n';
+
+/**
  * config options opt into telemetry
- * @type {string}
  */
 export const CONFIG_TELEMETRY = 'telemetry:optIn';
+
+/**
+ * config description for opting into telemetry
+ */
+export const getConfigTelemetryDesc = () => {
+  // Can't find where it's used but copying it over from the legacy code just in case...
+  return i18n.translate('telemetry.telemetryConfigDescription', {
+    defaultMessage:
+      'Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.',
+  });
+};
 
 /**
  * The amount of time, in milliseconds, to wait between reports when enabled.
@@ -29,7 +41,7 @@ export const CONFIG_TELEMETRY = 'telemetry:optIn';
  */
 export const REPORT_INTERVAL_MS = 86400000;
 
-/*
+/**
  * Key for the localStorage service
  */
 export const LOCALSTORAGE_KEY = 'telemetry.data';
