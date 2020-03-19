@@ -18,20 +18,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
 
-  async function createAlert(alertTypeId?: string, name?: string, params?: any) {
+  async function createAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
       .post(`/api/alert`)
       .set('kbn-xsrf', 'foo')
       .send({
         enabled: true,
-        name: name ?? generateUniqueKey(),
+        name: generateUniqueKey(),
         tags: ['foo', 'bar'],
-        alertTypeId: alertTypeId ?? 'test.noop',
+        alertTypeId: 'test.noop',
         consumer: 'test',
         schedule: { interval: '1m' },
         throttle: '1m',
         actions: [],
-        params: params ?? {},
+        params: {},
+        ...overwrites,
       })
       .expect(200);
     return createdAlert;
@@ -80,10 +81,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await loggingMessageInput.click();
       await loggingMessageInput.clearValue();
       await loggingMessageInput.type('test message');
-      // TODO: uncomment variables test when server API will be ready
-      // await testSubjects.click('slackAddVariableButton');
-      // const variableMenuButton = await testSubjects.find('variableMenuButton-0');
-      // await variableMenuButton.click();
+      await testSubjects.click('slackAddVariableButton');
+      const variableMenuButton = await testSubjects.find('variableMenuButton-0');
+      await variableMenuButton.click();
       await find.clickByCssSelector('[data-test-subj="saveAlertButton"]');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Saved '${alertName}'`);
@@ -97,6 +97,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           interval: '1m',
         },
       ]);
+    });
+
+    it('should display alerts in alphabetical order', async () => {
+      const uniqueKey = generateUniqueKey();
+      await createAlert({ name: 'b', tags: [uniqueKey] });
+      await createAlert({ name: 'c', tags: [uniqueKey] });
+      await createAlert({ name: 'a', tags: [uniqueKey] });
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(uniqueKey);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.have.length(3);
+      expect(searchResults[0].name).to.eql('a');
+      expect(searchResults[1].name).to.eql('b');
+      expect(searchResults[2].name).to.eql('c');
     });
 
     it('should search for alert', async () => {
@@ -116,16 +132,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should edit an alert', async () => {
-      const createdAlert = await createAlert('.index-threshold', 'new alert', {
-        aggType: 'count',
-        termSize: 5,
-        thresholdComparator: '>',
-        timeWindowSize: 5,
-        timeWindowUnit: 'm',
-        groupBy: 'all',
-        threshold: [1000, 5000],
-        index: ['.kibana_1'],
-        timeField: 'alert',
+      const createdAlert = await createAlert({
+        alertTypeId: '.index-threshold',
+        name: 'new alert',
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        },
       });
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -164,6 +184,45 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           interval: '1m',
         },
       ]);
+    });
+
+    it('should reset alert when canceling an edit', async () => {
+      const createdAlert = await createAlert({
+        alertTypeId: '.index-threshold',
+        name: generateUniqueKey(),
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        },
+      });
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLink[0].click();
+
+      const updatedAlertName = 'Changed Alert Name';
+      const nameInputToUpdate = await testSubjects.find('alertNameInput');
+      await nameInputToUpdate.click();
+      await nameInputToUpdate.clearValue();
+      await nameInputToUpdate.type(updatedAlertName);
+
+      await testSubjects.click('cancelSaveEditedAlertButton');
+      await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
+
+      const editLinkPostCancel = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLinkPostCancel[0].click();
+
+      const nameInputAfterCancel = await testSubjects.find('alertNameInput');
+      const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
+      expect(textAfterCancel).to.eql(createdAlert.name);
     });
 
     it('should search for tags', async () => {

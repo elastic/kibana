@@ -30,12 +30,14 @@ export const updateRulesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const {
+        anomaly_threshold: anomalyThreshold,
         description,
         enabled,
         false_positives: falsePositives,
         from,
         query,
         language,
+        machine_learning_job_id: machineLearningJobId,
         output_index: outputIndex,
         saved_id: savedId,
         timeline_id: timelineId,
@@ -55,7 +57,9 @@ export const updateRulesRoute = (router: IRouter) => {
         type,
         threat,
         references,
+        note,
         version,
+        lists,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
@@ -76,6 +80,7 @@ export const updateRulesRoute = (router: IRouter) => {
         const rule = await updateRules({
           alertsClient,
           actionsClient,
+          anomalyThreshold,
           description,
           enabled,
           falsePositives,
@@ -83,6 +88,7 @@ export const updateRulesRoute = (router: IRouter) => {
           immutable: false,
           query,
           language,
+          machineLearningJobId,
           outputIndex: finalIndex,
           savedId,
           savedObjectsClient,
@@ -103,7 +109,9 @@ export const updateRulesRoute = (router: IRouter) => {
           type,
           threat,
           references,
+          note,
           version,
+          lists,
         });
         if (rule != null) {
           const ruleStatuses = await savedObjectsClient.find<

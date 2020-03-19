@@ -36,7 +36,7 @@ export const caseSavedObjectType: SavedObjectsType = {
       title: {
         type: 'keyword',
       },
-      state: {
+      status: {
         type: 'keyword',
       },
       tags: {

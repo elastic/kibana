@@ -143,6 +143,7 @@ import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
+import { Unit } from '@elastic/datemath';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { Url } from 'url';
@@ -280,7 +281,7 @@ export interface FieldFormatConfig {
 export const fieldFormats: {
     FieldFormatsRegistry: typeof FieldFormatsRegistry;
     FieldFormat: typeof FieldFormat;
-    serializeFieldFormat: (agg: import("../../../legacy/core_plugins/data/public/search").AggConfig) => import("../../expressions/common").SerializedFieldFormat<object>;
+    serializeFieldFormat: (agg: import("../public/search").AggConfig) => import("../../expressions/common").SerializedFieldFormat<object>;
     BoolFormat: typeof BoolFormat;
     BytesFormat: typeof BytesFormat;
     ColorFormat: typeof ColorFormat;
@@ -327,12 +328,6 @@ export function getDefaultSearchParams(config: SharedGlobalConfig): {
     ignoreUnavailable: boolean;
     restTotalHitsAsInt: boolean;
 };
-
-// Warning: (ae-forgotten-export) The symbol "TStrategyTypes" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "ICancel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type ICancel<T extends TStrategyTypes> = (id: string) => Promise<void>;
 
 // Warning: (ae-missing-release-tag) "IFieldFormatsRegistry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -506,10 +501,16 @@ export interface IResponseTypesMap {
     [ES_SEARCH_STRATEGY]: IEsSearchResponse;
 }
 
+// Warning: (ae-forgotten-export) The symbol "TStrategyTypes" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ISearch" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export type ISearch<T extends TStrategyTypes> = (request: IRequestTypesMap[T], options?: ISearchOptions) => Promise<IResponseTypesMap[T]>;
+
+// Warning: (ae-missing-release-tag) "ISearchCancel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type ISearchCancel<T extends TStrategyTypes> = (id: string) => Promise<void>;
 
 // Warning: (ae-missing-release-tag) "ISearchContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -574,6 +575,12 @@ export interface KueryNode {
     // (undocumented)
     type: keyof NodeTypes;
 }
+
+// Warning: (ae-forgotten-export) The symbol "parseEsInterval" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "ParsedInterval" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type ParsedInterval = ReturnType<typeof parseEsInterval>;
 
 // Warning: (ae-missing-release-tag) "parseInterval" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -655,6 +662,22 @@ export interface RefreshInterval {
     value: number;
 }
 
+// Warning: (ae-missing-release-tag) "search" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const search: {
+    aggs: {
+        dateHistogramInterval: typeof dateHistogramInterval;
+        InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
+        InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
+        isValidEsInterval: typeof isValidEsInterval;
+        isValidInterval: typeof isValidInterval;
+        parseEsInterval: typeof parseEsInterval;
+        parseInterval: typeof parseInterval;
+        toAbsoluteDates: typeof toAbsoluteDates;
+    };
+};
+
 // Warning: (ae-missing-release-tag) "shouldReadFieldFromDocValues" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -704,7 +727,13 @@ export type TSearchStrategyProvider<T extends TStrategyTypes> = (context: ISearc
 // src/plugins/data/server/index.ts:102:26 - (ae-forgotten-export) The symbol "TruncateFormat" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:130:27 - (ae-forgotten-export) The symbol "isFilterable" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:130:27 - (ae-forgotten-export) The symbol "isNestedField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/plugin.ts:62:14 - (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:181:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:182:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:183:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:184:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:185:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:188:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:64:14 - (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

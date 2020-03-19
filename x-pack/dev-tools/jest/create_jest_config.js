@@ -16,6 +16,8 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
     ],
     moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
     moduleNameMapper: {
+      '@elastic/eui$': `${kibanaDirectory}/node_modules/@elastic/eui/test-env`,
+      '@elastic/eui/lib/(.*)?': `${kibanaDirectory}/node_modules/@elastic/eui/test-env/$1`,
       '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
       '^fixtures/(.*)': `${kibanaDirectory}/src/fixtures/$1`,
       'uiExports/(.*)': fileMockPath,
@@ -48,9 +50,9 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '^.+\\.html?$': 'jest-raw-loader',
     },
     transformIgnorePatterns: [
-      // ignore all node_modules except @elastic/eui and monaco-editor which both require babel transforms to handle dynamic import()
+      // ignore all node_modules except monaco-editor which requires babel transforms to handle dynamic import()
       // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-      '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
+      '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
     ],
     snapshotSerializers: [
       `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`,

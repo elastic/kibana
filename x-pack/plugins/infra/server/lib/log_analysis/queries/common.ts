@@ -35,3 +35,11 @@ export const createResultTypeFilters = (resultType: 'model_plot' | 'record') => 
     },
   },
 ];
+
+export const createCategoryIdFilters = (categoryIds: number[]) => [
+  {
+    terms: {
+      category_id: categoryIds,
+    },
+  },
+];

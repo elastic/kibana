@@ -44,13 +44,13 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  hasSearchStategyForIndexPattern,
   intervalOptions,
   unhashUrl,
   subscribeWithScope,
   tabifyAggResponse,
   getAngularModule,
   ensureDefaultIndexPattern,
+  redirectWhenMissing,
 } from '../../kibana_services';
 
 const {
@@ -58,6 +58,7 @@ const {
   chrome,
   data,
   docTitle,
+  history,
   indexPatterns,
   filterManager,
   share,
@@ -77,6 +78,7 @@ import {
   getDefaultQuery,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
+import { addFatalError } from '../../../../../../../plugins/kibana_legacy/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -113,10 +115,10 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function(redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
+      savedObjects: function($route, Promise) {
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
-          const { appStateContainer } = getState({});
+        return ensureDefaultIndexPattern(core, data, history).then(() => {
+          const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
             ip: indexPatterns.getCache().then(indexPatternList => {
@@ -151,9 +153,13 @@ app.config($routeProvider => {
               })
               .catch(
                 redirectWhenMissing({
-                  search: '/discover',
-                  'index-pattern':
-                    '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                  history,
+                  mapping: {
+                    search: '/discover',
+                    'index-pattern':
+                      '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                  },
+                  toastNotifications,
                 })
               ),
           });
@@ -207,6 +213,7 @@ function discoverController(
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
+    history,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -238,28 +245,9 @@ function discoverController(
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
-        const changes = ['interval', 'sort', 'index', 'query'].filter(
+        const changes = ['interval', 'sort', 'query'].filter(
           prop => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
-        if (changes.indexOf('index') !== -1) {
-          try {
-            $scope.indexPattern = await indexPatterns.get(newStatePartial.index);
-            $scope.opts.timefield = getTimeField();
-            $scope.enableTimeRangeSelector = !!$scope.opts.timefield;
-            // is needed to rerender the histogram
-            $scope.vis = undefined;
-
-            // Taking care of sort when switching index pattern:
-            // Old indexPattern: sort by A
-            // If A is not available in the new index pattern, sort has to be adapted and propagated to URL
-            const sort = getSortArray(newStatePartial.sort, $scope.indexPattern);
-            if (newStatePartial.sort && !_.isEqual(sort, newStatePartial.sort)) {
-              return await replaceUrlAppState({ sort });
-            }
-          } catch (e) {
-            toastNotifications.addWarning({ text: getIndexPatternWarning(newStatePartial.index) });
-          }
-        }
 
         if (changes.length) {
           $fetchObservable.next();
@@ -268,17 +256,23 @@ function discoverController(
     }
   });
 
-  $scope.setIndexPattern = id => {
-    setAppState({ index: id });
+  $scope.setIndexPattern = async id => {
+    await replaceUrlAppState({ index: id });
+    $route.reload();
   };
 
   // update data source when filters update
   subscriptions.add(
-    subscribeWithScope($scope, filterManager.getUpdates$(), {
-      next: () => {
-        $scope.updateDataSource();
+    subscribeWithScope(
+      $scope,
+      filterManager.getUpdates$(),
+      {
+        next: () => {
+          $scope.updateDataSource();
+        },
       },
-    })
+      error => addFatalError(core.fatalErrors, error)
+    )
   );
 
   const inspectorAdapters = {
@@ -640,16 +634,26 @@ function discoverController(
       ).pipe(debounceTime(100));
 
       subscriptions.add(
-        subscribeWithScope($scope, searchBarChanges, {
-          next: $scope.fetch,
-        })
+        subscribeWithScope(
+          $scope,
+          searchBarChanges,
+          {
+            next: $scope.fetch,
+          },
+          error => addFatalError(core.fatalErrors, error)
+        )
       );
       subscriptions.add(
-        subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-          next: () => {
-            $scope.updateTime();
+        subscribeWithScope(
+          $scope,
+          timefilter.getTimeUpdate$(),
+          {
+            next: () => {
+              $scope.updateTime();
+            },
           },
-        })
+          error => addFatalError(core.fatalErrors, error)
+        )
       );
       //Handling change oft the histogram interval
       $scope.$watch('state.interval', function(newInterval, oldInterval) {
@@ -805,7 +809,7 @@ function discoverController(
             title: i18n.translate('kbn.discover.errorLoadingData', {
               defaultMessage: 'Error loading data',
             }),
-            toastMessage: error.shortMessage,
+            toastMessage: error.shortMessage || error.body?.message,
           });
         }
       });
@@ -1105,17 +1109,6 @@ function discoverController(
     }
 
     return loadedIndexPattern;
-  }
-
-  // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
-  // supported.
-  $scope.isUnsupportedIndexPattern =
-    !isDefaultType($route.current.locals.savedObjects.ip.loaded) &&
-    !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded);
-
-  if ($scope.isUnsupportedIndexPattern) {
-    $scope.unsupportedIndexPatternType = $route.current.locals.savedObjects.ip.loaded.type;
-    return;
   }
 
   addHelpMenuToAppChrome(chrome);

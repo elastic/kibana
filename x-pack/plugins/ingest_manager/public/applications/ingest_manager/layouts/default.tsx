@@ -12,7 +12,7 @@ import { useLink, useConfig } from '../hooks';
 import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from '../constants';
 
 interface Props {
-  section: Section;
+  section?: Section;
   children?: React.ReactNode;
 }
 
@@ -43,7 +43,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTabs display="condensed">
-              <EuiTab isSelected={!section || section === 'overview'} href={useLink()}>
+              <EuiTab isSelected={section === 'overview'} href={useLink()}>
                 <FormattedMessage
                   id="xpack.ingestManager.appNavigation.overviewLinkText"
                   defaultMessage="Overview"

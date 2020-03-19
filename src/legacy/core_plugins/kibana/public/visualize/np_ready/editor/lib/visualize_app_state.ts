@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction, omit } from 'lodash';
+import { isFunction, omit, union } from 'lodash';
 
 import { migrateAppState } from './migrate_app_state';
 import {
@@ -75,10 +75,10 @@ export function useVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Argu
           query: defaultQuery,
         };
       },
-      unlinkSavedSearch: state => (query, filters) => ({
+      unlinkSavedSearch: state => ({ query, parentFilters = [] }) => ({
         ...state,
-        query,
-        filters,
+        query: query || state.query,
+        filters: union(state.filters, parentFilters),
         linked: false,
       }),
       updateVisState: state => newVisState => ({ ...state, vis: toObject(newVisState) }),

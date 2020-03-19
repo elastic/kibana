@@ -4,15 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
+import { first } from 'rxjs/operators';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  SavedObjectsServiceStart,
+} from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { PLUGIN_ID } from './constants';
-import { appContextService } from './services';
-import { registerDatasourceRoutes, registerAgentConfigRoutes } from './routes';
+import {
+  PLUGIN_ID,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
+  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+} from './constants';
+
+import {
+  registerEPMRoutes,
+  registerDatasourceRoutes,
+  registerAgentConfigRoutes,
+  registerSetupRoutes,
+  registerAgentRoutes,
+  registerEnrollmentApiKeyRoutes,
+  registerInstallScriptRoutes,
+} from './routes';
+
 import { IngestManagerConfigType } from '../common';
+import { appContextService } from './services';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -24,7 +50,18 @@ export interface IngestManagerAppContext {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
+  savedObjects: SavedObjectsServiceStart;
 }
+
+const allSavedObjectTypes = [
+  OUTPUT_SAVED_OBJECT_TYPE,
+  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
+  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+];
 
 export class IngestManagerPlugin implements Plugin {
   private config$: Observable<IngestManagerConfigType>;
@@ -50,37 +87,47 @@ export class IngestManagerPlugin implements Plugin {
         app: [PLUGIN_ID, 'kibana'],
         privileges: {
           all: {
-            api: [PLUGIN_ID],
+            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
             savedObject: {
-              all: [],
+              all: allSavedObjectTypes,
               read: [],
             },
-            ui: ['show'],
+            ui: ['show', 'read', 'write'],
           },
           read: {
-            api: [PLUGIN_ID],
+            api: [`${PLUGIN_ID}-read`],
             savedObject: {
               all: [],
-              read: [],
+              read: allSavedObjectTypes,
             },
-            ui: ['show'],
+            ui: ['show', 'read'],
           },
         },
       });
     }
 
-    // Create router
     const router = core.http.createRouter();
+    const config = await this.config$.pipe(first()).toPromise();
 
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
 
-    // Optional route registration depending on Kibana config
-    // restore when EPM & Fleet features are added
-    // const config = await this.config$.pipe(first()).toPromise();
-    // if (config.epm.enabled) registerEPMRoutes(router);
-    // if (config.fleet.enabled) registerFleetSetupRoutes(router);
+    // Conditional routes
+    if (config.epm.enabled) {
+      registerEPMRoutes(router);
+    }
+
+    if (config.fleet.enabled) {
+      registerSetupRoutes(router);
+      registerAgentRoutes(router);
+      registerEnrollmentApiKeyRoutes(router);
+      registerInstallScriptRoutes({
+        router,
+        serverInfo: core.http.getServerInfo(),
+        basePath: core.http.basePath,
+      });
+    }
   }
 
   public async start(
@@ -93,6 +140,7 @@ export class IngestManagerPlugin implements Plugin {
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
       config$: this.config$,
+      savedObjects: core.savedObjects,
     });
   }
 

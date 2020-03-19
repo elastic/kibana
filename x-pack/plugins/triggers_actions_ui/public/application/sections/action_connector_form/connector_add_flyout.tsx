@@ -71,9 +71,6 @@ export const ConnectorAddFlyout = ({
     setConnector(initialConnector);
   }, [setAddFlyoutVisibility, initialConnector]);
 
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
   const canSave = hasSaveActionsCapability(capabilities);
 
   if (!addFlyoutVisible) {
@@ -105,9 +102,9 @@ export const ConnectorAddFlyout = ({
         actionTypeName={actionType.name}
         connector={connector}
         dispatch={dispatch}
-        serverError={serverError}
         errors={errors}
         actionTypeRegistry={actionTypeRegistry}
+        http={http}
       />
     );
   }
@@ -131,7 +128,17 @@ export const ConnectorAddFlyout = ({
         return savedConnector;
       })
       .catch(errorRes => {
-        setServerError(errorRes);
+        toastNotifications.addDanger(
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.addConnectorForm.updateErrorNotificationText',
+            {
+              defaultMessage: 'Failed to create connector: {message}',
+              values: {
+                message: errorRes.body?.message ?? '',
+              },
+            }
+          )
+        );
         return undefined;
       });
 
