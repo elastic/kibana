@@ -112,4 +112,8 @@ access level.
 been deprecated with warnings that have been logged throughout 7.x. Please use Kibana UI to re-generate the
 POST URL snippets if you depend on these for automated PDF reports.
 
+[float]
+==== bin/kibana-keystore has moved from the `data` folder to `config`
+*Details:* The Kibana keystore is used to add configuration changes.  It has been moved to Kibana's confugration directory.
+
 // end::notable-breaking-changes[]
