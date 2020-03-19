@@ -12,6 +12,8 @@ import { createKibanaReactContext } from '../../../../../src/plugins/kibana_reac
 import { AppContextProvider } from './context';
 import { Main } from './components/main';
 
+import './monaco.editor.contributions';
+
 interface AppDependencies {
   http: CoreSetup['http'];
   I18nContext: CoreStart['i18n']['Context'];
