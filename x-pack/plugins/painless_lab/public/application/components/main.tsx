@@ -65,6 +65,7 @@ export const Main: FunctionComponent = () => {
 
       {isRequestFlyoutOpen && (
         <RequestFlyout
+          links={links}
           onClose={() => setRequestFlyoutOpen(false)}
           requestBody={formatRequestPayload(state, PayloadFormat.PRETTY)}
           response={response ? formatJson(response.result || response.error) : ''}
