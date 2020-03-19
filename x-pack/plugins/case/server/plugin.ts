@@ -12,18 +12,13 @@ import { SecurityPluginSetup } from '../../security/server';
 
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
-<<<<<<< HEAD
 import {
   caseSavedObjectType,
   caseConfigureSavedObjectType,
   caseCommentSavedObjectType,
+  caseUserActionSavedObjectType,
 } from './saved_object_types';
-import { CaseConfigureService, CaseService } from './services';
-=======
-import { caseSavedObjectType, caseCommentSavedObjectType } from './saved_object_types';
-import { CaseService } from './services';
-import { CaseUserActionService } from './services/user_actions';
->>>>>>>  modify API to get the total comments in _find + Add user action to track what user are doing + create _pushed api to know when case have been pushed
+import { CaseConfigureService, CaseService, CaseUserActionService } from './services';
 
 function createConfig$(context: PluginInitializerContext) {
   return context.config.create<ConfigType>().pipe(map(config => config));
@@ -52,6 +47,7 @@ export class CasePlugin {
     core.savedObjects.registerType(caseSavedObjectType);
     core.savedObjects.registerType(caseCommentSavedObjectType);
     core.savedObjects.registerType(caseConfigureSavedObjectType);
+    core.savedObjects.registerType(caseUserActionSavedObjectType);
 
     const caseServicePlugin = new CaseService(this.log);
     const caseConfigureServicePlugin = new CaseConfigureService(this.log);
