@@ -7,7 +7,7 @@
 import { EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useUrlParams } from '../../../hooks';
+import { useUrlParams, UpdateUrlParams } from '../../../hooks';
 
 interface PopoverButtonProps {
   setIsOpen: (isOpen: boolean) => any;
@@ -66,16 +66,39 @@ interface MonitorListPageSizeSelectProps {
   setSize: (value: number) => void;
 }
 
-export const MonitorListPageSizeSelect = ({ size, setSize }: MonitorListPageSizeSelectProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const [getUrlParams, setUrlParams] = useUrlParams();
-  const params = getUrlParams();
+/**
+ * This component wraps the underlying UI functionality to make the component more testable.
+ * The features leveraged in this function are tested elsewhere, and are not novel to this component.
+ */
+export const MonitorListPageSizeSelect: React.FC<MonitorListPageSizeSelectProps> = ({
+  size,
+  setSize,
+}) => {
+  const [, setUrlParams] = useUrlParams();
 
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, size.toString());
   }, [size]);
 
+  return (
+    <MonitorListPageSizeSelectComponent size={size} setSize={setSize} setUrlParams={setUrlParams} />
+  );
+};
+
+interface ComponentProps extends MonitorListPageSizeSelectProps {
+  setUrlParams: UpdateUrlParams;
+}
+
+/**
+ * This function contains the UI functionality for the page select feature. It's agnostic to any
+ * external services/features, and focuses only on providing the UI and handling user interaction.
+ */
+export const MonitorListPageSizeSelectComponent: React.FC<ComponentProps> = ({
+  size,
+  setSize,
+  setUrlParams,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <EuiPopover
       button={<PopoverButton setIsOpen={value => setIsOpen(value)} size={size} />}
@@ -91,9 +114,6 @@ export const MonitorListPageSizeSelect = ({ size, setSize }: MonitorListPageSize
             icon={size === numRows ? 'check' : 'empty'}
             onClick={() => {
               setSize(numRows);
-              if (params.pagination) {
-                delete params.pagination;
-              }
               // reset pagination because the page size has changed
               setUrlParams({ pagination: undefined });
               setIsOpen(false);
