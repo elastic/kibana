@@ -9,7 +9,6 @@ import * as reactTestingLibrary from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { appStoreFactory } from '../../store';
-import { coreMock } from 'src/core/public/mocks';
 import { RouteCapture } from '../route_capture';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
@@ -29,7 +28,7 @@ describe('when on the managing page', () => {
 
   beforeEach(async () => {
     history = createMemoryHistory<never>();
-    store = appStoreFactory(coreMock.createStart(), true);
+    store = appStoreFactory();
     render = () => {
       return reactTestingLibrary.render(
         <Provider store={store}>

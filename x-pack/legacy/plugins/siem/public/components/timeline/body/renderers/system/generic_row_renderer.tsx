@@ -35,19 +35,16 @@ export const createGenericSystemRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children, timelineId }) => (
-    <>
-      {children}
-      <RowRendererContainer>
-        <SystemGenericDetails
-          browserFields={browserFields}
-          data={data}
-          contextId={`${actionName}-${timelineId}`}
-          text={text}
-          timelineId={timelineId}
-        />
-      </RowRendererContainer>
-    </>
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <SystemGenericDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`${actionName}-${timelineId}`}
+        text={text}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
   ),
 });
 
@@ -68,20 +65,17 @@ export const createEndgameProcessRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children, timelineId }) => (
-    <>
-      {children}
-      <RowRendererContainer>
-        <SystemGenericFileDetails
-          browserFields={browserFields}
-          data={data}
-          contextId={`endgame-process-${actionName}-${timelineId}`}
-          showMessage={false}
-          text={text}
-          timelineId={timelineId}
-        />
-      </RowRendererContainer>
-    </>
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <SystemGenericFileDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`endgame-process-${actionName}-${timelineId}`}
+        showMessage={false}
+        text={text}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
   ),
 });
 
@@ -102,20 +96,17 @@ export const createFimRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children, timelineId }) => (
-    <>
-      {children}
-      <RowRendererContainer>
-        <SystemGenericFileDetails
-          browserFields={browserFields}
-          data={data}
-          contextId={`fim-${actionName}-${timelineId}`}
-          showMessage={false}
-          text={text}
-          timelineId={timelineId}
-        />
-      </RowRendererContainer>
-    </>
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <SystemGenericFileDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`fim-${actionName}-${timelineId}`}
+        showMessage={false}
+        text={text}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
   ),
 });
 
@@ -136,19 +127,16 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children, timelineId }) => (
-    <>
-      {children}
-      <RowRendererContainer>
-        <SystemGenericFileDetails
-          browserFields={browserFields}
-          data={data}
-          contextId={`${actionName}-${timelineId}`}
-          text={text}
-          timelineId={timelineId}
-        />
-      </RowRendererContainer>
-    </>
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <SystemGenericFileDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`${actionName}-${timelineId}`}
+        text={text}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
   ),
 });
 
@@ -163,19 +151,16 @@ export const createSocketRowRenderer = ({
     const action: string | null | undefined = get('event.action[0]', ecs);
     return action != null && action.toLowerCase() === actionName;
   },
-  renderRow: ({ browserFields, data, children, timelineId }) => (
-    <>
-      {children}
-      <RowRendererContainer>
-        <SystemGenericFileDetails
-          browserFields={browserFields}
-          data={data}
-          contextId={`socket-${actionName}-${timelineId}`}
-          text={text}
-          timelineId={timelineId}
-        />
-      </RowRendererContainer>
-    </>
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <SystemGenericFileDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`socket-${actionName}-${timelineId}`}
+        text={text}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
   ),
 });
 
@@ -194,18 +179,15 @@ export const createSecurityEventRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children, timelineId }) => (
-    <>
-      {children}
-      <RowRendererContainer>
-        <EndgameSecurityEventDetails
-          browserFields={browserFields}
-          data={data}
-          contextId={`authentication-${actionName}-${timelineId}`}
-          timelineId={timelineId}
-        />
-      </RowRendererContainer>
-    </>
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <EndgameSecurityEventDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`authentication-${actionName}-${timelineId}`}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
   ),
 });
 
@@ -215,18 +197,15 @@ export const createDnsRowRenderer = (): RowRenderer => ({
     const dnsQuestionName: string | null | undefined = get('dns.question.name[0]', ecs);
     return !isNillEmptyOrNotFinite(dnsQuestionType) && !isNillEmptyOrNotFinite(dnsQuestionName);
   },
-  renderRow: ({ browserFields, data, children, timelineId }) => (
-    <>
-      {children}
-      <RowRendererContainer>
-        <DnsRequestEventDetails
-          browserFields={browserFields}
-          data={data}
-          contextId={`dns-request-${timelineId}`}
-          timelineId={timelineId}
-        />
-      </RowRendererContainer>
-    </>
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <DnsRequestEventDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`dns-request-${timelineId}`}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
   ),
 });
 

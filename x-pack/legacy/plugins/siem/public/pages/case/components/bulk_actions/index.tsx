@@ -48,6 +48,7 @@ export const getBulkItems = ({
     <EuiContextMenuItem
       key={i18n.BULK_ACTION_DELETE_SELECTED}
       icon="trash"
+      disabled={selectedCaseIds.length === 0}
       onClick={async () => {
         closePopover();
         deleteCasesAction(selectedCaseIds);

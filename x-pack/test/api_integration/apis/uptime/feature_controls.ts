@@ -5,9 +5,9 @@
  */
 
 import expect from '@kbn/expect';
-import { docCountQueryString } from '../../../../legacy/plugins/uptime/public/queries';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
+import { REST_API_URLS } from '../../../../legacy/plugins/uptime/common/constants';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
@@ -26,22 +26,13 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     expect(result.response).to.have.property('statusCode', 200);
   };
 
-  const executeGraphQLQuery = async (username: string, password: string, spaceId?: string) => {
+  const executeRESTAPIQuery = async (username: string, password: string, spaceId?: string) => {
     const basePath = spaceId ? `/s/${spaceId}` : '';
-    const getDocCountQuery = {
-      operationName: null,
-      query: docCountQueryString,
-      variables: {
-        dateRangeStart: '2019-01-28T17:40:08.078Z',
-        dateRangeEnd: '2019-01-28T19:00:16.078Z',
-      },
-    };
 
     return await supertest
-      .post(`${basePath}/api/uptime/graphql`)
+      .get(basePath + REST_API_URLS.INDEX_STATUS)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
-      .send({ ...getDocCountQuery })
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   };
@@ -82,7 +73,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           full_name: 'a kibana user',
         });
 
-        const graphQLResult = await executeGraphQLQuery(username, password);
+        const graphQLResult = await executeRESTAPIQuery(username, password);
         expect404(graphQLResult);
 
         const pingsResult = await executePingsRequest(username, password);
@@ -121,7 +112,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           full_name: 'a kibana user',
         });
 
-        const graphQLResult = await executeGraphQLQuery(username, password);
+        const graphQLResult = await executeRESTAPIQuery(username, password);
         expectResponse(graphQLResult);
 
         const pingsResult = await executePingsRequest(username, password);
@@ -163,7 +154,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           full_name: 'a kibana user',
         });
 
-        const graphQLResult = await executeGraphQLQuery(username, password);
+        const graphQLResult = await executeRESTAPIQuery(username, password);
         expect404(graphQLResult);
 
         const pingsResult = await executePingsRequest(username, password);
@@ -232,7 +223,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       it('user_1 can access APIs in space_1', async () => {
-        const graphQLResult = await executeGraphQLQuery(username, password, space1Id);
+        const graphQLResult = await executeRESTAPIQuery(username, password, space1Id);
         expectResponse(graphQLResult);
 
         const pingsResult = await executePingsRequest(username, password, space1Id);
@@ -240,7 +231,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       it(`user_1 can't access APIs in space_2`, async () => {
-        const graphQLResult = await executeGraphQLQuery(username, password);
+        const graphQLResult = await executeRESTAPIQuery(username, password);
         expect404(graphQLResult);
 
         const pingsResult = await executePingsRequest(username, password);

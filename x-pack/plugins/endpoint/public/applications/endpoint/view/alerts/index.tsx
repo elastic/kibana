@@ -32,6 +32,7 @@ import * as selectors from '../../store/alerts/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailsOverview } from './details';
 import { FormattedDate } from './formatted_date';
+import { AlertIndexSearchBar } from './index_search_bar';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -242,6 +243,7 @@ export const AlertIndex = memo(() => {
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
             <EuiPageContentBody>
+              <AlertIndexSearchBar />
               <EuiDataGrid
                 aria-label="Alert List"
                 rowCount={total}

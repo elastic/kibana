@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTableFieldDataColumnType,
   EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,6 +29,7 @@ import {
 } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import { usePageId } from '../use_page_id';
 import {
   selectIsLoading,
@@ -68,6 +70,25 @@ const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
       <FormattedRelative value={date} />
     </>
   );
+};
+
+const PolicyLink: React.FC<{ name: string; route: string }> = ({ name, route }) => {
+  const history = useHistory();
+
+  return (
+    <EuiLink
+      onClick={(event: React.MouseEvent) => {
+        event.preventDefault();
+        history.push(route);
+      }}
+    >
+      {name}
+    </EuiLink>
+  );
+};
+
+const renderPolicyNameLink = (value: string, _item: PolicyData) => {
+  return <PolicyLink name={value} route={`/policy/${_item.id}`} />;
 };
 
 const renderDate = (date: string, _item: PolicyData) => (
@@ -124,6 +145,7 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.endpoint.policyList.nameField', {
           defaultMessage: 'Policy Name',
         }),
+        render: renderPolicyNameLink,
         truncateText: true,
       },
       {

@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiButtonIcon,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -44,6 +43,9 @@ import { OpenClosedStats } from '../open_closed_stats';
 
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
+
+const CONFIGURE_CASES_URL = getConfigureCasesUrl();
+const CREATE_CASE_URL = getCreateCaseUrl();
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -220,7 +222,7 @@ export const AllCases = React.memo(() => {
       pageIndex: queryParams.page - 1,
       pageSize: queryParams.perPage,
       totalItemCount: data.total,
-      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+      pageSizeOptions: [5, 10, 15, 20, 25],
     }),
     [data, queryParams]
   );
@@ -229,10 +231,7 @@ export const AllCases = React.memo(() => {
     sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
   };
   const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
-    () => ({
-      selectable: (item: Case) => true,
-      onSelectionChange: setSelectedCases,
-    }),
+    () => ({ onSelectionChange: setSelectedCases }),
     [selectedCases]
   );
   const isCasesLoading = useMemo(
@@ -259,16 +258,14 @@ export const AllCases = React.memo(() => {
             />
           </FlexItemDivider>
           <EuiFlexItem grow={false}>
-            <EuiButton fill href={getCreateCaseUrl()} iconType="plusInCircle">
-              {i18n.CREATE_TITLE}
+            <EuiButton href={CONFIGURE_CASES_URL} iconType="controlsHorizontal">
+              {i18n.CONFIGURE_CASES_BUTTON}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label={i18n.CONFIGURE_CASES_BUTTON}
-              href={getConfigureCasesUrl()}
-              iconType="gear"
-            />
+            <EuiButton fill href={CREATE_CASE_URL} iconType="plusInCircle">
+              {i18n.CREATE_TITLE}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
@@ -305,6 +302,7 @@ export const AllCases = React.memo(() => {
                     {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
                   </UtilityBarText>
                   <UtilityBarAction
+                    data-test-subj="case-table-bulk-actions"
                     iconSide="right"
                     iconType="arrowDown"
                     popoverContent={getBulkItemsPopoverContent}
@@ -316,6 +314,7 @@ export const AllCases = React.memo(() => {
             </UtilityBar>
             <EuiBasicTable
               columns={memoizedGetCasesColumns}
+              data-test-subj="all-cases-table"
               isSelectable
               itemId="id"
               items={data.cases}
@@ -325,7 +324,7 @@ export const AllCases = React.memo(() => {
                   titleSize="xs"
                   body={i18n.NO_CASES_BODY}
                   actions={
-                    <EuiButton fill size="s" href={getCreateCaseUrl()} iconType="plusInCircle">
+                    <EuiButton fill size="s" href={CREATE_CASE_URL} iconType="plusInCircle">
                       {i18n.ADD_NEW_CASE}
                     </EuiButton>
                   }

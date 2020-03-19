@@ -24,13 +24,13 @@ import { CoreStart } from 'src/core/public';
 import { UiActionsService } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { IContainer, PanelState, EmbeddableChildPanel } from '../..';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../types';
+import { EmbeddableStart } from '../../../plugin';
 
 interface Props {
   container: IContainer;
   getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;

@@ -7,44 +7,20 @@
 import { createStore, Dispatch, Store } from 'redux';
 import { ManagementAction, managementListReducer } from './index';
 import { EndpointMetadata } from '../../../../../common/types';
+import { EndpointDocGenerator } from '../../../../../common/generate_data';
 import { ManagementListState } from '../../types';
 import { listData } from './selectors';
 
 describe('endpoint_list store concerns', () => {
   let store: Store<ManagementListState>;
   let dispatch: Dispatch<ManagementAction>;
+  const generator = new EndpointDocGenerator();
   const createTestStore = () => {
     store = createStore(managementListReducer);
     dispatch = store.dispatch;
   };
   const generateEndpoint = (): EndpointMetadata => {
-    return {
-      '@timestamp': new Date(1582231151055).toString(),
-      event: {
-        created: new Date(0),
-      },
-      endpoint: {
-        policy: {
-          id: '',
-        },
-      },
-      agent: {
-        version: '',
-        id: '',
-      },
-      host: {
-        id: '',
-        hostname: '',
-        ip: [''],
-        mac: [''],
-        os: {
-          name: '',
-          full: '',
-          version: '',
-          variant: '',
-        },
-      },
-    };
+    return generator.generateEndpointMetadata();
   };
   const loadDataToStore = () => {
     dispatch({

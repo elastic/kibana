@@ -28,6 +28,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
+import { subscribeWithScope } from '../../../../../../../../plugins/kibana_legacy/public';
 import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -37,7 +38,6 @@ import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { npStart } from 'ui/new_platform';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { createEditIndexPatternPageStateContainer } from './edit_index_pattern_state_container';
@@ -214,11 +214,16 @@ uiModules
     $scope.getCurrentTab = getCurrentTab;
     $scope.setCurrentTab = setCurrentTab;
 
-    const stateChangedSub = subscribeWithScope($scope, state$, {
-      next: ({ tab }) => {
-        handleTabChange($scope, tab);
+    const stateChangedSub = subscribeWithScope(
+      $scope,
+      state$,
+      {
+        next: ({ tab }) => {
+          handleTabChange($scope, tab);
+        },
       },
-    });
+      fatalError
+    );
 
     handleTabChange($scope, getCurrentTab()); // setup initial tab depending on initial tab state
 

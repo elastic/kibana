@@ -11,7 +11,8 @@ export interface Comment {
   createdAt: string;
   createdBy: ElasticUser;
   comment: string;
-  updatedAt: string;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
   version: string;
 }
 
@@ -25,7 +26,8 @@ export interface Case {
   status: string;
   tags: string[];
   title: string;
-  updatedAt: string;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
   version: string;
 }
 
@@ -68,4 +70,8 @@ export interface ElasticUser {
 export interface FetchCasesProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+}
+
+export interface ApiProps {
+  signal: AbortSignal;
 }

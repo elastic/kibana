@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH, UIM_SHOW_DETAILS_CLICK } from '../../../constants';
+import { PROXY_MODE } from '../../../../../common/constants';
 import { getRouterLinkProps, trackUiMetric, METRIC_TYPE } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
@@ -83,7 +84,7 @@ export class RemoteClusterTable extends Component {
         }),
         sortable: true,
         truncateText: false,
-        render: (name, { isConfiguredByNode }) => {
+        render: (name, { isConfiguredByNode, hasDeprecatedProxySetting }) => {
           const link = (
             <EuiLink
               data-test-subj="remoteClustersTableListClusterLink"
@@ -120,36 +121,91 @@ export class RemoteClusterTable extends Component {
             );
           }
 
+          if (hasDeprecatedProxySetting) {
+            return (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj="remoteClustersTableListClusterWithDeprecatedSettingTooltip"
+                >
+                  {link}
+                </EuiFlexItem>
+
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj="remoteClustersTableListDeprecatedSetttingsTooltip"
+                >
+                  <EuiIconTip
+                    type="alert"
+                    color="warning"
+                    content={
+                      <FormattedMessage
+                        id="xpack.remoteClusters.remoteClusterList.table.hasDeprecatedSettingMessage"
+                        defaultMessage="This remote cluster contains deprecated settings. Edit the remote cluster to resolve."
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          }
+
           return link;
         },
       },
       {
-        field: 'seeds',
-        name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.seedsColumnTitle', {
-          defaultMessage: 'Seeds',
-        }),
-        truncateText: true,
-        render: seeds => seeds.join(', '),
-      },
-      {
         field: 'isConnected',
         name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.connectedColumnTitle', {
-          defaultMessage: 'Connection',
+          defaultMessage: 'Status',
         }),
         sortable: true,
-        render: isConnected => <ConnectionStatus isConnected={isConnected} />,
+        render: (isConnected, { mode }) => (
+          <ConnectionStatus isConnected={isConnected} mode={mode} />
+        ),
         width: '240px',
       },
       {
-        field: 'connectedNodesCount',
+        field: 'mode',
+        name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.modeColumnTitle', {
+          defaultMessage: 'Mode',
+        }),
+        sortable: true,
+        render: mode =>
+          mode === PROXY_MODE
+            ? mode
+            : i18n.translate('xpack.remoteClusters.remoteClusterList.table.sniffModeDescription', {
+                defaultMessage: 'default',
+              }),
+      },
+      {
+        field: 'mode',
+        name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.addressesColumnTitle', {
+          defaultMessage: 'Addresses',
+        }),
+        truncateText: true,
+        render: (mode, { seeds, proxyAddress }) => {
+          if (mode === PROXY_MODE) {
+            return proxyAddress;
+          }
+          return seeds.join(', ');
+        },
+      },
+      {
+        field: 'mode',
         name: i18n.translate(
-          'xpack.remoteClusters.remoteClusterList.table.connectedNodesColumnTitle',
+          'xpack.remoteClusters.remoteClusterList.table.connectionsColumnTitle',
           {
-            defaultMessage: 'Connected nodes',
+            defaultMessage: 'Connections',
           }
         ),
         sortable: true,
         width: '160px',
+        render: (mode, { connectedNodesCount, connectedSocketsCount }) => {
+          if (mode === PROXY_MODE) {
+            return connectedSocketsCount;
+          }
+          return connectedNodesCount;
+        },
       },
       {
         name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionsColumnTitle', {

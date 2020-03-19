@@ -21,7 +21,7 @@ import {
 } from '../../../common/http_api/log_entries';
 import { parseFilterQuery } from '../../utils/serialized_query';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initLogEntriesSummaryHighlightsRoute = ({
   framework,

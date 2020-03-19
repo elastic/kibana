@@ -52,6 +52,7 @@ export function createLegacyEsTestCluster(options = {}) {
     `http.port=${port}`,
     'discovery.type=single-node',
     `transport.port=${esTestConfig.getTransportPort()}`,
+    `indices.id_field_data.enabled=false`,
     ...customEsArgs,
   ];
 

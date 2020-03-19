@@ -23,6 +23,8 @@ import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../saved_object_ty
 import { readReporters } from './reporters/read_reporters';
 import { readTags } from './tags/read_tags';
 
+export { CaseConfigureService, CaseConfigureServiceSetup } from './configure';
+
 interface ClientArgs {
   client: SavedObjectsClientContract;
 }

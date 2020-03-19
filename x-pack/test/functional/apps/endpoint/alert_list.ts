@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'endpoint']);
+  const pageObjects = getPageObjects(['common', 'endpointAlerts']);
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
 
   describe('Endpoint Alert List', function() {
     this.tags(['ciGroup7']);
@@ -20,8 +22,18 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     it('loads the Alert List Page', async () => {
       await testSubjects.existOrFail('alertListPage');
     });
+    it('includes alerts search bar', async () => {
+      await testSubjects.existOrFail('alertsSearchBar');
+    });
     it('includes Alert list data grid', async () => {
       await testSubjects.existOrFail('alertListGrid');
+    });
+    it('updates the url upon submitting a new search bar query', async () => {
+      await pageObjects.endpointAlerts.enterSearchBarQuery();
+      await pageObjects.endpointAlerts.submitSearchBarFilter();
+      const currentUrl = await browser.getCurrentUrl();
+      expect(currentUrl).to.contain('query=');
+      expect(currentUrl).to.contain('date_range=');
     });
 
     after(async () => {
