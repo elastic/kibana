@@ -128,9 +128,13 @@ const ConfigureCasesComponent: React.FC = () => {
     // TO DO give a warning/error to user when field are not mapped so they have chance to do it
     () => {
       setActionBarVisible(false);
-      persistCaseConfigure({ connectorId, closureType });
+      persistCaseConfigure({
+        connectorId,
+        connectorName: connectors.find(c => c.id === connectorId)?.name ?? '',
+        closureType,
+      });
     },
-    [connectorId, closureType, mapping]
+    [connectorId, connectors, closureType, mapping]
   );
 
   const onChangeConnector = useCallback((newConnectorId: string) => {

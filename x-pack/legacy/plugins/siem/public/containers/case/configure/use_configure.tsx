@@ -13,6 +13,7 @@ import { ClosureType } from './types';
 
 interface PersistCaseConfigure {
   connectorId: string;
+  connectorName: string;
   closureType: ClosureType;
 }
 
@@ -74,7 +75,7 @@ export const useCaseConfigure = ({
   }, []);
 
   const persistCaseConfigure = useCallback(
-    async ({ connectorId, closureType }: PersistCaseConfigure) => {
+    async ({ connectorId, connectorName, closureType }: PersistCaseConfigure) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
       const saveCaseConfiguration = async () => {
@@ -83,7 +84,11 @@ export const useCaseConfigure = ({
           const res =
             version.length === 0
               ? await postCaseConfigure(
-                  { connector_id: connectorId, closure_type: closureType },
+                  {
+                    connector_id: connectorId,
+                    connector_name: connectorName,
+                    closure_type: closureType,
+                  },
                   abortCtrl.signal
                 )
               : await patchCaseConfigure(

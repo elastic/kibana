@@ -14,7 +14,6 @@ export const caseSavedObjectType: SavedObjectsType = {
   namespaceAgnostic: false,
   mappings: {
     properties: {
-<<<<<<< HEAD
       closed_at: {
         type: 'date',
       },
@@ -31,11 +30,6 @@ export const caseSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      comment_ids: {
-        type: 'keyword',
-      },
-=======
->>>>>>>  modify API to get the total comments in _find + Add user action to track what user are doing + create _pushed api to know when case have been pushed
       created_at: {
         type: 'date',
       },
