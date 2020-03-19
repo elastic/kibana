@@ -19,7 +19,6 @@ import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
-// import { MLJobLink } from '../../monitor_details/ml/ml_job_link';
 import { MLIntegrationComponent } from '../../monitor_details/ml/ml_integeration';
 
 interface DurationChartProps {
@@ -34,6 +33,8 @@ interface DurationChartProps {
    */
   loading: boolean;
 
+  hasMLJob: boolean;
+
   anomalies: any;
 }
 
@@ -47,6 +48,7 @@ export const DurationChartComponent = ({
   locationDurationLines,
   anomalies,
   loading,
+  hasMLJob,
 }: DurationChartProps) => {
   const hasLines = locationDurationLines.length > 0;
   const [getUrlParams, updateUrlParams] = useUrlParams();
@@ -80,18 +82,23 @@ export const DurationChartComponent = ({
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h4>
-                <FormattedMessage
-                  id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
-                  defaultMessage="Monitor duration (Anomalies: {noOfAnomalies})"
-                  description="The 'ms' is an abbreviation for milliseconds."
-                  values={{ noOfAnomalies: anomalies?.anomalies?.length ?? 0 }}
-                />
+                {hasMLJob ? (
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
+                    defaultMessage="Monitor duration (Anomalies: {noOfAnomalies})"
+                    description="The 'ms' is an abbreviation for milliseconds."
+                    values={{ noOfAnomalies: anomalies?.anomalies?.length ?? 0 }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+                    defaultMessage="Monitor duration"
+                    description="The 'ms' is an abbreviation for milliseconds."
+                  />
+                )}
               </h4>
             </EuiTitle>
           </EuiFlexItem>
-          {/* <EuiFlexItem grow={false}>*/}
-          {/*  <MLJobLink fill={true}>Explore in ML</MLJobLink>*/}
-          {/* </EuiFlexItem>*/}
           <EuiFlexItem grow={false}>
             <MLIntegrationComponent />
           </EuiFlexItem>

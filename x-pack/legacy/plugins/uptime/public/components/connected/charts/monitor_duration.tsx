@@ -9,8 +9,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useUrlParams } from '../../../hooks';
 import { getAnomalyRecordsAction, getMonitorDurationAction } from '../../../state/actions';
 import { DurationChartComponent } from '../../functional/charts';
-import { anomaliesSelector, selectDurationLines } from '../../../state/selectors';
+import { anomaliesSelector, hasMLJobSelector, selectDurationLines } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
+import { getMLJobId } from '../../../state/api/ml_anomaly';
 
 interface Props {
   monitorId: string;
@@ -26,6 +27,12 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
   } = getUrlParams();
 
   const { durationLines, loading } = useSelector(selectDurationLines);
+
+  const { data: mlJobs } = useSelector(hasMLJobSelector);
+
+  const hasMLJob =
+    !!mlJobs?.jobsExist &&
+    mlJobs.jobs.find((job: any) => job.id === getMLJobId(monitorId as string));
 
   const anomalies = useSelector(anomaliesSelector);
 
@@ -50,6 +57,7 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
   return (
     <DurationChartComponent
       anomalies={anomalies}
+      hasMLJob={hasMLJob}
       loading={loading}
       locationDurationLines={durationLines?.locationDurationLines ?? []}
     />

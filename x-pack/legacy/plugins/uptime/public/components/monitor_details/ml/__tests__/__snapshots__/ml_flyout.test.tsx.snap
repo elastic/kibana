@@ -137,7 +137,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
                 <span
                   class="euiCallOutHeader__title"
                 >
-                  Start free 14-day Platinum license trial
+                  Start free 14-day trial
                 </span>
               </div>
               <div

@@ -8,7 +8,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { hasNewMLJobSelector, isMLJobCreatingSelector } from '../../../state/selectors';
-import { createMLJobAction, getExistingMLJobAction } from '../../../state/actions';
+import {
+  createMLJobAction,
+  getAnomalyRecordsAction,
+  getExistingMLJobAction,
+} from '../../../state/actions';
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
 import {
@@ -17,7 +21,8 @@ import {
 } from '../../../../../../../../src/plugins/kibana_react/public';
 import { MLFlyoutView } from './ml_flyout';
 import { ML_JOB_ID } from '../../../../common/constants';
-import { UptimeSettingsContext } from '../../../contexts';
+import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
+import { useUrlParams } from '../../../hooks';
 
 interface Props {
   isOpen: boolean;
@@ -61,6 +66,8 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
   const isMLJobCreating = useSelector(isMLJobCreatingSelector);
   const { basePath } = useContext(UptimeSettingsContext);
 
+  const { refreshApp } = useContext(UptimeRefreshContext);
+
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
 
@@ -76,6 +83,11 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
           dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
 
         loadMLJob(ML_JOB_ID);
+
+        // wait a couple seconds to make sure, job is deleted
+        setTimeout(() => {
+          refreshApp();
+        }, 2000);
       } else {
         showMLJobNotification(
           notifications,
@@ -88,6 +100,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
       setIsCreatingJob(false);
       onClose();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     hasMLJob,
     notifications,
