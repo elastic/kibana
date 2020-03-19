@@ -15,7 +15,7 @@ import {
   useKibana,
   KibanaReactNotifications,
 } from '../../../../../../../../src/plugins/kibana_react/public';
-import { MachineLearningFlyoutView } from './ml_flyout';
+import { MLFlyoutView } from './ml_flyout';
 import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
 
@@ -111,7 +111,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
 
   return (
     <>
-      <MachineLearningFlyoutView
+      <MLFlyoutView
         isCreatingJob={isMLJobCreating}
         onClickCreate={createAnomalyJob}
         onClose={onClose}

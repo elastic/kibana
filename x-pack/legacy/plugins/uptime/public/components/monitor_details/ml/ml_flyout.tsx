@@ -30,7 +30,7 @@ interface Props {
   onClose: () => void;
 }
 
-export function MachineLearningFlyoutView({ isCreatingJob, onClickCreate, onClose }: Props) {
+export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose }: Props) {
   const { basePath, license } = useContext(UptimeSettingsContext);
 
   const isLoadingMLJob = false;

@@ -11,7 +11,12 @@ export const ShowLicenseInfo = () => {
   const { basePath } = useContext(UptimeSettingsContext);
   return (
     <>
-      <EuiCallOut title="Start free 14-day Platinum license trial" color="primary" iconType="help">
+      <EuiCallOut
+        className="license-info-trial"
+        title="Start free 14-day Platinum license trial"
+        color="primary"
+        iconType="help"
+      >
         <p>
           In order to access duration anomaly detection, you have to be subscribed to an Elastic
           Platinum license.
