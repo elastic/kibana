@@ -1,3 +1,5 @@
+import groovy.transform.Field
+
 public static @Field PR_CHANGES_CACHE = null
 
 def getSkippablePaths() {

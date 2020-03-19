@@ -6,8 +6,12 @@ kibanaLibrary.load()
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
   githubPr.withDefaultPrComments {
     catchError {
-      whenChanged(/^vars\//) {
-        print "Testing"
+      whenChanged('vars/') {
+        print "Testing 1"
+      }
+
+      whenChanged(regex: /^vars\//) {
+        print "Testing 2"
       }
 
       retryable.enable()
@@ -45,7 +49,7 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
           'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
           'xpack-accessibility': kibanaPipeline.functionalTestProcess('xpack-accessibility', './test/scripts/jenkins_xpack_accessibility.sh'),
           'xpack-siemCypress': {
-            whenChanged(/^x-pack\/legacy\/plugins\/siem\//, kibanaPipeline.functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'))
+            whenChanged('x-pack/legacy/plugins/siem/', kibanaPipeline.functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'))
           },
 
           // 'xpack-visualRegression': kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh'),
