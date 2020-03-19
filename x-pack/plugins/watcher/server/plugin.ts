@@ -45,26 +45,21 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     this.log = ctx.logger.get();
   }
 
-  async setup({ http, getStartServices }: CoreSetup, { licensing }: Dependencies) {
+  async setup(
+    { http, elasticsearch: elasticsearchService }: CoreSetup,
+    { licensing }: Dependencies
+  ) {
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
       router,
       getLicenseStatus: () => this.licenseStatus,
     };
 
-    const getWatcherEsClient = async () => {
-      const [coreStart] = await getStartServices();
-      const config = { plugins: [elasticsearchJsPlugin] };
-      return coreStart.elasticsearch.legacy.createClient('watcher', config);
-    };
+    const config = { plugins: [elasticsearchJsPlugin] };
+    const watcherESClient = elasticsearchService.createClient('watcher', config);
     http.registerRouteHandlerContext('watcher', (ctx, request) => {
       return {
-        client: {
-          callAsCurrentUser: async (...args) =>
-            (await getWatcherEsClient()).asScoped(request).callAsCurrentUser(...args),
-          callAsInternalUser: async (...args) =>
-            (await getWatcherEsClient()).asScoped(request).callAsInternalUser(...args),
-        },
+        client: watcherESClient.asScoped(request),
       };
     });
 
