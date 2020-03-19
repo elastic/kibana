@@ -30,7 +30,6 @@ import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AGGREGATION_TYPES } from '../../../../../triggers_actions_ui/public/common/constants';
 import { MetricsExplorerOptions } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { MetricsExplorerKueryBar } from '../../metrics_explorer/kuery_bar';
 import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
@@ -368,18 +367,20 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
                 onChangeSelectedAggType={updateAggType}
               />
             </StyledExpression>
-            <StyledExpression>
-              <OfExpression
-                aggField={metric}
-                fields={fields.map(f => ({
-                  normalizedType: f.type,
-                  name: f.name,
-                }))}
-                aggType={aggType}
-                errors={errors}
-                onChangeSelectedAggField={updateMetric}
-              />
-            </StyledExpression>
+            {aggType !== 'count' && (
+              <StyledExpression>
+                <OfExpression
+                  aggField={metric}
+                  fields={fields.map(f => ({
+                    normalizedType: f.type,
+                    name: f.name,
+                  }))}
+                  aggType={aggType}
+                  errors={errors}
+                  onChangeSelectedAggField={updateMetric}
+                />
+              </StyledExpression>
+            )}
             <StyledExpression>
               <ThresholdExpression
                 thresholdComparator={comparator || '>'}
@@ -409,35 +410,63 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   );
 };
 
+enum AGGREGATION_TYPES {
+  COUNT = 'count',
+  AVERAGE = 'avg',
+  SUM = 'sum',
+  MIN = 'min',
+  MAX = 'max',
+  RATE = 'rate',
+  CARDINALITY = 'cardinality',
+}
+
 export const aggregationType: { [key: string]: any } = {
-  count: {
-    text: 'count',
-    fieldRequired: false,
-    value: AGGREGATION_TYPES.COUNT,
-    validNormalizedTypes: [],
-  },
   avg: {
-    text: 'average',
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.avg', {
+      defaultMessage: 'Average',
+    }),
     fieldRequired: true,
     validNormalizedTypes: ['number'],
     value: AGGREGATION_TYPES.AVERAGE,
   },
-  sum: {
-    text: 'sum',
+  max: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.max', {
+      defaultMessage: 'Max',
+    }),
     fieldRequired: true,
-    validNormalizedTypes: ['number'],
-    value: AGGREGATION_TYPES.SUM,
+    validNormalizedTypes: ['number', 'date'],
+    value: AGGREGATION_TYPES.MAX,
   },
   min: {
-    text: 'min',
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.min', {
+      defaultMessage: 'Min',
+    }),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date'],
     value: AGGREGATION_TYPES.MIN,
   },
-  max: {
-    text: 'max',
-    fieldRequired: true,
-    validNormalizedTypes: ['number', 'date'],
-    value: AGGREGATION_TYPES.MAX,
+  cardinality: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.cardinality', {
+      defaultMessage: 'Cardinality',
+    }),
+    fieldRequired: false,
+    value: AGGREGATION_TYPES.CARDINALITY,
+    validNormalizedTypes: ['number'],
+  },
+  rate: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.rate', {
+      defaultMessage: 'Rate',
+    }),
+    fieldRequired: false,
+    value: AGGREGATION_TYPES.RATE,
+    validNormalizedTypes: ['number'],
+  },
+  count: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.count', {
+      defaultMessage: 'Document count',
+    }),
+    fieldRequired: false,
+    value: AGGREGATION_TYPES.COUNT,
+    validNormalizedTypes: ['number'],
   },
 };
