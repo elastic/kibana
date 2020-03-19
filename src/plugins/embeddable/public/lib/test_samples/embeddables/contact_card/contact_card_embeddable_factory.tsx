@@ -42,7 +42,7 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
     super(options);
   }
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 

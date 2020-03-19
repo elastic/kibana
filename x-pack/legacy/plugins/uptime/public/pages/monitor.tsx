@@ -17,7 +17,7 @@ import { MonitorStatusDetails } from '../components/connected';
 import { Ping } from '../../common/graphql/types';
 import { AppState } from '../state';
 import { selectSelectedMonitor } from '../state/selectors';
-import { getSelectedMonitor } from '../state/actions';
+import { getSelectedMonitorAction } from '../state/actions';
 import { PageHeader } from './page_header';
 
 interface StateProps {
@@ -102,7 +102,7 @@ const mapDispatchToProps: MapDispatchToPropsFunction<DispatchProps, {}> = (dispa
   return {
     dispatchGetMonitorStatus: (monitorId: string) => {
       dispatch(
-        getSelectedMonitor({
+        getSelectedMonitorAction({
           monitorId,
         })
       );

@@ -233,7 +233,7 @@ export const AlertIndex = memo(() => {
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle size="l">
-                  <h1>
+                  <h1 data-test-subj="alertsViewTitle">
                     <FormattedMessage
                       id="xpack.endpoint.alertList.viewTitle"
                       defaultMessage="Alerts"

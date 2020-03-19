@@ -23,7 +23,7 @@ import sizeMe from 'react-sizeme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
-import { EmbeddableFactory, GetEmbeddableFactory } from '../../embeddable_plugin';
+import { EmbeddableFactory } from '../../embeddable_plugin';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
@@ -41,7 +41,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
     CONTACT_CARD_EMBEDDABLE,
     new ContactCardEmbeddableFactory({} as any, (() => {}) as any, {} as any)
   );
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+  const getEmbeddableFactory = (id: string) => embeddableFactories.get(id);
   const initialInput = getSampleDashboardInput({
     panels: {
       '1': {

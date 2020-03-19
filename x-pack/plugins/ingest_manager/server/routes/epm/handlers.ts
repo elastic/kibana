@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler, CustomHttpResponseOptions } from 'kibana/server';
+import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
 import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,

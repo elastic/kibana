@@ -84,7 +84,7 @@ describe('chart_switch', () => {
   }
 
   function mockDatasourceMap() {
-    const datasource = createMockDatasource();
+    const datasource = createMockDatasource('testDatasource');
     datasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       {
         state: {},
