@@ -8,7 +8,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Render } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
-export interface Arguments {
+interface Arguments {
   column: string;
   compact: boolean;
   filterGroup: string;
