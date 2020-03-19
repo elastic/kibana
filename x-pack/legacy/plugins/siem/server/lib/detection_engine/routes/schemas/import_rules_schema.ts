@@ -40,12 +40,14 @@ import {
   references,
   note,
   version,
+  lists,
   anomaly_threshold,
   machine_learning_job_id,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
+import { hasListsFeature } from '../../feature_flags';
 
 /**
  * Differences from this and the createRulesSchema are
@@ -111,6 +113,9 @@ export const importRulesSchema = Joi.object({
   updated_at,
   created_by,
   updated_by,
+
+  // TODO: (LIST-FEATURE) Remove the hasListsFeatures once this is ready for release
+  lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 });
 
 export const importRulesQuerySchema = Joi.object({
