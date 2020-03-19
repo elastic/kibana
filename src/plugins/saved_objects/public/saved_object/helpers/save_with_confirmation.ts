@@ -16,20 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
+
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from 'kibana/public';
-import { SavedObject, SavedObjectKibanaServices } from '../../types';
+import {
+  SavedObjectAttributes,
+  SavedObjectsCreateOptions,
+  OverlayStart,
+  SavedObjectsClientContract,
+} from 'kibana/public';
 import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 /**
  * Attempts to create the current object using the serialized source. If an object already
  * exists, a warning message requests an overwrite confirmation.
- * @param source - serialized version of this object (return value from this._serialize())
- * What will be indexed into elasticsearch.
- * @param savedObject - savedObject
- * @param esType - type of the saved object
+ * @param source - serialized version of this object what will be indexed into elasticsearch.
+ * @param savedObject - a simple object that contains properties title and displayName, and getEsType method
  * @param options - options to pass to the saved object create method
  * @param services - provides Kibana services savedObjectsClient and overlays
  * @returns {Promise} - A promise that is resolved with the objects id if the object is
@@ -38,19 +41,22 @@ import { confirmModalPromise } from './confirm_modal_promise';
  * a create or index error.
  * @resolved {SavedObject}
  */
-export async function createSource(
+export async function saveWithConfirmation(
   source: SavedObjectAttributes,
-  savedObject: SavedObject,
-  esType: string,
-  options = {},
-  services: SavedObjectKibanaServices
+  savedObject: {
+    getEsType(): string;
+    title: string;
+    displayName: string;
+  },
+  options: SavedObjectsCreateOptions,
+  services: { savedObjectsClient: SavedObjectsClientContract; overlays: OverlayStart }
 ) {
   const { savedObjectsClient, overlays } = services;
   try {
-    return await savedObjectsClient.create(esType, source, options);
+    return await savedObjectsClient.create(savedObject.getEsType(), source, options);
   } catch (err) {
     // record exists, confirm overwriting
-    if (_.get(err, 'res.status') === 409) {
+    if (get(err, 'res.status') === 409) {
       const confirmMessage = i18n.translate(
         'savedObjects.confirmModal.overwriteConfirmationMessage',
         {
@@ -61,7 +67,7 @@ export async function createSource(
 
       const title = i18n.translate('savedObjects.confirmModal.overwriteTitle', {
         defaultMessage: 'Overwrite {name}?',
-        values: { name: savedObject.getDisplayName() },
+        values: { name: savedObject.displayName },
       });
       const confirmButtonText = i18n.translate('savedObjects.confirmModal.overwriteButtonLabel', {
         defaultMessage: 'Overwrite',
@@ -69,11 +75,10 @@ export async function createSource(
 
       return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
         .then(() =>
-          savedObjectsClient.create(
-            esType,
-            source,
-            savedObject.creationOpts({ overwrite: true, ...options })
-          )
+          savedObjectsClient.create(savedObject.getEsType(), source, {
+            overwrite: true,
+            ...options,
+          })
         )
         .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
     }
