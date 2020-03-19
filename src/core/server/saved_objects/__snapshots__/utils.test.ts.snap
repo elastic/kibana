@@ -15,9 +15,8 @@ Array [
       },
     },
     "migrations": Object {},
-    "multiNamespace": undefined,
     "name": "typeA",
-    "namespaceAgnostic": undefined,
+    "namespaceType": "single",
   },
   Object {
     "convertToAliasScript": undefined,
@@ -32,9 +31,8 @@ Array [
       },
     },
     "migrations": Object {},
-    "multiNamespace": undefined,
     "name": "typeB",
-    "namespaceAgnostic": undefined,
+    "namespaceType": "single",
   },
   Object {
     "convertToAliasScript": undefined,
@@ -49,9 +47,8 @@ Array [
       },
     },
     "migrations": Object {},
-    "multiNamespace": undefined,
     "name": "typeC",
-    "namespaceAgnostic": undefined,
+    "namespaceType": "single",
   },
 ]
 `;
@@ -74,9 +71,8 @@ Array [
       "1.0.0": [Function],
       "2.0.4": [Function],
     },
-    "multiNamespace": undefined,
     "name": "typeA",
-    "namespaceAgnostic": true,
+    "namespaceType": "agnostic",
   },
   Object {
     "convertToAliasScript": "some alias script",
@@ -94,9 +90,8 @@ Array [
       },
     },
     "migrations": Object {},
-    "multiNamespace": undefined,
     "name": "typeB",
-    "namespaceAgnostic": undefined,
+    "namespaceType": "single",
   },
   Object {
     "convertToAliasScript": undefined,
@@ -113,9 +108,8 @@ Array [
     "migrations": Object {
       "1.5.3": [Function],
     },
-    "multiNamespace": undefined,
     "name": "typeC",
-    "namespaceAgnostic": undefined,
+    "namespaceType": "single",
   },
 ]
 `;
@@ -135,9 +129,8 @@ Array [
       },
     },
     "migrations": Object {},
-    "multiNamespace": undefined,
     "name": "typeA",
-    "namespaceAgnostic": true,
+    "namespaceType": "agnostic",
   },
   Object {
     "convertToAliasScript": undefined,
@@ -152,9 +145,8 @@ Array [
       },
     },
     "migrations": Object {},
-    "multiNamespace": true,
     "name": "typeB",
-    "namespaceAgnostic": undefined,
+    "namespaceType": "multiple",
   },
   Object {
     "convertToAliasScript": undefined,
@@ -169,9 +161,24 @@ Array [
       },
     },
     "migrations": Object {},
-    "multiNamespace": undefined,
     "name": "typeC",
-    "namespaceAgnostic": undefined,
+    "namespaceType": "single",
+  },
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": false,
+    "indexPattern": "bazQux",
+    "management": undefined,
+    "mappings": Object {
+      "properties": Object {
+        "fieldD": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {},
+    "name": "typeD",
+    "namespaceType": "agnostic",
   },
 ]
 `;

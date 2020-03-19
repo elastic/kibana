@@ -2199,9 +2199,10 @@ export interface SavedObjectsType {
     management?: SavedObjectsTypeManagementDefinition;
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap;
-    multiNamespace?: boolean;
     name: string;
+    // @deprecated
     namespaceAgnostic?: boolean;
+    namespaceType?: 'single' | 'multiple' | 'agnostic';
 }
 
 // @public

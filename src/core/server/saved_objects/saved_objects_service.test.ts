@@ -138,7 +138,7 @@ describe('SavedObjectsService', () => {
         const type = {
           name: 'someType',
           hidden: false,
-          namespaceAgnostic: false,
+          namespaceType: 'single' as 'single',
           mappings: { properties: {} },
         };
         setup.registerType(type);
@@ -253,7 +253,7 @@ describe('SavedObjectsService', () => {
         setup.registerType({
           name: 'someType',
           hidden: false,
-          namespaceAgnostic: false,
+          namespaceType: 'single' as 'single',
           mappings: { properties: {} },
         });
       }).toThrowErrorMatchingInlineSnapshot(

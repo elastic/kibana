@@ -127,21 +127,21 @@ describe('SavedObjectsRepository', () => {
   });
   registry.registerType({
     ...createType(NAMESPACE_AGNOSTIC_TYPE),
-    namespaceAgnostic: true,
+    namespaceType: 'agnostic',
   });
   registry.registerType({
     ...createType(MULTI_NAMESPACE_TYPE),
-    multiNamespace: true,
+    namespaceType: 'multiple',
   });
   registry.registerType({
     ...createType(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE),
-    multiNamespace: true,
+    namespaceType: 'multiple',
     indexPattern: 'custom',
   });
   registry.registerType({
     ...createType(HIDDEN_TYPE),
     hidden: true,
-    namespaceAgnostic: true,
+    namespaceType: 'agnostic',
   });
 
   const getMockGetResponse = ({ type, id, references, namespace }) => ({

@@ -178,13 +178,16 @@ export interface SavedObjectsType {
   hidden: boolean;
   /**
    * Is the type global (true), or not (false).
+   * @deprecated Use `namespaceType` instead.
    */
   namespaceAgnostic?: boolean;
   /**
-   * Is the type shareable (true), or not (false).
-   * Does not have any effect if `namespaceAgnostic` is true.
+   * How this type operates in relation to namespaces:
+   *  * single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace.
+   *  * multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces.
+   *  * agnostic: this type of saved object is global.
    */
-  multiNamespace?: boolean;
+  namespaceType?: 'single' | 'multiple' | 'agnostic';
   /**
    * If defined, the type instances will be stored in the given index instead of the default one.
    */
@@ -321,6 +324,7 @@ export type SavedObjectLegacyMigrationFn = (
  */
 interface SavedObjectsLegacyTypeSchema {
   isNamespaceAgnostic?: boolean;
+  /** Cannot be used in conjunction with `isNamespaceAgnostic` */
   multiNamespace?: boolean;
   hidden?: boolean;
   indexPattern?: ((config: LegacyConfig) => string) | string;

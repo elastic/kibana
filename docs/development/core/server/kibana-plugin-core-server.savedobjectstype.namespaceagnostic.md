@@ -4,6 +4,11 @@
 
 ## SavedObjectsType.namespaceAgnostic property
 
+> Warning: This API is now obsolete.
+> 
+> Use `namespaceType` instead.
+> 
+
 Is the type global (true), or not (false).
 
 <b>Signature:</b>

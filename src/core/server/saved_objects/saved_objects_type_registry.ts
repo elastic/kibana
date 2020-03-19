@@ -72,7 +72,11 @@ export class SavedObjectTypeRegistry {
    * resolves to `false` if the type is not registered
    */
   public isNamespaceAgnostic(type: string) {
-    return this.types.get(type)?.namespaceAgnostic ?? false;
+    return (
+      this.types.get(type)?.namespaceType === 'agnostic' ||
+      this.types.get(type)?.namespaceAgnostic ||
+      false
+    );
   }
 
   /**
@@ -88,7 +92,7 @@ export class SavedObjectTypeRegistry {
    * resolves to `false` if the type is not registered
    */
   public isMultiNamespace(type: string) {
-    return !this.isNamespaceAgnostic(type) && (this.types.get(type)?.multiNamespace ?? false);
+    return !this.isNamespaceAgnostic(type) && this.types.get(type)?.namespaceType === 'multiple';
   }
 
   /**

@@ -48,11 +48,15 @@ export const convertLegacyTypes = (
         const schema = savedObjectSchemas[type];
         const migrations = savedObjectMigrations[type];
         const management = savedObjectsManagement[type];
+        const namespaceType = schema?.isNamespaceAgnostic
+          ? 'agnostic'
+          : schema?.multiNamespace
+          ? 'multiple'
+          : 'single';
         return {
           name: type,
           hidden: schema?.hidden ?? false,
-          namespaceAgnostic: schema?.isNamespaceAgnostic,
-          multiNamespace: schema?.multiNamespace,
+          namespaceType,
           mappings,
           indexPattern:
             typeof schema?.indexPattern === 'function'
@@ -61,7 +65,7 @@ export const convertLegacyTypes = (
           convertToAliasScript: schema?.convertToAliasScript,
           migrations: convertLegacyMigrations(migrations ?? {}),
           management: management ? convertLegacyTypeManagement(management) : undefined,
-        };
+        } as SavedObjectsType;
       }),
     ];
   }, [] as SavedObjectsType[]);
@@ -77,8 +81,8 @@ export const convertTypesToLegacySchema = (
     return {
       ...schema,
       [type.name]: {
-        isNamespaceAgnostic: type.namespaceAgnostic,
-        multiNamespace: type.multiNamespace,
+        isNamespaceAgnostic: type.namespaceAgnostic || type.namespaceType === 'agnostic',
+        multiNamespace: !type.namespaceAgnostic && type.namespaceType === 'multiple',
         hidden: type.hidden,
         indexPattern: type.indexPattern,
         convertToAliasScript: type.convertToAliasScript,
