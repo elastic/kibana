@@ -114,7 +114,7 @@ export class LensPlugin {
         const savedObjectsClient = coreStart.savedObjects.client;
         addHelpMenuToAppChrome(coreStart.chrome);
 
-        const instance = await this.createEditorFrame!({});
+        const instance = await this.createEditorFrame!();
 
         setReportManager(
           new LensReportManager({

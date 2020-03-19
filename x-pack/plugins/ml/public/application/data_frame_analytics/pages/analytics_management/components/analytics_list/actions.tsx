@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { DeepReadonly } from '../../../../../../../common/types/common';
 
 import {
   checkPermission,
@@ -107,7 +108,7 @@ export const getActions = (createAnalyticsForm: CreateAnalyticsFormProps) => {
       },
     },
     {
-      render: (item: DataFrameAnalyticsListRow) => {
+      render: (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
         return <CloneAction item={item} createAnalyticsForm={createAnalyticsForm} />;
       },
     },

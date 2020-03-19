@@ -19,3 +19,15 @@ export function dictionaryToArray<TValue>(dict: Dictionary<TValue>): TValue[] {
 export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
 };
+
+export type DeepReadonly<T> = T extends Array<infer R>
+  ? ReadonlyArray<DeepReadonly<T>>
+  : T extends Function
+  ? T
+  : T extends object
+  ? DeepReadonlyObject<T>
+  : T;
+
+type DeepReadonlyObject<T> = {
+  readonly [P in keyof T]: DeepReadonly<T[P]>;
+};

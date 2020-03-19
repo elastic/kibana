@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { EuiPage, EuiPageSideBar, EuiPageBody } from '@elastic/eui';
-import { RootDragDropProvider } from '../../drag_drop';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
@@ -17,19 +16,17 @@ export interface FrameLayoutProps {
 
 export function FrameLayout(props: FrameLayoutProps) {
   return (
-    <RootDragDropProvider>
-      <EuiPage className="lnsFrameLayout">
-        <div className="lnsFrameLayout__pageContent">
-          <EuiPageSideBar className="lnsFrameLayout__sidebar">{props.dataPanel}</EuiPageSideBar>
-          <EuiPageBody className="lnsFrameLayout__pageBody" restrictWidth={false}>
-            {props.workspacePanel}
-            {props.suggestionsPanel}
-          </EuiPageBody>
-          <EuiPageSideBar className="lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right">
-            {props.configPanel}
-          </EuiPageSideBar>
-        </div>
-      </EuiPage>
-    </RootDragDropProvider>
+    <EuiPage className="lnsFrameLayout">
+      <div className="lnsFrameLayout__pageContent">
+        <EuiPageSideBar className="lnsFrameLayout__sidebar">{props.dataPanel}</EuiPageSideBar>
+        <EuiPageBody className="lnsFrameLayout__pageBody" restrictWidth={false}>
+          {props.workspacePanel}
+          {props.suggestionsPanel}
+        </EuiPageBody>
+        <EuiPageSideBar className="lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right">
+          {props.configPanel}
+        </EuiPageSideBar>
+      </div>
+    </EuiPage>
   );
 }

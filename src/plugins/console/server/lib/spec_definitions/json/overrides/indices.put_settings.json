@@ -1,0 +1,7 @@
+{
+  "indices.put_settings": {
+    "data_autocomplete_rules": {
+      "__scope_link": "put_settings"
+    }
+  }
+}
