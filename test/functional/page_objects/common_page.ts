@@ -508,6 +508,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         }
       });
     }
+
+    async setFileInputPath(path: string) {
+      log.debug(`Setting the path '${path}' on the file input`);
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
+    }
   }
 
   return new CommonPage();
