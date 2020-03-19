@@ -26,6 +26,7 @@ export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -501,9 +502,7 @@ export default function({ getService, getPageObjects }) {
           );
           expect(isHelperScaledLabelExists).to.be(false);
           await PageObjects.visEditor.setInterval('Millisecond');
-          const helperScaledLabelText = await (
-            await find.byCssSelector('[data-test-subj="currentlyScaledText"]')
-          ).getVisibleText();
+          const helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
           expect(helperScaledLabelText).to.include.string('to 10 minutes');
         });
 
@@ -513,29 +512,23 @@ export default function({ getService, getPageObjects }) {
             '[data-test-subj="currentlyScaledText"]'
           );
           expect(isHelperScaledLabelExists).to.be(true);
-          const helperScaledLabel = await find.byCssSelector(
-            '[data-test-subj="currentlyScaledText"]'
-          );
-          let helperScaledLabelText = await helperScaledLabel.getVisibleText();
+          let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
           expect(helperScaledLabelText).to.include.string('to 10 minutes');
           const fromTime = 'Sep 20, 2015 @ 22:30:00.000';
           const toTime = 'Sep 20, 2015 @ 23:30:00.000';
           await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-          helperScaledLabelText = await helperScaledLabel.getVisibleText();
+          helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
           expect(helperScaledLabelText).to.include.string('to 30 seconds');
         });
 
         it('should update scaled label text after custom interval is set and time range is changed', async () => {
           await PageObjects.visEditor.setInterval('10s', { type: 'custom' });
-          const helperScaledLabel = await find.byCssSelector(
-            '[data-test-subj="currentlyScaledText"]'
-          );
-          let helperScaledLabelText = await helperScaledLabel.getVisibleText();
+          let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
           expect(helperScaledLabelText).to.include.string('to 10 minutes');
           const fromTime = 'Sep 20, 2015 @ 21:30:00.000';
           const toTime = 'Sep 20, 2015 @ 23:30:00.000';
           await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-          helperScaledLabelText = await helperScaledLabel.getVisibleText();
+          helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
           expect(helperScaledLabelText).to.include.string('to minute');
         });
       });
