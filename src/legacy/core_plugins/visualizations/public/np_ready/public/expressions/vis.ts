@@ -52,7 +52,7 @@ export interface ExprVisAPI {
 
 export class ExprVis extends EventEmitter {
   public title: string = '';
-  public type?: VisType;
+  public type: VisType;
   public params: VisParams = {};
   public sessionState: Record<string, any> = {};
   public API: ExprVisAPI;
@@ -62,6 +62,7 @@ export class ExprVis extends EventEmitter {
   constructor(visState: ExprVisState = { type: 'histogram' }) {
     super();
 
+    this.type = this.getType(visState.type);
     this.uiState = new PersistedState();
     this.setState(visState);
 
@@ -79,29 +80,33 @@ export class ExprVis extends EventEmitter {
     };
   }
 
-  setState(state: ExprVisState) {
-    this.title = state.title || '';
-    const type = state.type || this.type;
+  private getType(type: string | VisType) {
     if (_.isString(type)) {
-      this.type = getTypes().get(type);
+      return getTypes().get(type);
       if (!this.type) {
         throw new Error(`Invalid type "${type}"`);
       }
     } else {
-      this.type = type;
+      return type;
     }
+  }
 
+  setState(state: ExprVisState) {
+    this.title = state.title || '';
+    if (state.type) {
+      this.type = this.getType(state.type);
+    }
     this.params = _.defaultsDeep(
       {},
       _.cloneDeep(state.params || {}),
-      _.cloneDeep(this.type!.visConfig.defaults || {})
+      _.cloneDeep(this.type.visConfig.defaults || {})
     );
   }
 
   getState() {
     return {
       title: this.title,
-      type: this.type!.name,
+      type: this.type.name,
       params: _.cloneDeep(this.params),
     };
   }
@@ -115,10 +120,10 @@ export class ExprVis extends EventEmitter {
   }
 
   isHierarchical() {
-    if (_.isFunction(this.type!.hierarchicalData)) {
-      return !!this.type!.hierarchicalData(this);
+    if (_.isFunction(this.type.hierarchicalData)) {
+      return !!this.type.hierarchicalData(this);
     } else {
-      return !!this.type!.hierarchicalData;
+      return !!this.type.hierarchicalData;
     }
   }
 

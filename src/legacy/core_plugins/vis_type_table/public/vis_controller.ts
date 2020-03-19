@@ -19,7 +19,6 @@
 
 import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
-import { isEqual } from 'lodash';
 
 import { VisParams } from '../../visualizations/public';
 import { npStart } from './legacy_imports';

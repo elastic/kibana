@@ -54,7 +54,7 @@ function DefaultEditor({
 
     embeddableHandler.render(visRef.current);
     setTimeout(() => {
-      eventEmitter.emit('dirtyStateChange', false);
+      eventEmitter.emit('apply');
     });
 
     return () => embeddableHandler.destroy();

@@ -23,11 +23,11 @@ import { fetchIndexPatternFields } from './lib/fetch_fields';
 import { getSavedObjectsClient, getUISettings, getI18n } from './services';
 
 export class EditorController {
-  constructor(el, vis, embeddableHandler, reloadVisualization) {
+  constructor(el, vis, eventEmitter, embeddableHandler) {
     this.el = el;
 
     this.embeddableHandler = embeddableHandler;
-    this.reloadVisualization = reloadVisualization;
+    this.eventEmitter = eventEmitter;
 
     this.state = {
       fields: [],
@@ -77,7 +77,7 @@ export class EditorController {
           isEditorMode={true}
           appState={params.appState}
           embeddableHandler={this.embeddableHandler}
-          reloadVisualization={this.reloadVisualization}
+          eventEmitter={this.eventEmitter}
         />
       </I18nContext>,
       this.el

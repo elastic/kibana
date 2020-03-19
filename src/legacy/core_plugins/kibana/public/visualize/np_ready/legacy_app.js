@@ -42,6 +42,49 @@ import {
 } from './breadcrumbs';
 import { createSavedSearchesLoader } from '../../../../../../plugins/discover/public';
 
+const getResolvedResults = deps => {
+  const { core, data, visualizations } = deps;
+
+  const results = {};
+
+  return savedVis => {
+    results.savedVis = savedVis;
+    return visualizations
+      .convertToSerializedVis(savedVis)
+      .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
+      .then(vis => {
+        if (vis.type.setup) {
+          return vis.type.setup(vis).catch(() => vis);
+        }
+        return vis;
+      })
+      .then(vis => {
+        results.vis = vis;
+        return deps.embeddable.getEmbeddableFactory('visualization').createFromObject(results.vis, {
+          timeRange: data.query.timefilter.timefilter.getTime(),
+          filters: data.query.filterManager.getFilters(),
+        });
+      })
+      .then(embeddableHandler => {
+        results.embeddableHandler = embeddableHandler;
+        if (results.vis.data.savedSearchId) {
+          return createSavedSearchesLoader({
+            savedObjectsClient: core.savedObjects.client,
+            indexPatterns: data.indexPatterns,
+            chrome: core.chrome,
+            overlays: core.overlays,
+          }).get(results.vis.data.savedSearchId);
+        }
+      })
+      .then(savedSearch => {
+        if (savedSearch) {
+          results.savedSearch = savedSearch;
+        }
+        return results;
+      });
+  };
+};
+
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
 
@@ -120,47 +163,9 @@ export function initVisualizeApp(app, deps) {
               );
             }
 
-            const results = {};
-
             return ensureDefaultIndexPattern(core, data, history)
               .then(() => savedVisualizations.get($route.current.params))
-              .then(savedObj => {
-                results.savedVis = savedObj;
-                return visualizations.convertToSerializedVis(savedObj);
-              })
-              .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
-              .then(vis => {
-                if (vis.type.setup) {
-                  return vis.type.setup(vis).catch(() => vis);
-                }
-                return vis;
-              })
-              .then(vis => {
-                results.vis = vis;
-                return deps.embeddable
-                  .getEmbeddableFactory('visualization')
-                  .createFromObject(results.vis, {
-                    timeRange: data.query.timefilter.timefilter.getTime(),
-                    filters: data.query.filterManager.getFilters(),
-                  });
-              })
-              .then(embeddableHandler => {
-                results.embeddableHandler = embeddableHandler;
-                if (results.vis.data.savedSearchId) {
-                  return createSavedSearchesLoader({
-                    savedObjectsClient: core.savedObjects.client,
-                    indexPatterns: data.indexPatterns,
-                    chrome: core.chrome,
-                    overlays: core.overlays,
-                  }).get(results.vis.data.savedSearchId);
-                }
-              })
-              .then(savedSearch => {
-                if (savedSearch) {
-                  results.savedSearch = savedSearch;
-                }
-                return results;
-              })
+              .then(getResolvedResults(deps))
               .catch(
                 redirectWhenMissing({
                   history,
@@ -177,57 +182,15 @@ export function initVisualizeApp(app, deps) {
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
           resolved: function($route, history) {
-            const {
-              chrome,
-              core,
-              data,
-              savedVisualizations,
-              visualizations,
-              toastNotifications,
-            } = deps;
-
-            const results = {};
+            const { chrome, core, data, savedVisualizations, toastNotifications } = deps;
 
             return ensureDefaultIndexPattern(core, data, history)
               .then(() => savedVisualizations.get($route.current.params.id))
               .then(savedVis => {
                 chrome.recentlyAccessed.add(savedVis.getFullPath(), savedVis.title, savedVis.id);
-                results.savedVis = savedVis;
-                return visualizations.convertToSerializedVis(savedVis);
+                return savedVis;
               })
-              .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
-              .then(vis => {
-                if (vis.type.setup) {
-                  return vis.type.setup(vis).catch(() => vis);
-                }
-                return vis;
-              })
-              .then(vis => {
-                results.vis = vis;
-                return deps.embeddable
-                  .getEmbeddableFactory('visualization')
-                  .createFromObject(results.vis, {
-                    timeRange: data.query.timefilter.timefilter.getTime(),
-                    filters: data.query.filterManager.getFilters(),
-                  });
-              })
-              .then(embeddableHandler => {
-                results.embeddableHandler = embeddableHandler;
-                if (results.vis.data.savedSearchId) {
-                  return createSavedSearchesLoader({
-                    savedObjectsClient: core.savedObjects.client,
-                    indexPatterns: data.indexPatterns,
-                    chrome: core.chrome,
-                    overlays: core.overlays,
-                  }).get(results.vis.data.savedSearchId);
-                }
-              })
-              .then(savedSearch => {
-                if (savedSearch) {
-                  results.savedSearch = savedSearch;
-                }
-                return results;
-              })
+              .then(getResolvedResults(deps))
               .catch(
                 redirectWhenMissing({
                   history,

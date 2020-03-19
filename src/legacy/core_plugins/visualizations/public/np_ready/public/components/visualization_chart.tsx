@@ -43,7 +43,6 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     vis: ExprVis;
     visParams: any;
     visData: any;
-    container: HTMLElement;
   }>;
   private renderSubscription: Rx.Subscription;
 
@@ -54,7 +53,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     const render$ = this.renderSubject.asObservable().pipe(share());
 
     const success$ = render$.pipe(
-      filter(({ vis, visData }) => vis && (!vis.type!.requiresSearch || visData)),
+      filter(({ vis, visData }) => vis && (!vis.type.requiresSearch || visData)),
       debounceTime(100),
       switchMap(async ({ vis, visData, visParams }) => {
         if (!this.visualization) {
@@ -79,10 +78,10 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     return (
       <div className="visChart__container kbn-resetFocusState" tabIndex={0} ref={this.containerDiv}>
         <p className="euiScreenReaderOnly">
-          {this.props.vis.type!.title} visualization, not yet accessible
+          {this.props.vis.type.title} visualization, not yet accessible
         </p>
         <div
-          aria-hidden={!this.props.vis.type!.isAccessible}
+          aria-hidden={!this.props.vis.type.isAccessible}
           className="visChart"
           ref={this.chartDiv}
         />
@@ -96,7 +95,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     }
 
     const { vis } = this.props;
-    const Visualization = vis.type!.visualization;
+    const Visualization = vis.type.visualization;
 
     this.visualization = new Visualization(this.chartDiv.current, vis);
 
@@ -139,7 +138,6 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
         vis: this.props.vis,
         visData: this.props.visData,
         visParams: this.props.visParams,
-        container: this.containerDiv.current,
       });
     }
   }

@@ -84,30 +84,42 @@ export class Vis {
   public readonly uiState: PersistedState;
 
   constructor(visType: string, visState: SerializedVis = {} as any) {
-    this.type = getTypes().get(visType);
-    if (!this.type) {
-      throw new Error(`Invalid type "${visType}"`);
-    }
-
+    this.type = this.getType(visType);
+    this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
     this.id = visState.id;
 
     this.setState(visState || {});
   }
 
+  private getType(visType: string) {
+    const type = getTypes().get(visType);
+    if (!type) {
+      throw new Error(`Invalid type "${visType}"`);
+    }
+    return type;
+  }
+
+  private getParams(params: VisParams) {
+    return defaults({}, cloneDeep(params || {}), cloneDeep(this.type.visConfig.defaults || {}));
+  }
+
   setState(state: SerializedVis) {
+    let typeChanged = false;
+    if (state.type && this.type.name !== state.type) {
+      // @ts-ignore
+      this.type = this.getType(state.type);
+      typeChanged = true;
+    }
     if (state.title !== undefined) {
       this.title = state.title;
     }
     if (state.description !== undefined) {
       this.description = state.description;
     }
-
-    this.params = defaults(
-      {},
-      cloneDeep(state.params || {}),
-      cloneDeep(this.type.visConfig.defaults || {})
-    );
+    if (state.params || typeChanged) {
+      this.params = this.getParams(state.params);
+    }
 
     // move to migration script
     updateVisualizationConfig(state.params, this.params);

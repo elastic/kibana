@@ -78,7 +78,10 @@ export class VisEditor extends Component {
 
   updateVisState = debounce(() => {
     this.props.vis.params = this.state.model;
-    this.props.reloadVisualization();
+    this.props.eventEmitter.emit('updateVis');
+    this.props.eventEmitter.emit('dirtyStateChange', {
+      isDirty: false,
+    });
   }, VIS_STATE_DEBOUNCE_DELAY);
 
   isValidKueryQuery = filterQuery => {
