@@ -7,11 +7,12 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { setupIngest } from '../agents/services';
+import { setupIngest, getEsClientForAPIKey } from '../agents/services';
 
 const ENROLLMENT_KEY_ID = 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0';
 
-export default function({ getService }: FtrProviderContext) {
+export default function(providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
@@ -77,6 +78,54 @@ export default function({ getService }: FtrProviderContext) {
 
         expect(apiResponse.success).to.eql(true);
         expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'config_id');
+      });
+
+      it('should create an ES ApiKey with limited privileges', async () => {
+        const { body: apiResponse } = await supertest
+          .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            config_id: 'policy1',
+          })
+          .expect(200);
+        expect(apiResponse.success).to.eql(true);
+        const { body: privileges } = await getEsClientForAPIKey(
+          providerContext,
+          apiResponse.item.api_key
+        ).security.hasPrivileges({
+          body: {
+            cluster: ['all', 'monitor', 'manage_api_key'],
+            index: [
+              {
+                names: ['log-*', 'metrics-*', 'events-*', '*'],
+                privileges: ['write', 'create_index'],
+              },
+            ],
+          },
+        });
+        expect(privileges.cluster).to.eql({
+          all: false,
+          monitor: false,
+          manage_api_key: false,
+        });
+        expect(privileges.index).to.eql({
+          '*': {
+            create_index: false,
+            write: false,
+          },
+          'events-*': {
+            create_index: false,
+            write: false,
+          },
+          'log-*': {
+            create_index: false,
+            write: false,
+          },
+          'metrics-*': {
+            create_index: false,
+            write: false,
+          },
+        });
       });
     });
   });
