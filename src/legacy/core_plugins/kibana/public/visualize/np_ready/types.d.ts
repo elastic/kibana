@@ -56,6 +56,7 @@ export interface VisualizeAppStateTransitions {
     state: VisualizeAppState
   ) => ({ query, parentFilters }: { query?: Query; parentFilters?: Filter[] }) => VisualizeAppState;
   updateVisState: (state: VisualizeAppState) => (vis: PureVisState) => VisualizeAppState;
+  updateUiState: (state: VisualizeAppState) => (uiState: PersistedState) => VisualizeAppState;
   updateFromSavedQuery: (state: VisualizeAppState) => (savedQuery: SavedQuery) => VisualizeAppState;
 }
 

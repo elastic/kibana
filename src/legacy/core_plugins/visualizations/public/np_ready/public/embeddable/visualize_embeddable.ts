@@ -162,6 +162,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         });
         this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
+    } else if (this.parent) {
+      this.vis.uiState.clearAllKeys();
     }
   }
 

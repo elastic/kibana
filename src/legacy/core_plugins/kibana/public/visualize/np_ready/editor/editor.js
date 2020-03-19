@@ -165,6 +165,12 @@ function VisualizeAppController(
 
   $scope.embeddableHandler = embeddableHandler;
 
+  const handleUiStateChange = () => {
+    stateContainer.transitions.updateUiState(visStateToEditorState().uiState);
+  };
+
+  $scope.vis.uiState.on('change', handleUiStateChange);
+
   $scope.topNavMenu = [
     ...(visualizeCapabilities.save
       ? [
@@ -576,6 +582,7 @@ function VisualizeAppController(
       savedVis.destroy();
       subscriptions.unsubscribe();
       $scope.eventEmitter.off('apply', _applyVis);
+      $scope.vis.uiState.off('change', handleUiStateChange);
 
       unsubscribePersisted();
       unsubscribeStateUpdates();
