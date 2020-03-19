@@ -18,7 +18,7 @@ import {
   httpServiceMock,
   loggingServiceMock,
 } from '../../../../../src/core/server/mocks';
-import { EndpointMetadata, EndpointResultList } from '../../common/types';
+import { HostMetadata, HostResultList } from '../../common/types';
 import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './metadata';
 import { EndpointConfigSchema } from '../config';
@@ -49,8 +49,8 @@ describe('test endpoint route', () => {
   it('test find the latest of all endpoints', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({});
 
-    const response: SearchResponse<EndpointMetadata> = (data as unknown) as SearchResponse<
-      EndpointMetadata
+    const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
+      HostMetadata
     >;
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
@@ -72,8 +72,8 @@ describe('test endpoint route', () => {
     expect(mockScopedClient.callAsCurrentUser).toBeCalled();
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
-    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
-    expect(endpointResultList.endpoints.length).toEqual(2);
+    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
+    expect(endpointResultList.hosts.length).toEqual(2);
     expect(endpointResultList.total).toEqual(2);
     expect(endpointResultList.request_page_index).toEqual(0);
     expect(endpointResultList.request_page_size).toEqual(10);
@@ -93,7 +93,7 @@ describe('test endpoint route', () => {
       },
     });
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-      Promise.resolve((data as unknown) as SearchResponse<EndpointMetadata>)
+      Promise.resolve((data as unknown) as SearchResponse<HostMetadata>)
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/metadata')
@@ -117,8 +117,8 @@ describe('test endpoint route', () => {
     });
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
-    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
-    expect(endpointResultList.endpoints.length).toEqual(2);
+    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
+    expect(endpointResultList.hosts.length).toEqual(2);
     expect(endpointResultList.total).toEqual(2);
     expect(endpointResultList.request_page_index).toEqual(10);
     expect(endpointResultList.request_page_size).toEqual(10);
@@ -140,7 +140,7 @@ describe('test endpoint route', () => {
       },
     });
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-      Promise.resolve((data as unknown) as SearchResponse<EndpointMetadata>)
+      Promise.resolve((data as unknown) as SearchResponse<HostMetadata>)
     );
     [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/metadata')
@@ -177,8 +177,8 @@ describe('test endpoint route', () => {
     });
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
-    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as EndpointResultList;
-    expect(endpointResultList.endpoints.length).toEqual(2);
+    const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
+    expect(endpointResultList.hosts.length).toEqual(2);
     expect(endpointResultList.total).toEqual(2);
     expect(endpointResultList.request_page_index).toEqual(10);
     expect(endpointResultList.request_page_size).toEqual(10);
@@ -234,8 +234,8 @@ describe('test endpoint route', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: (data as any).hits.hits[0]._id },
       });
-      const response: SearchResponse<EndpointMetadata> = (data as unknown) as SearchResponse<
-        EndpointMetadata
+      const response: SearchResponse<HostMetadata> = (data as unknown) as SearchResponse<
+        HostMetadata
       >;
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
@@ -257,7 +257,7 @@ describe('test endpoint route', () => {
       expect(mockScopedClient.callAsCurrentUser).toBeCalled();
       expect(routeConfig.options).toEqual({ authRequired: true });
       expect(mockResponse.ok).toBeCalled();
-      const result = mockResponse.ok.mock.calls[0][0]?.body as EndpointMetadata;
+      const result = mockResponse.ok.mock.calls[0][0]?.body as HostMetadata;
       expect(result).toHaveProperty('endpoint');
     });
   });

@@ -30,15 +30,11 @@ export const searchSetupMock: jest.Mocked<ISearchSetup> = {
 };
 
 export const searchStartMock: jest.Mocked<ISearchStart> = {
-  cancelPendingSearches: jest.fn(),
-  getPendingSearchesCount$: jest.fn(() => {
-    return {
-      subscribe: jest.fn(),
-    } as any;
-  }),
-  runBeyondTimeout: jest.fn(),
   aggs: searchAggsStartMock(),
   search: jest.fn(),
+  cancel: jest.fn(),
+  getPendingCount$: jest.fn(),
+  runBeyondTimeout: jest.fn(),
   __LEGACY: {
     AggConfig: jest.fn() as any,
     AggType: jest.fn(),

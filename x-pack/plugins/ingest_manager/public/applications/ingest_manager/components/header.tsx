@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
@@ -35,13 +35,17 @@ export interface HeaderProps {
   tabs?: EuiTabProps[];
 }
 
+const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(({ leftColumn, rightColumn }) => (
+  <EuiFlexGroup alignItems="center">
+    {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
+    {rightColumn ? <EuiFlexItem>{rightColumn}</EuiFlexItem> : null}
+  </EuiFlexGroup>
+));
+
 export const Header: React.FC<HeaderProps> = ({ leftColumn, rightColumn, tabs }) => (
   <Container>
     <Wrapper>
-      <EuiFlexGroup alignItems="center">
-        {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
-        {rightColumn ? <EuiFlexItem>{rightColumn}</EuiFlexItem> : null}
-      </EuiFlexGroup>
+      <HeaderColumns leftColumn={leftColumn} rightColumn={rightColumn} />
       <EuiFlexGroup>
         {tabs ? (
           <EuiFlexItem>

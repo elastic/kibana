@@ -18,7 +18,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { CoreStart } from 'kibana/public';
 import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
@@ -74,8 +73,8 @@ export interface ISearchSetup {
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
-  cancelPendingSearches: () => void;
-  getPendingSearchesCount$: () => Observable<number>;
+  cancel: () => void;
+  getPendingCount$: () => Observable<number>;
   runBeyondTimeout: () => void;
   search: ISearchGeneric;
   __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;

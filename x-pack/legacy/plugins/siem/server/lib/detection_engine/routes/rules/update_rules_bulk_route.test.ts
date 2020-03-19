@@ -16,10 +16,19 @@ import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('update_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -110,7 +119,7 @@ describe('update_rules_bulk', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query]]]'
+        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]]'
       );
     });
   });

@@ -120,7 +120,7 @@ export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate(
 );
 
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.siem.case.configureCasesButton', {
-  defaultMessage: 'Configure cases',
+  defaultMessage: 'Edit third-party connection',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.siem.case.caseView.comment.addComment', {
