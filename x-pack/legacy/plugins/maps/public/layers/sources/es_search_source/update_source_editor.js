@@ -13,14 +13,9 @@ import { TooltipSelector } from '../../../components/tooltip_selector';
 import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
-import {
-  DEFAULT_MAX_INNER_RESULT_WINDOW,
-  DEFAULT_MAX_RESULT_WINDOW,
-  SORT_ORDER,
-} from '../../../../common/constants';
+import { SORT_ORDER } from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { loadIndexSettings } from './load_index_settings';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 import { ScalingPanel } from './scaling_panel';
 
@@ -41,31 +36,16 @@ export class UpdateSourceEditor extends Component {
     sourceFields: null,
     termFields: null,
     sortFields: null,
-    maxInnerResultWindow: DEFAULT_MAX_INNER_RESULT_WINDOW,
-    maxResultWindow: DEFAULT_MAX_RESULT_WINDOW,
     supportsClustering: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
     this.loadFields();
-    this.loadIndexSettings();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-  }
-
-  async loadIndexSettings() {
-    try {
-      const indexPattern = await indexPatternService.get(this.props.indexPatternId);
-      const { maxInnerResultWindow, maxResultWindow } = await loadIndexSettings(indexPattern.title);
-      if (this._isMounted) {
-        this.setState({ maxInnerResultWindow, maxResultWindow });
-      }
-    } catch (err) {
-      return;
-    }
   }
 
   async loadFields() {
