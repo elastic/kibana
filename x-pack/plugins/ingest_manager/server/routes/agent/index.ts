@@ -122,7 +122,6 @@ export const registerRoutes = (router: IRouter) => {
     },
     postNewAgentActionHandlerBuilder({
       getAgent: AgentService.getAgent,
-      getSavedObjectsClientContract: getInternalUserSOClient,
       updateAgentActions: AgentService.updateAgentActions,
     })
   );

@@ -78,13 +78,18 @@ describe('test actions handlers', () => {
       getAgent: jest.fn().mockReturnValueOnce({
         id: 'agent',
       }),
-      getSavedObjectsClientContract: jest.fn().mockReturnValueOnce(mockSavedObjectsClient),
       updateAgentActions: jest.fn().mockReturnValueOnce(agentAction),
     } as jest.Mocked<ActionsService>;
 
     const postNewAgentActionHandler = postNewAgentActionHandlerBuilder(actionsService);
     await postNewAgentActionHandler(
-      ({} as unknown) as RequestHandlerContext,
+      ({
+        core: {
+          savedObjects: {
+            client: mockSavedObjectsClient,
+          },
+        },
+      } as unknown) as RequestHandlerContext,
       mockRequest,
       mockResponse
     );

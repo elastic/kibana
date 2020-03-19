@@ -16,11 +16,13 @@ interface UpdatedActions {
 describe('test agent actions services', () => {
   it('should update agent current actions with new action', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+
     const newAgentAction: NewAgentAction = {
       type: 'CONFIG_CHANGE',
       data: 'data',
       sent_at: '2020-03-14T19:45:02.620Z',
     };
+
     await updateAgentActions(
       mockSavedObjectsClient,
       ({
@@ -41,6 +43,7 @@ describe('test agent actions services', () => {
 
     const updatedAgentActions = (mockSavedObjectsClient.update.mock
       .calls[0][2] as unknown) as UpdatedActions;
+
     expect(updatedAgentActions.actions.length).toEqual(2);
     const actualAgentAction = updatedAgentActions.actions.find(action => action?.data === 'data');
     expect(actualAgentAction?.type).toEqual(newAgentAction.type);
@@ -56,6 +59,7 @@ describe('test agent actions services', () => {
     };
     const now = new Date();
     const agentAction = createAgentAction(now, newAgentAction);
+
     expect(agentAction.type).toEqual(newAgentAction.type);
     expect(agentAction.data).toEqual(newAgentAction.data);
     expect(agentAction.sent_at).toEqual(newAgentAction.sent_at);

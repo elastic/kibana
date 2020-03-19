@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
 import {
   Agent,
@@ -41,8 +41,6 @@ export function createAgentAction(createdAt: Date, newAgentAction: NewAgentActio
 
 export interface ActionsService {
   getAgent: (soClient: SavedObjectsClientContract, agentId: string) => Promise<Agent>;
-
-  getSavedObjectsClientContract: (kibanaRequest: KibanaRequest) => SavedObjectsClientContract;
 
   updateAgentActions: (
     soClient: SavedObjectsClientContract,

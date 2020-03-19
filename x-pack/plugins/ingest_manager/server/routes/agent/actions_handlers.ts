@@ -22,7 +22,7 @@ export const postNewAgentActionHandlerBuilder = function(
 > {
   return async (context, request, response) => {
     try {
-      const soClient = actionsService.getSavedObjectsClientContract(request);
+      const soClient = context.core.savedObjects.client;
 
       const agent = await actionsService.getAgent(soClient, request.params.agentId);
 
