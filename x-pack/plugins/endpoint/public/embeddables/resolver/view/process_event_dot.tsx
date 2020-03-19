@@ -269,4 +269,5 @@ export const ProcessEventDot = styled(
   padding: 4px;
   white-space: nowrap;
   will-change: left, top, width, height;
+  contain: strict;
 `;
