@@ -248,7 +248,7 @@ export class EndpointDocGenerator {
   public generateEvent(options: EventOptions = {}): EndpointEvent {
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
-      agent: { ...this.commonInfo.agent, type: 'endgame' },
+      agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
         version: '1.4.0',
       },
