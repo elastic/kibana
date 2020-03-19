@@ -110,7 +110,7 @@ describe('input to expression', () => {
       const expression = embeddableInputToExpression(input, EmbeddableTypes.map);
       const ast = fromExpression(expression);
 
-      expect(ast.chain[0].arguments).toHaveProperty('title', input.title);
+      expect(ast.chain[0].arguments).toHaveProperty('title', [input.title]);
       expect(ast.chain[0].arguments).toHaveProperty('timerange');
 
       const timerangeExpression = ast.chain[0].arguments.timerange[0] as Ast;
