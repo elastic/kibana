@@ -3,6 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { DatasourcesTable } from './datasources/datasources_table';
-export { DonutChart } from './donut_chart';
-export { EditConfigFlyout } from './edit_config';
+
+import styled from 'styled-components';
+import { EuiContextMenuItem } from '@elastic/eui';
+
+export const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
+  color: ${props => props.theme.eui.textColors.danger};
+`;
