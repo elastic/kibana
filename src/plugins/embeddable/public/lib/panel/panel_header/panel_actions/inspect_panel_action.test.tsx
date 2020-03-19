@@ -34,14 +34,15 @@ import {
   isErrorEmbeddable,
   ErrorEmbeddable,
 } from '../../../embeddables';
-import { GetEmbeddableFactory } from '../../../types';
 import { of } from '../../../../tests/helpers';
 import { esFilters } from '../../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 
 const setup = async () => {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-  const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+  const getFactory = (id: string) => embeddableFactories.get(id);
   const container = new FilterableContainer(
     {
       id: 'hello',
@@ -54,7 +55,7 @@ const setup = async () => {
         },
       ],
     },
-    getFactory
+    getFactory as EmbeddableStart['getEmbeddableFactory']
   );
 
   const embeddable: FilterableEmbeddable | ErrorEmbeddable = await container.addNewEmbeddable<

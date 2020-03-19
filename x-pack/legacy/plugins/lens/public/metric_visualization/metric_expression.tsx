@@ -91,6 +91,11 @@ export function MetricChart({
   const { title, accessor, mode } = args;
   let value = '-';
   const firstTable = Object.values(data.tables)[0];
+  if (!accessor) {
+    return (
+      <VisualizationContainer reportTitle={title} className="lnsMetricExpression__container" />
+    );
+  }
 
   if (firstTable) {
     const column = firstTable.columns[0];

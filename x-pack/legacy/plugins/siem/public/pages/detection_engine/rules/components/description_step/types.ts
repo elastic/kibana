@@ -9,7 +9,6 @@ import {
   IIndexPattern,
   Filter,
   FilterManager,
-  Query,
 } from '../../../../../../../../../../src/plugins/data/public';
 import { IMitreEnterpriseAttack } from '../../types';
 
@@ -22,7 +21,7 @@ export interface BuildQueryBarDescription {
   field: string;
   filters: Filter[];
   filterManager: FilterManager;
-  query: Query;
+  query: string;
   savedId: string;
   indexPatterns?: IIndexPattern;
 }

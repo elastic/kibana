@@ -5,11 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import {
-  Ping,
-  PingResults,
-  StatesIndexStatus,
-} from '../../../../../legacy/plugins/uptime/common/graphql/types';
+import { Ping, PingResults } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 import {
   GetFilterBarParams,
   GetLatestMonitorParams,
@@ -20,12 +16,15 @@ import {
   GetMonitorStatesParams,
   GetPingsParams,
   GetPingHistogramParams,
+  GetMonitorStatusParams,
+  GetMonitorStatusResult,
 } from '.';
 import {
   OverviewFilters,
   MonitorDetails,
   MonitorLocations,
   Snapshot,
+  StatesIndexStatus,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
@@ -45,6 +44,7 @@ export interface UptimeRequests {
   getMonitorDetails: ESQ<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: ESQ<GetMonitorLocationsParams, MonitorLocations>;
   getMonitorStates: ESQ<GetMonitorStatesParams, GetMonitorStatesResult>;
+  getMonitorStatus: ESQ<GetMonitorStatusParams, GetMonitorStatusResult[]>;
   getPings: ESQ<GetPingsParams, PingResults>;
   getPingHistogram: ESQ<GetPingHistogramParams, HistogramResult>;
   getSnapshotCount: ESQ<GetSnapshotCountParams, Snapshot>;

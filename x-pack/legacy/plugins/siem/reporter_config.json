@@ -3,7 +3,7 @@
   "reporterOptions": {
     "html": false,
     "json": true,
-    "mochaFile": "../../../../target/kibana-siem/cypress/results/results-[hash].xml",
+    "mochaFile": "../../../../target/kibana-siem/cypress/results/TEST-siem-cypress-[hash].xml",
     "overwrite": false,
     "reportDir": "../../../../target/kibana-siem/cypress/results"
   }

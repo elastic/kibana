@@ -161,7 +161,7 @@ Full details are {repo}tree/master/packages/kbn-i18n#angularjs[here].
 
 To learn more about i18n tooling, see {blob}src/dev/i18n/README.md[i18n dev tooling].
 
-To learn more about implementing i18n in the UI, follow the links below:
+To learn more about implementing i18n in the UI, use the following links:
 
 * {blob}packages/kbn-i18n/README.md[i18n plugin]
 * {blob}packages/kbn-i18n/GUIDELINE.md[i18n guidelines]

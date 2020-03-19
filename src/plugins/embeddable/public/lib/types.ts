@@ -18,7 +18,6 @@
  */
 
 import { Adapters } from './inspector';
-import { EmbeddableFactory } from './embeddables/embeddable_factory';
 
 export interface Trigger {
   id: string;
@@ -40,6 +39,3 @@ export enum ViewMode {
 }
 
 export { Adapters };
-
-export type GetEmbeddableFactory = (id: string) => EmbeddableFactory | undefined;
-export type GetEmbeddableFactories = () => IterableIterator<EmbeddableFactory>;

@@ -23,22 +23,6 @@ export type Job = EventEmitter & {
   };
 };
 
-export interface ReportingConfigOptions {
-  browser: BrowserConfig;
-  poll: {
-    jobCompletionNotifier: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-    jobsRefresh: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-  };
-  queue: QueueConfig;
-  capture: CaptureConfig;
-}
-
 export interface NetworkPolicyRule {
   allow: boolean;
   protocol: string;
@@ -213,6 +197,7 @@ export interface JobDocPayload<JobParamsType> {
 
 export interface JobSource<JobParamsType> {
   _id: string;
+  _index: string;
   _source: {
     jobtype: string;
     output: JobDocOutput;

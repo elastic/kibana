@@ -12,7 +12,7 @@ import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
 import { FIELD_ORIGIN } from '../../../common/constants';
 
 export class TopTermPercentageField implements IESAggField {
-  private _topTermAggField: IESAggField;
+  private readonly _topTermAggField: IESAggField;
 
   constructor(topTermAggField: IESAggField) {
     this._topTermAggField = topTermAggField;
@@ -62,6 +62,14 @@ export class TopTermPercentageField implements IESAggField {
 
   supportsFieldMeta(): boolean {
     return false;
+  }
+
+  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+    return null;
+  }
+
+  async getCategoricalFieldMetaRequest(): Promise<unknown> {
+    return null;
   }
 
   canValueBeFormatted(): boolean {

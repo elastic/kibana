@@ -1,0 +1,5 @@
+type: log
+paths:
+  - "/var/log/nginx/access.log*"
+
+tags: nginx
