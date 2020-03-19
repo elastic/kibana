@@ -78,10 +78,6 @@ export class TableVisualizationController {
         this.$scope.visState = { params: visParams };
         this.$scope.esResponse = esResponse;
 
-        if (!isEqual(this.$scope.visParams, visParams)) {
-          this.vis.emit('updateEditorStateParams', visParams);
-        }
-
         this.$scope.visParams = visParams;
         this.$scope.renderComplete = resolve;
         this.$scope.renderFailed = reject;

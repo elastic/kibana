@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import { useEffect, useReducer, useCallback } from 'react';
-import { isEqual } from 'lodash';
+import { useReducer, useCallback } from 'react';
 import { EventEmitter } from 'events';
 
-import { Vis, VisParams } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { editorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
-import { EditorAction, updateStateParams } from './actions';
+import { EditorAction } from './actions';
 
 export * from './editor_form_state';
 export * from './actions';
@@ -34,21 +33,6 @@ export function useEditorReducer(
   eventEmitter: EventEmitter
 ): [EditorVisState, React.Dispatch<EditorAction>] {
   const [state, dispatch] = useReducer(editorStateReducer, vis, initEditorState);
-
-  useEffect(() => {
-    const handleVisUpdate = (params: VisParams) => {
-      if (!isEqual(params, state.params)) {
-        dispatch(updateStateParams(params));
-      }
-    };
-
-    // fires when visualization state changes, and we need to copy changes to editorState
-    eventEmitter.on('updateEditorStateParams', handleVisUpdate);
-
-    return () => {
-      eventEmitter.off('updateEditorStateParams', handleVisUpdate);
-    };
-  }, [eventEmitter, state.params]);
 
   const wrappedDispatch = useCallback(
     (action: EditorAction) => {

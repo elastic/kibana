@@ -294,7 +294,7 @@ function VisualizeAppController(
       uiState: vis.uiState.getChanges(),
       query: vis.data.searchSource.getOwnField('query') || defaultQuery,
       filters: vis.data.searchSource.getOwnField('filter') || [],
-      vis: savedVisState.visState,
+      vis: { ...savedVisState.visState, title: vis.title },
       linked: !!savedVis.savedSearchId,
     };
   };
@@ -335,6 +335,7 @@ function VisualizeAppController(
       const visState = stateContainer.getState().vis;
       const state = {
         type: visState.type,
+        title: visState.title,
         params: visState.params,
         data: {
           aggs: visState.aggs,
@@ -463,6 +464,8 @@ function VisualizeAppController(
         !_.isEqual(visualizations.convertFromSerializedVis(vis.serialize()).visState, state.vis)
       ) {
         vis.setState({
+          type: state.vis.type,
+          title: state.vis.title,
           params: state.vis.params,
           data: {
             aggs: state.vis.aggs,
