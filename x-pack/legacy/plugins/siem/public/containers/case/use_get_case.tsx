@@ -53,7 +53,6 @@ const initialData: Case = {
   closedBy: null,
   createdAt: '',
   comments: [],
-  commentIds: [],
   createdBy: {
     username: '',
   },
@@ -61,6 +60,7 @@ const initialData: Case = {
   status: '',
   tags: [],
   title: '',
+  totalComment: 0,
   updatedAt: null,
   updatedBy: null,
   version: '',

@@ -21,13 +21,13 @@ export interface Case {
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];
-  commentIds: string[];
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
   status: string;
   tags: string[];
   title: string;
+  totalComment: number;
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;

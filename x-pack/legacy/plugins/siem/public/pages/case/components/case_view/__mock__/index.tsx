@@ -13,7 +13,6 @@ export const caseProps: CaseProps = {
     closedAt: null,
     closedBy: null,
     id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
-    commentIds: ['a357c6a0-5435-11ea-b427-fb51a1fcb7b8'],
     comments: [
       {
         comment: 'Solve this fast!',
@@ -37,6 +36,7 @@ export const caseProps: CaseProps = {
     status: 'open',
     tags: ['defacement'],
     title: 'Another horrible breach!!',
+    totalComment: 1,
     updatedAt: '2020-02-19T15:02:57.995Z',
     updatedBy: {
       username: 'elastic',
@@ -44,6 +44,7 @@ export const caseProps: CaseProps = {
     version: 'WzQ3LDFd',
   },
 };
+
 export const caseClosedProps: CaseProps = {
   ...caseProps,
   initialData: {
