@@ -228,8 +228,8 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('should return alert details by id, getting first alert', async () => {
-        const documentID = 'xDUYMHABAJk0XnHd8rrd';
-        const nextDocumentID = 'zbNm0HABdD75WLjLYgcB';
+        const documentID = 'p7Nm0HABdD75WLjLYghv';
+        const nextDocumentID = 'mbNm0HABdD75WLjLYgho';
         const { body } = await supertest
           .get(`/api/endpoint/alerts/${documentID}`)
           .set('kbn-xsrf', 'xxx')
