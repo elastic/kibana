@@ -12,8 +12,15 @@ import {
   getDependents,
   addSavedId,
   addTimelineTitle,
+  addQueryFields,
+  addMlFields,
 } from './check_type_dependents';
-import { foldLeftRight, getBaseResponsePayload, getPaths } from './__mocks__/utils';
+import {
+  foldLeftRight,
+  getBaseResponsePayload,
+  getPaths,
+  getMlRuleResponsePayload,
+} from './__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
 import { exactCheck } from './exact_check';
 import { RulesSchema } from './rules_schema';
@@ -375,6 +382,34 @@ describe('check_type_dependents', () => {
       ]);
       expect(message.schema).toEqual({});
     });
+
+    test('it validates an ML rule response', () => {
+      const payload = getMlRuleResponsePayload();
+
+      const dependents = getDependents(payload);
+      const decoded = dependents.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getMlRuleResponsePayload();
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it rejects a response with both ML and query properties', () => {
+      const payload = {
+        ...getBaseResponsePayload(),
+        ...getMlRuleResponsePayload(),
+      };
+
+      const dependents = getDependents(payload);
+      const decoded = dependents.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "query,language"']);
+      expect(message.schema).toEqual({});
+    });
   });
 
   describe('addSavedId', () => {
@@ -400,6 +435,37 @@ describe('check_type_dependents', () => {
     test('should array of size 2 given a "timeline_id" that is not null', () => {
       const array = addTimelineTitle({ type: 'query', timeline_id: 'some id' });
       expect(array.length).toEqual(2);
+    });
+  });
+
+  describe('addQueryFields', () => {
+    test('should return empty array if type is not "query"', () => {
+      const fields = addQueryFields({ type: 'machine_learning' });
+      const expected: t.Mixed[] = [];
+      expect(fields).toEqual(expected);
+    });
+
+    test('should return two fields for a rule of type "query"', () => {
+      const fields = addQueryFields({ type: 'query' });
+      expect(fields.length).toEqual(2);
+    });
+
+    test('should return two fields for a rule of type "saved_query"', () => {
+      const fields = addQueryFields({ type: 'saved_query' });
+      expect(fields.length).toEqual(2);
+    });
+  });
+
+  describe('addMlFields', () => {
+    test('should return empty array if type is not "machine_learning"', () => {
+      const fields = addMlFields({ type: 'query' });
+      const expected: t.Mixed[] = [];
+      expect(fields).toEqual(expected);
+    });
+
+    test('should return two fields for a rule of type "machine_learning"', () => {
+      const fields = addMlFields({ type: 'machine_learning' });
+      expect(fields.length).toEqual(2);
     });
   });
 });

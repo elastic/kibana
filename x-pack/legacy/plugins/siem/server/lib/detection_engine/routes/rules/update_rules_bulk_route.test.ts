@@ -110,7 +110,7 @@ describe('update_rules_bulk', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query]]]'
+        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]]'
       );
     });
   });
