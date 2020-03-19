@@ -13,6 +13,7 @@ export { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytic
 export { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
 export { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 export { MachineLearningDataVisualizerProvider } from './data_visualizer';
+export { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
 export { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';
 export { MachineLearningJobManagementProvider } from './job_management';
 export { MachineLearningJobSelectionProvider } from './job_selection';
