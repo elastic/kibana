@@ -82,14 +82,14 @@ function TimeIntervalParamEditor({
   let definedOption: ComboBoxOption | undefined;
   let isValid = false;
   let invalidEsMessage = '';
-  const errors = [];
+  let errors = '';
   if (value) {
     definedOption = find(options, { key: value });
     selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
 
     // we check if Elasticsearch interval is valid ES interval to show a user appropriate error message
     // we don't check if there is timeBase
-    const isValidIntervalValue = timeBase ? true : isValidEsInterval(value);
+    const isValidIntervalValue = !!timeBase || isValidEsInterval(value);
 
     if (!isValidIntervalValue) {
       invalidEsMessage = getInvalidEsMessage(value);
@@ -100,7 +100,7 @@ function TimeIntervalParamEditor({
 
   let interval: { scaled: boolean; scale: number; expression: string } = {} as any;
   if (isValid) {
-    interval = get(agg, 'buckets.getInterval') && (agg as any).buckets.getInterval();
+    interval = (agg as any).buckets?.getInterval();
 
     // we check if Elasticsearch interval is valid to show a user appropriate error message
     // e.g. there is the case when a user inputs '14d' but it's '2w' in expression equivalent and the request will fail
@@ -111,12 +111,11 @@ function TimeIntervalParamEditor({
   }
 
   if (!isValid) {
-    errors.push(
+    errors =
       invalidEsMessage ||
-        i18n.translate('visDefaultEditor.controls.timeInterval.invalidFormatErrorMessage', {
-          defaultMessage: 'Invalid interval format.',
-        })
-    );
+      i18n.translate('visDefaultEditor.controls.timeInterval.invalidFormatErrorMessage', {
+        defaultMessage: 'Invalid interval format.',
+      });
   }
 
   const scaledHelpText =
