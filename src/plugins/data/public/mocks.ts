@@ -19,9 +19,7 @@
 
 import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsContract } from '.';
 import { fieldFormatsMock } from '../common/field_formats/mocks';
-import { searchSetupMock } from './search/mocks';
-import { AggTypeFieldFilters } from './search/aggs';
-import { searchAggsStartMock } from './search/aggs/mocks';
+import { searchSetupMock, searchStartMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
@@ -35,58 +33,27 @@ const autocompleteMock: any = {
 
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
-  const setupContract = {
+  return {
     autocomplete: autocompleteMock,
     search: searchSetupMock,
     fieldFormats: fieldFormatsMock as DataPublicPluginSetup['fieldFormats'],
     query: querySetupMock,
-    __LEGACY: {
-      esClient: {
-        search: jest.fn(),
-        msearch: jest.fn(),
-      },
-    },
   };
-
-  return setupContract;
 };
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
-  const startContract = {
+  return {
     actions: {
       createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']),
     },
     autocomplete: autocompleteMock,
-    getSuggestions: jest.fn(),
-    search: {
-      aggs: searchAggsStartMock(),
-      search: jest.fn(),
-      __LEGACY: {
-        AggConfig: jest.fn() as any,
-        AggType: jest.fn(),
-        aggTypeFieldFilters: new AggTypeFieldFilters(),
-        FieldParamType: jest.fn(),
-        MetricAggType: jest.fn(),
-        parentPipelineAggHelper: jest.fn() as any,
-        siblingPipelineAggHelper: jest.fn() as any,
-        esClient: {
-          search: jest.fn(),
-          msearch: jest.fn(),
-        },
-      },
-    },
+    search: searchStartMock,
     fieldFormats: fieldFormatsMock as DataPublicPluginStart['fieldFormats'],
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
       SearchBar: jest.fn(),
-    },
-    __LEGACY: {
-      esClient: {
-        search: jest.fn(),
-        msearch: jest.fn(),
-      },
     },
     indexPatterns: ({
       make: () => ({
@@ -97,7 +64,6 @@ const createStartContract = (): Start => {
       get: jest.fn().mockReturnValue(Promise.resolve({})),
     } as unknown) as IndexPatternsContract,
   };
-  return startContract;
 };
 
 export { searchSourceMock } from './search/mocks';

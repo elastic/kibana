@@ -612,9 +612,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
-      log.debug(`Setting the path on the file input`);
-      const input = await find.byCssSelector('.euiFilePicker__input');
-      await input.type(path);
+      await PageObjects.common.setFileInputPath(path);
 
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
