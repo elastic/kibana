@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { relative } from 'path';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';
@@ -64,6 +65,10 @@ export function decorateMochaUi(lifecycle, context) {
           this.tags = tags => {
             this._tags = [].concat(this._tags || [], tags);
           };
+
+          const relativeFilePath = relative(REPO_ROOT, this.file);
+          this.tags(relativeFilePath);
+          this.suiteTag = relativeFilePath; // The tag that uniquely targets this suite/file
 
           provider.call(this);
 

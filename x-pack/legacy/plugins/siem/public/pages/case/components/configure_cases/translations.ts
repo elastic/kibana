@@ -186,3 +186,7 @@ export const FIELD_MAPPING_FIELD_COMMENTS = i18n.translate(
     defaultMessage: 'Comments',
   }
 );
+
+export const UPDATE_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.updateConnector', {
+  defaultMessage: 'Update connector',
+});

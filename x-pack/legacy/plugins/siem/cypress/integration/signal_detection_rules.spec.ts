@@ -7,30 +7,30 @@
 import { newRule } from '../objects/rule';
 
 import {
-  ABOUT_DESCRIPTION,
-  ABOUT_EXPECTED_URLS,
   ABOUT_FALSE_POSITIVES,
   ABOUT_MITRE,
   ABOUT_RISK,
-  ABOUT_RULE_DESCRIPTION,
   ABOUT_SEVERITY,
+  ABOUT_STEP,
   ABOUT_TAGS,
   ABOUT_TIMELINE,
+  ABOUT_URLS,
   DEFINITION_CUSTOM_QUERY,
-  DEFINITION_DESCRIPTION,
   DEFINITION_INDEX_PATTERNS,
+  DEFINITION_STEP,
   RULE_NAME_HEADER,
-  SCHEDULE_DESCRIPTION,
   SCHEDULE_LOOPBACK,
   SCHEDULE_RUNS,
+  SCHEDULE_STEP,
+  ABOUT_RULE_DESCRIPTION,
 } from '../screens/rule_details';
 import {
   CUSTOM_RULES_BTN,
   ELASTIC_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
-  RULES_TABLE,
   RULES_ROW,
+  RULES_TABLE,
   SEVERITY,
 } from '../screens/signal_detection_rules';
 
@@ -127,10 +127,25 @@ describe('Signal detection rules', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER)
-      .invoke('text')
-      .should('eql', `${newRule.name} Beta`);
-
+    let expectedUrls = '';
+    newRule.referenceUrls.forEach(url => {
+      expectedUrls = expectedUrls + url;
+    });
+    let expectedFalsePositives = '';
+    newRule.falsePositivesExamples.forEach(falsePositive => {
+      expectedFalsePositives = expectedFalsePositives + falsePositive;
+    });
+    let expectedTags = '';
+    newRule.tags.forEach(tag => {
+      expectedTags = expectedTags + tag;
+    });
+    let expectedMitre = '';
+    newRule.mitre.forEach(mitre => {
+      expectedMitre = expectedMitre + mitre.tactic;
+      mitre.techniques.forEach(technique => {
+        expectedMitre = expectedMitre + technique;
+      });
+    });
     const expectedIndexPatterns = [
       'apm-*-transaction*',
       'auditbeat-*',
@@ -139,6 +154,43 @@ describe('Signal detection rules', () => {
       'packetbeat-*',
       'winlogbeat-*',
     ];
+
+    cy.get(RULE_NAME_HEADER)
+      .invoke('text')
+      .should('eql', `${newRule.name} Beta`);
+
+    cy.get(ABOUT_RULE_DESCRIPTION)
+      .invoke('text')
+      .should('eql', newRule.description);
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_SEVERITY)
+      .invoke('text')
+      .should('eql', newRule.severity);
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_RISK)
+      .invoke('text')
+      .should('eql', newRule.riskScore);
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_TIMELINE)
+      .invoke('text')
+      .should('eql', 'Default blank timeline');
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_URLS)
+      .invoke('text')
+      .should('eql', expectedUrls);
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_FALSE_POSITIVES)
+      .invoke('text')
+      .should('eql', expectedFalsePositives);
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_MITRE)
+      .invoke('text')
+      .should('eql', expectedMitre);
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_TAGS)
+      .invoke('text')
+      .should('eql', expectedTags);
+
     cy.get(DEFINITION_INDEX_PATTERNS).then(patterns => {
       cy.wrap(patterns).each((pattern, index) => {
         cy.wrap(pattern)
@@ -146,70 +198,16 @@ describe('Signal detection rules', () => {
           .should('eql', expectedIndexPatterns[index]);
       });
     });
-    cy.get(DEFINITION_DESCRIPTION)
+    cy.get(DEFINITION_STEP)
       .eq(DEFINITION_CUSTOM_QUERY)
       .invoke('text')
       .should('eql', `${newRule.customQuery} `);
-    cy.get(ABOUT_DESCRIPTION)
-      .eq(ABOUT_RULE_DESCRIPTION)
-      .invoke('text')
-      .should('eql', newRule.description);
-    cy.get(ABOUT_DESCRIPTION)
-      .eq(ABOUT_SEVERITY)
-      .invoke('text')
-      .should('eql', newRule.severity);
-    cy.get(ABOUT_DESCRIPTION)
-      .eq(ABOUT_RISK)
-      .invoke('text')
-      .should('eql', newRule.riskScore);
-    cy.get(ABOUT_DESCRIPTION)
-      .eq(ABOUT_TIMELINE)
-      .invoke('text')
-      .should('eql', 'Default blank timeline');
 
-    let expectedUrls = '';
-    newRule.referenceUrls.forEach(url => {
-      expectedUrls = expectedUrls + url;
-    });
-    cy.get(ABOUT_DESCRIPTION)
-      .eq(ABOUT_EXPECTED_URLS)
-      .invoke('text')
-      .should('eql', expectedUrls);
-
-    let expectedFalsePositives = '';
-    newRule.falsePositivesExamples.forEach(falsePositive => {
-      expectedFalsePositives = expectedFalsePositives + falsePositive;
-    });
-    cy.get(ABOUT_DESCRIPTION)
-      .eq(ABOUT_FALSE_POSITIVES)
-      .invoke('text')
-      .should('eql', expectedFalsePositives);
-
-    let expectedMitre = '';
-    newRule.mitre.forEach(mitre => {
-      expectedMitre = expectedMitre + mitre.tactic;
-      mitre.techniques.forEach(technique => {
-        expectedMitre = expectedMitre + technique;
-      });
-    });
-    cy.get(ABOUT_DESCRIPTION)
-      .eq(ABOUT_MITRE)
-      .invoke('text')
-      .should('eql', expectedMitre);
-
-    let expectedTags = '';
-    newRule.tags.forEach(tag => {
-      expectedTags = expectedTags + tag;
-    });
-    cy.get(ABOUT_DESCRIPTION)
-      .eq(ABOUT_TAGS)
-      .invoke('text')
-      .should('eql', expectedTags);
-    cy.get(SCHEDULE_DESCRIPTION)
+    cy.get(SCHEDULE_STEP)
       .eq(SCHEDULE_RUNS)
       .invoke('text')
       .should('eql', '5m');
-    cy.get(SCHEDULE_DESCRIPTION)
+    cy.get(SCHEDULE_STEP)
       .eq(SCHEDULE_LOOPBACK)
       .invoke('text')
       .should('eql', '1m');

@@ -22,7 +22,10 @@ export interface ThreatParams {
   technique: IMitreAttack[];
 }
 
+export type RuleType = 'query' | 'saved_query' | 'machine_learning';
+
 export interface RuleAlertParams {
+  anomalyThreshold: number | undefined;
   description: string;
   note: string | undefined | null;
   enabled: boolean;
@@ -30,11 +33,12 @@ export interface RuleAlertParams {
   filters: PartialFilter[] | undefined | null;
   from: string;
   immutable: boolean;
-  index: string[];
+  index: string[] | undefined | null;
   interval: string;
   ruleId: string | undefined | null;
   language: string | undefined | null;
   maxSignals: number;
+  machineLearningJobId: string | undefined;
   riskScore: number;
   outputIndex: string;
   name: string;
@@ -48,7 +52,7 @@ export interface RuleAlertParams {
   timelineId: string | undefined | null;
   timelineTitle: string | undefined | null;
   threat: ThreatParams[] | undefined | null;
-  type: 'query' | 'saved_query';
+  type: RuleType;
   version: number;
   throttle?: string;
 }
@@ -57,10 +61,12 @@ export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interva
 
 export type RuleAlertParamsRest = Omit<
   RuleAlertParams,
+  | 'anomalyThreshold'
   | 'ruleId'
   | 'falsePositives'
   | 'immutable'
   | 'maxSignals'
+  | 'machineLearningJobId'
   | 'savedId'
   | 'riskScore'
   | 'timelineId'
@@ -77,12 +83,14 @@ export type RuleAlertParamsRest = Omit<
     | 'lastSuccessMessage'
     | 'lastFailureMessage'
   > & {
+    anomaly_threshold: RuleAlertParams['anomalyThreshold'];
     rule_id: RuleAlertParams['ruleId'];
     false_positives: RuleAlertParams['falsePositives'];
     saved_id?: RuleAlertParams['savedId'];
     timeline_id: RuleAlertParams['timelineId'];
     timeline_title: RuleAlertParams['timelineTitle'];
     max_signals: RuleAlertParams['maxSignals'];
+    machine_learning_job_id: RuleAlertParams['machineLearningJobId'];
     risk_score: RuleAlertParams['riskScore'];
     output_index: RuleAlertParams['outputIndex'];
     created_at: string;

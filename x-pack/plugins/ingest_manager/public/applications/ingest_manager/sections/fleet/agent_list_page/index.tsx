@@ -26,6 +26,7 @@ import {
   EuiButtonIcon,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
@@ -289,6 +290,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
+      width: '100px',
       name: i18n.translate('xpack.ingestManager.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
@@ -299,10 +301,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.agentList.configColumnTitle', {
         defaultMessage: 'Configuration',
       }),
-      render: (configId: string) => {
+      render: (configId: string, agent: Agent) => {
         const configName = agentConfigs.find(p => p.id === configId)?.name;
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
               <EuiLink
                 href={`${CONFIG_DETAILS_URI}${configId}`}
@@ -312,21 +314,42 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 {configName || configId}
               </EuiLink>
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
-                <FormattedMessage
-                  id="xpack.ingestManager.agentList.revisionNumber"
-                  defaultMessage="rev. {revNumber}"
-                  values={{ revNumber: '999' }} // TODO fix when we have revision
-                />
-              </EuiText>
-            </EuiFlexItem>
+            {agent.config_revision && (
+              <EuiFlexItem grow={false}>
+                <EuiText color="default" size="xs" className="eui-textNoWrap">
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.revisionNumber"
+                    defaultMessage="rev. {revNumber}"
+                    values={{ revNumber: agent.config_revision }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            {agent.config_revision &&
+              agent.config_newest_revision &&
+              agent.config_newest_revision > agent.config_revision && (
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                    <EuiIcon size="m" type="alert" color="warning" />
+                    &nbsp;
+                    {true && (
+                      <>
+                        <FormattedMessage
+                          id="xpack.ingestManager.agentList.outOfDateLabel"
+                          defaultMessage="Out-of-date"
+                        />
+                      </>
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
           </EuiFlexGroup>
         );
       },
     },
     {
       field: 'local_metadata.agent_version',
+      width: '100px',
       name: i18n.translate('xpack.ingestManager.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),

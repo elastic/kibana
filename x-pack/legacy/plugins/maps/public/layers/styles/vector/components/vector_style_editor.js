@@ -69,7 +69,7 @@ export class VectorStyleEditor extends Component {
     };
 
     //These are all fields (only used for text labeling)
-    const fields = await this.props.layer.getFields();
+    const fields = await this.props.layer.getStyleEditorFields();
     const fieldPromises = fields.map(getFieldMeta);
     const fieldsArrayAll = await Promise.all(fieldPromises);
     if (!this._isMounted || _.isEqual(fieldsArrayAll, this.state.fields)) {
