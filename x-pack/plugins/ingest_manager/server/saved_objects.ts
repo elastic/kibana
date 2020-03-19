@@ -32,7 +32,8 @@ export const savedObjectMappings = {
       config_id: { type: 'keyword' },
       last_updated: { type: 'date' },
       last_checkin: { type: 'date' },
-      config_updated_at: { type: 'date' },
+      config_revision: { type: 'integer' },
+      config_newest_revision: { type: 'integer' },
       // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       default_api_key: { type: 'keyword' },
       updated_at: { type: 'date' },

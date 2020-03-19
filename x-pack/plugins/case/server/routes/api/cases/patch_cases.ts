@@ -37,10 +37,23 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
           client: context.core.savedObjects.client,
           caseIds: query.cases.map(q => q.id),
         });
+        let nonExistingCases: CasePatchRequest[] = [];
         const conflictedCases = query.cases.filter(q => {
           const myCase = myCases.saved_objects.find(c => c.id === q.id);
+
+          if (myCase && myCase.error) {
+            nonExistingCases = [...nonExistingCases, q];
+            return false;
+          }
           return myCase == null || myCase?.version !== q.version;
         });
+        if (nonExistingCases.length > 0) {
+          throw Boom.notFound(
+            `These cases ${nonExistingCases
+              .map(c => c.id)
+              .join(', ')} do not exist. Please check you have the correct ids.`
+          );
+        }
         if (conflictedCases.length > 0) {
           throw Boom.conflict(
             `These cases ${conflictedCases
@@ -60,18 +73,31 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
         });
         if (updateFilterCases.length > 0) {
           const updatedBy = await caseService.getUser({ request, response });
-          const { full_name, username } = updatedBy;
+          const { email, full_name, username } = updatedBy;
           const updatedDt = new Date().toISOString();
           const updatedCases = await caseService.patchCases({
             client: context.core.savedObjects.client,
             cases: updateFilterCases.map(thisCase => {
               const { id: caseId, version, ...updateCaseAttributes } = thisCase;
+              let closedInfo = {};
+              if (updateCaseAttributes.status && updateCaseAttributes.status === 'closed') {
+                closedInfo = {
+                  closed_at: updatedDt,
+                  closed_by: { email, full_name, username },
+                };
+              } else if (updateCaseAttributes.status && updateCaseAttributes.status === 'open') {
+                closedInfo = {
+                  closed_at: null,
+                  closed_by: null,
+                };
+              }
               return {
                 caseId,
                 updatedAttributes: {
                   ...updateCaseAttributes,
+                  ...closedInfo,
                   updated_at: updatedDt,
-                  updated_by: { full_name, username },
+                  updated_by: { email, full_name, username },
                 },
                 version,
               };

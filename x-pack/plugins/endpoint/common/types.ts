@@ -88,10 +88,10 @@ export interface AlertResultList {
   prev: string | null;
 }
 
-export interface EndpointResultList {
-  /* the endpoints restricted by the page size */
-  endpoints: EndpointMetadata[];
-  /* the total number of unique endpoints in the index */
+export interface HostResultList {
+  /* the hosts restricted by the page size */
+  hosts: HostMetadata[];
+  /* the total number of unique hosts in the index */
   total: number;
   /* the page size requested */
   request_page_size: number;
@@ -248,7 +248,7 @@ interface AlertMetadata {
  */
 export type AlertData = AlertEvent & AlertMetadata;
 
-export interface EndpointMetadata {
+export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
@@ -263,7 +263,7 @@ export interface EndpointMetadata {
     version: string;
   };
   host: HostFields;
-}
+}>;
 
 /**
  * Represents `total` response from Elasticsearch after ES 7.0.
@@ -316,8 +316,8 @@ export interface EndpointEvent {
     version: string;
   };
   event: {
-    category: string;
-    type: string;
+    category: string | string[];
+    type: string | string[];
     id: string;
     kind: string;
   };
@@ -333,6 +333,7 @@ export interface EndpointEvent {
     name: string;
     parent?: {
       entity_id: string;
+      name?: string;
     };
   };
 }

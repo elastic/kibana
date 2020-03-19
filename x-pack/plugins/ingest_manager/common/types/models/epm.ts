@@ -186,6 +186,7 @@ export interface RegistryVarsEntry {
   description?: string;
   type: string;
   required?: boolean;
+  show_user?: boolean;
   multi?: boolean;
   default?: string | string[];
   os?: {
