@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { APICaller } from 'kibana/server';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 /**
  * Service for carrying out queries to obtain data
@@ -153,6 +155,34 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
   }
 
   /**
+   * Caps provided time boundaries based on the interval.
+   * @param earliestMs
+   * @param latestMs
+   * @param interval
+   */
+  function getSafeTimeRange(
+    earliestMs: number,
+    latestMs: number,
+    interval: string
+  ): { start: number; end: number } {
+    const maxNumberOfBuckets = 1000;
+    const end = latestMs;
+
+    const intervalInMs = parseInterval(interval);
+
+    if (intervalInMs === null) {
+      throw Boom.badRequest('Interval is invalid');
+    }
+
+    const start = Math.max(
+      earliestMs,
+      latestMs - maxNumberOfBuckets * intervalInMs.asMilliseconds()
+    );
+
+    return { start, end };
+  }
+
+  /**
    * Retrieves max cardinalities for provided fields from date interval buckets
    * using max bucket pipeline aggregation.
    *
@@ -183,12 +213,14 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       return {};
     }
 
+    const { start, end } = getSafeTimeRange(earliestMs, latestMs, interval);
+
     const mustCriteria = [
       {
         range: {
           [timeFieldName]: {
-            gte: earliestMs,
-            lte: latestMs,
+            gte: start,
+            lte: end,
             format: 'epoch_millis',
           },
         },
@@ -223,7 +255,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     const body = {
       query: {
         bool: {
-          must: mustCriteria,
+          filter: mustCriteria,
         },
       },
       size: 0,
