@@ -34,7 +34,6 @@ const stepActionsDefaultValue = {
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   addPadding = false,
   defaultValues,
-  descriptionDirection = 'row',
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
@@ -88,7 +87,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
 
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
+      <StepRuleDescription direction={'row'} schema={schema} data={myStepData} />
     </StepContentWrapper>
   ) : (
     <>

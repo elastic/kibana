@@ -145,10 +145,10 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
   };
 };
 
-const getAlertThrottle = (throttle: string | null) =>
+export const getAlertThrottle = (throttle: string | null) =>
   throttle && !['no_actions', 'rule'].includes(throttle) ? throttle : null;
 
-const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
+export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
   const { actions = [], enabled, throttle = null } = actionsStepData;
 
   return {

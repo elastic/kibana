@@ -6,7 +6,7 @@
 
 import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
-import { AboutStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
+import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import { FieldValueQueryBar } from '../../components/query_bar';
 
 export const mockQueryBar: FieldValueQueryBar = {
@@ -77,6 +77,7 @@ export const mockRule = (id: string): Rule => ({
 });
 
 export const mockRuleWithEverything = (id: string): Rule => ({
+  actions: [],
   created_at: '2020-01-10T21:11:45.839Z',
   updated_at: '2020-01-10T21:11:45.839Z',
   created_by: 'elastic',
@@ -144,6 +145,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
       ],
     },
   ],
+  throttle: null, // propably delete
   note: '# this is some markdown documentation',
   version: 1,
 });
@@ -181,6 +183,13 @@ export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   note: '# this is some markdown documentation',
 });
 
+export const mockActionsStepRule = (isNew = false, enabled = false): ActionsStepRule => ({
+  isNew,
+  actions: [],
+  enabled,
+  throttle: null,
+});
+
 export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
   isNew,
   ruleType: 'query',
@@ -190,9 +199,8 @@ export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
   queryBar: mockQueryBar,
 });
 
-export const mockScheduleStepRule = (isNew = false, enabled = false): ScheduleStepRule => ({
+export const mockScheduleStepRule = (isNew = false): ScheduleStepRule => ({
   isNew,
-  enabled,
   interval: '5m',
   from: '6m',
   to: 'now',

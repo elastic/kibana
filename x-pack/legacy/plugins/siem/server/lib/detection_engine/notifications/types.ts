@@ -17,7 +17,6 @@ import {
 import { Alert, AlertAction } from '../../../../../../../plugins/alerting/common';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { LegacyRequest } from '../../../types';
-import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 
 export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
@@ -107,7 +106,8 @@ export type PatchNotificationParams = Partial<RuleAlertParams> & {
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
 
-export type UpdateNotificationParams = Omit<NotificationAlertParams, 'interval'> & {
+export type UpdateNotificationParams = Omit<NotificationAlertParams, 'interval', 'actions'> & {
+  actions?: AlertAction[];
   id?: string;
   ruleId: string;
   tags?: string[];

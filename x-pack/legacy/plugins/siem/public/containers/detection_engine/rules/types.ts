@@ -13,6 +13,19 @@ export const RuleTypeSchema = t.keyof({
 });
 export type RuleType = t.TypeOf<typeof RuleTypeSchema>;
 
+/**
+ * Params is an "object", since it is a type of AlertActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/alert.ts
+ */
+export const action = t.exact(
+  t.type({
+    group: t.string,
+    id: t.string,
+    actionTypeId: t.string,
+    params: t.object,
+  })
+);
+
 export const NewRuleSchema = t.intersection([
   t.type({
     description: t.string,
@@ -24,7 +37,7 @@ export const NewRuleSchema = t.intersection([
     type: RuleTypeSchema,
   }),
   t.partial({
-    actions: t.array(t.unknown),
+    actions: t.array(action),
     anomaly_threshold: t.number,
     created_by: t.string,
     false_positives: t.array(t.string),
@@ -83,7 +96,7 @@ export const RuleSchema = t.intersection([
     threat: t.array(t.unknown),
     updated_at: t.string,
     updated_by: t.string,
-    actions: t.array(t.unknown),
+    actions: t.array(action),
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({

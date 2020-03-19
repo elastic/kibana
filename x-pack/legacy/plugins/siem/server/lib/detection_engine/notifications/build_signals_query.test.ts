@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildEventsSearchQuery } from './build_events_query';
+import { buildSignalsSearchQuery } from './build_signals_query';
 
 describe('create_signals', () => {
   test('it builds a now-5m up to today filter', () => {

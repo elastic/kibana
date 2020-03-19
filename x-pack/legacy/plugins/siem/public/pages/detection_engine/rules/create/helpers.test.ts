@@ -9,7 +9,9 @@ import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
+  // ActionsStepRuleJson,
   AboutStepRule,
+  ActionsStepRule,
   ScheduleStepRule,
   DefineStepRule,
 } from '../types';
@@ -18,6 +20,7 @@ import {
   formatDefineStepData,
   formatScheduleStepData,
   formatAboutStepData,
+  // formatActionsStepData,
   formatRule,
 } from './helpers';
 import {
@@ -25,6 +28,7 @@ import {
   mockQueryBar,
   mockScheduleStepRule,
   mockAboutStepRule,
+  mockActionsStepRule,
 } from '../all/__mocks__/mock';
 
 describe('helpers', () => {
@@ -551,15 +555,17 @@ describe('helpers', () => {
     let mockAbout: AboutStepRule;
     let mockDefine: DefineStepRule;
     let mockSchedule: ScheduleStepRule;
+    let mockActions: ActionsStepRule;
 
     beforeEach(() => {
       mockAbout = mockAboutStepRule();
       mockDefine = mockDefineStepRule();
       mockSchedule = mockScheduleStepRule();
+      mockActions = mockActionsStepRule();
     });
 
     test('returns NewRule with type of saved_query when saved_id exists', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule);
+      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
 
       expect(result.type).toEqual('saved_query');
     });
@@ -572,13 +578,18 @@ describe('helpers', () => {
           saved_id: '',
         },
       };
-      const result: NewRule = formatRule(mockDefineStepRuleWithoutSavedId, mockAbout, mockSchedule);
+      const result: NewRule = formatRule(
+        mockDefineStepRuleWithoutSavedId,
+        mockAbout,
+        mockSchedule,
+        mockActions
+      );
 
       expect(result.type).toEqual('query');
     });
 
     test('returns NewRule without id if ruleId does not exist', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule);
+      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
 
       expect(result.id).toBeUndefined();
     });
