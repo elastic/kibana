@@ -70,6 +70,17 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'text-halo-color', color);
   }
 
+  supportsFieldMeta() {
+    if (!this.isComplete() || !this._field.supportsFieldMeta()) {
+      return false;
+    }
+
+    return (
+      (this.isCategorical() && !this.isCustomCategoricalPalette()) ||
+      (this.isOrdinal() && !this.isCustomOrdinalColorRamp())
+    );
+  }
+
   isOrdinal() {
     return (
       typeof this._options.type === 'undefined' || this._options.type === COLOR_MAP_TYPE.ORDINAL
@@ -82,6 +93,10 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
   isCustomOrdinalColorRamp() {
     return this._options.useCustomColorRamp;
+  }
+
+  isCustomCategoricalPalette() {
+    return this._options.useCustomColorPalette;
   }
 
   supportsMbFeatureState() {

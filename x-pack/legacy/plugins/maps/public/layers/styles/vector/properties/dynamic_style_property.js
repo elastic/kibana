@@ -142,13 +142,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   supportsFieldMeta() {
-    if (this.isOrdinal()) {
-      return this.isComplete() && this._field.supportsFieldMeta();
-    } else if (this.isCategorical()) {
-      return this.isComplete() && this._field.supportsFieldMeta();
-    } else {
-      return false;
-    }
+    return this.isComplete() && this._field.supportsFieldMeta();
   }
 
   async getFieldMetaRequest() {
