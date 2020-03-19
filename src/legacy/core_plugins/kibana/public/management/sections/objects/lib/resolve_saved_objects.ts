@@ -67,7 +67,7 @@ async function importIndexPattern(
   doc: SavedObjectsRawDoc,
   indexPatterns: IndexPatternsContract,
   overwriteAll: boolean,
-  confirmModalPromise: OverlayStart['openConfirm']
+  openConfirm: OverlayStart['openConfirm']
 ) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
   const emptyPattern = await indexPatterns.make();
@@ -97,7 +97,7 @@ async function importIndexPattern(
   let newId = await emptyPattern.create(overwriteAll);
   if (!newId) {
     // We can override and we want to prompt for confirmation
-    const isConfirmed = await confirmModalPromise(
+    const isConfirmed = await openConfirm(
       i18n.translate('kbn.management.indexPattern.confirmOverwriteLabel', {
         values: { title },
         defaultMessage: "Are you sure you want to overwrite '{title}'?",
@@ -123,7 +123,7 @@ async function importIndexPattern(
   return newId;
 }
 
-async function importDocument(obj: SavedObject, doc: any, overwriteAll: boolean) {
+async function importDocument(obj: SavedObject, doc: SavedObjectsRawDoc, overwriteAll: boolean) {
   await obj.applyESResp({
     references: doc._references || [],
     ...doc,
