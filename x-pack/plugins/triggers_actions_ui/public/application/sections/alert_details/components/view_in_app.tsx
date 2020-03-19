@@ -87,9 +87,9 @@ function getNavigationHandler(
     ? {
         onClick: () => {
           // eslint-disable-next-line no-console
-          console.log('NAVIGATE HAS BEEN CLICKED');
-          // eslint-disable-next-line no-console
-          console.log('NAVIGATING TO:', alert.consumer, JSON.stringify(alertNavigation));
+          console.log(
+            `NAVIGATE HAS BEEN CLICKED: ${alert.consumer} ${JSON.stringify(alertNavigation)}`
+          );
           navigateToApp(alert.consumer, alertNavigation);
         },
       }
