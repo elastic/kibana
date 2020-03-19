@@ -462,7 +462,7 @@ export class ImportView extends Component {
       initialized === true;
 
     return (
-      <EuiPage>
+      <EuiPage data-test-subj="mlPageFileDataVisImport">
         <EuiPageBody>
           <EuiPageContentHeader>
             <EuiTitle>
@@ -470,7 +470,7 @@ export class ImportView extends Component {
             </EuiTitle>
           </EuiPageContentHeader>
           <EuiSpacer size="m" />
-          <EuiPanel>
+          <EuiPanel data-test-subj="mlFileDataVisImportSettingsPanel">
             <EuiTitle size="s">
               <h2>
                 <FormattedMessage
@@ -516,6 +516,7 @@ export class ImportView extends Component {
                 isLoading={importing}
                 iconSide="right"
                 fill
+                data-test-subj="mlFileDataVisImportButton"
               >
                 <FormattedMessage
                   id="xpack.ml.fileDatavisualizer.importView.importButtonLabel"

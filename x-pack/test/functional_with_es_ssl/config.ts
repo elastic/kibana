@@ -28,7 +28,10 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     services,
     pageObjects,
     // list paths to the files that contain your plugins tests
-    testFiles: [resolve(__dirname, './apps/triggers_actions_ui')],
+    testFiles: [
+      resolve(__dirname, './apps/triggers_actions_ui'),
+      resolve(__dirname, './apps/uptime'),
+    ],
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       triggersActions: {
