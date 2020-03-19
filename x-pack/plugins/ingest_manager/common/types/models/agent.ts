@@ -20,10 +20,10 @@ export interface NewAgentAction {
   sent_at?: string;
 }
 
-export interface AgentAction extends NewAgentAction, SavedObjectAttributes {
+export type AgentAction = NewAgentAction & {
   id: string;
   created_at: string;
-}
+} & SavedObjectAttributes;
 
 export interface AgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';

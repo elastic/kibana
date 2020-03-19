@@ -51,7 +51,7 @@ describe('test actions handlers', () => {
   });
 
   it('should succeed on valid new agent action', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest(({
+    const postNewAgentActionRequest: PostNewAgentActionRequest = {
       body: {
         action: {
           type: 'CONFIG_CHANGE',
@@ -62,7 +62,9 @@ describe('test actions handlers', () => {
       params: {
         agentId: 'id',
       },
-    } as unknown) as PostNewAgentActionRequest);
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest(postNewAgentActionRequest);
 
     const agentAction = ({
       type: 'CONFIG_CHANGE',
