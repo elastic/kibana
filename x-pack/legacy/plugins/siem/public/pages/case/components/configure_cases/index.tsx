@@ -78,7 +78,7 @@ const ConfigureCasesComponent: React.FC = () => {
     null
   );
 
-  const [actionBarVisible, setActionBarVisisble] = useState(false);
+  const [actionBarVisible, setActionBarVisible] = useState(false);
 
   const handleShowAddFlyout = useCallback(() => setAddFlyoutVisibility(true), []);
 
@@ -92,7 +92,6 @@ const ConfigureCasesComponent: React.FC = () => {
       type: 'setConnectorId',
       connectorId: newConnectorId,
     });
-    setActionBarVisisble(true);
   }, []);
 
   const setClosureType = useCallback((newClosureType: ClosureType) => {
@@ -124,10 +123,21 @@ const ConfigureCasesComponent: React.FC = () => {
   const handleSubmit = useCallback(
     // TO DO give a warning/error to user when field are not mapped so they have chance to do it
     () => {
+      setActionBarVisible(false);
       persistCaseConfigure({ connectorId, closureType });
     },
     [connectorId, closureType, mapping]
   );
+
+  const onChangeConnector = useCallback((newConnectorId: string) => {
+    setActionBarVisible(true);
+    setConnectorId(newConnectorId);
+  }, []);
+
+  const onChangeClosureType = useCallback((newClosureType: ClosureType) => {
+    setActionBarVisible(true);
+    setClosureType(newClosureType);
+  }, []);
 
   useEffect(() => {
     if (
@@ -184,7 +194,7 @@ const ConfigureCasesComponent: React.FC = () => {
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors}
           isLoading={isLoadingConnectors}
-          onChangeConnector={setConnectorId}
+          onChangeConnector={onChangeConnector}
           handleShowAddFlyout={handleShowAddFlyout}
           selectedConnector={connectorId}
         />
@@ -193,7 +203,7 @@ const ConfigureCasesComponent: React.FC = () => {
         <ClosureOptions
           closureTypeSelected={closureType}
           disabled={persistLoading || isLoadingConnectors || connectorId === 'none'}
-          onChangeClosureType={setClosureType}
+          onChangeClosureType={onChangeClosureType}
         />
       </SectionWrapper>
       <SectionWrapper>
