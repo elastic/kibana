@@ -44,7 +44,9 @@ export const Settings: React.FC = props => {
                     }),
                     id: '1',
                     href: getAPMHref('/settings/agent-configuration', search),
-                    isSelected: pathname === '/settings/agent-configuration'
+                    isSelected: pathname.startsWith(
+                      '/settings/agent-configuration'
+                    )
                   },
                   {
                     name: i18n.translate('xpack.apm.settings.indices', {
