@@ -7,7 +7,6 @@
 import { Reducer } from 'redux';
 import { PolicyListState } from '../../types';
 import { AppAction } from '../action';
-import { selectApiError } from './selectors';
 
 const initialPolicyListState = (): PolicyListState => {
   return {
@@ -40,23 +39,13 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
     };
   }
 
-  if (action.type === 'userShownPolicyListServerFailedMessage') {
-    // Make sure that the apiError currently stored is the one the user was shown
-    if (selectApiError(state) === action.payload) {
-      return {
-        ...state,
-        apiError: undefined,
-      };
-    }
-    return state;
-  }
-
   if (
     action.type === 'userPaginatedPolicyListTable' ||
     (action.type === 'userNavigatedToPage' && action.payload === 'policyListPage')
   ) {
     return {
       ...state,
+      apiError: undefined,
       isLoading: true,
     };
   }

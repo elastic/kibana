@@ -21,11 +21,6 @@ interface ServerFailedToReturnPolicyListData {
   payload: ServerApiError;
 }
 
-interface UserShownPolicyListServerFailedMessage {
-  type: 'userShownPolicyListServerFailedMessage';
-  payload: ServerApiError;
-}
-
 interface UserPaginatedPolicyListTable {
   type: 'userPaginatedPolicyListTable';
   payload: {
@@ -37,5 +32,4 @@ interface UserPaginatedPolicyListTable {
 export type PolicyListAction =
   | ServerReturnedPolicyListData
   | UserPaginatedPolicyListTable
-  | ServerFailedToReturnPolicyListData
-  | UserShownPolicyListServerFailedMessage;
+  | ServerFailedToReturnPolicyListData;

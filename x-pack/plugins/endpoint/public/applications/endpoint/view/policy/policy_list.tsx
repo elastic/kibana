@@ -79,10 +79,6 @@ export const PolicyList = React.memo(() => {
         body: apiError.message,
         toastLifeTimeMs: 10000,
       });
-      dispatch({
-        type: 'userShownPolicyListServerFailedMessage',
-        payload: apiError,
-      });
     }
   }, [apiError, dispatch, notifications.toasts]);
 
