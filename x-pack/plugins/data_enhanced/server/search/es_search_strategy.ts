@@ -34,7 +34,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
   ) => {
     const config = await context.config$.pipe(first()).toPromise();
     const defaultParams = getDefaultSearchParams(config);
-    const params = { ...defaultParams, trackTotalHits: true, ...request.params };
+    const params = { ...defaultParams, ...request.params };
 
     const response = await (request.indexType === 'rollup'
       ? rollupSearch(caller, { ...request, params }, options)
@@ -44,11 +44,6 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
       request.indexType === 'rollup'
         ? (response as SearchResponse<any>)
         : (response as AsyncSearchResponse<any>).response;
-
-    if (typeof rawResponse.hits.total !== 'number') {
-      // @ts-ignore This should be fixed as part of https://github.com/elastic/kibana/issues/26356
-      rawResponse.hits.total = rawResponse.hits.total.value;
-    }
 
     const id = (response as AsyncSearchResponse<any>).id;
     const { total, failed, successful } = rawResponse._shards;

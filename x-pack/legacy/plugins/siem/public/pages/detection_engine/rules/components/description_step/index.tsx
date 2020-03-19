@@ -5,7 +5,7 @@
  */
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty, chunk, get, pick } from 'lodash/fp';
+import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -14,7 +14,6 @@ import {
   Filter,
   esFilters,
   FilterManager,
-  Query,
 } from '../../../../../../../../../../src/plugins/data/public';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import { useKibana } from '../../../../../lib/kibana';
@@ -133,14 +132,14 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
 export const getDescriptionItem = (
   field: string,
   label: string,
-  value: unknown,
+  data: unknown,
   filterManager: FilterManager,
   indexPatterns?: IIndexPattern
 ): ListItems[] => {
   if (field === 'queryBar') {
-    const filters = addFilterStateIfNotThere(get('queryBar.filters', value) ?? []);
-    const query = get('queryBar.query', value) as Query;
-    const savedId = get('queryBar.saved_id', value);
+    const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);
+    const query = get('queryBar.query.query', data);
+    const savedId = get('queryBar.saved_id', data);
     return buildQueryBarDescription({
       field,
       filters,
@@ -150,31 +149,24 @@ export const getDescriptionItem = (
       indexPatterns,
     });
   } else if (field === 'threat') {
-    const threat: IMitreEnterpriseAttack[] = get(field, value).filter(
+    const threat: IMitreEnterpriseAttack[] = get(field, data).filter(
       (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
     );
     return buildThreatDescription({ label, threat });
   } else if (field === 'references') {
-    const urls: string[] = get(field, value);
+    const urls: string[] = get(field, data);
     return buildUrlsDescription(label, urls);
   } else if (field === 'falsePositives') {
-    const values: string[] = get(field, value);
+    const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
-  } else if (Array.isArray(get(field, value))) {
-    const values: string[] = get(field, value);
+  } else if (Array.isArray(get(field, data))) {
+    const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
   } else if (field === 'severity') {
-    const val: string = get(field, value);
+    const val: string = get(field, data);
     return buildSeverityDescription(label, val);
-  } else if (field === 'riskScore') {
-    return [
-      {
-        title: label,
-        description: get(field, value),
-      },
-    ];
   } else if (field === 'timeline') {
-    const timeline = get(field, value) as FieldValueTimeline;
+    const timeline = get(field, data) as FieldValueTimeline;
     return [
       {
         title: label,
@@ -182,11 +174,12 @@ export const getDescriptionItem = (
       },
     ];
   } else if (field === 'note') {
-    const val: string = get(field, value);
+    const val: string = get(field, data);
     return buildNoteDescription(label, val);
   }
-  const description: string = get(field, value);
-  if (!isEmpty(description)) {
+
+  const description: string = get(field, data);
+  if (isNumber(description) || !isEmpty(description)) {
     return [
       {
         title: label,

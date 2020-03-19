@@ -5,7 +5,8 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER } from './constants';
+import { DataRequestDescriptor } from './data_request_descriptor_types';
+import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from './constants';
 
 export type AbstractSourceDescriptor = {
   id?: string;
@@ -49,7 +50,7 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   tooltipProperties?: string[];
   sortField?: string;
   sortOrder?: SORT_ORDER;
-  useTopHits?: boolean;
+  scalingType: SCALING_TYPES;
   topHitsSplitField?: string;
   topHitsSize?: number;
 };
@@ -91,14 +92,6 @@ export type XYZTMSSourceDescriptor = {
 export type JoinDescriptor = {
   leftField: string;
   right: ESTermSourceDescriptor;
-};
-
-export type DataRequestDescriptor = {
-  dataId: string;
-  dataMetaAtStart: object;
-  dataRequestToken: symbol;
-  data: object;
-  dataMeta: object;
 };
 
 export type LayerDescriptor = {

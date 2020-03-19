@@ -48,6 +48,7 @@ export const LAYER_TYPE = {
   VECTOR: 'VECTOR',
   VECTOR_TILE: 'VECTOR_TILE',
   HEATMAP: 'HEATMAP',
+  BLENDED_VECTOR: 'BLENDED_VECTOR',
 };
 
 export enum SORT_ORDER {
@@ -188,3 +189,9 @@ export enum LABEL_BORDER_SIZES {
 }
 
 export const DEFAULT_ICON = 'airfield';
+
+export enum SCALING_TYPES {
+  LIMIT = 'LIMIT',
+  CLUSTERS = 'CLUSTERS',
+  TOP_HITS = 'TOP_HITS',
+}
