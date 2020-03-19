@@ -30,8 +30,10 @@ export const PageHeader = React.memo(
     });
     const extraLinkComponents = !extraLinks ? null : (
       <EuiFlexItem grow={false}>
-        <Link to={`${SETTINGS_ROUTE}`}>
-          <EuiButtonEmpty data-test-subj="settings-page-link">{settingsLinkText}</EuiButtonEmpty>
+        <Link to={SETTINGS_ROUTE}>
+          <EuiButtonEmpty data-test-subj="settings-page-link" iconType="gear">
+            {settingsLinkText}
+          </EuiButtonEmpty>
         </Link>
       </EuiFlexItem>
     );
