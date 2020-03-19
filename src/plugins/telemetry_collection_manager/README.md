@@ -1,9 +1,7 @@
-# telemetry_collection_manager
+# Telemetry Collection Manager
 
-> Telemetry's collection manager to go through all the telemetry sources when fetching it before reporting
+Telemetry's collection manager to go through all the telemetry sources when fetching it before reporting.
 
----
+It has been split into a separate plugin because the `telemetry` plugin was pretty much being a passthrough in many cases to instantiate and maintain the logic of this bit.
 
-## Development
-
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions setting up your development environment.
+For separation of concerns, it's better to have this piece of logic independent to the rest.
