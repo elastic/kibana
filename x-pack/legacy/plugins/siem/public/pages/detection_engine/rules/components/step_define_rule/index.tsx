@@ -184,6 +184,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             path="ruleType"
             component={SelectRuleType}
             componentProps={{
+              describedByIds: ['detectionEngineStepDefineRuleType'],
               hasValidLicense: mlCapabilities.isPlatinumOrTrialLicense,
             }}
           />
@@ -236,8 +237,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </EuiFormRow>
           <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'flex' : 'none' }}>
             <>
-              <UseField path="machineLearningJobId" component={MlJobSelect} />
-              <UseField path="anomalyThreshold" component={AnomalyThresholdSlider} />
+              <UseField
+                path="machineLearningJobId"
+                component={MlJobSelect}
+                componentProps={{
+                  describedByIds: ['detectionEngineStepDefineRulemachineLearningJobId'],
+                }}
+              />
+              <UseField
+                path="anomalyThreshold"
+                component={AnomalyThresholdSlider}
+                componentProps={{
+                  describedByIds: ['detectionEngineStepDefineRuleAnomalyThreshold'],
+                }}
+              />
             </>
           </EuiFormRow>
           <FormDataProvider pathsToWatch={['index', 'ruleType']}>

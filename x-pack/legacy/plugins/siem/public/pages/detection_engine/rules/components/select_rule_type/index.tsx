@@ -45,11 +45,13 @@ const MlCardDescription = ({ hasValidLicense = false }: { hasValidLicense: boole
 );
 
 interface SelectRuleTypeProps {
+  describedByIds: string[];
   field: FieldHook;
   hasValidLicense: boolean;
 }
 
 export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
+  describedByIds = [],
   field,
   hasValidLicense = false,
 }) => {
@@ -64,7 +66,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setQuery = useCallback(() => setType('query'), [setType]);
 
   return (
-    <EuiFormRow label={field.label} fullWidth>
+    <EuiFormRow label={field.label} fullWidth describedByIds={describedByIds}>
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiCard
