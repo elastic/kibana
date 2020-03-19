@@ -92,7 +92,7 @@ export const updateRules = async ({
       name,
       schedule: { interval },
       actions: actions ?? rule.actions,
-      throttle: throttle ?? throttle === null ? null : rule.throttle,
+      throttle: throttle !== undefined ? throttle : rule.throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,

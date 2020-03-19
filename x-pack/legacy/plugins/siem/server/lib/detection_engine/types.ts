@@ -32,7 +32,7 @@ export interface ThreatParams {
 export type RuleType = 'query' | 'saved_query' | 'machine_learning';
 
 export interface RuleAlertParams {
-  actions: AlertAction[] | undefined;
+  actions: AlertAction[];
   anomalyThreshold: number | undefined;
   description: string;
   note: string | undefined | null;

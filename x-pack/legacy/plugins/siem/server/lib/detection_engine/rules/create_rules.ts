@@ -84,7 +84,7 @@ export const createRules = ({
       },
       schedule: { interval },
       enabled,
-      actions: actions ?? [],
+      actions,
       throttle,
     },
   });

@@ -54,6 +54,7 @@ export const patchRules = async ({
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
+    actions,
     description,
     falsePositives,
     query,
@@ -73,6 +74,7 @@ export const patchRules = async ({
     severity,
     tags,
     threat,
+    throttle,
     to,
     type,
     references,
@@ -116,7 +118,7 @@ export const patchRules = async ({
     id: rule.id,
     data: {
       tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
-      throttle: throttle ?? throttle === null ? null : rule.throttle,
+      throttle: throttle !== undefined ? throttle : rule.throttle,
       name: calculateName({ updatedName: name, originalName: rule.name }),
       schedule: {
         interval: calculateInterval(interval, rule.schedule.interval),
