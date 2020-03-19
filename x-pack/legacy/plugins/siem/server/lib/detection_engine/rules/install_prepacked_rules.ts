@@ -46,6 +46,7 @@ export const installPrepackagedRules = (
       references,
       note,
       version,
+      lists,
     } = rule;
     return [
       ...acc,
@@ -81,6 +82,7 @@ export const installPrepackagedRules = (
         references,
         note,
         version,
+        lists,
       }),
     ];
   }, []);

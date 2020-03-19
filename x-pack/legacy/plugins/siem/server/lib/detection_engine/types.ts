@@ -7,6 +7,7 @@
 import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
+import { ListsDefaultArraySchema } from './routes/schemas/types/lists_default_array';
 
 export type PartialFilter = Partial<Filter>;
 
@@ -22,6 +23,10 @@ export interface ThreatParams {
   technique: IMitreAttack[];
 }
 
+// Notice below we are using lists: ListsDefaultArraySchema[]; which is coming directly from the response output section.
+// TODO: Eventually this whole RuleAlertParams will be replaced with io-ts. For now we can slowly strangle it out and reduce duplicate types
+// We don't have the input types defined through io-ts just yet but as we being introducing types from there we will more and more remove
+// types and share them between input and output schema but have an input Rule Schema and an output Rule Schema.
 export type RuleType = 'query' | 'saved_query' | 'machine_learning';
 
 export interface RuleAlertParams {
@@ -55,6 +60,7 @@ export interface RuleAlertParams {
   type: RuleType;
   version: number;
   throttle?: string;
+  lists: ListsDefaultArraySchema | null | undefined;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;

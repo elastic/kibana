@@ -140,6 +140,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     timeline_id: timelineId,
                     timeline_title: timelineTitle,
                     version,
+                    lists,
                   } = parsedRule;
 
                   try {
@@ -191,6 +192,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         references,
                         note,
                         version,
+                        lists,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
                     } else if (rule != null && request.query.overwrite) {
