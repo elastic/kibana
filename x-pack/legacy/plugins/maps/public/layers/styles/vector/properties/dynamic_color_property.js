@@ -76,8 +76,8 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     return (
-      (this.isCategorical() && !this.isCustomCategoricalPalette()) ||
-      (this.isOrdinal() && !this.isCustomOrdinalColorRamp())
+      (this.isCategorical() && !this._options.useCustomColorPalette) ||
+      (this.isOrdinal() && !this._options.useCustomColorRamp)
     );
   }
 
@@ -91,24 +91,16 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return this._options.type === COLOR_MAP_TYPE.CATEGORICAL;
   }
 
-  isCustomOrdinalColorRamp() {
-    return this._options.useCustomColorRamp;
-  }
-
-  isCustomCategoricalPalette() {
-    return this._options.useCustomColorPalette;
-  }
-
   supportsMbFeatureState() {
     return true;
   }
 
   isOrdinalRanged() {
-    return this.isOrdinal() && !this.isCustomOrdinalColorRamp();
+    return this.isOrdinal() && !this._options.useCustomColorRamp;
   }
 
   hasOrdinalBreaks() {
-    return (this.isOrdinal() && this.isCustomOrdinalColorRamp()) || this.isCategorical();
+    return (this.isOrdinal() && this._options.useCustomColorRamp) || this.isCategorical();
   }
 
   _getMbColor() {
