@@ -36,6 +36,8 @@ Environment=NODE_ENV=production
 
 WorkingDirectory=/usr/local/kibana-7.5.2-linux-x64
 
+# Timeout when starting service, before triggering a restart with SIGTERM
+TimeoutStartSec=300
 ExecStart=/usr/local/kibana-7.5.2-linux-x64/bin/kibana
 
 ExecStartPost=/usr/bin/python /usr/local/kibana-7.5.2-linux-x64/scripts/configureKibana.py
