@@ -15,27 +15,24 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-  SPAN_TYPE,
-  SPAN_SUBTYPE,
+  TRACE_ID,
   DESTINATION_ADDRESS,
-  TRACE_ID
+  SPAN_TYPE,
+  SPAN_SUBTYPE
 } from '../../../common/elasticsearch_fieldnames';
 
-const MAX_CONNECTIONS_PER_REQUEST = 1000;
 const MAX_TRACES_TO_INSPECT = 1000;
 
 export async function getTraceSampleIds({
-  after,
   serviceName,
   environment,
   setup
 }: {
-  after?: string;
   serviceName?: string;
   environment?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, client, indices } = setup;
+  const { start, end, client, indices, config } = setup;
 
   const rangeQuery = { range: rangeFilter(start, end) };
 
@@ -65,9 +62,15 @@ export async function getTraceSampleIds({
     query.bool.filter.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
   }
 
-  const afterObj = after
-    ? { after: JSON.parse(Buffer.from(after, 'base64').toString()) }
-    : {};
+  const fingerprintBucketSize = serviceName
+    ? config['xpack.apm.serviceMapFingerprintBucketSize']
+    : config['xpack.apm.serviceMapFingerprintGlobalBucketSize'];
+
+  const traceIdBucketSize = serviceName
+    ? config['xpack.apm.serviceMapTraceIdBucketSize']
+    : config['xpack.apm.serviceMapTraceIdGlobalBucketSize'];
+
+  const samplerShardSize = traceIdBucketSize * 10;
 
   const params = {
     index: [indices['apm_oss.spanIndices']],
@@ -77,42 +80,57 @@ export async function getTraceSampleIds({
       aggs: {
         connections: {
           composite: {
-            size: MAX_CONNECTIONS_PER_REQUEST,
-            ...afterObj,
             sources: [
-              { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
+              {
+                [DESTINATION_ADDRESS]: {
+                  terms: {
+                    field: DESTINATION_ADDRESS
+                  }
+                }
+              },
+              {
+                [SERVICE_NAME]: {
+                  terms: {
+                    field: SERVICE_NAME
+                  }
+                }
+              },
               {
                 [SERVICE_ENVIRONMENT]: {
-                  terms: { field: SERVICE_ENVIRONMENT, missing_bucket: true }
+                  terms: {
+                    field: SERVICE_ENVIRONMENT,
+                    missing_bucket: true
+                  }
                 }
               },
               {
                 [SPAN_TYPE]: {
-                  terms: { field: SPAN_TYPE, missing_bucket: true }
+                  terms: {
+                    field: SPAN_TYPE
+                  }
                 }
               },
               {
                 [SPAN_SUBTYPE]: {
-                  terms: { field: SPAN_SUBTYPE, missing_bucket: true }
-                }
-              },
-              {
-                [DESTINATION_ADDRESS]: {
-                  terms: { field: DESTINATION_ADDRESS }
+                  terms: {
+                    field: SPAN_SUBTYPE,
+                    missing_bucket: true
+                  }
                 }
               }
-            ]
+            ],
+            size: fingerprintBucketSize
           },
           aggs: {
             sample: {
               sampler: {
-                shard_size: 30
+                shard_size: samplerShardSize
               },
               aggs: {
                 trace_ids: {
                   terms: {
                     field: TRACE_ID,
-                    size: 10,
+                    size: traceIdBucketSize,
                     execution_hint: 'map' as const,
                     // remove bias towards large traces by sorting on trace.id
                     // which will be random-esque
@@ -129,25 +147,9 @@ export async function getTraceSampleIds({
     }
   };
 
-  const tracesSampleResponse = await client.search<
-    { trace: { id: string } },
-    typeof params
-  >(params);
-
-  let nextAfter: string | undefined;
-
-  const receivedAfterKey =
-    tracesSampleResponse.aggregations?.connections.after_key;
-
-  if (
-    receivedAfterKey &&
-    (tracesSampleResponse.aggregations?.connections.buckets.length ?? 0) >=
-      MAX_CONNECTIONS_PER_REQUEST
-  ) {
-    nextAfter = Buffer.from(JSON.stringify(receivedAfterKey)).toString(
-      'base64'
-    );
-  }
+  const tracesSampleResponse = await client.search<unknown, typeof params>(
+    params
+  );
 
   // make sure at least one trace per composite/connection bucket
   // is queried
@@ -167,7 +169,6 @@ export async function getTraceSampleIds({
   );
 
   return {
-    after: nextAfter,
     traceIds
   };
 }

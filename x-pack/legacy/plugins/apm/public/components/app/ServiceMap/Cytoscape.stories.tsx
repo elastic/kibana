@@ -13,7 +13,7 @@ import { getCytoscapeElements } from './get_cytoscape_elements';
 import serviceMapResponse from './cytoscape-layout-test-response.json';
 import { iconForNode } from './icons';
 
-const elementsFromResponses = getCytoscapeElements([serviceMapResponse], '');
+const elementsFromResponses = getCytoscapeElements(serviceMapResponse, '');
 
 storiesOf('app/ServiceMap/Cytoscape', module).add(
   'example',

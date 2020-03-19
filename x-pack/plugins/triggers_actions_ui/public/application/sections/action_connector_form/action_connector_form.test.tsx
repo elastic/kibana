@@ -68,6 +68,7 @@ describe('action_connector_form', () => {
           dispatch={() => {}}
           errors={{ name: [] }}
           actionTypeRegistry={deps.actionTypeRegistry}
+          http={deps.http}
         />
       );
     }
