@@ -54,20 +54,3 @@ export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDel
 ));
 
 DeleteTimelineModal.displayName = 'DeleteTimelineModal';
-
-export const useDeleteTimelineModal = () => {
-  const [isDeleteTimelineModalOpen, setIsDeleteTimelineModalOpen] = useState<boolean>(false);
-
-  const onCloseDeleteTimelineModal = useCallback(() => {
-    setIsDeleteTimelineModalOpen(false);
-  }, []);
-
-  const onOpenDeleteTimelineModal = useCallback(() => {
-    setIsDeleteTimelineModalOpen(true);
-  }, []);
-  return {
-    isDeleteTimelineModalOpen,
-    onCloseDeleteTimelineModal,
-    onOpenDeleteTimelineModal,
-  };
-};

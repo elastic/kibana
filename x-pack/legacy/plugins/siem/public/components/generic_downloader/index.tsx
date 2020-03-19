@@ -55,9 +55,8 @@ export const GenericDownloaderComponent = ({
 
     const exportData = async () => {
       if (anchorRef && anchorRef.current && ids != null && ids.length > 0) {
-        let exportResponse;
         try {
-          exportResponse = await exportSelectedData({
+          const exportResponse = await exportSelectedData({
             ids,
             signal: abortCtrl.signal,
           });
@@ -81,7 +80,9 @@ export const GenericDownloaderComponent = ({
           }
         } catch (error) {
           if (isSubscribed) {
-            if (onExportFailure != null) onExportFailure();
+            if (onExportFailure != null) {
+              onExportFailure();
+            }
             errorToToaster({ title: i18n.EXPORT_FAILURE, error, dispatchToaster });
           }
         }
