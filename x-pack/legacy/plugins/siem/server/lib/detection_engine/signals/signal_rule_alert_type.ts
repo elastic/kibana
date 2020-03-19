@@ -120,6 +120,8 @@ export const signalRulesAlertType = ({
           }
 
           creationSucceeded = await bulkCreateMlSignals({
+            actions,
+            throttle,
             someResult: anomalyResults,
             ruleParams: params,
             services,
