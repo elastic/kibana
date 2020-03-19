@@ -111,47 +111,48 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     }, {} as { [field: string]: number });
   }
 
-  function getTimeFieldRange(
+  /**
+   * Gets time boundaries of the index data based on the provided time field.
+   */
+  async function getTimeFieldRange(
     index: string[] | string,
     timeFieldName: string,
     query: any
-  ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
+  ): Promise<{
+    success: boolean;
+    start: { epoch: number; string: string };
+    end: { epoch: number; string: string };
+  }> {
+    const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-      callAsCurrentUser('search', {
-        index,
-        size: 0,
-        body: {
-          query,
-          aggs: {
-            earliest: {
-              min: {
-                field: timeFieldName,
-              },
+    const resp = await callAsCurrentUser('search', {
+      index,
+      size: 0,
+      body: {
+        ...(query ? { query } : {}),
+        aggs: {
+          earliest: {
+            min: {
+              field: timeFieldName,
             },
-            latest: {
-              max: {
-                field: timeFieldName,
-              },
+          },
+          latest: {
+            max: {
+              field: timeFieldName,
             },
           },
         },
-      })
-        .then(resp => {
-          if (resp.aggregations && resp.aggregations.earliest && resp.aggregations.latest) {
-            obj.start.epoch = resp.aggregations.earliest.value;
-            obj.start.string = resp.aggregations.earliest.value_as_string;
-
-            obj.end.epoch = resp.aggregations.latest.value;
-            obj.end.string = resp.aggregations.latest.value_as_string;
-          }
-          resolve(obj);
-        })
-        .catch(resp => {
-          reject(resp);
-        });
+      },
     });
+
+    if (resp.aggregations && resp.aggregations.earliest && resp.aggregations.latest) {
+      obj.start.epoch = resp.aggregations.earliest.value;
+      obj.start.string = resp.aggregations.earliest.value_as_string;
+
+      obj.end.epoch = resp.aggregations.latest.value;
+      obj.end.string = resp.aggregations.latest.value_as_string;
+    }
+    return obj;
   }
 
   /**

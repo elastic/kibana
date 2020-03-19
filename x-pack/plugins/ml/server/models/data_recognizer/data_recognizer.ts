@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import { CallAPIOptions, APICaller, SavedObjectsClientContract } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
-import { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
+import { AnalysisLimits, CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import {
   KibanaObjects,
   ModuleDataFeed,
@@ -26,6 +26,8 @@ import {
 } from '../../../common/types/modules';
 import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
+import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
+import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 
@@ -367,16 +369,17 @@ export class DataRecognizer {
   // if any of the savedObjects already exist, they will not be overwritten.
   async setupModuleItems(
     moduleId: string,
-    jobPrefix: string,
-    groups: string[],
-    indexPatternName: string,
+    jobPrefix: string | undefined,
+    groups: string[] | undefined,
+    indexPatternName: string | undefined,
     query: any,
-    useDedicatedIndex: boolean,
-    startDatafeed: boolean,
-    start: number,
-    end: number,
+    useDedicatedIndex: boolean | undefined,
+    startDatafeed: boolean | undefined,
+    start: number | undefined,
+    end: number | undefined,
     jobOverrides: JobOverride[],
-    datafeedOverrides: DatafeedOverride[]
+    datafeedOverrides: DatafeedOverride[],
+    estimateModelMemory: boolean | undefined
   ) {
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, jobPrefix);
@@ -422,7 +425,7 @@ export class DataRecognizer {
     this.applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix);
     this.updateDatafeedIndices(moduleConfig);
     this.updateJobUrlIndexPatterns(moduleConfig);
-    await this.updateModelMemoryLimits(moduleConfig);
+    await this.updateModelMemoryLimits(moduleConfig, estimateModelMemory, start, end);
 
     // create the jobs
     if (moduleConfig.jobs && moduleConfig.jobs.length) {
@@ -689,8 +692,8 @@ export class DataRecognizer {
 
   async startDatafeeds(
     datafeeds: ModuleDataFeed[],
-    start: number,
-    end: number
+    start?: number,
+    end?: number
   ): Promise<{ [key: string]: DatafeedResponse }> {
     const results = {} as { [key: string]: DatafeedResponse };
     for (const datafeed of datafeeds) {
@@ -933,28 +936,111 @@ export class DataRecognizer {
     }
   }
 
-  // ensure the model memory limit for each job is not greater than
-  // the max model memory setting for the cluster
-  async updateModelMemoryLimits(moduleConfig: Module) {
-    const { limits } = await this.callAsCurrentUser('ml.info');
-    const maxMml = limits.max_model_memory_limit;
-    if (maxMml !== undefined) {
-      // @ts-ignore
-      const maxBytes: number = numeral(maxMml.toUpperCase()).value();
+  /**
+   * Checks if the time range is provided and fallbacks
+   * to the last 3 month of data
+   */
+  async getFallbackTimeRange(
+    timeField: string,
+    query?: any
+  ): Promise<{ start: number; end: number }> {
+    const fieldsService = fieldsServiceProvider(this.callAsCurrentUser);
+    const timeFieldRange = await fieldsService.getTimeFieldRange(
+      this.indexPatternName,
+      timeField,
+      query
+    );
+    return {
+      start: timeFieldRange.start.epoch,
+      end: timeFieldRange.end.epoch,
+    };
+  }
 
-      if (Array.isArray(moduleConfig.jobs)) {
-        moduleConfig.jobs.forEach(job => {
-          const mml = job.config?.analysis_limits?.model_memory_limit;
-          if (mml !== undefined) {
-            // @ts-ignore
-            const mmlBytes: number = numeral(mml.toUpperCase()).value();
-            if (mmlBytes > maxBytes) {
-              // if the job's mml is over the max,
-              // so set the jobs mml to be the max
-              job.config.analysis_limits!.model_memory_limit = maxMml;
-            }
+  /**
+   * Ensure the model memory limit for each job is not greater than
+   * the max model memory setting for the cluster
+   */
+  async updateModelMemoryLimits(
+    moduleConfig: Module,
+    estimateMML: boolean = false,
+    start?: number,
+    end?: number
+  ) {
+    const { limits } = await this.callAsCurrentUser('ml.info');
+
+    const maxMml = limits.max_model_memory_limit;
+    // @ts-ignore
+    const maxBytes: number = numeral(maxMml.toUpperCase()).value();
+
+    if (!Array.isArray(moduleConfig.jobs)) {
+      return;
+    }
+
+    if (estimateMML) {
+      const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this.callAsCurrentUser);
+      const query = moduleConfig.query ?? null;
+
+      const isSameTimeFields = moduleConfig.jobs.every(
+        job =>
+          job.config.data_description.time_field ===
+          moduleConfig.jobs[0].config.data_description.time_field
+      );
+
+      if (isSameTimeFields && (start === undefined || end === undefined)) {
+        const { start: fallbackStart, end: fallbackEnd } = await this.getFallbackTimeRange(
+          moduleConfig.jobs[0].config.data_description.time_field,
+          query
+        );
+        start = fallbackStart;
+        end = fallbackEnd;
+      }
+
+      for (const job of moduleConfig.jobs) {
+        let earliestMs = start;
+        let latestMs = end;
+        if (earliestMs === undefined || latestMs === undefined) {
+          const timeFieldRange = await this.getFallbackTimeRange(
+            job.config.data_description.time_field,
+            query
+          );
+          earliestMs = timeFieldRange.start;
+          latestMs = timeFieldRange.end;
+        }
+
+        const { modelMemoryLimit } = await calculateModelMemoryLimit(
+          job.config.analysis_config,
+          this.indexPatternName,
+          query,
+          job.config.data_description.time_field,
+          earliestMs,
+          latestMs
+        );
+
+        if (!job.config.analysis_limits) {
+          job.config.analysis_limits = {} as AnalysisLimits;
+        }
+
+        job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
+      }
+
+      return;
+    }
+
+    for (const job of moduleConfig.jobs) {
+      const mml = job.config?.analysis_limits?.model_memory_limit;
+      if (mml !== undefined) {
+        // @ts-ignore
+        const mmlBytes: number = numeral(mml.toUpperCase()).value();
+        if (mmlBytes > maxBytes) {
+          // if the job's mml is over the max,
+          // so set the jobs mml to be the max
+
+          if (!job.config.analysis_limits) {
+            job.config.analysis_limits = {} as AnalysisLimits;
           }
-        });
+
+          job.config.analysis_limits.model_memory_limit = maxMml;
+        }
       }
     }
   }

@@ -367,6 +367,7 @@ export const ml = {
     start,
     end,
     jobOverrides,
+    estimateModelMemory,
   }: {
     moduleId: string;
     prefix?: string;
@@ -378,6 +379,7 @@ export const ml = {
     start?: number;
     end?: number;
     jobOverrides?: Array<Partial<Job>>;
+    estimateModelMemory?: boolean;
   }) {
     const body = JSON.stringify({
       prefix,
@@ -389,6 +391,7 @@ export const ml = {
       start,
       end,
       jobOverrides,
+      estimateModelMemory,
     });
 
     return http<DataRecognizerConfigResponse>({
