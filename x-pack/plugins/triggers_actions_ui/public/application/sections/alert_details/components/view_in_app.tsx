@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
@@ -52,18 +52,21 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) =>
   }, [alert.id, maybeAlerting]);
 
   return (
-    <EuiButtonEmpty
-      data-test-subj="alertDetails-viewInApp"
-      isLoading={alertNavigation === null}
-      disabled={!hasNavigation(alertNavigation)}
-      iconType="popout"
-      {...getNavigationHandler(alertNavigation, alert, navigateToApp)}
-    >
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-        defaultMessage="View in app"
-      />
-    </EuiButtonEmpty>
+    <Fragment>
+      <p>{hasNavigation(alertNavigation) ? `${JSON.stringify(alertNavigation)}` : 'no nav'}</p>
+      <EuiButtonEmpty
+        data-test-subj="alertDetails-viewInApp"
+        isLoading={alertNavigation === null}
+        disabled={!hasNavigation(alertNavigation)}
+        iconType="popout"
+        {...getNavigationHandler(alertNavigation, alert, navigateToApp)}
+      >
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
+          defaultMessage="View in app"
+        />
+      </EuiButtonEmpty>
+    </Fragment>
   );
 };
 
@@ -86,7 +89,7 @@ function getNavigationHandler(
           // eslint-disable-next-line no-console
           console.log('NAVIGATE HAS BEEN CLICKED');
           // eslint-disable-next-line no-console
-          console.log('NAVIGATING TO:', alert.consumer, alertNavigation);
+          console.log('NAVIGATING TO:', alert.consumer, JSON.stringify(alertNavigation));
           navigateToApp(alert.consumer, alertNavigation);
         },
       }
