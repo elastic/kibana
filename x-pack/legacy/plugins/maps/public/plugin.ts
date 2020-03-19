@@ -26,6 +26,7 @@ import {
   setAutocompleteService,
   // @ts-ignore
 } from './kibana_services';
+// @ts-ignore
 import { setInjectedVarFunc as npSetInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
