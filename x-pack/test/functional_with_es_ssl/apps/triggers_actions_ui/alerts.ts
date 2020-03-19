@@ -187,16 +187,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should reset alert when canceling an edit', async () => {
-      const createdAlert = await createAlert('.index-threshold', generateUniqueKey(), {
-        aggType: 'count',
-        termSize: 5,
-        thresholdComparator: '>',
-        timeWindowSize: 5,
-        timeWindowUnit: 'm',
-        groupBy: 'all',
-        threshold: [1000, 5000],
-        index: ['.kibana_1'],
-        timeField: 'alert',
+      const createdAlert = await createAlert({
+        alertTypeId: '.index-threshold',
+        name: generateUniqueKey(),
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        },
       });
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
