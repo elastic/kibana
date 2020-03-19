@@ -134,7 +134,7 @@ export const registerFollowerIndexRoutes = ({ router, __LEGACY }: RouteDependenc
           {
             name: schema.string(),
           },
-          { allowUnknowns: true }
+          { unknowns: 'allow' }
         ),
       },
     },

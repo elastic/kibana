@@ -60,7 +60,7 @@ export const registerAutoFollowPatternRoutes = ({ router, __LEGACY }: RouteDepen
           {
             id: schema.string(),
           },
-          { allowUnknowns: true }
+          { unknowns: 'allow' }
         ),
       },
     },
@@ -108,7 +108,7 @@ export const registerAutoFollowPatternRoutes = ({ router, __LEGACY }: RouteDepen
         params: schema.object({
           id: schema.string(),
         }),
-        body: schema.object({}, { allowUnknowns: true }),
+        body: schema.object({}, { unknowns: 'allow' }),
       },
     },
     licensePreRoutingFactory({
