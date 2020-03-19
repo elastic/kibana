@@ -1264,41 +1264,6 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `visTypes`                   | `plugins.visualizations.types`                                                                                                                          |                                                                                                                                       |
 | `visualize`                  |                                                                                                                           |                                                                                                                                       |
 
-Examples:
-
-- **uiSettingDefaults**
-
-Before:
-
-```js
-uiExports: {
-  uiSettingDefaults: {
-    'my-plugin:my-setting': {
-      name: 'just-work',
-      value: true,
-      description: 'make it work',
-      category: ['my-category'],
-    },
-  }
-}
-```
-
-After:
-
-```ts
-// src/plugins/my-plugin/server/plugin.ts
-setup(core: CoreSetup){
-  core.uiSettings.register({
-    'my-plugin:my-setting': {
-      name: 'just-work',
-      value: true,
-      description: 'make it work',
-      category: ['my-category'],
-    },
-  })
-}
-```
-
 ## How to
 
 ### Configure plugin
