@@ -34,10 +34,14 @@ import {
   references,
   note,
   version,
+  lists,
+  anomaly_threshold,
+  machine_learning_job_id,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
+import { hasListsFeature } from '../../feature_flags';
 
 /**
  * Big differences between this schema and the createRulesSchema
@@ -49,6 +53,11 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  *  - index is a required field that must exist
  */
 export const addPrepackagedRulesSchema = Joi.object({
+  anomaly_threshold: anomaly_threshold.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   description: description.required(),
   enabled: enabled.default(false),
   false_positives: false_positives.default([]),
@@ -61,8 +70,21 @@ export const addPrepackagedRulesSchema = Joi.object({
     .valid(true),
   index: index.required(),
   interval: interval.default('5m'),
-  query: query.allow('').default(''),
-  language: language.default('kuery'),
+  query: query.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: query.allow('').default(''),
+  }),
+  language: language.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: language.default('kuery'),
+  }),
+  machine_learning_job_id: machine_learning_job_id.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   saved_id: saved_id.when('type', {
     is: 'saved_query',
     then: Joi.required(),
@@ -82,4 +104,7 @@ export const addPrepackagedRulesSchema = Joi.object({
   references: references.default([]),
   note: note.allow(''),
   version: version.required(),
+
+  // TODO: (LIST-FEATURE) Remove the hasListsFeatures once this is ready for release
+  lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 });

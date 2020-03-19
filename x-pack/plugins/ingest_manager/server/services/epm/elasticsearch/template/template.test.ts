@@ -28,15 +28,38 @@ test('get template', () => {
   expect(template.index_patterns).toStrictEqual([`${templateName}-*`]);
 });
 
-test('tests loading fields.yml', () => {
-  // Load fields.yml file
+test('tests loading base.yml', () => {
   const ymlPath = path.join(__dirname, '../../fields/tests/base.yml');
   const fieldsYML = readFileSync(ymlPath, 'utf-8');
   const fields: Field[] = safeLoad(fieldsYML);
 
-  processFields(fields);
-  const mappings = generateMappings(fields);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
   const template = getTemplate('logs', 'foo', mappings);
+
+  expect(template).toMatchSnapshot(path.basename(ymlPath));
+});
+
+test('tests loading coredns.logs.yml', () => {
+  const ymlPath = path.join(__dirname, '../../fields/tests/coredns.logs.yml');
+  const fieldsYML = readFileSync(ymlPath, 'utf-8');
+  const fields: Field[] = safeLoad(fieldsYML);
+
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  const template = getTemplate('logs', 'foo', mappings);
+
+  expect(template).toMatchSnapshot(path.basename(ymlPath));
+});
+
+test('tests loading system.yml', () => {
+  const ymlPath = path.join(__dirname, '../../fields/tests/system.yml');
+  const fieldsYML = readFileSync(ymlPath, 'utf-8');
+  const fields: Field[] = safeLoad(fieldsYML);
+
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  const template = getTemplate('metrics', 'whatsthis', mappings);
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });
