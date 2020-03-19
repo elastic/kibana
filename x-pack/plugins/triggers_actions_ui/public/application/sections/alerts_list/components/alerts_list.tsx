@@ -443,7 +443,7 @@ export const AlertsList: React.FunctionComponent = () => {
           addFlyoutVisible={alertFlyoutVisible}
           setAddFlyoutVisibility={setAlertFlyoutVisibility}
         />
-        {editedAlertItem ? (
+        {editFlyoutVisible && editedAlertItem ? (
           <AlertEdit
             key={editedAlertItem.id}
             initialAlert={editedAlertItem}

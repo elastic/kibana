@@ -135,6 +135,7 @@ export class AlertingPlugin {
       taskRunnerFactory: this.taskRunnerFactory,
     });
     this.alertTypeRegistry = alertTypeRegistry;
+
     this.serverBasePath = core.http.basePath.serverBasePath;
 
     const usageCollection = plugins.usageCollection;
