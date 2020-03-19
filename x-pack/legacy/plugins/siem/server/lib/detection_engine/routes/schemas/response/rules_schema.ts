@@ -7,10 +7,12 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
-import { Either } from 'fp-ts/lib/Either';
+import { Either, fold, right, left } from 'fp-ts/lib/Either';
 
+import { pipe } from 'fp-ts/lib/pipeable';
 import { checkTypeDependents } from './check_type_dependents';
 import {
+  anomaly_threshold,
   description,
   enabled,
   false_positives,
@@ -24,6 +26,7 @@ import {
   name,
   output_index,
   max_signals,
+  machine_learning_job_id,
   query,
   references,
   severity,
@@ -50,6 +53,8 @@ import {
   meta,
   note,
 } from './schemas';
+import { ListsDefaultArray } from '../types/lists_default_array';
+import { hasListsFeature } from '../../../feature_flags';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -65,12 +70,10 @@ export const requiredRulesSchema = t.type({
   immutable,
   interval,
   rule_id,
-  language,
   output_index,
   max_signals,
   risk_score,
   name,
-  query,
   references,
   severity,
   updated_by,
@@ -82,6 +85,7 @@ export const requiredRulesSchema = t.type({
   updated_at,
   created_by,
   version,
+  lists: ListsDefaultArray,
 });
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
@@ -91,12 +95,20 @@ export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
  * check_type_dependents file for whichever REST flow it is going through.
  */
 export const dependentRulesSchema = t.partial({
+  // query fields
+  language,
+  query,
+
   // when type = saved_query, saved_is is required
   saved_id,
 
   // These two are required together or not at all.
   timeline_id,
   timeline_title,
+
+  // ML fields
+  anomaly_threshold,
+  machine_learning_job_id,
 });
 
 /**
@@ -139,10 +151,29 @@ export const rulesSchema = new t.Type<
   'RulesSchema',
   (input: unknown): input is RulesWithoutTypeDependentsSchema => isObject(input),
   (input): Either<t.Errors, RulesWithoutTypeDependentsSchema> => {
-    return checkTypeDependents(input);
+    const output = checkTypeDependents(input);
+    if (!hasListsFeature()) {
+      // TODO: (LIST-FEATURE) Remove this after the lists feature is an accepted feature for a particular release
+      return removeList(output);
+    } else {
+      return output;
+    }
   },
   t.identity
 );
+
+// TODO: (LIST-FEATURE) Remove this after the lists feature is an accepted feature for a particular release
+export const removeList = (
+  decoded: Either<t.Errors, RequiredRulesSchema>
+): Either<t.Errors, RequiredRulesSchema> => {
+  const onLeft = (errors: t.Errors): Either<t.Errors, RequiredRulesSchema> => left(errors);
+  const onRight = (decodedValue: RequiredRulesSchema): Either<t.Errors, RequiredRulesSchema> => {
+    delete decodedValue.lists;
+    return right(decodedValue);
+  };
+  const folded = fold(onLeft, onRight);
+  return pipe(decoded, folded);
+};
 
 /**
  * This is the correct type you want to use for Rules that are outputted from the
