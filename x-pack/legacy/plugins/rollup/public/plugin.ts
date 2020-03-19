@@ -83,12 +83,12 @@ export class RollupPlugin implements Plugin {
       });
     }
 
-    const esSection = management.sections.getSection('elasticsearch');
+    const esSection = management.sections.getSection('data');
     if (esSection) {
       esSection.registerApp({
         id: 'rollup_jobs',
-        title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
-        order: 3,
+        title: '^ Rollups',
+        order: 30,
         mount(params) {
           params.setBreadcrumbs([
             {

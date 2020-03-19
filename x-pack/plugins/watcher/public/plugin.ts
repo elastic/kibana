@@ -29,7 +29,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
     { licensing, management, data, home, charts }: Dependencies
   ) {
-    const esSection = management.sections.getSection('elasticsearch');
+    const esSection = management.sections.getSection('actions');
 
     const watcherESApp = esSection!.registerApp({
       id: 'watcher',

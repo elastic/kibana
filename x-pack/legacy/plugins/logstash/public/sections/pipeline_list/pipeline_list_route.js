@@ -20,7 +20,7 @@ routes.defaults(/\/management/, {
   resolve: {
     logstashManagementSection: $injector => {
       const licenseService = $injector.get('logstashLicenseService');
-      const logstashSection = management.getSection('logstash/pipelines');
+      const logstashSection = management.getSection('ingest');
 
       if (licenseService.enableLinks) {
         logstashSection.show();

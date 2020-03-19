@@ -29,14 +29,14 @@ export class TransformUiPlugin {
     const { management } = pluginsSetup;
 
     // Register management section
-    const esSection = management.sections.getSection('elasticsearch');
+    const esSection = management.sections.getSection('data');
     if (esSection !== undefined) {
       esSection.registerApp({
         id: 'transform',
         title: kbnI18n.translate('xpack.transform.appTitle', {
           defaultMessage: 'Transforms',
         }),
-        order: 3,
+        order: 70,
         mount: async ({ element, setBreadcrumbs }) => {
           const { http, notifications, getStartServices } = coreSetup;
           const startServices = await getStartServices();

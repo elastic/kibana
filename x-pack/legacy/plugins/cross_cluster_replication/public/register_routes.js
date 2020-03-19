@@ -28,14 +28,14 @@ const isLicenseOK = isAvailable && isActive;
 const isCcrUiEnabled = chrome.getInjected('ccrUiEnabled');
 
 if (isLicenseOK && isCcrUiEnabled) {
-  const esSection = management.getSection('elasticsearch');
+  const esSection = management.getSection('data');
 
   esSection.register('ccr', {
     visible: true,
     display: i18n.translate('xpack.crossClusterReplication.appTitle', {
-      defaultMessage: 'Cross-Cluster Replication',
+      defaultMessage: 'Cross-Cluster',
     }),
-    order: 4,
+    order: 90,
     url: `#${BASE_PATH}`,
   });
 

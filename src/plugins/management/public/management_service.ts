@@ -79,13 +79,39 @@ export class ManagementService {
       getStartServices
     );
 
-    register({ id: 'kibana', title: 'Kibana', order: 30, euiIconType: 'logoKibana' });
-    register({ id: 'logstash', title: 'Logstash', order: 30, euiIconType: 'logoLogstash' });
     register({
-      id: 'elasticsearch',
-      title: 'Elasticsearch',
+      id: 'ingest',
+      title: 'Ingest',
+      order: 10,
+      euiIconType: 'none',
+    });
+
+    register({
+      id: 'data',
+      title: 'Data',
       order: 20,
-      euiIconType: 'logoElasticsearch',
+      euiIconType: 'none',
+    });
+
+    register({
+      id: 'actions',
+      title: 'Detection',
+      order: 30,
+      euiIconType: 'none',
+    });
+
+    register({
+      id: 'kibana',
+      title: 'Kibana',
+      order: 60,
+      euiIconType: 'logoKibana',
+    });
+
+    register({
+      id: 'cluster',
+      title: 'Stack',
+      order: 70,
+      euiIconType: 'none',
     });
 
     return {

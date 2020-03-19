@@ -42,12 +42,12 @@ export class SnapshotRestoreUIPlugin {
     textService.setup(i18n);
     httpService.setup(http);
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection('data')!.registerApp({
       id: PLUGIN.id,
       title: i18n.translate('xpack.snapshotRestore.appTitle', {
-        defaultMessage: 'Snapshot and Restore',
+        defaultMessage: '^ Snapshot and Restore',
       }),
-      order: 7,
+      order: 40,
       mount: async ({ element, setBreadcrumbs }) => {
         const [core] = await getStartServices();
         const {

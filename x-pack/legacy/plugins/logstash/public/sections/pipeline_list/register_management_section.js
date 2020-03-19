@@ -7,30 +7,30 @@
 import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 
-management.getSection('logstash').register('pipelines', {
+management.getSection('ingest').register('pipelines', {
   display: i18n.translate('xpack.logstash.managementSection.pipelinesTitle', {
-    defaultMessage: 'Pipelines',
+    defaultMessage: 'Logstash Pipelines',
   }),
-  order: 10,
+  order: 40,
   url: '#/management/logstash/pipelines/',
 });
 
-management.getSection('logstash/pipelines').register('pipeline', {
-  visible: false,
-});
+// management.getSection('ingest/pipelines').register('pipeline', {
+//   visible: false,
+// });
 
-management.getSection('logstash/pipelines/pipeline').register('edit', {
-  display: i18n.translate('xpack.logstash.managementSection.editPipelineTitle', {
-    defaultMessage: 'Edit pipeline',
-  }),
-  order: 1,
-  visible: false,
-});
+// management.getSection('ingest/pipelines/pipeline').register('edit', {
+//   display: i18n.translate('xpack.logstash.managementSection.editPipelineTitle', {
+//     defaultMessage: 'Edit pipeline',
+//   }),
+//   order: 1,
+//   visible: false,
+// });
 
-management.getSection('logstash/pipelines/pipeline').register('new', {
-  display: i18n.translate('xpack.logstash.managementSection.createPipelineTitle', {
-    defaultMessage: 'Create pipeline',
-  }),
-  order: 1,
-  visible: false,
-});
+// management.getSection('ingest/pipelines/pipeline').register('new', {
+//   display: i18n.translate('xpack.logstash.managementSection.createPipelineTitle', {
+//     defaultMessage: 'Create pipeline',
+//   }),
+//   order: 1,
+//   visible: false,
+// });

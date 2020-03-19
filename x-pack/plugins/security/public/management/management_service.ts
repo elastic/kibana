@@ -40,11 +40,11 @@ export class ManagementService {
     this.license = license;
 
     const securitySection = management.sections.register({
-      id: 'security',
+      id: 'auth',
       title: i18n.translate('xpack.security.management.securityTitle', {
-        defaultMessage: 'Security',
+        defaultMessage: 'Access',
       }),
-      order: 100,
+      order: 50,
       euiIconType: 'securityApp',
     });
 
@@ -58,7 +58,7 @@ export class ManagementService {
 
   start({ management }: StartParams) {
     this.licenseFeaturesSubscription = this.license.features$.subscribe(async features => {
-      const securitySection = management.sections.getSection('security')!;
+      const securitySection = management.sections.getSection('auth')!;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
         [securitySection.getApp(usersManagementApp.id)!, features.showLinks],

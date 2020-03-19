@@ -26,7 +26,7 @@ export class UpgradeAssistantUIPlugin implements Plugin {
     if (!enabled) {
       return;
     }
-    const appRegistrar = management.sections.getSection('elasticsearch')!;
+    const appRegistrar = management.sections.getSection('cluster')!;
     const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
     appRegistrar.registerApp({

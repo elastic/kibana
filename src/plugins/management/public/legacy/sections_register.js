@@ -33,29 +33,25 @@ export class LegacyManagementAdapter {
       capabilities
     );
 
-    this.main.register('data', {
+    this.main.register('ingest', {
       display: i18n.translate('management.connectDataDisplayName', {
-        defaultMessage: 'Connect Data',
+        defaultMessage: 'Ingest',
       }),
-      order: 0,
+      order: 10,
+      icon: 'none',
     });
 
-    this.main.register('elasticsearch', {
-      display: 'Elasticsearch',
+    this.main.register('data', {
+      display: i18n.translate('management.connectDataDisplayName', {
+        defaultMessage: 'Data',
+      }),
       order: 20,
-      icon: 'logoElasticsearch',
     });
 
     this.main.register('kibana', {
       display: 'Kibana',
-      order: 30,
+      order: 40,
       icon: 'logoKibana',
-    });
-
-    this.main.register('logstash', {
-      display: 'Logstash',
-      order: 30,
-      icon: 'logoLogstash',
     });
 
     return this.main;

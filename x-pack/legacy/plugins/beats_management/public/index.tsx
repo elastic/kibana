@@ -52,19 +52,12 @@ async function startApp(libs: FrontendLibs) {
   await libs.framework.waitUntilFrameworkReady();
 
   if (libs.framework.licenseIsAtLeast('standard')) {
-    libs.framework.registerManagementSection({
-      id: 'beats',
-      name: i18n.translate('xpack.beatsManagement.centralManagementSectionLabel', {
+    libs.framework.registerManagementUI({
+      sectionId: 'ingest',
+      name: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
         defaultMessage: 'Beats',
       }),
-      iconName: 'logoBeats',
-    });
-
-    libs.framework.registerManagementUI({
-      sectionId: 'beats',
-      name: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
-        defaultMessage: 'Central Management',
-      }),
+      order: 30,
       basePath: BASE_PATH,
     });
   }

@@ -51,10 +51,10 @@ export class IndexMgmtUIPlugin {
     notificationService.setup(notifications);
     this.uiMetricService.setup(usageCollection);
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection('data')!.registerApp({
       id: PLUGIN.id,
-      title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
-      order: 1,
+      title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Sources' }),
+      order: 10,
       mount: async ({ element, setBreadcrumbs }) => {
         const [core] = await getStartServices();
         const { docLinks, fatalErrors } = core;
@@ -76,10 +76,23 @@ export class IndexMgmtUIPlugin {
             notificationService,
           },
         };
-
         const { renderApp } = await import('./application');
         return renderApp(element, { core, dependencies: appDependencies });
       },
+    });
+
+    management.sections.getSection('ingest')!.registerApp({
+      id: 'ingest_node',
+      title: 'Ingest Node',
+      order: 50,
+      mount: async ({ element, setBreadcrumbs }) => {},
+    });
+
+    management.sections.getSection('ingest')!.registerApp({
+      id: 'index_templates',
+      title: 'Index Templates',
+      order: 60,
+      mount: async ({ element, setBreadcrumbs }) => {},
     });
 
     return {

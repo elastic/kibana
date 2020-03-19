@@ -32,21 +32,14 @@ export function initManagementSection(
   licensing.subscribe(license => {
     if (license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid) {
       const management = pluginsSetup.management;
-      const mlSection = management.sections.register({
-        id: PLUGIN_ID,
-        title: i18n.translate('xpack.ml.management.mlTitle', {
-          defaultMessage: 'Machine Learning',
-        }),
-        order: 100,
-        icon: PLUGIN_ICON,
-      });
+      const mlSection = management.sections.getSection('actions');
 
       mlSection.registerApp({
         id: 'jobsListLink',
         title: i18n.translate('xpack.ml.management.jobsListTitle', {
-          defaultMessage: 'Jobs list',
+          defaultMessage: 'Machine Learning',
         }),
-        order: 10,
+        order: 60,
         async mount({ element, setBreadcrumbs }) {
           const [coreStart] = await core.getStartServices();
           setBreadcrumbs(getJobsListBreadcrumbs());

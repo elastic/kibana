@@ -46,11 +46,11 @@ if (chrome.getInjected('ilmUiEnabled')) {
 
   // Once this app no longer depends upon Angular's routing (e.g. for the "redirect" service), we can
   // use the Management plugin's API to register this app within the Elasticsearch section.
-  const esSection = management.getSection('elasticsearch');
+  const esSection = management.getSection('data');
   esSection.register('index_lifecycle_policies', {
     visible: true,
-    display: PLUGIN.TITLE,
-    order: 2,
+    display: 'Schedules',
+    order: 20,
     url: `#${BASE_PATH}policies`,
   });
 

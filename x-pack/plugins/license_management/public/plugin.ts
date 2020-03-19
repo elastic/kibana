@@ -36,7 +36,7 @@ export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
     const { getStartServices } = coreSetup;
     const { management, telemetry, licensing } = plugins;
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection('cluster')!.registerApp({
       id: PLUGIN.id,
       title: PLUGIN.title,
       order: 99,

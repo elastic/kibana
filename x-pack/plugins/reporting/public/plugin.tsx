@@ -68,11 +68,11 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
   private readonly stop$ = new Rx.ReplaySubject(1);
 
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
-    defaultMessage: 'Reporting',
+    defaultMessage: 'Reports',
   });
 
   private readonly breadcrumbText = i18n.translate('xpack.reporting.breadcrumb', {
-    defaultMessage: 'Reporting',
+    defaultMessage: 'Reports',
   });
 
   constructor(initializerContext: PluginInitializerContext) {}
@@ -107,7 +107,7 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
     home.featureCatalogue.register({
       id: 'reporting',
       title: i18n.translate('xpack.reporting.registerFeature.reportingTitle', {
-        defaultMessage: 'Reporting',
+        defaultMessage: 'Reports',
       }),
       description: i18n.translate('xpack.reporting.registerFeature.reportingDescription', {
         defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
@@ -118,7 +118,7 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    management.sections.getSection('kibana')!.registerApp({
+    management.sections.getSection('actions')!.registerApp({
       id: 'reporting',
       title: this.title,
       order: 15,
