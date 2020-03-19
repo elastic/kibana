@@ -89,7 +89,7 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
       })
     );
   }
-  if (!threshold || threshold.length === 0 || (threshold.length === 1 && !threshold[0])) {
+  if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
     errors.threshold0.push(
       i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold0Text', {
         defaultMessage: 'Threshold0 is required.',
@@ -100,6 +100,7 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
     thresholdComparator &&
     builtInComparators[thresholdComparator].requiredValues > 1 &&
     (!threshold ||
+      threshold[1] === undefined ||
       (threshold && threshold.length < builtInComparators[thresholdComparator!].requiredValues))
   ) {
     errors.threshold1.push(
