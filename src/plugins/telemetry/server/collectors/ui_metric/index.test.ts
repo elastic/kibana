@@ -33,9 +33,12 @@ describe('telemetry_ui_metric', () => {
   } as any;
 
   const getUsageCollector = jest.fn();
+  const registerType = jest.fn();
   const callCluster = jest.fn();
 
-  beforeAll(() => registerUiMetricUsageCollector(usageCollectionMock, getUsageCollector));
+  beforeAll(() =>
+    registerUiMetricUsageCollector(usageCollectionMock, registerType, getUsageCollector)
+  );
 
   test('registered collector is set', () => {
     expect(collector).not.toBeUndefined();

@@ -155,7 +155,7 @@ export class TelemetryPlugin implements Plugin {
     });
     registerTelemetryUsageCollector(usageCollection);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
-    registerUiMetricUsageCollector(usageCollection, getSavedObjectsClient);
+    registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(usageCollection, registerType, getSavedObjectsClient);
   }
 }

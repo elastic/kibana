@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository, SavedObjectAttributes } from 'kibana/server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectAttributes,
+  SavedObjectsServiceSetup,
+} from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { UI_METRIC_USAGE_TYPE } from '../../../common/constants';
 import { findAll } from '../find_all';
@@ -28,8 +32,22 @@ interface UIMetricsSavedObjects extends SavedObjectAttributes {
 
 export function registerUiMetricUsageCollector(
   usageCollection: UsageCollectionSetup,
+  registerType: SavedObjectsServiceSetup['registerType'],
   getSavedObjectsClient: () => ISavedObjectsRepository | undefined
 ) {
+  registerType({
+    name: 'ui-metric',
+    hidden: false,
+    namespaceAgnostic: true,
+    mappings: {
+      properties: {
+        count: {
+          type: 'integer',
+        },
+      },
+    },
+  });
+
   const collector = usageCollection.makeUsageCollector({
     type: UI_METRIC_USAGE_TYPE,
     fetch: async () => {
