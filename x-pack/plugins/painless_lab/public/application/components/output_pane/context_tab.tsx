@@ -102,7 +102,7 @@ export const ContextTab: FunctionComponent = () => {
         <EuiFormRow
           label={
             <EuiToolTip
-              content={i18n.translate('xpack.painlessLab.queryFieldLabel', {
+              content={i18n.translate('xpack.painlessLab.queryFieldTooltipText', {
                 defaultMessage:
                   'Use query to specify that that _score will be used to calculate score.',
               })}
