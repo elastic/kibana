@@ -5,11 +5,17 @@
  */
 
 import { EuiButtonIcon, EuiPopover, EuiSelectableOption } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
+import { connect, ConnectedProps } from 'react-redux';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
+// import { State, timelineSelectors } from '../../../store';
+// import { TimelineById } from '../../../store/timeline/types';
+// import { DEFAULT_TIMELINE_WIDTH } from '../body/constants';
+import { timelineActions } from '../../../store/timeline';
 
 interface InsertTimelinePopoverProps {
   isDisabled: boolean;
@@ -17,12 +23,34 @@ interface InsertTimelinePopoverProps {
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
 }
 
-const InsertTimelinePopoverComponent: React.FC<InsertTimelinePopoverProps> = ({
+interface RouterState {
+  insertTimeline: {
+    timelineId: string;
+    timelineTitle: string;
+  };
+}
+
+type Props = InsertTimelinePopoverProps & PropsFromRedux;
+
+const InsertTimelinePopoverComponent: React.FC<Props> = ({
   isDisabled,
   hideUntitled = false,
   onTimelineChange,
+  showTimeline,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { state } = useLocation();
+  const [routerState, setRouterState] = useState<RouterState | null>(state ?? null);
+  useEffect(() => {
+    if (routerState && routerState.insertTimeline) {
+      showTimeline({ id: routerState.insertTimeline.timelineId, show: false });
+      onTimelineChange(
+        routerState.insertTimeline.timelineTitle,
+        routerState.insertTimeline.timelineId
+      );
+      setRouterState(null);
+    }
+  }, [routerState]);
 
   const handleClosePopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -80,4 +108,28 @@ const InsertTimelinePopoverComponent: React.FC<InsertTimelinePopoverProps> = ({
   );
 };
 
-export const InsertTimelinePopover = memo(InsertTimelinePopoverComponent);
+// const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
+//   const timelineById: TimelineById =
+//     timelineSelectors.timelineByIdSelector(state) ?? DEFAULT_TIMELINE_BY_ID;
+//   /*
+//     In case timelineById[timelineId]?.dataProviders is an empty array it will cause unnecessary rerender
+//     of StatefulTimeline which can be expensive, so to avoid that return DEFAULT_DATA_PROVIDERS
+//   */
+//   const dataProviders = timelineById[timelineId]?.dataProviders.length
+//     ? timelineById[timelineId]?.dataProviders
+//     : DEFAULT_DATA_PROVIDERS;
+//   const show = timelineById[timelineId]?.show ?? false;
+//   const width = timelineById[timelineId]?.width ?? DEFAULT_TIMELINE_WIDTH;
+//
+//   return { dataProviders, show, width };
+// };
+
+const mapDispatchToProps = {
+  showTimeline: timelineActions.showTimeline,
+};
+
+const connector = connect(null, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const InsertTimelinePopover = connector(memo(InsertTimelinePopoverComponent));
