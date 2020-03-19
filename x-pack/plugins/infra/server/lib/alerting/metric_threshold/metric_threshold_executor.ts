@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mapValues } from 'lodash';
+import { mapValues, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
@@ -11,6 +11,8 @@ import { getAllCompositeData } from '../../../utils/get_all_composite_data';
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Comparator, AlertStates } from './types';
 import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
+import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { getDateHistogramOffset } from '../../snapshot/query_helpers';
 
 interface Aggregation {
   aggregatedIntervals: {
@@ -64,6 +66,10 @@ export const getElasticsearchMetricQuery = (
   filterQuery?: string
 ) => {
   const interval = `${timeSize}${timeUnit}`;
+  const to = Date.now();
+  const intervalAsSeconds = getIntervalInSeconds(interval);
+  const from = to - intervalAsSeconds * 5000;
+  const offset = getDateHistogramOffset(from, interval);
 
   const aggregations =
     aggType === 'count'
@@ -83,6 +89,11 @@ export const getElasticsearchMetricQuery = (
       date_histogram: {
         field: '@timestamp',
         fixed_interval: interval,
+        offset,
+        extended_bounds: {
+          min: from,
+          max: to,
+        },
       },
       aggregations,
     },
@@ -117,7 +128,9 @@ export const getElasticsearchMetricQuery = (
           {
             range: {
               '@timestamp': {
-                gte: `now-${interval}`,
+                gte: from,
+                lte: to,
+                format: 'epoch_millis',
               },
             },
           },
