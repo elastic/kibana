@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginInitializerContext } from 'src/core/public';
 import { DashboardEnhancedPlugin } from './plugin';
 
 export {
@@ -13,6 +14,6 @@ export {
   StartDependencies as DashboardEnhancedStartDependencies,
 } from './plugin';
 
-export function plugin() {
-  return new DashboardEnhancedPlugin();
+export function plugin(context: PluginInitializerContext) {
+  return new DashboardEnhancedPlugin(context);
 }

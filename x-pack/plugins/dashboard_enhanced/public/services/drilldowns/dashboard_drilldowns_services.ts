@@ -26,8 +26,22 @@ declare module '../../../../../../src/plugins/ui_actions/public' {
   }
 }
 
+interface BootstrapParams {
+  enableDrilldowns: boolean;
+}
+
 export class DashboardDrilldownsService {
-  async bootstrap(
+  bootstrap(
+    core: CoreSetup<{ drilldowns: DrilldownsStartContract }>,
+    plugins: SetupDependencies,
+    { enableDrilldowns }: BootstrapParams
+  ) {
+    if (enableDrilldowns) {
+      this.setupDrilldowns(core, plugins);
+    }
+  }
+
+  setupDrilldowns(
     core: CoreSetup<{ drilldowns: DrilldownsStartContract }>,
     plugins: SetupDependencies
   ) {

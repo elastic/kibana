@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { config } from './config';
+
 export const plugin = () => ({
   setup() {},
   start() {},
