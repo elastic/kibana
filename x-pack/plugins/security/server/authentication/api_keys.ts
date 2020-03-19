@@ -159,7 +159,7 @@ export class APIKeys {
    * Tries to grant an API key for the current user.
    * @param request Request instance.
    */
-  async grant(request: KibanaRequest): Promise<GrantAPIKeyResult | null> {
+  async grantAsInternalUser(request: KibanaRequest): Promise<GrantAPIKeyResult | null> {
     if (!this.license.isEnabled()) {
       return null;
     }

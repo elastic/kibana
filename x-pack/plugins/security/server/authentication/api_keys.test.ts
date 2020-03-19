@@ -83,10 +83,10 @@ describe('API Keys', () => {
     });
   });
 
-  describe('grant()', () => {
+  describe('grantAsInternalUser()', () => {
     it('returns null when security feature is disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
-      const result = await apiKeys.grant(httpServerMock.createKibanaRequest());
+      const result = await apiKeys.grantAsInternalUser(httpServerMock.createKibanaRequest());
       expect(result).toBeNull();
       expect(mockScopedClusterClient.callAsInternalUser).not.toHaveBeenCalled();
     });
@@ -98,7 +98,7 @@ describe('API Keys', () => {
         name: 'key-name',
         api_key: 'abc123',
       });
-      const result = await apiKeys.grant(
+      const result = await apiKeys.grantAsInternalUser(
         httpServerMock.createKibanaRequest({
           headers: {
             authorization: `Basic ${encodeToBase64('foo:bar')}`,
@@ -129,7 +129,7 @@ describe('API Keys', () => {
         name: 'key-name',
         api_key: 'abc123',
       });
-      const result = await apiKeys.grant(
+      const result = await apiKeys.grantAsInternalUser(
         httpServerMock.createKibanaRequest({
           headers: {
             authorization: `Bearer foo-access-token`,
@@ -155,7 +155,7 @@ describe('API Keys', () => {
     it('throw error for other schemes', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       expect(
-        apiKeys.grant(
+        apiKeys.grantAsInternalUser(
           httpServerMock.createKibanaRequest({
             headers: {
               authorization: `Digest username="foo"`,
