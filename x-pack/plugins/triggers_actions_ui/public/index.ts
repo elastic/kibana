@@ -11,7 +11,7 @@ export { AlertsContextProvider } from './application/context/alerts_context';
 export { ActionsConnectorsContextProvider } from './application/context/actions_connectors_context';
 export { AlertAdd } from './application/sections/alert_form';
 export { ActionForm } from './application/sections/action_connector_form';
-export { AlertAction, Alert } from './types';
+export { AlertAction, Alert, ActionType } from './types';
 export {
   ConnectorAddFlyout,
   ConnectorEditFlyout,

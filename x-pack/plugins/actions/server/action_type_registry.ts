@@ -117,7 +117,10 @@ export class ActionTypeRegistry {
     return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => ({
       id: actionTypeId,
       name: actionType.name,
-      enabled: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+      minimumLicenseRequired: actionType.minimumLicenseRequired,
+      enabled: this.isActionTypeEnabled(actionTypeId),
+      enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+      enabledInLicense: this.licenseState.isLicenseValidForActionType(actionType).isValid === true,
     }));
   }
 }

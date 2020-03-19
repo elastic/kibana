@@ -218,29 +218,25 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-interval',
     },
     {
-      field: '',
       name: '',
       width: '50px',
-      actions: canSave
-        ? [
-            {
-              render: (item: AlertTableItem) => {
-                return (
-                  <EuiLink
-                    data-test-subj="alertsTableCell-editLink"
-                    color="primary"
-                    onClick={() => editItem(item)}
-                  >
-                    <FormattedMessage
-                      defaultMessage="Edit"
-                      id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editLinkTitle"
-                    />
-                  </EuiLink>
-                );
-              },
-            },
-          ]
-        : [],
+      render(item: AlertTableItem) {
+        if (!canSave) {
+          return;
+        }
+        return (
+          <EuiLink
+            data-test-subj="alertsTableCell-editLink"
+            color="primary"
+            onClick={() => editItem(item)}
+          >
+            <FormattedMessage
+              defaultMessage="Edit"
+              id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editLinkTitle"
+            />
+          </EuiLink>
+        );
+      },
     },
     {
       name: '',
