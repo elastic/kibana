@@ -192,20 +192,9 @@ module.exports = {
                 )};\n`;
               },
               webpackImporter: false,
-              sassOptions(loaderContext) {
-                const darkMode = loaderContext.resourceQuery === '?dark';
-
-                return {
-                  outputStyle: 'nested',
-                  includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
-                  importer: url => {
-                    if (darkMode && url.includes('eui_colors_light')) {
-                      return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
-                    }
-
-                    return { file: url };
-                  },
-                };
+              sassOptions: {
+                outputStyle: 'nested',
+                includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
               },
             },
           },
