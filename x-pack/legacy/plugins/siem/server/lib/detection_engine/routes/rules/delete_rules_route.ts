@@ -53,8 +53,7 @@ export const deleteRulesRoute = (router: IRouter) => {
           ruleId,
         });
         if (rule != null) {
-          console.log('aaaa', JSON.stringify(rule, null, 2));
-          await deleteNotifications({ alertsClient, ruleId });
+          await deleteNotifications({ alertsClient, ruleId: rule.params.ruleId });
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({

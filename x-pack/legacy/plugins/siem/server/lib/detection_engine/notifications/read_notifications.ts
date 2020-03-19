@@ -36,7 +36,8 @@ export const readNotifications = async ({
       filter: `alert.attributes.tags: "${INTERNAL_NOTIFICATION_RULE_ID_KEY}:${ruleId}"`,
       page: 1,
     });
-    if (notificationFromFind.data.length === 0 || !isAlertType(notificationFromFind.data[0])) {
+    if (notificationFromFind.data.length === 0) {
+      // if (notificationFromFind.data.length === 0 || !isAlertType(notificationFromFind.data[0])) {
       return null;
     } else {
       return notificationFromFind.data[0];

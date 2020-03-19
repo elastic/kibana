@@ -8,12 +8,12 @@ import { addTags } from './add_tags';
 import { INTERNAL_NOTIFICATION_RULE_ID_KEY } from '../../../../common/constants';
 
 describe('add_tags', () => {
-  test('it should add a rule id as an internal structure with immutable true', () => {
+  test('it should add a rule id as an internal structure', () => {
     const tags = addTags([], 'rule-1');
     expect(tags).toEqual([`${INTERNAL_NOTIFICATION_RULE_ID_KEY}:rule-1`]);
   });
 
-  test('it should add a rule id as an internal structure with immutable false', () => {
+  test('it should add a rule id as an internal structure', () => {
     const tags = addTags([], 'rule-1');
     expect(tags).toEqual([`${INTERNAL_NOTIFICATION_RULE_ID_KEY}:rule-1`]);
   });

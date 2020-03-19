@@ -155,7 +155,7 @@ export type NotificationExecutorOptions = Omit<AlertExecutorOptions, 'params'> &
   params: NotificationAlertParams;
 };
 
-// This returns true because by default a RuleAlertTypeDefinition is an AlertType
+// This returns true because by default a NotificationAlertTypeDefinition is an AlertType
 // since we are only increasing the strictness of params.
 export const isNotificationAlertExecutor = (
   obj: NotificationAlertTypeDefinition

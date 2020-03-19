@@ -17,9 +17,7 @@ export const deleteNotifications = async ({
     return null;
   }
 
-  console.log('notifications ', JSON.stringify(notification, null, 2));
-
-  if (notification?.id != null) {
+  if (notification.id != null) {
     await alertsClient.delete({ id: notification.id });
     return notification;
   } else if (id != null) {
