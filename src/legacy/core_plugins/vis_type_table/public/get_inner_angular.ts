@@ -25,15 +25,13 @@ import 'angular-recursion';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 import {
+  initAngularBootstrap,
+  PaginateDirectiveProvider,
+  PaginateControlsDirectiveProvider,
   PrivateProvider,
   watchMultiDecorator,
   KbnAccessibleClickProvider,
   configureAppAngularModule,
-} from './legacy_imports';
-import {
-  initAngularBootstrap,
-  PaginateDirectiveProvider,
-  PaginateControlsDirectiveProvider,
 } from '../../../../plugins/kibana_legacy/public';
 
 initAngularBootstrap();
