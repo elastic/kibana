@@ -12,15 +12,19 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('Endpoint Alert List', function() {
+  describe('Endpoint Alert List page', function() {
     this.tags(['ciGroup7']);
     before(async () => {
       await esArchiver.load('endpoint/alerts/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/alerts');
     });
 
-    it('loads the Alert List Page', async () => {
+    it('loads in the browser', async () => {
       await testSubjects.existOrFail('alertListPage');
+    });
+    it('contains the Alert List Page title', async () => {
+      const alertsTitle = await testSubjects.getVisibleText('alertsViewTitle');
+      expect(alertsTitle).to.equal('Alerts');
     });
     it('includes alerts search bar', async () => {
       await testSubjects.existOrFail('alertsSearchBar');
