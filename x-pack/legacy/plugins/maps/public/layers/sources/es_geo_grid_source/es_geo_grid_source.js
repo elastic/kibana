@@ -75,7 +75,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   renderSourceSettingsEditor({ onChange }) {
     return (
       <UpdateSourceEditor
-        indexPatternId={this._descriptor.indexPatternId}
+        indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
@@ -85,7 +85,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   async getImmutableProperties() {
-    let indexPatternTitle = this._descriptor.indexPatternId;
+    let indexPatternTitle = this.getIndexPatternId();
     try {
       const indexPattern = await this.getIndexPattern();
       indexPatternTitle = indexPattern.title;
@@ -292,7 +292,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback, isRequestStillActive) {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
 
     let bucketsPerGrid = 1;
     this.getMetricFields().forEach(metricField => {
@@ -325,6 +325,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       },
       meta: {
         areResultsTrimmed: false,
+        sourceType: ES_GEO_GRID,
       },
     };
   }

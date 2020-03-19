@@ -6,8 +6,17 @@
 
 import { exportRulesSchema, exportRulesQuerySchema } from './export_rules_schema';
 import { ExportRulesRequestParams } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('create rules schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   describe('exportRulesSchema', () => {
     test('null value or absent values validate', () => {
       expect(exportRulesSchema.validate(null).error).toBeFalsy();
