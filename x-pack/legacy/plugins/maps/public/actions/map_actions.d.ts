@@ -23,4 +23,4 @@ export function updateSourceProp(
   propName: string,
   value: unknown,
   newLayerType?: LAYER_TYPE
-);
+): void;

@@ -28,7 +28,6 @@ import { ValidatedRange } from '../../../components/validated_range';
 import {
   DEFAULT_MAX_INNER_RESULT_WINDOW,
   DEFAULT_MAX_RESULT_WINDOW,
-  SORT_ORDER,
   SCALING_TYPES,
   LAYER_TYPE,
 } from '../../../../common/constants';
@@ -40,7 +39,7 @@ import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/vi
 interface Props {
   filterByMapBounds: boolean;
   indexPatternId: string;
-  onChange: (OnSourceChangeArgs) => void;
+  onChange: (args: OnSourceChangeArgs) => void;
   scalingType: SCALING_TYPES;
   supportsClustering: boolean;
   termFields: IFieldType[];
@@ -54,11 +53,11 @@ interface State {
 }
 
 export class ScalingForm extends Component<Props, State> {
-  private _isMounted: boolean;
   state = {
     maxInnerResultWindow: DEFAULT_MAX_INNER_RESULT_WINDOW,
     maxResultWindow: DEFAULT_MAX_RESULT_WINDOW,
   };
+  _isMounted = false;
 
   componentDidMount() {
     this._isMounted = true;
@@ -81,7 +80,7 @@ export class ScalingForm extends Component<Props, State> {
     }
   }
 
-  _onScalingTypeChange = (optionId: SCALING_TYPES): void => {
+  _onScalingTypeChange = (optionId: string): void => {
     const layerType =
       optionId === SCALING_TYPES.CLUSTERS ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR;
     this.props.onChange({ propName: 'scalingType', value: optionId, newLayerType: layerType });
@@ -142,7 +141,7 @@ export class ScalingForm extends Component<Props, State> {
             )}
             value={this.props.topHitsSplitField}
             onChange={this._onTopHitsSplitFieldChange}
-            fields={this.state.termFields}
+            fields={this.props.termFields}
             compressed
           />
         </EuiFormRow>
