@@ -40,6 +40,9 @@ export const datatableVisualization: Visualization<
       }),
     },
   ],
+  getVisualizationTypeId() {
+    return 'lnsDatatable';
+  },
 
   getLayerIds(state) {
     return state.layers.map(l => l.layerId);

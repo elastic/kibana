@@ -44,6 +44,7 @@ export function getSuggestions({
   datasourceStates,
   visualizationMap,
   activeVisualizationId,
+  subVisualizationId,
   visualizationState,
   field,
 }: {
@@ -57,6 +58,7 @@ export function getSuggestions({
   >;
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
+  subVisualizationId?: string;
   visualizationState: unknown;
   field?: unknown;
 }): Suggestion[] {
@@ -89,7 +91,8 @@ export function getSuggestions({
             table,
             visualizationId,
             datasourceSuggestion,
-            currentVisualizationState
+            currentVisualizationState,
+            subVisualizationId
           );
         })
       )
@@ -108,13 +111,15 @@ function getVisualizationSuggestions(
   table: TableSuggestion,
   visualizationId: string,
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
-  currentVisualizationState: unknown
+  currentVisualizationState: unknown,
+  subVisualizationId?: string
 ) {
   return visualization
     .getSuggestions({
       table,
       state: currentVisualizationState,
       keptLayerIds: datasourceSuggestion.keptLayerIds,
+      subVisualizationId,
     })
     .map(({ state, ...visualizationSuggestion }) => ({
       ...visualizationSuggestion,

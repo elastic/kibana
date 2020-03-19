@@ -310,6 +310,10 @@ export interface SuggestionRequest<T = unknown> {
    * The visualization needs to know which table is being suggested
    */
   keptLayerIds: string[];
+  /**
+   * Different suggestions can be generated for each subtype of the visualization
+   */
+  subVisualizationId?: string;
 }
 
 /**
@@ -366,9 +370,21 @@ export interface VisualizationType {
 }
 
 export interface Visualization<T = unknown, P = unknown> {
+  /**
+   * Visualization ID for internal Lens use. Not shown to users.
+   */
   id: string;
 
+  /**
+   * Visualizations can provide multiple subtypes with unique IDs
+   * that can share the same state, for example bar/line/area.
+   */
   visualizationTypes: VisualizationType[];
+  /**
+   * Return the ID of the current visualization. Used to highlight
+   * the active subtype of the visualization.
+   */
+  getVisualizationTypeId: (state: T) => string;
 
   getLayerIds: (state: T) => string[];
   clearLayer: (state: T, layerId: string) => T;

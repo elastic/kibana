@@ -58,7 +58,25 @@ describe('chart_switch', () => {
             id: 'subvisC2',
             label: 'C2',
           },
+          {
+            icon: 'empty',
+            id: 'subvisC3',
+            label: 'C3',
+          },
         ],
+        getSuggestions: jest.fn(options => {
+          if (options.subVisualizationId === 'subvisC2') {
+            return [];
+          }
+          return [
+            {
+              score: 1,
+              title: '',
+              state: `suggestion`,
+              previewIcon: 'empty',
+            },
+          ];
+        }),
       },
     };
   }
@@ -309,7 +327,31 @@ describe('chart_switch', () => {
     expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toBeUndefined();
   });
 
-  it('should not indicate data loss if visualization is not changed', () => {
+  it('should not show a warning when the subvisualization is the same', () => {
+    const dispatch = jest.fn();
+    const frame = mockFrame(['a', 'b', 'c']);
+    const visualizations = mockVisualizations();
+    visualizations.visC.getVisualizationTypeId.mockReturnValue('subvisC2');
+    const switchVisualizationType = jest.fn(() => 'therebedragons');
+
+    visualizations.visC.switchVisualizationType = switchVisualizationType;
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visC"
+        visualizationState={'therebegriffins'}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    expect(getMenuItem('subvisC2', component).prop('betaBadgeIconType')).not.toBeDefined();
+  });
+
+  it('should get suggestions when switching subvisualization', () => {
     const dispatch = jest.fn();
     const frame = mockFrame(['a', 'b', 'c']);
     const visualizations = mockVisualizations();
@@ -329,7 +371,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisC2', component).prop('betaBadgeIconType')).toBeUndefined();
+    expect(getMenuItem('subvisC2', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
   it('should remove all layers if there is no suggestion', () => {
@@ -369,11 +411,11 @@ describe('chart_switch', () => {
     );
   });
 
-  it('should not remove layers when switching between subtypes', () => {
+  it('should not remove layers when switching between subtypes with valid suggestions', () => {
     const dispatch = jest.fn();
     const frame = mockFrame(['a', 'b', 'c']);
     const visualizations = mockVisualizations();
-    const switchVisualizationType = jest.fn(() => 'therebedragons');
+    const switchVisualizationType = jest.fn(() => 'switched');
 
     visualizations.visC.switchVisualizationType = switchVisualizationType;
 
@@ -389,12 +431,12 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisC2', component);
-    expect(switchVisualizationType).toHaveBeenCalledWith('subvisC2', 'therebegriffins');
+    switchTo('subvisC3', component);
+    expect(switchVisualizationType).toHaveBeenCalledWith('subvisC3', 'suggestion');
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'SWITCH_VISUALIZATION',
-        initialState: 'therebedragons',
+        initialState: 'switched',
       })
     );
     expect(frame.removeLayers).not.toHaveBeenCalled();
