@@ -1057,7 +1057,6 @@
     "kbn.discover.fieldChooser.detailViews.recordsText": "記録",
     "kbn.discover.fieldChooser.detailViews.topValuesInRecordsDescription": "次の記録のトップ 5 の値",
     "kbn.discover.fieldChooser.detailViews.visualizeLinkText": "可視化",
-    "kbn.discover.fieldChooser.detailViews.warningsText": "{warningsLength, plural, one {# 警告} other {# 警告}}",
     "kbn.discover.fieldChooser.discoverField.addButtonLabel": "追加",
     "kbn.discover.fieldChooser.discoverField.bucketAriaLabel": "値: {value}",
     "kbn.discover.fieldChooser.discoverField.emptyStringText": "空の文字列",

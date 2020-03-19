@@ -1057,7 +1057,6 @@
     "kbn.discover.fieldChooser.detailViews.recordsText": "个记录",
     "kbn.discover.fieldChooser.detailViews.topValuesInRecordsDescription": "排名前 5 位的值，范围：",
     "kbn.discover.fieldChooser.detailViews.visualizeLinkText": "可视化",
-    "kbn.discover.fieldChooser.detailViews.warningsText": "{warningsLength, plural, one {# 个警告} other {# 个警告}}",
     "kbn.discover.fieldChooser.discoverField.addButtonLabel": "添加",
     "kbn.discover.fieldChooser.discoverField.bucketAriaLabel": "值：{value}",
     "kbn.discover.fieldChooser.discoverField.emptyStringText": "空字符串",
