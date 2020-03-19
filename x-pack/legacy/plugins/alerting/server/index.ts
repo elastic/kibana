@@ -4,10 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertsClient as AlertsClientClass } from './alerts_client';
+import { Legacy } from 'kibana';
+import { Root } from 'joi';
+import mappings from './mappings.json';
 
-export type AlertsClient = PublicMethodsOf<AlertsClientClass>;
-
-export { init } from './init';
-export { AlertType, AlertingPlugin, AlertExecutorOptions } from './types';
-export { PluginSetupContract, PluginStartContract } from './plugin';
+export function alerting(kibana: any) {
+  return new kibana.Plugin({
+    id: 'alerting',
+    configPrefix: 'xpack.alerting',
+    require: ['kibana', 'elasticsearch', 'actions', 'task_manager', 'encryptedSavedObjects'],
+    isEnabled(config: Legacy.KibanaConfig) {
+      return (
+        config.get('xpack.alerting.enabled') === true &&
+        config.get('xpack.actions.enabled') === true &&
+        config.get('xpack.encryptedSavedObjects.enabled') === true &&
+        config.get('xpack.task_manager.enabled') === true
+      );
+    },
+    config(Joi: Root) {
+      return Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+        })
+        .default();
+    },
+    uiExports: {
+      mappings,
+    },
+  });
+}

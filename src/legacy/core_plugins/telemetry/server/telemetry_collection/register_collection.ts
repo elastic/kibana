@@ -39,6 +39,7 @@
 import { telemetryCollectionManager } from '../collection_manager';
 import { getLocalStats } from './get_local_stats';
 import { getClusterUuids } from './get_cluster_stats';
+import { getLocalLicense } from './get_local_license';
 
 export function registerCollection() {
   telemetryCollectionManager.setCollection({
@@ -47,5 +48,6 @@ export function registerCollection() {
     priority: 0,
     statsGetter: getLocalStats,
     clusterDetailsGetter: getClusterUuids,
+    licenseGetter: getLocalLicense,
   });
 }

@@ -23,8 +23,8 @@ import { Properties } from '../../timeline/properties';
 import { appActions } from '../../../store/app';
 import { inputsActions } from '../../../store/inputs';
 import { timelineActions } from '../../../store/actions';
-import { timelineDefaults, TimelineModel } from '../../../store/timeline/model';
-import { DEFAULT_TIMELINE_WIDTH } from '../../timeline/body/helpers';
+import { TimelineModel } from '../../../store/timeline/model';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { InputsModelId } from '../../../store/inputs/constants';
 
 interface OwnProps {
@@ -43,7 +43,6 @@ const StatefulFlyoutHeader = React.memo<Props>(
     isDataInTimeline,
     isDatepickerLocked,
     title,
-    width = DEFAULT_TIMELINE_WIDTH,
     noteIds,
     notesById,
     timelineId,
@@ -76,7 +75,6 @@ const StatefulFlyoutHeader = React.memo<Props>(
         updateTitle={updateTitle}
         updateNote={updateNote}
         usersViewing={usersViewing}
-        width={width}
       />
     );
   }
@@ -102,7 +100,6 @@ const makeMapStateToProps = () => {
       kqlQuery,
       title = '',
       noteIds = emptyNotesId,
-      width = DEFAULT_TIMELINE_WIDTH,
     } = timeline;
 
     const history = emptyHistory; // TODO: get history from store via selector
@@ -117,7 +114,6 @@ const makeMapStateToProps = () => {
       isDatepickerLocked: globalInput.linkTo.includes('timeline'),
       noteIds,
       title,
-      width,
     };
   };
   return mapStateToProps;
@@ -125,28 +121,6 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   associateNote: (noteId: string) => dispatch(timelineActions.addNote({ id: timelineId, noteId })),
-  applyDeltaToWidth: ({
-    id,
-    delta,
-    bodyClientWidthPixels,
-    maxWidthPercent,
-    minWidthPixels,
-  }: {
-    id: string;
-    delta: number;
-    bodyClientWidthPixels: number;
-    maxWidthPercent: number;
-    minWidthPixels: number;
-  }) =>
-    dispatch(
-      timelineActions.applyDeltaToWidth({
-        id,
-        delta,
-        bodyClientWidthPixels,
-        maxWidthPercent,
-        minWidthPixels,
-      })
-    ),
   createTimeline: ({ id, show }: { id: string; show?: boolean }) =>
     dispatch(
       timelineActions.createTimeline({

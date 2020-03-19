@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedAlert } from '../../../../../../../plugins/alerting/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
 import { ReadRuleParams, isAlertType } from './types';
@@ -31,7 +31,7 @@ export const readRules = async ({
         return null;
       }
     } catch (err) {
-      if (err.output.statusCode === 404) {
+      if (err?.output?.statusCode === 404) {
         return null;
       } else {
         // throw non-404 as they would be 500 or other internal errors

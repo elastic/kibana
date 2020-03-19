@@ -19,7 +19,7 @@ export interface QueryTemplateProps {
   startDate?: number;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &
+export type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &
   FetchMoreOptions<TData, TVariables>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,6 +40,19 @@ export class QueryTemplate<
     tiebreaker?: string
   ) => FetchMoreOptionsArgs<TData, TVariables>;
 
+  private refetch!: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>;
+
+  private executeBeforeFetchMore!: ({ id }: { id?: string }) => void;
+
+  private executeBeforeRefetch!: ({ id }: { id?: string }) => void;
+
+  public setExecuteBeforeFetchMore = (val: ({ id }: { id?: string }) => void) => {
+    this.executeBeforeFetchMore = val;
+  };
+  public setExecuteBeforeRefetch = (val: ({ id }: { id?: string }) => void) => {
+    this.executeBeforeRefetch = val;
+  };
+
   public setFetchMore = (
     val: (fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>) => PromiseApolloQueryResult
   ) => {
@@ -52,6 +65,17 @@ export class QueryTemplate<
     this.fetchMoreOptions = val;
   };
 
-  public wrappedLoadMore = (newCursor: string, tiebreaker?: string) =>
-    this.fetchMore(this.fetchMoreOptions(newCursor, tiebreaker));
+  public setRefetch = (val: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>) => {
+    this.refetch = val;
+  };
+
+  public wrappedLoadMore = (newCursor: string, tiebreaker?: string) => {
+    this.executeBeforeFetchMore({ id: this.props.id });
+    return this.fetchMore(this.fetchMoreOptions(newCursor, tiebreaker));
+  };
+
+  public wrappedRefetch = (variables?: TVariables) => {
+    this.executeBeforeRefetch({ id: this.props.id });
+    return this.refetch(variables);
+  };
 }

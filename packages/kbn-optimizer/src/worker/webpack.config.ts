@@ -30,6 +30,7 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import * as SharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, WorkerConfig } from '../common';
+import { parseDirPath } from './parse_path';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
@@ -127,9 +128,32 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                   },
                 },
                 {
+                  loader: 'resolve-url-loader',
+                  options: {
+                    join: (_: string, __: any) => (uri: string, base?: string) => {
+                      if (!base) {
+                        return null;
+                      }
+
+                      // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
+                      if (uri.startsWith('ui/') && parseDirPath(base).dirs.includes('legacy')) {
+                        return Path.resolve(
+                          worker.repoRoot,
+                          'src/legacy/ui/public',
+                          uri.replace('ui/', '')
+                        );
+                      }
+
+                      return null;
+                    },
+                  },
+                },
+                {
                   loader: 'sass-loader',
                   options: {
-                    sourceMap: !worker.dist,
+                    // must always be enabled as long as we're using the `resolve-url-loader` to
+                    // rewrite `ui/*` urls. They're dropped by subsequent loaders though
+                    sourceMap: true,
                     prependData(loaderContext: webpack.loader.LoaderContext) {
                       return `@import ${stringifyRequest(
                         loaderContext,
@@ -231,6 +255,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           cache: false,
           sourceMap: false,
           extractComments: false,
+          parallel: false,
           terserOptions: {
             compress: false,
             mangle: false,

@@ -16,8 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
-import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
+import {
+  createSavedObjectClass,
+  SavedObject,
+  SavedObjectKibanaServices,
+} from '../../../../../../plugins/saved_objects/public';
 import { extractReferences, injectReferences } from './saved_dashboard_references';
 
 import {

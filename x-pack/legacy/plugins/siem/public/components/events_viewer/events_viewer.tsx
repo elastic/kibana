@@ -5,19 +5,17 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
-import { getOr, isEmpty, isEqual, union } from 'lodash/fp';
+import { getOr, isEmpty, union } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import useResizeObserver from 'use-resize-observer';
+import deepEqual from 'fast-deep-equal';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { useKibana } from '../../lib/kibana';
-import { KqlMode } from '../../store/timeline/model';
+import { ColumnHeaderOptions, KqlMode } from '../../store/timeline/model';
 import { HeaderSection } from '../header_section';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { Sort } from '../timeline/body/sort';
 import { StatefulBody } from '../timeline/body/stateful_body';
@@ -26,8 +24,8 @@ import { OnChangeItemsPerPage } from '../timeline/events';
 import { Footer, footerHeight } from '../timeline/footer';
 import { combineQueries } from '../timeline/helpers';
 import { TimelineRefetch } from '../timeline/refetch_timeline';
-import { isCompactFooter } from '../timeline/timeline';
 import { ManageTimelineContext, TimelineTypeContextProps } from '../timeline/timeline_context';
+import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
 import {
   Filter,
@@ -39,18 +37,18 @@ import { inputsModel } from '../../store';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
-const WrappedByAutoSizer = styled.div`
-  width: 100%;
-`; // required by AutoSizer
-WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
-
 const StyledEuiPanel = styled(EuiPanel)`
   max-width: 100%;
 `;
 
+const EventsContainerLoading = styled.div`
+  width: 100%;
+  overflow: auto;
+`;
+
 interface Props {
   browserFields: BrowserFields;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   deletedEventIds: Readonly<string[]>;
   end: number;
@@ -68,7 +66,7 @@ interface Props {
   start: number;
   sort: Sort;
   timelineTypeContext: TimelineTypeContextProps;
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
@@ -95,7 +93,6 @@ const EventsViewerComponent: React.FC<Props> = ({
   toggleColumn,
   utilityBar,
 }) => {
-  const { ref: measureRef, width = 0 } = useResizeObserver<HTMLDivElement>({});
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const combinedQueries = combineQueries({
@@ -118,25 +115,25 @@ const EventsViewerComponent: React.FC<Props> = ({
       ),
     [columnsHeader, timelineTypeContext.queryFields]
   );
+  const sortField = useMemo(
+    () => ({
+      sortFieldId: sort.columnId,
+      direction: sort.sortDirection as Direction,
+    }),
+    [sort.columnId, sort.sortDirection]
+  );
 
   return (
     <StyledEuiPanel data-test-subj="events-viewer-panel">
-      <>
-        <WrappedByAutoSizer ref={measureRef}>
-          <div data-test-subj="events-viewer-measured" style={{ height: '0px', width: '100%' }} />
-        </WrappedByAutoSizer>
-
-        {combinedQueries != null ? (
+      {combinedQueries != null ? (
+        <EventDetailsWidthProvider>
           <TimelineQuery
             fields={queryFields}
             filterQuery={combinedQueries.filterQuery}
             id={id}
             indexPattern={indexPattern}
             limit={itemsPerPage}
-            sortField={{
-              sortFieldId: sort.columnId,
-              direction: sort.sortDirection as Direction,
-            }}
+            sortField={sortField}
             sourceId="default"
           >
             {({
@@ -158,7 +155,6 @@ const EventsViewerComponent: React.FC<Props> = ({
                 totalCountMinusDeleted
               ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
 
-              // TODO: Reset eventDeletedIds/eventLoadingIds on refresh/loadmore (getUpdatedAt)
               return (
                 <>
                   <HeaderSection
@@ -171,15 +167,8 @@ const EventsViewerComponent: React.FC<Props> = ({
 
                   {utilityBar?.(refetch, totalCountMinusDeleted)}
 
-                  <div
-                    data-test-subj={`events-container-loading-${loading}`}
-                    style={{ width: `${width}px` }}
-                  >
-                    <ManageTimelineContext
-                      loading={loading}
-                      width={width}
-                      type={timelineTypeContext}
-                    >
+                  <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
+                    <ManageTimelineContext loading={loading} type={timelineTypeContext}>
                       <TimelineRefetch
                         id={id}
                         inputId="global"
@@ -199,11 +188,9 @@ const EventsViewerComponent: React.FC<Props> = ({
                       />
 
                       <Footer
-                        compact={isCompactFooter(width)}
                         getUpdatedAt={getUpdatedAt}
                         hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                         height={footerHeight}
-                        isEventViewer={true}
                         isLive={isLive}
                         isLoading={loading}
                         itemsCount={events.length}
@@ -216,13 +203,13 @@ const EventsViewerComponent: React.FC<Props> = ({
                         tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
                       />
                     </ManageTimelineContext>
-                  </div>
+                  </EventsContainerLoading>
                 </>
               );
             }}
           </TimelineQuery>
-        ) : null}
-      </>
+        </EventDetailsWidthProvider>
+      ) : null}
     </StyledEuiPanel>
   );
 };
@@ -230,7 +217,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 export const EventsViewer = React.memo(
   EventsViewerComponent,
   (prevProps, nextProps) =>
-    isEqual(prevProps.browserFields, nextProps.browserFields) &&
+    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
     prevProps.dataProviders === nextProps.dataProviders &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
@@ -243,9 +230,9 @@ export const EventsViewer = React.memo(
     prevProps.itemsPerPage === nextProps.itemsPerPage &&
     prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
     prevProps.kqlMode === nextProps.kqlMode &&
-    isEqual(prevProps.query, nextProps.query) &&
+    deepEqual(prevProps.query, nextProps.query) &&
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort &&
-    isEqual(prevProps.timelineTypeContext, nextProps.timelineTypeContext) &&
+    deepEqual(prevProps.timelineTypeContext, nextProps.timelineTypeContext) &&
     prevProps.utilityBar === nextProps.utilityBar
 );

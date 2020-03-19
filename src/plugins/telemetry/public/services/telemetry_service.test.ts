@@ -26,9 +26,18 @@ const mockSubtract = jest.fn().mockImplementation(() => {
   };
 });
 
+const mockClone = jest.fn().mockImplementation(() => {
+  return {
+    clone: mockClone,
+    subtract: mockSubtract,
+    toISOString: jest.fn(),
+  };
+});
+
 jest.mock('moment', () => {
   return jest.fn().mockImplementation(() => {
     return {
+      clone: mockClone,
       subtract: mockSubtract,
       toISOString: jest.fn(),
     };
@@ -43,6 +52,7 @@ describe('TelemetryService', () => {
       expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
         body: JSON.stringify({ unencrypted: false, timeRange: {} }),
       });
+      expect(mockClone).toBeCalled();
       expect(mockSubtract).toBeCalledWith(20, 'minutes');
     });
   });

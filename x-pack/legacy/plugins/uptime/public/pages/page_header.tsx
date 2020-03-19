@@ -4,75 +4,63 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useEffect } from 'react';
+import { ChromeBreadcrumb } from 'kibana/public';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
-import { getMonitorPageBreadcrumb, getOverviewPageBreadcrumbs } from '../breadcrumbs';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { getTitle } from '../lib/helper/get_title';
-import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { useUrlParams } from '../hooks';
-import { MONITOR_ROUTE } from '../../common/constants';
-import { Ping } from '../../common/graphql/types';
+import { UptimeUrlParams } from '../lib/helper';
 
 interface PageHeaderProps {
-  monitorStatus?: Ping;
-  setBreadcrumbs: UMUpdateBreadcrumbs;
+  headingText: string;
+  breadcrumbs: ChromeBreadcrumb[];
+  datePicker: boolean;
 }
 
-export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeaderProps) => {
-  const monitorPage = useRouteMatch({
-    path: MONITOR_ROUTE,
-  });
+export const makeBaseBreadcrumb = (params?: UptimeUrlParams): ChromeBreadcrumb => {
+  let href = '#/';
+  if (params) {
+    const crumbParams: Partial<UptimeUrlParams> = { ...params };
+    // We don't want to encode this values because they are often set to Date.now(), the relative
+    // values in dateRangeStart are better for a URL.
+    delete crumbParams.absoluteDateRangeStart;
+    delete crumbParams.absoluteDateRangeEnd;
+    href += stringifyUrlParams(crumbParams, true);
+  }
+  return {
+    text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
+      defaultMessage: 'Uptime',
+    }),
+    href,
+  };
+};
 
-  const [getUrlParams] = useUrlParams();
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
+export const PageHeader = ({ headingText, breadcrumbs, datePicker = true }: PageHeaderProps) => {
+  const setBreadcrumbs = useKibana().services.chrome?.setBreadcrumbs!;
 
-  const headingText = !monitorPage
-    ? i18n.translate('xpack.uptime.overviewPage.headerText', {
-        defaultMessage: 'Overview',
-        description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-      })
-    : monitorStatus?.url?.full;
-
-  const [headerText, setHeaderText] = useState(headingText);
-
+  const params = useUrlParams()[0]();
   useEffect(() => {
-    if (monitorPage) {
-      setHeaderText(monitorStatus?.url?.full ?? '');
-      if (monitorStatus?.monitor) {
-        const { name, id } = monitorStatus.monitor;
-        document.title = getTitle((name || id) ?? '');
-      }
-    } else {
-      setHeaderText(headingText);
-      document.title = getTitle();
-    }
-  }, [monitorStatus, monitorPage, setHeaderText, headingText]);
+    setBreadcrumbs([makeBaseBreadcrumb(params)].concat(breadcrumbs));
+  }, [breadcrumbs, params, setBreadcrumbs]);
 
-  useEffect(() => {
-    if (monitorPage) {
-      if (headerText) {
-        setBreadcrumbs(getMonitorPageBreadcrumb(headerText, stringifyUrlParams(params, true)));
-      }
-    } else {
-      setBreadcrumbs(getOverviewPageBreadcrumbs());
-    }
-  }, [headerText, setBreadcrumbs, params, monitorPage]);
+  const datePickerComponent = datePicker ? (
+    <EuiFlexItem grow={false}>
+      <UptimeDatePicker />
+    </EuiFlexItem>
+  ) : null;
 
   return (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <EuiTitle>
-            <h1>{headerText}</h1>
+            <h1>{headingText}</h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <UptimeDatePicker />
-        </EuiFlexItem>
+        {datePickerComponent}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
     </>

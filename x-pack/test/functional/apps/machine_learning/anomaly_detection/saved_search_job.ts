@@ -275,6 +275,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {

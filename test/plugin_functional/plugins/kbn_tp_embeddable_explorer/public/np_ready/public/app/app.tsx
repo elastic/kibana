@@ -19,18 +19,15 @@
 import { EuiTab } from '@elastic/eui';
 import React, { Component } from 'react';
 import { CoreStart } from 'src/core/public';
-import {
-  GetEmbeddableFactory,
-  GetEmbeddableFactories,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { GetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { UiActionsService } from '../../../../../../../../src/plugins/ui_actions/public';
 import { DashboardContainerExample } from './dashboard_container_example';
 import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
 
 export interface AppProps {
-  getActions: GetActionsCompatibleWithTrigger;
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getActions: UiActionsService['getTriggerCompatibleActions'];
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;

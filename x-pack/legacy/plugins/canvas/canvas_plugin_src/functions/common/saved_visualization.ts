@@ -5,13 +5,13 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-import { VisualizeInput } from 'src/legacy/core_plugins/visualizations/public/embeddable';
+import { VisualizeInput } from 'src/legacy/core_plugins/visualizations/public';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
-import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
+import { buildEmbeddableFilters } from '../../../public/lib/build_embeddable_filters';
 import { Filter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -46,6 +46,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         type: EmbeddableExpressionType,
         input: {
           id,
+          disableTriggers: true,
           ...buildEmbeddableFilters(filters),
         },
         embeddableType: EmbeddableTypes.visualization,

@@ -5,14 +5,15 @@
  */
 
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
+import styled from 'styled-components';
 
 import { setFieldValue } from '../../helpers';
 import { RuleStep, RuleStepProps, ScheduleStepRule } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
-import { Form, UseField, useForm } from '../../../../shared_imports';
+import { Form, UseField, useForm } from '../../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { schema } from './schema';
 import * as I18n from './translations';
@@ -20,6 +21,10 @@ import * as I18n from './translations';
 interface StepScheduleRuleProps extends RuleStepProps {
   defaultValues?: ScheduleStepRule | null;
 }
+
+const RestrictedWidthContainer = styled.div`
+  max-width: 300px;
+`;
 
 const stepScheduleDefaultValue = {
   enabled: true,
@@ -31,7 +36,7 @@ const stepScheduleDefaultValue = {
 const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   addPadding = false,
   defaultValues,
-  descriptionDirection = 'row',
+  descriptionColumns = 'singleSplit',
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
@@ -62,7 +67,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
 
   useEffect(() => {
     const { isNew, ...initDefaultValue } = myStepData;
-    if (defaultValues != null && !isEqual(initDefaultValue, defaultValues)) {
+    if (defaultValues != null && !deepEqual(initDefaultValue, defaultValues)) {
       const myDefaultValues = {
         ...defaultValues,
         isNew: false,
@@ -80,31 +85,35 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
 
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
+      <StepRuleDescription columns={descriptionColumns} schema={schema} data={myStepData} />
     </StepContentWrapper>
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepScheduleRule">
-          <UseField
-            path="interval"
-            component={ScheduleItem}
-            componentProps={{
-              idAria: 'detectionEngineStepScheduleRuleInterval',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
-            }}
-          />
-          <UseField
-            path="from"
-            component={ScheduleItem}
-            componentProps={{
-              idAria: 'detectionEngineStepScheduleRuleFrom',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
-              minimumValue: 1,
-            }}
-          />
+          <RestrictedWidthContainer>
+            <UseField
+              path="interval"
+              component={ScheduleItem}
+              componentProps={{
+                idAria: 'detectionEngineStepScheduleRuleInterval',
+                isDisabled: isLoading,
+                dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
+              }}
+            />
+          </RestrictedWidthContainer>
+          <RestrictedWidthContainer>
+            <UseField
+              path="from"
+              component={ScheduleItem}
+              componentProps={{
+                idAria: 'detectionEngineStepScheduleRuleFrom',
+                isDisabled: isLoading,
+                dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
+                minimumValue: 1,
+              }}
+            />
+          </RestrictedWidthContainer>
         </Form>
       </StepContentWrapper>
 
@@ -133,6 +142,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
                 isDisabled={isLoading}
                 isLoading={isLoading}
                 onClick={onSubmit.bind(null, true)}
+                data-test-subj="create-activate"
               >
                 {I18n.COMPLETE_WITH_ACTIVATING}
               </EuiButton>

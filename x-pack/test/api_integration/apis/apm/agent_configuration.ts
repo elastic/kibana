@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { AgentConfigurationIntake } from '../../../../plugins/apm/server/lib/settings/agent_configuration/configuration_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
@@ -18,108 +19,122 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       .set('kbn-xsrf', 'foo');
   }
 
-  let createdConfigIds: any[] = [];
-  async function createConfiguration(configuration: any) {
+  async function createConfiguration(config: AgentConfigurationIntake) {
+    log.debug('creating configuration', config.service);
     const res = await supertest
-      .post(`/api/apm/settings/agent-configuration/new`)
-      .send(configuration)
+      .put(`/api/apm/settings/agent-configuration`)
+      .send(config)
       .set('kbn-xsrf', 'foo');
 
-    createdConfigIds.push(res.body._id);
+    throwOnError(res);
 
     return res;
   }
 
-  function deleteCreatedConfigurations() {
-    const promises = Promise.all(createdConfigIds.map(deleteConfiguration));
-    return promises;
+  async function updateConfiguration(config: AgentConfigurationIntake) {
+    log.debug('updating configuration', config.service);
+    const res = await supertest
+      .put(`/api/apm/settings/agent-configuration?overwrite=true`)
+      .send(config)
+      .set('kbn-xsrf', 'foo');
+
+    throwOnError(res);
+
+    return res;
   }
 
-  function deleteConfiguration(configurationId: string) {
-    return supertest
-      .delete(`/api/apm/settings/agent-configuration/${configurationId}`)
-      .set('kbn-xsrf', 'foo')
-      .then((response: any) => {
-        createdConfigIds = createdConfigIds.filter(id => id === configurationId);
-        return response;
-      });
+  async function deleteConfiguration({ service }: AgentConfigurationIntake) {
+    log.debug('deleting configuration', service);
+    const res = await supertest
+      .delete(`/api/apm/settings/agent-configuration`)
+      .send({ service })
+      .set('kbn-xsrf', 'foo');
+
+    throwOnError(res);
+
+    return res;
+  }
+
+  function throwOnError(res: any) {
+    const { statusCode, req, body } = res;
+    if (statusCode !== 200) {
+      throw new Error(`
+      Endpoint: ${req.method} ${req.path}
+      Service: ${JSON.stringify(res.request._data.service)}
+      Status code: ${statusCode}
+      Response: ${body.message}`);
+    }
   }
 
   describe('agent configuration', () => {
     describe('when creating one configuration', () => {
-      let createdConfigId: string;
+      const newConfig = {
+        service: {},
+        settings: { transaction_sample_rate: 0.55 },
+      };
 
-      const parameters = {
+      const searchParams = {
         service: { name: 'myservice', environment: 'development' },
         etag: '7312bdcc34999629a3d39df24ed9b2a7553c0c39',
       };
 
       before(async () => {
-        log.debug('creating agent configuration');
-
-        // all / all
-        const { body } = await createConfiguration({
-          service: {},
-          settings: { transaction_sample_rate: 0.1 },
-        });
-
-        createdConfigId = body._id;
+        await createConfiguration(newConfig);
       });
 
-      it('returns the created configuration', async () => {
-        const { statusCode, body } = await searchConfigurations(parameters);
-
+      it('can find the created config', async () => {
+        const { statusCode, body } = await searchConfigurations(searchParams);
         expect(statusCode).to.equal(200);
-        expect(body._id).to.equal(createdConfigId);
+        expect(body._source.service).to.eql({});
+        expect(body._source.settings).to.eql({ transaction_sample_rate: 0.55 });
       });
 
-      it('succesfully deletes the configuration', async () => {
-        await deleteConfiguration(createdConfigId);
+      it('can update the created config', async () => {
+        await updateConfiguration({ service: {}, settings: { transaction_sample_rate: 0.85 } });
 
-        const { statusCode } = await searchConfigurations(parameters);
+        const { statusCode, body } = await searchConfigurations(searchParams);
+        expect(statusCode).to.equal(200);
+        expect(body._source.service).to.eql({});
+        expect(body._source.settings).to.eql({ transaction_sample_rate: 0.85 });
+      });
 
+      it('can delete the created config', async () => {
+        await deleteConfiguration(newConfig);
+        const { statusCode } = await searchConfigurations(searchParams);
         expect(statusCode).to.equal(404);
       });
     });
 
-    describe('when creating four configurations', () => {
-      before(async () => {
-        log.debug('creating agent configuration');
-
-        // all / all
-        await createConfiguration({
+    describe('when creating multiple configurations', () => {
+      const configs = [
+        {
           service: {},
           settings: { transaction_sample_rate: 0.1 },
-        });
-
-        // my_service / all
-        await createConfiguration({
+        },
+        {
           service: { name: 'my_service' },
           settings: { transaction_sample_rate: 0.2 },
-        });
-
-        // all / production
-        await createConfiguration({
-          service: { environment: 'production' },
-          settings: { transaction_sample_rate: 0.3 },
-        });
-
-        // all / production
-        await createConfiguration({
-          service: { environment: 'development' },
-          settings: { transaction_sample_rate: 0.4 },
-        });
-
-        // my_service / production
-        await createConfiguration({
+        },
+        {
           service: { name: 'my_service', environment: 'development' },
+          settings: { transaction_sample_rate: 0.3 },
+        },
+        {
+          service: { environment: 'production' },
+          settings: { transaction_sample_rate: 0.4 },
+        },
+        {
+          service: { environment: 'development' },
           settings: { transaction_sample_rate: 0.5 },
-        });
+        },
+      ];
+
+      before(async () => {
+        await Promise.all(configs.map(config => createConfiguration(config)));
       });
 
       after(async () => {
-        log.debug('deleting agent configurations');
-        await deleteCreatedConfigurations();
+        await Promise.all(configs.map(config => deleteConfiguration(config)));
       });
 
       const agentsRequests = [
@@ -128,19 +143,23 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           expectedSettings: { transaction_sample_rate: 0.1 },
         },
         {
+          service: { name: 'my_service', environment: 'non_existing_env' },
+          expectedSettings: { transaction_sample_rate: 0.2 },
+        },
+        {
           service: { name: 'my_service', environment: 'production' },
           expectedSettings: { transaction_sample_rate: 0.2 },
         },
         {
-          service: { name: 'non_existing_service', environment: 'production' },
+          service: { name: 'my_service', environment: 'development' },
           expectedSettings: { transaction_sample_rate: 0.3 },
         },
         {
-          service: { name: 'non_existing_service', environment: 'development' },
+          service: { name: 'non_existing_service', environment: 'production' },
           expectedSettings: { transaction_sample_rate: 0.4 },
         },
         {
-          service: { name: 'my_service', environment: 'development' },
+          service: { name: 'non_existing_service', environment: 'development' },
           expectedSettings: { transaction_sample_rate: 0.5 },
         },
       ];
@@ -159,18 +178,18 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     });
 
     describe('when an agent retrieves a configuration', () => {
+      const config = {
+        service: { name: 'myservice', environment: 'development' },
+        settings: { transaction_sample_rate: 0.9 },
+      };
+
       before(async () => {
         log.debug('creating agent configuration');
-
-        await createConfiguration({
-          service: { name: 'myservice', environment: 'development' },
-          settings: { transaction_sample_rate: 0.9 },
-        });
+        await createConfiguration(config);
       });
 
       after(async () => {
-        log.debug('deleting agent configurations');
-        await deleteCreatedConfigurations();
+        await deleteConfiguration(config);
       });
 
       it(`should have 'applied_by_agent=false' on first request`, async () => {

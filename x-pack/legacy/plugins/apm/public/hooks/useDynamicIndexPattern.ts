@@ -5,7 +5,7 @@
  */
 
 import { useFetcher } from './useFetcher';
-import { ProcessorEvent } from '../../common/processor_event';
+import { ProcessorEvent } from '../../../../../plugins/apm/common/processor_event';
 
 export function useDynamicIndexPattern(
   processorEvent: ProcessorEvent | undefined

@@ -17,7 +17,8 @@ import {
 } from './helpers';
 import { toQuery } from '../../components/shared/Links/url_helpers';
 import { TIMEPICKER_DEFAULTS } from './constants';
-import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { localUIFilterNames } from '../../../../../../plugins/apm/server/lib/ui_filters/local_ui_filters/config';
 import { pickKeys } from '../../utils/pickKeys';
 
 type TimeUrlParams = Pick<

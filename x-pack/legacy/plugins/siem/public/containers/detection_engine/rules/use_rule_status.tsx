@@ -6,14 +6,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { useStateToaster } from '../../../components/toasters';
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { getRuleStatusById } from './api';
 import * as i18n from './translations';
 import { RuleStatus } from './types';
 
 type Func = (ruleId: string) => void;
-type Return = [boolean, RuleStatus | null, Func | null];
+export type ReturnRuleStatus = [boolean, RuleStatus | null, Func | null];
 
 /**
  * Hook for using to get a Rule from the Detection Engine API
@@ -21,7 +20,7 @@ type Return = [boolean, RuleStatus | null, Func | null];
  * @param id desired Rule ID's (not rule_id)
  *
  */
-export const useRuleStatus = (id: string | undefined | null): Return => {
+export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus => {
   const [ruleStatus, setRuleStatus] = useState<RuleStatus | null>(null);
   const fetchRuleStatus = useRef<Func | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,6 +33,7 @@ export const useRuleStatus = (id: string | undefined | null): Return => {
     const fetchData = async (idToFetch: string) => {
       try {
         setLoading(true);
+
         const ruleStatusResponse = await getRuleStatusById({
           id: idToFetch,
           signal: abortCtrl.signal,

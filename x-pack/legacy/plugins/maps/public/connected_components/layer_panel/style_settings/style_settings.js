@@ -21,7 +21,7 @@ export function StyleSettings({ layer, updateStyleDescriptor }) {
 
   return (
     <Fragment>
-      <EuiPanel>
+      <EuiPanel className="mapStyleSettings">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">

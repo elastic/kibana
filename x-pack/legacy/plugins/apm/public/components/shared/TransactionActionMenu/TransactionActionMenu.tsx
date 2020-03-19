@@ -16,7 +16,7 @@ import {
   SectionSubtitle,
   SectionTitle
 } from '../../../../../../../plugins/observability/public';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';

@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../legacy/plugins/ml/common/constants/new_job';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../plugins/ml/common/constants/new_job';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
@@ -79,6 +79,7 @@ export default function({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('ml/categorization');
       await ml.api.createCalendar('wizard-test-calendar');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {

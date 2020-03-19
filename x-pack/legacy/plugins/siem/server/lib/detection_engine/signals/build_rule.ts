@@ -44,6 +44,7 @@ export const buildRule = ({
     risk_score: ruleParams.riskScore,
     output_index: ruleParams.outputIndex,
     description: ruleParams.description,
+    note: ruleParams.note,
     from: ruleParams.from,
     immutable: ruleParams.immutable,
     index: ruleParams.index,
@@ -64,5 +65,8 @@ export const buildRule = ({
     version: ruleParams.version,
     created_at: createdAt,
     updated_at: updatedAt,
+    lists: ruleParams.lists,
+    machine_learning_job_id: ruleParams.machineLearningJobId,
+    anomaly_threshold: ruleParams.anomalyThreshold,
   });
 };

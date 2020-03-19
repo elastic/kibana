@@ -35,12 +35,15 @@ import {
   IAggType,
 } from '../legacy_imports';
 import { EditorConfig } from './utils';
+import { Schema, getSchemaByName } from '../schemas';
 
 interface ParamInstanceBase {
   agg: IAggConfig;
   editorConfig: EditorConfig;
   metricAggs: IAggConfig[];
   state: VisState;
+  schemas: Schema[];
+  hideCustomLabel?: boolean;
 }
 
 export interface ParamInstance extends ParamInstanceBase {
@@ -50,7 +53,14 @@ export interface ParamInstance extends ParamInstanceBase {
   value: unknown;
 }
 
-function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamInstanceBase) {
+function getAggParamsToRender({
+  agg,
+  editorConfig,
+  metricAggs,
+  state,
+  schemas,
+  hideCustomLabel,
+}: ParamInstanceBase) {
   const params = {
     basic: [] as ParamInstance[],
     advanced: [] as ParamInstance[],
@@ -63,19 +73,26 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
         .filter((param: AggParam) => !get(editorConfig, [param.name, 'hidden'], false))) ||
     [];
 
+  const schema = getSchemaByName(schemas, agg.schema);
   // build collection of agg params components
   paramsToRender.forEach((param: AggParam, index: number) => {
     let indexedFields: ComboBoxGroupedOptions<IndexPatternField> = [];
     let fields: IndexPatternField[];
 
-    if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
+    if (hideCustomLabel && param.name === 'customLabel') {
       return;
     }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
-      const availableFields: IndexPatternField[] = (param as IFieldParamType).getAvailableFields(
-        agg
-      );
+      let availableFields: IndexPatternField[] = (param as IFieldParamType).getAvailableFields(agg);
+      // should be refactored in the future to provide a more general way
+      // for visualization to override some agg config settings
+      if (agg.type.name === 'top_hits' && param.name === 'field') {
+        const allowStrings = _.get(schema, `aggSettings[${agg.type.name}].allowStrings`, false);
+        if (!allowStrings) {
+          availableFields = availableFields.filter(field => field.type === 'number');
+        }
+      }
       fields = aggTypeFieldFilters.filter(availableFields, agg);
       indexedFields = groupAndSortBy(fields, 'type', 'name');
 
@@ -109,6 +126,8 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
         metricAggs,
         state,
         value: agg.params[param.name],
+        schemas,
+        hideCustomLabel,
       });
     }
   });
@@ -119,9 +138,15 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 function getAggTypeOptions(
   agg: IAggConfig,
   indexPattern: IndexPattern,
-  groupName: string
+  groupName: string,
+  allowedAggs: string[]
 ): ComboBoxGroupedOptions<IAggType> {
-  const aggTypeOptions = aggTypeFilters.filter((aggTypes as any)[groupName], indexPattern, agg);
+  const aggTypeOptions = aggTypeFilters.filter(
+    (aggTypes as any)[groupName],
+    indexPattern,
+    agg,
+    allowedAggs
+  );
   return groupAndSortBy(aggTypeOptions as any[], 'subtype', 'title');
 }
 

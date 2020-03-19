@@ -50,6 +50,14 @@ describe('ExpressionsPublicPlugin', () => {
         const bar = await setup.run('var_set name="foo" value="bar" | var name="foo"', null);
         expect(bar).toBe('bar');
       });
+
+      test('kibana_context function is available', async () => {
+        const { setup } = await expressionsPluginMock.createPlugin();
+        const result = await setup.run('kibana_context', null);
+        expect(result).toMatchObject({
+          type: 'kibana_context',
+        });
+      });
     });
   });
 

@@ -17,8 +17,10 @@
  * under the License.
  */
 
-export { addProcessorDefinition } from './es_6_0/ingest';
+export { addProcessorDefinition } from './js/ingest';
 
-export { addExtensionSpecFilePath } from './spec';
+export { addExtensionSpecFilePath } from './json';
+
+export { loadSpec } from './es';
 
 export { resolveApi } from './server';

@@ -21,6 +21,7 @@ import { InjectedMetadataService, InjectedMetadataSetup } from './injected_metad
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InjectedMetadataSetup> = {
     getBasePath: jest.fn(),
+    getServerBasePath: jest.fn(),
     getKibanaVersion: jest.fn(),
     getKibanaBranch: jest.fn(),
     getCspConfig: jest.fn(),

@@ -80,7 +80,7 @@ export function runTypeCheckCli() {
   }
 
   const tscArgs = ['--noEmit', '--pretty', ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : [])];
-  const projects = filterProjectsByFlag(opts.project);
+  const projects = filterProjectsByFlag(opts.project).filter(p => !p.disableTypeCheck);
 
   if (!projects.length) {
     log.error(`Unable to find project at ${opts.project}`);

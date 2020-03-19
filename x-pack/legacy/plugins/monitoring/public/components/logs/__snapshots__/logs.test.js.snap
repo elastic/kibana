@@ -13,7 +13,7 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
       values={
         Object {
           "link": <ForwardRef
-            href="/app/infra#/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345"
+            href="/app/logs/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345"
           >
             Logs
           </ForwardRef>,
@@ -37,7 +37,7 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
       values={
         Object {
           "link": <ForwardRef
-            href="/app/infra#/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.index.name:6789"
+            href="/app/logs/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.index.name:6789"
           >
             Logs
           </ForwardRef>,
@@ -61,7 +61,7 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
       values={
         Object {
           "link": <ForwardRef
-            href="/app/infra#/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.node.id:6789"
+            href="/app/logs/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.node.id:6789"
           >
             Logs
           </ForwardRef>,
@@ -287,7 +287,7 @@ exports[`Logs should render normally 1`] = `
         values={
           Object {
             "link": <ForwardRef
-              href="/app/infra#/link-to/internal-stack-monitoring/logs"
+              href="/app/logs/link-to/internal-stack-monitoring/logs"
             >
               Logs
             </ForwardRef>,

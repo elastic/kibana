@@ -374,7 +374,6 @@ export const JsonWatchEditSimulate = ({
             errors={executeWatchErrors}
           >
             <EuiCodeEditor
-              fullWidth
               mode={xJsonMode}
               width="100%"
               height="200px"

@@ -19,14 +19,14 @@
 
 import { get, find } from 'lodash';
 import React, { useEffect } from 'react';
-import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { isValidInterval, AggParamOption } from '../../legacy_imports';
 import { AggParamEditorProps } from '../agg_param_props';
 
-interface ComboBoxOption extends EuiComboBoxOptionProps {
+interface ComboBoxOption extends EuiComboBoxOptionOption {
   key: string;
 }
 
@@ -105,7 +105,7 @@ function TimeIntervalParamEditor({
     }
   };
 
-  const onChange = (opts: EuiComboBoxOptionProps[]) => {
+  const onChange = (opts: EuiComboBoxOptionOption[]) => {
     const selectedOpt: ComboBoxOption = get(opts, '0');
     setValue(selectedOpt ? selectedOpt.key : '');
 

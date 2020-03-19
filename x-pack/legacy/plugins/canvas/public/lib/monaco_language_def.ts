@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { npSetup } from 'ui/new_platform';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { ExpressionFunction } from '../../types';
 
 export const LANGUAGE_ID = 'canvas-expression';
 
@@ -94,9 +94,8 @@ export const language: Language = {
   },
 };
 
-export function registerLanguage() {
-  const functions = Object.values(npSetup.plugins.expressions.getFunctions());
-  language.keywords = functions.map(({ name }) => name);
+export function registerLanguage(functions: ExpressionFunction[]) {
+  language.keywords = functions.map(fn => fn.name);
 
   monaco.languages.register({ id: LANGUAGE_ID });
   monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, language);

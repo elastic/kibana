@@ -10,7 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const appsMenu = getService('appsMenu');
-  const PageObjects = getPageObjects(['common', 'security', 'settings']);
+  const PageObjects = getPageObjects(['common', 'security']);
 
   describe('security', () => {
     before(async () => {
@@ -97,7 +97,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows monitoring navlink', async () => {
-        await PageObjects.settings.setNavType('individual');
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Stack Monitoring');
       });

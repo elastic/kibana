@@ -18,42 +18,37 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import ReactDOM from 'react-dom';
+import classNames from 'classnames';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
 
 import {
   EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiCode,
   EuiCodeBlock,
+  EuiScreenReaderOnly,
   // @ts-ignore
   EuiCodeEditor,
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
   // @ts-ignore
   EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
   EuiImage,
   EuiLink,
   EuiSpacer,
-  EuiToolTip,
   EuiText,
   EuiSelect,
   EuiSwitch,
   EuiSwitchEvent,
-  keyCodes,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldSetting } from '../../types';
+import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
 import {
   UiSettingsType,
@@ -65,71 +60,37 @@ import {
 
 interface FieldProps {
   setting: FieldSetting;
-  save: (name: string, value: string) => Promise<boolean>;
-  clear: (name: string) => Promise<boolean>;
+  handleChange: (name: string, value: FieldState) => void;
   enableSaving: boolean;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
+  clearChange?: (name: string) => void;
+  unsavedChanges?: FieldState;
+  loading?: boolean;
 }
 
-interface FieldState {
-  unsavedValue: any;
-  savedValue: any;
-  loading: boolean;
-  isInvalid: boolean;
-  error: string | null;
-  changeImage: boolean;
-  isJsonArray: boolean;
-}
-
-export class Field extends PureComponent<FieldProps, FieldState> {
-  private changeImageForm: EuiFilePicker | undefined;
-  constructor(props: FieldProps) {
-    super(props);
-    const { type, value, defVal } = this.props.setting;
-    const editableValue = this.getEditableValue(type, value, defVal);
-
-    this.state = {
-      isInvalid: false,
-      error: null,
-      loading: false,
-      changeImage: false,
-      savedValue: editableValue,
-      unsavedValue: editableValue,
-      isJsonArray: type === 'json' ? Array.isArray(JSON.parse(String(defVal) || '{}')) : false,
-    };
+export const getEditableValue = (
+  type: UiSettingsType,
+  value: FieldSetting['value'],
+  defVal?: FieldSetting['defVal']
+) => {
+  const val = value === null || value === undefined ? defVal : value;
+  switch (type) {
+    case 'array':
+      return (val as string[]).join(', ');
+    case 'boolean':
+      return !!val;
+    case 'number':
+      return Number(val);
+    case 'image':
+      return val;
+    default:
+      return val || '';
   }
+};
 
-  UNSAFE_componentWillReceiveProps(nextProps: FieldProps) {
-    const { unsavedValue } = this.state;
-    const { type, value, defVal } = nextProps.setting;
-    const editableValue = this.getEditableValue(type, value, defVal);
-
-    this.setState({
-      savedValue: editableValue,
-      unsavedValue: value === null || value === undefined ? editableValue : unsavedValue,
-    });
-  }
-
-  getEditableValue(
-    type: UiSettingsType,
-    value: FieldSetting['value'],
-    defVal: FieldSetting['defVal']
-  ) {
-    const val = value === null || value === undefined ? defVal : value;
-    switch (type) {
-      case 'array':
-        return (val as string[]).join(', ');
-      case 'boolean':
-        return !!val;
-      case 'number':
-        return Number(val);
-      case 'image':
-        return val;
-      default:
-        return val || '';
-    }
-  }
+export class Field extends PureComponent<FieldProps> {
+  private changeImageForm = React.createRef<EuiFilePicker>();
 
   getDisplayedDefaultValue(
     type: UiSettingsType,
@@ -151,47 +112,60 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
   }
 
-  setLoading(loading: boolean) {
-    this.setState({
-      loading,
-    });
+  handleChange = (unsavedChanges: FieldState) => {
+    this.props.handleChange(this.props.setting.name, unsavedChanges);
+  };
+
+  resetField = () => {
+    const { type, defVal } = this.props.setting;
+    if (type === 'image') {
+      this.cancelChangeImage();
+      return this.handleChange({
+        value: getEditableValue(type, defVal),
+        changeImage: true,
+      });
+    }
+    return this.handleChange({ value: getEditableValue(type, defVal) });
+  };
+
+  componentDidUpdate(prevProps: FieldProps) {
+    if (
+      prevProps.setting.type === 'image' &&
+      prevProps.unsavedChanges?.value &&
+      !this.props.unsavedChanges?.value
+    ) {
+      this.cancelChangeImage();
+    }
   }
 
-  clearError() {
-    this.setState({
-      isInvalid: false,
-      error: null,
-    });
-  }
-
-  onCodeEditorChange = (value: UiSettingsType) => {
-    const { type } = this.props.setting;
-    const { isJsonArray } = this.state;
+  onCodeEditorChange = (value: string) => {
+    const { defVal, type } = this.props.setting;
 
     let newUnsavedValue;
-    let isInvalid = false;
-    let error = null;
+    let errorParams = {};
 
     switch (type) {
       case 'json':
+        const isJsonArray = Array.isArray(JSON.parse((defVal as string) || '{}'));
         newUnsavedValue = value.trim() || (isJsonArray ? '[]' : '{}');
         try {
           JSON.parse(newUnsavedValue);
         } catch (e) {
-          isInvalid = true;
-          error = i18n.translate('advancedSettings.field.codeEditorSyntaxErrorMessage', {
-            defaultMessage: 'Invalid JSON syntax',
-          });
+          errorParams = {
+            error: i18n.translate('advancedSettings.field.codeEditorSyntaxErrorMessage', {
+              defaultMessage: 'Invalid JSON syntax',
+            }),
+            isInvalid: true,
+          };
         }
         break;
       default:
         newUnsavedValue = value;
     }
 
-    this.setState({
-      error,
-      isInvalid,
-      unsavedValue: newUnsavedValue,
+    this.handleChange({
+      value: newUnsavedValue,
+      ...errorParams,
     });
   };
 
@@ -202,58 +176,46 @@ export class Field extends PureComponent<FieldProps, FieldState> {
   onFieldChangeEvent = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     this.onFieldChange(e.target.value);
 
-  onFieldChange = (value: any) => {
-    const { type, validation } = this.props.setting;
-    const { unsavedValue } = this.state;
-
+  onFieldChange = (targetValue: any) => {
+    const { type, validation, value, defVal } = this.props.setting;
     let newUnsavedValue;
 
     switch (type) {
       case 'boolean':
-        newUnsavedValue = !unsavedValue;
+        const { unsavedChanges } = this.props;
+        const currentValue = unsavedChanges
+          ? unsavedChanges.value
+          : getEditableValue(type, value, defVal);
+        newUnsavedValue = !currentValue;
         break;
       case 'number':
-        newUnsavedValue = Number(value);
+        newUnsavedValue = Number(targetValue);
         break;
       default:
-        newUnsavedValue = value;
+        newUnsavedValue = targetValue;
     }
 
-    let isInvalid = false;
-    let error = null;
+    let errorParams = {};
 
-    if (validation && (validation as StringValidationRegex).regex) {
+    if ((validation as StringValidationRegex)?.regex) {
       if (!(validation as StringValidationRegex).regex!.test(newUnsavedValue.toString())) {
-        error = (validation as StringValidationRegex).message;
-        isInvalid = true;
+        errorParams = {
+          error: (validation as StringValidationRegex).message,
+          isInvalid: true,
+        };
       }
     }
 
-    this.setState({
-      unsavedValue: newUnsavedValue,
-      isInvalid,
-      error,
+    this.handleChange({
+      value: newUnsavedValue,
+      ...errorParams,
     });
   };
 
-  onFieldKeyDown = ({ keyCode }: { keyCode: number }) => {
-    if (keyCode === keyCodes.ENTER) {
-      this.saveEdit();
-    }
-    if (keyCode === keyCodes.ESCAPE) {
-      this.cancelEdit();
-    }
-  };
+  onImageChange = async (files: FileList | null) => {
+    if (files == null) return;
 
-  onFieldEscape = ({ keyCode }: { keyCode: number }) => {
-    if (keyCode === keyCodes.ESCAPE) {
-      this.cancelEdit();
-    }
-  };
-
-  onImageChange = async (files: any[]) => {
     if (!files.length) {
-      this.clearError();
       this.setState({
         unsavedValue: null,
       });
@@ -267,19 +229,24 @@ export class Field extends PureComponent<FieldProps, FieldState> {
       if (file instanceof File) {
         base64Image = (await this.getImageAsBase64(file)) as string;
       }
-      const isInvalid = !!(maxSize && maxSize.length && base64Image.length > maxSize.length);
-      this.setState({
-        isInvalid,
-        error: isInvalid
-          ? i18n.translate('advancedSettings.field.imageTooLargeErrorMessage', {
-              defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
-              values: {
-                maxSizeDescription: maxSize.description,
-              },
-            })
-          : null,
+
+      let errorParams = {};
+      const isInvalid = !!(maxSize?.length && base64Image.length > maxSize.length);
+      if (isInvalid) {
+        errorParams = {
+          isInvalid,
+          error: i18n.translate('advancedSettings.field.imageTooLargeErrorMessage', {
+            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
+            values: {
+              maxSizeDescription: maxSize.description,
+            },
+          }),
+        };
+      }
+      this.handleChange({
         changeImage: true,
-        unsavedValue: base64Image,
+        value: base64Image,
+        ...errorParams,
       });
     } catch (err) {
       this.props.toasts.addDanger(
@@ -306,152 +273,62 @@ export class Field extends PureComponent<FieldProps, FieldState> {
   }
 
   changeImage = () => {
-    this.setState({
+    this.handleChange({
+      value: null,
       changeImage: true,
     });
   };
 
   cancelChangeImage = () => {
-    const { savedValue } = this.state;
-
-    if (this.changeImageForm) {
-      this.changeImageForm.fileInput.value = null;
-      this.changeImageForm.handleChange();
+    if (this.changeImageForm.current?.fileInput) {
+      this.changeImageForm.current.fileInput.value = '';
+      this.changeImageForm.current.handleChange();
     }
-
-    this.setState({
-      changeImage: false,
-      unsavedValue: savedValue,
-    });
-  };
-
-  cancelEdit = () => {
-    const { savedValue } = this.state;
-    this.clearError();
-    this.setState({
-      unsavedValue: savedValue,
-    });
-  };
-
-  showPageReloadToast = () => {
-    if (this.props.setting.requiresPageReload) {
-      this.props.toasts.add({
-        title: i18n.translate('advancedSettings.field.requiresPageReloadToastDescription', {
-          defaultMessage: 'Please reload the page for the "{settingName}" setting to take effect.',
-          values: {
-            settingName: this.props.setting.displayName || this.props.setting.name,
-          },
-        }),
-        text: element => {
-          const content = (
-            <>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiButton size="s" onClick={() => window.location.reload()}>
-                    {i18n.translate('advancedSettings.field.requiresPageReloadToastButtonLabel', {
-                      defaultMessage: 'Reload page',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          );
-          ReactDOM.render(content, element);
-          return () => ReactDOM.unmountComponentAtNode(element);
-        },
-        color: 'success',
-      });
+    if (this.props.clearChange) {
+      this.props.clearChange(this.props.setting.name);
     }
   };
 
-  saveEdit = async () => {
-    const { name, defVal, type } = this.props.setting;
-    const { changeImage, savedValue, unsavedValue, isJsonArray } = this.state;
-
-    if (savedValue === unsavedValue) {
-      return;
-    }
-
-    let valueToSave = unsavedValue;
-    let isSameValue = false;
-
-    switch (type) {
-      case 'array':
-        valueToSave = valueToSave.split(',').map((val: string) => val.trim());
-        isSameValue = valueToSave.join(',') === (defVal as string[]).join(',');
-        break;
-      case 'json':
-        valueToSave = valueToSave.trim();
-        valueToSave = valueToSave || (isJsonArray ? '[]' : '{}');
-      default:
-        isSameValue = valueToSave === defVal;
-    }
-
-    this.setLoading(true);
-    try {
-      if (isSameValue) {
-        await this.props.clear(name);
-      } else {
-        await this.props.save(name, valueToSave);
-      }
-
-      this.showPageReloadToast();
-
-      if (changeImage) {
-        this.cancelChangeImage();
-      }
-    } catch (e) {
-      this.props.toasts.addDanger(
-        i18n.translate('advancedSettings.field.saveFieldErrorMessage', {
-          defaultMessage: 'Unable to save {name}',
-          values: { name },
-        })
-      );
-    }
-    this.setLoading(false);
-  };
-
-  resetField = async () => {
-    const { name } = this.props.setting;
-    this.setLoading(true);
-    try {
-      await this.props.clear(name);
-      this.showPageReloadToast();
-      this.cancelChangeImage();
-      this.clearError();
-    } catch (e) {
-      this.props.toasts.addDanger(
-        i18n.translate('advancedSettings.field.resetFieldErrorMessage', {
-          defaultMessage: 'Unable to reset {name}',
-          values: { name },
-        })
-      );
-    }
-    this.setLoading(false);
-  };
-
-  renderField(setting: FieldSetting) {
-    const { enableSaving } = this.props;
-    const { loading, changeImage, unsavedValue } = this.state;
-    const { name, value, type, options, optionLabels = {}, isOverridden, ariaName } = setting;
+  renderField(id: string, setting: FieldSetting) {
+    const { enableSaving, unsavedChanges, loading } = this.props;
+    const {
+      name,
+      value,
+      type,
+      options,
+      optionLabels = {},
+      isOverridden,
+      defVal,
+      ariaName,
+    } = setting;
+    const a11yProps: { [key: string]: string } = unsavedChanges
+      ? {
+          'aria-label': ariaName,
+          'aria-describedby': id,
+        }
+      : {
+          'aria-label': ariaName,
+        };
+    const currentValue = unsavedChanges
+      ? unsavedChanges.value
+      : getEditableValue(type, value, defVal);
 
     switch (type) {
       case 'boolean':
         return (
           <EuiSwitch
             label={
-              !!unsavedValue ? (
+              !!currentValue ? (
                 <FormattedMessage id="advancedSettings.field.onLabel" defaultMessage="On" />
               ) : (
                 <FormattedMessage id="advancedSettings.field.offLabel" defaultMessage="Off" />
               )
             }
-            checked={!!unsavedValue}
+            checked={!!currentValue}
             onChange={this.onFieldChangeSwitch}
             disabled={loading || isOverridden || !enableSaving}
-            onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
-            aria-label={ariaName}
+            {...a11yProps}
           />
         );
       case 'markdown':
@@ -459,10 +336,10 @@ export class Field extends PureComponent<FieldProps, FieldState> {
         return (
           <div data-test-subj={`advancedSetting-editField-${name}`}>
             <EuiCodeEditor
-              aria-label={ariaName}
+              {...a11yProps}
               mode={type}
               theme="textmate"
-              value={unsavedValue}
+              value={currentValue}
               onChange={this.onCodeEditorChange}
               width="100%"
               height="auto"
@@ -481,20 +358,17 @@ export class Field extends PureComponent<FieldProps, FieldState> {
           </div>
         );
       case 'image':
+        const changeImage = unsavedChanges?.changeImage;
         if (!isDefaultValue(setting) && !changeImage) {
-          return (
-            <EuiImage aria-label={ariaName} allowFullScreen url={value as string} alt={name} />
-          );
+          return <EuiImage {...a11yProps} allowFullScreen url={value as string} alt={name} />;
         } else {
           return (
             <EuiFilePicker
               disabled={loading || isOverridden || !enableSaving}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
-              ref={(input: HTMLInputElement) => {
-                this.changeImageForm = input;
-              }}
-              onKeyDown={this.onFieldEscape}
+              ref={this.changeImageForm}
+              fullWidth
               data-test-subj={`advancedSetting-editField-${name}`}
             />
           );
@@ -502,8 +376,8 @@ export class Field extends PureComponent<FieldProps, FieldState> {
       case 'select':
         return (
           <EuiSelect
-            aria-label={ariaName}
-            value={unsavedValue}
+            {...a11yProps}
+            value={currentValue}
             options={(options as string[]).map(option => {
               return {
                 text: optionLabels.hasOwnProperty(option) ? optionLabels[option] : option,
@@ -513,31 +387,31 @@ export class Field extends PureComponent<FieldProps, FieldState> {
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
             disabled={loading || isOverridden || !enableSaving}
-            onKeyDown={this.onFieldKeyDown}
+            fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
       case 'number':
         return (
           <EuiFieldNumber
-            aria-label={ariaName}
-            value={unsavedValue}
+            {...a11yProps}
+            value={currentValue}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
             disabled={loading || isOverridden || !enableSaving}
-            onKeyDown={this.onFieldKeyDown}
+            fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
       default:
         return (
           <EuiFieldText
-            aria-label={ariaName}
-            value={unsavedValue}
+            {...a11yProps}
+            value={currentValue}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
             disabled={loading || isOverridden || !enableSaving}
-            onKeyDown={this.onFieldKeyDown}
+            fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
@@ -577,9 +451,24 @@ export class Field extends PureComponent<FieldProps, FieldState> {
   }
 
   renderTitle(setting: FieldSetting) {
+    const { unsavedChanges } = this.props;
+    const isInvalid = unsavedChanges?.isInvalid;
+
+    const unsavedIconLabel = unsavedChanges
+      ? isInvalid
+        ? i18n.translate('advancedSettings.field.invalidIconLabel', {
+            defaultMessage: 'Invalid',
+          })
+        : i18n.translate('advancedSettings.field.unsavedIconLabel', {
+            defaultMessage: 'Unsaved',
+          })
+      : undefined;
+
     return (
       <h3>
-        {setting.displayName || setting.name}
+        <span className="mgtAdvancedSettings__fieldTitle">
+          {setting.displayName || setting.name}
+        </span>
         {setting.isCustom ? (
           <EuiIconTip
             type="asterisk"
@@ -593,6 +482,18 @@ export class Field extends PureComponent<FieldProps, FieldState> {
                 defaultMessage="Custom setting"
               />
             }
+          />
+        ) : (
+          ''
+        )}
+
+        {unsavedChanges ? (
+          <EuiIconTip
+            anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+            type={isInvalid ? 'alert' : 'dot'}
+            color={isInvalid ? 'danger' : 'warning'}
+            aria-label={unsavedIconLabel}
+            content={unsavedIconLabel}
           />
         ) : (
           ''
@@ -700,8 +601,12 @@ export class Field extends PureComponent<FieldProps, FieldState> {
   }
 
   renderResetToDefaultLink(setting: FieldSetting) {
-    const { ariaName, name } = setting;
-    if (isDefaultValue(setting)) {
+    const { defVal, ariaName, name } = setting;
+    if (
+      defVal === this.props.unsavedChanges?.value ||
+      isDefaultValue(setting) ||
+      this.props.loading
+    ) {
       return;
     }
     return (
@@ -727,7 +632,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
   }
 
   renderChangeImageLink(setting: FieldSetting) {
-    const { changeImage } = this.state;
+    const changeImage = this.props.unsavedChanges?.changeImage;
     const { type, value, ariaName, name } = setting;
     if (type !== 'image' || !value || changeImage) {
       return;
@@ -753,84 +658,49 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     );
   }
 
-  renderActions(setting: FieldSetting) {
-    const { ariaName, name } = setting;
-    const { loading, isInvalid, changeImage, savedValue, unsavedValue } = this.state;
-    const isDisabled = loading || setting.isOverridden;
-
-    if (savedValue === unsavedValue && !changeImage) {
-      return;
-    }
-
-    return (
-      <EuiFormRow className="mgtAdvancedSettings__fieldActions" hasEmptyLabelSpace>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              aria-label={i18n.translate('advancedSettings.field.saveButtonAriaLabel', {
-                defaultMessage: 'Save {ariaName}',
-                values: {
-                  ariaName,
-                },
-              })}
-              onClick={this.saveEdit}
-              disabled={isDisabled || isInvalid}
-              data-test-subj={`advancedSetting-saveEditField-${name}`}
-            >
-              <FormattedMessage id="advancedSettings.field.saveButtonLabel" defaultMessage="Save" />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              aria-label={i18n.translate('advancedSettings.field.cancelEditingButtonAriaLabel', {
-                defaultMessage: 'Cancel editing {ariaName}',
-                values: {
-                  ariaName,
-                },
-              })}
-              onClick={() => (changeImage ? this.cancelChangeImage() : this.cancelEdit())}
-              disabled={isDisabled}
-              data-test-subj={`advancedSetting-cancelEditField-${name}`}
-            >
-              <FormattedMessage
-                id="advancedSettings.field.cancelEditingButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-    );
-  }
-
   render() {
-    const { setting } = this.props;
-    const { error, isInvalid } = this.state;
+    const { setting, unsavedChanges } = this.props;
+    const error = unsavedChanges?.error;
+    const isInvalid = unsavedChanges?.isInvalid;
+
+    const className = classNames('mgtAdvancedSettings__field', {
+      'mgtAdvancedSettings__field--unsaved': unsavedChanges,
+      'mgtAdvancedSettings__field--invalid': isInvalid,
+    });
+    const id = setting.name;
 
     return (
-      <EuiFlexGroup className="mgtAdvancedSettings__field">
-        <EuiFlexItem grow={false}>
-          <EuiDescribedFormGroup
-            className="mgtAdvancedSettings__fieldWrapper"
-            title={this.renderTitle(setting)}
-            description={this.renderDescription(setting)}
-          >
-            <EuiFormRow
-              isInvalid={isInvalid}
-              error={error}
-              label={this.renderLabel(setting)}
-              helpText={this.renderHelpText(setting)}
-              describedByIds={[`${setting.name}-aria`]}
-              className="mgtAdvancedSettings__fieldRow"
-              hasChildLabel={setting.type !== 'boolean'}
-            >
-              {this.renderField(setting)}
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{this.renderActions(setting)}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiDescribedFormGroup
+        className={className}
+        title={this.renderTitle(setting)}
+        description={this.renderDescription(setting)}
+        fullWidth
+      >
+        <EuiFormRow
+          isInvalid={isInvalid}
+          error={error}
+          label={this.renderLabel(setting)}
+          helpText={this.renderHelpText(setting)}
+          className="mgtAdvancedSettings__fieldRow"
+          hasChildLabel={setting.type !== 'boolean'}
+          fullWidth
+        >
+          <>
+            {this.renderField(id, setting)}
+            {unsavedChanges && (
+              <EuiScreenReaderOnly>
+                <p id={id}>
+                  {unsavedChanges.error
+                    ? unsavedChanges.error
+                    : i18n.translate('advancedSettings.field.settingIsUnsaved', {
+                        defaultMessage: 'Setting is currently not saved.',
+                      })}
+                </p>
+              </EuiScreenReaderOnly>
+            )}
+          </>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
     );
   }
 }

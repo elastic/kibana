@@ -263,7 +263,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql([
-          { rule_id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
+          { id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
         ]);
       });
 
@@ -347,7 +347,7 @@ export default ({ getService }: FtrProviderContext) => {
               message: 'id: "fake_id" not found',
               status_code: 404,
             },
-            rule_id: 'fake_id', // TODO: This should be id and not rule_id in the codebase
+            id: 'fake_id',
           },
         ]);
       });

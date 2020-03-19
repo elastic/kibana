@@ -70,8 +70,8 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
   });
 
   describe(`then running`, () => {
-    it(`'yarn test:browser' should exit 0`, async () => {
-      await execa('yarn', ['test:browser'], {
+    it(`'yarn test:karma' should exit 0`, async () => {
+      await execa('yarn', ['test:karma'], {
         cwd: generatedPath,
         env: {
           DISABLE_JUNIT_REPORTER: '1',
@@ -102,6 +102,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
             'start',
             '--optimize.enabled=false',
             '--logging.json=false',
+            '--logging.verbose=true',
             '--migrations.skip=true',
           ],
           cwd: generatedPath,

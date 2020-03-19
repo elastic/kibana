@@ -43,8 +43,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   private managementService?: ManagementService;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
-    this.spacesManager = new SpacesManager(serverBasePath, core.http);
+    this.spacesManager = new SpacesManager(core.http);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());

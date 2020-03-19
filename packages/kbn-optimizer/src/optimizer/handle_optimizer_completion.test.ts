@@ -22,7 +22,7 @@ import { REPO_ROOT } from '@kbn/dev-utils';
 
 import { Update } from '../common';
 
-import { OptimizerState } from './optimizer_reducer';
+import { OptimizerState } from './optimizer_state';
 import { OptimizerConfig } from './optimizer_config';
 import { handleOptimizerCompletion } from './handle_optimizer_completion';
 import { toArray } from 'rxjs/operators';

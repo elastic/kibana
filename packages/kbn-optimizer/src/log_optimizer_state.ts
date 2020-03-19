@@ -77,10 +77,6 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             loggedInit = true;
             log.info(`initialized, ${state.offlineBundles.length} bundles cached`);
           }
-
-          if (state.onlineBundles.length === 0) {
-            log.success(`all bundles cached, success after ${state.durSec}`);
-          }
           return;
         }
 
@@ -123,10 +119,16 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         if (state.phase === 'success') {
           const buildCount = bundlesThatWereBuilt.size;
           bundlesThatWereBuilt.clear();
-          log.success(
-            `${buildCount} bundles compiled successfully after ${state.durSec} sec` +
-              (config.watch ? ', watching for changes' : '')
-          );
+
+          if (state.offlineBundles.length && buildCount === 0) {
+            log.success(`all bundles cached, success after ${state.durSec} sec`);
+          } else {
+            log.success(
+              `${buildCount} bundles compiled successfully after ${state.durSec} sec` +
+                (config.watch ? ', watching for changes' : '')
+            );
+          }
+
           return true;
         }
 

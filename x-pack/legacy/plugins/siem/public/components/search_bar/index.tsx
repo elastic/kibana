@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, isEqual, set } from 'lodash/fp';
+import { getOr, set } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import { FilterManager, IIndexPattern, TimeRange, Query, Filter } from 'src/plugins/data/public';
-import { SavedQuery } from 'src/legacy/core_plugins/data/public';
+import deepEqual from 'fast-deep-equal';
+import {
+  FilterManager,
+  IIndexPattern,
+  TimeRange,
+  Query,
+  Filter,
+  SavedQuery,
+} from 'src/plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 
@@ -60,7 +67,6 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     setSavedQuery,
     setSearchBarFilter,
     start,
-    timelineId,
     toStr,
     updateSearch,
     dataTestSubj,
@@ -108,7 +114,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           updateSearchBar.start = payload.dateRange.from;
         }
 
-        if (payload.query != null && !isEqual(payload.query, filterQuery)) {
+        if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
           isStateUpdated = true;
           updateSearchBar = set('query', payload.query, updateSearchBar);
         }

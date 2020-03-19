@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import { has } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { hostsActions } from '../../../../store/hosts';
@@ -100,10 +100,12 @@ const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
       [type, updateTableActivePage]
     );
 
+    const columns = useMemo(() => getAuthenticationColumnsCurated(type), [type]);
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getAuthenticationColumnsCurated(type)}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={i18n.AUTHENTICATIONS}

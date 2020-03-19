@@ -17,12 +17,26 @@
  * under the License.
  */
 
-import { VisType } from './types';
-import { IAggConfigs } from '../../legacy_imports';
+import { VisType } from './vis_types';
 import { Status } from './legacy/update_status';
+import { IAggConfigs } from '../../../../../../plugins/data/public';
 
 export interface Vis {
   type: VisType;
+  getCurrentState: (
+    includeDisabled?: boolean
+  ) => {
+    title: string;
+    type: string;
+    params: VisParams;
+    aggs: Array<{ [key: string]: any }>;
+  };
+
+  /**
+   * If a visualization based on the saved search,
+   * the id is necessary for building an expression function in src/plugins/expressions/common/expression_functions/specs/kibana_context.ts
+   */
+  savedSearchId?: string;
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition

@@ -110,7 +110,7 @@ const clusterColumns = [
 ];
 
 function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
-  const base = `${chrome.getBasePath()}/app/infra#/link-to/${INFRA_SOURCE_ID}/logs`;
+  const base = `${chrome.getBasePath()}/app/logs/link-to/${INFRA_SOURCE_ID}/logs`;
 
   const params = [];
   if (clusterUuid) {

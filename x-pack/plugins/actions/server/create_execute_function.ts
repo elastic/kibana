@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import { GetBasePathFunction } from './types';
+import { GetBasePathFunction, RawAction } from './types';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
@@ -59,7 +59,7 @@ export function createExecuteFunction({
     };
 
     const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-    const actionSavedObject = await savedObjectsClient.get('action', id);
+    const actionSavedObject = await savedObjectsClient.get<RawAction>('action', id);
     const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
       actionId: id,
       params,

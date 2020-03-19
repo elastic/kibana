@@ -102,151 +102,16 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
     value=""
   />
   <LabelOptions
-    axesName="valueAxes"
-    axis={
+    axisFilterCheckboxName="yAxisFilterLabelsCheckboxValueAxis-1"
+    axisLabels={
       Object {
-        "id": "ValueAxis-1",
-        "labels": Object {
-          "color": "black",
-          "filter": true,
-          "show": true,
-          "truncate": 0,
-        },
-        "name": "ValueAxis-1",
-        "position": "left",
-        "scale": Object {
-          "boundsMargin": 1,
-          "defaultYExtents": true,
-          "max": 2,
-          "min": 1,
-          "setYExtents": true,
-          "type": "linear",
-        },
+        "color": "black",
+        "filter": true,
         "show": true,
-        "style": Object {},
-        "title": Object {
-          "text": "",
-        },
-        "type": "value",
+        "truncate": 0,
       }
     }
-    index={0}
-    isCategoryAxisHorizontal={false}
-    onValueAxisPositionChanged={[MockFunction]}
-    setMultipleValidity={[MockFunction]}
-    setParamByIndex={[MockFunction]}
-    stateParams={
-      Object {
-        "categoryAxes": Array [
-          Object {
-            "id": "CategoryAxis-1",
-            "labels": Object {
-              "color": "black",
-              "filter": true,
-              "show": true,
-              "truncate": 0,
-            },
-            "position": "bottom",
-            "scale": Object {
-              "type": "linear",
-            },
-            "show": true,
-            "style": Object {},
-            "title": Object {
-              "text": "",
-            },
-            "type": "category",
-          },
-        ],
-        "valueAxes": Array [
-          Object {
-            "id": "ValueAxis-1",
-            "labels": Object {
-              "color": "black",
-              "filter": true,
-              "show": true,
-              "truncate": 0,
-            },
-            "name": "ValueAxis-1",
-            "position": "left",
-            "scale": Object {
-              "boundsMargin": 1,
-              "defaultYExtents": true,
-              "max": 2,
-              "min": 1,
-              "setYExtents": true,
-              "type": "linear",
-            },
-            "show": true,
-            "style": Object {},
-            "title": Object {
-              "text": "",
-            },
-            "type": "value",
-          },
-        ],
-      }
-    }
-    vis={
-      Object {
-        "type": Object {
-          "editorConfig": Object {
-            "collections": Object {
-              "axisModes": Array [
-                Object {
-                  "text": "Normal",
-                  "value": "normal",
-                },
-                Object {
-                  "text": "Percentage",
-                  "value": "percentage",
-                },
-                Object {
-                  "text": "Wiggle",
-                  "value": "wiggle",
-                },
-                Object {
-                  "text": "Silhouette",
-                  "value": "silhouette",
-                },
-              ],
-              "positions": Array [
-                Object {
-                  "text": "Top",
-                  "value": "top",
-                },
-                Object {
-                  "text": "Left",
-                  "value": "left",
-                },
-                Object {
-                  "text": "Right",
-                  "value": "right",
-                },
-                Object {
-                  "text": "Bottom",
-                  "value": "bottom",
-                },
-              ],
-              "scaleTypes": Array [
-                Object {
-                  "text": "Linear",
-                  "value": "linear",
-                },
-                Object {
-                  "text": "Log",
-                  "value": "log",
-                },
-                Object {
-                  "text": "Square root",
-                  "value": "square root",
-                },
-              ],
-            },
-          },
-        },
-      }
-    }
+    setAxisLabel={[Function]}
   />
   <EuiHorizontalRule
     margin="s"
@@ -264,152 +129,19 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
       size="m"
     />
     <CustomExtentsOptions
-      axis={
+      axisScale={
         Object {
-          "id": "ValueAxis-1",
-          "labels": Object {
-            "color": "black",
-            "filter": true,
-            "show": true,
-            "truncate": 0,
-          },
-          "name": "ValueAxis-1",
-          "position": "left",
-          "scale": Object {
-            "boundsMargin": 1,
-            "defaultYExtents": true,
-            "max": 2,
-            "min": 1,
-            "setYExtents": true,
-            "type": "linear",
-          },
-          "show": true,
-          "style": Object {},
-          "title": Object {
-            "text": "",
-          },
-          "type": "value",
+          "boundsMargin": 1,
+          "defaultYExtents": true,
+          "max": 2,
+          "min": 1,
+          "setYExtents": true,
+          "type": "linear",
         }
       }
-      index={0}
-      isCategoryAxisHorizontal={false}
-      onValueAxisPositionChanged={[MockFunction]}
       setMultipleValidity={[MockFunction]}
-      setParamByIndex={[MockFunction]}
       setValueAxis={[Function]}
       setValueAxisScale={[Function]}
-      stateParams={
-        Object {
-          "categoryAxes": Array [
-            Object {
-              "id": "CategoryAxis-1",
-              "labels": Object {
-                "color": "black",
-                "filter": true,
-                "show": true,
-                "truncate": 0,
-              },
-              "position": "bottom",
-              "scale": Object {
-                "type": "linear",
-              },
-              "show": true,
-              "style": Object {},
-              "title": Object {
-                "text": "",
-              },
-              "type": "category",
-            },
-          ],
-          "valueAxes": Array [
-            Object {
-              "id": "ValueAxis-1",
-              "labels": Object {
-                "color": "black",
-                "filter": true,
-                "show": true,
-                "truncate": 0,
-              },
-              "name": "ValueAxis-1",
-              "position": "left",
-              "scale": Object {
-                "boundsMargin": 1,
-                "defaultYExtents": true,
-                "max": 2,
-                "min": 1,
-                "setYExtents": true,
-                "type": "linear",
-              },
-              "show": true,
-              "style": Object {},
-              "title": Object {
-                "text": "",
-              },
-              "type": "value",
-            },
-          ],
-        }
-      }
-      vis={
-        Object {
-          "type": Object {
-            "editorConfig": Object {
-              "collections": Object {
-                "axisModes": Array [
-                  Object {
-                    "text": "Normal",
-                    "value": "normal",
-                  },
-                  Object {
-                    "text": "Percentage",
-                    "value": "percentage",
-                  },
-                  Object {
-                    "text": "Wiggle",
-                    "value": "wiggle",
-                  },
-                  Object {
-                    "text": "Silhouette",
-                    "value": "silhouette",
-                  },
-                ],
-                "positions": Array [
-                  Object {
-                    "text": "Top",
-                    "value": "top",
-                  },
-                  Object {
-                    "text": "Left",
-                    "value": "left",
-                  },
-                  Object {
-                    "text": "Right",
-                    "value": "right",
-                  },
-                  Object {
-                    "text": "Bottom",
-                    "value": "bottom",
-                  },
-                ],
-                "scaleTypes": Array [
-                  Object {
-                    "text": "Linear",
-                    "value": "linear",
-                  },
-                  Object {
-                    "text": "Log",
-                    "value": "log",
-                  },
-                  Object {
-                    "text": "Square root",
-                    "value": "square root",
-                  },
-                ],
-              },
-            },
-          },
-        }
-      }
     />
   </EuiAccordion>
 </Fragment>

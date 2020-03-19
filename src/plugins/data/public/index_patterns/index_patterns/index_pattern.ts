@@ -64,7 +64,7 @@ export class IndexPattern implements IIndexPattern {
   private getConfig: any;
   private sourceFilters?: [];
   private originalBody: { [key: string]: any } = {};
-  private fieldsFetcher: any;
+  public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
 
   private mapping: MappingObject = expandShorthand({

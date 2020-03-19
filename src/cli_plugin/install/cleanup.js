@@ -27,7 +27,7 @@ export function cleanPrevious(settings, logger) {
 
       logger.log('Found previous install attempt. Deleting...');
       try {
-        del.sync(settings.workingPath);
+        del.sync(settings.workingPath, { force: true });
       } catch (e) {
         reject(e);
       }

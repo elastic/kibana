@@ -16,7 +16,7 @@ import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { MetricsChart } from '../../shared/charts/MetricsChart';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { PROJECTION } from '../../../../../../../plugins/apm/common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
 interface ServiceMetricsProps {

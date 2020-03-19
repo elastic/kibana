@@ -6,20 +6,25 @@
 
 import React, { useCallback, useState } from 'react';
 import { isEqual } from 'lodash/fp';
-import { EuiFieldSearch, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import * as i18n from './translations';
 
 import { FilterOptions } from '../../../../containers/case/types';
 import { useGetTags } from '../../../../containers/case/use_get_tags';
-import { TagsFilterPopover } from '../../../../pages/detection_engine/rules/all/rules_table_filters/tags_filter_popover';
+import { useGetReporters } from '../../../../containers/case/use_get_reporters';
+import { FilterPopover } from '../../../../components/filter_popover';
 
-interface Initial {
-  search: string;
-  tags: string[];
-}
 interface CasesTableFiltersProps {
+  countClosedCases: number | null;
+  countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
-  initial: Initial;
+  initial: FilterOptions;
 }
 
 /**
@@ -29,34 +34,64 @@ interface CasesTableFiltersProps {
  * @param onFilterChanged change listener to be notified on filter changes
  */
 
+const defaultInitial = { search: '', reporters: [], status: 'open', tags: [] };
+
 const CasesTableFiltersComponent = ({
+  countClosedCases,
+  countOpenCases,
   onFilterChanged,
-  initial = { search: '', tags: [] },
+  initial = defaultInitial,
 }: CasesTableFiltersProps) => {
+  const [selectedReporters, setselectedReporters] = useState(
+    initial.reporters.map(r => r.full_name ?? r.username)
+  );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const [{ isLoading, data }] = useGetTags();
+  const [showOpenCases, setShowOpenCases] = useState(initial.status === 'open');
+  const { tags } = useGetTags();
+  const { reporters, respReporters } = useGetReporters();
+
+  const handleSelectedReporters = useCallback(
+    newReporters => {
+      if (!isEqual(newReporters, selectedReporters)) {
+        setselectedReporters(newReporters);
+        const reportersObj = respReporters.filter(
+          r => newReporters.includes(r.username) || newReporters.includes(r.full_name)
+        );
+        onFilterChanged({ reporters: reportersObj });
+      }
+    },
+    [selectedReporters, respReporters]
+  );
 
   const handleSelectedTags = useCallback(
     newTags => {
       if (!isEqual(newTags, selectedTags)) {
         setSelectedTags(newTags);
-        onFilterChanged({ search, tags: newTags });
+        onFilterChanged({ tags: newTags });
       }
     },
-    [search, selectedTags]
+    [selectedTags]
   );
   const handleOnSearch = useCallback(
     newSearch => {
       const trimSearch = newSearch.trim();
       if (!isEqual(trimSearch, search)) {
         setSearch(trimSearch);
-        onFilterChanged({ tags: selectedTags, search: trimSearch });
+        onFilterChanged({ search: trimSearch });
       }
     },
-    [search, selectedTags]
+    [search]
   );
-
+  const handleToggleFilter = useCallback(
+    showOpen => {
+      if (showOpen !== showOpenCases) {
+        setShowOpenCases(showOpen);
+        onFilterChanged({ status: showOpen ? 'open' : 'closed' });
+      }
+    },
+    [showOpenCases]
+  );
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
       <EuiFlexItem grow={true}>
@@ -71,11 +106,34 @@ const CasesTableFiltersComponent = ({
 
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <TagsFilterPopover
-            isLoading={isLoading}
-            onSelectedTagsChanged={handleSelectedTags}
-            selectedTags={selectedTags}
-            tags={data}
+          <EuiFilterButton
+            withNext
+            hasActiveFilters={showOpenCases}
+            onClick={handleToggleFilter.bind(null, true)}
+          >
+            {i18n.OPEN_CASES}
+            {countOpenCases != null ? ` (${countOpenCases})` : ''}
+          </EuiFilterButton>
+          <EuiFilterButton
+            hasActiveFilters={!showOpenCases}
+            onClick={handleToggleFilter.bind(null, false)}
+          >
+            {i18n.CLOSED_CASES}
+            {countClosedCases != null ? ` (${countClosedCases})` : ''}
+          </EuiFilterButton>
+          <FilterPopover
+            buttonLabel={i18n.REPORTER}
+            onSelectedOptionsChanged={handleSelectedReporters}
+            selectedOptions={selectedReporters}
+            options={reporters}
+            optionsEmptyLabel={i18n.NO_REPORTERS_AVAILABLE}
+          />
+          <FilterPopover
+            buttonLabel={i18n.TAGS}
+            onSelectedOptionsChanged={handleSelectedTags}
+            selectedOptions={selectedTags}
+            options={tags}
+            optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
           />
         </EuiFilterGroup>
       </EuiFlexItem>

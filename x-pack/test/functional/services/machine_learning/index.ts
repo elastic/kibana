@@ -13,6 +13,7 @@ export { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytic
 export { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
 export { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 export { MachineLearningDataVisualizerProvider } from './data_visualizer';
+export { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
 export { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';
 export { MachineLearningJobManagementProvider } from './job_management';
 export { MachineLearningJobSelectionProvider } from './job_selection';
@@ -25,5 +26,7 @@ export { MachineLearningJobWizardCategorizationProvider } from './job_wizard_cat
 export { MachineLearningJobWizardMultiMetricProvider } from './job_wizard_multi_metric';
 export { MachineLearningJobWizardPopulationProvider } from './job_wizard_population';
 export { MachineLearningNavigationProvider } from './navigation';
+export { MachineLearningSecurityCommonProvider } from './security_common';
+export { MachineLearningSecurityUIProvider } from './security_ui';
 export { MachineLearningSettingsProvider } from './settings';
 export { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';

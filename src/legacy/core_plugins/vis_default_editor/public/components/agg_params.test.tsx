@@ -105,6 +105,7 @@ describe('DefaultEditorAggParams component', () => {
       onAggTypeChange,
       setTouched,
       setValidity,
+      schemas: [],
     };
   });
 

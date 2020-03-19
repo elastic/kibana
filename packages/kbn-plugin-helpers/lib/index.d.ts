@@ -21,6 +21,6 @@ export function babelRegister(): void;
 export function resolveKibanaPath(path: string): string;
 export function readFtrConfigFile(path: string): any;
 export function run(
-  task: 'build' | 'start' | 'testAll' | 'testBrowser' | 'testServer' | 'postinstall',
+  task: 'build' | 'start' | 'testAll' | 'testKarma' | 'testMocha' | 'postinstall',
   options: any
 ): Promise<void>;

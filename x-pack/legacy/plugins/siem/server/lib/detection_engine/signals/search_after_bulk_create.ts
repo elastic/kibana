@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { RuleTypeParams } from '../types';
-import { AlertServices } from '../../../../../alerting/server/types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -17,6 +17,7 @@ interface SearchAfterAndBulkCreateParams {
   services: AlertServices;
   logger: Logger;
   id: string;
+  inputIndexPattern: string[];
   signalsIndex: string;
   name: string;
   createdAt: string;
@@ -37,6 +38,7 @@ export const searchAfterAndBulkCreate = async ({
   services,
   logger,
   id,
+  inputIndexPattern,
   signalsIndex,
   filter,
   name,
@@ -77,7 +79,7 @@ export const searchAfterAndBulkCreate = async ({
   // If the total number of hits for the overall search result is greater than
   // maxSignals, default to requesting a total of maxSignals, otherwise use the
   // totalHits in the response from the searchAfter query.
-  const maxTotalHitsSize = totalHits >= ruleParams.maxSignals ? ruleParams.maxSignals : totalHits;
+  const maxTotalHitsSize = Math.min(totalHits, ruleParams.maxSignals);
 
   // number of docs in the current search result
   let hitsSize = someResult.hits.hits.length;
@@ -98,7 +100,9 @@ export const searchAfterAndBulkCreate = async ({
       logger.debug(`sortIds: ${sortIds}`);
       const searchAfterResult: SignalSearchResponse = await singleSearchAfter({
         searchAfterSortId: sortId,
-        ruleParams,
+        index: inputIndexPattern,
+        from: ruleParams.from,
+        to: ruleParams.to,
         services,
         logger,
         filter,

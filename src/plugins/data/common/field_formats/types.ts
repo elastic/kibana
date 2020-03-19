@@ -18,6 +18,7 @@
  */
 
 import { FieldFormat } from './field_format';
+export { FieldFormat };
 
 /** @public **/
 export type FieldFormatsContentType = 'html' | 'text';
@@ -86,6 +87,7 @@ export type IFieldFormatType = (new (
   getConfig?: FieldFormatsGetConfigFn
 ) => FieldFormat) & {
   id: FieldFormatId;
+  title: string;
   fieldType: string | string[];
 };
 

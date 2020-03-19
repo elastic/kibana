@@ -22,8 +22,41 @@ import { ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
 
-export type ExpressionsServiceSetup = ReturnType<ExpressionsService['setup']>;
-export type ExpressionsServiceStart = ReturnType<ExpressionsService['start']>;
+/**
+ * The public contract that `ExpressionsService` provides to other plugins
+ * in Kibana Platform in *setup* life-cycle.
+ */
+export type ExpressionsServiceSetup = Pick<
+  ExpressionsService,
+  | 'getFunction'
+  | 'getFunctions'
+  | 'getRenderer'
+  | 'getRenderers'
+  | 'getType'
+  | 'getTypes'
+  | 'registerFunction'
+  | 'registerRenderer'
+  | 'registerType'
+  | 'run'
+  | 'fork'
+>;
+
+/**
+ * The public contract that `ExpressionsService` provides to other plugins
+ * in Kibana Platform in *start* life-cycle.
+ */
+export type ExpressionsServiceStart = Pick<
+  ExpressionsService,
+  | 'getFunction'
+  | 'getFunctions'
+  | 'getRenderer'
+  | 'getRenderers'
+  | 'getType'
+  | 'getTypes'
+  | 'run'
+  | 'execute'
+  | 'fork'
+>;
 
 export interface ExpressionServiceParams {
   executor?: Executor;
@@ -97,6 +130,14 @@ export class ExpressionsService {
     ...args: Parameters<Executor['registerFunction']>
   ): ReturnType<Executor['registerFunction']> => this.executor.registerFunction(...args);
 
+  public readonly registerType = (
+    ...args: Parameters<Executor['registerType']>
+  ): ReturnType<Executor['registerType']> => this.executor.registerType(...args);
+
+  public readonly registerRenderer = (
+    ...args: Parameters<ExpressionRendererRegistry['register']>
+  ): ReturnType<ExpressionRendererRegistry['register']> => this.renderers.register(...args);
+
   /**
    * Executes expression string or a parsed expression AST and immediately
    * returns the result.
@@ -132,21 +173,51 @@ export class ExpressionsService {
   ): Promise<Output> => this.executor.run<Input, Output, ExtraContext>(ast, input, context);
 
   /**
-   * Create a new instance of `ExpressionsService`. The new instance inherits
-   * all state of the original `ExpressionsService`, including all expression
-   * types, expression functions and context. Also, all new types and functions
-   * registered in the original services AFTER the forking event will be
-   * available in the forked instance. However, all new types and functions
-   * registered in the forked instances will NOT be available to the original
-   * service.
+   * Get a registered `ExpressionFunction` by its name, which was registered
+   * using the `registerFunction` method. The returned `ExpressionFunction`
+   * instance is an internal representation of the function in Expressions
+   * service - do not mutate that object.
    */
-  public readonly fork = (): ExpressionsService => {
-    const executor = this.executor.fork();
-    const renderers = this.renderers;
-    const fork = new ExpressionsService({ executor, renderers });
+  public readonly getFunction = (name: string): ReturnType<Executor['getFunction']> =>
+    this.executor.getFunction(name);
 
-    return fork;
-  };
+  /**
+   * Returns POJO map of all registered expression functions, where keys are
+   * names of the functions and values are `ExpressionFunction` instances.
+   */
+  public readonly getFunctions = (): ReturnType<Executor['getFunctions']> =>
+    this.executor.getFunctions();
+
+  /**
+   * Get a registered `ExpressionRenderer` by its name, which was registered
+   * using the `registerRenderer` method. The returned `ExpressionRenderer`
+   * instance is an internal representation of the renderer in Expressions
+   * service - do not mutate that object.
+   */
+  public readonly getRenderer = (name: string): ReturnType<ExpressionRendererRegistry['get']> =>
+    this.renderers.get(name);
+
+  /**
+   * Returns POJO map of all registered expression renderers, where keys are
+   * names of the renderers and values are `ExpressionRenderer` instances.
+   */
+  public readonly getRenderers = (): ReturnType<ExpressionRendererRegistry['toJS']> =>
+    this.renderers.toJS();
+
+  /**
+   * Get a registered `ExpressionType` by its name, which was registered
+   * using the `registerType` method. The returned `ExpressionType`
+   * instance is an internal representation of the type in Expressions
+   * service - do not mutate that object.
+   */
+  public readonly getType = (name: string): ReturnType<Executor['getType']> =>
+    this.executor.getType(name);
+
+  /**
+   * Returns POJO map of all registered expression types, where keys are
+   * names of the types and values are `ExpressionType` instances.
+   */
+  public readonly getTypes = (): ReturnType<Executor['getTypes']> => this.executor.getTypes();
 
   /**
    * Starts expression execution and immediately returns `ExecutionContract`
@@ -168,53 +239,37 @@ export class ExpressionsService {
     return execution.contract;
   };
 
-  public setup() {
-    const { executor, renderers, registerFunction, run, fork } = this;
+  /**
+   * Create a new instance of `ExpressionsService`. The new instance inherits
+   * all state of the original `ExpressionsService`, including all expression
+   * types, expression functions and context. Also, all new types and functions
+   * registered in the original services AFTER the forking event will be
+   * available in the forked instance. However, all new types and functions
+   * registered in the forked instances will NOT be available to the original
+   * service.
+   */
+  public readonly fork = (): ExpressionsService => {
+    const executor = this.executor.fork();
+    const renderers = this.renderers;
+    const fork = new ExpressionsService({ executor, renderers });
 
-    const getFunction = executor.getFunction.bind(executor);
-    const getFunctions = executor.getFunctions.bind(executor);
-    const getRenderer = renderers.get.bind(renderers);
-    const getRenderers = renderers.toJS.bind(renderers);
-    const getType = executor.getType.bind(executor);
-    const getTypes = executor.getTypes.bind(executor);
-    const registerRenderer = renderers.register.bind(renderers);
-    const registerType = executor.registerType.bind(executor);
+    return fork;
+  };
 
-    return {
-      fork,
-      getFunction,
-      getFunctions,
-      getRenderer,
-      getRenderers,
-      getType,
-      getTypes,
-      registerFunction,
-      registerRenderer,
-      registerType,
-      run,
-    };
+  /**
+   * Returns Kibana Platform *setup* life-cycle contract. Useful to return the
+   * same contract on server-side and browser-side.
+   */
+  public setup(): ExpressionsServiceSetup {
+    return this;
   }
 
-  public start() {
-    const { execute, executor, renderers, run } = this;
-
-    const getFunction = executor.getFunction.bind(executor);
-    const getFunctions = executor.getFunctions.bind(executor);
-    const getRenderer = renderers.get.bind(renderers);
-    const getRenderers = renderers.toJS.bind(renderers);
-    const getType = executor.getType.bind(executor);
-    const getTypes = executor.getTypes.bind(executor);
-
-    return {
-      execute,
-      getFunction,
-      getFunctions,
-      getRenderer,
-      getRenderers,
-      getType,
-      getTypes,
-      run,
-    };
+  /**
+   * Returns Kibana Platform *start* life-cycle contract. Useful to return the
+   * same contract on server-side and browser-side.
+   */
+  public start(): ExpressionsServiceStart {
+    return this;
   }
 
   public stop() {}

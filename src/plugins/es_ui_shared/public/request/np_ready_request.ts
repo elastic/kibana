@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 
 import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
 
@@ -28,9 +28,9 @@ export interface SendRequestConfig {
   body?: any;
 }
 
-export interface SendRequestResponse {
-  data: any;
-  error: Error | null;
+export interface SendRequestResponse<D = any, E = Error> {
+  data: D | null;
+  error: E | null;
 }
 
 export interface UseRequestConfig extends SendRequestConfig {
@@ -39,20 +39,21 @@ export interface UseRequestConfig extends SendRequestConfig {
   deserializer?: (data: any) => any;
 }
 
-export interface UseRequestResponse {
+export interface UseRequestResponse<D = any, E = Error> {
   isInitialRequest: boolean;
   isLoading: boolean;
-  error: null | unknown;
-  data: any;
-  sendRequest: (...args: any[]) => Promise<SendRequestResponse>;
+  error: E | null;
+  data: D | null;
+  sendRequest: (...args: any[]) => Promise<SendRequestResponse<D, E>>;
 }
 
-export const sendRequest = async (
+export const sendRequest = async <D = any, E = Error>(
   httpClient: HttpSetup,
   { path, method, body, query }: SendRequestConfig
-): Promise<SendRequestResponse> => {
+): Promise<SendRequestResponse<D, E>> => {
   try {
-    const response = await httpClient[method](path, { body, query });
+    const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
+    const response = await httpClient[method](path, { body: stringifiedBody, query });
 
     return {
       data: response.data ? response.data : response,
@@ -66,7 +67,7 @@ export const sendRequest = async (
   }
 };
 
-export const useRequest = (
+export const useRequest = <D = any, E = Error>(
   httpClient: HttpSetup,
   {
     path,
@@ -77,7 +78,8 @@ export const useRequest = (
     initialData,
     deserializer = (data: any): any => data,
   }: UseRequestConfig
-): UseRequestResponse => {
+): UseRequestResponse<D, E> => {
+  const sendRequestRef = useRef<() => Promise<SendRequestResponse<D, E>>>();
   // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -102,7 +104,10 @@ export const useRequest = (
 
     // Set new interval
     if (pollInterval.current) {
-      pollIntervalId.current = setTimeout(_sendRequest, pollInterval.current);
+      pollIntervalId.current = setTimeout(
+        () => (sendRequestRef.current ?? _sendRequest)(),
+        pollInterval.current
+      );
     }
   };
 
@@ -118,7 +123,7 @@ export const useRequest = (
       body,
     };
 
-    const response = await sendRequest(httpClient, requestBody);
+    const response = await sendRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
 
     // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
@@ -145,11 +150,17 @@ export const useRequest = (
   };
 
   useEffect(() => {
-    _sendRequest();
-    // To be functionally correct we'd send a new request if the method, path, or body changes.
+    sendRequestRef.current = _sendRequest;
+  }, [_sendRequest]);
+
+  const stringifiedQuery = useMemo(() => JSON.stringify(query), [query]);
+
+  useEffect(() => {
+    (sendRequestRef.current ?? _sendRequest)();
+    // To be functionally correct we'd send a new request if the method, path, query or body changes.
     // But it doesn't seem likely that the method will change and body is likely to be a new
-    // object even if its shape hasn't changed, so for now we're just watching the path.
-  }, [path]);
+    // object even if its shape hasn't changed, so for now we're just watching the path and the query.
+  }, [path, stringifiedQuery]);
 
   useEffect(() => {
     scheduleRequest();
@@ -168,6 +179,6 @@ export const useRequest = (
     isLoading,
     error,
     data,
-    sendRequest: _sendRequest, // Gives the user the ability to manually request data
+    sendRequest: sendRequestRef.current ?? _sendRequest, // Gives the user the ability to manually request data
   };
 };
