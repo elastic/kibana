@@ -33,7 +33,7 @@ const MlCardDescription = ({ hasValidLicense = false }: { hasValidLicense: boole
           subscriptionsLink: (
             <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
               <FormattedMessage
-                id="xpack.siem.components.stepDefineRule.ruleTypeFIeld.subscriptionsLink"
+                id="xpack.siem.components.stepDefineRule.ruleTypeField.subscriptionsLink"
                 defaultMessage="Platinum subscription"
               />
             </EuiLink>
