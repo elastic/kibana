@@ -83,6 +83,10 @@ function getNavigationHandler(
   return hasNavigation(alertNavigation)
     ? {
         onClick: () => {
+          // eslint-disable-next-line no-console
+          console.log('NAVIGATE HAS BEEN CLICKED');
+          // eslint-disable-next-line no-console
+          console.log('NAVIGATING TO:', alert.consumer, alertNavigation);
           navigateToApp(alert.consumer, alertNavigation);
         },
       }

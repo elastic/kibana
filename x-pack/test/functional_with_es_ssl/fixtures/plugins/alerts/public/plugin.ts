@@ -20,7 +20,11 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
     alerting.registerNavigation(
       'consumer-noop',
       'test.noop',
-      (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
+      (alert: SanitizedAlert, alertType: AlertType) => {
+        // eslint-disable-next-line no-console
+        console.log('NAVIGATION HANDLER HAS BEEN CALLED');
+        return `/alert/${alert.id}`;
+      }
     );
 
     core.application.register({

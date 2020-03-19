@@ -107,10 +107,13 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
       return (await viewInAppButton.getAttribute('disabled')) !== 'disabled';
     },
     async clickViewInAppEnabled() {
-      const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
-      return viewInAppButton.click();
+      return await testSubjects.click('alertDetails-viewInApp');
     },
     async getNoOpAppTitle() {
+      await retry.try(async () => {
+        const title = await testSubjects.find('noop-title');
+        expect(title.isDisplayed()).to.eql(true);
+      });
       return await testSubjects.getVisibleText('noop-title');
     },
   };
