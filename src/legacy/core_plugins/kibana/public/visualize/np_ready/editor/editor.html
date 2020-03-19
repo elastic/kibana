@@ -1,28 +1,4 @@
 <visualize-app class="app-container visEditor visEditor--{{ vis.type.name }}">
-  <!-- Linked search. -->
-  <div
-      ng-show="isVisible"
-      ng-if="vis.type.requiresSearch && state.linked"
-      class="fullWidth visEditor__linkedMessage"
-    >
-    <div class="kuiVerticalRhythmSmall">
-      {{ ::'kbn.visualize.linkedToSearchInfoText' | i18n: { defaultMessage: 'Linked to Saved Search' } }}
-      <a
-        href="#/discover/{{savedVis.savedSearch.id}}"
-      >
-        {{ savedVis.savedSearch.title }}
-      </a>
-      &nbsp;
-      <a
-        data-test-subj="unlinkSavedSearch"
-        href=""
-        ng-dblclick="unlink()"
-        tooltip="{{ ::'kbn.visualize.linkedToSearch.unlinkButtonTooltip' | i18n: { defaultMessage: 'Double click to unlink from Saved Search' } }}"
-      >
-        <span aria-hidden="true" class="kuiIcon fa-chain-broken"></span>
-      </a>
-    </div>
-  </div>
 
   <!--
     Local nav.
@@ -42,9 +18,9 @@
     show-filter-bar="showFilterBar() && isVisible"
     show-date-picker="showQueryBarTimePicker()"
     show-auto-refresh-only="!showQueryBarTimePicker()"
-    query="state.query"
+    query="query"
     saved-query="savedQuery"
-    screen-title="state.vis.title"
+    screen-title="vis.title"
     on-query-submit="updateQueryAndFetch"
     index-patterns="[indexPattern]"
     filters="filters"
@@ -55,8 +31,8 @@
     refresh-interval="refreshInterval.value"
     on-refresh-change="onRefreshChange"
     show-save-query="showSaveQuery"
-    on-saved="onQuerySaved"
-    on-saved-query-updated="onSavedQueryUpdated"
+    on-saved="updateSavedQuery"
+    on-saved-query-updated="updateSavedQuery"
     on-clear-saved-query="onClearSavedQuery"
   >
   </kbn-top-nav>
@@ -97,7 +73,9 @@
     ui-state="uiState"
     time-range="timeRange"
     filters="filters"
-    query="query"/>
+    query="query"
+    app-state="appState"
+    />
 
   <h1
     class="euiScreenReaderOnly"
@@ -117,6 +95,7 @@
     filters="filters"
     query="query"
     class="visEditor__content"
+    app-state="appState"
   />
 
 </visualize-app>

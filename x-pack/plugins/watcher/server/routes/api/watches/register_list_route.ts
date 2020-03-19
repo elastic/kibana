@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { isEsError } from '../../../lib/is_es_error';
@@ -15,7 +14,7 @@ import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_facto
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
 
-function fetchWatches(callWithRequest: any) {
+function fetchWatches(dataClient: IScopedClusterClient) {
   const params = {
     index: INDEX_NAMES.WATCHES,
     scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
@@ -25,62 +24,58 @@ function fetchWatches(callWithRequest: any) {
     ignore: [404],
   };
 
-  return callWithRequest('search', params).then((response: any) =>
-    fetchAllFromScroll(response, callWithRequest)
-  );
+  return dataClient
+    .callAsCurrentUser('search', params)
+    .then((response: any) => fetchAllFromScroll(response, dataClient));
 }
 
 export function registerListRoute(deps: RouteDependencies) {
-  const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
-
-    try {
-      const hits = await fetchWatches(callWithRequest);
-      const watches = hits.map((hit: any) => {
-        const id = get(hit, '_id');
-        const watchJson = get(hit, '_source');
-        const watchStatusJson = get(hit, '_source.status');
-
-        return Watch.fromUpstreamJson(
-          {
-            id,
-            watchJson,
-            watchStatusJson,
-          },
-          {
-            throwExceptions: {
-              Action: false,
-            },
-          }
-        );
-      });
-
-      return response.ok({
-        body: {
-          watches: watches.map((watch: any) => watch.downstreamJson),
-        },
-      });
-    } catch (e) {
-      // Case: Error from Elasticsearch JS client
-      if (isEsError(e)) {
-        return response.customError({
-          statusCode: e.statusCode,
-          body: {
-            message: e.message,
-          },
-        });
-      }
-
-      // Case: default
-      return response.internalError({ body: e });
-    }
-  };
-
   deps.router.get(
     {
       path: '/api/watcher/watches',
       validate: false,
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      try {
+        const hits = await fetchWatches(ctx.watcher!.client);
+        const watches = hits.map((hit: any) => {
+          const id = get(hit, '_id');
+          const watchJson = get(hit, '_source');
+          const watchStatusJson = get(hit, '_source.status');
+
+          return Watch.fromUpstreamJson(
+            {
+              id,
+              watchJson,
+              watchStatusJson,
+            },
+            {
+              throwExceptions: {
+                Action: false,
+              },
+            }
+          );
+        });
+
+        return response.ok({
+          body: {
+            watches: watches.map((watch: any) => watch.downstreamJson),
+          },
+        });
+      } catch (e) {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(e)) {
+          return response.customError({
+            statusCode: e.statusCode,
+            body: {
+              message: e.message,
+            },
+          });
+        }
+
+        // Case: default
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

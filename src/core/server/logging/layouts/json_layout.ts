@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import moment from 'moment-timezone';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { LogRecord } from '../log_record';
@@ -52,7 +53,7 @@ export class JsonLayout implements Layout {
 
   public format(record: LogRecord): string {
     return JSON.stringify({
-      '@timestamp': record.timestamp.toISOString(),
+      '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       context: record.context,
       error: JsonLayout.errorToSerializableObject(record.error),
       level: record.level.id.toUpperCase(),

@@ -4,19 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import qs from 'querystring';
-import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
+import { parse, stringify } from 'query-string';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { LocalUIFilterName } from '../../../../../../../plugins/apm/server/lib/ui_filters/local_ui_filters/config';
+import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
-  return search ? qs.parse(search.slice(1)) : {};
+  return search ? parse(search.slice(1), { sort: false }) : {};
 }
 
 export function fromQuery(query: Record<string, any>) {
-  return qs.stringify(query, undefined, undefined, {
-    encodeURIComponent: (value: string) => {
-      return encodeURIComponent(value).replace(/%3A/g, ':');
-    }
-  });
+  const encodedQuery = url.encodeQuery(query, value =>
+    encodeURIComponent(value).replace(/%3A/g, ':')
+  );
+
+  return stringify(encodedQuery, { sort: false, encode: false });
 }
 
 export type APMQueryParams = {

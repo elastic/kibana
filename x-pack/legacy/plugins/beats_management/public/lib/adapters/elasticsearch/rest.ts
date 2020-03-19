@@ -7,7 +7,7 @@
 import { isEmpty } from 'lodash';
 import { npStart } from 'ui/new_platform';
 import { ElasticsearchAdapter } from './adapter_types';
-import { autocomplete, esKuery } from '../../../../../../../../src/plugins/data/public';
+import { QuerySuggestion, esKuery } from '../../../../../../../../src/plugins/data/public';
 
 export class RestElasticsearchAdapter implements ElasticsearchAdapter {
   private cachedIndexPattern: any = null;
@@ -31,10 +31,7 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
     return JSON.stringify(esKuery.toElasticsearchQuery(ast, indexPattern));
   }
 
-  public async getSuggestions(
-    kuery: string,
-    selectionStart: any
-  ): Promise<autocomplete.QuerySuggestion[]> {
+  public async getSuggestions(kuery: string, selectionStart: any): Promise<QuerySuggestion[]> {
     const indexPattern = await this.getIndexPattern();
 
     return (

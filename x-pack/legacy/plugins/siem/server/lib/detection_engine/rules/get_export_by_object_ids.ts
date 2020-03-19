@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertsClient } from '../../../../../alerting';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { isAlertType } from '../rules/types';
 import { readRules } from './read_rules';

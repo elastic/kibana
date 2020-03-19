@@ -9,6 +9,11 @@ import chrome from 'ui/chrome';
 export const Path = {
   isUnauthenticated() {
     const path = chrome.removeBasePath(window.location.pathname);
-    return path === '/login' || path === '/logout' || path === '/logged_out' || path === '/status';
+    return (
+      path === '/login' ||
+      path === '/logout' ||
+      path === '/security/logged_out' ||
+      path === '/status'
+    );
   },
 };

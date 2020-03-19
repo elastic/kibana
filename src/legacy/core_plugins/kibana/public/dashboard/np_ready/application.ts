@@ -24,42 +24,49 @@ import {
   AppMountContext,
   ChromeStart,
   IUiSettingsClient,
-  LegacyCoreStart,
+  CoreStart,
   SavedObjectsClientContract,
+  PluginInitializerContext,
 } from 'kibana/public';
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
   configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
   IPrivate,
   KbnUrlProvider,
   PrivateProvider,
   PromiseServiceCreator,
-  RedirectWhenMissingProvider,
-  SavedObjectLoader,
 } from '../legacy_imports';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
-import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
-import { DataPublicPluginStart as NpDataStart } from '../../../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
-import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
+import {
+  KibanaLegacyStart,
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../../plugins/kibana_legacy/public';
+import { SavedObjectLoader } from '../../../../../../plugins/saved_objects/public';
 
 export interface RenderDeps {
-  core: LegacyCoreStart;
-  npDataStart: NpDataStart;
+  pluginInitializerContext: PluginInitializerContext;
+  core: CoreStart;
+  data: DataPublicPluginStart;
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
   dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
+  embeddableCapabilities: {
+    visualizeCapabilities: any;
+    mapsCapabilities: any;
+  };
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
-  savedQueryService: NpDataStart['query']['savedQueries'];
-  embeddables: IEmbeddableStart;
+  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  embeddable: EmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
   config: KibanaLegacyStart['config'];
@@ -71,7 +78,11 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
-    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
+    configureAppAngularModule(
+      angularModuleInstance,
+      { core: deps.core, env: deps.pluginInitializerContext.env },
+      true
+    );
     initDashboardApp(angularModuleInstance, deps);
   }
 
@@ -134,8 +145,7 @@ function createLocalIconModule() {
 function createLocalKbnUrlModule() {
   angular
     .module('app/dashboard/KbnUrl', ['app/dashboard/Private', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
+    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
 }
 
 function createLocalConfigModule(core: AppMountContext['core']) {

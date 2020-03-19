@@ -29,7 +29,7 @@ import {
   // @ts-ignore
 } from '../kb/kb';
 
-import * as utils from '../utils/utils';
+import * as utils from '../utils';
 
 // @ts-ignore
 import { populateContext } from './engine';

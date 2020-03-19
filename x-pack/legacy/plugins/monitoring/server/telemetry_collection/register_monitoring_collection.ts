@@ -5,9 +5,9 @@
  */
 
 import { telemetryCollectionManager } from '../../../../../../src/legacy/core_plugins/telemetry/server';
-// @ts-ignore
 import { getAllStats } from './get_all_stats';
 import { getClusterUuids } from './get_cluster_uuids';
+import { getLicenses } from './get_licenses';
 
 export function registerMonitoringCollection() {
   telemetryCollectionManager.setCollection({
@@ -16,5 +16,6 @@ export function registerMonitoringCollection() {
     priority: 2,
     statsGetter: getAllStats,
     clusterDetailsGetter: getClusterUuids,
+    licenseGetter: getLicenses,
   });
 }

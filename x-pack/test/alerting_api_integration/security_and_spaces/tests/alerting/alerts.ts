@@ -26,7 +26,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  describe('alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/58643
+  // FLAKY: https://github.com/elastic/kibana/issues/58991
+  describe.skip('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
@@ -120,7 +122,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   spaceId: space.id,
                   namespace: space.id,
                   name: 'abc',
-                  tags: [],
+                  tags: ['tag-A', 'tag-B'],
                   createdBy: user.fullName,
                   updatedBy: user.fullName,
                 },
@@ -142,7 +144,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
-                  message: 'instanceContextValue: true, instanceStateValue: true',
+                  message: `
+alertId: ${alertId},
+alertName: abc,
+spaceId: ${space.id},
+tags: tag-A,tag-B,
+alertInstanceId: 1,
+instanceContextValue: true,
+instanceStateValue: true
+`.trim(),
                 },
                 reference,
                 source: 'action:test.index-record',

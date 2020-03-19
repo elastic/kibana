@@ -21,7 +21,7 @@ import {
   DEFAULT_MAX_RESULT_WINDOW,
 } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
-import { isNestedField } from '../../../../../../../../src/plugins/data/public';
+import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 import { npStart } from 'ui/new_platform';
 const { IndexPatternSelect } = npStart.plugins.data.ui;
@@ -29,7 +29,7 @@ const { IndexPatternSelect } = npStart.plugins.data.ui;
 function getGeoFields(fields) {
   return fields.filter(field => {
     return (
-      !isNestedField(field) &&
+      !indexPatterns.isNestedField(field) &&
       [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(field.type)
     );
   });

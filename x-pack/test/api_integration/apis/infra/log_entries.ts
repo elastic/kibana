@@ -13,19 +13,16 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { fold } from 'fp-ts/lib/Either';
 
-import {
-  createPlainError,
-  throwErrors,
-} from '../../../../legacy/plugins/infra/common/runtime_types';
+import { createPlainError, throwErrors } from '../../../../plugins/infra/common/runtime_types';
 
 import {
   LOG_ENTRIES_PATH,
   logEntriesRequestRT,
   logEntriesResponseRT,
-} from '../../../../legacy/plugins/infra/common/http_api';
+} from '../../../../plugins/infra/common/http_api';
 
-import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
-import { InfraTimeKey } from '../../../../legacy/plugins/infra/public/graphql/types';
+import { sharedFragments } from '../../../../plugins/infra/common/graphql/shared';
+import { InfraTimeKey } from '../../../../plugins/infra/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const KEY_WITHIN_DATA_RANGE = {

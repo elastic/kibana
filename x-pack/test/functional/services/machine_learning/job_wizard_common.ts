@@ -224,6 +224,16 @@ export function MachineLearningJobWizardCommonProvider(
       expect(actualCheckedState).to.eql(expectedValue);
     },
 
+    async assertModelPlotSwitchEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlJobWizardSwitchModelPlot');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected model plot switch to be '${expectedValue ? 'enabled' : 'disabled'}' (got ${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
     async assertDedicatedIndexSwitchExists(
       sectionOptions: SectionOptions = { withAdvancedSection: true }
     ) {
@@ -270,11 +280,13 @@ export function MachineLearningJobWizardCommonProvider(
           withAdvancedSection: sectionOptions.withAdvancedSection,
         })) === false
       ) {
-        await testSubjects.clickWhenNotDisabled(subj);
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabled(subj);
+          await this.assertDedicatedIndexSwitchCheckedState(true, {
+            withAdvancedSection: sectionOptions.withAdvancedSection,
+          });
+        });
       }
-      await this.assertDedicatedIndexSwitchCheckedState(true, {
-        withAdvancedSection: sectionOptions.withAdvancedSection,
-      });
     },
 
     async assertModelMemoryLimitInputExists(

@@ -6,11 +6,20 @@
 
 import { updateRulesBulkSchema } from './update_rules_bulk_schema';
 import { UpdateRuleAlertParamsRest } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 // only the basics of testing are here.
 // see: update_rules_schema.test.ts for the bulk of the validation tests
 // this just wraps updateRulesSchema in an array
 describe('update_rules_bulk_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('can take an empty array and validate it', () => {
     expect(
       updateRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([]).error
@@ -31,7 +40,17 @@ describe('update_rules_bulk_schema', () => {
     expect(
       updateRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([
         {
-          id: 'rule-1',
+          id: 'id-1',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          query: 'some query',
+          index: ['index-1'],
+          interval: '5m',
         },
       ]).error
     ).toBeFalsy();
@@ -41,10 +60,30 @@ describe('update_rules_bulk_schema', () => {
     expect(
       updateRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([
         {
-          id: 'rule-1',
+          id: 'id-1',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          query: 'some query',
+          index: ['index-1'],
+          interval: '5m',
         },
         {
-          id: 'rule-2',
+          id: 'id-2',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          query: 'some query',
+          index: ['index-1'],
+          interval: '5m',
         },
       ]).error
     ).toBeFalsy();

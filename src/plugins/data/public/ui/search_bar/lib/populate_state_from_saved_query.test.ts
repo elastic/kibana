@@ -21,7 +21,8 @@ import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 
 import { dataPluginMock } from '../../../mocks';
 import { DataPublicPluginStart } from '../../../types';
-import { SavedQuery, esFilters } from '../../..';
+import { SavedQuery } from '../../..';
+import { FilterStateStore } from '../../../../common';
 import { getFilter } from '../../../query/filter_manager/test_helpers/get_stub_filter';
 
 describe('populateStateFromSavedQuery', () => {
@@ -59,7 +60,7 @@ describe('populateStateFromSavedQuery', () => {
     const savedQuery: SavedQuery = {
       ...baseSavedQuery,
     };
-    const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
+    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
     savedQuery.attributes.filters = [f1];
     populateStateFromSavedQuery(dataMock.query, setQueryState, savedQuery);
     expect(setQueryState).toHaveBeenCalled();
@@ -67,19 +68,13 @@ describe('populateStateFromSavedQuery', () => {
   });
 
   it('should preserve global filters', async () => {
-    const globalFilter = getFilter(
-      esFilters.FilterStateStore.GLOBAL_STATE,
-      false,
-      false,
-      'age',
-      34
-    );
+    const globalFilter = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
     dataMock.query.filterManager.getGlobalFilters = jest.fn().mockReturnValue([globalFilter]);
     const setQueryState = jest.fn();
     const savedQuery: SavedQuery = {
       ...baseSavedQuery,
     };
-    const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
+    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
     savedQuery.attributes.filters = [f1];
     populateStateFromSavedQuery(dataMock.query, setQueryState, savedQuery);
     expect(setQueryState).toHaveBeenCalled();

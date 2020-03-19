@@ -21,24 +21,22 @@ import { Observable } from 'rxjs';
 import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../../common/search';
 import { SYNC_SEARCH_STRATEGY } from '../sync_search_strategy';
 import { getEsPreference } from './get_es_preference';
-import { TSearchStrategyProvider, ISearchStrategy, ISearchGeneric, ISearchContext } from '..';
+import { ISearchContext, TSearchStrategyProvider, ISearchStrategy } from '../types';
 
 export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
-  context: ISearchContext,
-  search: ISearchGeneric
+  context: ISearchContext
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
+  const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
+  const { search } = syncStrategyProvider(context);
   return {
     search: (request, options) => {
-      if (typeof request.params.preference === 'undefined') {
-        const setPreference = context.core.uiSettings.get('courier:setRequestPreference');
-        const customPreference = context.core.uiSettings.get('courier:customRequestPreference');
-        request.params.preference = getEsPreference(setPreference, customPreference);
-      }
-      return search(
-        { ...request, serverStrategy: ES_SEARCH_STRATEGY },
-        options,
-        SYNC_SEARCH_STRATEGY
-      ) as Observable<IEsSearchResponse>;
+      request.params = {
+        preference: getEsPreference(context.core.uiSettings),
+        ...request.params,
+      };
+      return search({ ...request, serverStrategy: ES_SEARCH_STRATEGY }, options) as Observable<
+        IEsSearchResponse
+      >;
     },
   };
 };

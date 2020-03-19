@@ -19,7 +19,6 @@
 
 import * as React from 'react';
 import { AddPanelFlyout } from './add_panel_flyout';
-import { GetEmbeddableFactory } from '../../../../types';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
@@ -29,12 +28,19 @@ import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/cont
 import { ContainerInput } from '../../../../containers';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-
+import { coreMock } from '../../../../../../../../core/public/mocks';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 
-// eslint-disable-next-line
-import { coreMock } from '../../../../../../../../core/public/mocks';
+function DummySavedObjectFinder(props: { children: React.ReactNode }) {
+  return (
+    <div>
+      <div>Hello World</div>
+      {props.children}
+    </div>
+  ) as JSX.Element;
+}
 
 test('createNewEmbeddable() add embeddable to container', async () => {
   const core = coreMock.createStart();
@@ -49,7 +55,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
       firstName: 'foo',
       lastName: 'bar',
     } as any);
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => contactCardEmbeddableFactory;
+  const getEmbeddableFactory = (id: string) => contactCardEmbeddableFactory;
   const input: ContainerInput<{ firstName: string; lastName: string }> = {
     id: '1',
     panels: {},
@@ -60,7 +66,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
     <AddPanelFlyout
       container={container}
       onClose={onClose}
-      getFactory={getEmbeddableFactory}
+      getFactory={getEmbeddableFactory as EmbeddableStart['getEmbeddableFactory']}
       getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
       notifications={core.notifications}
       SavedObjectFinder={() => null}
@@ -94,21 +100,22 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
       firstName: 'foo',
       lastName: 'bar',
     } as any);
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => contactCardEmbeddableFactory;
+  const getEmbeddableFactory = ((id: string) =>
+    contactCardEmbeddableFactory) as EmbeddableStart['getEmbeddableFactory'];
   const input: ContainerInput<{ firstName: string; lastName: string }> = {
     id: '1',
     panels: {},
   };
   const container = new HelloWorldContainer(input, { getEmbeddableFactory } as any);
   const onClose = jest.fn();
-  const component = mount<AddPanelFlyout>(
+  const component = mount(
     <AddPanelFlyout
       container={container}
       onClose={onClose}
       getFactory={getEmbeddableFactory}
       getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
       notifications={core.notifications}
-      SavedObjectFinder={() => null}
+      SavedObjectFinder={props => <DummySavedObjectFinder {...props} />}
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 

@@ -6,12 +6,15 @@
 
 import { isEmpty, isString, flow } from 'lodash/fp';
 import {
+  EsQueryConfig,
   Query,
-  esFilters,
+  Filter,
   esQuery,
   esKuery,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
+
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 import { KueryFilterQuery } from '../../store';
 
@@ -33,7 +36,7 @@ export const convertKueryToElasticSearchQuery = (
 export const convertKueryToDslFilter = (
   kueryExpression: string,
   indexPattern: IIndexPattern
-): esKuery.JsonObject => {
+): JsonObject => {
   try {
     return kueryExpression
       ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
@@ -87,10 +90,10 @@ export const convertToBuildEsQuery = ({
   queries,
   filters,
 }: {
-  config: esQuery.EsQueryConfig;
+  config: EsQueryConfig;
   indexPattern: IIndexPattern;
   queries: Query[];
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }) => {
   try {
     return JSON.stringify(

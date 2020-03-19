@@ -56,10 +56,14 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
         <Route
           strict
           path={getHostDetailsTabPath(hostsPagePath)}
-          render={props => (
+          render={({
+            match: {
+              params: { detailName },
+            },
+          }) => (
             <HostDetails
               hostDetailsPagePath={hostDetailsPagePath}
-              detailName={props.match.params.detailName}
+              detailName={detailName}
               from={from}
               to={to}
               setQuery={setQuery}

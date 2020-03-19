@@ -18,12 +18,13 @@
  */
 
 import { getMatchedIndices } from './get_matched_indices';
+import { Tag } from '../types';
 
 jest.mock('./../constants', () => ({
   MAX_NUMBER_OF_MATCHING_INDICES: 6,
 }));
 
-const tags: string[] = [];
+const tags: Tag[] = [];
 const indices = [
   { name: 'kibana', tags },
   { name: 'es', tags },

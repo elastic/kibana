@@ -6,8 +6,7 @@
 import { createHash } from 'crypto';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-
-import { parseDuration } from '../../../../../alerting/server/lib';
+import { parseDuration } from '../../../../../../../plugins/alerting/server';
 
 export const generateId = (
   docIndex: string,
@@ -69,7 +68,7 @@ export const getGapBetweenRuns = ({
   to,
   now = moment(),
 }: {
-  previousStartedAt: moment.Moment | undefined | null;
+  previousStartedAt: Date | undefined | null;
   interval: string;
   from: string;
   to: string;

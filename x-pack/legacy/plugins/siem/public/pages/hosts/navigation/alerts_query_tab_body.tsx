@@ -6,11 +6,11 @@
 
 import React, { useMemo } from 'react';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { AlertsView } from '../../../components/alerts_viewer';
 import { AlertsComponentQueryProps } from './types';
 
-export const filterHostData: esFilters.Filter[] = [
+export const filterHostData: Filter[] = [
   {
     query: {
       bool: {

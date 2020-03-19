@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { isClassComponent } from 'recompose';
 import PropTypes from 'prop-types';
 import { routerProvider } from '../../lib/router_provider';
 import { getAppState } from '../../lib/app_state';
@@ -98,9 +97,6 @@ export class Router extends React.PureComponent {
       return React.createElement(CanvasLoading, { msg: this.props.loadingMessage });
     }
 
-    // show the activeComponent
-    return isClassComponent(this.state.activeComponent)
-      ? React.createElement(this.state.activeComponent, {})
-      : this.state.activeComponent({});
+    return <this.state.activeComponent />;
   }
 }

@@ -7,13 +7,12 @@
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields } from '../../containers/source';
 import { timelineActions } from '../../store/actions';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
@@ -31,22 +30,10 @@ const FieldsBrowserButtonContainer = styled.div`
 
 FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
 
-interface DispatchProps {
-  removeColumn?: ActionCreator<{
-    id: string;
-    columnId: string;
-  }>;
-  upsertColumn?: ActionCreator<{
-    column: ColumnHeader;
-    id: string;
-    index: number;
-  }>;
-}
-
 /**
  * Manages the state of the field browser
  */
-export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & DispatchProps>(
+export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & PropsFromRedux>(
   ({
     columnHeaders,
     browserFields,
@@ -137,7 +124,7 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
      * columns in the timeline, this function dispatches the action that
      * causes the timeline display those columns.
      */
-    const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeader[]) => {
+    const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeaderOptions[]) => {
       onUpdateColumns(columns); // show the category columns in the timeline
     }, []);
 
@@ -212,7 +199,13 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
   }
 );
 
-export const StatefulFieldsBrowser = connect(null, {
+const mapDispatchToProps = {
   removeColumn: timelineActions.removeColumn,
   upsertColumn: timelineActions.upsertColumn,
-})(React.memo(StatefulFieldsBrowserComponent));
+};
+
+const connector = connect(null, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulFieldsBrowser = connector(React.memo(StatefulFieldsBrowserComponent));

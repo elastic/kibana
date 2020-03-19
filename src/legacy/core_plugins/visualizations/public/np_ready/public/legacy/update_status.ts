@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { PersistedState } from '../../../legacy_imports';
-import { calculateObjectHash } from './calculate_object_hash';
+import { PersistedState } from '../../../../../../../plugins/visualizations/public';
+import { calculateObjectHash } from '../../../../../../../plugins/kibana_utils/common';
 import { Vis } from '../vis';
 
 enum Status {

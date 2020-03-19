@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -13,7 +13,7 @@ interface Arguments {
   default: () => any;
 }
 
-export function switchFn(): ExpressionFunction<'switch', any, Arguments, any> {
+export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Arguments, unknown> {
   const { help, args: argHelp } = getFunctionHelp().switch;
 
   return {
@@ -33,7 +33,7 @@ export function switchFn(): ExpressionFunction<'switch', any, Arguments, any> {
         help: argHelp.default,
       },
     },
-    fn: async (context, args) => {
+    fn: async (input, args) => {
       const cases = args.case || [];
 
       for (let i = 0; i < cases.length; i++) {
@@ -48,7 +48,7 @@ export function switchFn(): ExpressionFunction<'switch', any, Arguments, any> {
         return await args.default();
       }
 
-      return context;
+      return input;
     },
   };
 }

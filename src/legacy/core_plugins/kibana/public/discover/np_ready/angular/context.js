@@ -19,13 +19,11 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getAngularModule, getServices, subscribeWithScope } from '../../kibana_services';
-
+import { getAngularModule, getServices } from '../../kibana_services';
 import './context_app';
+import { getState } from './context_state';
 import contextAppRouteTemplate from './context.html';
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
-import { FilterStateManager } from '../../../../../data/public';
-const { chrome } = getServices();
 
 const k7Breadcrumbs = $route => {
   const { indexPattern } = $route.current.locals;
@@ -68,53 +66,50 @@ getAngularModule().config($routeProvider => {
     });
 });
 
-function ContextAppRouteController(
-  $routeParams,
-  $scope,
-  AppState,
-  config,
-  $route,
-  getAppState,
-  globalState
-) {
+function ContextAppRouteController($routeParams, $scope, config, $route) {
   const filterManager = getServices().filterManager;
-  const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
   const indexPattern = $route.current.locals.indexPattern.ip;
+  const {
+    startSync: startStateSync,
+    stopSync: stopStateSync,
+    appState,
+    getFilters,
+    setFilters,
+    setAppState,
+  } = getState({
+    defaultStepSize: config.get('context:defaultSize'),
+    timeFieldName: indexPattern.timeFieldName,
+    storeInSessionStorage: config.get('state:storeInSessionStorage'),
+  });
+  this.state = { ...appState.getState() };
+  this.anchorId = $routeParams.id;
+  this.indexPattern = indexPattern;
+  this.discoverUrl = getServices().chrome.navLinks.get('kibana:discover').url;
+  filterManager.setFilters(_.cloneDeep(getFilters()));
+  startStateSync();
 
-  this.state = new AppState(createDefaultAppState(config, indexPattern));
-  this.state.save(true);
-
+  // take care of parameter changes in UI
   $scope.$watchGroup(
     [
       'contextAppRoute.state.columns',
       'contextAppRoute.state.predecessorCount',
       'contextAppRoute.state.successorCount',
     ],
-    () => this.state.save(true)
+    newValues => {
+      const [columns, predecessorCount, successorCount] = newValues;
+      if (Array.isArray(columns) && predecessorCount >= 0 && successorCount >= 0) {
+        setAppState({ columns, predecessorCount, successorCount });
+      }
+    }
   );
-
-  const updateSubsciption = subscribeWithScope($scope, filterManager.getUpdates$(), {
-    next: () => {
-      this.filters = _.cloneDeep(filterManager.getFilters());
-    },
+  // take care of parameter filter changes
+  const filterObservable = filterManager.getUpdates$().subscribe(() => {
+    setFilters(filterManager);
+    $route.reload();
   });
 
   $scope.$on('$destroy', () => {
-    filterStateManager.destroy();
-    updateSubsciption.unsubscribe();
+    stopStateSync();
+    filterObservable.unsubscribe();
   });
-  this.anchorId = $routeParams.id;
-  this.indexPattern = indexPattern;
-  this.discoverUrl = chrome.navLinks.get('kibana:discover').url;
-  this.filters = _.cloneDeep(filterManager.getFilters());
-}
-
-function createDefaultAppState(config, indexPattern) {
-  return {
-    columns: ['_source'],
-    filters: [],
-    predecessorCount: parseInt(config.get('context:defaultSize'), 10),
-    sort: [indexPattern.timeFieldName, 'desc'],
-    successorCount: parseInt(config.get('context:defaultSize'), 10),
-  };
 }

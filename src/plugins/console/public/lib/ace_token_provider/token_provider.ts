@@ -66,7 +66,10 @@ export class AceTokensProvider implements TokensProvider {
   getTokens(lineNumber: number): Token[] | null {
     if (lineNumber < 1) return null;
 
-    const lineCount = this.session.doc.getAllLines().length;
+    // Important: must use a .session.getLength because this is a cached value.
+    // Calculating line length here will lead to performance issues because this function
+    // may be called inside of tight loops.
+    const lineCount = this.session.getLength();
     if (lineNumber > lineCount) {
       return null;
     }

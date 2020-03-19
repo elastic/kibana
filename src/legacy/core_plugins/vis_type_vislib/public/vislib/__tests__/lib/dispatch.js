@@ -25,7 +25,6 @@ import expect from '@kbn/expect';
 import data from './fixtures/mock_data/date_histogram/_series';
 
 import { getVis, getMockUiState } from './fixtures/_vis_fixture';
-import { SimpleEmitter } from '../../../legacy_imports';
 
 describe('Vislib Dispatch Class Test Suite', function() {
   function destroyVis(vis) {
@@ -54,11 +53,13 @@ describe('Vislib Dispatch Class Test Suite', function() {
       destroyVis(vis);
     });
 
-    it('extends the SimpleEmitter class', function() {
+    it('implements on, off, emit methods', function() {
       const events = _.pluck(vis.handler.charts, 'events');
       expect(events.length).to.be.above(0);
       events.forEach(function(dispatch) {
-        expect(dispatch).to.be.a(SimpleEmitter);
+        expect(dispatch).to.have.property('on');
+        expect(dispatch).to.have.property('off');
+        expect(dispatch).to.have.property('emit');
       });
     });
   });

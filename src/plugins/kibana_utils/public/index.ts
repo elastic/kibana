@@ -18,14 +18,19 @@
  */
 
 export {
+  calculateObjectHash,
+  createGetterSetter,
   defer,
   Defer,
-  of,
-  createGetterSetter,
   Get,
+  JsonArray,
+  JsonObject,
+  JsonValue,
+  of,
   Set,
   UiComponent,
   UiComponentInstance,
+  url,
 } from '../common';
 export * from './core';
 export * from './errors';
@@ -68,5 +73,5 @@ export {
   StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';
-export { removeQueryParam } from './history';
+export { removeQueryParam, redirectWhenMissing, ensureDefaultIndexPattern } from './history';
 export { applyDiff } from './state_management/utils/diff_object';

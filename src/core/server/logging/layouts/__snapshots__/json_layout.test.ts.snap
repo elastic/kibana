@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`\`format()\` correctly formats record. 1`] = `"{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"context-1\\",\\"error\\":{\\"message\\":\\"Some error message\\",\\"name\\":\\"Some error name\\",\\"stack\\":\\"Some error stack\\"},\\"level\\":\\"FATAL\\",\\"message\\":\\"message-1\\",\\"pid\\":5355}"`;
+exports[`\`format()\` correctly formats record. 1`] = `"{\\"@timestamp\\":\\"2012-02-01T09:30:22.011-05:00\\",\\"context\\":\\"context-1\\",\\"error\\":{\\"message\\":\\"Some error message\\",\\"name\\":\\"Some error name\\",\\"stack\\":\\"Some error stack\\"},\\"level\\":\\"FATAL\\",\\"message\\":\\"message-1\\",\\"pid\\":5355}"`;
 
-exports[`\`format()\` correctly formats record. 2`] = `"{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"context-2\\",\\"level\\":\\"ERROR\\",\\"message\\":\\"message-2\\",\\"pid\\":5355}"`;
+exports[`\`format()\` correctly formats record. 2`] = `"{\\"@timestamp\\":\\"2012-02-01T09:30:22.011-05:00\\",\\"context\\":\\"context-2\\",\\"level\\":\\"ERROR\\",\\"message\\":\\"message-2\\",\\"pid\\":5355}"`;
 
-exports[`\`format()\` correctly formats record. 3`] = `"{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"context-3\\",\\"level\\":\\"WARN\\",\\"message\\":\\"message-3\\",\\"pid\\":5355}"`;
+exports[`\`format()\` correctly formats record. 3`] = `"{\\"@timestamp\\":\\"2012-02-01T09:30:22.011-05:00\\",\\"context\\":\\"context-3\\",\\"level\\":\\"WARN\\",\\"message\\":\\"message-3\\",\\"pid\\":5355}"`;
 
-exports[`\`format()\` correctly formats record. 4`] = `"{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"context-4\\",\\"level\\":\\"DEBUG\\",\\"message\\":\\"message-4\\",\\"pid\\":5355}"`;
+exports[`\`format()\` correctly formats record. 4`] = `"{\\"@timestamp\\":\\"2012-02-01T09:30:22.011-05:00\\",\\"context\\":\\"context-4\\",\\"level\\":\\"DEBUG\\",\\"message\\":\\"message-4\\",\\"pid\\":5355}"`;
 
-exports[`\`format()\` correctly formats record. 5`] = `"{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"context-5\\",\\"level\\":\\"INFO\\",\\"message\\":\\"message-5\\",\\"pid\\":5355}"`;
+exports[`\`format()\` correctly formats record. 5`] = `"{\\"@timestamp\\":\\"2012-02-01T09:30:22.011-05:00\\",\\"context\\":\\"context-5\\",\\"level\\":\\"INFO\\",\\"message\\":\\"message-5\\",\\"pid\\":5355}"`;
 
-exports[`\`format()\` correctly formats record. 6`] = `"{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"context-6\\",\\"level\\":\\"TRACE\\",\\"message\\":\\"message-6\\",\\"pid\\":5355}"`;
+exports[`\`format()\` correctly formats record. 6`] = `"{\\"@timestamp\\":\\"2012-02-01T09:30:22.011-05:00\\",\\"context\\":\\"context-6\\",\\"level\\":\\"TRACE\\",\\"message\\":\\"message-6\\",\\"pid\\":5355}"`;

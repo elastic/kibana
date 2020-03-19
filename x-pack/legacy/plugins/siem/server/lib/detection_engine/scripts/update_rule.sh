@@ -14,7 +14,7 @@ RULES=(${@:-./rules/updates/simplest_updated_name.json})
 
 # Example: ./update_rule.sh
 # Example: ./update_rule.sh ./rules/updates/simplest_updated_name.json
-# Example glob: ./post_rule.sh ./rules/updates/*
+# Example glob: ./update_rule.sh ./rules/updates/*
 for RULE in "${RULES[@]}"
 do {
   [ -e "$RULE" ] || continue

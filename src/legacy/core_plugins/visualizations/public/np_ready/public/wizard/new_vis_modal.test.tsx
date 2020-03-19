@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypesStart, VisType } from '../types';
+import { TypesStart, VisType } from '../vis_types';
 import { NewVisModal } from './new_vis_modal';
-import { SavedObjectsStart } from 'kibana/public';
+import { SavedObjectsStart } from '../../../../../../../core/public';
 
 describe('NewVisModal', () => {
   const { location } = window;

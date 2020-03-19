@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 // @ts-ignore untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
@@ -19,7 +19,7 @@ interface Arguments {
   emptyImage: string | null;
 }
 
-export function repeatImage(): ExpressionFunction<
+export function repeatImage(): ExpressionFunctionDefinition<
   'repeatImage',
   number,
   Arguments,
@@ -31,10 +31,8 @@ export function repeatImage(): ExpressionFunction<
     name: 'repeatImage',
     aliases: [],
     type: 'render',
+    inputTypes: ['number'],
     help,
-    context: {
-      types: ['number'],
-    },
     args: {
       emptyImage: {
         types: ['string', 'null'],

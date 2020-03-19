@@ -74,6 +74,12 @@ describe('validateActionTypeSecrets()', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [number]"`
     );
+
+    expect(() => {
+      validateSecrets(actionType, { webhookUrl: 'fee-fi-fo-fum' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl"`
+    );
   });
 
   test('should validate and pass when the slack webhookUrl is whitelisted', () => {
@@ -95,8 +101,8 @@ describe('validateActionTypeSecrets()', () => {
     actionType = getActionType({
       configurationUtilities: {
         ...configUtilsMock,
-        ensureWhitelistedUri: url => {
-          throw new Error(`target url is not whitelisted`);
+        ensureWhitelistedHostname: url => {
+          throw new Error(`target hostname is not whitelisted`);
         },
       },
     });
@@ -104,7 +110,7 @@ describe('validateActionTypeSecrets()', () => {
     expect(() => {
       validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: target url is not whitelisted"`
+      `"error validating action type secrets: error configuring slack action: target hostname is not whitelisted"`
     );
   });
 });

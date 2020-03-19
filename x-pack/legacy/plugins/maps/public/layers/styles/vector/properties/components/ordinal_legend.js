@@ -46,7 +46,7 @@ export class OrdinalLegend extends React.Component {
     this._loadParams();
   }
   render() {
-    const fieldMeta = this.props.style.getFieldMeta();
+    const fieldMeta = this.props.style.getRangeFieldMeta();
 
     let minLabel = EMPTY_VALUE;
     let maxLabel = EMPTY_VALUE;

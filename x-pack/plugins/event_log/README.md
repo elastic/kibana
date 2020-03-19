@@ -9,14 +9,14 @@ and actions.
 
 ## Basic Usage - Logging Events
 
-Follow these steps to use `event_log` in your plugin: 
+Follow these steps to use `eventLog` in your plugin: 
 
-1. Declare `event_log` as a dependency in `kibana.json`:
+1. Declare `eventLog` as a dependency in `kibana.json`:
 
 ```json
 {
   ...
-  "requiredPlugins": ["event_log"],
+  "requiredPlugins": ["eventLog"],
   ...
 }
 ```
@@ -28,13 +28,13 @@ API provided in the `setup` stage:
 ...
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 interface PluginSetupDependencies {
-  event_log: IEventLogService;
+  eventLog: IEventLogService;
 }
 ...
-public setup(core: CoreSetup, { event_log }: PluginSetupDependencies) {
+public setup(core: CoreSetup, { eventLog }: PluginSetupDependencies) {
   ...
-  event_log.registerProviderActions('my-plugin', ['action-1, action-2']);
-  const eventLogger: IEventLogger = event_log.getLogger({ event: { provider: 'my-plugin' } });
+  eventLog.registerProviderActions('my-plugin', ['action-1, action-2']);
+  const eventLogger: IEventLogger = eventLog.getLogger({ event: { provider: 'my-plugin' } });
   ...
 }
 ...
@@ -73,7 +73,7 @@ a new elasticsearch index referred to as the "event log".
 Example events are actions firing, alerts running their scheduled functions,
 alerts scheduling actions to run, etc.
 
-This functionality will be provided in a new NP plugin `event_log`, and will
+This functionality will be provided in a new NP plugin `eventLog`, and will
 provide server-side plugin APIs to write to the event log, and run limited
 queries against it. For now, access via HTTP will not be available, due to
 security concerns and lack of use cases.

@@ -10,12 +10,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import uiRoutes from 'ui/routes';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { isPipelineMonitoringSupportedInVersion } from 'plugins/monitoring/lib/logstash/pipelines';
 import template from './index.html';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { MonitoringViewBaseEuiTableController } from '../../../';
 import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../../components/logstash/pipeline_listing/pipeline_listing';

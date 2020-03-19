@@ -29,6 +29,7 @@ export {
   ManagementStart,
   RegisterManagementApp,
   RegisterManagementAppArgs,
+  ManagementAppMountParams,
 } from './types';
 export { ManagementApp } from './management_app';
 export { ManagementSection } from './management_section';

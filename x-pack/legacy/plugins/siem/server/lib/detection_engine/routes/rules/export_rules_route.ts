@@ -4,68 +4,79 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { ExportRulesRequest } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
+import { LegacyServices } from '../../../../types';
+import { ExportRulesRequestParams } from '../../rules/types';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { exportRulesSchema, exportRulesQuerySchema } from '../schemas/export_rules_schema';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
+import { transformError, buildRouteValidation, buildSiemResponse } from '../utils';
 
-export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: `${DETECTION_ENGINE_RULES_URL}/_export`,
-    options: {
-      tags: ['access:siem'],
+export const exportRulesRoute = (router: IRouter, config: LegacyServices['config']) => {
+  router.post(
+    {
+      path: `${DETECTION_ENGINE_RULES_URL}/_export`,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: exportRulesSchema,
-        query: exportRulesQuerySchema,
+        query: buildRouteValidation<ExportRulesRequestParams['query']>(exportRulesQuerySchema),
+        body: buildRouteValidation<ExportRulesRequestParams['body']>(exportRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: ExportRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+      if (!context.alerting) {
+        return siemResponse.error({ statusCode: 404 });
+      }
+      const alertsClient = context.alerting.getAlertsClient();
 
       if (!alertsClient) {
-        return headers.response().code(404);
+        return siemResponse.error({ statusCode: 404 });
       }
 
       try {
-        const exportSizeLimit = server.config().get<number>('savedObjects.maxImportExportSize');
-        if (request.payload?.objects != null && request.payload.objects.length > exportSizeLimit) {
-          return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
+        const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
+        if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
+          return siemResponse.error({
+            statusCode: 400,
+            body: `Can't export more than ${exportSizeLimit} rules`,
+          });
         } else {
           const nonPackagedRulesCount = await getNonPackagedRulesCount({ alertsClient });
           if (nonPackagedRulesCount > exportSizeLimit) {
-            return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
+            return siemResponse.error({
+              statusCode: 400,
+              body: `Can't export more than ${exportSizeLimit} rules`,
+            });
           }
         }
 
         const exported =
-          request.payload?.objects != null
-            ? await getExportByObjectIds(alertsClient, request.payload.objects)
+          request.body?.objects != null
+            ? await getExportByObjectIds(alertsClient, request.body.objects)
             : await getExportAll(alertsClient);
 
-        const response = request.query.exclude_export_details
-          ? headers.response(exported.rulesNdjson)
-          : headers.response(`${exported.rulesNdjson}${exported.exportDetails}`);
+        const responseBody = request.query.exclude_export_details
+          ? exported.rulesNdjson
+          : `${exported.rulesNdjson}${exported.exportDetails}`;
 
-        return response
-          .header('Content-Disposition', `attachment; filename="${request.query.file_name}"`)
-          .header('Content-Type', 'application/ndjson');
-      } catch {
-        return Boom.badRequest(`Sorry, something went wrong to export rules`);
+        return response.ok({
+          headers: {
+            'Content-Disposition': `attachment; filename="${request.query.file_name}"`,
+            'Content-Type': 'application/ndjson',
+          },
+          body: responseBody,
+        });
+      } catch (err) {
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const exportRulesRoute = (server: ServerFacade): void => {
-  server.route(createExportRulesRoute(server));
+    }
+  );
 };

@@ -4,19 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { ScaleType } from '@elastic/charts';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Position } from '@elastic/charts';
 import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { noop } from 'lodash/fp';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import * as i18n from './translations';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
 import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
-import { getBarchartConfigs, getCustomChartData } from './utils';
-import { useQuery } from '../../containers/matrix_histogram/utils';
+import { getBarchartConfigs, getCustomChartData } from '../../components/matrix_histogram/utils';
+import { useQuery } from '../../containers/matrix_histogram';
 import {
   MatrixHistogramProps,
   MatrixHistogramOption,
@@ -25,6 +27,35 @@ import {
 } from './types';
 import { ChartSeriesData } from '../charts/common';
 import { InspectButtonContainer } from '../inspect';
+
+import { State, inputsSelectors, hostsModel, networkModel } from '../../store';
+
+import {
+  MatrixHistogramMappingTypes,
+  GetTitle,
+  GetSubTitle,
+} from '../../components/matrix_histogram/types';
+import { SetQuery } from '../../pages/hosts/navigation/types';
+import { QueryTemplateProps } from '../../containers/query_template';
+import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { HistogramType } from '../../graphql/types';
+
+export interface OwnProps extends QueryTemplateProps {
+  defaultStackByOption: MatrixHistogramOption;
+  errorMessage: string;
+  headerChildren?: React.ReactNode;
+  hideHistogramIfEmpty?: boolean;
+  histogramType: HistogramType;
+  id: string;
+  legendPosition?: Position;
+  mapping?: MatrixHistogramMappingTypes;
+  setQuery: SetQuery;
+  showLegend?: boolean;
+  stackByOptions: MatrixHistogramOption[];
+  subtitle?: string | GetSubTitle;
+  title: string | GetTitle;
+  type: hostsModel.HostsType | networkModel.NetworkType;
+}
 
 const DEFAULT_PANEL_HEIGHT = 300;
 
@@ -41,45 +72,50 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   MatrixHistogramQueryProps> = ({
   chartHeight,
-  dataKey,
   defaultStackByOption,
   endDate,
   errorMessage,
   filterQuery,
   headerChildren,
+  histogramType,
   hideHistogramIfEmpty = false,
   id,
-  isAlertsHistogram,
-  isAnomaliesHistogram,
-  isAuthenticationsHistogram,
-  isDnsHistogram,
-  isEventsHistogram,
   isInspected,
-  legendPosition = 'right',
+  legendPosition,
   mapping,
   panelHeight = DEFAULT_PANEL_HEIGHT,
-  query,
-  scaleType = ScaleType.Time,
   setQuery,
-  showLegend = true,
-  skip,
+  showLegend,
   stackByOptions,
   startDate,
   subtitle,
   title,
-  updateDateRange,
+  dispatchSetAbsoluteRangeDatePicker,
   yTickFormatter,
 }) => {
-  const barchartConfigs = getBarchartConfigs({
-    chartHeight,
-    from: startDate,
-    legendPosition,
-    to: endDate,
-    onBrushEnd: updateDateRange,
-    scaleType,
-    yTickFormatter,
-    showLegend,
-  });
+  const barchartConfigs = useMemo(
+    () =>
+      getBarchartConfigs({
+        chartHeight,
+        from: startDate,
+        legendPosition,
+        to: endDate,
+        onBrushEnd: (min: number, max: number) => {
+          dispatchSetAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+        },
+        yTickFormatter,
+        showLegend,
+      }),
+    [
+      chartHeight,
+      startDate,
+      legendPosition,
+      endDate,
+      dispatchSetAbsoluteRangeDatePicker,
+      yTickFormatter,
+      showLegend,
+    ]
+  );
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
     defaultStackByOption
@@ -100,19 +136,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
 
   const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
     {
-      dataKey,
       endDate,
       errorMessage,
       filterQuery,
-      query,
-      skip,
+      histogramType,
       startDate,
-      title,
-      isAlertsHistogram,
-      isAnomaliesHistogram,
-      isAuthenticationsHistogram,
-      isDnsHistogram,
-      isEventsHistogram,
       isInspected,
       stackByField: selectedStackByOption.value,
     }
@@ -129,7 +157,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     } else {
       setHideHistogram(false);
     }
-
     setBarChartData(getCustomChartData(data, mapping));
 
     setQuery({ id, inspect, loading, refetch });
@@ -145,8 +172,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     setQuery,
     hideHistogramIfEmpty,
     totalCount,
+    id,
+    inspect,
     isInspected,
     loading,
+    refetch,
     data,
     refetch,
     isInitialLoading,
@@ -174,7 +204,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
               <HeaderSection
                 id={id}
                 title={titleWithStackByField}
-                subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
+                subtitle={!isInitialLoading && (totalCount >= 0 ? subtitleWithCounts : null)}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="none">
                   <EuiFlexItem grow={false}>
@@ -197,7 +227,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
               <HeaderSection
                 id={id}
                 title={titleWithStackByField}
-                subtitle={!isInitialLoading && (totalCount >= 0 ? subtitleWithCounts : null)}
+                subtitle={
+                  !isInitialLoading &&
+                  (totalCount != null && totalCount >= 0 ? subtitleWithCounts : null)
+                }
               >
                 <EuiFlexGroup alignItems="center" gutterSize="none">
                   <EuiFlexItem grow={false}>
@@ -224,3 +257,20 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
 };
 
 export const MatrixHistogram = React.memo(MatrixHistogramComponent);
+
+const makeMapStateToProps = () => {
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { type, id }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      isInspected,
+    };
+  };
+  return mapStateToProps;
+};
+
+export const MatrixHistogramContainer = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps, {
+    dispatchSetAbsoluteRangeDatePicker: setAbsoluteRangeDatePicker,
+  })
+)(MatrixHistogram);

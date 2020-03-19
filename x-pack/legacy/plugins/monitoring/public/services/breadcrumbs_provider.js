@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import chrome from 'plugins/monitoring/np_imports/ui/chrome';
 import { i18n } from '@kbn/i18n';
 
 // Helper for making objects to use in a link element

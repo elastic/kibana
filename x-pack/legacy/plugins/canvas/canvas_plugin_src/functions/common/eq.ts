@@ -3,25 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  value: Context;
+  value: Input;
 }
 
-type Context = boolean | number | string | null;
+type Input = boolean | number | string | null;
 
-export function eq(): ExpressionFunction<'eq', Context, Arguments, boolean> {
+export function eq(): ExpressionFunctionDefinition<'eq', Input, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().eq;
 
   return {
     name: 'eq',
     type: 'boolean',
+    inputTypes: ['boolean', 'number', 'string', 'null'],
     help,
-    context: {
-      types: ['boolean', 'number', 'string', 'null'],
-    },
     args: {
       value: {
         aliases: ['_'],
@@ -30,8 +28,8 @@ export function eq(): ExpressionFunction<'eq', Context, Arguments, boolean> {
         help: argHelp.value,
       },
     },
-    fn: (context, args) => {
-      return context === args.value;
+    fn: (input, args) => {
+      return input === args.value;
     },
   };
 }

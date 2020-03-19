@@ -40,6 +40,7 @@ export default function({ getService }) {
             name: 'test_cluster',
             seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -57,6 +58,8 @@ export default function({ getService }) {
           .send({
             name: 'test_cluster',
             seeds: [NODE_SEED],
+            skipUnavailable: false,
+            mode: 'sniff',
           })
           .expect(409);
 
@@ -78,6 +81,7 @@ export default function({ getService }) {
           .send({
             skipUnavailable: false,
             seeds: [NODE_SEED],
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -86,6 +90,7 @@ export default function({ getService }) {
           skipUnavailable: 'false', // ES issue #35671
           seeds: [NODE_SEED],
           isConfiguredByNode: false,
+          mode: 'sniff',
         });
       });
     });
@@ -108,6 +113,7 @@ export default function({ getService }) {
               initialConnectTimeout: '30s',
               skipUnavailable: false,
               isConfiguredByNode: false,
+              mode: 'sniff',
             },
           ]);
         });
@@ -138,6 +144,7 @@ export default function({ getService }) {
             name: 'test_cluster1',
             seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -148,6 +155,7 @@ export default function({ getService }) {
             name: 'test_cluster2',
             seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -183,17 +191,11 @@ export default function({ getService }) {
             {
               name: 'test_cluster_doesnt_exist',
               error: {
-                isBoom: true,
-                isServer: false,
-                data: null,
-                output: {
+                status: 404,
+                payload: { message: 'There is no remote cluster with that name.' },
+                options: {
                   statusCode: 404,
-                  payload: {
-                    statusCode: 404,
-                    error: 'Not Found',
-                    message: 'There is no remote cluster with that name.',
-                  },
-                  headers: {},
+                  body: { message: 'There is no remote cluster with that name.' },
                 },
               },
             },

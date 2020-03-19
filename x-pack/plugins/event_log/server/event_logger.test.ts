@@ -7,9 +7,8 @@
 import { IEvent, IEventLogger, IEventLogService } from './index';
 import { ECS_VERSION } from './types';
 import { EventLogService } from './event_log_service';
-import { getEsNames } from './es/names';
 import { EsContext } from './es/context';
-import { createMockEsContext } from './es/context.mock';
+import { contextMock } from './es/context.mock';
 import { loggerMock, MockedLogger } from '../../../../src/core/server/logging/logger.mock';
 import { delay } from './lib/delay';
 import { EVENT_LOGGED_PREFIX } from './event_logger';
@@ -24,7 +23,7 @@ describe('EventLogger', () => {
 
   beforeEach(() => {
     systemLogger = loggerMock.create();
-    esContext = createMockEsContext({ esNames: getEsNames('ABC'), logger: systemLogger });
+    esContext = contextMock.create();
     service = new EventLogService({
       esContext,
       systemLogger,
@@ -57,8 +56,6 @@ describe('EventLogger', () => {
       kibana: {
         server_uuid: '424-24-2424',
       },
-      error: {},
-      user: {},
     });
 
     const $timeStamp = event!['@timestamp']!;

@@ -17,14 +17,12 @@
  * under the License.
  */
 
+import { npStart } from 'ui/new_platform';
+export const { createFiltersFromEvent } = npStart.plugins.data.actions;
 export { AggType, AggGroupNames, IAggConfig, IAggType, Schemas } from 'ui/agg_types';
-// @ts-ignore
-export { SimpleEmitter } from 'ui/utils/simple_emitter';
-// @ts-ignore
-export { Binder } from 'ui/binder';
-export { getFormat, getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
-// @ts-ignore
-export { tabifyAggResponse } from 'ui/agg_response/tabify';
+export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { search } from '../../../../plugins/data/public';
+export const { tabifyAggResponse, tabifyGetColumns } = search;
 // @ts-ignore
 export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 // @ts-ignore

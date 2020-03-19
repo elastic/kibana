@@ -18,29 +18,30 @@
  */
 import React from 'react';
 import { EuiButton, EuiLoadingChart } from '@elastic/eui';
+import { ContainerOutput } from 'src/plugins/embeddable/public';
 import {
   ErrorEmbeddable,
   ViewMode,
   isErrorEmbeddable,
   EmbeddablePanel,
-  GetEmbeddableFactory,
-  GetEmbeddableFactories,
+  EmbeddableStart,
 } from '../embeddable_api';
 import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
   DashboardContainerFactory,
-} from '../../../../../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
+  DashboardContainerInput,
+} from '../../../../../../../../src/plugins/dashboard/public';
 
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { dashboardInput } from './dashboard_input';
 import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
-import { GetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsService } from '../../../../../../../../src/plugins/ui_actions/public';
 
 interface Props {
-  getActions: GetActionsCompatibleWithTrigger;
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getActions: UiActionsService['getTriggerCompatibleActions'];
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
@@ -67,9 +68,10 @@ export class DashboardContainerExample extends React.Component<Props, State> {
 
   public async componentDidMount() {
     this.mounted = true;
-    const dashboardFactory = this.props.getEmbeddableFactory(
-      DASHBOARD_CONTAINER_TYPE
-    ) as DashboardContainerFactory;
+    const dashboardFactory = this.props.getEmbeddableFactory<
+      DashboardContainerInput,
+      ContainerOutput
+    >(DASHBOARD_CONTAINER_TYPE) as DashboardContainerFactory;
     if (dashboardFactory) {
       this.container = await dashboardFactory.create(dashboardInput);
       if (this.mounted) {

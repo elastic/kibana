@@ -12,8 +12,6 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
         />
       </p>
     }
-    fullWidth={false}
-    gutterSize="l"
     title={
       <h3>
         <FormattedMessage
@@ -23,7 +21,6 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
         />
       </h3>
     }
-    titleSize="xs"
   >
     <EuiFormRow
       describedByIds={Array []}

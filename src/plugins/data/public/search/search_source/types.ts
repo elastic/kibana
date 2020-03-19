@@ -17,7 +17,8 @@
  * under the License.
  */
 import { NameList } from 'elasticsearch';
-import { esFilters, IndexPattern, Query } from '../..';
+import { IndexPattern, Query } from '../..';
+import { Filter } from '../../../common';
 
 export type EsQuerySearchAfter = [string | number, string | number];
 
@@ -36,10 +37,7 @@ export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumer
 export interface SearchSourceFields {
   type?: string;
   query?: Query;
-  filter?:
-    | esFilters.Filter[]
-    | esFilters.Filter
-    | (() => esFilters.Filter[] | esFilters.Filter | undefined);
+  filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
   sort?: EsQuerySortValue | EsQuerySortValue[];
   highlight?: any;
   highlightAll?: boolean;

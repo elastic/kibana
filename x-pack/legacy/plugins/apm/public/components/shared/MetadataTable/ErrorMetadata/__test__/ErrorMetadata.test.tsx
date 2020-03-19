@@ -7,7 +7,7 @@
 import React from 'react';
 import { ErrorMetadata } from '..';
 import { render } from '@testing-library/react';
-import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
+import { APMError } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,

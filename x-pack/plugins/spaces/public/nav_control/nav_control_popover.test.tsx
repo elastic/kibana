@@ -21,6 +21,7 @@ describe('NavControlPopover', () => {
     const wrapper = shallow(
       <NavControlPopover
         spacesManager={(spacesManager as unknown) as SpacesManager}
+        serverBasePath={'/server-base-path'}
         anchorPosition={'downRight'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
@@ -53,6 +54,7 @@ describe('NavControlPopover', () => {
     const wrapper = mountWithIntl(
       <NavControlPopover
         spacesManager={(spacesManager as unknown) as SpacesManager}
+        serverBasePath={'/server-base-path'}
         anchorPosition={'rightCenter'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}

@@ -55,6 +55,16 @@ describe('state selectors', () => {
       loading: false,
       errors: [],
     },
+    monitorDuration: {
+      monitor_duration: null,
+      loading: false,
+      errors: [],
+    },
+    indexStatus: {
+      loading: false,
+      data: null,
+      errors: [],
+    },
   };
 
   it('selects base path from state', () => {

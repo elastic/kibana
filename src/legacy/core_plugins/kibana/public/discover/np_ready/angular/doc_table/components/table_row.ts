@@ -33,6 +33,7 @@ import { dispatchRenderComplete } from '../../../../../../../../../plugins/kiban
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 import { esFilters } from '../../../../../../../../../plugins/data/public';
+import { getServices } from '../../../../kibana_services';
 
 // guesstimate at the minimum number of chars wide cells in the table should be
 const MIN_LINE_LENGTH = 20;
@@ -55,7 +56,6 @@ export function createTableRowDirective(
     scope: {
       columns: '=',
       filter: '=',
-      filters: '=?',
       indexPattern: '=',
       row: '=kbnTableRow',
       onAddColumn: '=?',
@@ -116,12 +116,18 @@ export function createTableRowDirective(
           anchorId: $scope.row._id,
           indexPattern: $scope.indexPattern.id,
         });
+        const globalFilters: any = getServices().filterManager.getGlobalFilters();
+        const appFilters: any = getServices().filterManager.getAppFilters();
         const hash = $httpParamSerializer({
+          _g: rison.encode({
+            filters: globalFilters || [],
+          }),
           _a: rison.encode({
             columns: $scope.columns,
-            filters: ($scope.filters || []).map(esFilters.disableFilter),
+            filters: (appFilters || []).map(esFilters.disableFilter),
           }),
         });
+
         return `${path}?${hash}`;
       };
 

@@ -17,40 +17,25 @@
  * under the License.
  */
 
-import {
+export {
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  IndexPatternMissingIndices,
   validateIndexPattern,
   getFromSavedObject,
   isDefault,
 } from './lib';
-import { getRoutes } from './utils';
-import { flattenHitWrapper, formatHitProvider } from './index_patterns';
-
-export const indexPatterns = {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  ILLEGAL_CHARACTERS,
-  IndexPatternMissingIndices,
-  validate: validateIndexPattern,
-  getRoutes,
-  getFromSavedObject,
-  flattenHitWrapper,
-  formatHitProvider,
-  isDefault,
-};
+export { getRoutes } from './utils';
+export { flattenHitWrapper, formatHitProvider } from './index_patterns';
 
 export { Field, FieldList } from './fields';
 
 // TODO: figure out how to replace IndexPatterns in get_inner_angular.
 export {
-  IndexPattern,
-  IndexPatterns,
+  IndexPatternsService,
   IndexPatternsContract,
+  IndexPattern,
   TypeMeta,
   AggregationRestrictions,
 } from './index_patterns';

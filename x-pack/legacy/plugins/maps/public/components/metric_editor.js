@@ -12,17 +12,16 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { MetricSelect, METRIC_AGGREGATION_VALUES } from './metric_select';
 import { SingleFieldSelect } from './single_field_select';
-import { METRIC_TYPE } from '../../common/constants';
+import { AGG_TYPE } from '../../common/constants';
+import { getTermsFields } from '../index_pattern_util';
 
 function filterFieldsForAgg(fields, aggType) {
   if (!fields) {
     return [];
   }
 
-  if (aggType === METRIC_TYPE.UNIQUE_COUNT) {
-    return fields.filter(field => {
-      return field.aggregatable;
-    });
+  if (aggType === AGG_TYPE.UNIQUE_COUNT || aggType === AGG_TYPE.TERMS) {
+    return getTermsFields(fields);
   }
 
   return fields.filter(field => {
@@ -38,7 +37,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
     };
 
     // unset field when new agg type does not support currently selected field.
-    if (metric.field && metricAggregationType !== METRIC_TYPE.COUNT) {
+    if (metric.field && metricAggregationType !== AGG_TYPE.COUNT) {
       const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
       const found = fieldsForNewAggType.find(field => {
         return field.name === metric.field;
@@ -64,7 +63,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
   };
 
   let fieldSelect;
-  if (metric.type && metric.type !== METRIC_TYPE.COUNT) {
+  if (metric.type && metric.type !== AGG_TYPE.COUNT) {
     fieldSelect = (
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.selectFieldLabel', {

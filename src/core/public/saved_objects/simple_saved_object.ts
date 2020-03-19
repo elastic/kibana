@@ -18,7 +18,7 @@
  */
 
 import { get, has, set } from 'lodash';
-import { SavedObject as SavedObjectType, SavedObjectAttributes } from '../../server';
+import { SavedObject as SavedObjectType } from '../../server';
 import { SavedObjectsClientContract } from './saved_objects_client';
 
 /**
@@ -30,7 +30,7 @@ import { SavedObjectsClientContract } from './saved_objects_client';
  *
  * @public
  */
-export class SimpleSavedObject<T extends SavedObjectAttributes> {
+export class SimpleSavedObject<T = unknown> {
   public attributes: T;
   // We want to use the same interface this class had in JS
   public _version?: SavedObjectType<T>['version'];
@@ -46,7 +46,7 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
   ) {
     this.id = id;
     this.type = type;
-    this.attributes = attributes || {};
+    this.attributes = attributes || ({} as T);
     this.references = references || [];
     this._version = version;
     this.migrationVersion = migrationVersion;

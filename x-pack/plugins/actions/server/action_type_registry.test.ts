@@ -13,7 +13,9 @@ import { configUtilsMock } from './actions_config.mock';
 const mockTaskManager = taskManagerMock.setup();
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
-  taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+  taskRunnerFactory: new TaskRunnerFactory(
+    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+  ),
   actionsConfigUtils: configUtilsMock,
 };
 

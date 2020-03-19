@@ -4,25 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
+import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
-import { QueryString } from 'ui/utils/query_string';
-import { Query, esFilters } from 'src/plugins/data/public';
 
-import { isEmpty } from 'lodash/fp';
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+
 import { SiemPageName } from '../../pages/home/types';
 import { inputsSelectors, State, timelineSelectors } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
+import { TimelineUrl } from '../../store/timeline/model';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
-import {
-  LocationTypes,
-  UrlStateContainerPropTypes,
-  ReplaceStateInLocation,
-  Timeline,
-  UpdateUrlStateString,
-} from './types';
+import { ReplaceStateInLocation, UpdateUrlStateString } from './types';
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
@@ -40,30 +37,35 @@ export const encodeRisonUrlState = (state: any) => encode(state);
 
 export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
-export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const queryParam = QueryString.decode(queryString)[key];
+export const getParamFromQueryString = (queryString: string, key: string) => {
+  const parsedQueryString = parse(queryString, { sort: false });
+  const queryParam = parsedQueryString[key];
+
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
 export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) => (
   queryString: string
 ): string => {
-  const previousQueryValues = QueryString.decode(queryString);
+  const previousQueryValues = parse(queryString, { sort: false });
   if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];
-    return QueryString.encode({
-      ...previousQueryValues,
-    });
+
+    return stringify(url.encodeQuery(previousQueryValues), { sort: false, encode: false });
   }
 
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
   // Remove this if these utilities are promoted to kibana core
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  return QueryString.encode({
-    ...previousQueryValues,
-    [stateKey]: encodedUrlState,
-  });
+
+  return stringify(
+    url.encodeQuery({
+      ...previousQueryValues,
+      [stateKey]: encodedUrlState,
+    }),
+    { sort: false, encode: false }
+  );
 };
 
 export const replaceQueryStringInLocation = (
@@ -91,6 +93,8 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'detections';
   } else if (pageName === SiemPageName.timelines) {
     return 'timeline';
+  } else if (pageName === SiemPageName.case) {
+    return 'case';
   }
   return 'overview';
 };
@@ -104,37 +108,13 @@ export const getTitle = (
   return navTabs[pageName] != null ? navTabs[pageName].name : '';
 };
 
-export const getCurrentLocation = (
-  pageName: string,
-  detailName: string | undefined
-): LocationTypes => {
-  if (pageName === SiemPageName.overview) {
-    return CONSTANTS.overviewPage;
-  } else if (pageName === SiemPageName.hosts) {
-    if (detailName != null) {
-      return CONSTANTS.hostsDetails;
-    }
-    return CONSTANTS.hostsPage;
-  } else if (pageName === SiemPageName.network) {
-    if (detailName != null) {
-      return CONSTANTS.networkDetails;
-    }
-    return CONSTANTS.networkPage;
-  } else if (pageName === SiemPageName.detections) {
-    return CONSTANTS.detectionsPage;
-  } else if (pageName === SiemPageName.timelines) {
-    return CONSTANTS.timelinePage;
-  }
-  return CONSTANTS.unknown;
-};
-
 export const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimelines = timelineSelectors.getTimelines();
-  const mapStateToProps = (state: State, { pageName, detailName }: UrlStateContainerPropTypes) => {
+  const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
@@ -149,7 +129,7 @@ export const makeMapStateToProps = () => {
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;
-      [CONSTANTS.filters]?: esFilters.Filter[];
+      [CONSTANTS.filters]?: Filter[];
       [CONSTANTS.savedQuery]?: string;
     } = {
       [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
@@ -232,7 +212,7 @@ export const updateUrlStateString = ({
       });
     }
   } else if (urlKey === CONSTANTS.filters) {
-    const queryState = decodeRisonUrlState<esFilters.Filter[]>(newUrlStateString);
+    const queryState = decodeRisonUrlState<Filter[]>(newUrlStateString);
     if (isEmpty(queryState)) {
       return replaceStateInLocation({
         history,
@@ -243,7 +223,7 @@ export const updateUrlStateString = ({
       });
     }
   } else if (urlKey === CONSTANTS.timeline) {
-    const queryState = decodeRisonUrlState<Timeline>(newUrlStateString);
+    const queryState = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
     if (queryState != null && queryState.id === '') {
       return replaceStateInLocation({
         history,

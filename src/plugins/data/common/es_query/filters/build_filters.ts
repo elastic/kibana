@@ -17,19 +17,28 @@
  * under the License.
  */
 
-import { esFilters, IIndexPattern, IFieldType } from '../..';
-import { FilterMeta, FilterStateStore } from '.';
+import { IIndexPattern, IFieldType } from '../..';
+import {
+  Filter,
+  FILTERS,
+  FilterStateStore,
+  FilterMeta,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildRangeFilter,
+  buildExistsFilter,
+} from '.';
 
 export function buildFilter(
   indexPattern: IIndexPattern,
   field: IFieldType,
-  type: esFilters.FILTERS,
+  type: FILTERS,
   negate: boolean,
   disabled: boolean,
   params: any,
   alias: string | null,
-  store: esFilters.FilterStateStore
-): esFilters.Filter {
+  store: FilterStateStore
+): Filter {
   const filter = buildBaseFilter(indexPattern, field, type, params);
   filter.meta.alias = alias;
   filter.meta.negate = negate;
@@ -45,15 +54,15 @@ export function buildCustomFilter(
   negate: boolean,
   alias: string | null,
   store: FilterStateStore
-): esFilters.Filter {
+): Filter {
   const meta: FilterMeta = {
     index: indexPatternString,
-    type: esFilters.FILTERS.CUSTOM,
+    type: FILTERS.CUSTOM,
     disabled,
     negate,
     alias,
   };
-  const filter: esFilters.Filter = { ...queryDsl, meta };
+  const filter: Filter = { ...queryDsl, meta };
   filter.$state = { store };
   return filter;
 }
@@ -61,19 +70,19 @@ export function buildCustomFilter(
 function buildBaseFilter(
   indexPattern: IIndexPattern,
   field: IFieldType,
-  type: esFilters.FILTERS,
+  type: FILTERS,
   params: any
-): esFilters.Filter {
+): Filter {
   switch (type) {
     case 'phrase':
-      return esFilters.buildPhraseFilter(field, params, indexPattern);
+      return buildPhraseFilter(field, params, indexPattern);
     case 'phrases':
-      return esFilters.buildPhrasesFilter(field, params, indexPattern);
+      return buildPhrasesFilter(field, params, indexPattern);
     case 'range':
       const newParams = { gte: params.from, lt: params.to };
-      return esFilters.buildRangeFilter(field, newParams, indexPattern);
+      return buildRangeFilter(field, newParams, indexPattern);
     case 'exists':
-      return esFilters.buildExistsFilter(field, indexPattern);
+      return buildExistsFilter(field, indexPattern);
     default:
       throw new Error(`Unknown filter type: ${type}`);
   }

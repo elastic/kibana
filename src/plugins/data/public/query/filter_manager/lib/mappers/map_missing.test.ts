@@ -18,14 +18,14 @@
  */
 
 import { mapMissing } from './map_missing';
-import { esFilters } from '../../../../../common';
+import { MissingFilter, buildEmptyFilter } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapMissing()', () => {
     test('should return the key and value for matching filters', async () => {
-      const filter: esFilters.MissingFilter = {
+      const filter: MissingFilter = {
         missing: { field: '_type' },
-        ...esFilters.buildEmptyFilter(true),
+        ...buildEmptyFilter(true),
       };
       const result = mapMissing(filter);
 
@@ -34,7 +34,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should return undefined for none matching', async done => {
-      const filter = esFilters.buildEmptyFilter(true);
+      const filter = buildEmptyFilter(true);
 
       try {
         mapMissing(filter);

@@ -25,7 +25,6 @@ import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import {
   IAggConfig,
   AggGroupNames,
-  ISchemas,
   parentPipelineType,
   IMetricAggType,
 } from '../../legacy_imports';
@@ -40,6 +39,7 @@ import {
   toggleEnabledAgg,
 } from './state';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
+import { ISchemas } from '../../schemas';
 
 export interface DefaultEditorDataTabProps {
   dispatch: React.Dispatch<EditorAction>;
@@ -76,8 +76,8 @@ function DefaultEditorDataTab({
   const addSchema: AddSchema = useCallback(schema => dispatch(addNewAgg(schema)), [dispatch]);
 
   const onAggRemove: DefaultEditorAggCommonProps['removeAgg'] = useCallback(
-    aggId => dispatch(removeAgg(aggId)),
-    [dispatch]
+    aggId => dispatch(removeAgg(aggId, schemas.all || [])),
+    [dispatch, schemas]
   );
 
   const onReorderAggs: ReorderAggs = useCallback((...props) => dispatch(reorderAggs(...props)), [

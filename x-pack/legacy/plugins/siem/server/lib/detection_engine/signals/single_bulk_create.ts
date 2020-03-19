@@ -6,7 +6,7 @@
 
 import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
-import { AlertServices } from '../../../../../alerting/server/types';
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { SignalSearchResponse, BulkResponse } from './types';
 import { RuleTypeParams } from '../types';
 import { generateId } from './utils';

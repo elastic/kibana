@@ -1,0 +1,9 @@
+{
+  "id": "ingestManager",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "ingestManager"],
+  "requiredPlugins": ["licensing", "data", "encryptedSavedObjects"],
+  "optionalPlugins": ["security", "features"]
+}

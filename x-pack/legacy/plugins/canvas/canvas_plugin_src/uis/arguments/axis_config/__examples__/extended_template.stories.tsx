@@ -7,11 +7,11 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ExpressionAST } from '../../../../../types';
+import { ExpressionAstExpression } from '../../../../../types';
 
 import { ExtendedTemplate } from '../extended_template';
 
-const defaultExpression: ExpressionAST = {
+const defaultExpression: ExpressionAstExpression = {
   type: 'expression',
   chain: [
     {
@@ -29,7 +29,7 @@ const defaultValues = {
 class Interactive extends React.Component<{}, typeof defaultValues> {
   public state = defaultValues;
 
-  _onValueChange: (argValue: ExpressionAST) => void = argValue => {
+  _onValueChange: (argValue: ExpressionAstExpression) => void = argValue => {
     action('onValueChange')(argValue);
     this.setState({ argValue });
   };

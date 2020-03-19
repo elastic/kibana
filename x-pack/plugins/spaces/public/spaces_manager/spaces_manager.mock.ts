@@ -20,7 +20,6 @@ function createSpacesManagerMock() {
     copySavedObjects: jest.fn().mockResolvedValue(undefined),
     resolveCopySavedObjectsErrors: jest.fn().mockResolvedValue(undefined),
     redirectToSpaceSelector: jest.fn().mockResolvedValue(undefined),
-    changeSelectedSpace: jest.fn(),
   } as unknown) as jest.Mocked<SpacesManager>;
 }
 

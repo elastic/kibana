@@ -18,6 +18,7 @@
  */
 
 import { ComponentRegistry } from './component_registry';
+import { ManagementSetup } from '../../management/public';
 
 export interface AdvancedSettingsSetup {
   component: ComponentRegistry['setup'];
@@ -25,3 +26,9 @@ export interface AdvancedSettingsSetup {
 export interface AdvancedSettingsStart {
   component: ComponentRegistry['start'];
 }
+
+export interface AdvancedSettingsPluginSetup {
+  management: ManagementSetup;
+}
+
+export { ComponentRegistry };

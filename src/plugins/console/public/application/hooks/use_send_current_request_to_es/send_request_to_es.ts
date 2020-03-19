@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import * as utils from '../../../lib/utils/utils';
+import { extractDeprecationMessages } from '../../../lib/utils';
+import { collapseLiteralStrings } from '../../../../../es_ui_shared/console_lang/lib';
 // @ts-ignore
 import * as es from '../../../lib/es/es';
-import { BaseResponseType } from '../../../types/common';
+import { BaseResponseType } from '../../../types';
 
 export interface EsRequestArgs {
   requests: any;
@@ -73,7 +74,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
       const req = requests.shift();
       const esPath = req.url;
       const esMethod = req.method;
-      let esData = utils.collapseLiteralStrings(req.data.join('\n'));
+      let esData = collapseLiteralStrings(req.data.join('\n'));
       if (esData) {
         esData += '\n';
       } // append a new line for bulk requests.
@@ -97,7 +98,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
             const warnings = xhr.getResponseHeader('warning');
             if (warnings) {
-              const deprecationMessages = utils.extractDeprecationMessages(warnings);
+              const deprecationMessages = extractDeprecationMessages(warnings);
               value = deprecationMessages.join('\n') + '\n' + value;
             }
 

@@ -17,17 +17,20 @@
  * under the License.
  */
 
+import { SavedObject } from 'src/core/public';
 import { get } from 'lodash';
-import { IIndexPattern } from '../..';
+import { IIndexPattern, IndexPatternAttributes } from '../..';
 
-export function getFromSavedObject(savedObject: any): IIndexPattern | undefined {
+export function getFromSavedObject(
+  savedObject: SavedObject<IndexPatternAttributes>
+): IIndexPattern | undefined {
   if (get(savedObject, 'attributes.fields') === undefined) {
     return;
   }
 
   return {
     id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields),
+    fields: JSON.parse(savedObject.attributes.fields!),
     title: savedObject.attributes.title,
   };
 }

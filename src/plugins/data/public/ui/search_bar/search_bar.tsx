@@ -25,28 +25,19 @@ import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
-import {
-  IDataPluginServices,
-  TimeRange,
-  Query,
-  esFilters,
-  IIndexPattern,
-  TimeHistoryContract,
-  FilterBar,
-  SavedQuery,
-  SavedQueryMeta,
-  SaveQueryForm,
-  SavedQueryManagementComponent,
-  SavedQueryAttributes,
-} from '../..';
+
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
+import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
+import { IDataPluginServices } from '../../types';
+import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
+import { SavedQueryMeta, SavedQueryManagementComponent, SaveQueryForm, FilterBar } from '..';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   timeHistory: TimeHistoryContract;
   // Filter bar
-  onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
+  onFiltersUpdated?: (filters: Filter[]) => void;
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
 }
@@ -63,7 +54,7 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   // Date picker
   isRefreshPaused?: boolean;
   refreshInterval?: number;

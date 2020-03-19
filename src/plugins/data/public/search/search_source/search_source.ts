@@ -73,12 +73,13 @@ import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { esFilters, esQuery, SearchRequest } from '../..';
+import { IIndexPattern, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 
 import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
-import { getHighlightRequest } from '../../../common';
+import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
+import { getHighlightRequest } from '../../../common/field_formats';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -338,11 +339,20 @@ export class SearchSource {
     return searchRequest;
   }
 
+  private getIndexType(index: IIndexPattern) {
+    if (this.searchStrategyId) {
+      return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
+    } else {
+      return index?.type;
+    }
+  }
+
   private flatten() {
     const searchRequest = this.mergeProps();
 
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
+    searchRequest.indexType = this.getIndexType(index);
 
     const computedFields = index ? index.getComputedFields() : {};
 
@@ -379,15 +389,15 @@ export class SearchSource {
       _.set(body, '_source.includes', remainingFields);
     }
 
-    const esQueryConfigs = esQuery.getEsQueryConfig(getUiSettings());
-    body.query = esQuery.buildEsQuery(index, query, filters, esQueryConfigs);
+    const esQueryConfigs = getEsQueryConfig(getUiSettings());
+    body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(body.query, getUiSettings().get('doc_table:highlight'));
       delete searchRequest.highlightAll;
     }
 
-    const translateToQuery = (filter: esFilters.Filter) => filter && (filter.query || filter);
+    const translateToQuery = (filter: Filter) => filter && (filter.query || filter);
 
     // re-write filters within filter aggregations
     (function recurse(aggBranch) {

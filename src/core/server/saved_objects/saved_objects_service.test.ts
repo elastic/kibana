@@ -23,7 +23,8 @@ import {
   clientProviderInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
-
+import { BehaviorSubject } from 'rxjs';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
 import * as legacyElasticsearch from 'elasticsearch';
@@ -31,14 +32,32 @@ import { Env } from '../config';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { BehaviorSubject } from 'rxjs';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 
 describe('SavedObjectsService', () => {
+  const createCoreContext = ({
+    skipMigration = true,
+    env,
+  }: { skipMigration?: boolean; env?: Env } = {}) => {
+    const configService = configServiceMock.create({ atPath: { skip: true } });
+    configService.atPath.mockImplementation(path => {
+      if (path === 'migrations') {
+        return new BehaviorSubject({ skip: skipMigration });
+      }
+      return new BehaviorSubject({
+        maxImportPayloadBytes: new ByteSizeValue(0),
+        maxImportExportSize: new ByteSizeValue(0),
+      });
+    });
+    return mockCoreContext.create({ configService, env });
+  };
+
   const createSetupDeps = () => {
     const elasticsearchMock = elasticsearchServiceMock.createInternalSetup();
     return {
+      http: httpServiceMock.createSetupContract(),
       elasticsearch: elasticsearchMock,
       legacyPlugins: legacyServiceMock.createDiscoverPlugins(),
     };
@@ -51,7 +70,7 @@ describe('SavedObjectsService', () => {
   describe('#setup()', () => {
     describe('#setClientFactoryProvider', () => {
       it('registers the factory to the clientProvider', async () => {
-        const coreContext = mockCoreContext.create();
+        const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
@@ -65,7 +84,7 @@ describe('SavedObjectsService', () => {
         expect(clientProviderInstanceMock.setClientFactory).toHaveBeenCalledWith(factory);
       });
       it('throws if a factory is already registered', async () => {
-        const coreContext = mockCoreContext.create();
+        const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
@@ -84,7 +103,7 @@ describe('SavedObjectsService', () => {
 
     describe('#addClientWrapper', () => {
       it('registers the wrapper to the clientProvider', async () => {
-        const coreContext = mockCoreContext.create();
+        const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
@@ -110,9 +129,9 @@ describe('SavedObjectsService', () => {
       });
     });
 
-    describe('registerType', () => {
+    describe('#registerType', () => {
       it('registers the type to the internal typeRegistry', async () => {
-        const coreContext = mockCoreContext.create();
+        const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
@@ -132,7 +151,7 @@ describe('SavedObjectsService', () => {
 
   describe('#start()', () => {
     it('creates a KibanaMigrator which retries NoConnections errors from callAsInternalUser', async () => {
-      const coreContext = mockCoreContext.create();
+      const coreContext = createCoreContext();
 
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = createSetupDeps();
@@ -153,7 +172,7 @@ describe('SavedObjectsService', () => {
     });
 
     it('skips KibanaMigrator migrations when --optimize=true', async () => {
-      const coreContext = mockCoreContext.create({
+      const coreContext = createCoreContext({
         env: ({ cliArgs: { optimize: true }, packageInfo: { version: 'x.x.x' } } as unknown) as Env,
       });
       const soService = new SavedObjectsService(coreContext);
@@ -164,8 +183,7 @@ describe('SavedObjectsService', () => {
     });
 
     it('skips KibanaMigrator migrations when migrations.skip=true', async () => {
-      const configService = configServiceMock.create({ atPath: { skip: true } });
-      const coreContext = mockCoreContext.create({ configService });
+      const coreContext = createCoreContext({ skipMigration: true });
       const soService = new SavedObjectsService(coreContext);
       await soService.setup(createSetupDeps());
       await soService.start({});
@@ -174,8 +192,7 @@ describe('SavedObjectsService', () => {
 
     it('waits for all es nodes to be compatible before running migrations', async done => {
       expect.assertions(2);
-      const configService = configServiceMock.create({ atPath: { skip: false } });
-      const coreContext = mockCoreContext.create({ configService });
+      const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
       const setupDeps = createSetupDeps();
       // Create an new subject so that we can control when isCompatible=true
@@ -204,8 +221,7 @@ describe('SavedObjectsService', () => {
     });
 
     it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {
-      const configService = configServiceMock.create({ atPath: { skip: false } });
-      const coreContext = mockCoreContext.create({ configService });
+      const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
       await soService.setup(createSetupDeps());
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
@@ -213,6 +229,47 @@ describe('SavedObjectsService', () => {
       const startContract = await soService.start({});
       expect(startContract.migrator).toBe(migratorInstanceMock);
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws when calling setup APIs once started', async () => {
+      const coreContext = createCoreContext({ skipMigration: false });
+      const soService = new SavedObjectsService(coreContext);
+      const setup = await soService.setup(createSetupDeps());
+      await soService.start({});
+
+      expect(() => {
+        setup.setClientFactoryProvider(jest.fn());
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`setClientFactoryProvider\` after service startup."`
+      );
+
+      expect(() => {
+        setup.addClientWrapper(0, 'dummy', jest.fn());
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`addClientWrapper\` after service startup."`
+      );
+
+      expect(() => {
+        setup.registerType({
+          name: 'someType',
+          hidden: false,
+          namespaceAgnostic: false,
+          mappings: { properties: {} },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`registerType\` after service startup."`
+      );
+    });
+
+    describe('#getTypeRegistry', () => {
+      it('returns the internal type registry of the service', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const { getTypeRegistry } = await soService.start({});
+
+        expect(getTypeRegistry()).toBe(typeRegistryInstanceMock);
+      });
     });
   });
 });

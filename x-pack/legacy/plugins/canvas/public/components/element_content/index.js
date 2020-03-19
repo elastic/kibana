@@ -8,8 +8,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
-import { registries } from 'plugins/interpreter/registries';
 import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ElementContent as Component } from './element_content';
 
 const mapStateToProps = state => ({
@@ -18,8 +18,9 @@ const mapStateToProps = state => ({
 
 export const ElementContent = compose(
   connect(mapStateToProps),
-  withProps(({ renderable }) => ({
-    renderFunction: registries.renderers.get(get(renderable, 'as')),
+  withKibana,
+  withProps(({ renderable, kibana }) => ({
+    renderFunction: kibana.services.expressions.getRenderer(get(renderable, 'as')),
   }))
 )(Component);
 

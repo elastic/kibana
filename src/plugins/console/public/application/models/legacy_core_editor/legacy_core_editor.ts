@@ -189,8 +189,9 @@ export class LegacyCoreEditor implements CoreEditor {
   }
 
   getLineCount() {
-    const text = this.getValue();
-    return text.split('\n').length;
+    // Only use this function to return line count as it uses
+    // a cache.
+    return this.editor.getSession().getLength();
   }
 
   addMarker(range: Range) {

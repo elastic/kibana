@@ -35,14 +35,14 @@ import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { esFilters } from '../../../../plugins/data/public';
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {
-  const { doStart } = testPlugin();
+  const { doStart, setup } = testPlugin();
   const api = doStart();
 
   const factory1 = new FilterableContainerFactory(api.getEmbeddableFactory);
   const factory2 = new FilterableEmbeddableFactory();
 
-  api.registerEmbeddableFactory(factory1.type, factory1);
-  api.registerEmbeddableFactory(factory2.type, factory2);
+  setup.registerEmbeddableFactory(factory1.type, factory1);
+  setup.registerEmbeddableFactory(factory2.type, factory2);
 
   const applyFilterAction = createFilterAction();
 
@@ -93,7 +93,7 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
 });
 
 test('ApplyFilterAction is incompatible if the root container does not accept a filter as input', async () => {
-  const { doStart, coreStart } = testPlugin();
+  const { doStart, coreStart, setup } = testPlugin();
   const api = doStart();
   const inspector = inspectorPluginMock.createStartContract();
 
@@ -112,7 +112,7 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
   );
 
   const factory = new FilterableEmbeddableFactory();
-  api.registerEmbeddableFactory(factory.type, factory);
+  setup.registerEmbeddableFactory(factory.type, factory);
 
   const embeddable = await parent.addNewEmbeddable<
     FilterableContainerInput,
@@ -129,12 +129,12 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
 });
 
 test('trying to execute on incompatible context throws an error ', async () => {
-  const { doStart, coreStart } = testPlugin();
+  const { doStart, coreStart, setup } = testPlugin();
   const api = doStart();
   const inspector = inspectorPluginMock.createStartContract();
 
   const factory = new FilterableEmbeddableFactory();
-  api.registerEmbeddableFactory(factory.type, factory);
+  setup.registerEmbeddableFactory(factory.type, factory);
 
   const applyFilterAction = createFilterAction();
   const parent = new HelloWorldContainer(

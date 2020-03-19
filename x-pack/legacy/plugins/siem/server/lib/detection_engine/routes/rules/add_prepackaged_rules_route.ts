@@ -4,84 +4,94 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
-import Boom from 'boom';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
 import { getIndexExists } from '../../index/get_index_exists';
-import { callWithRequestFactory, getIndex, transformError } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
 import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import {
+  PrePackagedRulesSchema,
+  prePackagedRulesSchema,
+} from '../schemas/response/prepackaged_rules_schema';
+import { validate } from './validate';
 
-export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'PUT',
-    path: DETECTION_ENGINE_PREPACKAGED_URL,
-    options: {
-      tags: ['access:siem'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
+export const addPrepackedRulesRoute = (router: IRouter) => {
+  router.put(
+    {
+      path: DETECTION_ENGINE_PREPACKAGED_URL,
+      validate: false,
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: RequestFacade, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
 
       try {
-        const callWithRequest = callWithRequestFactory(request, server);
+        if (!context.alerting || !context.actions) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+        const alertsClient = context.alerting.getAlertsClient();
+        const actionsClient = context.actions.getActionsClient();
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const savedObjectsClient = context.core.savedObjects.client;
+        const siemClient = context.siem.getSiemClient();
+
+        if (!actionsClient || !alertsClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
         const rulesFromFileSystem = getPrepackagedRules();
 
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
 
-        const spaceIndex = getIndex(request, server);
+        const { signalsIndex } = siemClient;
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
-          const spaceIndexExists = await getIndexExists(callWithRequest, spaceIndex);
-          if (!spaceIndexExists) {
-            return Boom.badRequest(
-              `Pre-packaged rules cannot be installed until the space index is created: ${spaceIndex}`
-            );
+          const signalsIndexExists = await getIndexExists(
+            clusterClient.callAsCurrentUser,
+            signalsIndex
+          );
+          if (!signalsIndexExists) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: `Pre-packaged rules cannot be installed until the signals index is created: ${signalsIndex}`,
+            });
           }
         }
         await Promise.all(
-          installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, spaceIndex)
+          installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, signalsIndex)
         );
         await updatePrepackagedRules(
           alertsClient,
           actionsClient,
           savedObjectsClient,
           rulesToUpdate,
-          spaceIndex
+          signalsIndex
         );
-        return {
+        const prepackagedRulesOutput: PrePackagedRulesSchema = {
           rules_installed: rulesToInstall.length,
           rules_updated: rulesToUpdate.length,
         };
+        const [validated, errors] = validate(prepackagedRulesOutput, prePackagedRulesSchema);
+        if (errors != null) {
+          return siemResponse.error({ statusCode: 500, body: errors });
+        } else {
+          return response.ok({ body: validated ?? {} });
+        }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const addPrepackedRulesRoute = (server: ServerFacade): void => {
-  server.route(createAddPrepackedRulesRoute(server));
+    }
+  );
 };

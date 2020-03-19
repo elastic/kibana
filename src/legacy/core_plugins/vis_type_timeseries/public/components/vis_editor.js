@@ -50,7 +50,7 @@ export class VisEditor extends Component {
       visFields: props.visFields,
       extractedIndexPatterns: [''],
     };
-    this.onBrush = createBrushHandler(getDataStart().query.timefilter);
+    this.onBrush = createBrushHandler(getDataStart().query.timefilter.timefilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 
@@ -82,7 +82,6 @@ export class VisEditor extends Component {
     // This check should be redundant, since this method should only be called when we're in editor
     // mode where there's also an appState passed into us.
     if (this.props.appState) {
-      this.props.appState.vis = this.props.vis.getState();
       this.props.appState.save();
     }
   }, VIS_STATE_DEBOUNCE_DELAY);

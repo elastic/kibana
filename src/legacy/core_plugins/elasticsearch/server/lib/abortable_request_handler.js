@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AbortController } from 'abort-controller';
+import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 
 /*
  * A simple utility for generating a handler that provides a signal to the handler that signals when

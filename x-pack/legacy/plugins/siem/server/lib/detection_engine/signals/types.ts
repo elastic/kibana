@@ -6,8 +6,11 @@
 
 import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
-import { RequestFacade } from '../../../types';
-import { AlertType, State, AlertExecutorOptions } from '../../../../../alerting/server/types';
+import {
+  AlertType,
+  State,
+  AlertExecutorOptions,
+} from '../../../../../../../plugins/alerting/server';
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
@@ -34,14 +37,6 @@ export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
 };
 
 export type SignalsQueryRestParams = SignalQueryParams;
-
-export interface SignalsStatusRequest extends RequestFacade {
-  payload: SignalsStatusRestParams;
-}
-
-export interface SignalsQueryRequest extends RequestFacade {
-  payload: SignalsQueryRestParams;
-}
 
 export type SearchTypes =
   | string
@@ -109,7 +104,7 @@ export interface GetResponse {
 }
 
 export type SignalSearchResponse = SearchResponse<SignalSource>;
-export type SignalSourceHit = SignalSearchResponse['hits']['hits'][0];
+export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
 
 export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
   params: RuleAlertParams & {
@@ -149,4 +144,16 @@ export interface SignalHit {
   '@timestamp': string;
   event: object;
   signal: Partial<Signal>;
+}
+
+export interface AlertAttributes {
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  schedule: {
+    interval: string;
+  };
 }

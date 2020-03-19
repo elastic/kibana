@@ -26,8 +26,8 @@ const filterByName = propFilter('name');
  * and limits available aggregations based on that.
  */
 aggTypeFilters.addFilter(
-  (aggType: IAggType, indexPatterns: IndexPattern, aggConfig: IAggConfig) => {
-    const doesSchemaAllowAggType = filterByName([aggType], aggConfig.schema.aggFilter).length !== 0;
+  (aggType: IAggType, indexPatterns: IndexPattern, aggConfig: IAggConfig, aggFilter: string[]) => {
+    const doesSchemaAllowAggType = filterByName([aggType], aggFilter).length !== 0;
     return doesSchemaAllowAggType;
   }
 );

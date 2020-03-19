@@ -21,6 +21,6 @@ require('core-js/stable');
 require('regenerator-runtime/runtime');
 require('custom-event-polyfill');
 require('whatwg-fetch');
-require('abort-controller/polyfill');
+require('abortcontroller-polyfill/dist/polyfill-patch-fetch');
 require('./vendor/childnode_remove_polyfill');
 require('symbol-observable');

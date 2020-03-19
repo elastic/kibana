@@ -23,11 +23,19 @@ import {
   I18nStart,
   IUiSettingsClient,
   SavedObjectsStart,
-} from 'src/core/public';
-import { TypesStart } from './types';
+} from '../../../../../../core/public';
+import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
-import { FilterManager, IndexPatternsContract } from '../../../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  FilterManager,
+  IndexPatternsContract,
+  TimefilterContract,
+} from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
+import { ExpressionsStart } from '../../../../../../plugins/expressions/public';
+import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
+import { SavedVisualizationsLoader } from './saved_visualizations';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -47,10 +55,24 @@ export const [getFilterManager, setFilterManager] = createGetterSetter<FilterMan
   'FilterManager'
 );
 
+export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContract>('TimeFilter');
+
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
   'IndexPatterns'
 );
 
 export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
   'UsageCollection'
+);
+
+export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
+
+export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UiActions');
+
+export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] = createGetterSetter<
+  SavedVisualizationsLoader
+>('SavedVisualisationsLoader');
+
+export const [getAggs, setAggs] = createGetterSetter<DataPublicPluginStart['search']['aggs']>(
+  'AggConfigs'
 );

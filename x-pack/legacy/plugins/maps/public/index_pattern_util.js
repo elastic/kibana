@@ -5,7 +5,7 @@
  */
 
 import { indexPatternService } from './kibana_services';
-import { isNestedField } from '../../../../../src/plugins/data/public';
+import { indexPatterns } from '../../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE } from '../common/constants';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
@@ -24,7 +24,7 @@ export function getTermsFields(fields) {
   return fields.filter(field => {
     return (
       field.aggregatable &&
-      !isNestedField(field) &&
+      !indexPatterns.isNestedField(field) &&
       ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
     );
   });
@@ -36,7 +36,7 @@ export function getAggregatableGeoFields(fields) {
   return fields.filter(field => {
     return (
       field.aggregatable &&
-      !isNestedField(field) &&
+      !indexPatterns.isNestedField(field) &&
       AGGREGATABLE_GEO_FIELD_TYPES.includes(field.type)
     );
   });
@@ -47,6 +47,6 @@ export function getSourceFields(fields) {
   return fields.filter(field => {
     // Multi fields are not stored in _source and only exist in index.
     const isMultiField = field.subType && field.subType.multi;
-    return !isMultiField && !isNestedField(field);
+    return !isMultiField && !indexPatterns.isNestedField(field);
   });
 }

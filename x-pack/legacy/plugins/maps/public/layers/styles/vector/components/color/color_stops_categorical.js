@@ -17,18 +17,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ColorStops } from './color_stops';
 import { getOtherCategoryLabel } from '../../style_util';
+import { StopInput } from '../stop_input';
 
 export const ColorStopsCategorical = ({
   colorStops = [
     { stop: null, color: DEFAULT_CUSTOM_COLOR }, //first stop is the "other" color
     { stop: '', color: DEFAULT_NEXT_COLOR },
   ],
+  field,
   onChange,
+  getValueSuggestions,
 }) => {
-  const sanitizeStopInput = value => {
-    return value;
-  };
-
   const getStopError = (stop, index) => {
     let count = 0;
     for (let i = 1; i < colorStops.length; i++) {
@@ -49,34 +48,23 @@ export const ColorStopsCategorical = ({
     if (index === 0) {
       return (
         <EuiFieldText
-          aria-label={i18n.translate(
-            'xpack.maps.styles.colorStops.categoricalStop.defaultCategoryAriaLabel',
-            {
-              defaultMessage: 'Default stop',
-            }
-          )}
-          value={stopValue}
+          aria-label={getOtherCategoryLabel()}
           placeholder={getOtherCategoryLabel()}
           disabled
-          onChange={onStopChange}
-          compressed
-        />
-      );
-    } else {
-      return (
-        <EuiFieldText
-          aria-label={i18n.translate(
-            'xpack.maps.styles.colorStops.categoricalStop.categoryAriaLabel',
-            {
-              defaultMessage: 'Category',
-            }
-          )}
-          value={stopValue}
-          onChange={onStopChange}
           compressed
         />
       );
     }
+
+    return (
+      <StopInput
+        key={field.getName()} // force new component instance when field changes
+        field={field}
+        getValueSuggestions={getValueSuggestions}
+        value={stopValue}
+        onChange={onStopChange}
+      />
+    );
   };
 
   const canDeleteStop = (colorStops, index) => {
@@ -88,7 +76,6 @@ export const ColorStopsCategorical = ({
       onChange={onChange}
       colorStops={colorStops}
       isStopsInvalid={isCategoricalStopsInvalid}
-      sanitizeStopInput={sanitizeStopInput}
       getStopError={getStopError}
       renderStopInput={renderStopInput}
       canDeleteStop={canDeleteStop}
@@ -114,4 +101,8 @@ ColorStopsCategorical.propTypes = {
    * Callback for when the color stops changes. Called with { colorStops, isInvalid }
    */
   onChange: PropTypes.func.isRequired,
+  /**
+   * Callback for fetching stop value suggestions. Called with query.
+   */
+  getValueSuggestions: PropTypes.func.isRequired,
 };

@@ -21,6 +21,7 @@ const Path = require('path');
 
 exports.distDir = Path.resolve(__dirname, 'target');
 exports.distFilename = 'kbn-ui-shared-deps.js';
+exports.baseCssDistFilename = 'kbn-ui-shared-deps.css';
 exports.lightCssDistFilename = 'kbn-ui-shared-deps.light.css';
 exports.darkCssDistFilename = 'kbn-ui-shared-deps.dark.css';
 exports.externals = {
@@ -41,4 +42,7 @@ exports.externals = {
   'react-intl': '__kbnSharedDeps__.ReactIntl',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
+  '@kbn/ui-shared-deps/monaco': '__kbnSharedDeps__.Monaco',
+  // this is how plugins/consumers from npm load monaco
+  'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBare',
 };

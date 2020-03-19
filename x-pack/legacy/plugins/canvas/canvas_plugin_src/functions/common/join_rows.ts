@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable, ExpressionFunction } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
@@ -23,16 +23,14 @@ const escapeString = (data: string, quotechar: string): string => {
   }
 };
 
-export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments, string> {
+export function joinRows(): ExpressionFunctionDefinition<'joinRows', Datatable, Arguments, string> {
   const { help, args: argHelp } = getFunctionHelp().joinRows;
   const errors = getFunctionErrors().joinRows;
   return {
     name: 'joinRows',
     type: 'string',
     help,
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['datatable'],
     args: {
       column: {
         aliases: ['_'],
@@ -57,14 +55,14 @@ export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments,
         default: ',',
       },
     },
-    fn: (context, { column, separator, quote, distinct }) => {
-      const columnMatch = context.columns.find(col => col.name === column);
+    fn: (input, { column, separator, quote, distinct }) => {
+      const columnMatch = input.columns.find(col => col.name === column);
 
       if (!columnMatch) {
         throw errors.columnNotFound(column);
       }
 
-      return context.rows
+      return input.rows
         .reduce((acc, row) => {
           const value = row[column];
           if (distinct && acc.includes(value)) return acc;

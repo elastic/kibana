@@ -11,7 +11,7 @@ import { flagSupportedClusters } from './flag_supported_clusters';
 import { getMlJobsForCluster } from '../elasticsearch';
 import { getKibanasForClusters } from '../kibana';
 import { getLogstashForClusters } from '../logstash';
-import { getPipelines } from '../logstash/get_pipelines';
+import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
 import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_aggregation';
 import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
@@ -36,7 +36,6 @@ import { checkCcrEnabled } from '../elasticsearch/ccr';
 import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
 import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
-import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -57,7 +56,6 @@ export async function getClustersFromRequest(
   } = indexPatterns;
 
   const config = req.server.config();
-  const size = config.get('monitoring.ui.max_bucket_size');
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
   let clusters = [];
@@ -181,22 +179,14 @@ export async function getClustersFromRequest(
   // add logstash data
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
     const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
-    const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, size);
-    const clusterPipelineNodesCount = await getPipelines(req, lsIndexPattern, pipelines, [
-      'logstash_cluster_pipeline_nodes_count',
-    ]);
-    // add the logstash data to each cluster
+    const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, 1);
     logstashes.forEach(logstash => {
       const clusterIndex = findIndex(clusters, { cluster_uuid: logstash.clusterUuid });
 
-      // withhold LS overview stats until pipeline metrics have at least one full bucket
-      if (
-        logstash.clusterUuid === req.params.clusterUuid &&
-        clusterPipelineNodesCount.length === 0
-      ) {
+      // withhold LS overview stats until there is at least 1 pipeline
+      if (logstash.clusterUuid === clusterUuid && !pipelines.length) {
         logstash.stats = {};
       }
-
       set(clusters[clusterIndex], 'logstash', logstash.stats);
     });
   }

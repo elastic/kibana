@@ -5,20 +5,21 @@
  */
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty, chunk, get, pick } from 'lodash/fp';
+import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
+import styled from 'styled-components';
 
 import {
   IIndexPattern,
+  Filter,
   esFilters,
   FilterManager,
-  Query,
 } from '../../../../../../../../../../src/plugins/data/public';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/search_super_select/translations';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import { useKibana } from '../../../../../lib/kibana';
 import { IMitreEnterpriseAttack } from '../../types';
 import { FieldValueTimeline } from '../pick_timeline';
-import { FormSchema } from '../shared_imports';
+import { FormSchema } from '../../../../../shared_imports';
 import { ListItems } from './types';
 import {
   buildQueryBarDescription,
@@ -27,18 +28,28 @@ import {
   buildThreatDescription,
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
+  buildNoteDescription,
 } from './helpers';
 
+const DescriptionListContainer = styled(EuiDescriptionList)`
+  &.euiDescriptionList--column .euiDescriptionList__title {
+    width: 30%;
+  }
+  &.euiDescriptionList--column .euiDescriptionList__description {
+    width: 70%;
+  }
+`;
+
 interface StepRuleDescriptionProps {
-  direction?: 'row' | 'column';
+  columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: IIndexPattern;
   schema: FormSchema;
 }
 
-const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
+export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
   data,
-  direction = 'row',
+  columns = 'multi',
   indexPatterns,
   schema,
 }) => {
@@ -54,11 +65,14 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
     []
   );
 
-  if (direction === 'row') {
+  if (columns === 'multi') {
     return (
       <EuiFlexGroup>
         {chunk(Math.ceil(listItems.length / 2), listItems).map((chunkListItems, index) => (
-          <EuiFlexItem key={`description-step-rule-${index}`}>
+          <EuiFlexItem
+            data-test-subj="listItemColumnStepRuleDescription"
+            key={`description-step-rule-${index}`}
+          >
             <EuiDescriptionList listItems={chunkListItems} />
           </EuiFlexItem>
         ))}
@@ -68,8 +82,16 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem key={`description-step-rule`}>
-        <EuiDescriptionList listItems={listItems} />
+      <EuiFlexItem data-test-subj="listItemColumnStepRuleDescription">
+        {columns === 'single' ? (
+          <EuiDescriptionList listItems={listItems} />
+        ) : (
+          <DescriptionListContainer
+            data-test-subj="singleSplitStepRuleDescriptionList"
+            type="column"
+            listItems={listItems}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -77,7 +99,7 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
 
 export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
-const buildListItems = (
+export const buildListItems = (
   data: unknown,
   schema: FormSchema,
   filterManager: FilterManager,
@@ -97,7 +119,7 @@ const buildListItems = (
     []
   );
 
-export const addFilterStateIfNotThere = (filters: esFilters.Filter[]): esFilters.Filter[] => {
+export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   return filters.map(filter => {
     if (filter.$state == null) {
       return { $state: { store: esFilters.FilterStateStore.APP_STATE }, ...filter };
@@ -107,17 +129,17 @@ export const addFilterStateIfNotThere = (filters: esFilters.Filter[]): esFilters
   });
 };
 
-const getDescriptionItem = (
+export const getDescriptionItem = (
   field: string,
   label: string,
-  value: unknown,
+  data: unknown,
   filterManager: FilterManager,
   indexPatterns?: IIndexPattern
 ): ListItems[] => {
   if (field === 'queryBar') {
-    const filters = addFilterStateIfNotThere(get('queryBar.filters', value) ?? []);
-    const query = get('queryBar.query', value) as Query;
-    const savedId = get('queryBar.saved_id', value);
+    const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);
+    const query = get('queryBar.query.query', data);
+    const savedId = get('queryBar.saved_id', data);
     return buildQueryBarDescription({
       field,
       filters,
@@ -127,55 +149,37 @@ const getDescriptionItem = (
       indexPatterns,
     });
   } else if (field === 'threat') {
-    const threat: IMitreEnterpriseAttack[] = get(field, value).filter(
+    const threat: IMitreEnterpriseAttack[] = get(field, data).filter(
       (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
     );
     return buildThreatDescription({ label, threat });
-  } else if (field === 'description') {
-    return [
-      {
-        title: label,
-        description: get(field, value),
-      },
-    ];
   } else if (field === 'references') {
-    const urls: string[] = get(field, value);
+    const urls: string[] = get(field, data);
     return buildUrlsDescription(label, urls);
   } else if (field === 'falsePositives') {
-    const values: string[] = get(field, value);
+    const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
-  } else if (Array.isArray(get(field, value))) {
-    const values: string[] = get(field, value);
+  } else if (Array.isArray(get(field, data))) {
+    const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
   } else if (field === 'severity') {
-    const val: string = get(field, value);
+    const val: string = get(field, data);
     return buildSeverityDescription(label, val);
-  } else if (field === 'riskScore') {
-    return [
-      {
-        title: label,
-        description: get(field, value),
-      },
-    ];
   } else if (field === 'timeline') {
-    const timeline = get(field, value) as FieldValueTimeline;
+    const timeline = get(field, data) as FieldValueTimeline;
     return [
       {
         title: label,
         description: timeline.title ?? DEFAULT_TIMELINE_TITLE,
       },
     ];
-  } else if (field === 'riskScore') {
-    const description: string = get(field, value);
-    return [
-      {
-        title: label,
-        description,
-      },
-    ];
+  } else if (field === 'note') {
+    const val: string = get(field, data);
+    return buildNoteDescription(label, val);
   }
-  const description: string = get(field, value);
-  if (!isEmpty(description)) {
+
+  const description: string = get(field, data);
+  if (isNumber(description) || !isEmpty(description)) {
     return [
       {
         title: label,

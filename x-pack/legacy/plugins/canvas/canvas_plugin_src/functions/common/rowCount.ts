@@ -4,22 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Datatable } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
-export function rowCount(): ExpressionFunction<'rowCount', Datatable, {}, number> {
+export function rowCount(): ExpressionFunctionDefinition<'rowCount', Datatable, {}, number> {
   const { help } = getFunctionHelp().rowCount;
 
   return {
     name: 'rowCount',
     aliases: [],
     type: 'number',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {},
-    fn: context => context.rows.length,
+    fn: input => input.rows.length,
   };
 }

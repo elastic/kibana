@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Component, createRef } from 'react';
+import classnames from 'classnames';
 import * as Rx from 'rxjs';
 import {
   ChromeBadge,
@@ -42,7 +43,7 @@ import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { HeaderBadge } from './header_badge';
-import { NavSetting, OnIsLockedUpdate } from './';
+import { OnIsLockedUpdate } from './';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
@@ -68,9 +69,8 @@ export interface HeaderProps {
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
-  isLocked?: boolean;
-  navSetting$: Rx.Observable<NavSetting>;
-  onIsLockedUpdate?: OnIsLockedUpdate;
+  isLocked$: Rx.Observable<boolean>;
+  onIsLockedUpdate: OnIsLockedUpdate;
 }
 
 interface State {
@@ -81,8 +81,8 @@ interface State {
   forceNavigation: boolean;
   navControlsLeft: readonly ChromeNavControl[];
   navControlsRight: readonly ChromeNavControl[];
-  navSetting: NavSetting;
   currentAppId: string | undefined;
+  isLocked: boolean;
 }
 
 export class Header extends Component<HeaderProps, State> {
@@ -100,8 +100,8 @@ export class Header extends Component<HeaderProps, State> {
       forceNavigation: false,
       navControlsLeft: [],
       navControlsRight: [],
-      navSetting: 'grouped',
       currentAppId: '',
+      isLocked: false,
     };
   }
 
@@ -112,12 +112,12 @@ export class Header extends Component<HeaderProps, State> {
       this.props.forceAppSwitcherNavigation$,
       this.props.navLinks$,
       this.props.recentlyAccessed$,
-      // Types for combineLatest only handle up to 6 inferred types so we combine these two separately.
+      // Types for combineLatest only handle up to 6 inferred types so we combine these separately.
       Rx.combineLatest(
         this.props.navControlsLeft$,
         this.props.navControlsRight$,
         this.props.application.currentAppId$,
-        this.props.navSetting$
+        this.props.isLocked$
       )
     ).subscribe({
       next: ([
@@ -126,7 +126,7 @@ export class Header extends Component<HeaderProps, State> {
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        [navControlsLeft, navControlsRight, currentAppId, navSetting],
+        [navControlsLeft, navControlsRight, currentAppId, isLocked],
       ]) => {
         this.setState({
           appTitle,
@@ -136,8 +136,8 @@ export class Header extends Component<HeaderProps, State> {
           recentlyAccessed,
           navControlsLeft,
           navControlsRight,
-          navSetting,
           currentAppId,
+          isLocked,
         });
       },
     });
@@ -186,8 +186,16 @@ export class Header extends Component<HeaderProps, State> {
       return null;
     }
 
+    const className = classnames(
+      'chrHeaderWrapper',
+      {
+        'chrHeaderWrapper--navIsLocked': this.state.isLocked,
+      },
+      'hide-for-sharing'
+    );
+
     return (
-      <header>
+      <header className={className} data-test-subj="headerGlobalNav">
         <EuiHeader>
           <EuiHeaderSection grow={false}>
             <EuiShowFor sizes={['xs', 's']}>
@@ -225,8 +233,7 @@ export class Header extends Component<HeaderProps, State> {
           </EuiHeaderSection>
         </EuiHeader>
         <NavDrawer
-          navSetting={this.state.navSetting}
-          isLocked={this.props.isLocked}
+          isLocked={this.state.isLocked}
           onIsLockedUpdate={this.props.onIsLockedUpdate}
           navLinks={navLinks}
           chromeNavLinks={this.state.navLinks}

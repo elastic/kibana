@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/
 import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
-import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode, EventType } from '../../../store/timeline/model';
@@ -54,10 +54,10 @@ interface Props {
   timelineId: string;
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
   refreshInterval: number;
-  setFilters: (filters: esFilters.Filter[]) => void;
+  setFilters: (filters: Filter[]) => void;
   setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   savedQueryId: string | null;
   to: number;
   toStr: string;

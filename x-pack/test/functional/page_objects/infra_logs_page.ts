@@ -19,7 +19,7 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
     },
 
     async navigateToTab(logsUiTab: LogsUiTab) {
-      await pageObjects.common.navigateToActualUrl('infraLogs', `/logs/${logsUiTab}`);
+      await pageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', `/${logsUiTab}`);
     },
 
     async getLogStream() {

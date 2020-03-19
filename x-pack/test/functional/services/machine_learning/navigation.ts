@@ -17,7 +17,10 @@ export function MachineLearningNavigationProvider({
 
   return {
     async navigateToMl() {
-      return await PageObjects.common.navigateToApp('ml');
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('ml');
+        await testSubjects.existOrFail('mlPageOverview', { timeout: 2000 });
+      });
     },
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {

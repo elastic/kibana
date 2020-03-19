@@ -4,41 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_TAGS_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
-import { transformError } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { readTags } from '../../tags/read_tags';
 
-export const createReadTagsRoute: Hapi.ServerRoute = {
-  method: 'GET',
-  path: DETECTION_ENGINE_TAGS_URL,
-  options: {
-    tags: ['access:siem'],
-    validate: {
+export const readTagsRoute = (router: IRouter) => {
+  router.get(
+    {
+      path: DETECTION_ENGINE_TAGS_URL,
+      validate: false,
       options: {
-        abortEarly: false,
+        tags: ['access:siem'],
       },
     },
-  },
-  async handler(request: RequestFacade, headers) {
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-    if (!alertsClient) {
-      return headers.response().code(404);
-    }
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
 
-    try {
-      const tags = await readTags({
-        alertsClient,
-      });
-      return tags;
-    } catch (err) {
-      return transformError(err);
-    }
-  },
-};
+      if (!context.alerting) {
+        return siemResponse.error({ statusCode: 404 });
+      }
+      const alertsClient = context.alerting.getAlertsClient();
 
-export const readTagsRoute = (server: ServerFacade) => {
-  server.route(createReadTagsRoute);
+      if (!alertsClient) {
+        return siemResponse.error({ statusCode: 404 });
+      }
+
+      try {
+        const tags = await readTags({
+          alertsClient,
+        });
+        return response.ok({ body: tags });
+      } catch (err) {
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
+      }
+    }
+  );
 };

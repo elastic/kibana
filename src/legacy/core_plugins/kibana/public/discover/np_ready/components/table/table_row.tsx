@@ -87,7 +87,12 @@ export function DocViewTableRow({
         </td>
       )}
       <td className="kbnDocViewer__field">
-        <FieldName field={fieldMapping} fieldName={field} fieldType={fieldType} />
+        <FieldName
+          field={fieldMapping}
+          fieldName={field}
+          fieldType={fieldType}
+          fieldIconProps={{ fill: 'none', color: 'gray' }}
+        />
       </td>
       <td>
         {isCollapsible && (

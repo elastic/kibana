@@ -20,9 +20,8 @@
 import _ from 'lodash';
 // @ts-ignore
 import { functions } from '../functions';
-import { IIndexPattern } from '../../..';
+import { IIndexPattern, KueryNode } from '../../..';
 import { FunctionName, FunctionTypeBuildNode } from './types';
-import { JsonValue } from '..';
 
 export function buildNode(functionName: FunctionName, ...args: any[]) {
   const kueryFunction = functions[functionName];
@@ -33,6 +32,8 @@ export function buildNode(functionName: FunctionName, ...args: any[]) {
   return {
     type: 'function',
     function: functionName,
+    // This requires better typing of the different typings and their return types.
+    // @ts-ignore
     ...kueryFunction.buildNodeParams(...args),
   };
 }
@@ -54,11 +55,11 @@ export function buildNodeWithArgumentNodes(
 }
 
 export function toElasticsearchQuery(
-  node: any,
+  node: KueryNode,
   indexPattern?: IIndexPattern,
   config?: Record<string, any>,
   context?: Record<string, any>
-): JsonValue {
-  const kueryFunction = functions[node.function];
+) {
+  const kueryFunction = functions[node.function as FunctionName];
   return kueryFunction.toElasticsearchQuery(node, indexPattern, config, context);
 }

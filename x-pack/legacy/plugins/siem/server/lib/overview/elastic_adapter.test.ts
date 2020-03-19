@@ -36,7 +36,6 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockResolvedValue(mockResponseNetwork);
       const mockFramework: FrameworkAdapter = {
-        version: 'mock',
         callWithRequest: mockCallWithRequest,
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
@@ -70,7 +69,6 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockResolvedValue(mockNoDataResponse);
       const mockFramework: FrameworkAdapter = {
-        version: 'mock',
         callWithRequest: mockCallWithRequest,
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
@@ -108,7 +106,6 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockResolvedValue(mockResponseHost);
       const mockFramework: FrameworkAdapter = {
-        version: 'mock',
         callWithRequest: mockCallWithRequest,
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
@@ -148,7 +145,6 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockResolvedValue(mockNoDataResponse);
       const mockFramework: FrameworkAdapter = {
-        version: 'mock',
         callWithRequest: mockCallWithRequest,
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),

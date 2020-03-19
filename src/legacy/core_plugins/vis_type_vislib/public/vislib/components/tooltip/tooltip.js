@@ -21,7 +21,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 
-import { Binder } from '../../../legacy_imports';
+import { Binder } from '../../lib/binder';
 import { positionTooltip } from './position_tooltip';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 

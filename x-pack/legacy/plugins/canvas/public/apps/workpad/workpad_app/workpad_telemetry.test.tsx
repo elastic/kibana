@@ -12,6 +12,7 @@ import {
   WorkpadLoadedWithErrorsMetric,
 } from './workpad_telemetry';
 import { METRIC_TYPE } from '../../../lib/ui_metric';
+import { ResolvedArgType } from '../../../../types';
 
 jest.mock('ui/new_platform');
 const trackMetric = jest.fn();
@@ -30,15 +31,15 @@ const mockWorkpad = {
 };
 
 const resolvedArgsMatchWorkpad = {
-  '1': {},
-  '2': {},
-  '3': {},
-  '4': {},
-  '5': {},
+  '1': {} as ResolvedArgType,
+  '2': {} as ResolvedArgType,
+  '3': {} as ResolvedArgType,
+  '4': {} as ResolvedArgType,
+  '5': {} as ResolvedArgType,
 };
 
 const resolvedArgsNotMatchWorkpad = {
-  'non-matching-id': {},
+  'non-matching-id': {} as ResolvedArgType,
 };
 
 const pendingCounts = {

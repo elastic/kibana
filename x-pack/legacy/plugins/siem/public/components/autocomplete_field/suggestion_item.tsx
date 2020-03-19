@@ -9,13 +9,13 @@ import { transparentize } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 import euiStyled from '../../../../../common/eui_styled_components';
-import { autocomplete } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../../src/plugins/data/public';
 
 interface SuggestionItemProps {
   isSelected?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
-  suggestion: autocomplete.QuerySuggestion;
+  suggestion: QuerySuggestion;
 }
 
 export const SuggestionItem = React.memo<SuggestionItemProps>(

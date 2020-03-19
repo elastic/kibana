@@ -112,6 +112,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         );
         const styleSheetPaths = [
           ...dllStyleChunks,
+          `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
           ...(darkMode
             ? [
                 `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
@@ -142,6 +143,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             dllJsChunks,
             styleSheetPaths,
             sharedDepsFilename: UiSharedDeps.distFilename,
+            darkMode,
           },
         });
 

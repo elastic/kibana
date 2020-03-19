@@ -20,7 +20,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
+import { SERVICE_NODE_NAME_MISSING } from '../../../../../../../plugins/apm/common/service_nodes';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useAgentName } from '../../../hooks/useAgentName';

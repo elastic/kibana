@@ -11,7 +11,7 @@ import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
 import { TooltipIcon, IconType } from '../../../components/tooltip_icon';
-import { ExpressionAST, CanvasWorkpad } from '../../../../types';
+import { ExpressionAstExpression, CanvasWorkpad } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 
 const { set, del } = immutable;
@@ -23,9 +23,9 @@ interface Arguments {
 type Argument = keyof Arguments;
 
 interface Props {
-  argValue: ExpressionAST;
+  argValue: ExpressionAstExpression;
   labels?: string[];
-  onValueChange: (argValue: ExpressionAST) => void;
+  onValueChange: (argValue: ExpressionAstExpression) => void;
   typeInstance: {
     name: string;
   };

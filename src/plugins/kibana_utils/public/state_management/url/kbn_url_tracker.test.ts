@@ -38,7 +38,7 @@ describe('kbnUrlTracker', () => {
   let navLinkUpdaterSubject: BehaviorSubject<(app: AppBase) => { activeUrl?: string } | undefined>;
   let toastService: jest.Mocked<ToastsSetup>;
 
-  function createTracker() {
+  function createTracker(shouldTrackUrlUpdate?: (pathname: string) => boolean) {
     urlTracker = createKbnUrlTracker({
       baseUrl: '/app/test',
       defaultSubUrl: '#/start',
@@ -57,6 +57,7 @@ describe('kbnUrlTracker', () => {
       ],
       navLinkUpdater$: navLinkUpdaterSubject,
       toastNotifications: toastService,
+      shouldTrackUrlUpdate,
     });
   }
 
@@ -82,44 +83,44 @@ describe('kbnUrlTracker', () => {
   });
 
   test('set nav link to session storage value if defined', () => {
-    storage.setItem('storageKey', '#/deep/path');
+    storage.setItem('storageKey', '#/start/deep/path');
     createTracker();
-    expect(getActiveNavLinkUrl()).toEqual('/app/test#/deep/path');
+    expect(getActiveNavLinkUrl()).toEqual('/app/test#/start/deep/path');
   });
 
   test('set nav link to default if app gets mounted', () => {
-    storage.setItem('storageKey', '#/deep/path');
+    storage.setItem('storageKey', '#/start/deep/path');
     createTracker();
     urlTracker.appMounted();
     expect(getActiveNavLinkUrl()).toEqual('/app/test#/start');
   });
 
   test('keep nav link to default if path gets changed while app mounted', () => {
-    storage.setItem('storageKey', '#/deep/path');
+    storage.setItem('storageKey', '#/start/deep/path');
     createTracker();
     urlTracker.appMounted();
-    history.push('/deep/path/2');
+    history.push('/start/deep/path/2');
     expect(getActiveNavLinkUrl()).toEqual('/app/test#/start');
   });
 
   test('change nav link to last visited url within app after unmount', () => {
     createTracker();
     urlTracker.appMounted();
-    history.push('/deep/path/2');
-    history.push('/deep/path/3');
+    history.push('/start/deep/path/2');
+    history.push('/start/deep/path/3');
     urlTracker.appUnMounted();
-    expect(getActiveNavLinkUrl()).toEqual('/app/test#/deep/path/3');
+    expect(getActiveNavLinkUrl()).toEqual('/app/test#/start/deep/path/3');
   });
 
   test('unhash all urls that are recorded while app is mounted', () => {
     (unhashUrl as jest.Mock).mockImplementation(x => x + '?unhashed');
     createTracker();
     urlTracker.appMounted();
-    history.push('/deep/path/2');
-    history.push('/deep/path/3');
+    history.push('/start/deep/path/2');
+    history.push('/start/deep/path/3');
     urlTracker.appUnMounted();
     expect(unhashUrl).toHaveBeenCalledTimes(2);
-    expect(getActiveNavLinkUrl()).toEqual('/app/test#/deep/path/3?unhashed');
+    expect(getActiveNavLinkUrl()).toEqual('/app/test#/start/deep/path/3?unhashed');
   });
 
   test('show warning and use hashed url if unhashing does not work', () => {
@@ -128,17 +129,17 @@ describe('kbnUrlTracker', () => {
     });
     createTracker();
     urlTracker.appMounted();
-    history.push('/deep/path/2');
+    history.push('/start/deep/path/2');
     urlTracker.appUnMounted();
-    expect(getActiveNavLinkUrl()).toEqual('/app/test#/deep/path/2');
+    expect(getActiveNavLinkUrl()).toEqual('/app/test#/start/deep/path/2');
     expect(toastService.addDanger).toHaveBeenCalledWith('unhash broke');
   });
 
   test('change nav link back to default if app gets mounted again', () => {
     createTracker();
     urlTracker.appMounted();
-    history.push('/deep/path/2');
-    history.push('/deep/path/3');
+    history.push('/start/deep/path/2');
+    history.push('/start/deep/path/3');
     urlTracker.appUnMounted();
     urlTracker.appMounted();
     expect(getActiveNavLinkUrl()).toEqual('/app/test#/start');
@@ -151,11 +152,11 @@ describe('kbnUrlTracker', () => {
   });
 
   test('update state param without overwriting rest of the url when app is not mounted', () => {
-    storage.setItem('storageKey', '#/deep/path?extrastate=1');
+    storage.setItem('storageKey', '#/start/deep/path?extrastate=1');
     createTracker();
     state1Subject.next({ key1: 'abc' });
     expect(getActiveNavLinkUrl()).toMatchInlineSnapshot(
-      `"/app/test#/deep/path?extrastate=1&state1=(key1:abc)"`
+      `"/app/test#/start/deep/path?extrastate=1&state1=(key1:abc)"`
     );
   });
 
@@ -180,5 +181,49 @@ describe('kbnUrlTracker', () => {
     expect(getActiveNavLinkUrl()).toMatchInlineSnapshot(
       `"/app/test#/start?state1=(key1:abc)&state2=(key2:def)"`
     );
+  });
+
+  test('set url to storage when setActiveUrl was called', () => {
+    createTracker();
+    urlTracker.setActiveUrl('/start/deep/path/4');
+    expect(storage.getItem('storageKey')).toEqual('#/start/deep/path/4');
+  });
+
+  describe('shouldTrackUrlUpdate', () => {
+    test('change nav link when shouldTrackUrlUpdate is not overridden', () => {
+      storage.setItem('storageKey', '#/start/deep/path');
+      createTracker();
+      urlTracker.appMounted();
+      history.push('/start/path');
+      urlTracker.appUnMounted();
+      expect(getActiveNavLinkUrl()).toEqual('/app/test#/start/path');
+    });
+
+    test('not change nav link when shouldTrackUrlUpdate is not overridden', () => {
+      storage.setItem('storageKey', '#/start/deep/path');
+      createTracker();
+      urlTracker.appMounted();
+      history.push('/setup/path/2');
+      urlTracker.appUnMounted();
+      expect(getActiveNavLinkUrl()).toEqual('/app/test#/start/deep/path');
+    });
+
+    test('change nav link when shouldTrackUrlUpdate is overridden', () => {
+      storage.setItem('storageKey', '#/start/deep/path');
+      createTracker(() => true);
+      urlTracker.appMounted();
+      history.push('/setup/path/2');
+      urlTracker.appUnMounted();
+      expect(getActiveNavLinkUrl()).toEqual('/app/test#/setup/path/2');
+    });
+
+    test('not change nav link when shouldTrackUrlUpdate is overridden', () => {
+      storage.setItem('storageKey', '#/start/deep/path');
+      createTracker(() => false);
+      urlTracker.appMounted();
+      history.push('/setup/path/2');
+      urlTracker.appUnMounted();
+      expect(getActiveNavLinkUrl()).toEqual('/app/test#/start/deep/path');
+    });
   });
 });

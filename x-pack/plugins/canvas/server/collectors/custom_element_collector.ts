@@ -6,14 +6,13 @@
 
 import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
-import { fromExpression } from '@kbn/interpreter/common';
 import { collectFns } from './collector_helpers';
 import {
-  ExpressionAST,
   TelemetryCollector,
   TelemetryCustomElement,
   TelemetryCustomElementDocument,
 } from '../../types';
+import { parseExpression } from '../../../../../src/plugins/expressions/common';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {
@@ -79,7 +78,7 @@ export function summarizeCustomElements(
 
   parsedContents.map(contents => {
     contents.selectedNodes.map(node => {
-      const ast: ExpressionAST = fromExpression(node.expression) as ExpressionAST; // TODO: Remove once fromExpression is properly typed
+      const ast = parseExpression(node.expression);
       collectFns(ast, (cFunction: string) => {
         functionSet.add(cFunction);
       });

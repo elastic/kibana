@@ -25,13 +25,18 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { UiActionsSetup, UiActionsStart } from './plugin';
-export {
-  Action,
-  Trigger,
-  UiActionsApi,
-  GetActionsCompatibleWithTrigger,
-  ExecuteTriggerActions,
-} from './types';
-export { createAction } from './actions';
+export { UiActionsServiceParams, UiActionsService } from './service';
+export { Action, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
-export { IncompatibleActionError } from './triggers';
+export {
+  Trigger,
+  TriggerContext,
+  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  VALUE_CLICK_TRIGGER,
+  valueClickTrigger,
+  APPLY_FILTER_TRIGGER,
+  applyFilterTrigger,
+} from './triggers';
+export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
+export { ActionByType } from './actions';

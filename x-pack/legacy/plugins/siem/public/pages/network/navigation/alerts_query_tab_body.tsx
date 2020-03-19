@@ -6,11 +6,11 @@
 
 import React from 'react';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { AlertsView } from '../../../components/alerts_viewer';
 import { NetworkComponentQueryProps } from './types';
 
-export const filterNetworkData: esFilters.Filter[] = [
+export const filterNetworkData: Filter[] = [
   {
     query: {
       bool: {

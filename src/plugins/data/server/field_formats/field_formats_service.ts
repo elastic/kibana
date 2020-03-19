@@ -19,9 +19,10 @@
 import { has } from 'lodash';
 import { FieldFormatsRegistry, IFieldFormatType, baseFormatters } from '../../common/field_formats';
 import { IUiSettingsClient } from '../../../../core/server';
+import { DateFormat } from './converters';
 
 export class FieldFormatsService {
-  private readonly fieldFormatClasses: IFieldFormatType[] = baseFormatters;
+  private readonly fieldFormatClasses: IFieldFormatType[] = [DateFormat, ...baseFormatters];
 
   public setup() {
     return {

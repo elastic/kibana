@@ -25,24 +25,30 @@ import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { EuiSelectable, EuiSelectableList } from '@elastic/eui';
+import { IIndexPattern } from 'src/plugins/data/public';
+
+const indexPattern = {
+  id: 'test1',
+  title: 'test1 title',
+} as IIndexPattern;
 
 const indexPattern1 = {
   id: 'test1',
   attributes: {
     title: 'test1 title',
   },
-} as SavedObject;
+} as SavedObject<any>;
 
 const indexPattern2 = {
   id: 'test2',
   attributes: {
     title: 'test2 title',
   },
-} as SavedObject;
+} as SavedObject<any>;
 
 const defaultProps = {
   indexPatternList: [indexPattern1, indexPattern2],
-  selectedIndexPattern: indexPattern1,
+  selectedIndexPattern: indexPattern,
   setIndexPattern: jest.fn(async () => {}),
 };
 

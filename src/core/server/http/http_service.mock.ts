@@ -115,6 +115,8 @@ const createOnPostAuthToolkitMock = (): jest.Mocked<OnPostAuthToolkit> => ({
 
 const createAuthToolkitMock = (): jest.Mocked<AuthToolkit> => ({
   authenticated: jest.fn(),
+  notHandled: jest.fn(),
+  redirected: jest.fn(),
 });
 
 const createOnPreResponseToolkitMock = (): jest.Mocked<OnPreResponseToolkit> => ({

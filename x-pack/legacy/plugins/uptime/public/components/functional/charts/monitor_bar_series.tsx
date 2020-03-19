@@ -15,6 +15,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { SummaryHistogramPoint } from '../../../../common/graphql/types';
@@ -38,15 +39,25 @@ export interface MonitorBarSeriesProps {
  * @param props - the values for the monitor this chart visualizes
  */
 export const MonitorBarSeries = ({ dangerColor, histogramSeries }: MonitorBarSeriesProps) => {
-  const [getUrlParams] = useUrlParams();
+  const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
+
+  const onBrushEnd = (min: number, max: number) => {
+    updateUrlParams({
+      dateRangeStart: moment(min).toISOString(),
+      dateRangeEnd: moment(max).toISOString(),
+    });
+  };
 
   const id = 'downSeries';
 
   return seriesHasDownValues(histogramSeries) ? (
     <div style={{ height: 50, width: '100%', maxWidth: '1200px', marginRight: 15 }}>
       <Chart>
-        <Settings xDomain={{ min: absoluteDateRangeStart, max: absoluteDateRangeEnd }} />
+        <Settings
+          xDomain={{ min: absoluteDateRangeStart, max: absoluteDateRangeEnd }}
+          onBrushEnd={onBrushEnd}
+        />
         <Axis
           hide
           id="bottom"

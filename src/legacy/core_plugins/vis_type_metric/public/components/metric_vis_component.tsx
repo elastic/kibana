@@ -19,13 +19,11 @@
 
 import { last, findIndex, isNaN } from 'lodash';
 import React, { Component } from 'react';
-
 import { isColorDark } from '@elastic/eui';
-
 import { getFormat } from '../legacy_imports';
 import { MetricVisValue } from './metric_vis_value';
+import { Input } from '../metric_vis_fn';
 import { FieldFormatsContentType, IFieldFormat } from '../../../../../plugins/data/public';
-import { Context } from '../metric_vis_fn';
 import { KibanaDatatable } from '../../../../../plugins/expressions/public';
 import { getHeatmapColors } from '../../../../../plugins/charts/public';
 import { VisParams, MetricVisMetric } from '../types';
@@ -33,7 +31,7 @@ import { SchemaConfig, Vis } from '../../../visualizations/public';
 
 export interface MetricVisComponentProps {
   visParams: VisParams;
-  visData: Context;
+  visData: Input;
   vis: Vis;
   renderComplete: () => void;
 }

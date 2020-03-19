@@ -15,6 +15,7 @@ import { AuthenticationServiceSetup } from '../authentication';
 interface SetupDeps {
   securityLicense: SecurityLicense;
   authc: AuthenticationServiceSetup;
+  logoutUrl: string;
 }
 
 interface StartDeps {
@@ -24,14 +25,16 @@ interface StartDeps {
 export class SecurityNavControlService {
   private securityLicense!: SecurityLicense;
   private authc!: AuthenticationServiceSetup;
+  private logoutUrl!: string;
 
   private navControlRegistered!: boolean;
 
   private securityFeaturesSubscription?: Subscription;
 
-  public setup({ securityLicense, authc }: SetupDeps) {
+  public setup({ securityLicense, authc, logoutUrl }: SetupDeps) {
     this.securityLicense = securityLicense;
     this.authc = authc;
+    this.logoutUrl = logoutUrl;
   }
 
   public start({ core }: StartDeps) {
@@ -65,14 +68,10 @@ export class SecurityNavControlService {
       mount: (el: HTMLElement) => {
         const I18nContext = core.i18n.Context;
 
-        const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
-
-        const logoutUrl = `${serverBasePath}/logout`;
-
         const props = {
           user: currentUserPromise,
-          editProfileUrl: core.http.basePath.prepend('/app/kibana#/account'),
-          logoutUrl,
+          editProfileUrl: core.http.basePath.prepend('/security/account'),
+          logoutUrl: this.logoutUrl,
         };
         ReactDOM.render(
           <I18nContext>

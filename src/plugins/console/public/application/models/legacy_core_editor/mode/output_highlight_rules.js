@@ -19,7 +19,7 @@
 
 const ace = require('brace');
 import 'brace/mode/json';
-import { addToRules } from './x_json_highlight_rules';
+import { addXJsonToRules } from '../../../../../../es_ui_shared/console_lang';
 
 const oop = ace.acequire('ace/lib/oop');
 const JsonHighlightRules = ace.acequire('ace/mode/json_highlight_rules').JsonHighlightRules;
@@ -27,7 +27,7 @@ const JsonHighlightRules = ace.acequire('ace/mode/json_highlight_rules').JsonHig
 export function OutputJsonHighlightRules() {
   this.$rules = {};
 
-  addToRules(this, 'start');
+  addXJsonToRules(this, 'start');
 
   this.$rules.start.unshift(
     {

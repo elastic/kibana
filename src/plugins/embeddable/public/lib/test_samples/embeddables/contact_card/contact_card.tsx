@@ -22,12 +22,19 @@ import { EuiCard, EuiFlexItem, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 import { Subscription } from 'rxjs';
 import { EuiButton } from '@elastic/eui';
 import * as Rx from 'rxjs';
-import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../ui_actions/public';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
+import { EmbeddableContext } from '../../../triggers';
+
+declare module '../../../../../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [CONTACT_USER_TRIGGER]: EmbeddableContext;
+  }
+}
 
 interface Props {
   embeddable: ContactCardEmbeddable;
-  execTrigger: ExecuteTriggerActions;
+  execTrigger: UiActionsStart['executeTriggerActions'];
 }
 
 interface State {
@@ -72,7 +79,6 @@ export class ContactCardEmbeddableComponent extends React.Component<Props, State
   emitContactTrigger = () => {
     this.props.execTrigger(CONTACT_USER_TRIGGER, {
       embeddable: this.props.embeddable,
-      triggerContext: {},
     });
   };
 

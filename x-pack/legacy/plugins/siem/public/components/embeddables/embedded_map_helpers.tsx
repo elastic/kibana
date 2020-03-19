@@ -9,18 +9,13 @@ import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
 import minimatch from 'minimatch';
 import { ViewMode } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import {
-  IndexPatternMapping,
-  MapEmbeddable,
-  RenderTooltipContentParams,
-  SetQuery,
-  EmbeddableApi,
-} from './types';
+import { IndexPatternMapping, MapEmbeddable, RenderTooltipContentParams, SetQuery } from './types';
 import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
-import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import { EmbeddableStart } from '../../../../../../../src/plugins/embeddable/public';
 import { IndexPatternSavedObject } from '../../hooks/types';
 
 /**
@@ -38,14 +33,14 @@ import { IndexPatternSavedObject } from '../../hooks/types';
  * @throws Error if EmbeddableFactory does not exist
  */
 export const createEmbeddable = async (
-  filters: esFilters.Filter[],
+  filters: Filter[],
   indexPatterns: IndexPatternMapping[],
   query: Query,
   startDate: number,
   endDate: number,
   setQuery: SetQuery,
   portalNode: PortalNode,
-  embeddableApi: EmbeddableApi
+  embeddableApi: EmbeddableStart
 ): Promise<MapEmbeddable> => {
   const factory = embeddableApi.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 

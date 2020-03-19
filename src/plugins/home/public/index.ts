@@ -21,11 +21,16 @@ import { PluginInitializerContext } from 'kibana/public';
 
 export {
   FeatureCatalogueSetup,
-  FeatureCatalogueStart,
+  EnvironmentSetup,
+  TutorialSetup,
   HomePublicPluginSetup,
-  HomePublicPluginStart,
 } from './plugin';
-export { FeatureCatalogueEntry, FeatureCatalogueCategory, Environment } from './services';
+export {
+  FeatureCatalogueEntry,
+  FeatureCatalogueCategory,
+  Environment,
+  TutorialVariables,
+} from './services';
 export * from '../common/instruction_variant';
 import { HomePublicPlugin } from './plugin';
 

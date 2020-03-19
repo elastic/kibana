@@ -17,16 +17,18 @@
  * under the License.
  */
 
+import { parse, stringify } from 'query-string';
 import { History, Location } from 'history';
-import { parse } from 'querystring';
-import { stringifyQueryString } from '../state_management/url/stringify_query_string'; // TODO: extract it to ../url
+import { url } from '../../common';
 
 export function removeQueryParam(history: History, param: string, replace: boolean = true) {
   const oldLocation = history.location;
   const search = (oldLocation.search || '').replace(/^\?/, '');
-  const query = parse(search);
+  const query = parse(search, { sort: false });
+
   delete query[param];
-  const newSearch = stringifyQueryString(query);
+
+  const newSearch = stringify(url.encodeQuery(query), { sort: false, encode: false });
   const newLocation: Location<any> = {
     ...oldLocation,
     search: newSearch,

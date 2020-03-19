@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { curry } from 'lodash';
+import { curry, isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -34,10 +34,20 @@ const ConfigSchema = schema.object(configSchemaProps);
 type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 // secrets definition
-type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
-const SecretsSchema = schema.object({
-  user: schema.string(),
-  password: schema.string(),
+export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
+const secretSchemaProps = {
+  user: schema.nullable(schema.string()),
+  password: schema.nullable(schema.string()),
+};
+const SecretsSchema = schema.object(secretSchemaProps, {
+  validate: secrets => {
+    // user and password must be set together (or not at all)
+    if (!secrets.password && !secrets.user) return;
+    if (secrets.password && secrets.user) return;
+    return i18n.translate('xpack.actions.builtin.webhook.invalidUsernamePassword', {
+      defaultMessage: 'both user and password must be specified',
+    });
+  },
 });
 
 // params definition
@@ -61,7 +71,7 @@ export function getActionType({
     }),
     validate: {
       config: schema.object(configSchemaProps, {
-        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+        validate: curry(validateActionTypeConfig)(configurationUtilities),
       }),
       secrets: SecretsSchema,
       params: ParamsSchema,
@@ -70,7 +80,7 @@ export function getActionType({
   };
 }
 
-function valdiateActionTypeConfig(
+function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
@@ -93,17 +103,19 @@ export async function executor(
 ): Promise<ActionTypeExecutorResult> {
   const actionId = execOptions.actionId;
   const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
-  const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
+
+  const secrets: ActionTypeSecretsType = execOptions.secrets as ActionTypeSecretsType;
+  const basicAuth =
+    isString(secrets.user) && isString(secrets.password)
+      ? { auth: { username: secrets.user, password: secrets.password } }
+      : {};
 
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(
     axios.request({
       method,
       url,
-      auth: {
-        username,
-        password,
-      },
+      ...basicAuth,
       headers,
       data,
     })

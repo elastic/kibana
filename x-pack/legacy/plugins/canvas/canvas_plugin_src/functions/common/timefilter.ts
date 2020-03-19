@@ -5,7 +5,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { Filter, ExpressionFunction } from '../../../types';
+import { Filter, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
@@ -15,7 +15,12 @@ interface Arguments {
   filterGroup: string;
 }
 
-export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments, Filter> {
+export function timefilter(): ExpressionFunctionDefinition<
+  'timefilter',
+  Filter,
+  Arguments,
+  Filter
+> {
   const { help, args: argHelp } = getFunctionHelp().timefilter;
   const errors = getFunctionErrors().timefilter;
 
@@ -23,9 +28,7 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
     name: 'timefilter',
     aliases: [],
     type: 'filter',
-    context: {
-      types: ['filter'],
-    },
+    inputTypes: ['filter'],
     help,
     args: {
       column: {
@@ -49,9 +52,9 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
         help: 'The group name for the filter',
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.from && !args.to) {
-        return context;
+        return input;
       }
 
       const { from, to, column } = args;
@@ -79,7 +82,7 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
         (filter as any).from = parseAndValidate(from);
       }
 
-      return { ...context, and: [...context.and, filter] };
+      return { ...input, and: [...input.and, filter] };
     },
   };
 }

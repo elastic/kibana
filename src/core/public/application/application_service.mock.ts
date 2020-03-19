@@ -43,12 +43,17 @@ const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup
   registerMountContext: jest.fn(),
 });
 
-const createStartContractMock = (): jest.Mocked<ApplicationStart> => ({
-  capabilities: capabilitiesServiceMock.createStartContract().capabilities,
-  navigateToApp: jest.fn(),
-  getUrlForApp: jest.fn(),
-  registerMountContext: jest.fn(),
-});
+const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
+  const currentAppId$ = new Subject<string | undefined>();
+
+  return {
+    currentAppId$: currentAppId$.asObservable(),
+    capabilities: capabilitiesServiceMock.createStartContract().capabilities,
+    navigateToApp: jest.fn(),
+    getUrlForApp: jest.fn(),
+    registerMountContext: jest.fn(),
+  };
+};
 
 const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => {
   const currentAppId$ = new Subject<string | undefined>();

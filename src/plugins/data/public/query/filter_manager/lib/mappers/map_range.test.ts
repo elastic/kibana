@@ -18,15 +18,15 @@
  */
 
 import { mapRange } from './map_range';
-import { esFilters } from '../../../../../common';
+import { FilterMeta, RangeFilter, Filter } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapRange()', () => {
     test('should return the key and value for matching filters with gt/lt', async () => {
       const filter = {
-        meta: { index: 'logstash-*' } as esFilters.FilterMeta,
+        meta: { index: 'logstash-*' } as FilterMeta,
         range: { bytes: { lt: 2048, gt: 1024 } },
-      } as esFilters.RangeFilter;
+      } as RangeFilter;
       const result = mapRange(filter);
 
       expect(result).toHaveProperty('key', 'bytes');
@@ -41,7 +41,7 @@ describe('filter manager utilities', () => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
-      } as esFilters.Filter;
+      } as Filter;
 
       try {
         mapRange(filter);

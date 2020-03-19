@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable, ExpressionFunction } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   fn: (datatable: Datatable) => Promise<boolean>;
 }
 
-export function filterrows(): ExpressionFunction<
+export function filterrows(): ExpressionFunctionDefinition<
   'filterrows',
   Datatable,
   Arguments,
@@ -23,10 +23,8 @@ export function filterrows(): ExpressionFunction<
     name: 'filterrows',
     aliases: [],
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       fn: {
         resolve: false,
@@ -36,20 +34,20 @@ export function filterrows(): ExpressionFunction<
         help: argHelp.fn,
       },
     },
-    fn(context, { fn }) {
-      const checks = context.rows.map(row =>
+    fn(input, { fn }) {
+      const checks = input.rows.map(row =>
         fn({
-          ...context,
+          ...input,
           rows: [row],
         })
       );
 
       return Promise.all(checks)
-        .then(results => context.rows.filter((row, i) => results[i]))
+        .then(results => input.rows.filter((row, i) => results[i]))
         .then(
           rows =>
             ({
-              ...context,
+              ...input,
               rows,
             } as Datatable)
         );

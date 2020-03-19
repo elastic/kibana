@@ -15,16 +15,15 @@ import {
   renderComponent,
 } from 'recompose';
 import { fromExpression } from '@kbn/interpreter/common';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
-import { getFunctionDefinitions } from '../../lib/function_definitions';
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
 
 const mapStateToProps = state => ({
   pageId: getSelectedPage(state),
   element: getSelectedElement(state),
-  functionDefinitionsPromise: getFunctionDefinitions(state),
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -47,9 +46,12 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   const { expression } = element;
 
+  const functions = Object.values(allProps.kibana.services.expressions.getFunctions());
+
   return {
     ...allProps,
     expression,
+    functionDefinitions: functions,
     setExpression: dispatchProps.setExpression(element.id, pageId),
   };
 };
@@ -66,15 +68,11 @@ const expressionLifecycle = lifecycle({
       });
     }
   },
-  componentDidMount() {
-    const { functionDefinitionsPromise, setFunctionDefinitions } = this.props;
-    functionDefinitionsPromise.then(defs => setFunctionDefinitions(defs));
-  },
 });
 
 export const Expression = compose(
+  withKibana,
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withState('functionDefinitions', 'setFunctionDefinitions', []),
   withState('formState', 'setFormState', ({ expression }) => ({
     expression,
     dirty: false,

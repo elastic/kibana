@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { uiModules } from 'ui/modules';
+import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 import { Beat } from 'plugins/monitoring/components/beats/beat';
 import { I18nContext } from 'ui/i18n';
 

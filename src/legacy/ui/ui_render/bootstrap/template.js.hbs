@@ -1,5 +1,6 @@
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
+window.__kbnDarkMode__ = {{darkMode}};
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
@@ -12,17 +13,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   loadingMessage.style.display = 'flex';
 
   window.onload = function () {
-    var files = [
-      '{{dllBundlePath}}/vendors_runtime.bundle.dll.js',
-      {{#each dllJsChunks}}
-        '{{this}}',
-      {{/each}}
-      '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedDepsFilename}}',
-      '{{regularBundlePath}}/commons.bundle.js',
-      '{{regularBundlePath}}/{{appId}}.bundle.js'
-    ];
-
-    var failure = function () {
+    function failure() {
       // make subsequent calls to failure() noop
       failure = function () {};
 
@@ -37,41 +28,73 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       document.body.innerHTML = err.outerHTML;
     }
 
-    function loadStyleSheet(path) {
+    function loadStyleSheet(url, cb) {
       var dom = document.createElement('link');
-
       dom.addEventListener('error', failure);
       dom.setAttribute('rel', 'stylesheet');
       dom.setAttribute('type', 'text/css');
-      dom.setAttribute('href', path);
+      dom.setAttribute('href', url);
+      dom.addEventListener('load', cb);
       document.head.appendChild(dom);
     }
 
-    function createJavascriptElement(path) {
+    function loadScript(url, cb) {
       var dom = document.createElement('script');
-
-      dom.setAttribute('defer', 'defer');
-      dom.addEventListener('error', failure);
-      dom.setAttribute('src', file);
-      dom.addEventListener('load', next);
-      document.head.appendChild(dom);
-    }
-
-    {{#each styleSheetPaths}}
-      loadStyleSheet('{{this}}');
-    {{/each}}
-
-    (function next() {
-      var file = files.shift();
-      if (!file) return;
-
-      var dom = document.createElement('script');
-
       dom.setAttribute('async', '');
       dom.addEventListener('error', failure);
-      dom.setAttribute('src', file);
-      dom.addEventListener('load', next);
+      dom.setAttribute('src', url);
+      dom.addEventListener('load', cb);
       document.head.appendChild(dom);
-    }());
+    }
+
+    function load(urlSet, cb) {
+      if (urlSet.deps) {
+        load({ urls: urlSet.deps }, function () {
+          load({ urls: urlSet.urls }, cb);
+        });
+        return;
+      }
+
+      var pending = urlSet.urls.length;
+      urlSet.urls.forEach(function (url) {
+        var innerCb = function () {
+          pending = pending - 1;
+          if (pending === 0 && typeof cb === 'function') {
+            cb();
+          }
+        }
+
+        if (typeof url !== 'string') {
+          load(url, innerCb);
+        } else if (url.slice(-4) === '.css') {
+          loadStyleSheet(url, innerCb);
+        } else {
+          loadScript(url, innerCb);
+        }
+      });
+    }
+
+    load({
+      deps: [
+        {
+          deps: [
+            '{{dllBundlePath}}/vendors_runtime.bundle.dll.js'
+          ],
+          urls: [
+            {{#each dllJsChunks}}
+              '{{this}}',
+            {{/each}}
+          ]
+        },
+        '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedDepsFilename}}',
+        '{{regularBundlePath}}/commons.bundle.js',
+      ],
+      urls: [
+        '{{regularBundlePath}}/{{appId}}.bundle.js',
+        {{#each styleSheetPaths}}
+          '{{this}}',
+        {{/each}},
+      ]
+    });
   };
 }

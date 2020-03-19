@@ -32,7 +32,7 @@ const indexPatternCache = createIndexPatternCache();
 
 type IndexPatternCachedFieldType = 'id' | 'title';
 
-export class IndexPatterns {
+export class IndexPatternsService {
   private config: IUiSettingsClient;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
@@ -50,7 +50,7 @@ export class IndexPatterns {
 
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = (
-      await this.savedObjectsClient.find({
+      await this.savedObjectsClient.find<Record<string, any>>({
         type: 'index-pattern',
         fields: ['title'],
         perPage: 10000,
@@ -150,4 +150,4 @@ export class IndexPatterns {
   };
 }
 
-export type IndexPatternsContract = PublicMethodsOf<IndexPatterns>;
+export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;

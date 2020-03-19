@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../src/plugins/data/common';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { HostsComponentsQueryProps } from '../../pages/hosts/navigation/types';
 import { NetworkComponentQueryProps } from '../../pages/network/navigation/types';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
@@ -13,17 +13,10 @@ type CommonQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;
 export interface AlertsComponentsQueryProps
   extends Pick<
     CommonQueryProps,
-    | 'deleteQuery'
-    | 'endDate'
-    | 'filterQuery'
-    | 'skip'
-    | 'setQuery'
-    | 'startDate'
-    | 'type'
-    | 'updateDateRange'
+    'deleteQuery' | 'endDate' | 'filterQuery' | 'skip' | 'setQuery' | 'startDate' | 'type'
   > {
-  pageFilters: esFilters.Filter[];
+  pageFilters: Filter[];
   stackByOptions?: MatrixHistogramOption[];
-  defaultFilters?: esFilters.Filter[];
+  defaultFilters?: Filter[];
   defaultStackByOption?: MatrixHistogramOption;
 }
