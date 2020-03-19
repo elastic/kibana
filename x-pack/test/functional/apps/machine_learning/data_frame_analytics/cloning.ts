@@ -172,7 +172,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('should create a clone job', async () => {
-          await ml.dataFrameAnalyticsCreation.createAnalyticsJob();
+          await ml.dataFrameAnalyticsCreation.createAnalyticsJob(cloneJobId);
         });
 
         it('should start the clone analytics job', async () => {
@@ -183,6 +183,10 @@ export default function({ getService }: FtrProviderContext) {
         it('should close the create job flyout', async () => {
           await ml.dataFrameAnalyticsCreation.assertCloseButtonExists();
           await ml.dataFrameAnalyticsCreation.closeCreateAnalyticsJobFlyout();
+        });
+
+        it('finishes analytics processing', async () => {
+          await ml.dataFrameAnalytics.waitForAnalyticsCompletion(cloneJobId);
         });
 
         it('displays the created job in the analytics table', async () => {
