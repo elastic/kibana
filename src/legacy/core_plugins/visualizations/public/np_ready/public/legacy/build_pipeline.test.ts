@@ -28,7 +28,7 @@ import {
 } from './build_pipeline';
 import { Vis } from '..';
 import { searchSourceMock, dataPluginMock } from '../../../../../../../plugins/data/public/mocks';
-import { IAggConfig } from '../../../../../data/public';
+import { IAggConfig } from '../../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 

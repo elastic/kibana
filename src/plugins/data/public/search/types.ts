@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import { CoreStart } from 'kibana/public';
-import { TimeRange } from '../../common';
+import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './es_client';
@@ -67,12 +68,8 @@ export type TRegisterSearchStrategyProvider = <T extends TStrategyTypes>(
   searchStrategyProvider: TSearchStrategyProvider<T>
 ) => void;
 
-interface SearchAggsSetup {
-  calculateAutoTimeExpression: (range: TimeRange) => string | undefined;
-}
-
-interface SearchAggsStart {
-  calculateAutoTimeExpression: (range: TimeRange) => string | undefined;
+interface ISearchStartLegacy {
+  esClient: LegacyApiCaller;
 }
 
 /**
@@ -90,8 +87,9 @@ export interface ISearchSetup {
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
+  cancel: () => void;
+  getPendingCount$: () => Observable<number>;
+  runBeyondTimeout: () => void;
   search: ISearchGeneric;
-  __LEGACY: {
-    esClient: LegacyApiCaller;
-  };
+  __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
 }

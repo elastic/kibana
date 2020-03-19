@@ -85,7 +85,7 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
           state.caseData.version
         );
         if (!cancel) {
-          dispatch({ type: 'FETCH_SUCCESS', payload: response });
+          dispatch({ type: 'FETCH_SUCCESS', payload: response[0] });
         }
       } catch (error) {
         if (!cancel) {

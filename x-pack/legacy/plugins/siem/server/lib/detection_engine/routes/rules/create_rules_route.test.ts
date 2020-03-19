@@ -14,13 +14,23 @@ import {
   getNonEmptyIndex,
   getEmptyIndex,
   getFindResultWithSingleHit,
+  createMlRuleRequest,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesRoute } from './create_rules_route';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('create_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -45,6 +55,13 @@ describe('create_rules', () => {
       const response = await server.inject(getCreateRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+  });
+
+  describe('creating an ML Rule', () => {
+    it('is successful', async () => {
+      const response = await server.inject(createMlRuleRequest(), context);
+      expect(response.status).toEqual(200);
     });
   });
 
@@ -111,7 +128,7 @@ describe('create_rules', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'child "type" fails because ["type" must be one of [query, saved_query]]'
+        'child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]'
       );
     });
   });

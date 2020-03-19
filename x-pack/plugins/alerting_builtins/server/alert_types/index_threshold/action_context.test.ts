@@ -26,11 +26,8 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4],
     });
-    const alertInfo = {
-      name: '[alert-name]',
-    };
-    const context = addMessages(alertInfo, base, params);
-    expect(context.subject).toMatchInlineSnapshot(
+    const context = addMessages({ name: '[alert-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(
       `"alert [alert-name] group [group] exceeded threshold"`
     );
     expect(context.message).toMatchInlineSnapshot(
@@ -57,11 +54,8 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4.2],
     });
-    const alertInfo = {
-      name: '[alert-name]',
-    };
-    const context = addMessages(alertInfo, base, params);
-    expect(context.subject).toMatchInlineSnapshot(
+    const context = addMessages({ name: '[alert-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(
       `"alert [alert-name] group [group] exceeded threshold"`
     );
     expect(context.message).toMatchInlineSnapshot(
@@ -87,11 +81,8 @@ describe('ActionContext', () => {
       thresholdComparator: 'between',
       threshold: [4, 5],
     });
-    const alertInfo = {
-      name: '[alert-name]',
-    };
-    const context = addMessages(alertInfo, base, params);
-    expect(context.subject).toMatchInlineSnapshot(
+    const context = addMessages({ name: '[alert-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(
       `"alert [alert-name] group [group] exceeded threshold"`
     );
     expect(context.message).toMatchInlineSnapshot(

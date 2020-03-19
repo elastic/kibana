@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiModal, EuiToolTip, EuiOverlayMask } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
 import * as i18n from '../translations';
@@ -23,15 +23,15 @@ export const DeleteTimelineModalButton = React.memo<Props>(
   ({ deleteTimelines, savedObjectId, title }) => {
     const [showModal, setShowModal] = useState(false);
 
-    const openModal = () => setShowModal(true);
-    const closeModal = () => setShowModal(false);
+    const openModal = useCallback(() => setShowModal(true), [setShowModal]);
+    const closeModal = useCallback(() => setShowModal(false), [setShowModal]);
 
-    const onDelete = () => {
+    const onDelete = useCallback(() => {
       if (deleteTimelines != null && savedObjectId != null) {
         deleteTimelines([savedObjectId]);
       }
       closeModal();
-    };
+    }, [deleteTimelines, savedObjectId, closeModal]);
 
     return (
       <>

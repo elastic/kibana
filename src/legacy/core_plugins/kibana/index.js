@@ -126,57 +126,6 @@ export default function(kibana) {
       ],
 
       savedObjectsManagement: {
-        'index-pattern': {
-          icon: 'indexPatternApp',
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getEditUrl(obj) {
-            return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
-              uiCapabilitiesPath: 'management.kibana.index_patterns',
-            };
-          },
-        },
-        visualization: {
-          icon: 'visualizeApp',
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getEditUrl(obj) {
-            return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: `/app/kibana#/visualize/edit/${encodeURIComponent(obj.id)}`,
-              uiCapabilitiesPath: 'visualize.show',
-            };
-          },
-        },
-        search: {
-          icon: 'discoverApp',
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getEditUrl(obj) {
-            return `/management/kibana/objects/savedSearches/${encodeURIComponent(obj.id)}`;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: `/app/kibana#/discover/${encodeURIComponent(obj.id)}`,
-              uiCapabilitiesPath: 'discover.show',
-            };
-          },
-        },
         dashboard: {
           icon: 'dashboardApp',
           defaultSearchField: 'title',
