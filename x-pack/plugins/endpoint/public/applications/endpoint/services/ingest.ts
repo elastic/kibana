@@ -25,15 +25,15 @@ interface GetDatasourceResponse {
 }
 
 /**
- * Retrieves a list of endpoint specific datasources (those created with a package.name of
+ * Retrieves a list of endpoint specific datasources (those created with a `package.name` of
  * `endpoint`) from Ingest
  * @param http
  * @param options
  */
-export const sendGetEndpoingDatasources = (
+export const sendGetEndpointSpecificDatasources = (
   http: HttpStart,
   options: HttpFetchOptions & Partial<GetDatasourcesRequest> = {}
-) => {
+): Promise<GetDatasourcesResponse> => {
   return http.get<GetDatasourcesResponse>(INGEST_API_DATASOURCES, {
     ...options,
     query: {

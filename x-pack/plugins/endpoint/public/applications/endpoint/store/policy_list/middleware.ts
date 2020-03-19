@@ -5,7 +5,7 @@
  */
 
 import { MiddlewareFactory, PolicyListState } from '../../types';
-import { sendGetEndpoingDatasources } from '../../services/ingest';
+import { sendGetEndpointSpecificDatasources } from '../../services/ingest';
 
 export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
   const http = coreStart.http;
@@ -30,7 +30,7 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
       }
 
       try {
-        const { items: policyItems, total } = await sendGetEndpoingDatasources(http, {
+        const { items: policyItems, total } = await sendGetEndpointSpecificDatasources(http, {
           query: {
             perPage: pageSize,
             page: pageIndex + 1,
