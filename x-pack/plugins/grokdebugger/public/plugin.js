@@ -5,9 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { registerFeature } from './register_feature';
 
 export class Plugin {
   setup(coreSetup, plugins) {
+    registerFeature(plugins.home);
+
     plugins.devTools.register({
       order: 6,
       title: i18n.translate('xpack.grokDebugger.displayName', {

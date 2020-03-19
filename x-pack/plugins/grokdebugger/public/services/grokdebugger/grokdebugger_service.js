@@ -18,7 +18,7 @@ export class GrokdebuggerService {
         body: JSON.stringify(grokdebuggerRequest.upstreamJSON),
       })
       .then(response => {
-        return GrokdebuggerResponse.fromUpstreamJSON(response.grokdebuggerResponse);
+        return GrokdebuggerResponse.fromUpstreamJSON(response);
       })
       .catch(e => {
         throw e.body.message;
