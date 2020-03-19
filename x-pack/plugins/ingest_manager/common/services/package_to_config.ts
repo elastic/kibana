@@ -8,6 +8,7 @@ import {
   RegistryDatasource,
   RegistryVarsEntry,
   Datasource,
+  DatasourceConfigRecord,
   DatasourceInput,
   DatasourceInputStream,
   NewDatasource,
@@ -27,31 +28,27 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
   if (packageDatasource?.inputs?.length) {
     // Map each package datasource input to agent config datasource input
     packageDatasource.inputs.forEach(packageInput => {
+      // Reduces registry var def into config object entry
+      const varsReducer = (
+        configObject: DatasourceConfigRecord,
+        registryVar: RegistryVarsEntry
+      ): DatasourceConfigRecord => {
+        if (!registryVar.default && registryVar.multi) {
+          configObject![registryVar.name] = { type: registryVar.type, value: [] };
+        } else {
+          configObject![registryVar.name] = { type: registryVar.type, value: registryVar.default };
+        }
+        return configObject;
+      };
+
       // Map each package input stream into datasource input stream
       const streams: DatasourceInputStream[] = packageInput.streams
         ? packageInput.streams.map(packageStream => {
-            // Copy input vars into each stream's vars
-            const streamVars: RegistryVarsEntry[] = [
-              ...(packageInput.vars || []),
-              ...(packageStream.vars || []),
-            ];
-            const streamConfig = {};
-            const streamVarsReducer = (
-              configObject: DatasourceInputStream['config'],
-              streamVar: RegistryVarsEntry
-            ): DatasourceInputStream['config'] => {
-              if (!streamVar.default && streamVar.multi) {
-                configObject![streamVar.name] = { type: streamVar.type, value: [] };
-              } else {
-                configObject![streamVar.name] = { type: streamVar.type, value: streamVar.default };
-              }
-              return configObject;
-            };
             return {
               id: `${packageInput.type}-${packageStream.dataset}`,
               enabled: packageStream.enabled === false ? false : true,
               dataset: packageStream.dataset,
-              config: streamVars.reduce(streamVarsReducer, streamConfig),
+              config: (packageStream.vars || []).reduce(varsReducer, {}),
             };
           })
         : [];
@@ -59,6 +56,7 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
       const input: DatasourceInput = {
         type: packageInput.type,
         enabled: streams.length ? !!streams.find(stream => stream.enabled) : true,
+        config: (packageInput.vars || []).reduce(varsReducer, {}),
         streams,
       };
 
