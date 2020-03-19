@@ -11,6 +11,7 @@ import { PatchRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './ty
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion, calculateName, calculateInterval } from './utils';
+import { transformRuleToAlertAction } from './transform_actions';
 
 export const patchRules = async ({
   alertsClient,
@@ -123,7 +124,7 @@ export const patchRules = async ({
       schedule: {
         interval: calculateInterval(interval, rule.schedule.interval),
       },
-      actions: actions ?? rule.actions,
+      actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
       params: nextParams,
     },
   });

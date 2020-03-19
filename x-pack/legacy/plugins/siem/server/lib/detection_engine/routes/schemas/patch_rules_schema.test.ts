@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertAction } from '../../../../../../../../plugins/alerting/common';
 import { patchRulesSchema } from './patch_rules_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
-import { ThreatParams, AlertAction } from '../../types';
+import { ThreatParams, RuleAlertAction } from '../../types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('patch rules schema', () => {
@@ -1068,11 +1069,11 @@ describe('patch rules schema', () => {
       patchRulesSchema.validate<
         Partial<
           Omit<PatchRuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'group'>>;
+            actions: Array<Omit<RuleAlertAction, 'group'>>;
           }
         >
       >({
-        actions: [{ id: 'id', actionTypeId: 'actionTypeId', params: {} }],
+        actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
@@ -1095,11 +1096,11 @@ describe('patch rules schema', () => {
       patchRulesSchema.validate<
         Partial<
           Omit<PatchRuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'id'>>;
+            actions: Array<Omit<RuleAlertAction, 'id'>>;
           }
         >
       >({
-        actions: [{ group: 'group', actionTypeId: 'actionTypeId', params: {} }],
+        actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
@@ -1117,12 +1118,12 @@ describe('patch rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of actions that are missing "actionTypeId"', () => {
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
     expect(
       patchRulesSchema.validate<
         Partial<
           Omit<PatchRuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'actionTypeId'>>;
+            actions: Array<Omit<RuleAlertAction, 'action_type_id'>>;
           }
         >
       >({
@@ -1140,7 +1141,7 @@ describe('patch rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "actionTypeId" fails because ["actionTypeId" is required]]]'
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
     );
   });
 
@@ -1149,11 +1150,11 @@ describe('patch rules schema', () => {
       patchRulesSchema.validate<
         Partial<
           Omit<PatchRuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'params'>>;
+            actions: Array<Omit<RuleAlertAction, 'params'>>;
           }
         >
       >({
-        actions: [{ group: 'group', id: 'id', actionTypeId: 'actionTypeId' }],
+        actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
@@ -1171,12 +1172,12 @@ describe('patch rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of actions that are including "action_type_id', () => {
+  test('You cannot send in an array of actions that are including "actionTypeId', () => {
     expect(
       patchRulesSchema.validate<
         Partial<
           Omit<PatchRuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'actionTypeId'> & { action_type_id: string }>;
+            actions: AlertAction[];
           }
         >
       >({
@@ -1184,7 +1185,7 @@ describe('patch rules schema', () => {
           {
             group: 'group',
             id: 'id',
-            action_type_id: 'action_type_id',
+            actionTypeId: 'actionTypeId',
             params: {},
           },
         ],
@@ -1201,7 +1202,7 @@ describe('patch rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "actionTypeId" fails because ["actionTypeId" is required]]]'
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
     );
   });
 

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertParams, OutputRuleAlertRest } from '../types';
+import { RuleAlertParams, OutputRuleAlertRest, RuleAlertAction } from '../types';
 import { SearchResponse } from '../../types';
 import {
   AlertType,
   State,
   AlertExecutorOptions,
 } from '../../../../../../../plugins/alerting/server';
-import { AlertAction } from '../../../../../../../plugins/alerting/common';
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
@@ -148,7 +147,7 @@ export interface SignalHit {
 }
 
 export interface AlertAttributes {
-  actions: AlertAction[];
+  actions: RuleAlertAction[];
   enabled: boolean;
   name: string;
   tags: string[];

@@ -9,13 +9,12 @@ import { SearchResponse } from 'elasticsearch';
 
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
-import { AlertAction } from '../../../../../../../plugins/alerting/common';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RuleAlertAction } from '../types';
 import { singleBulkCreate } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 
 interface BulkCreateMlSignalsParams {
-  actions: AlertAction[];
+  actions: RuleAlertAction[];
   someResult: AnomalyResults;
   ruleParams: RuleTypeParams;
   services: AlertServices;

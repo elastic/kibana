@@ -11,6 +11,7 @@ import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion } from './utils';
 import { hasListsFeature } from '../feature_flags';
+import { transformRuleToAlertAction } from './transform_actions';
 
 export const updateRules = async ({
   alertsClient,
@@ -91,7 +92,7 @@ export const updateRules = async ({
       tags: addTags(tags, rule.params.ruleId, immutable),
       name,
       schedule: { interval },
-      actions: actions ?? rule.actions,
+      actions: actions.map(transformRuleToAlertAction) ?? rule.actions,
       throttle: throttle !== undefined ? throttle : rule.throttle,
       params: {
         description,

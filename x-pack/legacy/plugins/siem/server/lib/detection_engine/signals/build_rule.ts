@@ -5,14 +5,13 @@
  */
 
 import { pickBy } from 'lodash/fp';
-import { RuleTypeParams, OutputRuleAlertRest } from '../types';
-import { AlertAction } from '../../../../../../../plugins/alerting/common';
+import { RuleTypeParams, OutputRuleAlertRest, RuleAlertAction } from '../types';
 
 interface BuildRuleParams {
   ruleParams: RuleTypeParams;
   name: string;
   id: string;
-  actions: AlertAction[];
+  actions: RuleAlertAction[];
   enabled: boolean;
   createdAt: string;
   createdBy: string;

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertAction } from '../../../../../../../../plugins/alerting/common';
 import {
   importRulesSchema,
   importRulesQuerySchema,
   importRulesPayloadSchema,
 } from './import_rules_schema';
-import { ThreatParams, ImportRuleAlertRest, AlertAction } from '../../types';
+import { ThreatParams, ImportRuleAlertRest, RuleAlertAction } from '../../types';
 import { ImportRulesRequestParams } from '../../rules/types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
@@ -1456,11 +1457,11 @@ describe('import rules schema', () => {
       importRulesSchema.validate<
         Partial<
           Omit<ImportRuleAlertRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'group'>>;
+            actions: Array<Omit<RuleAlertAction, 'group'>>;
           }
         >
       >({
-        actions: [{ id: 'id', actionTypeId: 'actionTypeId', params: {} }],
+        actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
@@ -1483,11 +1484,11 @@ describe('import rules schema', () => {
       importRulesSchema.validate<
         Partial<
           Omit<ImportRuleAlertRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'id'>>;
+            actions: Array<Omit<RuleAlertAction, 'id'>>;
           }
         >
       >({
-        actions: [{ group: 'group', actionTypeId: 'actionTypeId', params: {} }],
+        actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
@@ -1505,12 +1506,12 @@ describe('import rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of actions that are missing "actionTypeId"', () => {
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
     expect(
       importRulesSchema.validate<
         Partial<
           Omit<ImportRuleAlertRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'actionTypeId'>>;
+            actions: Array<Omit<RuleAlertAction, 'action_type_id'>>;
           }
         >
       >({
@@ -1528,7 +1529,7 @@ describe('import rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "actionTypeId" fails because ["actionTypeId" is required]]]'
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
     );
   });
 
@@ -1537,11 +1538,11 @@ describe('import rules schema', () => {
       importRulesSchema.validate<
         Partial<
           Omit<ImportRuleAlertRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'params'>>;
+            actions: Array<Omit<RuleAlertAction, 'params'>>;
           }
         >
       >({
-        actions: [{ group: 'group', id: 'id', actionTypeId: 'actionTypeId' }],
+        actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
@@ -1559,12 +1560,12 @@ describe('import rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of actions that are including "action_type_id', () => {
+  test('You cannot send in an array of actions that are including "actionTypeId', () => {
     expect(
       importRulesSchema.validate<
         Partial<
           Omit<ImportRuleAlertRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'actionTypeId'> & { action_type_id: string }>;
+            actions: AlertAction[];
           }
         >
       >({
@@ -1572,7 +1573,7 @@ describe('import rules schema', () => {
           {
             group: 'group',
             id: 'id',
-            action_type_id: 'action_type_id',
+            actionTypeId: 'actionTypeId',
             params: {},
           },
         ],
@@ -1589,7 +1590,7 @@ describe('import rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "actionTypeId" fails because ["actionTypeId" is required]]]'
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
     );
   });
 

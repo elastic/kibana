@@ -112,12 +112,12 @@ export const version = Joi.number()
   .min(1);
 export const action_group = Joi.string();
 export const action_id = Joi.string();
-export const action_actionTypeId = Joi.string();
+export const action_action_type_id = Joi.string();
 export const action_params = Joi.object();
 export const action = Joi.object({
   group: action_group.required(),
   id: action_id.required(),
-  actionTypeId: action_actionTypeId.required(),
+  action_type_id: action_action_type_id.required(),
   params: action_params.required(),
 });
 export const actions = Joi.array().items(action);

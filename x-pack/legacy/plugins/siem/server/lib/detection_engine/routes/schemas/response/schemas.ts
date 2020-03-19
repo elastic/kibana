@@ -37,7 +37,7 @@ export const action = t.exact(
   t.type({
     group: action_group,
     id: action_id,
-    actionTypeId: action_action_type_id,
+    action_type_id: action_action_type_id,
     params: action_params,
   })
 );
