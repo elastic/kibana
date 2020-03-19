@@ -48,12 +48,14 @@ export const updateRulesBulkRoute = (router: IRouter) => {
         request.body.map(async payloadRule => {
           const {
             actions,
+            anomaly_threshold: anomalyThreshold,
             description,
             enabled,
             false_positives: falsePositives,
             from,
             query,
             language,
+            machine_learning_job_id: machineLearningJobId,
             output_index: outputIndex,
             saved_id: savedId,
             timeline_id: timelineId,
@@ -76,6 +78,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             references,
             note,
             version,
+            lists,
           } = payloadRule;
           const finalIndex = outputIndex ?? siemClient.signalsIndex;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
@@ -84,6 +87,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               alertsClient,
               actionsClient,
               actions,
+              anomalyThreshold,
               description,
               enabled,
               immutable: false,
@@ -91,6 +95,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               from,
               query,
               language,
+              machineLearningJobId,
               outputIndex: finalIndex,
               savedId,
               savedObjectsClient,
@@ -114,6 +119,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               references,
               note,
               version,
+              lists,
             });
             if (rule != null) {
               const ruleStatuses = await savedObjectsClient.find<

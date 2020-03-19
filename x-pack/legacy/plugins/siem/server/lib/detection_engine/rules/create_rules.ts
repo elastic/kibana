@@ -8,11 +8,13 @@ import { Alert } from '../../../../../../../plugins/alerting/common';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
+import { hasListsFeature } from '../feature_flags';
 
 export const createRules = ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
   actions,
+  anomalyThreshold,
   description,
   enabled,
   falsePositives,
@@ -23,6 +25,7 @@ export const createRules = ({
   timelineId,
   timelineTitle,
   meta,
+  machineLearningJobId,
   filters,
   ruleId,
   immutable,
@@ -41,7 +44,10 @@ export const createRules = ({
   references,
   note,
   version,
+  lists,
 }: CreateRuleParams): Promise<Alert> => {
+  // TODO: Remove this and use regular lists once the feature is stable for a release
+  const listsParam = hasListsFeature() ? { lists } : {};
   return alertsClient.create({
     data: {
       name,
@@ -49,6 +55,7 @@ export const createRules = ({
       alertTypeId: SIGNALS_ID,
       consumer: APP_ID,
       params: {
+        anomalyThreshold,
         description,
         ruleId,
         index,
@@ -62,6 +69,7 @@ export const createRules = ({
         timelineId,
         timelineTitle,
         meta,
+        machineLearningJobId,
         filters,
         maxSignals,
         riskScore,
@@ -72,6 +80,7 @@ export const createRules = ({
         references,
         note,
         version,
+        ...listsParam,
       },
       schedule: { interval },
       enabled,

@@ -23,8 +23,17 @@ import { createMockConfig, requestContextMock, serverMock, requestMock } from '.
 import { importRulesRoute } from './import_rules_route';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('import_rules_route', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   let config = createMockConfig();
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;

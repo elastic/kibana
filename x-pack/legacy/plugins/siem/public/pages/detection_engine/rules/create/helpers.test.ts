@@ -87,6 +87,7 @@ describe('helpers', () => {
         query: 'test query',
         saved_id: 'test123',
         index: ['filebeat-'],
+        type: 'saved_query',
       };
 
       expect(result).toEqual(expected);
@@ -106,6 +107,8 @@ describe('helpers', () => {
         filters: mockQueryBar.filters,
         query: 'test query',
         index: ['filebeat-'],
+        saved_id: '',
+        type: 'query',
       };
 
       expect(result).toEqual(expected);
@@ -572,12 +575,6 @@ describe('helpers', () => {
       const result: NewRule = formatRule(mockDefineStepRuleWithoutSavedId, mockAbout, mockSchedule);
 
       expect(result.type).toEqual('query');
-    });
-
-    test('returns NewRule with id set to ruleId if ruleId exists', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, 'query-with-rule-id');
-
-      expect(result.id).toEqual('query-with-rule-id');
     });
 
     test('returns NewRule without id if ruleId does not exist', () => {

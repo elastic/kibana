@@ -28,6 +28,7 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
+import { hasListsFeature } from '../../feature_flags';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -107,6 +108,7 @@ export const transformAlertToRule = (
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
+    anomaly_threshold: alert.params.anomalyThreshold,
     false_positives: alert.params.falsePositives,
     filters: alert.params.filters,
     from: alert.params.from,
@@ -118,6 +120,7 @@ export const transformAlertToRule = (
     language: alert.params.language,
     output_index: alert.params.outputIndex,
     max_signals: alert.params.maxSignals,
+    machine_learning_job_id: alert.params.machineLearningJobId,
     risk_score: alert.params.riskScore,
     name: alert.name,
     query: alert.params.query,
@@ -141,6 +144,8 @@ export const transformAlertToRule = (
     last_success_at: ruleStatus?.attributes.lastSuccessAt,
     last_failure_message: ruleStatus?.attributes.lastFailureMessage,
     last_success_message: ruleStatus?.attributes.lastSuccessMessage,
+    // TODO: (LIST-FEATURE) Remove hasListsFeature() check once we have lists available for a release
+    lists: hasListsFeature() ? alert.params.lists : null,
   });
 };
 

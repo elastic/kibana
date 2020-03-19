@@ -37,10 +37,14 @@ import {
   id,
   note,
   version,
+  lists,
+  anomaly_threshold,
+  machine_learning_job_id,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
+import { hasListsFeature } from '../../feature_flags';
 
 /**
  * This almost identical to the create_rules_schema except for a few details.
@@ -51,6 +55,11 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  */
 export const updateRulesSchema = Joi.object({
   actions: actions.default([]),
+  anomaly_threshold: anomaly_threshold.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   description: description.required(),
   enabled: enabled.default(true),
   id,
@@ -60,8 +69,21 @@ export const updateRulesSchema = Joi.object({
   rule_id,
   index,
   interval: interval.default('5m'),
-  query: query.allow('').default(''),
-  language: language.default('kuery'),
+  query: query.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: query.allow('').default(''),
+  }),
+  language: language.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: language.default('kuery'),
+  }),
+  machine_learning_job_id: machine_learning_job_id.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   output_index,
   saved_id: saved_id.when('type', {
     is: 'saved_query',
@@ -83,4 +105,7 @@ export const updateRulesSchema = Joi.object({
   references: references.default([]),
   note: note.allow(''),
   version,
+
+  // TODO: (LIST-FEATURE) Remove the hasListsFeatures once this is ready for release
+  lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 }).xor('id', 'rule_id');
