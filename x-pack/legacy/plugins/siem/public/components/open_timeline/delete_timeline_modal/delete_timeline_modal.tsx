@@ -29,7 +29,7 @@ export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDel
     return (
       <FormattedMessage
         id="xpack.siem.open.timeline.deleteTimelineModalTitle"
-        defaultMessage={'Delete "{title}"?'}
+        defaultMessage='Delete "{title}"?'
         data-test-subj="title"
         values={{
           title: titleResult,
