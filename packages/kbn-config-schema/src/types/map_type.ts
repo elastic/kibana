@@ -57,7 +57,10 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
           path.length,
           0,
           // If `key` validation failed, let's stress that to make error more obvious.
-          type === 'map.key' ? `key("${entryKey}")` : entryKey.toString()
+          type === 'map.key' ? `key("${entryKey}")` : entryKey.toString(),
+          // Error could have happened deep inside value/key schema and error message should
+          // include full path.
+          ...(reason instanceof SchemaTypeError ? reason.path : [])
         );
 
         return reason instanceof SchemaTypesError

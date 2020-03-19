@@ -137,6 +137,7 @@ export class AlertingPlugin {
       taskRunnerFactory: this.taskRunnerFactory,
     });
     this.alertTypeRegistry = alertTypeRegistry;
+
     this.serverBasePath = core.http.basePath.serverBasePath;
 
     const usageCollection = plugins.usageCollection;
@@ -172,16 +173,6 @@ export class AlertingPlugin {
     unmuteAllAlertRoute(router, this.licenseState);
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
-
-    alertTypeRegistry.register({
-      id: 'test',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroupId: 'default',
-      name: 'Test',
-      executor: async options => {
-        return { status: 'ok' };
-      },
-    });
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
