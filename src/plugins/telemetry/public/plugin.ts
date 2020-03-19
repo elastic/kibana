@@ -81,12 +81,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public start({
-    http,
-    overlays,
-    application,
-    savedObjects,
-  }: CoreStart): Promise<TelemetryPluginStart> {
+  public start({ http, overlays, application, savedObjects }: CoreStart): TelemetryPluginStart {
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
@@ -102,6 +97,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         return;
       }
 
+      // Update the telemetry config based as a mix of the config files and saved objects
       const telemetrySavedObject = await this.getTelemetrySavedObject(savedObjects.client);
       const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
       this.telemetryService!.config = updatedConfig;
