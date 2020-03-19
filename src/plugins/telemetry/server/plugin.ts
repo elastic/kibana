@@ -31,6 +31,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClient,
   Plugin,
+  Logger,
 } from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
@@ -57,6 +58,7 @@ export interface TelemetryPluginsStart {
 type SavedObjectsRegisterType = CoreSetup['savedObjects']['registerType'];
 
 export class TelemetryPlugin implements Plugin {
+  private readonly logger: Logger;
   private readonly currentKibanaVersion: string;
   private readonly config$: Observable<TelemetryConfigType>;
   private readonly isDev: boolean;
@@ -65,12 +67,13 @@ export class TelemetryPlugin implements Plugin {
   private uiSettingsClient?: IUiSettingsClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
+    this.logger = initializerContext.logger.get('telemetry');
     this.isDev = initializerContext.env.mode.dev;
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
     this.config$ = initializerContext.config.create();
     this.fetcherTask = new FetcherTask({
       ...initializerContext,
-      logger: initializerContext.logger.get('telemetry'),
+      logger: this.logger,
     });
   }
 
@@ -103,7 +106,11 @@ export class TelemetryPlugin implements Plugin {
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
 
-    await handleOldSettings(savedObjectsClient, this.uiSettingsClient);
+    try {
+      await handleOldSettings(savedObjectsClient, this.uiSettingsClient);
+    } catch (error) {
+      this.logger.warn('Unable to update legacy telemetry configs.');
+    }
 
     this.fetcherTask.start(core, { telemetryCollectionManager });
   }
