@@ -128,9 +128,14 @@ describe('get_local_stats', () => {
     },
   };
 
+  const context = {
+    logger: console,
+    version: '8.0.0',
+  };
+
   describe('handleLocalStats', () => {
     it('returns expected object without xpack and kibana data', () => {
-      const result = handleLocalStats(getMockServer(), clusterInfo, clusterStats);
+      const result = handleLocalStats(clusterInfo, clusterStats, void 0, context);
       expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
       expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
       expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
@@ -141,7 +146,7 @@ describe('get_local_stats', () => {
     });
 
     it('returns expected object with xpack', () => {
-      const result = handleLocalStats(getMockServer(), clusterInfo, clusterStats);
+      const result = handleLocalStats(clusterInfo, clusterStats, void 0, context);
       const { stack_stats: stack, ...cluster } = result;
       expect(cluster.collection).to.be(combinedStatsResult.collection);
       expect(cluster.cluster_uuid).to.be(combinedStatsResult.cluster_uuid);
