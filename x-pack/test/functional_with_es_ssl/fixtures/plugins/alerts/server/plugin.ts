@@ -4,21 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from '../../../../../plugins/alerting/server';
+import { Plugin, CoreSetup } from 'kibana/server';
+import {
+  PluginSetupContract as AlertingSetup,
+  AlertType,
+} from '../../../../../../plugins/alerting/server';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
-  return new kibana.Plugin({
-    require: ['alerting'],
-    name: 'alerts',
-    init(server: any) {
-      createNoopAlertType(server.newPlatform.setup.plugins.alerting);
-      createAlwaysFiringAlertType(server.newPlatform.setup.plugins.alerting);
-    },
-  });
+// this plugin's dependendencies
+export interface AlertingExampleDeps {
+  alerting: AlertingSetup;
 }
 
-function createNoopAlertType(setupContract: any) {
+export class AlertingFixturePlugin implements Plugin<void, void, AlertingExampleDeps> {
+  public setup(core: CoreSetup, { alerting }: AlertingExampleDeps) {
+    createNoopAlertType(alerting);
+    createAlwaysFiringAlertType(alerting);
+  }
+
+  public start() {}
+  public stop() {}
+}
+
+function createNoopAlertType(alerting: AlertingSetup) {
   const noopAlertType: AlertType = {
     id: 'test.noop',
     name: 'Test: Noop',
@@ -26,10 +33,10 @@ function createNoopAlertType(setupContract: any) {
     defaultActionGroupId: 'default',
     async executor() {},
   };
-  setupContract.registerType(noopAlertType);
+  alerting.registerType(noopAlertType);
 }
 
-function createAlwaysFiringAlertType(setupContract: any) {
+function createAlwaysFiringAlertType(alerting: AlertingSetup) {
   // Alert types
   const alwaysFiringAlertType: any = {
     id: 'test.always-firing',
@@ -54,5 +61,5 @@ function createAlwaysFiringAlertType(setupContract: any) {
       };
     },
   };
-  setupContract.registerType(alwaysFiringAlertType);
+  alerting.registerType(alwaysFiringAlertType);
 }
