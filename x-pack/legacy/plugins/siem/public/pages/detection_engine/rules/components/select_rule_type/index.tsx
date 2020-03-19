@@ -5,18 +5,54 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiCard,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 
 import { FieldHook } from '../../../../../shared_imports';
 import { RuleType } from '../../../../../containers/detection_engine/rules/types';
 import * as i18n from './translations';
 import { isMlRule } from '../../helpers';
 
+const MlCardDescription = ({ hasValidLicense = false }: { hasValidLicense: boolean }) => (
+  <EuiText size="s">
+    {hasValidLicense ? (
+      i18n.ML_TYPE_DESCRIPTION
+    ) : (
+      <FormattedMessage
+        id="xpack.siem.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDisabledDescription"
+        defaultMessage="Access to ML requires a {subscriptionsLink}."
+        values={{
+          subscriptionsLink: (
+            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+              <FormattedMessage
+                id="xpack.siem.components.stepDefineRule.ruleTypeFIeld.subscriptionsLink"
+                defaultMessage="Platinum subscription"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    )}
+  </EuiText>
+);
+
 interface SelectRuleTypeProps {
   field: FieldHook;
+  hasValidLicense: boolean;
 }
 
-export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({ field }) => {
+export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
+  field,
+  hasValidLicense = false,
+}) => {
   const ruleType = field.value as RuleType;
   const setType = useCallback(
     (type: RuleType) => {
@@ -26,7 +62,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({ field }) => {
   );
   const setMl = useCallback(() => setType('machine_learning'), [setType]);
   const setQuery = useCallback(() => setType('query'), [setType]);
-  const license = true; // TODO
 
   return (
     <EuiFormRow label={field.label} fullWidth>
@@ -45,10 +80,10 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({ field }) => {
         <EuiFlexItem>
           <EuiCard
             title={i18n.ML_TYPE_TITLE}
-            description={license ? i18n.ML_TYPE_DESCRIPTION : i18n.ML_TYPE_DISABLED_DESCRIPTION}
-            isDisabled={!license}
+            description={<MlCardDescription hasValidLicense={hasValidLicense} />}
             icon={<EuiIcon size="l" type="machineLearningApp" />}
             selectable={{
+              isDisabled: !hasValidLicense,
               onClick: setMl,
               isSelected: isMlRule(ruleType),
             }}

@@ -13,13 +13,14 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { FC, memo, useCallback, useState, useEffect } from 'react';
+import React, { FC, memo, useCallback, useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
+import { MlCapabilitiesContext } from '../../../../../components/ml/permissions/ml_capabilities_provider';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { setFieldValue, isMlRule } from '../../helpers';
 import * as RuleI18n from '../../translations';
@@ -103,6 +104,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   setForm,
   setStepData,
 }) => {
+  const mlCapabilities = useContext(MlCapabilitiesContext);
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState(false);
   const [localIsMlRule, setIsMlRule] = useState(false);
@@ -178,7 +180,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
-          <UseField path="ruleType" component={SelectRuleType} />
+          <UseField
+            path="ruleType"
+            component={SelectRuleType}
+            componentProps={{
+              hasValidLicense: mlCapabilities.isPlatinumOrTrialLicense,
+            }}
+          />
           <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'none' : 'flex' }}>
             <>
               <CommonUseField
