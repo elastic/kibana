@@ -17,12 +17,16 @@
  * under the License.
  */
 
-import { resolveImportErrors } from '../resolve_import_errors';
-
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
-function getFormData(form) {
-  const formData = {};
+import { SavedObjectsImportUnknownError } from 'src/core/public';
+import { kfetch } from 'ui/kfetch';
+import { resolveImportErrors } from '../resolve_import_errors';
+
+const kfetchMock = kfetch as jest.Mock;
+
+function getFormData(form: Map<string, any>) {
+  const formData: Record<string, any> = {};
   for (const [key, val] of form.entries()) {
     if (key === 'retries') {
       formData[key] = JSON.parse(val);
@@ -69,7 +73,7 @@ Object {
             },
             error: {
               type: 'unknown',
-            },
+            } as SavedObjectsImportUnknownError,
           },
         ],
       },
@@ -94,8 +98,7 @@ Object {
   });
 
   test('resolves conflicts', async () => {
-    const { kfetch } = require('ui/kfetch');
-    kfetch.mockResolvedValueOnce({
+    kfetchMock.mockResolvedValueOnce({
       success: true,
       successCount: 1,
     });
@@ -136,7 +139,7 @@ Object {
   "status": "success",
 }
 `);
-    const formData = getFormData(kfetch.mock.calls[0][0].body);
+    const formData = getFormData(kfetchMock.mock.calls[0][0].body);
     expect(formData).toMatchInlineSnapshot(`
 Object {
   "file": "undefined",
@@ -153,8 +156,7 @@ Object {
   });
 
   test('resolves missing references', async () => {
-    const { kfetch } = require('ui/kfetch');
-    kfetch.mockResolvedValueOnce({
+    kfetchMock.mockResolvedValueOnce({
       success: true,
       successCount: 2,
     });
@@ -201,7 +203,7 @@ Object {
   "status": "success",
 }
 `);
-    const formData = getFormData(kfetch.mock.calls[0][0].body);
+    const formData = getFormData(kfetchMock.mock.calls[0][0].body);
     expect(formData).toMatchInlineSnapshot(`
 Object {
   "file": "undefined",
@@ -274,8 +276,7 @@ Object {
   });
 
   test('handles missing references then conflicts on the same errored objects', async () => {
-    const { kfetch } = require('ui/kfetch');
-    kfetch.mockResolvedValueOnce({
+    kfetchMock.mockResolvedValueOnce({
       success: false,
       successCount: 0,
       errors: [
@@ -288,7 +289,7 @@ Object {
         },
       ],
     });
-    kfetch.mockResolvedValueOnce({
+    kfetchMock.mockResolvedValueOnce({
       success: true,
       successCount: 1,
     });
@@ -333,7 +334,7 @@ Object {
   "status": "success",
 }
 `);
-    const formData1 = getFormData(kfetch.mock.calls[0][0].body);
+    const formData1 = getFormData(kfetchMock.mock.calls[0][0].body);
     expect(formData1).toMatchInlineSnapshot(`
 Object {
   "file": "undefined",
@@ -353,7 +354,7 @@ Object {
   ],
 }
 `);
-    const formData2 = getFormData(kfetch.mock.calls[1][0].body);
+    const formData2 = getFormData(kfetchMock.mock.calls[1][0].body);
     expect(formData2).toMatchInlineSnapshot(`
 Object {
   "file": "undefined",

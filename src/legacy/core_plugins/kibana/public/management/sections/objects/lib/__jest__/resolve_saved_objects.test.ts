@@ -23,20 +23,29 @@ import {
   saveObjects,
   saveObject,
 } from '../resolve_saved_objects';
+import {
+  SavedObject,
+  SavedObjectLoader,
+} from '../../../../../../../../../plugins/saved_objects/public';
+import { IndexPatternsContract } from '../../../../../../../../../plugins/data/public';
 
-jest.mock('../../../../../../../../../plugins/kibana_utils/public', () => ({
-  SavedObjectNotFound: class SavedObjectNotFound extends Error {
-    constructor(options) {
-      super();
-      for (const option in options) {
-        if (options.hasOwnProperty(option)) {
-          this[option] = options[option];
-        }
+class SavedObjectNotFound extends Error {
+  constructor(options: Record<string, any>) {
+    super();
+    for (const option in options) {
+      if (options.hasOwnProperty(option)) {
+        (this as any)[option] = options[option];
       }
     }
-  },
-}));
-import { SavedObjectNotFound } from '../../../../../../../../../plugins/kibana_utils/public';
+  }
+}
+
+const openModalMock = jest.fn();
+
+const createObj = (props: Partial<SavedObject>): SavedObject =>
+  ({
+    ...props,
+  } as SavedObject);
 
 describe('resolveSavedObjects', () => {
   describe('resolveSavedObjects', () => {
@@ -61,7 +70,7 @@ describe('resolveSavedObjects', () => {
         },
       ];
 
-      const indexPatterns = {
+      const indexPatterns = ({
         get: async () => {
           return {
             create: () => '2',
@@ -73,7 +82,7 @@ describe('resolveSavedObjects', () => {
         cache: {
           clear: () => {},
         },
-      };
+      } as unknown) as IndexPatternsContract;
 
       const services = [
         {
@@ -115,11 +124,17 @@ describe('resolveSavedObjects', () => {
             };
           },
         },
-      ];
+      ] as SavedObjectLoader[];
 
       const overwriteAll = false;
 
-      const result = await resolveSavedObjects(savedObjects, overwriteAll, services, indexPatterns);
+      const result = await resolveSavedObjects(
+        savedObjects,
+        overwriteAll,
+        services,
+        indexPatterns,
+        openModalMock
+      );
 
       expect(result.conflictedIndexPatterns.length).toBe(3);
       expect(result.conflictedSavedObjectsLinkedToSavedSearches.length).toBe(0);
@@ -147,7 +162,7 @@ describe('resolveSavedObjects', () => {
         },
       ];
 
-      const indexPatterns = {
+      const indexPatterns = ({
         get: async () => {
           return {
             create: () => '2',
@@ -159,7 +174,7 @@ describe('resolveSavedObjects', () => {
         cache: {
           clear: () => {},
         },
-      };
+      } as unknown) as IndexPatternsContract;
 
       const services = [
         {
@@ -202,11 +217,17 @@ describe('resolveSavedObjects', () => {
             };
           },
         },
-      ];
+      ] as SavedObjectLoader[];
 
       const overwriteAll = false;
 
-      const result = await resolveSavedObjects(savedObjects, overwriteAll, services, indexPatterns);
+      const result = await resolveSavedObjects(
+        savedObjects,
+        overwriteAll,
+        services,
+        indexPatterns,
+        openModalMock
+      );
 
       expect(result.conflictedIndexPatterns.length).toBe(1);
       expect(result.conflictedSavedObjectsLinkedToSavedSearches.length).toBe(1);
@@ -223,7 +244,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: field => {
+              getOwnField: (field: string) => {
                 return field === 'index' ? '1' : undefined;
               },
             },
@@ -234,7 +255,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: field => {
+              getOwnField: (field: string) => {
                 return field === 'index' ? '3' : undefined;
               },
             },
@@ -277,7 +298,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: field => {
+              getOwnField: (field: string) => {
                 return field === 'index' ? '1' : [{ meta: { index: 'filterIndex' } }];
               },
               setField: jest.fn(),
@@ -289,7 +310,7 @@ describe('resolveSavedObjects', () => {
         {
           obj: {
             searchSource: {
-              getOwnField: field => {
+              getOwnField: (field: string) => {
                 return field === 'index' ? '3' : undefined;
               },
             },
@@ -330,12 +351,12 @@ describe('resolveSavedObjects', () => {
       const save = jest.fn();
 
       const objs = [
-        {
+        createObj({
           save,
-        },
-        {
+        }),
+        createObj({
           save,
-        },
+        }),
       ];
 
       const overwriteAll = false;
@@ -349,9 +370,9 @@ describe('resolveSavedObjects', () => {
   describe('saveObject', () => {
     it('should save the object', async () => {
       const save = jest.fn();
-      const obj = {
+      const obj = createObj({
         save,
-      };
+      });
 
       const overwriteAll = false;
 

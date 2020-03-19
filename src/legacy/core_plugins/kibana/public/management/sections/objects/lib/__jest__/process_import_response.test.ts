@@ -17,6 +17,11 @@
  * under the License.
  */
 
+import {
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportMissingReferencesError,
+} from 'src/core/public';
 import { processImportResponse } from '../process_import_response';
 
 describe('processImportResponse()', () => {
@@ -36,32 +41,28 @@ describe('processImportResponse()', () => {
       successCount: 0,
       errors: [
         {
-          obj: {
-            type: 'a',
-            id: '1',
-          },
+          type: 'a',
+          id: '1',
           error: {
             type: 'conflict',
-          },
+          } as SavedObjectsImportConflictError,
         },
       ],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "error": Object {
-      "type": "conflict",
-    },
-    "obj": Object {
-      "obj": Object {
-        "id": "1",
-        "type": "a",
-      },
-    },
-  },
-]
-`);
+      Array [
+        Object {
+          "error": Object {
+            "type": "conflict",
+          },
+          "obj": Object {
+            "id": "1",
+            "type": "a",
+          },
+        },
+      ]
+    `);
   });
 
   test('unknown errors get added to failedImports', () => {
@@ -70,32 +71,28 @@ Array [
       successCount: 0,
       errors: [
         {
-          obj: {
-            type: 'a',
-            id: '1',
-          },
+          type: 'a',
+          id: '1',
           error: {
             type: 'unknown',
-          },
+          } as SavedObjectsImportUnknownError,
         },
       ],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "error": Object {
-      "type": "unknown",
-    },
-    "obj": Object {
-      "obj": Object {
-        "id": "1",
-        "type": "a",
-      },
-    },
-  },
-]
-`);
+      Array [
+        Object {
+          "error": Object {
+            "type": "unknown",
+          },
+          "obj": Object {
+            "id": "1",
+            "type": "a",
+          },
+        },
+      ]
+    `);
   });
 
   test('missing references get added to failedImports', () => {
@@ -104,10 +101,8 @@ Array [
       successCount: 0,
       errors: [
         {
-          obj: {
-            type: 'a',
-            id: '1',
-          },
+          type: 'a',
+          id: '1',
           error: {
             type: 'missing_references',
             references: [
@@ -116,31 +111,29 @@ Array [
                 id: '2',
               },
             ],
-          },
+          } as SavedObjectsImportMissingReferencesError,
         },
       ],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "error": Object {
-      "references": Array [
+      Array [
         Object {
-          "id": "2",
-          "type": "index-pattern",
+          "error": Object {
+            "references": Array [
+              Object {
+                "id": "2",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "missing_references",
+          },
+          "obj": Object {
+            "id": "1",
+            "type": "a",
+          },
         },
-      ],
-      "type": "missing_references",
-    },
-    "obj": Object {
-      "obj": Object {
-        "id": "1",
-        "type": "a",
-      },
-    },
-  },
-]
-`);
+      ]
+    `);
   });
 });

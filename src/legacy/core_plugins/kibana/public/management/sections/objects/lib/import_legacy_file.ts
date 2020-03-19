@@ -17,12 +17,9 @@
  * under the License.
  */
 
-export async function importLegacyFile(
-  file: File,
-  fileReader: typeof FileReader = window.FileReader
-) {
+export async function importLegacyFile(file: File) {
   return new Promise((resolve, reject) => {
-    const fr = new fileReader();
+    const fr = new FileReader();
     fr.onload = event => {
       const result = event.target!.result as string;
       try {

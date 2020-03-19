@@ -20,44 +20,18 @@
 import { importLegacyFile } from '../import_legacy_file';
 
 describe('importFile', () => {
-  it('should import a file', async () => {
-    class FileReader {
-      readAsText(text) {
-        this.onload({
-          target: {
-            result: JSON.stringify({ text }),
-          },
-        });
-      }
-    }
+  it('should import a file with valid json format', async () => {
+    const file = new File([`{"text": "foo"}`], 'file.json');
 
-    const file = 'foo';
-
-    const imported = await importLegacyFile(file, FileReader);
-    expect(imported).toEqual({ text: file });
+    const imported = await importLegacyFile(file);
+    expect(imported).toEqual({ text: 'foo' });
   });
 
-  it('should throw errors', async () => {
-    class FileReader {
-      readAsText() {
-        this.onload({
-          target: {
-            result: 'not_parseable',
-          },
-        });
-      }
-    }
+  it('should throw errors when file content is not parseable', async () => {
+    const file = new File([`not_parseable`], 'file.json');
 
-    const file = 'foo';
-
-    try {
-      await importLegacyFile(file, FileReader);
-    } catch (e) {
-      // There isn't a great way to handle throwing exceptions
-      // with async/await but this seems to work :shrug:
-      expect(() => {
-        throw e;
-      }).toThrow();
-    }
+    await expect(importLegacyFile(file)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unexpected token o in JSON at position 1"`
+    );
   });
 });
