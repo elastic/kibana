@@ -168,15 +168,15 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     const maxNumberOfBuckets = 1000;
     const end = latestMs;
 
-    const intervalInMs = parseInterval(interval);
+    const intervalDuration = parseInterval(interval);
 
-    if (intervalInMs === null) {
+    if (intervalDuration === null) {
       throw Boom.badRequest('Interval is invalid');
     }
 
     const start = Math.max(
       earliestMs,
-      latestMs - maxNumberOfBuckets * intervalInMs.asMilliseconds()
+      latestMs - maxNumberOfBuckets * intervalDuration.asMilliseconds()
     );
 
     return { start, end };
