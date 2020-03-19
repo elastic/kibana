@@ -62,3 +62,13 @@ You can login with username `elastic` and password `changeme` by default.
 
 If you want to freeze a UI or API test you can include an async call like `await new Promise(r => setTimeout(r, 1000 * 60))`
 to freeze the execution for 60 seconds if you need to click around or check things in the state that is loaded.
+
+#### Running --ssl tests
+
+Some of our tests require there to be an SSL connection between Kibana and Elasticsearch.
+
+We can run these tests like described above, but with some special config.
+
+`node scripts/functional_tests_server.js --config=test/functional_with_es_ssl/config.ts`
+
+`node scripts/functional_test_runner.js --config=test/functional_with_es_ssl/config.ts`
