@@ -78,12 +78,15 @@ export async function readTelemetryFile(path: string): Promise<object | undefine
   return undefined;
 }
 
-export function createTelemetryUsageCollector(usageCollection: UsageCollectionSetup) {
+export function createTelemetryUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  getConfigPathFn = getConfigPath // exposed for testing
+) {
   return usageCollection.makeUsageCollector({
     type: 'static_telemetry',
     isReady: () => true,
     fetch: async () => {
-      const configPath = getConfigPath();
+      const configPath = getConfigPathFn();
       const telemetryPath = join(dirname(configPath), 'telemetry.yml');
       return await readTelemetryFile(telemetryPath);
     },

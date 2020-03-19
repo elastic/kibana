@@ -117,7 +117,10 @@ describe('telemetry_usage_collector', () => {
 
       // the `makeUsageCollector` is mocked above to return the argument passed to it
       const usageCollector = mockUsageCollector() as any;
-      const collectorOptions = createTelemetryUsageCollector(usageCollector);
+      const collectorOptions = createTelemetryUsageCollector(
+        usageCollector,
+        () => tempFiles.unreadable
+      );
 
       expect(collectorOptions.type).toBe('static_telemetry');
       expect(await collectorOptions.fetch({} as any)).toEqual(expectedObject); // Sending any as the callCluster client because it's not needed in this collector but TS requires it when calling it.
