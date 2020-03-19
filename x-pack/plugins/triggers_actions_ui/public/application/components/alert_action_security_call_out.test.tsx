@@ -5,14 +5,14 @@
  */
 import React, { Fragment } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { SecurityEnabledCallOut } from './security_call_out';
+import { AlertActionSecurityCallOut } from './alert_action_security_call_out';
 
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 
 const docLinks = { ELASTIC_WEBSITE_URL: 'elastic.co/', DOC_LINK_VERSION: 'current' };
 
-describe('security call out', () => {
+describe('alert action security call out', () => {
   let useEffect: any;
 
   const mockUseEffect = () => {
@@ -32,7 +32,9 @@ describe('security call out', () => {
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
-      component = shallow(<SecurityEnabledCallOut getHealth={health} docLinks={docLinks} />);
+      component = shallow(
+        <AlertActionSecurityCallOut action="created" getHealth={health} docLinks={docLinks} />
+      );
     });
 
     expect(component?.is(Fragment)).toBeTruthy();
@@ -46,7 +48,9 @@ describe('security call out', () => {
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
-      component = shallow(<SecurityEnabledCallOut getHealth={health} docLinks={docLinks} />);
+      component = shallow(
+        <AlertActionSecurityCallOut action="created" getHealth={health} docLinks={docLinks} />
+      );
     });
 
     expect(component?.is(Fragment)).toBeTruthy();
@@ -56,15 +60,17 @@ describe('security call out', () => {
   test('renders the callout if keys are disabled', async () => {
     const health = jest.fn();
 
-    health.mockImplementationOnce(async () => ({ canGenerateApiKeys: false }));
+    health.mockResolvedValue({ canGenerateApiKeys: false });
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
-      component = shallow(<SecurityEnabledCallOut getHealth={health} docLinks={docLinks} />);
+      component = shallow(
+        <AlertActionSecurityCallOut action="created" getHealth={health} docLinks={docLinks} />
+      );
     });
 
     expect(component?.find(EuiCallOut).prop('title')).toMatchInlineSnapshot(
-      `"Transport Layer Security is not enabled"`
+      `"Alerts cannot be created while TLS is not enabled."`
     );
 
     expect(component?.find(EuiButton).prop('href')).toMatchInlineSnapshot(

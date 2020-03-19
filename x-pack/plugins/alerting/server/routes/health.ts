@@ -13,6 +13,7 @@ import {
   ElasticsearchServiceSetup,
 } from 'kibana/server';
 import { isApiKeyDisabledError, isSecurityPluginDisabledError } from './lib/error_handler';
+import { AlertingFrameworkHealth } from '../types';
 
 export function healthRoute(router: IRouter, elasticsearch: ElasticsearchServiceSetup) {
   const clusterClient = elasticsearch.createClient('alertingSecurity', {
@@ -34,7 +35,7 @@ export function healthRoute(router: IRouter, elasticsearch: ElasticsearchService
 
         const {
           canGenerateApiKeys,
-        } = await scopedClusterClient
+        }: AlertingFrameworkHealth = await scopedClusterClient
           .callAsCurrentUser('alertingSecurity.canGenerateApiKeys', { owner: true })
           .then(
             //  If the API returns a truthy result that means it's enabled.

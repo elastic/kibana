@@ -24,6 +24,8 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
+import { AlertActionSecurityCallOutWithApi as AlertActionSecurityCallOut } from '../../components/alert_action_security_call_out';
+import { useAppDependencies } from '../../app_context';
 
 interface AlertEditProps {
   initialAlert: Alert;
@@ -36,6 +38,8 @@ export const AlertEdit = ({
   editFlyoutVisible,
   setEditFlyoutVisibility,
 }: AlertEditProps) => {
+  const { docLinks } = useAppDependencies();
+
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -140,6 +144,7 @@ export const AlertEdit = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
+        <AlertActionSecurityCallOut docLinks={docLinks} action={'edited'} />
         <EuiFlyoutBody>
           <AlertForm alert={alert} dispatch={dispatch} errors={errors} canChangeTrigger={false} />
         </EuiFlyoutBody>

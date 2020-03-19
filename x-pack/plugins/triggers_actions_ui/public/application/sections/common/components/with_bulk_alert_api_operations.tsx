@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { Alert, AlertType, AlertTaskState } from '../../../../types';
+import { Alert, AlertType, AlertTaskState, AlertingFrameworkHealth } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
@@ -43,7 +43,7 @@ export interface ComponentOpts {
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
   loadAlertTypes: () => Promise<AlertType[]>;
-  health: () => Promise<any>;
+  getHealth: () => Promise<AlertingFrameworkHealth>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -108,7 +108,7 @@ export function withBulkAlertOperations<T>(
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
         loadAlertTypes={async () => loadAlertTypes({ http })}
-        health={async () => health({ http })}
+        getHealth={async () => health({ http })}
       />
     );
   };

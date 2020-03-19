@@ -12,3 +12,7 @@ export interface ActionGroup {
   id: string;
   name: string;
 }
+
+export interface AlertingFrameworkHealth {
+  canGenerateApiKeys: boolean;
+}

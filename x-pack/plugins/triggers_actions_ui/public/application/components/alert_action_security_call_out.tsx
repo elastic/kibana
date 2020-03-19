@@ -22,12 +22,16 @@ interface Health {
   canGenerateApiKeys: boolean;
 }
 
-type Props = { docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'> } & Pick<
-  BulkOperationsComponentOpts,
-  'getHealth'
->;
+type Props = {
+  docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
+  action: string;
+} & Pick<BulkOperationsComponentOpts, 'getHealth'>;
 
-export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ getHealth, docLinks }) => {
+export const AlertActionSecurityCallOut: React.FunctionComponent<Props> = ({
+  getHealth,
+  action,
+  docLinks,
+}) => {
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
   const [alertingHealth, setAlertingHealth] = React.useState<Option<Health>>(none);
@@ -42,32 +46,31 @@ export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ getHeal
 
   return pipe(
     alertingHealth,
-    filter(healthCheck => !healthCheck?.canGenerateApiKeys),
+    filter(healthCheck => !healthCheck.canGenerateApiKeys),
     fold(
       () => <Fragment />,
       () => (
         <Fragment>
           <EuiCallOut
             title={i18n.translate(
-              'xpack.triggersActionsUI.components.securityCallOut.tlsDisabledTitle',
+              'xpack.triggersActionsUI.components.alertActionSecurityCallOut.tlsDisabledTitle',
               {
-                defaultMessage: 'Transport Layer Security is not enabled',
+                defaultMessage: 'Alerts cannot be {action} while TLS is not enabled.',
+                values: {
+                  action,
+                },
               }
             )}
-            color="primary"
+            color="warning"
+            size="s"
             iconType="iInCircle"
           >
-            <p>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.components.securityCallOut.tlsDisabledDescription"
-                defaultMessage="Alerting relies upon API keys, which requires TLS between Elasticsearch and Kibana when security is enabled. Creating alerts is currently disabled."
-              />
-            </p>
             <EuiButton
+              color="warning"
               href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/configuring-tls.html`}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.components.securityCallOut.enableTlsCta"
+                id="xpack.triggersActionsUI.components.alertActionSecurityCallOut.enableTlsCta"
                 defaultMessage="Enabled TLS"
               />
             </EuiButton>
@@ -79,4 +82,6 @@ export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ getHeal
   );
 };
 
-export const SecurityEnabledCallOutWithApi = withBulkAlertOperations(SecurityEnabledCallOut);
+export const AlertActionSecurityCallOutWithApi = withBulkAlertOperations(
+  AlertActionSecurityCallOut
+);
