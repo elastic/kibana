@@ -54,14 +54,14 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await uptimeService.setFilterText(filterQuery);
     }
 
-    public async pageHasExpectedIds(monitorIdsToCheck: string[]) {
-      await retry.tryForTime(15000, async () => {
+    public async pageHasExpectedIds(monitorIdsToCheck: string[]): Promise<void> {
+      return retry.tryForTime(15000, async () => {
         await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
       });
     }
 
-    public async pageUrlContains(value: string, expected: boolean = true) {
-      await retry.tryForTime(12000, async () => {
+    public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
+      return retry.tryForTime(12000, async () => {
         expect(await uptimeService.urlContains(value)).to.eql(expected);
       });
     }
