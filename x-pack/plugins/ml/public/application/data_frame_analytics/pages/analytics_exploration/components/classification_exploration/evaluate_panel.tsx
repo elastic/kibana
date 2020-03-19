@@ -168,8 +168,10 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
           const colId = children?.props?.columnId;
           const gridItem = columnData[rowIndex];
 
-          if (gridItem !== undefined) {
-            const count = colId === gridItem.actual_class ? gridItem.count : gridItem.error_count;
+          if (gridItem !== undefined && colId !== ACTUAL_CLASS_ID) {
+            // const count = colId === gridItem.actual_class ? gridItem.count : gridItem.error_count;
+            // @ts-ignore
+            const count = gridItem[colId];
             return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
           }
 
@@ -203,19 +205,28 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     setCellProps: any;
   }) => {
     const cellValue = columnsData[rowIndex][columnId];
+    const actualCount = columnsData[rowIndex] && columnsData[rowIndex].actual_class_doc_count;
+    // @ts-ignore
+    let accuracy;
+
+    if (columnId !== ACTUAL_CLASS_ID && actualCount) {
+      accuracy = cellValue / actualCount;
+      // round to 2 decimal places without converting to string;
+      accuracy = Math.round(accuracy * 100) / 100;
+      accuracy = `${Math.round(accuracy * 100)}%`;
+    }
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       if (columnId !== ACTUAL_CLASS_ID) {
         setCellProps({
           style: {
-            backgroundColor: `rgba(0, 179, 164, ${cellValue})`,
+            // @ts-ignore
+            backgroundColor: `rgba(0, 179, 164, ${accuracy})`,
           },
         });
       }
     }, [rowIndex, columnId, setCellProps]);
-    return (
-      <span>{typeof cellValue === 'number' ? `${Math.round(cellValue * 100)}%` : cellValue}</span>
-    );
+    return <span>{columnId === ACTUAL_CLASS_ID ? cellValue : accuracy}</span>;
   };
 
   if (isLoading === true) {
