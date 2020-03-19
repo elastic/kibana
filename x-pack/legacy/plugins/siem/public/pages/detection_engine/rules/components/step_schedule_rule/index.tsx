@@ -112,7 +112,9 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
         </Form>
       </StepContentWrapper>
 
-      {!isUpdateView && <NextStep onClick={onSubmit} isDisabled={isLoading} />}
+      {!isUpdateView && (
+        <NextStep dataTestSubj="schedule-continue" onClick={onSubmit} isDisabled={isLoading} />
+      )}
     </>
   );
 };

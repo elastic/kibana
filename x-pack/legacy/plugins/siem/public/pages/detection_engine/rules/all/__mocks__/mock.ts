@@ -145,7 +145,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
       ],
     },
   ],
-  throttle: null, // propably delete
+  throttle: null,
   note: '# this is some markdown documentation',
   version: 1,
 });

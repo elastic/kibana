@@ -36,7 +36,7 @@ const getMessageVariables = memoizeOne(() => {
 });
 
 export const RuleActionsField: ThrottleSelectField = ({ field }) => {
-  const { http, triggers_actions_ui } = useKibana().services;
+  const { http, triggers_actions_ui, notifications } = useKibana().services;
   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
   const messageVariables = getMessageVariables();
 
@@ -76,6 +76,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field }) => {
       actionTypeRegistry={actionTypeRegistry}
       actionTypes={SUPPORTED_ACTION_TYPES}
       defaultActionMessage={DEFAULT_ACTION_MESSAGE}
+      toastNotifications={notifications.toasts}
     />
   );
 };

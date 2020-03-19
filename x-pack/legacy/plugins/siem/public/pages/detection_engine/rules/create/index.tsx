@@ -408,7 +408,6 @@ const CreateRulePageComponent: React.FC = () => {
             <EuiHorizontalRule margin="m" />
             <StepRuleActions
               addPadding={true}
-              descriptionDirection="row"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.ruleActions]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}

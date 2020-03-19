@@ -129,7 +129,6 @@ describe('helpers', () => {
     test('returns formatted object as ScheduleStepRuleJson', () => {
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockData);
       const expected = {
-        enabled: false,
         from: 'now-660s',
         to: 'now',
         interval: '5m',
@@ -148,7 +147,6 @@ describe('helpers', () => {
       delete mockStepData.to;
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-660s',
         to: 'now',
         interval: '5m',
@@ -167,7 +165,6 @@ describe('helpers', () => {
       };
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-660s',
         to: 'now',
         interval: '5m',
@@ -186,7 +183,6 @@ describe('helpers', () => {
       };
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-300s',
         to: 'now',
         interval: '5m',
@@ -205,7 +201,6 @@ describe('helpers', () => {
       };
       const result: ScheduleStepRuleJson = formatScheduleStepData(mockStepData);
       const expected = {
-        enabled: false,
         from: 'now-360s',
         to: 'now',
         interval: 'random',

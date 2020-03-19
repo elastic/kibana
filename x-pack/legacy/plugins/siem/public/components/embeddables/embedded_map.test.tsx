@@ -17,6 +17,17 @@ mockUseIndexPatterns.mockImplementation(() => [true, []]);
 
 jest.mock('../../lib/kibana');
 
+/* eslint-disable no-console */
+// Silence until enzyme fixed to use ReactTestUtils.act()
+const originalError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+afterAll(() => {
+  console.error = originalError;
+});
+/* eslint-enable no-console */
+
 describe('EmbeddedMapComponent', () => {
   let setQuery: SetQuery;
 

@@ -279,7 +279,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
         </Form>
       </StepContentWrapper>
 
-      {!isUpdateView && <NextStep onClick={onSubmit} isDisabled={isLoading} />}
+      {!isUpdateView && (
+        <NextStep dataTestSubj="about-continue" onClick={onSubmit} isDisabled={isLoading} />
+      )}
     </>
   );
 };

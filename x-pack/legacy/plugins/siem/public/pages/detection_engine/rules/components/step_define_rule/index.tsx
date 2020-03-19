@@ -253,7 +253,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         </Form>
       </StepContentWrapper>
 
-      {!isUpdateView && <NextStep onClick={onSubmit} isDisabled={isLoading} />}
+      {!isUpdateView && (
+        <NextStep dataTestSubj="define-continue" onClick={onSubmit} isDisabled={isLoading} />
+      )}
     </>
   );
 };

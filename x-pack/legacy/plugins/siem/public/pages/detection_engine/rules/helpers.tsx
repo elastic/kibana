@@ -9,6 +9,7 @@ import { get } from 'lodash/fp';
 import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
+import { AlertAction } from '../../../../../../../plugins/alerting/common';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule, RuleType } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
@@ -52,12 +53,12 @@ export const getStepsData = ({
 };
 
 export const getActionsStepsData = (rule: Rule): ActionsStepRule => {
-  const { throttle, enabled, actions } = rule;
+  const { throttle = null, enabled, actions = [] } = rule;
 
   return {
-    actions: actions ?? [],
+    actions,
     isNew: false,
-    throttle: throttle ?? null,
+    throttle,
     enabled,
   };
 };

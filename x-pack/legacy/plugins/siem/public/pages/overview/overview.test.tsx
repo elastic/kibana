@@ -33,6 +33,17 @@ jest.mock('../../components/query_bar', () => ({
   QueryBar: () => null,
 }));
 
+/* eslint-disable no-console */
+// Silence until enzyme fixed to use ReactTestUtils.act()
+const originalError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+afterAll(() => {
+  console.error = originalError;
+});
+/* eslint-enable no-console */
+
 let localSource: Array<{
   request: {};
   result: {
