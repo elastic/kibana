@@ -83,9 +83,9 @@ export function registerTelemetryOptInStatsRoutes(
           newOptInStatus,
           statsGetterConfig
         );
-        return res.ok({ body: JSON.stringify(optInStatus) });
+        return res.ok({ body: optInStatus });
       } catch (err) {
-        return res.ok({ body: JSON.stringify([]) });
+        return res.ok({ body: [] });
       }
     }
   );

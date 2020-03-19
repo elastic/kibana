@@ -66,7 +66,7 @@ export function registerTelemetryUsageStatsRoutes(
           callAsInternalUser: context.core.elasticsearch.adminClient.callAsInternalUser,
         };
         const stats = await telemetryCollectionManager.getStats(statsConfig);
-        return res.ok({ body: JSON.stringify(stats) });
+        return res.ok({ body: stats });
       } catch (err) {
         if (isDev) {
           // don't ignore errors when running in dev mode
@@ -75,7 +75,7 @@ export function registerTelemetryUsageStatsRoutes(
           return res.forbidden();
         } else {
           // ignore errors and return empty set
-          return res.ok({ body: JSON.stringify([]) });
+          return res.ok({ body: [] });
         }
       }
     }

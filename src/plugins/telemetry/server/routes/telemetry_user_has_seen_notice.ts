@@ -44,7 +44,7 @@ export function registerTelemetryUserHasSeenNotice(router: IRouter) {
       };
       await updateTelemetrySavedObject(internalRepository, updatedAttributes);
 
-      return res.ok({ body: JSON.stringify(updatedAttributes) });
+      return res.ok({ body: updatedAttributes });
     }
   );
 }
