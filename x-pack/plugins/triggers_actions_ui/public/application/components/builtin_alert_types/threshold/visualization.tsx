@@ -91,7 +91,7 @@ interface Props {
     [key: string]: Comparator;
   };
   alertsContext: AlertsContextValue;
-  refreshRateInMilliseconds: number;
+  refreshRateInMilliseconds?: number;
 }
 
 const DEFAULT_REFRESH_RATE = 5000;
