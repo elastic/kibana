@@ -48,6 +48,7 @@ test('returns isEnabled:false when action type is disabled by license', async ()
         className="actCheckActionTypeEnabled__disabledActionWarningCard"
         description="To re-enable this action, please upgrade your license."
         title="This feature requires a basic license."
+        titleSize="xs"
       >
         <ForwardRef
           href="https://www.elastic.co/subscriptions"
