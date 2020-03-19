@@ -34,16 +34,16 @@ import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world
 // eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
-import { EmbeddableApi } from '../api';
 import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/customize_title/customize_panel_modal';
 import { mount } from 'enzyme';
+import { EmbeddableStart } from '../plugin';
 
-let api: EmbeddableApi;
+let api: EmbeddableStart;
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 beforeEach(async () => {
-  const { doStart, coreStart, uiActions } = testPlugin(
+  const { doStart, coreStart, uiActions, setup } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
   );
@@ -54,7 +54,7 @@ beforeEach(async () => {
     uiActions.executeTriggerActions,
     {} as any
   );
-  api.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
+  setup.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
 
   container = new HelloWorldContainer(
     { id: '123', panels: {} },

@@ -998,7 +998,7 @@ export interface IScopedRenderingClient {
 export interface IUiSettingsClient {
     get: <T = any>(key: string) => Promise<T>;
     getAll: <T = any>() => Promise<Record<string, T>>;
-    getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
+    getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;
     getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
@@ -1443,6 +1443,9 @@ export interface PluginsServiceStart {
     contracts: Map<PluginName, unknown>;
 }
 
+// @public
+export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
+
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
@@ -1592,6 +1595,8 @@ export interface RouteValidatorOptions {
 // @public
 export type SafeRouteMethod = 'get' | 'options';
 
+// Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
@@ -2284,7 +2289,7 @@ export interface StringValidationRegexString {
 }
 
 // @public
-export interface UiSettingsParams {
+export interface UiSettingsParams<T = unknown> {
     category?: string[];
     deprecation?: DeprecationSettings;
     description?: string;
@@ -2293,10 +2298,12 @@ export interface UiSettingsParams {
     options?: string[];
     readonly?: boolean;
     requiresPageReload?: boolean;
+    // (undocumented)
+    schema: Type<T>;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;
-    value?: SavedObjectAttribute;
+    value?: T;
 }
 
 // @public (undocumented)

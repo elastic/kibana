@@ -5,7 +5,7 @@
  */
 
 import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'kibana/public';
-import { IEmbeddableSetup } from 'src/plugins/embeddable/public';
+import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
@@ -13,7 +13,7 @@ import { ResolverEmbeddableFactory } from './embeddables/resolver';
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
 export interface EndpointPluginSetupDependencies {
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   data: DataPublicPluginStart;
 }
 export interface EndpointPluginStartDependencies {
