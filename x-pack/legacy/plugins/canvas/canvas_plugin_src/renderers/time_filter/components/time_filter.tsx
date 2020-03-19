@@ -69,6 +69,7 @@ export const TimeFilter = ({ filter, commit, dateFormat, commonlyUsedRanges = []
         dateFormat={dateFormat}
         commonlyUsedRanges={commonlyUsedRanges.length ? commonlyUsedRanges : defaultQuickRanges}
       />
+      <div>{dateFormat}</div>
     </div>
   );
 };
