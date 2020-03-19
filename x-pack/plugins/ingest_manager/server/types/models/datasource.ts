@@ -31,7 +31,13 @@ const DatasourceBaseSchema = {
           enabled: schema.boolean(),
           dataset: schema.string(),
           processors: schema.maybe(schema.arrayOf(schema.string())),
-          config: schema.recordOf(schema.string(), schema.any()),
+          config: schema.recordOf(
+            schema.string(),
+            schema.object({
+              type: schema.maybe(schema.string()),
+              value: schema.any(),
+            })
+          ),
         })
       ),
     })
