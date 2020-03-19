@@ -59,7 +59,6 @@ export default function({ getService, getPageObjects }) {
 
       it('adds a new visualization', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-        await PageObjects.dashboard.switchToEditMode();
         await dashboardAddPanel.ensureAddPanelIsShowing();
         await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
         await PageObjects.visualize.clickAreaChart();
