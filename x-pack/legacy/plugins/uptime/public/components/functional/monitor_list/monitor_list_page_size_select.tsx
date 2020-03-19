@@ -17,6 +17,7 @@ interface PopoverButtonProps {
 const PopoverButton: React.FC<PopoverButtonProps> = ({ setIsOpen, size }) => (
   <EuiButtonEmpty
     color="text"
+    data-test-subj="xpack.uptime.monitorList.pageSizeSelect.popoverOpen"
     iconType="arrowDown"
     iconSide="right"
     onClick={() => setIsOpen(true)}
@@ -30,24 +31,29 @@ const PopoverButton: React.FC<PopoverButtonProps> = ({ setIsOpen, size }) => (
 );
 
 interface ContextItemProps {
+  'data-test-subj': string;
   key: string;
   numRows: number;
 }
 
 const items: ContextItemProps[] = [
   {
+    'data-test-subj': 'xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem10',
     key: '10 rows',
     numRows: 10,
   },
   {
+    'data-test-subj': 'xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem25',
     key: '25 rows',
     numRows: 25,
   },
   {
+    'data-test-subj': 'xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem50',
     key: '50 rows',
     numRows: 50,
   },
   {
+    'data-test-subj': 'xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem100',
     key: '100 rows',
     numRows: 100,
   },
@@ -78,8 +84,9 @@ export const MonitorListPageSizeSelect = ({ size, setSize }: MonitorListPageSize
       anchorPosition="upLeft"
     >
       <EuiContextMenuPanel
-        items={items.map(({ key, numRows }) => (
+        items={items.map(({ 'data-test-subj': dataTestSubj, key, numRows }) => (
           <EuiContextMenuItem
+            data-test-subj={dataTestSubj}
             key={key}
             icon={size === numRows ? 'check' : 'empty'}
             onClick={() => {

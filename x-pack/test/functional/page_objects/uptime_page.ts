@@ -55,11 +55,13 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     }
 
     public async pageHasExpectedIds(monitorIdsToCheck: string[]) {
-      await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
+      await retry.tryForTime(15000, async () => {
+        await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
+      });
     }
 
     public async pageUrlContains(value: string, expected: boolean = true) {
-      await retry.try(async () => {
+      await retry.tryForTime(12000, async () => {
         expect(await uptimeService.urlContains(value)).to.eql(expected);
       });
     }
@@ -131,6 +133,11 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await alerts.setMonitorStatusSelectableToHours();
       await alerts.setLocationsSelectable();
       await alerts.clickSaveAlertButtion();
+    }
+
+    public async setMonitorListPageSize(size: number): Promise<void> {
+      await uptimeService.openPageSizeSelectPopover();
+      return uptimeService.clickPageSizeSelectPopoverItem(size);
     }
   })();
 }

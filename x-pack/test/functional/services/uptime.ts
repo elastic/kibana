@@ -160,5 +160,14 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
         timeout: 3000,
       });
     },
+    async openPageSizeSelectPopover(): Promise<void> {
+      return testSubjects.click('xpack.uptime.monitorList.pageSizeSelect.popoverOpen', 5000);
+    },
+    async clickPageSizeSelectPopoverItem(size: number = 10): Promise<void> {
+      return testSubjects.click(
+        `xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem${size.toString()}`,
+        5000
+      );
+    },
   };
 }
