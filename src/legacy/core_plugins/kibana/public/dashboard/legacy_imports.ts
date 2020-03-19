@@ -33,7 +33,6 @@ export { IInjector } from 'ui/chrome';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export {
   configureAppAngularModule,
-  ensureDefaultIndexPattern,
   IPrivate,
   migrateLegacyQuery,
   PrivateProvider,

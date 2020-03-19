@@ -649,13 +649,14 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
   };
 }
 
-export function updateSourceProp(layerId, propName, value) {
+export function updateSourceProp(layerId, propName, value, newLayerType) {
   return async dispatch => {
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
       propName,
       value,
+      newLayerType,
     });
     await dispatch(clearMissingStyleProperties(layerId));
     dispatch(syncDataForLayer(layerId));
