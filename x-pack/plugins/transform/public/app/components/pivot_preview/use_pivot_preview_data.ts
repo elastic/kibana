@@ -47,7 +47,12 @@ export interface UsePivotPreviewDataReturnType {
 
 export interface GetTransformsResponse {
   preview: PreviewData;
-  mappings: PreviewMappings;
+  generated_dest_index: {
+    mappings: PreviewMappings;
+    // Not in use yet
+    aliases: any;
+    settings: any;
+  };
 }
 
 export const usePivotPreviewData = (
@@ -79,7 +84,7 @@ export const usePivotPreviewData = (
     try {
       const resp: GetTransformsResponse = await api.getTransformsPreview(previewRequest);
       setPreviewData(resp.preview);
-      setPreviewMappings(resp.mappings);
+      setPreviewMappings(resp.generated_dest_index.mappings);
       setStatus(PIVOT_PREVIEW_STATUS.LOADED);
     } catch (e) {
       setErrorMessage(JSON.stringify(e, null, 2));
