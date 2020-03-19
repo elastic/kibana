@@ -12,9 +12,6 @@ import { connect, ConnectedProps } from 'react-redux';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-// import { State, timelineSelectors } from '../../../store';
-// import { TimelineById } from '../../../store/timeline/types';
-// import { DEFAULT_TIMELINE_WIDTH } from '../body/constants';
 import { timelineActions } from '../../../store/timeline';
 
 interface InsertTimelinePopoverProps {

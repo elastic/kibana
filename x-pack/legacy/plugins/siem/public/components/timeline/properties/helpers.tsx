@@ -130,7 +130,12 @@ export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, t
       <Redirect
         to={{
           pathname: `/${SiemPageName.case}/create`,
-          state: { insertTimeline: { timelineId, timelineTitle } },
+          state: {
+            insertTimeline: {
+              timelineId,
+              timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+            },
+          },
         }}
       />
     );
