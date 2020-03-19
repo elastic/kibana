@@ -102,7 +102,13 @@ This section summarizes the changes in each release.
 [[enhancement-6.8.8]]
 === Enhancement
 Security::
-* Allows SAML IdP initiated login when SAML authentication provider is not configured as the first provider. {pull}60240[#60240]
+* {kib} now allows Identity Provider initiated SAML login even if saml authentication provider is not configured as the first one in xpack.security.authProviders {pull}60240[#60240]
+
+[float]
+[[bug-6.8.8]]
+=== Bug fix
+Security::
+* {kib} now automatically re-initiates login when session access/refresh token pair used for Token and SAML authentication is removed from Elasticsearch (typically after 24 hours of user inactivity) {pull}33777[#33777]
 
 [[release-notes-6.8.7]]
 == {kib} 6.8.7
