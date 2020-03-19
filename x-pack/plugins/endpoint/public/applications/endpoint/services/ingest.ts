@@ -11,7 +11,8 @@ import { PolicyData } from '../types';
 const INGEST_API_ROOT = `/api/ingest_manager`;
 const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 
-interface GetDatasourcesResponse {
+// FIXME: Follow up in possibly adding this to Ingest Manager
+export interface GetDatasourcesResponse {
   items: PolicyData[];
   total: number;
   page: number;
@@ -19,7 +20,8 @@ interface GetDatasourcesResponse {
   success: boolean;
 }
 
-interface GetDatasourceResponse {
+// FIXME: Follow up in possibly adding this to Ingest Manager
+export interface GetDatasourceResponse {
   item: PolicyData;
   success: boolean;
 }

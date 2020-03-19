@@ -5,7 +5,7 @@
  */
 
 import { MiddlewareFactory, PolicyListState } from '../../types';
-import { sendGetEndpointSpecificDatasources } from '../../services/ingest';
+import { GetDatasourcesResponse, sendGetEndpointSpecificDatasources } from '../../services/ingest';
 
 export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
   const http = coreStart.http;
@@ -29,21 +29,13 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
         pageIndex = state.pageIndex;
       }
 
+      let response: GetDatasourcesResponse;
+
       try {
-        const { items: policyItems, total } = await sendGetEndpointSpecificDatasources(http, {
+        response = await sendGetEndpointSpecificDatasources(http, {
           query: {
             perPage: pageSize,
             page: pageIndex + 1,
-          },
-        });
-
-        dispatch({
-          type: 'serverReturnedPolicyListData',
-          payload: {
-            policyItems,
-            pageIndex,
-            pageSize,
-            total,
           },
         });
       } catch (err) {
@@ -51,7 +43,20 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
           type: 'serverFailedToReturnPolicyListData',
           payload: err.body ?? err,
         });
+        return;
       }
+
+      const { items: policyItems, total } = response;
+
+      dispatch({
+        type: 'serverReturnedPolicyListData',
+        payload: {
+          policyItems,
+          pageIndex,
+          pageSize,
+          total,
+        },
+      });
     }
   };
 };
