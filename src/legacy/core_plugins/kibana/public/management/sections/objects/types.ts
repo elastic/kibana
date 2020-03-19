@@ -17,22 +17,22 @@
  * under the License.
  */
 
-export function canViewInApp(uiCapabilities, type) {
-  switch (type) {
-    case 'search':
-    case 'searches':
-      return uiCapabilities.discover.show;
-    case 'visualization':
-    case 'visualizations':
-      return uiCapabilities.visualize.show;
-    case 'index-pattern':
-    case 'index-patterns':
-    case 'indexPatterns':
-      return uiCapabilities.management.kibana.index_patterns;
-    case 'dashboard':
-    case 'dashboards':
-      return uiCapabilities.dashboard.show;
-    default:
-      return uiCapabilities[type].show;
-  }
+import { SavedObjectReference } from 'src/core/public';
+
+export interface ObjectField {
+  type: FieldType;
+  name: string;
+  value: any;
+}
+
+export type FieldType = 'text' | 'number' | 'boolean' | 'array' | 'json';
+
+export interface FieldState {
+  value?: any;
+  invalid?: boolean;
+}
+
+export interface SubmittedFormData {
+  attributes: any;
+  references: SavedObjectReference[];
 }
