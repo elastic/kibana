@@ -47,14 +47,14 @@ test('returns actions set on trigger', () => {
 
   expect(list0).toHaveLength(0);
 
-  setup.attachAction('trigger' as TriggerId, action1);
+  setup.addTriggerAction('trigger' as TriggerId, action1);
   const list1 = start.getTriggerActions('trigger' as TriggerId);
 
   expect(list1).toHaveLength(1);
   expect(list1[0]).toBeInstanceOf(ActionInternal);
   expect(list1[0].id).toBe(action1.id);
 
-  setup.attachAction('trigger' as TriggerId, action2);
+  setup.addTriggerAction('trigger' as TriggerId, action2);
   const list2 = start.getTriggerActions('trigger' as TriggerId);
 
   expect(list2).toHaveLength(2);

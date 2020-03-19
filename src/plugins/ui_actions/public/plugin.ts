@@ -23,7 +23,13 @@ import { selectRangeTrigger, valueClickTrigger, applyFilterTrigger } from './tri
 
 export type UiActionsSetup = Pick<
   UiActionsService,
-  'attachAction' | 'detachAction' | 'registerAction' | 'registerTrigger' | 'registerActionFactory'
+  | 'addTriggerAction'
+  | 'attachAction'
+  | 'detachAction'
+  | 'registerAction'
+  | 'registerActionFactory'
+  | 'registerTrigger'
+  | 'unregisterAction'
 >;
 
 export type UiActionsStart = PublicMethodsOf<UiActionsService>;

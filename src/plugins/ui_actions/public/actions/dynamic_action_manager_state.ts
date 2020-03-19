@@ -36,6 +36,13 @@ export interface State {
   readonly fetchCount: number;
 
   /**
+   * Error received last time when fetching events.
+   */
+  readonly fetchError?: {
+    message: string;
+  };
+
+  /**
    * List of all fetched events.
    */
   readonly events: readonly SerializedEvent[];
@@ -44,6 +51,7 @@ export interface State {
 export interface Transitions {
   startFetching: (state: State) => () => State;
   finishFetching: (state: State) => (events: SerializedEvent[]) => State;
+  failFetching: (state: State) => (error: { message: string }) => State;
   addEvent: (state: State) => (event: SerializedEvent) => State;
   removeEvent: (state: State) => (eventId: string) => State;
   replaceEvent: (state: State) => (event: SerializedEvent) => State;
@@ -66,7 +74,15 @@ export const transitions: Transitions = {
     ...state,
     isFetchingEvents: false,
     fetchCount: state.fetchCount + 1,
+    fetchError: undefined,
     events,
+  }),
+
+  failFetching: state => ({ message }) => ({
+    ...state,
+    isFetchingEvents: false,
+    fetchCount: state.fetchCount + 1,
+    fetchError: { message },
   }),
 
   addEvent: state => (event: SerializedEvent) => ({

@@ -38,12 +38,10 @@ export class DashboardDrilldownsService {
       (await core.getStartServices())[1].share.urlGenerators.getUrlGenerator;
 
     const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ overlays, drilldowns });
-    plugins.uiActions.registerAction(actionFlyoutCreateDrilldown);
-    plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
 
     const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ overlays, drilldowns });
-    plugins.uiActions.registerAction(actionFlyoutEditDrilldown);
-    plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
 
     const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({
       getSavedObjectsClient,

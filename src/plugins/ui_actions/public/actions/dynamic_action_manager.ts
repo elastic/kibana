@@ -42,7 +42,7 @@ export interface DynamicActionManagerParams {
   storage: ActionStorage;
   uiActions: Pick<
     UiActionsService,
-    'registerAction' | '__attachAction' | 'unregisterAction' | 'detachAction' | 'getActionFactory'
+    'registerAction' | 'attachAction' | 'unregisterAction' | 'detachAction' | 'getActionFactory'
   >;
   isCompatible: <C = unknown>(context: C) => Promise<boolean>;
 }
@@ -90,7 +90,7 @@ export class DynamicActionManager {
     };
 
     uiActions.registerAction(actionDefinition);
-    for (const trigger of triggers) uiActions.__attachAction(trigger as any, actionId);
+    for (const trigger of triggers) uiActions.attachAction(trigger as any, actionId);
   }
 
   protected killAction({ eventId, triggers }: SerializedEvent) {
@@ -150,9 +150,14 @@ export class DynamicActionManager {
     if (this.ui.get().isFetchingEvents) return;
 
     this.ui.transitions.startFetching();
-    const events = await this.params.storage.list();
-    for (const event of events) this.reviveAction(event);
-    this.ui.transitions.finishFetching(events);
+    try {
+      const events = await this.params.storage.list();
+      for (const event of events) this.reviveAction(event);
+      this.ui.transitions.finishFetching(events);
+    } catch (error) {
+      this.ui.transitions.failFetching(error instanceof Error ? error : { message: String(error) });
+      throw error;
+    }
 
     if (this.params.storage.reload$) {
       this.reloadSubscription = this.params.storage.reload$.subscribe(this.onSync);
@@ -200,8 +205,9 @@ export class DynamicActionManager {
     try {
       await this.params.storage.create(event);
       this.reviveAction(event);
-    } catch {
+    } catch (error) {
       this.ui.transitions.removeEvent(event.eventId);
+      throw error;
     }
   }
 
@@ -229,7 +235,6 @@ export class DynamicActionManager {
       triggers,
       action,
     };
-
     const oldEvent = this.getEvent(eventId);
     this.killAction(oldEvent);
 
@@ -238,10 +243,11 @@ export class DynamicActionManager {
 
     try {
       await this.params.storage.update(event);
-    } catch {
+    } catch (error) {
       this.killAction(event);
       this.reviveAction(oldEvent);
       this.ui.transitions.replaceEvent(oldEvent);
+      throw error;
     }
   }
 
@@ -262,9 +268,10 @@ export class DynamicActionManager {
 
     try {
       await this.params.storage.remove(eventId);
-    } catch {
+    } catch (error) {
       this.reviveAction(event);
       this.ui.transitions.addEvent(event);
+      throw error;
     }
   }
 

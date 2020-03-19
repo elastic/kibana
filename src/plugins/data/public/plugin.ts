@@ -108,12 +108,12 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.attachAction(
+    uiActions.addTriggerAction(
       SELECT_RANGE_TRIGGER,
       selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.attachAction(
+    uiActions.addTriggerAction(
       VALUE_CLICK_TRIGGER,
       valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
@@ -144,7 +144,10 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const search = this.searchService.start(core);
     setSearchService(search);
 
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));
+    uiActions.addTriggerAction(
+      APPLY_FILTER_TRIGGER,
+      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
+    );
 
     const dataServices = {
       actions: {
