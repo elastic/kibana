@@ -42,28 +42,116 @@ describe('filterByAgent', () => {
     });
   });
 
-  describe('RUM agent', () => {
-    it('should only display 1 setting (transaction_sample_rate)', () => {
-      const definitions = configSettingDefinitions.filter(
-        filterByAgent('js-base')
-      );
-      expect(definitions.length).toEqual(1);
-      expect(definitions[0].key).toEqual('transaction_sample_rate');
+  describe('options per agent', () => {
+    it('go', () => {
+      expect(getSettingKeysForAgent('go')).toEqual([
+        'active',
+        'api_request_size',
+        'api_request_time',
+        'capture_headers',
+        'capture_body',
+        'log_level',
+        'server_timeout',
+        'span_frames_min_duration',
+        'stack_trace_limit',
+        'transaction_sample_rate',
+        'transaction_max_spans'
+      ]);
     });
-  });
 
-  describe('stack_trace_limit', () => {
-    it('should be listed for java agent', () => {
-      expect(hasSetting('java', 'stack_trace_limit')).toBe(true);
+    it('java', () => {
+      expect(getSettingKeysForAgent('java')).toEqual([
+        'active',
+        'api_request_size',
+        'api_request_time',
+        'capture_headers',
+        'capture_body',
+        'enable_log_correlation',
+        'log_level',
+        'server_timeout',
+        'span_frames_min_duration',
+        'stack_trace_limit',
+        'trace_methods_duration_threshold',
+        'transaction_sample_rate',
+        'transaction_max_spans'
+      ]);
     });
 
-    it('should not be listed for nodejs agent', () => {
-      expect(hasSetting('nodejs', 'stack_trace_limit')).toBe(false);
+    it('js-base', () => {
+      expect(getSettingKeysForAgent('js-base')).toEqual([
+        'transaction_sample_rate'
+      ]);
+    });
+
+    it('rum-js', () => {
+      expect(getSettingKeysForAgent('rum-js')).toEqual([
+        'transaction_sample_rate'
+      ]);
+    });
+
+    it('nodejs', () => {
+      expect(getSettingKeysForAgent('nodejs')).toEqual([
+        'active',
+        'api_request_size',
+        'api_request_time',
+        'capture_headers',
+        'capture_body',
+        'log_level',
+        'server_timeout',
+        'stack_trace_limit',
+        'transaction_sample_rate',
+        'transaction_max_spans'
+      ]);
+    });
+
+    it('python', () => {
+      expect(getSettingKeysForAgent('python')).toEqual([
+        'api_request_size',
+        'api_request_time',
+        'capture_headers',
+        'capture_body',
+        'span_frames_min_duration',
+        'transaction_sample_rate',
+        'transaction_max_spans'
+      ]);
+    });
+
+    it('dotnet', () => {
+      expect(getSettingKeysForAgent('dotnet')).toEqual([
+        'capture_headers',
+        'log_level',
+        'span_frames_min_duration',
+        'stack_trace_limit',
+        'transaction_sample_rate',
+        'transaction_max_spans'
+      ]);
+    });
+
+    it('ruby', () => {
+      expect(getSettingKeysForAgent('ruby')).toEqual([
+        'active',
+        'api_request_size',
+        'api_request_time',
+        'capture_headers',
+        'capture_body',
+        'log_level',
+        'span_frames_min_duration',
+        'transaction_sample_rate',
+        'transaction_max_spans'
+      ]);
+    });
+
+    it('"All" services (no agent name)', () => {
+      expect(getSettingKeysForAgent(undefined)).toEqual([
+        'capture_headers',
+        'transaction_sample_rate',
+        'transaction_max_spans'
+      ]);
     });
   });
 });
 
-function hasSetting(agentName: AgentName, settingKey: string) {
+function getSettingKeysForAgent(agentName: AgentName | undefined) {
   const definitions = configSettingDefinitions.filter(filterByAgent(agentName));
-  return definitions.some(def => def.key === settingKey);
+  return definitions.map(def => def.key);
 }

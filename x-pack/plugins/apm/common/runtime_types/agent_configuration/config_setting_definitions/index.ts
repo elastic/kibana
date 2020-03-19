@@ -13,6 +13,7 @@ import {
 } from './config_setting_definitions';
 import { booleanRt } from '../boolean_rt';
 import { integerRt } from '../integer_rt';
+import { isRumAgentName } from '../../../agent_name';
 
 export type ConfigSettingDefinition = RawConfigSettingDefinition & {
   validation: NonNullable<RawConfigSettingDefinition['validation']>;
@@ -33,7 +34,18 @@ function getDefaultValidation(
 
 export function filterByAgent(agentName?: AgentName) {
   return (setting: ConfigSettingDefinition) => {
+    // agentName is missing if "All" was selected
     if (!agentName) {
+      // options that only apply to certain agents will be filtered out
+      if (setting.includeAgents) {
+        return false;
+      }
+
+      // only options that apply to every agent (ignoring RUM) should be returned
+      if (setting.excludeAgents) {
+        return setting.excludeAgents.every(isRumAgentName);
+      }
+
       return true;
     }
 
