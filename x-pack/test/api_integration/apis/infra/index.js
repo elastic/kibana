@@ -16,6 +16,7 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./sources'));
     loadTestFile(require.resolve('./waffle'));
     loadTestFile(require.resolve('./log_item'));
+    loadTestFile(require.resolve('./metrics_alerting'));
     loadTestFile(require.resolve('./metrics_explorer'));
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./ip_to_hostname'));
