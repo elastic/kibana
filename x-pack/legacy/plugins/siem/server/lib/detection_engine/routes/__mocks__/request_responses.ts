@@ -293,6 +293,21 @@ export const getCreateRequest = () =>
     body: typicalPayload(),
   });
 
+export const createMlRuleRequest = () => {
+  const { query, language, index, ...mlParams } = typicalPayload();
+
+  return requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: {
+      ...mlParams,
+      type: 'machine_learning',
+      anomaly_threshold: 50,
+      machine_learning_job_id: 'some-uuid',
+    },
+  });
+};
+
 export const getSetSignalStatusByIdsRequest = () =>
   requestMock.create({
     method: 'post',
@@ -349,6 +364,7 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
+    anomalyThreshold: undefined,
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -357,6 +373,7 @@ export const getResult = (): RuleAlertType => ({
     immutable: false,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
+    machineLearningJobId: undefined,
     outputIndex: '.siem-signals',
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',
