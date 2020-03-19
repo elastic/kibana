@@ -37,7 +37,7 @@ export async function agentCheckin(
   const actions = filterActionsForCheckin(agent);
 
   // Generate new agent config if config is updated
-  if (isNewAgentConfig(agent) && agent.config_id) {
+  if (agent.config_id && shouldCreateConfigAction(agent)) {
     const config = await agentConfigService.getFullConfig(soClient, agent.config_id);
     if (config) {
       // Assign output API keys
@@ -149,12 +149,37 @@ function isActionEvent(event: AgentEvent) {
   );
 }
 
-function isNewAgentConfig(agent: Agent) {
-  const isFirstCheckin = !agent.last_checkin;
-  const isConfigUpdatedSinceLastCheckin =
-    agent.last_checkin && agent.config_updated_at && agent.last_checkin <= agent.config_updated_at;
+export function shouldCreateConfigAction(agent: Agent): boolean {
+  if (!agent.config_id) {
+    return false;
+  }
 
-  return isFirstCheckin || isConfigUpdatedSinceLastCheckin;
+  const isFirstCheckin = !agent.last_checkin;
+  if (isFirstCheckin) {
+    return true;
+  }
+
+  const isAgentConfigOutdated =
+    agent.config_revision &&
+    agent.config_newest_revision &&
+    agent.config_revision < agent.config_newest_revision;
+  if (!isAgentConfigOutdated) {
+    return false;
+  }
+
+  const isActionAlreadyGenerated = !!agent.actions.find(action => {
+    if (!action.data || action.type !== 'CONFIG_CHANGE') {
+      return false;
+    }
+
+    const data = JSON.parse(action.data);
+
+    return (
+      data.config.id === agent.config_id && data.config.revision === agent.config_newest_revision
+    );
+  });
+
+  return !isActionAlreadyGenerated;
 }
 
 function filterActionsForCheckin(agent: Agent): AgentAction[] {

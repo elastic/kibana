@@ -115,7 +115,7 @@ describe('update_rules', () => {
       const result = await server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'child "type" fails because ["type" must be one of [query, saved_query]]'
+        'child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]'
       );
     });
   });
