@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esdocs } from './esdocs';
+import styled from 'styled-components';
+import { EuiContextMenuItem } from '@elastic/eui';
 
-export const datasourceSpecs = [esdocs];
+export const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
+  color: ${props => props.theme.eui.textColors.danger};
+`;
