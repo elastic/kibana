@@ -19,19 +19,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('renders the tabs when the app loads', async () => {
       const homeTabText = await testSubjects.getVisibleText('homeEndpointTab');
-      const managementTabText = await testSubjects.getVisibleText('managementEndpointTab');
+      const hostsTabText = await testSubjects.getVisibleText('hostsEndpointTab');
       const alertsTabText = await testSubjects.getVisibleText('alertsEndpointTab');
       const policiesTabText = await testSubjects.getVisibleText('policiesEndpointTab');
 
       expect(homeTabText.trim()).to.be('Home');
-      expect(managementTabText.trim()).to.be('Management');
+      expect(hostsTabText.trim()).to.be('Hosts');
       expect(alertsTabText.trim()).to.be('Alerts');
       expect(policiesTabText.trim()).to.be('Policies');
     });
 
-    it('renders the management page when the Management tab is selected', async () => {
-      await (await testSubjects.find('managementEndpointTab')).click();
-      await testSubjects.existOrFail('managementViewTitle');
+    it('renders the hosts page when the Hosts tab is selected', async () => {
+      await (await testSubjects.find('hostsEndpointTab')).click();
+      await testSubjects.existOrFail('hostListTitle');
     });
 
     it('renders the alerts page when the Alerts tab is selected', async () => {
@@ -45,8 +45,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('renders the home page when Home tab is selected after selecting another tab', async () => {
-      await (await testSubjects.find('managementEndpointTab')).click();
-      await testSubjects.existOrFail('managementViewTitle');
+      await (await testSubjects.find('hostsEndpointTab')).click();
+      await testSubjects.existOrFail('hostListTitle');
 
       await (await testSubjects.find('homeEndpointTab')).click();
       await testSubjects.existOrFail('welcomeTitle');

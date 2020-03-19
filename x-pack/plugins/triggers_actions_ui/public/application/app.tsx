@@ -34,7 +34,6 @@ export interface AppDeps {
   navigateToApp: CoreStart['application']['navigateToApp'];
   docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;
-  injectedMetadata: any;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;

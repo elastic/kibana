@@ -94,13 +94,6 @@ describe('alerts_list component empty', () => {
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
@@ -224,13 +217,6 @@ describe('alerts_list component with items', () => {
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
@@ -247,6 +233,8 @@ describe('alerts_list component with items', () => {
       alertTypeRegistry: alertTypeRegistry as any,
     };
 
+    alertTypeRegistry.has.mockReturnValue(true);
+
     wrapper = mountWithIntl(
       <AppContextProvider appDeps={deps}>
         <AlertsList />
@@ -262,10 +250,14 @@ describe('alerts_list component with items', () => {
     expect(loadActionTypes).toHaveBeenCalled();
   }
 
-  it('renders table of connectors', async () => {
+  it('renders table of alerts', async () => {
     await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+  });
+  it('renders edit button for registered alert types', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBeGreaterThan(0);
   });
 });
 
@@ -315,13 +307,6 @@ describe('alerts_list component empty with show only capability', () => {
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
@@ -441,13 +426,6 @@ describe('alerts_list with show only capability', () => {
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
@@ -463,6 +441,8 @@ describe('alerts_list with show only capability', () => {
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
     };
+
+    alertTypeRegistry.has.mockReturnValue(false);
 
     wrapper = mountWithIntl(
       <AppContextProvider appDeps={deps}>
@@ -481,5 +461,9 @@ describe('alerts_list with show only capability', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     // TODO: check delete button
+  });
+  it('not renders edit button for non registered alert types', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBe(0);
   });
 });
