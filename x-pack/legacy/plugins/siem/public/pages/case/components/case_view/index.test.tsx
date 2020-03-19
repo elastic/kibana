@@ -6,12 +6,22 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+/* eslint-disable @kbn/eslint/module_migration */
+import routeData from 'react-router';
+/* eslint-enable @kbn/eslint/module_migration */
 import { CaseComponent } from './';
 import { caseProps, caseClosedProps, data, dataClosed } from './__mock__';
 import { TestProviders } from '../../../../mock';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
 jest.mock('../../../../containers/case/use_update_case');
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
+
+const mockLocation = {
+  pathname: '/welcome',
+  hash: '',
+  search: '',
+  state: '',
+};
 
 describe('CaseView ', () => {
   const updateCaseProperty = jest.fn();
@@ -37,6 +47,7 @@ describe('CaseView ', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
+    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
   it('should render CaseComponent', () => {

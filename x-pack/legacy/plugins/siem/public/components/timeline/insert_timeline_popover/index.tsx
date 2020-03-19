@@ -32,7 +32,7 @@ interface RouterState {
 
 type Props = InsertTimelinePopoverProps & PropsFromRedux;
 
-const InsertTimelinePopoverComponent: React.FC<Props> = ({
+export const InsertTimelinePopoverComponent: React.FC<Props> = ({
   isDisabled,
   hideUntitled = false,
   onTimelineChange,
@@ -41,6 +41,7 @@ const InsertTimelinePopoverComponent: React.FC<Props> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { state } = useLocation();
   const [routerState, setRouterState] = useState<RouterState | null>(state ?? null);
+
   useEffect(() => {
     if (routerState && routerState.insertTimeline) {
       showTimeline({ id: routerState.insertTimeline.timelineId, show: false });
@@ -93,6 +94,7 @@ const InsertTimelinePopoverComponent: React.FC<Props> = ({
 
   return (
     <EuiPopover
+      data-test-subj="insert-timeline-popover"
       id="searchTimelinePopover"
       button={insertTimelineButton}
       isOpen={isPopoverOpen}
@@ -107,22 +109,6 @@ const InsertTimelinePopoverComponent: React.FC<Props> = ({
     </EuiPopover>
   );
 };
-
-// const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-//   const timelineById: TimelineById =
-//     timelineSelectors.timelineByIdSelector(state) ?? DEFAULT_TIMELINE_BY_ID;
-//   /*
-//     In case timelineById[timelineId]?.dataProviders is an empty array it will cause unnecessary rerender
-//     of StatefulTimeline which can be expensive, so to avoid that return DEFAULT_DATA_PROVIDERS
-//   */
-//   const dataProviders = timelineById[timelineId]?.dataProviders.length
-//     ? timelineById[timelineId]?.dataProviders
-//     : DEFAULT_DATA_PROVIDERS;
-//   const show = timelineById[timelineId]?.show ?? false;
-//   const width = timelineById[timelineId]?.width ?? DEFAULT_TIMELINE_WIDTH;
-//
-//   return { dataProviders, show, width };
-// };
 
 const mapDispatchToProps = {
   showTimeline: timelineActions.showTimeline,
