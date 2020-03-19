@@ -17,4 +17,5 @@
  * under the License.
  */
 
+export * from './filter_manager';
 export * from './types';
