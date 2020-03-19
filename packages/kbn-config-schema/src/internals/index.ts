@@ -314,7 +314,8 @@ export const internals = Joi.extend([
           for (const [entryKey, entryValue] of value) {
             const { value: validatedEntryKey, error: keyError } = Joi.validate(
               entryKey,
-              params.key
+              params.key,
+              { presence: 'required' }
             );
 
             if (keyError) {
@@ -323,7 +324,8 @@ export const internals = Joi.extend([
 
             const { value: validatedEntryValue, error: valueError } = Joi.validate(
               entryValue,
-              params.value
+              params.value,
+              { presence: 'required' }
             );
 
             if (valueError) {
@@ -374,7 +376,8 @@ export const internals = Joi.extend([
           for (const [entryKey, entryValue] of Object.entries(value)) {
             const { value: validatedEntryKey, error: keyError } = Joi.validate(
               entryKey,
-              params.key
+              params.key,
+              { presence: 'required' }
             );
 
             if (keyError) {
@@ -383,7 +386,8 @@ export const internals = Joi.extend([
 
             const { value: validatedEntryValue, error: valueError } = Joi.validate(
               entryValue,
-              params.value
+              params.value,
+              { presence: 'required' }
             );
 
             if (valueError) {

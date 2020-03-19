@@ -22,13 +22,19 @@ import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 
-import { COMPARE_ALL_OPTIONS, compareFilters } from './lib/compare_filters';
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './types';
-import { FilterStateStore, Filter, isFilterPinned } from '../../../common';
+
+import {
+  FilterStateStore,
+  Filter,
+  uniqFilters,
+  isFilterPinned,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+} from '../../../common';
 
 export class FilterManager {
   private filters: Filter[] = [];

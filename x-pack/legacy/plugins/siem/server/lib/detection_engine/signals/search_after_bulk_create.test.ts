@@ -26,8 +26,10 @@ export const mockService = {
 };
 
 describe('searchAfterAndBulkCreate', () => {
+  let inputIndexPattern: string[] = [];
   beforeEach(() => {
     jest.clearAllMocks();
+    inputIndexPattern = ['auditbeat-*'];
   });
 
   test('if successful with empty search results', async () => {
@@ -38,6 +40,7 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       createdAt: '2020-01-28T15:58:34.810Z',
@@ -93,6 +96,7 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       createdAt: '2020-01-28T15:58:34.810Z',
@@ -119,6 +123,7 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       createdAt: '2020-01-28T15:58:34.810Z',
@@ -152,6 +157,7 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       createdAt: '2020-01-28T15:58:34.810Z',
@@ -185,6 +191,7 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       createdAt: '2020-01-28T15:58:34.810Z',
@@ -220,6 +227,7 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       createdAt: '2020-01-28T15:58:34.810Z',
@@ -255,6 +263,7 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       createdAt: '2020-01-28T15:58:34.810Z',
@@ -292,6 +301,7 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
       createdAt: '2020-01-28T15:58:34.810Z',
