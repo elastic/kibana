@@ -22,7 +22,12 @@ import { mount, shallow } from 'enzyme';
 
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { IndexPattern, IAggConfig, AggGroupNames } from 'src/plugins/data/public';
-import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
+import {
+  DefaultEditorAggParams as PureDefaultEditorAggParams,
+  DefaultEditorAggParamsProps,
+} from './agg_params';
+import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
+import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
 
 const mockEditorConfig = {
   useNormalizedEsInterval: { hidden: false, fixedValue: false },
@@ -33,6 +38,11 @@ const mockEditorConfig = {
     timeBase: '1m',
   },
 };
+const DefaultEditorAggParams = (props: DefaultEditorAggParamsProps) => (
+  <KibanaContextProvider services={{ data: dataPluginMock.createStartContract() }}>
+    <PureDefaultEditorAggParams {...props} />
+  </KibanaContextProvider>
+);
 
 jest.mock('./utils', () => ({
   getEditorConfig: jest.fn(() => mockEditorConfig),
@@ -67,27 +77,6 @@ jest.mock('./agg_select', () => ({
 }));
 jest.mock('./agg_param', () => ({
   DefaultEditorAggParam: () => null,
-}));
-jest.mock('../../../../../plugins/kibana_react/public', () => ({
-  useKibana: () => ({
-    services: {
-      data: {
-        search: {
-          aggs: {
-            types: {
-              getAll: () => [],
-            },
-          },
-          __LEGACY: {
-            aggTypeFieldFilters: {
-              filter: () => [],
-            },
-          },
-        },
-      },
-    },
-  }),
-  withKibana: (x: any) => x,
 }));
 
 describe('DefaultEditorAggParams component', () => {
