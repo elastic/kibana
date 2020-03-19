@@ -17,6 +17,8 @@ Definition of done for a feature:
 - an umbrella task closed/updated with follow-ups
 - all code review comments are resolved
 - works for OSS version
+   - works with and without a `server.basePath` configured
+   - cannot crash the Kibana server when it fails
 - works for the commercial version with a license
    - for a logged-in user
    - for anonymous user
