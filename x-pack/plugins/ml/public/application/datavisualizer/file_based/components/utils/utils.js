@@ -66,6 +66,10 @@ export function createUrlOverrides(overrides, originalSettings) {
     ) {
       formattedOverrides.format = originalSettings.format;
     }
+
+    if (Array.isArray(formattedOverrides.column_names)) {
+      formattedOverrides.column_names = formattedOverrides.column_names.join();
+    }
   }
 
   if (formattedOverrides.format === '' && originalSettings.format === 'semi_structured_text') {
@@ -80,11 +84,6 @@ export function createUrlOverrides(overrides, originalSettings) {
     formattedOverrides.delimiter = '';
     formattedOverrides.quote = '';
     formattedOverrides.column_names = '';
-  }
-
-  // escape grok pattern as it can contain bad characters
-  if (formattedOverrides.grok_pattern !== '') {
-    formattedOverrides.grok_pattern = encodeURIComponent(formattedOverrides.grok_pattern);
   }
 
   if (formattedOverrides.lines_to_sample === '') {

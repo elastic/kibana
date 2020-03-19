@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
 import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
 import { SETTINGS_ROUTE } from '../../common/constants';
+import { ToggleAlertFlyoutButton } from '../components/connected';
 
 interface PageHeaderProps {
   headingText: string;
@@ -29,25 +30,34 @@ export const PageHeader = React.memo(
       defaultMessage: 'Settings',
     });
     const extraLinkComponents = !extraLinks ? null : (
-      <EuiFlexItem grow={false}>
-        <Link to={SETTINGS_ROUTE}>
-          <EuiButtonEmpty data-test-subj="settings-page-link" iconType="gear">
-            {settingsLinkText}
-          </EuiButtonEmpty>
-        </Link>
-      </EuiFlexItem>
+      <EuiFlexGroup alignItems="flexEnd">
+        <EuiFlexItem grow={false}>
+          <ToggleAlertFlyoutButton />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Link to={SETTINGS_ROUTE}>
+            <EuiButtonEmpty data-test-subj="settings-page-link" iconType="gear">
+              {settingsLinkText}
+            </EuiButtonEmpty>
+          </Link>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
 
     return (
       <>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" wrap={true}>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiTitle>
               <h1>{headingText}</h1>
             </EuiTitle>
           </EuiFlexItem>
-          {extraLinkComponents}
-          {datePickerComponent}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem>{extraLinkComponents}</EuiFlexItem>
+              <EuiFlexItem>{datePickerComponent}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
       </>

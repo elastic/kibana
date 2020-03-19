@@ -38,6 +38,7 @@ describe('state selectors', () => {
       loading: false,
     },
     ui: {
+      alertFlyoutVisible: false,
       basePath: 'yyz',
       esKuery: '',
       integrationsPopoverOpen: null,
