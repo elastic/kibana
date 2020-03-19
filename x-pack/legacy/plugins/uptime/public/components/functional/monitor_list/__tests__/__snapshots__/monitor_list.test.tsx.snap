@@ -100,6 +100,11 @@ exports[`MonitorList component renders a no items message when no data is provid
           pagination=""
         />
       </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <MonitorListPageSizeSelect />
+      </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
 </Fragment>
@@ -108,6 +113,10 @@ exports[`MonitorList component renders a no items message when no data is provid
 exports[`MonitorList component renders the monitor list 1`] = `
 .c1 {
   padding-left: 17px;
+}
+
+.c3 {
+  padding-top: 12px;
 }
 
 .c2 {
@@ -577,7 +586,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
     >
       <button
         aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-        class="euiButtonIcon euiButtonIcon--text"
+        class="euiButtonIcon euiButtonIcon--text c3"
         data-test-subj="xpack.uptime.monitorList.prevButton"
         disabled=""
         type="button"
@@ -594,7 +603,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
     >
       <button
         aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-        class="euiButtonIcon euiButtonIcon--text"
+        class="euiButtonIcon euiButtonIcon--text c3"
         data-test-subj="xpack.uptime.monitorList.nextButton"
         disabled=""
         type="button"
@@ -605,6 +614,38 @@ exports[`MonitorList component renders the monitor list 1`] = `
           data-euiicon-type="arrowRight"
         />
       </button>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiPopover euiPopover--anchorUpLeft"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight"
+            data-test-subj="xpack.uptime.monitorList.pageSizeSelect.popoverOpen"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content"
+            >
+              <div
+                aria-hidden="true"
+                class="euiButtonEmpty__icon"
+                data-euiicon-type="arrowDown"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Rows per page: 
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -771,6 +812,11 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
           direction="next"
           pagination=""
         />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <MonitorListPageSizeSelect />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
