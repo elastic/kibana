@@ -1,0 +1,63 @@
+[[custom-links]]
+=== Custom links
+
+Custom links allow you to easily create dynamic links based on your specific APM data.
+Links can be filtered to only appear for specific services,
+and there's no limit to the number of links you can create.
+
+[float]
+==== Create a link
+
+Create a custom link in the APM app. Navigate to **Settings** > **Customize UI**,
+and select **Create custom link**.
+
+[float]
+===== Label
+
+The name of your custom link,
+and what will be shown in the actions context menu.
+Keep it as short as possible.
+
+[float]
+===== URL
+
+The URL your link points to.
+URLs support dynamic fieldname variables, encapsulated in double curly brackets: `{{field.name}}`.
+
+The following example uses the `trace.id` field to create a custom link:
+
+`https://www.elastic.co/{{trace.id}}`
+
+[float]
+===== Filters
+
+Filter each link to only appear for specific services, or based on a specific transaction type or name.
+You can filter on the following fields:
+
+* `service.name`
+* `service.env`
+* `transaction.type`
+* `transaction.name`
+
+Multiple values are allowed when comma separated.
+
+[float]
+==== Custom link examples
+
+**Internal dashboards?**
+
+Link to custom dashboards (filtered via the URL) in Kibana?
+
+**Slack?**
+
+You can create links with webhooks, but I'm not sure you can do anything useful with query params
+https://api.slack.com/messaging/webhooks
+
+**GitHub?**
+
+ - Here's a URL template for creating an issue in the apm-agent-rum-js repo. We could use this to create an issue and use some of the transaction metadata?
+https://github.com/elastic/apm-agent-rum-js/issues/new?title=Test+title&body=%0A%0A%0A---%0ATest+post.+Please+be+nice.
+
+**Jira?**
+
+**Company website?**
