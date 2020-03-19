@@ -5,10 +5,21 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 
 const PolicyDetailCard = styled.div`
+  .policyDetailTitleOS {
+    flex-grow: 2;
+  }
   .policyDetailTitleValue {
     font-size: 16px;
     font-weight: normal;
@@ -17,6 +28,11 @@ const PolicyDetailCard = styled.div`
   .policyDetailTitleFlexItem {
     margin: 0;
   }
+  .eventCollectionsEnabled {
+    color: ${props => props.theme.eui.euiColorMediumShade};
+    font-size: 14px;
+    font-weight: normal;
+  }
 `;
 export const ConfigForm: React.FC<{
   type: string;
@@ -24,39 +40,71 @@ export const ConfigForm: React.FC<{
   children: React.ReactNode;
   id: string;
 }> = React.memo(({ type, supportedOss, children, id }) => {
-  const typeTitle = (
-    <EuiFlexGroup direction="row" gutterSize="none" alignItems="flexStart">
-      <EuiFlexGroup direction="column" gutterSize="none" className="policyDetailTitleSection">
-        <EuiFlexItem className="policyDetailTitleFlexItem">
-          <EuiTitle size="xxxs">
-            <h6>Type</h6>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem className="policyDetailTitleFlexItem">
-          <p className="policyDetailTitleValue">{type}</p>
+  const typeTitle = () => {
+    return (
+      <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem className="policyDetailTitleFlexItem">
+            <EuiTitle size="xxxs">
+              <h6>
+                <FormattedMessage id="xpack.endpoint.policyDetailType" defaultMessage="Type" />
+              </h6>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem className="policyDetailTitleFlexItem">
+            <p className="policyDetailTitleValue">{type}</p>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup direction="column" gutterSize="none" className="policyDetailTitleOS">
+          <EuiFlexItem className="policyDetailTitleFlexItem">
+            <EuiTitle size="xxxs">
+              <h6>
+                <FormattedMessage
+                  id="xpack.endpoint.policyDetailOS"
+                  defaultMessage="Operating System"
+                />
+              </h6>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem className="policyDetailTitleFlexItem">
+            <p className="policyDetailTitleValue">{supportedOss.join(', ')}</p>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <p className="eventCollectionsEnabled">#/# event collections enabled</p>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup direction="column" gutterSize="none" className="policyDetailTitleSection">
-        <EuiFlexItem className="policyDetailTitleFlexItem">
-          <EuiTitle size="xxxs">
-            <h6>Operating System</h6>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem className="policyDetailTitleFlexItem">
-          <p className="policyDetailTitleValue">{supportedOss.join()}</p>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexGroup>
-  );
+    );
+  };
+
+  const events = () => {
+    return (
+      <EuiTitle size="xxs">
+        <h5>
+          <FormattedMessage
+            id="xpack.endpoint.policyDetailsConfig.eventingEvents"
+            defaultMessage="Events"
+          />
+        </h5>
+      </EuiTitle>
+    );
+  };
 
   return (
     <PolicyDetailCard>
       <EuiCard
         data-test-subj={id}
         textAlign="left"
-        title={typeTitle}
-        description={<EuiHorizontalRule />}
-        children={children}
+        title={typeTitle()}
+        description=""
+        children={
+          <>
+            <EuiHorizontalRule margin="m" />
+            {events()}
+            <EuiSpacer size="s" />
+            {children}
+          </>
+        }
       />
     </PolicyDetailCard>
   );

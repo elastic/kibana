@@ -29,11 +29,12 @@ export const WindowsEventing = React.memo(() => {
   ];
 
   const renderCheckboxes = () => {
-    return checkboxes.map(item => {
+    return checkboxes.map((item, index) => {
       return (
         <EventingCheckbox
           id={`eventing${item.name}`}
           name={item.name}
+          key={index}
           os={item.os}
           protectionField={item.protectionField}
         />
@@ -41,8 +42,11 @@ export const WindowsEventing = React.memo(() => {
     });
   };
   return (
-    <ConfigForm type={`Event Collection`} supportedOss={['Windows']} id="windowsEventingForm">
-      {renderCheckboxes()}
-    </ConfigForm>
+    <ConfigForm
+      type={`Event Collection`}
+      supportedOss={['Windows']}
+      id="windowsEventingForm"
+      children={renderCheckboxes()}
+    />
   );
 });
