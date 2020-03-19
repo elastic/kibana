@@ -9,8 +9,7 @@ import { useEffect, useState } from 'react';
 import { dictionaryToArray } from '../../../../common/types/common';
 import { useApi } from '../../hooks/use_api';
 
-import { Dictionary } from '../../../../common/types/common';
-import { IndexPattern, ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 import {
   getPreviewRequestBody,
@@ -18,6 +17,8 @@ import {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotQuery,
+  PreviewData,
+  PreviewMappings,
 } from '../../common';
 
 export enum PIVOT_PREVIEW_STATUS {
@@ -27,32 +28,12 @@ export enum PIVOT_PREVIEW_STATUS {
   ERROR,
 }
 
-interface EsMappingType {
-  type: ES_FIELD_TYPES;
-}
-
-export type PreviewItem = Dictionary<any>;
-type PreviewData = PreviewItem[];
-interface PreviewMappings {
-  properties: Dictionary<EsMappingType>;
-}
-
 export interface UsePivotPreviewDataReturnType {
   errorMessage: string;
   status: PIVOT_PREVIEW_STATUS;
   previewData: PreviewData;
   previewMappings: PreviewMappings;
   previewRequest: PreviewRequestBody;
-}
-
-export interface GetTransformsResponse {
-  preview: PreviewData;
-  generated_dest_index: {
-    mappings: PreviewMappings;
-    // Not in use yet
-    aliases: any;
-    settings: any;
-  };
 }
 
 export const usePivotPreviewData = (
@@ -82,7 +63,7 @@ export const usePivotPreviewData = (
     setStatus(PIVOT_PREVIEW_STATUS.LOADING);
 
     try {
-      const resp: GetTransformsResponse = await api.getTransformsPreview(previewRequest);
+      const resp = await api.getTransformsPreview(previewRequest);
       setPreviewData(resp.preview);
       setPreviewMappings(resp.generated_dest_index.mappings);
       setStatus(PIVOT_PREVIEW_STATUS.LOADED);
