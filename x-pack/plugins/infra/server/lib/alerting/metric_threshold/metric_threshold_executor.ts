@@ -60,8 +60,8 @@ const getParsedFilterQuery: (
 
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
-  groupBy?: string | undefined,
-  filterQuery?: string | undefined
+  groupBy?: string,
+  filterQuery?: string
 ) => {
   const interval = `${timeSize}${timeUnit}`;
 
