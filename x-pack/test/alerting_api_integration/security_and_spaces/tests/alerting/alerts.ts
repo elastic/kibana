@@ -177,6 +177,9 @@ instanceStateValue: true
           // only need to test creation success paths
           if (response.statusCode !== 200) return;
 
+          // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
+          await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+
           // Avoid invalidating an API key while the alert is executing
           await taskManagerUtils.waitForAllTasksIdle(testStart);
 
@@ -191,6 +194,8 @@ instanceStateValue: true
             overwrites: {
               name: 'def',
               tags: ['fee', 'fi', 'fo'],
+              // This will cause the task to re-run on update
+              schedule: { interval: '59s' },
             },
           });
 
