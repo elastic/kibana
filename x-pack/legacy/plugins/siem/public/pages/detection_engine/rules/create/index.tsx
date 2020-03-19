@@ -115,7 +115,6 @@ const CreateRulePageComponent: React.FC = () => {
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {
       stepsData.current[step] = { ...stepsData.current[step], data, isValid };
@@ -157,12 +156,10 @@ const CreateRulePageComponent: React.FC = () => {
     [isStepRuleInReadOnlyView, openAccordionId, stepsData.current, setRule]
   );
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setStepsForm = useCallback((step: RuleStep, form: FormHook<FormData>) => {
     stepsForm.current[step] = form;
   }, []);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const getAccordionType = useCallback(
     (accordionId: RuleStep) => {
       if (accordionId === openAccordionId) {

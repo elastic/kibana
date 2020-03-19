@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertAction } from '../../../../../../../plugins/triggers_actions_ui/public/types';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
-import { Rule } from '../../../containers/detection_engine/rules';
+import { Rule, RuleType } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
 import {
   AboutStepRule,
@@ -65,18 +65,16 @@ export const getActionsStepsData = (rule: Rule): ActionsStepRule => {
 };
 
 export const getDefineStepsData = (rule: Rule): DefineStepRule => {
-  const { index, query, language, filters, saved_id: savedId } = rule;
-
   return {
     isNew: false,
-    index,
+    ruleType: rule.type,
+    anomalyThreshold: rule.anomaly_threshold ?? 50,
+    machineLearningJobId: rule.machine_learning_job_id ?? '',
+    index: rule.index ?? [],
     queryBar: {
-      query: {
-        query,
-        language,
-      },
-      filters: filters as Filter[],
-      saved_id: savedId ?? null,
+      query: { query: rule.query ?? '', language: rule.language ?? '' },
+      filters: (rule.filters ?? []) as Filter[],
+      saved_id: rule.saved_id,
     },
   };
 };
@@ -216,6 +214,8 @@ export const setFieldValue = (
       form.setFieldValue(key, val);
     }
   });
+
+export const isMlRule = (ruleType: RuleType) => ruleType === 'machine_learning';
 
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,

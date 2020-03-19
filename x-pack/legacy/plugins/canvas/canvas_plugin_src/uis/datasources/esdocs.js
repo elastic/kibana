@@ -6,15 +6,24 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiSelect, EuiTextArea, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { getSimpleArg, setSimpleArg } from '../../lib/arg_helpers';
-import { ESFieldsSelect } from '../../components/es_fields_select';
-import { ESFieldSelect } from '../../components/es_field_select';
-import { ESIndexSelect } from '../../components/es_index_select';
-import { templateFromReactComponent } from '../../lib/template_from_react_component';
-import { ExpressionDataSourceStrings } from '../../../i18n';
+import {
+  EuiFormRow,
+  EuiAccordion,
+  EuiSelect,
+  EuiTextArea,
+  EuiCallOut,
+  EuiSpacer,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
+import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
+import { ESFieldsSelect } from '../../../public/components/es_fields_select';
+import { ESFieldSelect } from '../../../public/components/es_field_select';
+import { ESIndexSelect } from '../../../public/components/es_index_select';
+import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { DataSourceStrings, LUCENE_QUERY_URL } from '../../../i18n';
 
-const { ESDocs: strings } = ExpressionDataSourceStrings;
+const { ESDocs: strings } = DataSourceStrings;
 
 const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   const setArg = (name, value) => {
@@ -74,30 +83,12 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
 
   return (
     <div>
-      <EuiCallOut size="s" title={strings.getWarningTitle()} iconType="alert" color="warning">
-        <p>{strings.getWarning()}</p>
-      </EuiCallOut>
-
-      <EuiSpacer size="m" />
-
       <EuiFormRow
         label={strings.getIndexTitle()}
         helpText={strings.getIndexLabel()}
         display="rowCompressed"
       >
         <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={strings.getQueryTitle()}
-        helpText={strings.getQueryLabel()}
-        display="rowCompressed"
-      >
-        <EuiTextArea
-          value={getQuery()}
-          onChange={e => setArg(getArgName(), e.target.value)}
-          compressed
-        />
       </EuiFormRow>
 
       <EuiFormRow
@@ -112,30 +103,54 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={strings.getSortFieldTitle()}
-        helpText={strings.getSortFieldLabel()}
-        display="columnCompressed"
+      <EuiSpacer size="s" />
+      <EuiAccordion
+        id="accordionAdvancedSettings"
+        buttonContent="Advanced settings"
+        className="canvasArg__accordion"
       >
-        <ESFieldSelect
-          index={index}
-          value={sortField}
-          onChange={field => setArg('sort', [field, sortOrder].join(', '))}
-        />
-      </EuiFormRow>
+        <EuiSpacer size="s" />
+        <EuiFormRow label={strings.getSortFieldTitle()} display="columnCompressed">
+          <ESFieldSelect
+            index={index}
+            value={sortField}
+            onChange={field => setArg('sort', [field, sortOrder].join(', '))}
+          />
+        </EuiFormRow>
 
-      <EuiFormRow
-        label={strings.getSortOrderTitle()}
-        helpText={strings.getSortOrderLabel()}
-        display="columnCompressed"
-      >
-        <EuiSelect
-          value={sortOrder.toLowerCase()}
-          onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
-          options={sortOptions}
-          compressed
-        />
-      </EuiFormRow>
+        <EuiFormRow label={strings.getSortOrderTitle()} display="columnCompressed">
+          <EuiSelect
+            value={sortOrder.toLowerCase()}
+            onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
+            options={sortOptions}
+            compressed
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={strings.getQueryTitle()}
+          labelAppend={
+            <EuiText size="xs">
+              <EuiLink href={LUCENE_QUERY_URL} target="_blank">
+                {strings.getQueryLabel()}
+              </EuiLink>
+            </EuiText>
+          }
+          display="rowCompressed"
+        >
+          <EuiTextArea
+            value={getQuery()}
+            onChange={e => setArg(getArgName(), e.target.value)}
+            compressed
+          />
+        </EuiFormRow>
+      </EuiAccordion>
+
+      <EuiSpacer size="m" />
+
+      <EuiCallOut size="s" title={strings.getWarningTitle()} iconType="alert" color="warning">
+        <p>{strings.getWarning()}</p>
+      </EuiCallOut>
     </div>
   );
 };
@@ -150,6 +165,6 @@ export const esdocs = () => ({
   name: 'esdocs',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  image: 'logoElasticsearch',
+  image: 'documents',
   template: templateFromReactComponent(EsdocsDatasource),
 });

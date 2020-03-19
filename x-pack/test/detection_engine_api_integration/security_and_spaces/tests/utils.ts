@@ -49,8 +49,24 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
+  index: ['auditbeat-*'],
   type: 'query',
   query: 'user.name: root or user.name: admin',
+});
+
+/**
+ * This is a representative ML rule payload as expected by the server
+ * @param ruleId
+ */
+export const getSimpleMlRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  name: 'Simple ML Rule',
+  description: 'Simple Machine Learning Rule',
+  anomaly_threshold: 44,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  machine_learning_job_id: 'some_job_id',
+  type: 'machine_learning',
 });
 
 export const getSignalStatus = () => ({
@@ -119,6 +135,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   false_positives: [],
   from: 'now-6m',
   immutable: false,
+  index: ['auditbeat-*'],
   interval: '5m',
   rule_id: ruleId,
   language: 'kuery',
@@ -134,6 +151,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   to: 'now',
   type: 'query',
   threat: [],
+  lists: [],
   version: 1,
 });
 
@@ -146,6 +164,20 @@ export const getSimpleRuleOutputWithoutRuleId = (
   const rule = getSimpleRuleOutput(ruleId);
   const { rule_id, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
+};
+
+export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => {
+  const rule = getSimpleRuleOutput(ruleId);
+  const { query, language, index, ...rest } = rule;
+
+  return {
+    ...rest,
+    name: 'Simple ML Rule',
+    description: 'Simple Machine Learning Rule',
+    anomaly_threshold: 44,
+    machine_learning_job_id: 'some_job_id',
+    type: 'machine_learning',
+  };
 };
 
 /**
@@ -377,4 +409,5 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
   note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
+  lists: [],
 });

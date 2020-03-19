@@ -78,6 +78,32 @@ describe('buildRule', () => {
           query: 'host.name: Braden',
         },
       ],
+      lists: [
+        {
+          field: 'source.ip',
+          boolean_operator: 'and',
+          values: [
+            {
+              name: '127.0.0.1',
+              type: 'value',
+            },
+          ],
+        },
+        {
+          field: 'host.name',
+          boolean_operator: 'and not',
+          values: [
+            {
+              name: 'rock01',
+              type: 'value',
+            },
+            {
+              name: 'mothra',
+              type: 'value',
+            },
+          ],
+        },
+      ],
       version: 1,
     };
     expect(rule).toEqual(expected);
@@ -128,6 +154,32 @@ describe('buildRule', () => {
       version: 1,
       updated_at: rule.updated_at,
       created_at: rule.created_at,
+      lists: [
+        {
+          field: 'source.ip',
+          boolean_operator: 'and',
+          values: [
+            {
+              name: '127.0.0.1',
+              type: 'value',
+            },
+          ],
+        },
+        {
+          field: 'host.name',
+          boolean_operator: 'and not',
+          values: [
+            {
+              name: 'rock01',
+              type: 'value',
+            },
+            {
+              name: 'mothra',
+              type: 'value',
+            },
+          ],
+        },
+      ],
     };
     expect(rule).toEqual(expected);
   });
@@ -177,6 +229,32 @@ describe('buildRule', () => {
       version: 1,
       updated_at: rule.updated_at,
       created_at: rule.created_at,
+      lists: [
+        {
+          field: 'source.ip',
+          boolean_operator: 'and',
+          values: [
+            {
+              name: '127.0.0.1',
+              type: 'value',
+            },
+          ],
+        },
+        {
+          field: 'host.name',
+          boolean_operator: 'and not',
+          values: [
+            {
+              name: 'rock01',
+              type: 'value',
+            },
+            {
+              name: 'mothra',
+              type: 'value',
+            },
+          ],
+        },
+      ],
     };
     expect(rule).toEqual(expected);
   });
@@ -225,6 +303,32 @@ describe('buildRule', () => {
       version: 1,
       updated_at: rule.updated_at,
       created_at: rule.created_at,
+      lists: [
+        {
+          field: 'source.ip',
+          boolean_operator: 'and',
+          values: [
+            {
+              name: '127.0.0.1',
+              type: 'value',
+            },
+          ],
+        },
+        {
+          field: 'host.name',
+          boolean_operator: 'and not',
+          values: [
+            {
+              name: 'rock01',
+              type: 'value',
+            },
+            {
+              name: 'mothra',
+              type: 'value',
+            },
+          ],
+        },
+      ],
     };
     expect(rule).toEqual(expected);
   });

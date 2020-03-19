@@ -10,10 +10,8 @@ import deepMerge from 'deepmerge';
 
 import { SelectField } from '../../../../../shared_imports';
 import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
+import { AlertAction } from '../../../../../../../../../plugins/alerting/common';
 import { useKibana } from '../../../../../lib/kibana';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertAction } from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
 
 type ThrottleSelectField = typeof SelectField;
 

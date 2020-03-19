@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
-import deepmerge from 'deepmerge';
 
-import { NewRule } from '../../../../containers/detection_engine/rules';
+import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
 
 import {
   AboutStepRule,
@@ -19,8 +18,8 @@ import {
   ScheduleStepRuleJson,
   AboutStepRuleJson,
   ActionsStepRuleJson,
-  FormatRuleType,
 } from '../types';
+import { isMlRule } from '../helpers';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
@@ -42,16 +41,52 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
   return timeObj;
 };
 
+export interface RuleFields {
+  anomalyThreshold: unknown;
+  machineLearningJobId: unknown;
+  queryBar: unknown;
+  index: unknown;
+  ruleType: unknown;
+}
+type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
+type MlRuleFields<T> = Omit<T, 'queryBar' | 'index'>;
+
+const isMlFields = <T>(fields: QueryRuleFields<T> | MlRuleFields<T>): fields is MlRuleFields<T> =>
+  has('anomalyThreshold', fields);
+
+export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
+  if (isMlRule(type)) {
+    const { index, queryBar, ...mlRuleFields } = fields;
+    return mlRuleFields;
+  } else {
+    const { anomalyThreshold, machineLearningJobId, ...queryRuleFields } = fields;
+    return queryRuleFields;
+  }
+};
+
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const { queryBar, isNew, ...rest } = defineStepData;
-  const { filters, query, saved_id: savedId } = queryBar;
-  return {
-    ...rest,
-    language: query.language,
-    filters,
-    query: query.query as string,
-    ...(savedId != null && savedId !== '' ? { saved_id: savedId } : {}),
-  };
+  const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
+
+  if (isMlFields(ruleFields)) {
+    const { anomalyThreshold, machineLearningJobId, isNew, ruleType, ...rest } = ruleFields;
+    return {
+      ...rest,
+      type: ruleType,
+      anomaly_threshold: anomalyThreshold,
+      machine_learning_job_id: machineLearningJobId,
+    };
+  } else {
+    const { queryBar, isNew, ruleType, ...rest } = ruleFields;
+    return {
+      ...rest,
+      type: ruleType,
+      filters: queryBar?.filters,
+      language: queryBar?.query?.language,
+      query: queryBar?.query?.query as string,
+      saved_id: queryBar?.saved_id,
+      ...(ruleType === 'query' && queryBar?.saved_id ? { type: 'saved_query' as RuleType } : {}),
+    };
+  }
 };
 
 export const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
@@ -130,17 +165,10 @@ export const formatRule = (
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
-  actionsData: ActionsStepRule,
-  ruleId?: string
-): NewRule => {
-  const type: FormatRuleType = !isEmpty(defineStepData.queryBar.saved_id) ? 'saved_query' : 'query';
-  const persistData = deepmerge.all([
-    { type },
-    formatDefineStepData(defineStepData),
-    formatAboutStepData(aboutStepData),
-    formatScheduleStepData(scheduleData),
-    formatActionsStepData(actionsData),
-  ]);
-
-  return ruleId != null ? { id: ruleId, ...persistData } : persistData;
-};
+  actionsData: ActionsStepRule
+): NewRule => ({
+  ...formatDefineStepData(defineStepData),
+  ...formatAboutStepData(aboutStepData),
+  ...formatScheduleStepData(scheduleData),
+  ...formatActionsStepData(actionsData),
+});

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertAction } from '../../../../../../../plugins/triggers_actions_ui/public/types';
+import { AlertAction } from '../../../../../../../plugins/alerting/common';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
+import { RuleType } from '../../../containers/detection_engine/rules/types';
 import { FieldValueQueryBar } from './components/query_bar';
 import { FormData, FormHook } from '../../../shared_imports';
 import { FieldValueTimeline } from './components/pick_timeline';
@@ -70,8 +70,11 @@ export interface AboutStepRuleDetails {
 }
 
 export interface DefineStepRule extends StepRuleData {
+  anomalyThreshold: number;
   index: string[];
+  machineLearningJobId: string;
   queryBar: FieldValueQueryBar;
+  ruleType: RuleType;
 }
 
 export interface ScheduleStepRule extends StepRuleData {
@@ -87,11 +90,14 @@ export interface ActionsStepRule extends StepRuleData {
 }
 
 export interface DefineStepRuleJson {
-  index: string[];
-  filters: Filter[];
+  anomaly_threshold?: number;
+  index?: string[];
+  filters?: Filter[];
+  machine_learning_job_id?: string;
   saved_id?: string;
-  query: string;
-  language: string;
+  query?: string;
+  language?: string;
+  type: RuleType;
 }
 
 export interface AboutStepRuleJson {
@@ -125,8 +131,6 @@ export interface ActionsStepRuleJson {
 export type MyRule = Omit<DefineStepRule & ScheduleStepRule & AboutStepRule, 'isNew'> & {
   immutable: boolean;
 };
-
-export type FormatRuleType = 'query' | 'saved_query';
 
 export interface IMitreAttack {
   id: string;
