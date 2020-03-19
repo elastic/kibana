@@ -137,9 +137,9 @@ describe('validateParams()', () => {
       validateParams(actionType, { eventAction: 'ackynollage' });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action params: [eventAction]: types that failed validation:
-- [eventAction.0]: expected value to equal [trigger] but got [ackynollage]
-- [eventAction.1]: expected value to equal [resolve] but got [ackynollage]
-- [eventAction.2]: expected value to equal [acknowledge] but got [ackynollage]"
+- [eventAction.0]: expected value to equal [trigger]
+- [eventAction.1]: expected value to equal [resolve]
+- [eventAction.2]: expected value to equal [acknowledge]"
 `);
   });
 });

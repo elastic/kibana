@@ -27,6 +27,7 @@ import {
 } from './agg_params_helper';
 import { FieldParamEditor, OrderByParamEditor } from './controls';
 import { EditorConfig } from './utils';
+import { Schema } from '../schemas';
 
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),
@@ -38,6 +39,15 @@ describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {
     let agg: IAggConfig;
     let editorConfig: EditorConfig;
+    const schemas: Schema[] = [
+      {
+        name: 'metric',
+      } as Schema,
+      {
+        name: 'metric2',
+        hideCustomLabel: true,
+      } as Schema,
+    ];
     const state = {} as VisState;
     const metricAggs: IAggConfig[] = [];
     const emptyParams = {
@@ -50,16 +60,16 @@ describe('DefaultEditorAggParams helpers', () => {
         type: {
           params: [{ name: 'interval' }],
         },
-        schema: {},
+        schema: 'metric',
       } as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should not create any param if there is no agg type', () => {
-      agg = {} as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+      agg = { schema: 'metric' } as IAggConfig;
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
@@ -75,21 +85,19 @@ describe('DefaultEditorAggParams helpers', () => {
           hidden: true,
         },
       };
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should skip customLabel param if it is hidden', () => {
-      agg = {
+      agg = ({
         type: {
           params: [{ name: 'customLabel' }],
         },
-        schema: {
-          hideCustomLabel: true,
-        },
-      } as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+        schema: 'metric2',
+      } as any) as IAggConfig;
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
@@ -116,7 +124,7 @@ describe('DefaultEditorAggParams helpers', () => {
             },
           ],
         },
-        schema: {},
+        schema: 'metric',
         getIndexPattern: jest.fn(() => ({
           fields: [
             { name: '@timestamp', type: 'date' },
@@ -128,7 +136,7 @@ describe('DefaultEditorAggParams helpers', () => {
           field: 'field',
         },
       } as any) as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual({
         basic: [
@@ -140,6 +148,7 @@ describe('DefaultEditorAggParams helpers', () => {
             paramEditor: FieldParamEditor,
             metricAggs,
             state,
+            schemas,
             value: agg.params.field,
           },
           {
@@ -150,6 +159,7 @@ describe('DefaultEditorAggParams helpers', () => {
             paramEditor: OrderByParamEditor,
             metricAggs,
             state,
+            schemas,
             value: agg.params.orderBy,
           },
         ],
@@ -162,7 +172,7 @@ describe('DefaultEditorAggParams helpers', () => {
   describe('getAggTypeOptions', () => {
     it('should return agg type options grouped by subtype', () => {
       const indexPattern = {} as IndexPattern;
-      const aggs = getAggTypeOptions({} as IAggConfig, indexPattern, 'metrics');
+      const aggs = getAggTypeOptions({} as IAggConfig, indexPattern, 'metrics', []);
 
       expect(aggs).toEqual(['indexedFields']);
     });

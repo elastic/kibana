@@ -28,6 +28,7 @@ import { IAggType, AggGroupNames } from '../legacy_imports';
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { DefaultEditorAggParams } from './agg_params';
 import { AGGS_ACTION_KEYS } from './agg_group_state';
+import { Schema } from '../schemas';
 
 jest.mock('ui/new_platform');
 
@@ -55,7 +56,7 @@ describe('DefaultEditorAgg component', () => {
         id: '1',
         brandNew: true,
         getIndexPattern: () => ({} as IndexPattern),
-        schema: { title: 'Schema name' },
+        schema: 'metric',
         title: 'Metrics',
         params: {},
       } as any,
@@ -69,13 +70,18 @@ describe('DefaultEditorAgg component', () => {
       isLastBucket: false,
       isRemovable: false,
       metricAggs: [],
-      state: {} as VisState,
+      state: { params: {} } as VisState,
       setAggParamValue,
       setStateParamValue,
       onAggTypeChange: () => {},
       setAggsState,
       onToggleEnableAgg,
       removeAgg,
+      schemas: [
+        {
+          name: 'metric',
+        } as Schema,
+      ],
     };
   });
 
@@ -175,9 +181,7 @@ describe('DefaultEditorAgg component', () => {
   });
 
   it('should add schema component', () => {
-    defaultProps.agg.schema = {
-      name: 'split',
-    } as any;
+    defaultProps.agg.schema = 'split';
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     expect(comp.find('RowsOrColumnsControl').exists()).toBeTruthy();

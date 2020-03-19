@@ -5,9 +5,15 @@
  */
 
 import Boom from 'boom';
-import { snakeCase } from 'lodash/fp';
-import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
-import { LegacyServices } from '../../../types';
+import Joi from 'joi';
+import { has, snakeCase } from 'lodash/fp';
+
+import {
+  RouteValidationFunction,
+  KibanaResponseFactory,
+  CustomHttpResponseOptions,
+} from '../../../../../../../../src/core/server';
+import { BadRequestError } from '../errors/bad_request_error';
 
 export interface OutputError {
   message: string;
@@ -26,9 +32,8 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
         message: err.message,
         statusCode: err.statusCode,
       };
-    } else if (err instanceof TypeError) {
-      // allows us to throw type errors instead of booms in some conditions
-      // where we don't want to mingle Boom with the rest of the code
+    } else if (err instanceof BadRequestError) {
+      // allows us to throw request validation errors in the absence of Boom
       return {
         message: err.message,
         statusCode: 400,
@@ -100,16 +105,25 @@ export const createBulkErrorObject = ({
   }
 };
 
-export interface ImportRuleResponse {
-  rule_id?: string;
-  id?: string;
-  status_code?: number;
+export interface ImportRegular {
+  rule_id: string;
+  status_code: number;
   message?: string;
-  error?: {
-    status_code: number;
-    message: string;
-  };
 }
+
+export type ImportRuleResponse = ImportRegular | BulkError;
+
+export const isBulkError = (
+  importRuleResponse: ImportRuleResponse
+): importRuleResponse is BulkError => {
+  return has('error', importRuleResponse);
+};
+
+export const isImportRegular = (
+  importRuleResponse: ImportRuleResponse
+): importRuleResponse is ImportRegular => {
+  return !has('error', importRuleResponse) && has('status_code', importRuleResponse);
+};
 
 export interface ImportSuccessError {
   success: boolean;
@@ -164,7 +178,7 @@ export const transformImportError = (
       message: err.message,
       existingImportSuccessError,
     });
-  } else if (err instanceof TypeError) {
+  } else if (err instanceof BadRequestError) {
     return createImportErrorObject({
       ruleId,
       statusCode: 400,
@@ -191,7 +205,7 @@ export const transformBulkError = (
       statusCode: err.output.statusCode,
       message: err.message,
     });
-  } else if (err instanceof TypeError) {
+  } else if (err instanceof BadRequestError) {
     return createBulkErrorObject({
       ruleId,
       statusCode: 400,
@@ -206,15 +220,70 @@ export const transformBulkError = (
   }
 };
 
-export const getIndex = (getSpaceId: () => string, config: LegacyServices['config']): string => {
-  const signalsIndex = config().get<string>(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
-  const spaceId = getSpaceId();
-
-  return `${signalsIndex}-${spaceId}`;
+export const buildRouteValidation = <T>(schema: Joi.Schema): RouteValidationFunction<T> => (
+  payload: T,
+  { ok, badRequest }
+) => {
+  const { value, error } = schema.validate(payload);
+  if (error) {
+    return badRequest(error.message);
+  }
+  return ok(value);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> | null => {
+const statusToErrorMessage = (statusCode: number) => {
+  switch (statusCode) {
+    case 400:
+      return 'Bad Request';
+    case 401:
+      return 'Unauthorized';
+    case 403:
+      return 'Forbidden';
+    case 404:
+      return 'Not Found';
+    case 409:
+      return 'Conflict';
+    case 500:
+      return 'Internal Error';
+    default:
+      return '(unknown error)';
+  }
+};
+
+export class SiemResponseFactory {
+  constructor(private response: KibanaResponseFactory) {}
+
+  error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
+    const contentType: CustomHttpResponseOptions<T>['headers'] = {
+      'content-type': 'application/json',
+    };
+    const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
+      ...contentType,
+      ...(headers ?? {}),
+    };
+
+    return this.response.custom({
+      headers: defaultedHeaders,
+      statusCode,
+      body: Buffer.from(
+        JSON.stringify({
+          message: body ?? statusToErrorMessage(statusCode),
+          status_code: statusCode,
+        })
+      ),
+    });
+  }
+}
+
+export const buildSiemResponse = (response: KibanaResponseFactory) =>
+  new SiemResponseFactory(response);
+
+export const convertToSnakeCase = <T extends Record<string, unknown>>(
+  obj: T
+): Partial<T> | null => {
+  if (!obj) {
+    return null;
+  }
   return Object.keys(obj).reduce((acc, item) => {
     const newKey = snakeCase(item);
     return { ...acc, [newKey]: obj[item] };

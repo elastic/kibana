@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { chunk } from 'lodash';
 import { PromiseReturnType } from '../../../typings/common';
 import {
   Setup,
@@ -16,50 +16,64 @@ import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import {
   SERVICE_AGENT_NAME,
-  SERVICE_NAME
+  SERVICE_NAME,
+  SERVICE_FRAMEWORK_NAME
 } from '../../../common/elasticsearch_fieldnames';
+import { dedupeConnections } from './dedupe_connections';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName?: string;
   environment?: string;
-  after?: string;
 }
 
 async function getConnectionData({
   setup,
   serviceName,
-  environment,
-  after
+  environment
 }: IEnvOptions) {
-  const { traceIds, after: nextAfter } = await getTraceSampleIds({
+  const { traceIds } = await getTraceSampleIds({
     setup,
     serviceName,
-    environment,
-    after
+    environment
   });
 
-  const serviceMapData = traceIds.length
-    ? await getServiceMapFromTraceIds({
+  const chunks = chunk(
+    traceIds,
+    setup.config['xpack.apm.serviceMapMaxTracesPerRequest']
+  );
+
+  const init = {
+    connections: [],
+    discoveredServices: []
+  };
+
+  if (!traceIds.length) {
+    return init;
+  }
+
+  const chunkedResponses = await Promise.all(
+    chunks.map(traceIdsChunk =>
+      getServiceMapFromTraceIds({
         setup,
         serviceName,
         environment,
-        traceIds
+        traceIds: traceIdsChunk
       })
-    : { connections: [], discoveredServices: [] };
+    )
+  );
 
-  return {
-    after: nextAfter,
-    ...serviceMapData
-  };
+  return chunkedResponses.reduce((prev, current) => {
+    return {
+      connections: prev.connections.concat(current.connections),
+      discoveredServices: prev.discoveredServices.concat(
+        current.discoveredServices
+      )
+    };
+  });
 }
 
 async function getServicesData(options: IEnvOptions) {
-  // only return services on the first request for the global service map
-  if (options.after) {
-    return [];
-  }
-
   const { setup } = options;
 
   const projection = getServicesProjection({ setup });
@@ -92,6 +106,11 @@ async function getServicesData(options: IEnvOptions) {
               terms: {
                 field: SERVICE_AGENT_NAME
               }
+            },
+            service_framework_name: {
+              terms: {
+                field: SERVICE_FRAMEWORK_NAME
+              }
             }
           }
         }
@@ -109,21 +128,29 @@ async function getServicesData(options: IEnvOptions) {
         'service.name': bucket.key as string,
         'agent.name':
           (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        'service.environment': options.environment || null
+        'service.environment': options.environment || null,
+        'service.framework.name':
+          (bucket.service_framework_name.buckets[0]?.key as
+            | string
+            | undefined) || null
       };
     }) || []
   );
 }
 
+export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
+export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
+
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
+
 export async function getServiceMap(options: IEnvOptions) {
   const [connectionData, servicesData] = await Promise.all([
     getConnectionData(options),
     getServicesData(options)
   ]);
 
-  return {
+  return dedupeConnections({
     ...connectionData,
     services: servicesData
-  };
+  });
 }

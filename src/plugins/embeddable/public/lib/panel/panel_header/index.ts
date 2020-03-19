@@ -17,9 +17,4 @@
  * under the License.
  */
 
-export {
-  ADD_PANEL_ACTION_ID,
-  AddPanelAction,
-  RemovePanelAction,
-  openAddPanelFlyout,
-} from './panel_actions';
+export * from './panel_actions';

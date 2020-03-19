@@ -6,8 +6,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { useStateToaster } from '../../../components/toasters';
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { getRuleStatusById } from './api';
 import * as i18n from './translations';
 import { RuleStatus } from './types';

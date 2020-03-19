@@ -4,60 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
-import { LegacyServices } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
-import { SignalsQueryRequest } from '../../signals/types';
+import { SignalsQueryRestParams } from '../../signals/types';
 import { querySignalsSchema } from '../schemas/query_signals_index_schema';
-import { transformError, getIndex } from '../utils';
+import { transformError, buildRouteValidation, buildSiemResponse } from '../utils';
 
-export const querySignalsRouteDef = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-    options: {
-      tags: ['access:siem'],
+export const querySignalsRoute = (router: IRouter) => {
+  router.post(
+    {
+      path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: querySignalsSchema,
+        body: buildRouteValidation<SignalsQueryRestParams>(querySignalsSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: SignalsQueryRequest, headers) {
-      const { query, aggs, _source, track_total_hits, size } = request.payload;
-      const { clusterClient, spacesClient } = await getClients(request);
-
-      const index = getIndex(spacesClient.getSpaceId, config);
+    async (context, request, response) => {
+      const { query, aggs, _source, track_total_hits, size } = request.body;
+      const clusterClient = context.core.elasticsearch.dataClient;
+      const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
 
       try {
-        const searchSignalsIndexResult = await clusterClient.callAsCurrentUser('search', {
-          index,
+        const result = await clusterClient.callAsCurrentUser('search', {
+          index: siemClient.signalsIndex,
           body: { query, aggs, _source, track_total_hits, size },
           ignoreUnavailable: true,
         });
-        return searchSignalsIndexResult;
+        return response.ok({ body: result });
       } catch (err) {
+        // error while getting or updating signal with id: id in signal index .siem-signals
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const querySignalsRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-) => {
-  route(querySignalsRouteDef(config, getClients));
+    }
+  );
 };

@@ -7,16 +7,36 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { CaseComponent } from './';
-import * as apiHook from '../../../../containers/case/use_update_case';
-import { caseProps, data } from './__mock__';
+import { caseProps, caseClosedProps, data, dataClosed } from './__mock__';
 import { TestProviders } from '../../../../mock';
+import { useUpdateCase } from '../../../../containers/case/use_update_case';
+jest.mock('../../../../containers/case/use_update_case');
+const useUpdateCaseMock = useUpdateCase as jest.Mock;
 
 describe('CaseView ', () => {
-  const dispatchUpdateCaseProperty = jest.fn();
+  const updateCaseProperty = jest.fn();
+  /* eslint-disable no-console */
+  // Silence until enzyme fixed to use ReactTestUtils.act()
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+  afterAll(() => {
+    console.error = originalError;
+  });
+  /* eslint-enable no-console */
+
+  const defaultUpdateCaseState = {
+    caseData: data,
+    isLoading: false,
+    isError: false,
+    updateKey: null,
+    updateCaseProperty,
+  };
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue([{ data }, dispatchUpdateCaseProperty]);
+    useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
   });
 
   it('should render CaseComponent', () => {
@@ -33,10 +53,10 @@ describe('CaseView ', () => {
     ).toEqual(data.title);
     expect(
       wrapper
-        .find(`[data-test-subj="case-view-state"]`)
+        .find(`[data-test-subj="case-view-status"]`)
         .first()
         .text()
-    ).toEqual(data.state);
+    ).toEqual(data.status);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-tag-list"] .euiBadge__text`)
@@ -49,6 +69,7 @@ describe('CaseView ', () => {
         .first()
         .text()
     ).toEqual(data.createdBy.username);
+    expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-createdAt"]`)
@@ -62,6 +83,30 @@ describe('CaseView ', () => {
         .prop('raw')
     ).toEqual(data.description);
   });
+  it('should show closed indicators in header when case is closed', () => {
+    useUpdateCaseMock.mockImplementation(() => ({
+      ...defaultUpdateCaseState,
+      caseData: dataClosed,
+    }));
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseClosedProps} />
+      </TestProviders>
+    );
+    expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-view-closedAt"]`)
+        .first()
+        .prop('value')
+    ).toEqual(dataClosed.closedAt);
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-view-status"]`)
+        .first()
+        .text()
+    ).toEqual(dataClosed.status);
+  });
 
   it('should dispatch update state when button is toggled', () => {
     const wrapper = mount(
@@ -71,12 +116,46 @@ describe('CaseView ', () => {
     );
 
     wrapper
-      .find('input[data-test-subj="toggle-case-state"]')
-      .simulate('change', { target: { value: false } });
+      .find('input[data-test-subj="toggle-case-status"]')
+      .simulate('change', { target: { checked: true } });
 
-    expect(dispatchUpdateCaseProperty).toBeCalledWith({
-      updateKey: 'state',
+    expect(updateCaseProperty).toBeCalledWith({
+      updateKey: 'status',
       updateValue: 'closed',
     });
+  });
+
+  it('should render comments', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].id}-avatar"] [data-test-subj="user-action-avatar"]`
+        )
+        .first()
+        .prop('name')
+    ).toEqual(data.comments[0].createdBy.fullName);
+
+    expect(
+      wrapper
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].id}"] [data-test-subj="user-action-title"] strong`
+        )
+        .first()
+        .text()
+    ).toEqual(data.comments[0].createdBy.username);
+
+    expect(
+      wrapper
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].id}"] [data-test-subj="markdown"]`
+        )
+        .first()
+        .prop('source')
+    ).toEqual(data.comments[0].comment);
   });
 });

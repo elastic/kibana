@@ -67,7 +67,7 @@ Enhancements are pretty much always going to have extensive unit tests as a base
 [float]
 === Product level review
 
-Reviewers are not simply evaluating the code itself, they are also evaluating the quality of the user-facing change in the product. This generally means they need to check out the branch locally and "play around" with it. In addition to the "do we want this change in the product" details from above, the reviewer should be looking for bugs and evaluating how approachable and useful the feature is as implemented. Special attention should be given to error scenarios and edge cases to ensure they are all handled well within the product.
+Reviewers are not simply evaluating the code itself, they are also evaluating the quality of the user-facing change in the product. This generally means they need to check out the branch locally and "play around" with it. In addition to the "do we want this change in the product" details, the reviewer should be looking for bugs and evaluating how approachable and useful the feature is as implemented. Special attention should be given to error scenarios and edge cases to ensure they are all handled well within the product.
 
 
 [float]
@@ -107,7 +107,7 @@ Conflicting opinions between reviewers and authors happen, and sometimes it is h
 
 Whether or not a bit of feedback is appropriate for a pull request is often dependent on the motivation for giving the feedback in the first place.
 
-_Demanding_ an author make changes based primarily on the mindset of "how would I write this code?" isn't appropriate. The reviewer didn't write the code, and their critical purpose in the review process is not to craft the contribution into a form that is simply whatever they would have written if they had. If a reviewer wants to provide this type of feedback, they should qualify it as a "nit" as mentioned in the nitpicking section above to make it clear that the author can take it or leave it.
+_Demanding_ an author make changes based primarily on the mindset of "how would I write this code?" isn't appropriate. The reviewer didn't write the code, and their critical purpose in the review process is not to craft the contribution into a form that is simply whatever they would have written if they had. If a reviewer wants to provide this type of feedback, they should qualify it as a "nit" as mentioned in the nitpicking section to make it clear that the author can take it or leave it.
 
 Inflammatory feedback such as "this is crap" isn't feedback at all. It's both mean and unhelpful, and it is never appropriate.
 

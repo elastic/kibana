@@ -63,6 +63,7 @@ const backgroundColorRulesItems = Joi.object({
 
 const gaugeColorRulesItems = Joi.object({
   gauge: stringOptionalNullable,
+  text: stringOptionalNullable,
   id: stringOptionalNullable,
   operator: stringOptionalNullable,
   value: Joi.number(),
@@ -92,6 +93,18 @@ const metricsItems = Joi.object({
         field: stringOptionalNullable,
         id: stringRequired,
         name: stringOptionalNullable,
+      })
+    )
+    .optional(),
+  percentiles: Joi.array()
+    .items(
+      Joi.object({
+        id: stringRequired,
+        field: stringOptionalNullable,
+        mode: Joi.string().allow('line', 'band'),
+        shade: Joi.alternatives(numberOptional, stringOptionalNullable),
+        value: Joi.alternatives(numberOptional, stringOptionalNullable),
+        percentile: stringOptionalNullable,
       })
     )
     .optional(),
@@ -132,10 +145,13 @@ const seriesItems = Joi.object({
     )
     .optional(),
   fill: numberOptionalOrEmptyString,
-  filter: Joi.object({
-    query: stringRequired,
-    language: stringOptionalNullable,
-  }).optional(),
+  filter: Joi.alternatives(
+    Joi.object({
+      query: stringRequired,
+      language: stringOptionalNullable,
+    }).optional(),
+    Joi.string().valid('')
+  ),
   formatter: stringRequired,
   hide_in_legend: numberIntegerOptional,
   hidden: Joi.boolean().optional(),

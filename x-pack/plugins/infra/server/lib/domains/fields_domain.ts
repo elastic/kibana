@@ -31,8 +31,7 @@ export class InfraFieldsDomain {
       requestContext,
       `${includeMetricIndices ? configuration.metricAlias : ''},${
         includeLogIndices ? configuration.logAlias : ''
-      }`,
-      configuration.fields.timestamp
+      }`
     );
 
     return fields;

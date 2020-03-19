@@ -133,7 +133,7 @@ describe('No global chart settings', function() {
     responseHandler = vislibSlicesResponseHandler;
 
     let id1 = 1;
-    stubVis1 = new visualizationsStart.Vis(indexPattern, {
+    stubVis1 = visualizationsStart.createVis(indexPattern, {
       type: 'pie',
       aggs: rowAgg,
     });
@@ -222,7 +222,7 @@ describe('Vislib PieChart Class Test Suite', function() {
         responseHandler = vislibSlicesResponseHandler;
 
         let id = 1;
-        stubVis = new visualizationsStart.Vis(indexPattern, {
+        stubVis = visualizationsStart.createVis(indexPattern, {
           type: 'pie',
           aggs: dataAgg,
         });

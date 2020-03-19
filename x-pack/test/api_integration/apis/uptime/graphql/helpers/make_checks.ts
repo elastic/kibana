@@ -146,7 +146,7 @@ export const makeCheck = async (
   }
 
   if (refresh) {
-    es.indices.refresh();
+    await es.indices.refresh();
   }
 
   return docs;
@@ -181,7 +181,7 @@ export const makeChecks = async (
   }
 
   if (refresh) {
-    es.indices.refresh();
+    await es.indices.refresh();
   }
 
   return checks;

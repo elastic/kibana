@@ -8,18 +8,19 @@ import { darken, transparentize } from 'polished';
 import React, { memo } from 'react';
 
 import { euiStyled, css } from '../../../../../observability/public';
-import { useFormattedTime } from '../../formatted_time';
+import { TimeFormat, useFormattedTime } from '../../formatted_time';
 import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryTimestampColumnProps {
+  format?: TimeFormat;
   isHighlighted: boolean;
   isHovered: boolean;
   time: number;
 }
 
 export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
-  ({ isHighlighted, isHovered, time }) => {
-    const formattedTime = useFormattedTime(time, { format: 'time' });
+  ({ format = 'time', isHighlighted, isHovered, time }) => {
+    const formattedTime = useFormattedTime(time, { format });
 
     return (
       <TimestampColumnContent isHovered={isHovered} isHighlighted={isHighlighted}>

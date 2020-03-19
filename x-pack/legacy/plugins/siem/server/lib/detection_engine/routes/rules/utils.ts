@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pickBy } from 'lodash/fp';
-import { Dictionary } from 'lodash';
-import { SavedObject } from 'kibana/server';
+import { pickBy, countBy } from 'lodash/fp';
+import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
+
+import { PartialAlert, FindResult } from '../../../../../../../../plugins/alerting/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -18,7 +19,7 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest, ImportRuleAlertRest } from '../../types';
+import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
@@ -27,6 +28,7 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
+import { hasListsFeature } from '../../feature_flags';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -105,6 +107,7 @@ export const transformAlertToRule = (
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
+    anomaly_threshold: alert.params.anomalyThreshold,
     false_positives: alert.params.falsePositives,
     filters: alert.params.filters,
     from: alert.params.from,
@@ -116,6 +119,7 @@ export const transformAlertToRule = (
     language: alert.params.language,
     output_index: alert.params.outputIndex,
     max_signals: alert.params.maxSignals,
+    machine_learning_job_id: alert.params.machineLearningJobId,
     risk_score: alert.params.riskScore,
     name: alert.name,
     query: alert.params.query,
@@ -130,6 +134,7 @@ export const transformAlertToRule = (
     to: alert.params.to,
     type: alert.params.type,
     threat: alert.params.threat,
+    note: alert.params.note,
     version: alert.params.version,
     status: ruleStatus?.attributes.status,
     status_date: ruleStatus?.attributes.statusDate,
@@ -137,6 +142,8 @@ export const transformAlertToRule = (
     last_success_at: ruleStatus?.attributes.lastSuccessAt,
     last_failure_message: ruleStatus?.attributes.lastFailureMessage,
     last_success_message: ruleStatus?.attributes.lastSuccessMessage,
+    // TODO: (LIST-FEATURE) Remove hasListsFeature() check once we have lists available for a release
+    lists: hasListsFeature() ? alert.params.lists : null,
   });
 };
 
@@ -156,26 +163,38 @@ export const transformAlertsToRules = (
 };
 
 export const transformFindAlerts = (
-  findResults: { data: unknown[] },
-  ruleStatuses?: unknown[]
-): unknown | null => {
+  findResults: FindResult,
+  ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
+): {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Array<Partial<OutputRuleAlertRest>>;
+} | null => {
   if (!ruleStatuses && isAlertTypes(findResults.data)) {
-    findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
-    return findResults;
-  }
-  if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
-    findResults.data = findResults.data.map((alert, idx) =>
-      transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
-    );
-    return findResults;
+    return {
+      page: findResults.page,
+      perPage: findResults.perPage,
+      total: findResults.total,
+      data: findResults.data.map(alert => transformAlertToRule(alert)),
+    };
+  } else if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
+    return {
+      page: findResults.page,
+      perPage: findResults.perPage,
+      total: findResults.total,
+      data: findResults.data.map((alert, idx) =>
+        transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
+      ),
+    };
   } else {
     return null;
   }
 };
 
 export const transform = (
-  alert: unknown,
-  ruleStatus?: unknown
+  alert: PartialAlert,
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> | null => {
   if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
@@ -189,7 +208,7 @@ export const transform = (
 
 export const transformOrBulkError = (
   ruleId: string,
-  alert: unknown,
+  alert: PartialAlert,
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
@@ -209,7 +228,7 @@ export const transformOrBulkError = (
 
 export const transformOrImportError = (
   ruleId: string,
-  alert: unknown,
+  alert: PartialAlert,
   existingImportSuccessError: ImportSuccessError
 ): ImportSuccessError => {
   if (isAlertType(alert)) {
@@ -224,10 +243,14 @@ export const transformOrImportError = (
   }
 };
 
-export const getDuplicates = (lodashDict: Dictionary<number>): string[] => {
-  const hasDuplicates = Object.values(lodashDict).some(i => i > 1);
+export const getDuplicates = (ruleDefinitions: RuleAlertParamsRest[], by: 'rule_id'): string[] => {
+  const mappedDuplicates = countBy(
+    by,
+    ruleDefinitions.filter(r => r[by] != null)
+  );
+  const hasDuplicates = Object.values(mappedDuplicates).some(i => i > 1);
   if (hasDuplicates) {
-    return Object.keys(lodashDict).filter(key => lodashDict[key] > 1);
+    return Object.keys(mappedDuplicates).filter(key => mappedDuplicates[key] > 1);
   }
   return [];
 };

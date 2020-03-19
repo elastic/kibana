@@ -15,6 +15,7 @@ interface Props {
 
 const SeverityBadgeComponent: React.FC<Props> = ({ value }) => (
   <EuiHealth
+    data-test-subj="severity"
     color={
       value === 'low'
         ? euiLightVars.euiColorVis0

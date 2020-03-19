@@ -64,9 +64,7 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
 
     expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
 
-    visualizations.types.createBaseVisualization(
-      createTileMapTypeDefinition(visualizationDependencies)
-    );
+    visualizations.createBaseVisualization(createTileMapTypeDefinition(visualizationDependencies));
   }
 
   public start(core: CoreStart) {

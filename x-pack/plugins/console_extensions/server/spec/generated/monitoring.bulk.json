@@ -12,6 +12,6 @@
     "patterns": [
       "_monitoring/bulk"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/es-monitoring.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html"
   }
 }

@@ -111,9 +111,7 @@ describe('RegionMapsVisualizationTests', function() {
 
       if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(
-          createRegionMapTypeDefinition(dependencies)
-        );
+        visualizationsSetup.createBaseVisualization(createRegionMapTypeDefinition(dependencies));
       }
 
       RegionMapsVisualization = createRegionMapVisualization(dependencies);
@@ -160,7 +158,7 @@ describe('RegionMapsVisualizationTests', function() {
 
       imageComparator = new ImageComparator();
 
-      vis = new visualizationsStart.Vis(indexPattern, {
+      vis = visualizationsStart.createVis(indexPattern, {
         type: 'region_map',
       });
 
