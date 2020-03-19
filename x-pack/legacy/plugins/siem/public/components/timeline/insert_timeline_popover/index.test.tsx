@@ -36,16 +36,6 @@ const defaultProps = {
 };
 
 describe('Insert timeline popover ', () => {
-  /* eslint-disable no-console */
-  // Silence until enzyme fixed to use ReactTestUtils.act()
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-  /* eslint-enable no-console */
   beforeEach(() => {
     jest.resetAllMocks();
   });
