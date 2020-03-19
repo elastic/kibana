@@ -49,9 +49,9 @@ Machine Learning::
 * Shows view series link in anomalies table for machine_learning_user role {pull}59549[#59549]
 * Fixes bucket span estimators loading of max_buckets setting {pull}59639[#59639]
 Management::
-* Handles improperly defined Watcher Logging Action text parameter. {pull}60169[#60169]
+* Improperly defined Watcher Logging Action text parameters will now be handled elegantly by {kib} instead of causing {kib} to crash {pull}60169[#60169]
 * Fixes the namespace for indices autocompletion {pull}59043[#59043]
-* Fixes overriding of `host` header name {pull}59143[#59143]
+* We fixed a bug in Console's proxy that would always override the "host" header {pull}59143[#59143]
 * Spacing between rendered shards {pull}60238[#60238]
 Maps::
 * Adds missing license to requests in maps embeddables {pull}59207[#59207]
@@ -62,7 +62,7 @@ Monitoring::
 * Ensures we use the monitoring cluster for retrieving xpack info {pull}59075[#59075]
 Platform::
 * Edits to filter's custom label are ignored {pull}59169[#59169]
-* Fixes a bug that could cause saved object migrations to fail when an {es} snapshot is currently in progress. {pull}58884[#58884]
+* Fixes a bug that could cause saved object migrations to fail when an {es} snapshot is currently in progress {pull}58884[#58884]
 Security::
 * Fixes base path prepending for session storage short url redirects {pull}59871[#59871]
 SIEM::
