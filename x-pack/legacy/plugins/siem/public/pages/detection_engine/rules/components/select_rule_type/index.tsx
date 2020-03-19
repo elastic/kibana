@@ -66,7 +66,12 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setQuery = useCallback(() => setType('query'), [setType]);
 
   return (
-    <EuiFormRow label={field.label} fullWidth describedByIds={describedByIds}>
+    <EuiFormRow
+      fullWidth
+      data-test-subj="selectRuleType"
+      describedByIds={describedByIds}
+      label={field.label}
+    >
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiCard

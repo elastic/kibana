@@ -47,6 +47,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
       label={field.label}
       isInvalid={isInvalid}
       error={errorMessage}
+      data-test-subj="mlJobSelect"
       describedByIds={describedByIds}
     >
       <EuiFlexGroup>

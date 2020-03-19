@@ -30,7 +30,12 @@ export const AnomalyThresholdSlider: React.FC<AnomalyThresholdSliderProps> = ({
   );
 
   return (
-    <EuiFormRow fullWidth label={field.label} describedByIds={describedByIds}>
+    <EuiFormRow
+      fullWidth
+      label={field.label}
+      data-test-subj="anomalyThresholdSlider"
+      describedByIds={describedByIds}
+    >
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiRange
