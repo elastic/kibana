@@ -8,7 +8,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getService, loadTestFile }: FtrProviderContext) {
   const transform = getService('transform');
 
-  describe('transform', function() {
+  // prevent test failures with current ES snapshot, see https://github.com/elastic/kibana/issues/60516
+  describe.skip('transform', function() {
     this.tags(['ciGroup9', 'transform']);
 
     before(async () => {

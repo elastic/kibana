@@ -29,12 +29,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { indices } from '../../../../../../../../src/plugins/es_ui_shared/public';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 import routing from '../services/routing';
 import { extractQueryParams } from '../services/query_params';
 import { getRemoteClusterName } from '../services/get_remote_cluster_name';
-import { API_STATUS, INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
+import { API_STATUS } from '../constants';
 import { SectionError } from './section_error';
 import { AutoFollowPatternIndicesPreview } from './auto_follow_pattern_indices_preview';
 import { RemoteClustersFormField } from './remote_clusters_form_field';
@@ -46,7 +47,7 @@ import {
 import { AutoFollowPatternRequestFlyout } from './auto_follow_pattern_request_flyout';
 
 const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
-const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexNameIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const getEmptyAutoFollowPattern = (remoteClusterName = '') => ({
   name: '',

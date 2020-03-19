@@ -28,11 +28,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { indices } from '../../../../../../../../../src/plugins/es_ui_shared/public';
 import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
 import routing from '../../services/routing';
 import { getFatalErrors } from '../../services/notifications';
 import { loadIndices } from '../../services/api';
-import { API_STATUS, INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../constants';
+import { API_STATUS } from '../../constants';
 import { SectionError } from '../section_error';
 import { FormEntryRow } from '../form_entry_row';
 import {
@@ -46,7 +47,7 @@ import { RemoteClustersFormField } from '../remote_clusters_form_field';
 
 import { FollowerIndexRequestFlyout } from './follower_index_request_flyout';
 
-const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexNameIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const fieldToValidatorMap = advancedSettingsFields.reduce(
   (map, advancedSetting) => {
