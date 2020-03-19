@@ -1,4 +1,4 @@
-## Node command line options for CI ENV
+## Node command line options for CI
 ## See `node --help` and `node --v8-options` for available options
 
 ## max size of old space in megabytes
