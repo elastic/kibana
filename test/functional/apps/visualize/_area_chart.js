@@ -469,7 +469,7 @@ export default function({ getService, getPageObjects }) {
 
     describe('date histogram interval', () => {
       before(async () => {
-        await PageObjects.visualize.loadSavedVisualization(vizName1);
+        await PageObjects.visualize.loadSavedVisualization('Visualization AreaChart');
         await PageObjects.visChart.waitForVisualization();
       });
 
