@@ -22,5 +22,10 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
       await testSubjects.click('mlDataVisualizerSelectIndexButton');
       await testSubjects.existOrFail('mlPageSourceSelection');
     },
+
+    async navigateToFileUpload() {
+      await testSubjects.click('mlDataVisualizerUploadFileButton');
+      await testSubjects.existOrFail('mlPageFileDataVisualizerUpload');
+    },
   };
 }
