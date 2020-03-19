@@ -228,6 +228,7 @@ describe('The metric threshold alert type', () => {
               comparator,
               threshold,
               aggType: 'count',
+              metric: undefined,
             },
           ],
         },

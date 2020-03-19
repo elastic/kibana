@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mapValues } from 'lodash';
+import { mapValues, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
@@ -63,6 +63,12 @@ export const getElasticsearchMetricQuery = (
   groupBy?: string,
   filterQuery?: string
 ) => {
+  if (aggType === 'count' && metric) {
+    throw new Error('Cannot aggregate document count with a metric');
+  }
+  if (aggType !== 'count' && !metric) {
+    throw new Error('Can only aggregate without a metric if using the document count aggregator');
+  }
   const interval = `${timeSize}${timeUnit}`;
 
   const aggregations =
@@ -108,26 +114,33 @@ export const getElasticsearchMetricQuery = (
       }
     : baseAggs;
 
+  const rangeFilters = [
+    {
+      range: {
+        '@timestamp': {
+          gte: `now-${interval}`,
+        },
+      },
+    },
+  ];
+
+  const metricFieldFilters = metric
+    ? [
+        {
+          exists: {
+            field: metric,
+          },
+        },
+      ]
+    : [];
+
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
+  const queryFilters = !isEmpty(parsedFilterQuery) ? [parsedFilterQuery] : [];
 
   return {
     query: {
       bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: `now-${interval}`,
-              },
-            },
-          },
-          {
-            exists: {
-              field: metric,
-            },
-          },
-        ],
-        ...parsedFilterQuery,
+        filter: [...rangeFilters, ...metricFieldFilters, ...queryFilters],
       },
     },
     size: 0,
