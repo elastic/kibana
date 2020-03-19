@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { IndexPattern, IAggConfig, AggGroupNames } from 'src/plugins/data/public';
