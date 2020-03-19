@@ -135,12 +135,12 @@ export const getElasticsearchMetricQuery = (
     : [];
 
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
-  const queryFilters = !isEmpty(parsedFilterQuery) ? [parsedFilterQuery] : [];
 
   return {
     query: {
       bool: {
-        filter: [...rangeFilters, ...metricFieldFilters, ...queryFilters],
+        filter: [...rangeFilters, ...metricFieldFilters],
+        ...parsedFilterQuery,
       },
     },
     size: 0,
