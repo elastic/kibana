@@ -2,7 +2,7 @@
 === Custom links
 
 Custom links allow you to easily create dynamic links based on your specific APM data.
-Links can be filtered to only appear for specific services,
+Links can be filtered to only appear for specific services, environments, transaction types or transaction names
 and there's no limit to the number of links you can create.
 
 [float]
