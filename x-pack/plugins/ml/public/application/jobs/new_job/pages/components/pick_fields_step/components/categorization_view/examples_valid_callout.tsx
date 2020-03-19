@@ -21,11 +21,11 @@ import {
   FieldExampleCheck,
 } from '../../../../../../../../../common/types/categories';
 import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../../../../common/constants/new_job';
 import {
-  VALIDATION_RESULT,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
   VALIDATION_CHECK_DESCRIPTION,
-} from '../../../../../../../../../common/types/categories';
+} from '../../../../../../../../../common/constants/categorization_job';
+import { VALIDATION_RESULT } from '../../../../../../../../../common/types/categories';
 
 interface Props {
   validationChecks: FieldExampleCheck[];
