@@ -204,6 +204,10 @@ export interface AdjacentProcessMap {
   down: string | null;
   previous: string | null;
   next: string | null;
+  /**
+   * To support aria-level, this must be >= 1
+   */
+  level: number;
 }
 
 /**

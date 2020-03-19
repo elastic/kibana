@@ -23,13 +23,27 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
 
     const uniqueParentPid = uniqueParentPidForProcess(process);
     const processChildren = idToChildren.get(uniqueParentPid);
-    const adjacencyMapToUpdate: AdjacentProcessMap = idToAdjacent.get(uniqueProcessPid) || {
-      self: uniqueProcessPid,
-      up: null,
-      down: null,
-      previous: null,
-      next: null,
-    };
+    function emptyAdjacencyMap(id: string): AdjacentProcessMap {
+      return {
+        self: id,
+        up: null,
+        down: null,
+        previous: null,
+        next: null,
+        get level(): number {
+          if (!this.up) {
+            return 1;
+          }
+          const mapAbove = idToAdjacent.get(this.up!);
+          return mapAbove ? mapAbove.level + 1 : 1;
+        },
+      };
+    }
+    const parentAdjacencyMap =
+      (uniqueParentPid && idToAdjacent.get(uniqueParentPid)) ||
+      emptyAdjacencyMap(uniqueParentPid || 'root');
+    const adjacencyMapToUpdate: AdjacentProcessMap =
+      idToAdjacent.get(uniqueProcessPid) || emptyAdjacencyMap(uniqueProcessPid);
 
     if (processChildren) {
       processChildren.push(process);
@@ -49,20 +63,14 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
       idToAdjacent.set(uniqueProcessPid, adjacencyMapToUpdate);
     } else {
       idToChildren.set(uniqueParentPid, [process]);
+
       // set up, down
       if (uniqueParentPid) {
-        const parentAdjacencyMap = idToAdjacent.get(uniqueParentPid) || {
-          self: uniqueParentPid,
-          up: null,
-          down: null,
-          previous: null,
-          next: null,
-        };
         parentAdjacencyMap.down = uniqueProcessPid;
         idToAdjacent.set(uniqueParentPid, parentAdjacencyMap);
-        adjacencyMapToUpdate.up = uniqueParentPid;
-        idToAdjacent.set(uniqueProcessPid, adjacencyMapToUpdate);
       }
+      adjacencyMapToUpdate.up = uniqueParentPid || null;
+      idToAdjacent.set(uniqueProcessPid, adjacencyMapToUpdate);
     }
   }
 

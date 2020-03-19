@@ -119,6 +119,12 @@ export const ProcessEventDot = styled(
         return markerSize(magFactorX) / 1.7647;
       };
 
+      const levelAttribute = adjacentNodeMap?.level
+        ? {
+            'aria-level': adjacentNodeMap.level,
+          }
+        : {};
+
       const nodeType = ((nodeData: any) => {
         // TODO FIX
         if (nodeData?.event_subtype_full === 'already_running') {
@@ -162,7 +168,7 @@ export const ProcessEventDot = styled(
             viewBox="-15 -15 90 30"
             preserveAspectRatio="xMidYMid meet"
             role="treeitem"
-            aria-level={0 /** TODO FIX */}
+            {...levelAttribute}
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
