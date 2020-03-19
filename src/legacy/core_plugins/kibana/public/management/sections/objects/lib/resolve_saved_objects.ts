@@ -33,7 +33,7 @@ async function getSavedObject(doc: SavedObjectsRawDoc, services: SavedObjectLoad
     return;
   }
 
-  const obj = await service.get(doc._id);
+  const obj = await service.get();
   obj.id = doc._id;
   obj.migrationVersion = doc._migrationVersion;
   return obj;
