@@ -18,7 +18,7 @@ const configReducer = (
   configEntry: [string, DatasourceConfigRecordEntry]
 ): DatasourceConfigRecord => {
   const [configName, { type: configType, value: configValue }] = configEntry;
-  if (configValue !== undefined) {
+  if (configValue !== undefined && configValue !== '') {
     if (configType === 'yaml') {
       try {
         const yamlValue = safeLoad(configValue);

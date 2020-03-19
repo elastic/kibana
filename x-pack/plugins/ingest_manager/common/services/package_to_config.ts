@@ -9,6 +9,7 @@ import {
   RegistryVarsEntry,
   Datasource,
   DatasourceConfigRecord,
+  DatasourceConfigRecordEntry,
   DatasourceInput,
   DatasourceInputStream,
   NewDatasource,
@@ -33,32 +34,40 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
         configObject: DatasourceConfigRecord,
         registryVar: RegistryVarsEntry
       ): DatasourceConfigRecord => {
-        if (!registryVar.default && registryVar.multi) {
-          configObject![registryVar.name] = { type: registryVar.type, value: [] };
-        } else {
-          configObject![registryVar.name] = { type: registryVar.type, value: registryVar.default };
+        const configEntry: DatasourceConfigRecordEntry = {
+          value: !registryVar.default && registryVar.multi ? [] : registryVar.default,
+        };
+        if (registryVar.type) {
+          configEntry.type = registryVar.type;
         }
+        configObject![registryVar.name] = configEntry;
         return configObject;
       };
 
       // Map each package input stream into datasource input stream
       const streams: DatasourceInputStream[] = packageInput.streams
         ? packageInput.streams.map(packageStream => {
-            return {
+            const stream: DatasourceInputStream = {
               id: `${packageInput.type}-${packageStream.dataset}`,
               enabled: packageStream.enabled === false ? false : true,
               dataset: packageStream.dataset,
-              config: (packageStream.vars || []).reduce(varsReducer, {}),
             };
+            if (packageStream.vars && packageStream.vars.length) {
+              stream.config = packageStream.vars.reduce(varsReducer, {});
+            }
+            return stream;
           })
         : [];
 
       const input: DatasourceInput = {
         type: packageInput.type,
         enabled: streams.length ? !!streams.find(stream => stream.enabled) : true,
-        config: (packageInput.vars || []).reduce(varsReducer, {}),
         streams,
       };
+
+      if (packageInput.vars && packageInput.vars.length) {
+        input.config = packageInput.vars.reduce(varsReducer, {});
+      }
 
       inputs.push(input);
     });
