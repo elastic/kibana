@@ -103,7 +103,7 @@ export function QueryBarTopRow(props: Props) {
         timer = setTimeout(() => {
           if (toast) notifications.toasts.remove(toast);
           toast = showNotification(notifications, data);
-        }, 1000);
+        }, 10000);
       } else {
         if (timer) clearTimeout(timer);
         if (toast) notifications.toasts.remove(toast);
