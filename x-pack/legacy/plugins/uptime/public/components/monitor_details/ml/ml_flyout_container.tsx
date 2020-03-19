@@ -8,11 +8,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { hasNewMLJobSelector, isMLJobCreatingSelector } from '../../../state/selectors';
-import {
-  createMLJobAction,
-  getAnomalyRecordsAction,
-  getExistingMLJobAction,
-} from '../../../state/actions';
+import { createMLJobAction, getExistingMLJobAction } from '../../../state/actions';
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
 import {
@@ -22,7 +18,6 @@ import {
 import { MLFlyoutView } from './ml_flyout';
 import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
-import { useUrlParams } from '../../../hooks';
 
 interface Props {
   isOpen: boolean;

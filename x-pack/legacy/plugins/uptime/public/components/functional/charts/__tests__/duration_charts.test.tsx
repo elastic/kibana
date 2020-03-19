@@ -65,6 +65,7 @@ describe('MonitorCharts component', () => {
     const component = shallowWithRouter(
       <DurationChartComponent
         loading={false}
+        hasMLJob={false}
         anomalies={[]}
         locationDurationLines={chartResponse.monitorChartsData.locationDurationLines}
       />
