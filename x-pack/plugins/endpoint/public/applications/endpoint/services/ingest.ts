@@ -11,7 +11,7 @@ import { PolicyData } from '../types';
 const INGEST_API_ROOT = `/api/ingest_manager`;
 const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 
-// FIXME: Follow up in possibly adding this to Ingest Manager
+// FIXME: Import from ingest after - https://github.com/elastic/kibana/issues/60677
 export interface GetDatasourcesResponse {
   items: PolicyData[];
   total: number;
@@ -20,7 +20,7 @@ export interface GetDatasourcesResponse {
   success: boolean;
 }
 
-// FIXME: Follow up in possibly adding this to Ingest Manager
+// FIXME: Import from Ingest after - https://github.com/elastic/kibana/issues/60677
 export interface GetDatasourceResponse {
   item: PolicyData;
   success: boolean;
