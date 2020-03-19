@@ -10,6 +10,7 @@ import {
   loadIndexPatterns,
   getMatchingIndicesForThresholdAlertType,
   getThresholdAlertTypeFields,
+  getSavedObjectsClient,
 } from '../lib/index_threshold_api';
 
 export interface IOption {
@@ -18,8 +19,12 @@ export interface IOption {
 }
 
 export const getIndexPatterns = async () => {
-  const indexPatternObjects = await loadIndexPatterns();
-  return indexPatternObjects.map((indexPattern: any) => indexPattern.attributes.title);
+  // TODO: Implement a possibility to retrive index patterns different way to be able to expose this in consumer plugins
+  if (getSavedObjectsClient()) {
+    const indexPatternObjects = await loadIndexPatterns();
+    return indexPatternObjects.map((indexPattern: any) => indexPattern.attributes.title);
+  }
+  return [];
 };
 
 export const getIndexOptions = async (
