@@ -310,6 +310,7 @@ describe('xy_expression', () => {
               },
             ],
           },
+          timeFieldName: '',
         }
       );
     });

@@ -265,6 +265,7 @@ export function XYChart({
                 table,
               })),
             },
+            timeFieldName: args.xTitle,
           };
 
           npStart.plugins.uiActions.executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
@@ -317,13 +318,25 @@ export function XYChart({
           const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
           const idForLegend = accessors;
           const table = data.tables[layerId];
+
+          const rows = table.rows.filter(row => {
+            if (
+              splitAccessor &&
+              !row[splitAccessor] &&
+              accessors.every(accessor => !row[accessor])
+            ) {
+              return false;
+            }
+            return true;
+          });
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
             id: idForLegend.join(','),
             xAccessor,
             yAccessors: accessors,
-            data: table.rows,
+            data: rows,
             xScaleType,
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
