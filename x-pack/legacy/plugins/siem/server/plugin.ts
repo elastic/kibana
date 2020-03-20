@@ -34,6 +34,7 @@ import {
   ruleStatusSavedObjectType,
 } from './saved_objects';
 import { SiemClientFactory } from './client';
+import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
 
 export { CoreSetup, CoreStart };
 
@@ -66,6 +67,12 @@ export class Plugin {
 
   public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: LegacyServices) {
     this.logger.debug('Shim plugin setup');
+    if (hasListsFeature()) {
+      // TODO: Remove this once we have the lists feature supported
+      this.logger.error(
+        `You have activated the lists feature flag which is NOT currently supported for SIEM! You should turn this feature flag off immediately by un-setting the environment variable: ${listsEnvFeatureFlagName} and restarting Kibana`
+      );
+    }
 
     const router = core.http.createRouter();
     core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({
