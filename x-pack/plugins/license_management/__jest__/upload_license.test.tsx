@@ -28,8 +28,6 @@ import {
   // @ts-ignore
 } from './api_responses';
 
-window.location.reload = () => {};
-
 let store: any = null;
 let component: any = null;
 
@@ -54,6 +52,18 @@ const thunkServices = {
 };
 
 describe('UploadLicense', () => {
+  // https://remarkablemark.org/blog/2018/11/17/mock-window-location/
+  const { location } = window;
+
+  beforeAll(() => {
+    delete window.location;
+    (window as any).location = { reload: jest.fn() };
+  });
+
+  afterAll(() => {
+    window.location = location;
+  });
+
   beforeEach(() => {
     store = licenseManagementStore({}, thunkServices);
     component = (

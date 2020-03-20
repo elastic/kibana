@@ -47,6 +47,7 @@ const noop = () => {
 const { location, addEventListener } = window;
 
 beforeAll(() => {
+  // https://remarkablemark.org/blog/2018/11/17/mock-window-location/
   delete window.location;
   delete window.addEventListener;
 

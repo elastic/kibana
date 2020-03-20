@@ -65,6 +65,7 @@ describe('NewVisModal', () => {
   const uiSettings: any = { get: settingsGet };
 
   beforeAll(() => {
+    // https://remarkablemark.org/blog/2018/11/17/mock-window-location/
     delete window.location;
     (window as any).location = { assign: jest.fn() };
   });

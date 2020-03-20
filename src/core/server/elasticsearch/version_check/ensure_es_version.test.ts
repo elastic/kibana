@@ -190,6 +190,7 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
+  // TODO: It breaks tests run due to insufficient memory
   it.skip('starts polling immediately and then every esVersionCheckInterval', () => {
     expect.assertions(1);
     callWithInternalUser.mockReturnValueOnce([createNodes('5.1.0', '5.2.0', '5.0.0')]);
@@ -221,6 +222,7 @@ describe('pollEsNodesVersion', () => {
     });
   });
 
+  // TODO: It breaks tests run due to insufficient memory
   it.skip('waits for es version check requests to complete before scheduling the next one', () => {
     expect.assertions(2);
 
