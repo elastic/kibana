@@ -5,7 +5,7 @@
  */
 
 import React, { useContext } from 'react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from 'src/core/public';
 
 export const CoreContext = React.createContext<CoreStart | null>(null);
 

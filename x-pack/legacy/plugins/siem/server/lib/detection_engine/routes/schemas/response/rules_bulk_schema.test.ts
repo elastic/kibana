@@ -17,8 +17,17 @@ import {
 import { RulesBulkSchema, rulesBulkSchema } from './rules_bulk_schema';
 import { RulesSchema } from './rules_schema';
 import { ErrorSchema } from './error_schema';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 
 describe('prepackaged_rule_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('it should validate a regular message and and error together with a uuid', () => {
     const payload: RulesBulkSchema = [getBaseResponsePayload(), getErrorPayload()];
     const decoded = rulesBulkSchema.decode(payload);
