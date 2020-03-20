@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/public';
-import { AppMountParameters } from 'kibana/public';
+import { CoreSetup, Plugin, AppMountParameters } from 'kibana/public';
 import { NavigationPublicPluginSetup } from '../../../../../src/plugins/navigation/public';
 import { AppPluginDependencies } from './types';
 
