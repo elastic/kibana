@@ -485,7 +485,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const labels = await testSubjects.findAll('aggRow');
       const label = labels[aggNth];
 
-      return (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
+      return (await label.findAllByTestSubject('comboBoxInput'))[1];
     }
 
     public async clickColorPicker(): Promise<void> {
@@ -533,7 +533,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      */
     public async getAggregationCount(nth: number = 0): Promise<number> {
       const series = await this.getSeries();
-      const aggregation = await series[nth].findAllByCssSelector('[data-test-subj="draggable"]');
+      const aggregation = await series[nth].findAllByTestSubject('draggable');
       return aggregation.length;
     }
 
