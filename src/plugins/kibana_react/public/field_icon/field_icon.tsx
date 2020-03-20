@@ -17,14 +17,10 @@
  * under the License.
  */
 import React from 'react';
-import { euiPaletteColorBlind, EuiIcon } from '@elastic/eui';
-import { IconSize } from '@elastic/eui/src/components/icon/icon';
+import classNames from 'classnames';
+import { EuiToken, EuiTokenProps } from '@elastic/eui';
 
-interface IconMapEntry {
-  icon: string;
-  color: string;
-}
-interface FieldIconProps {
+export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
   type:
     | 'boolean'
     | 'conflict'
@@ -39,51 +35,50 @@ interface FieldIconProps {
     | string
     | 'nested';
   label?: string;
-  size?: IconSize;
-  useColor?: boolean;
-  className?: string;
+  scripted?: boolean;
 }
 
-const colors = euiPaletteColorBlind();
-
 // defaultIcon => a unknown datatype
-const defaultIcon = { icon: 'questionInCircle', color: colors[0] };
+const defaultIcon = { iconType: 'questionInCircle', color: 'gray' };
 
-export const typeToEuiIconMap: Partial<Record<string, IconMapEntry>> = {
-  boolean: { icon: 'invert', color: colors[5] },
+export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
+  boolean: { iconType: 'tokenBoolean' },
   // icon for an index pattern mapping conflict in discover
-  conflict: { icon: 'alert', color: colors[8] },
-  date: { icon: 'calendar', color: colors[7] },
-  geo_point: { icon: 'globe', color: colors[2] },
-  geo_shape: { icon: 'globe', color: colors[2] },
-  ip: { icon: 'storage', color: colors[8] },
+  conflict: { iconType: 'alert', color: 'euiVisColor9' },
+  date: { iconType: 'tokenDate' },
+  geo_point: { iconType: 'tokenGeo' },
+  geo_shape: { iconType: 'tokenGeo' },
+  ip: { iconType: 'tokenIP' },
   // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
-  murmur3: { icon: 'document', color: colors[1] },
-  number: { icon: 'number', color: colors[0] },
-  _source: { icon: 'editorCodeBlock', color: colors[3] },
-  string: { icon: 'string', color: colors[4] },
-  nested: { icon: 'nested', color: colors[2] },
+  murmur3: { iconType: 'tokenFile' },
+  number: { iconType: 'tokenNumber' },
+  _source: { iconType: 'editorCodeBlock', color: 'gray' },
+  string: { iconType: 'tokenString' },
+  nested: { iconType: 'tokenNested' },
 };
 
 /**
- * Field icon used across the app
+ * Field token icon used across the app
  */
 export function FieldIcon({
   type,
   label,
   size = 's',
-  useColor = false,
-  className = undefined,
+  scripted,
+  className,
+  ...rest
 }: FieldIconProps) {
-  const euiIcon = typeToEuiIconMap[type] || defaultIcon;
+  const token = typeToEuiIconMap[type] || defaultIcon;
 
   return (
-    <EuiIcon
-      type={euiIcon.icon}
+    <EuiToken
+      {...token}
+      className={classNames('kbnFieldIcon', className)}
       aria-label={label || type}
-      size={size as IconSize}
-      color={useColor || type === 'conflict' ? euiIcon.color : undefined}
-      className={className}
+      title={label || type}
+      size={size as EuiTokenProps['size']}
+      fill={scripted ? 'dark' : undefined}
+      {...rest}
     />
   );
 }

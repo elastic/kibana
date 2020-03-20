@@ -94,7 +94,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           name: 'A slack action',
           actionTypeId: '.slack',
           secrets: {
-            webhookUrl: 'http://slack.mynonexistent.com',
+            webhookUrl: 'http://slack.mynonexistent.com/other/stuff/in/the/path',
           },
         })
         .expect(400)
@@ -103,7 +103,29 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: error configuring slack action: target url "http://slack.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+              'error validating action type secrets: error configuring slack action: target hostname "slack.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+          });
+        });
+    });
+
+    it('should respond with a 400 Bad Request when creating a slack action with a webhookUrl with no hostname', async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A slack action',
+          actionTypeId: '.slack',
+          secrets: {
+            webhookUrl: 'fee-fi-fo-fum',
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl',
           });
         });
     });
@@ -135,6 +157,20 @@ export default function slackTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.eql('ok');
+    });
+
+    it('should handle an empty message error', async () => {
+      const { body: result } = await supertest
+        .post(`/api/action/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            message: '',
+          },
+        })
+        .expect(200);
+      expect(result.status).to.eql('error');
+      expect(result.message).to.match(/error validating action params: \[message\]: /);
     });
 
     it('should handle a 40x slack error', async () => {

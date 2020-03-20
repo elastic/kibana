@@ -9,17 +9,21 @@ import { onPremInstructions } from './envs/on_prem';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import apmIndexPattern from './index_pattern.json';
 import { CloudSetup } from '../../../cloud/server';
-import { ArtifactsSchema, TutorialsCategory } from '../../../../../src/plugins/home/server';
+import {
+  ArtifactsSchema,
+  TutorialsCategory
+} from '../../../../../src/plugins/home/server';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
-  defaultMessage: 'Collect in-depth performance metrics and errors from inside your applications.',
+  defaultMessage:
+    'Collect in-depth performance metrics and errors from inside your applications.'
 });
 
 export const tutorialProvider = ({
   isEnabled,
   indexPatternTitle,
   cloud,
-  indices,
+  indices
 }: {
   isEnabled: boolean;
   indexPatternTitle: string;
@@ -37,9 +41,9 @@ export const tutorialProvider = ({
       ...apmIndexPattern,
       attributes: {
         ...apmIndexPattern.attributes,
-        title: indexPatternTitle,
-      },
-    },
+        title: indexPatternTitle
+      }
+    }
   ];
 
   const artifacts: ArtifactsSchema = {
@@ -49,41 +53,47 @@ export const tutorialProvider = ({
         linkLabel: i18n.translate(
           'xpack.apm.tutorial.specProvider.artifacts.dashboards.linkLabel',
           {
-            defaultMessage: 'APM dashboard',
+            defaultMessage: 'APM dashboard'
           }
         ),
-        isOverview: true,
-      },
-    ],
+        isOverview: true
+      }
+    ]
   };
 
   if (isEnabled) {
     artifacts.application = {
       path: '/app/apm',
-      label: i18n.translate('xpack.apm.tutorial.specProvider.artifacts.application.label', {
-        defaultMessage: 'Launch APM',
-      }),
+      label: i18n.translate(
+        'xpack.apm.tutorial.specProvider.artifacts.application.label',
+        {
+          defaultMessage: 'Launch APM'
+        }
+      )
     };
   }
 
   return {
     id: 'apm',
     name: i18n.translate('xpack.apm.tutorial.specProvider.name', {
-      defaultMessage: 'APM',
+      defaultMessage: 'APM'
     }),
     category: TutorialsCategory.OTHER,
     shortDescription: apmIntro,
-    longDescription: i18n.translate('xpack.apm.tutorial.specProvider.longDescription', {
-      defaultMessage:
-        'Application Performance Monitoring (APM) collects in-depth \
+    longDescription: i18n.translate(
+      'xpack.apm.tutorial.specProvider.longDescription',
+      {
+        defaultMessage:
+          'Application Performance Monitoring (APM) collects in-depth \
 performance metrics and errors from inside your application. \
 It allows you to monitor the performance of thousands of applications in real time. \
 [Learn more]({learnMoreLink}).',
-      values: {
-        learnMoreLink:
-          '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html',
-      },
-    }),
+        values: {
+          learnMoreLink:
+            '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html'
+        }
+      }
+    ),
     euiIconType: 'apmApp',
     artifacts,
     onPrem: onPremInstructions(indices),
@@ -93,8 +103,9 @@ It allows you to monitor the performance of thousands of applications in real ti
     savedObjectsInstallMsg: i18n.translate(
       'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
       {
-        defaultMessage: 'An APM index pattern is required for some features in the APM UI.',
+        defaultMessage:
+          'An APM index pattern is required for some features in the APM UI.'
       }
-    ),
+    )
   };
 };

@@ -16,7 +16,6 @@ import {
   setMapInitError,
 } from '../../../actions/map_actions';
 import {
-  getTooltipState,
   getLayerList,
   getMapReady,
   getGoto,
@@ -25,7 +24,8 @@ import {
   isTooltipControlDisabled,
   isViewControlHidden,
 } from '../../../selectors/map_selectors';
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../../../plugins/maps/public/reducers/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
@@ -33,7 +33,6 @@ function mapStateToProps(state = {}) {
     layerList: getLayerList(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
-    tooltipState: getTooltipState(state),
     scrollZoom: getScrollZoom(state),
     disableInteractive: isInteractiveDisabled(state),
     disableTooltipControl: isTooltipControlDisabled(state),
@@ -71,6 +70,6 @@ function mapDispatchToProps(dispatch) {
 }
 
 const connectedMBMapContainer = connect(mapStateToProps, mapDispatchToProps, null, {
-  withRef: true,
+  forwardRef: true,
 })(MBMapContainer);
 export { connectedMBMapContainer as MBMapContainer };

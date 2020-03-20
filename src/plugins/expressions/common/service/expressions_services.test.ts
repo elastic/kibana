@@ -51,4 +51,83 @@ describe('ExpressionsService', () => {
 
     expect(typeof expressions.setup().getFunctions().var_set).toBe('object');
   });
+
+  describe('.fork()', () => {
+    test('returns a new ExpressionsService instance', () => {
+      const service = new ExpressionsService();
+      const fork = service.fork();
+
+      expect(fork).not.toBe(service);
+      expect(fork).toBeInstanceOf(ExpressionsService);
+    });
+
+    test('fork keeps all types of the origin service', () => {
+      const service = new ExpressionsService();
+      const fork = service.fork();
+
+      expect(fork.executor.state.get().types).toEqual(service.executor.state.get().types);
+    });
+
+    test('fork keeps all functions of the origin service', () => {
+      const service = new ExpressionsService();
+      const fork = service.fork();
+
+      expect(fork.executor.state.get().functions).toEqual(service.executor.state.get().functions);
+    });
+
+    test('fork keeps context of the origin service', () => {
+      const service = new ExpressionsService();
+      const fork = service.fork();
+
+      expect(fork.executor.state.get().context).toEqual(service.executor.state.get().context);
+    });
+
+    test('newly registered functions in origin are also available in fork', () => {
+      const service = new ExpressionsService();
+      const fork = service.fork();
+
+      service.registerFunction({
+        name: '__test__',
+        args: {},
+        help: '',
+        fn: () => {},
+      });
+
+      expect(fork.executor.state.get().functions).toEqual(service.executor.state.get().functions);
+    });
+
+    test('newly registered functions in fork are NOT available in origin', () => {
+      const service = new ExpressionsService();
+      const fork = service.fork();
+
+      fork.registerFunction({
+        name: '__test__',
+        args: {},
+        help: '',
+        fn: () => {},
+      });
+
+      expect(Object.values(fork.executor.state.get().functions)).toHaveLength(
+        Object.values(service.executor.state.get().functions).length + 1
+      );
+    });
+
+    test('fork can execute an expression with newly registered function', async () => {
+      const service = new ExpressionsService();
+      const fork = service.fork();
+
+      service.registerFunction({
+        name: '__test__',
+        args: {},
+        help: '',
+        fn: () => {
+          return '123';
+        },
+      });
+
+      const result = await fork.run('__test__', null);
+
+      expect(result).toBe('123');
+    });
+  });
 });

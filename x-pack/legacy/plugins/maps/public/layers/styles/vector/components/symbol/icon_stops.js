@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { getOtherCategoryLabel } from '../../style_util';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { IconSelect } from './icon_select';
+import { StopInput } from '../stop_input';
 
 function isDuplicateStop(targetStop, iconStops) {
   const stops = iconStops.filter(({ stop }) => {
@@ -23,7 +24,14 @@ const DEFAULT_ICON_STOPS = [
   { stop: '', icon: DEFAULT_ICON },
 ];
 
-export function IconStops({ iconStops = DEFAULT_ICON_STOPS, isDarkMode, onChange, symbolOptions }) {
+export function IconStops({
+  field,
+  getValueSuggestions,
+  iconStops = DEFAULT_ICON_STOPS,
+  isDarkMode,
+  onChange,
+  symbolOptions,
+}) {
   return iconStops.map(({ stop, icon }, index) => {
     const onIconSelect = selectedIconId => {
       const newIconStops = [...iconStops];
@@ -33,8 +41,7 @@ export function IconStops({ iconStops = DEFAULT_ICON_STOPS, isDarkMode, onChange
       };
       onChange({ customMapStops: newIconStops });
     };
-    const onStopChange = e => {
-      const newStopValue = e.target.value;
+    const onStopChange = newStopValue => {
       const newIconStops = [...iconStops];
       newIconStops[index] = {
         ...iconStops[index],
@@ -83,7 +90,24 @@ export function IconStops({ iconStops = DEFAULT_ICON_STOPS, isDarkMode, onChange
     const errors = [];
     // TODO check for duplicate values and add error messages here
 
-    const isOtherCategoryRow = index === 0;
+    const stopInput =
+      index === 0 ? (
+        <EuiFieldText
+          aria-label={getOtherCategoryLabel()}
+          placeholder={getOtherCategoryLabel()}
+          disabled
+          compressed
+        />
+      ) : (
+        <StopInput
+          key={field.getName()} // force new component instance when field changes
+          field={field}
+          getValueSuggestions={getValueSuggestions}
+          value={stop}
+          onChange={onStopChange}
+        />
+      );
+
     return (
       <EuiFormRow
         key={index}
@@ -94,18 +118,7 @@ export function IconStops({ iconStops = DEFAULT_ICON_STOPS, isDarkMode, onChange
       >
         <div>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiFieldText
-                aria-label={i18n.translate('xpack.maps.styles.iconStops.stopInputAriaLabel', {
-                  defaultMessage: 'Icon stop',
-                })}
-                value={isOtherCategoryRow ? null : stop}
-                placeholder={isOtherCategoryRow ? getOtherCategoryLabel() : null}
-                disabled={isOtherCategoryRow}
-                onChange={onStopChange}
-                compressed
-              />
-            </EuiFlexItem>
+            <EuiFlexItem>{stopInput}</EuiFlexItem>
             <EuiFlexItem>
               <IconSelect
                 isDarkMode={isDarkMode}

@@ -74,7 +74,7 @@ export class TableVisualizationController {
           return;
         }
         this.$scope.vis = this.vis;
-        this.$scope.visState = this.vis.getState();
+        this.$scope.visState = { params: visParams };
         this.$scope.esResponse = esResponse;
 
         if (!isEqual(this.$scope.visParams, visParams)) {

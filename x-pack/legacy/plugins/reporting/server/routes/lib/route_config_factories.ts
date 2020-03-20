@@ -7,7 +7,7 @@
 import Joi from 'joi';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { Logger, ServerFacade } from '../../../types';
-import { ReportingSetupDeps } from '../../plugin';
+import { ReportingSetupDeps } from '../../types';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 import {
   GetReportingFeatureIdFn,
@@ -106,7 +106,22 @@ export function getRouteConfigFactoryDownloadPre(
   const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
   return (): RouteConfigFactory => ({
     ...getManagementRouteConfig(),
-    tags: [API_TAG],
+    tags: [API_TAG, 'download'],
+    response: {
+      ranges: false,
+    },
+  });
+}
+
+export function getRouteConfigFactoryDeletePre(
+  server: ServerFacade,
+  plugins: ReportingSetupDeps,
+  logger: Logger
+): GetRouteConfigFactoryFn {
+  const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
+  return (): RouteConfigFactory => ({
+    ...getManagementRouteConfig(),
+    tags: [API_TAG, 'delete'],
     response: {
       ranges: false,
     },

@@ -28,6 +28,7 @@ export const UptimeRefreshContextProvider: React.FC = ({ children }) => {
   const refreshApp = () => {
     const refreshTime = Date.now();
     setLastRefresh(refreshTime);
+    // @ts-ignore
     store.dispatch(triggerAppRefresh(refreshTime));
   };
 

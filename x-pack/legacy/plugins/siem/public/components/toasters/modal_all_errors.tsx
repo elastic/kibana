@@ -17,7 +17,7 @@ import {
   EuiModalFooter,
   EuiAccordion,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { AppToast } from '.';
@@ -29,10 +29,14 @@ interface FullErrorProps {
   toggle: (toast: AppToast) => void;
 }
 
-export const ModalAllErrors = ({ isShowing, toast, toggle }: FullErrorProps) =>
-  isShowing && toast != null ? (
+const ModalAllErrorsComponent: React.FC<FullErrorProps> = ({ isShowing, toast, toggle }) => {
+  const handleClose = useCallback(() => toggle(toast), [toggle, toast]);
+
+  if (!isShowing || toast == null) return null;
+
+  return (
     <EuiOverlayMask>
-      <EuiModal onClose={() => toggle(toast)}>
+      <EuiModal onClose={handleClose}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{i18n.TITLE_ERROR_MODAL}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -55,13 +59,16 @@ export const ModalAllErrors = ({ isShowing, toast, toggle }: FullErrorProps) =>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButton onClick={() => toggle(toast)} fill data-test-subj="modal-all-errors-close">
+          <EuiButton onClick={handleClose} fill data-test-subj="modal-all-errors-close">
             {i18n.CLOSE_ERROR_MODAL}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
     </EuiOverlayMask>
-  ) : null;
+  );
+};
+
+export const ModalAllErrors = React.memo(ModalAllErrorsComponent);
 
 const MyEuiCodeBlock = styled(EuiCodeBlock)`
   margin-top: 4px;

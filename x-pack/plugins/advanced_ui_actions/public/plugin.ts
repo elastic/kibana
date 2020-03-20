@@ -15,26 +15,41 @@ import { UiActionsStart, UiActionsSetup } from '../../../../src/plugins/ui_actio
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-  IEmbeddableSetup,
-  IEmbeddableStart,
+  EmbeddableSetup,
+  EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
-import { CustomTimeRangeAction } from './custom_time_range_action';
+import {
+  CustomTimeRangeAction,
+  CUSTOM_TIME_RANGE,
+  TimeRangeActionContext,
+} from './custom_time_range_action';
 
-import { CustomTimeRangeBadge } from './custom_time_range_badge';
+import {
+  CustomTimeRangeBadge,
+  CUSTOM_TIME_RANGE_BADGE,
+  TimeBadgeActionContext,
+} from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 
 interface SetupDependencies {
-  embeddable: IEmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
+  embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
   uiActions: UiActionsSetup;
 }
 
 interface StartDependencies {
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
 }
 
 export type Setup = void;
 export type Start = void;
+
+declare module '../../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [CUSTOM_TIME_RANGE]: TimeRangeActionContext;
+    [CUSTOM_TIME_RANGE_BADGE]: TimeBadgeActionContext;
+  }
+}
 
 export class AdvancedUiActionsPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
@@ -52,7 +67,7 @@ export class AdvancedUiActionsPublicPlugin
       commonlyUsedRanges,
     });
     uiActions.registerAction(timeRangeAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, timeRangeAction.id);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, timeRangeAction);
 
     const timeRangeBadge = new CustomTimeRangeBadge({
       openModal,
@@ -60,7 +75,7 @@ export class AdvancedUiActionsPublicPlugin
       commonlyUsedRanges,
     });
     uiActions.registerAction(timeRangeBadge);
-    uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge.id);
+    uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
   }
 
   public stop() {}

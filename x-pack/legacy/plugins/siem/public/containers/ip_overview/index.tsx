@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetIpOverviewQuery, IpOverviewData } from '../../graphql/types';
@@ -28,17 +28,13 @@ export interface IpOverviewArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface IpOverviewReduxProps {
-  isInspected: boolean;
-}
-
 export interface IpOverviewProps extends QueryTemplateProps {
   children: (args: IpOverviewArgs) => React.ReactNode;
   type: networkModel.NetworkType;
   ip: string;
 }
 
-const IpOverviewComponentQuery = React.memo<IpOverviewProps & IpOverviewReduxProps>(
+const IpOverviewComponentQuery = React.memo<IpOverviewProps & PropsFromRedux>(
   ({ id = ID, isInspected, children, filterQuery, skip, sourceId, ip }) => (
     <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
       query={ipOverviewQuery}
@@ -81,4 +77,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const IpOverviewQuery = connect(makeMapStateToProps)(IpOverviewComponentQuery);
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const IpOverviewQuery = connector(IpOverviewComponentQuery);

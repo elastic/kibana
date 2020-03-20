@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isEqual, last } from 'lodash/fp';
+import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
 import { networkActions } from '../../../../store/actions';
 import {
@@ -36,23 +35,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface NetworkTopNFlowTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: NetworkTopTablesSortField;
-}
-
-interface NetworkTopNFlowTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.TopNTableType;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type NetworkTopNFlowTableProps = OwnProps &
-  NetworkTopNFlowTableReduxProps &
-  NetworkTopNFlowTableDispatchProps;
+type NetworkTopNFlowTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -114,7 +97,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
           field: field as NetworkTopTablesFields,
           direction: newSortDirection as Direction,
         };
-        if (!isEqual(newTopNFlowSort, sort)) {
+        if (!deepEqual(newTopNFlowSort, sort)) {
           updateNetworkTable({
             networkType: type,
             tableType,
@@ -180,8 +163,12 @@ const makeMapStateToProps = () => {
     getTopNFlowSelector(state, type, flowTargeted);
 };
 
-export const NetworkTopNFlowTable = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  })
-)(React.memo(NetworkTopNFlowTableComponent));
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const NetworkTopNFlowTable = connector(React.memo(NetworkTopNFlowTableComponent));

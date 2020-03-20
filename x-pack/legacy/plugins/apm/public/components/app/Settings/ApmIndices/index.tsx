@@ -20,8 +20,7 @@ import {
   EuiButtonEmpty
 } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { useCallApmApi } from '../../../../hooks/useCallApmApi';
-import { APMClient } from '../../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { clearCache } from '../../../../services/rest/callApi';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 
@@ -68,10 +67,8 @@ const APM_INDEX_LABELS = [
 ];
 
 async function saveApmIndices({
-  callApmApi,
   apmIndices
 }: {
-  callApmApi: APMClient;
   apmIndices: Record<string, string>;
 }) {
   await callApmApi({
@@ -94,11 +91,11 @@ export function ApmIndices() {
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const callApmApiFromHook = useCallApmApi();
-
   const { data = INITIAL_STATE, status, refetch } = useFetcher(
-    callApmApi =>
-      callApmApi({ pathname: `/api/apm/settings/apm-index-settings` }),
+    _callApmApi =>
+      _callApmApi({
+        pathname: `/api/apm/settings/apm-index-settings`
+      }),
     []
   );
 
@@ -122,10 +119,7 @@ export function ApmIndices() {
     event.preventDefault();
     setIsSaving(true);
     try {
-      await saveApmIndices({
-        callApmApi: callApmApiFromHook,
-        apmIndices
-      });
+      await saveApmIndices({ apmIndices });
       toasts.addSuccess({
         title: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.succeeded.title',

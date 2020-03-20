@@ -25,13 +25,12 @@ import {
   TimelineData,
   TimelineDetailsData,
   TimelineEdges,
-  EventsOverTimeData,
 } from '../../graphql/types';
 import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
-import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
+import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
 import { buildDetailsQuery, buildTimelineQuery } from './query.dsl';
@@ -43,10 +42,7 @@ import {
   LastEventTimeRequestOptions,
   RequestDetailsOptions,
   TimelineRequestOptions,
-  EventsActionGroupData,
 } from './types';
-import { buildEventsOverTimeQuery } from './query.events_over_time.dsl';
-import { MatrixOverTimeHistogramData } from '../../../public/graphql/types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -129,64 +125,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       lastSeen: getOr(null, 'aggregations.last_seen_event.value_as_string', response),
     };
   }
-
-  public async getEventsOverTime(
-    request: FrameworkRequest,
-    options: MatrixHistogramRequestOptions
-  ): Promise<EventsOverTimeData> {
-    const dsl = buildEventsOverTimeQuery(options);
-    const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
-      request,
-      'search',
-      dsl
-    );
-    const totalCount = getOr(0, 'hits.total.value', response);
-    const eventsOverTimeBucket = getOr([], 'aggregations.eventActionGroup.buckets', response);
-    const inspect = {
-      dsl: [inspectStringifyObject(dsl)],
-      response: [inspectStringifyObject(response)],
-    };
-    return {
-      inspect,
-      matrixHistogramData: getEventsOverTimeByActionName(eventsOverTimeBucket),
-      totalCount,
-    };
-  }
 }
-
-/**
- * Not in use at the moment,
- * reserved this parser for next feature of switchign between total events and grouped events
- */
-export const getTotalEventsOverTime = (
-  data: EventsActionGroupData[]
-): MatrixOverTimeHistogramData[] => {
-  return data && data.length > 0
-    ? data.map<MatrixOverTimeHistogramData>(({ key, doc_count }) => ({
-        x: key,
-        y: doc_count,
-        g: 'total events',
-      }))
-    : [];
-};
-
-const getEventsOverTimeByActionName = (
-  data: EventsActionGroupData[]
-): MatrixOverTimeHistogramData[] => {
-  let result: MatrixOverTimeHistogramData[] = [];
-  data.forEach(({ key: group, events }) => {
-    const eventsData = getOr([], 'buckets', events).map(
-      ({ key, doc_count }: { key: number; doc_count: number }) => ({
-        x: key,
-        y: doc_count,
-        g: group,
-      })
-    );
-    result = [...result, ...eventsData];
-  });
-
-  return result;
-};
 
 export const formatEventsData = (
   fields: readonly string[],

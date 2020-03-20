@@ -38,10 +38,11 @@ import {
   TooltipValue,
   TooltipType,
   ElementClickListener,
+  XYChartElementEvent,
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
-import { EuiChartThemeType } from '@elastic/eui/src/themes/charts/themes';
+import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription } from 'rxjs';
 import { getServices, timezoneProvider } from '../../../kibana_services';
 
@@ -140,7 +141,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   };
 
   public onElementClick = (xInterval: number): ElementClickListener => ([elementData]) => {
-    const startRange = elementData[0].x;
+    const startRange = (elementData as XYChartElementEvent)[0].x;
 
     const range = {
       from: startRange,

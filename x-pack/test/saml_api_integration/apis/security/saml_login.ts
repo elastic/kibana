@@ -330,7 +330,7 @@ export default function({ getService }: FtrProviderContext) {
         const systemAPIResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -728,7 +728,7 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', existingSessionCookie.cookieString())
           .send({ SAMLResponse: await createSAMLResponse({ username: newUsername }) })
-          .expect('location', '/overwritten_session')
+          .expect('location', '/security/overwritten_session')
           .expect(302);
 
         const newSessionCookie = request.cookie(

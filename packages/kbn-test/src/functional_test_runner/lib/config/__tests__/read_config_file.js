@@ -55,18 +55,4 @@ describe('readConfigFile()', () => {
       expect(err.message).to.match(/"foo"/);
     }
   });
-
-  it('throws if config does not define testFiles', async () => {
-    try {
-      await readConfigFile(log, require.resolve('./fixtures/config.4'));
-      throw new Error('expected readConfigFile() to fail');
-    } catch (err) {
-      expect(err.message).to.match(/"testFiles"/);
-    }
-  });
-
-  it('does not throw if child config file does not have any testFiles', async () => {
-    const config = await readConfigFile(log, require.resolve('./fixtures/config.3'));
-    expect(config.get('screenshots.directory')).to.be('bar');
-  });
 });

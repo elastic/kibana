@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertsClient } from '../../../../../alerting';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { isAlertType } from '../rules/types';
 import { readRules } from './read_rules';
-import { transformRulesToNdjson, transformAlertToRule } from '../routes/rules/utils';
+import { transformDataToNdjson, transformAlertToRule } from '../routes/rules/utils';
 import { OutputRuleAlertRest } from '../types';
 
 interface ExportSuccesRule {
@@ -37,7 +37,7 @@ export const getExportByObjectIds = async (
   exportDetails: string;
 }> => {
   const rulesAndErrors = await getRulesFromObjects(alertsClient, objects);
-  const rulesNdjson = transformRulesToNdjson(rulesAndErrors.rules);
+  const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
   const exportDetails = getExportDetailsNdjson(rulesAndErrors.rules, rulesAndErrors.missingRules);
   return { rulesNdjson, exportDetails };
 };

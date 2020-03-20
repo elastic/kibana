@@ -41,7 +41,7 @@ describe('src/dev/npm/installed_packages', () => {
           includeDev: true,
         }),
       ]);
-    }, 60 * 1000);
+    }, 360 * 1000);
 
     it('reads all installed packages of a module', () => {
       expect(fixture1Packages).toEqual([

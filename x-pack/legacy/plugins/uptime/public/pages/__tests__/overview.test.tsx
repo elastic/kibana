@@ -92,6 +92,7 @@ describe('MonitorPage', () => {
     getQuerySuggestions: jest.fn(),
     hasQuerySuggestions: () => true,
     getValueSuggestions: jest.fn(),
+    addQuerySuggestionProvider: jest.fn(),
   };
 
   it('shallow renders expected elements for valid props', () => {

@@ -6,10 +6,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import {
-  Job,
-  Datafeed,
-} from '../../../../..//legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs';
+import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 const JOB_CONFIG: Job = {
   job_id: `fq_multi_1_ae`,
@@ -47,6 +44,7 @@ export default function({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('ml/farequote');
       await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {

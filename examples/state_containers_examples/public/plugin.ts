@@ -18,14 +18,16 @@
  */
 
 import { AppMountParameters, CoreSetup, Plugin } from 'kibana/public';
+import { AppPluginDependencies } from './with_data_services/types';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 
 export class StateContainersExamplesPlugin implements Plugin {
   public setup(core: CoreSetup) {
     core.application.register({
-      id: 'state-containers-example-browser-history',
+      id: 'stateContainersExampleBrowserHistory',
       title: 'State containers example - browser history routing',
       async mount(params: AppMountParameters) {
-        const { renderApp, History } = await import('./app');
+        const { renderApp, History } = await import('./todo/app');
         return renderApp(params, {
           appInstanceId: '1',
           appTitle: 'Routing with browser history',
@@ -34,15 +36,28 @@ export class StateContainersExamplesPlugin implements Plugin {
       },
     });
     core.application.register({
-      id: 'state-containers-example-hash-history',
+      id: 'stateContainersExampleHashHistory',
       title: 'State containers example - hash history routing',
       async mount(params: AppMountParameters) {
-        const { renderApp, History } = await import('./app');
+        const { renderApp, History } = await import('./todo/app');
         return renderApp(params, {
           appInstanceId: '2',
           appTitle: 'Routing with hash history',
           historyType: History.Hash,
         });
+      },
+    });
+
+    core.application.register({
+      id: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      async mount(params: AppMountParameters) {
+        // Load application bundle
+        const { renderApp } = await import('./with_data_services/application');
+        // Get start services as specified in kibana.json
+        const [coreStart, depsStart] = await core.getStartServices();
+        // Render the application
+        return renderApp(coreStart, depsStart as AppPluginDependencies, params);
       },
     });
   }

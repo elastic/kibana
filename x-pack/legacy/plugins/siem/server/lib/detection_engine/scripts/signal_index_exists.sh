@@ -10,7 +10,7 @@ set -e
 ./check_env_variables.sh
 
 # Example: ./signal_index_exists.sh
-curl -s -k --head \
+curl -s -k -f \
  -H 'Content-Type: application/json' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- ${KIBANA_URL}${SPACE_URL}/api/detection_engine/index
+ ${KIBANA_URL}${SPACE_URL}/api/detection_engine/index > /dev/null

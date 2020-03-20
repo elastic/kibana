@@ -13,7 +13,8 @@ export const makePing = async (
   es: any,
   monitorId: string,
   fields: { [key: string]: any },
-  mogrify: (doc: any) => any
+  mogrify: (doc: any) => any,
+  refresh: boolean = true
 ) => {
   const baseDoc = {
     tcp: {
@@ -103,7 +104,7 @@ export const makePing = async (
 
   await es.index({
     index: INDEX_NAME,
-    refresh: true,
+    refresh,
     body: doc,
   });
 
@@ -115,7 +116,8 @@ export const makeCheck = async (
   monitorId: string,
   numIps: number,
   fields: { [key: string]: any },
-  mogrify: (doc: any) => any
+  mogrify: (doc: any) => any,
+  refresh: boolean = true
 ) => {
   const cgFields = {
     monitor: {
@@ -137,11 +139,16 @@ export const makeCheck = async (
     if (i === numIps - 1) {
       pingFields.summary = summary;
     }
-    const doc = await makePing(es, monitorId, pingFields, mogrify);
+    const doc = await makePing(es, monitorId, pingFields, mogrify, false);
     docs.push(doc);
     // @ts-ignore
     summary[doc.monitor.status]++;
   }
+
+  if (refresh) {
+    await es.indices.refresh();
+  }
+
   return docs;
 };
 
@@ -152,7 +159,8 @@ export const makeChecks = async (
   numIps: number,
   every: number, // number of millis between checks
   fields: { [key: string]: any } = {},
-  mogrify: (doc: any) => any = d => d
+  mogrify: (doc: any) => any = d => d,
+  refresh: boolean = true
 ) => {
   const checks = [];
   const oldestTime = new Date().getTime() - numChecks * every;
@@ -169,7 +177,11 @@ export const makeChecks = async (
         },
       },
     });
-    checks.push(await makeCheck(es, monitorId, numIps, fields, mogrify));
+    checks.push(await makeCheck(es, monitorId, numIps, fields, mogrify, false));
+  }
+
+  if (refresh) {
+    await es.indices.refresh();
   }
 
   return checks;
@@ -183,19 +195,29 @@ export const makeChecksWithStatus = async (
   every: number,
   fields: { [key: string]: any } = {},
   status: 'up' | 'down',
-  mogrify: (doc: any) => any = d => d
+  mogrify: (doc: any) => any = d => d,
+  refresh: boolean = true
 ) => {
   const oppositeStatus = status === 'up' ? 'down' : 'up';
 
-  return await makeChecks(es, monitorId, numChecks, numIps, every, fields, d => {
-    d.monitor.status = status;
-    if (d.summary) {
-      d.summary[status] += d.summary[oppositeStatus];
-      d.summary[oppositeStatus] = 0;
-    }
+  return await makeChecks(
+    es,
+    monitorId,
+    numChecks,
+    numIps,
+    every,
+    fields,
+    d => {
+      d.monitor.status = status;
+      if (d.summary) {
+        d.summary[status] += d.summary[oppositeStatus];
+        d.summary[oppositeStatus] = 0;
+      }
 
-    return mogrify(d);
-  });
+      return mogrify(d);
+    },
+    refresh
+  );
 };
 
 // Helper for processing a list of checks to find the time picker bounds.

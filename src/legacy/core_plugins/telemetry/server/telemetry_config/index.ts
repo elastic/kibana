@@ -21,3 +21,7 @@ export { replaceTelemetryInjectedVars } from './replace_injected_vars';
 export { getTelemetryOptIn } from './get_telemetry_opt_in';
 export { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
 export { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_changing_opt_in_status';
+export {
+  getTelemetryFailureDetails,
+  TelemetryFailureDetails,
+} from './get_telemetry_failure_details';

@@ -38,8 +38,8 @@ exports[`Renders PolygonIcon 1`] = `
 exports[`Renders SymbolIcon 1`] = `
 <SymbolIcon
   fill="#ff0000"
+  key="airfield-15#ff0000rgb(106,173,213)"
   stroke="rgb(106,173,213)"
-  strokeWidth="1px"
   symbolId="airfield-15"
 />
 `;

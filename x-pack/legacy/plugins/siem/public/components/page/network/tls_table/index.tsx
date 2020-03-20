@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
-import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
+import React, { useCallback, useMemo } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
 import { networkActions } from '../../../../store/network';
 import { TlsEdges, TlsSortField, TlsFields, Direction } from '../../../../graphql/types';
@@ -29,21 +27,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface TlsTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: TlsSortField;
-}
-
-interface TlsTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.AllNetworkTables;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type TlsTableProps = OwnProps & TlsTableReduxProps & TlsTableDispatchProps;
+type TlsTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -107,7 +91,7 @@ const TlsTableComponent = React.memo<TlsTableProps>(
             field: getSortFromString(splitField[splitField.length - 1]),
             direction: criteria.sort.direction as Direction,
           };
-          if (!isEqual(newTlsSort, sort)) {
+          if (!deepEqual(newTlsSort, sort)) {
             updateNetworkTable({
               networkType: type,
               tableType,
@@ -119,10 +103,12 @@ const TlsTableComponent = React.memo<TlsTableProps>(
       [sort, type, tableType, updateNetworkTable]
     );
 
+    const columns = useMemo(() => getTlsColumns(tlsTableId), [tlsTableId]);
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getTlsColumns(tlsTableId)}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
@@ -152,11 +138,15 @@ const makeMapStateToProps = () => {
   return (state: State, { type }: OwnProps) => getTlsSelector(state, type);
 };
 
-export const TlsTable = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  })
-)(TlsTableComponent);
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const TlsTable = connector(TlsTableComponent);
 
 const getSortField = (sortField: TlsSortField): SortingBasicTable => ({
   field: `node.${sortField.field}`,

@@ -36,6 +36,7 @@ export interface KbnUrlTracker {
    * Unregistering the url tracker. This won't reset the current state of the nav link
    */
   stop: () => void;
+  setActiveUrl: (newUrl: string) => void;
 }
 
 /**
@@ -57,6 +58,12 @@ export function createKbnUrlTracker({
   toastNotifications,
   history,
   storage,
+  shouldTrackUrlUpdate = pathname => {
+    const currentAppName = defaultSubUrl.slice(2); // cut hash and slash symbols
+    const targetAppName = pathname.split('/')[1];
+
+    return currentAppName === targetAppName;
+  },
 }: {
   /**
    * Base url of the current app. This will be used as a prefix for the
@@ -81,7 +88,7 @@ export function createKbnUrlTracker({
     stateUpdate$: Observable<unknown>;
   }>;
   /**
-   * Key used to store the current sub url in session storage. This key should only be used for one active url tracker at any given ntime.
+   * Key used to store the current sub url in session storage. This key should only be used for one active url tracker at any given time.
    */
   storageKey: string;
   /**
@@ -100,6 +107,13 @@ export function createKbnUrlTracker({
    * Storage object to use to persist currently active url. If this isn't provided, the browser wide session storage instance will be used.
    */
   storage?: Storage;
+  /**
+   * Checks if pathname belongs to current app. It's used in history listener to define whether it's necessary to set pathname as active url or not.
+   * The default implementation compares the app name to the first part of pathname. Consumers can override this function for more complex cases.
+   *
+   * @param {string} pathname A location's pathname which comes to history listener
+   */
+  shouldTrackUrlUpdate?: (pathname: string) => boolean;
 }): KbnUrlTracker {
   const historyInstance = history || createHashHistory();
   const storageInstance = storage || sessionStorage;
@@ -130,20 +144,26 @@ export function createKbnUrlTracker({
     }
   }
 
+  function setActiveUrl(newUrl: string) {
+    const urlWithHashes = baseUrl + '#' + newUrl;
+    let urlWithStates = '';
+    try {
+      urlWithStates = unhashUrl(urlWithHashes);
+    } catch (e) {
+      toastNotifications.addDanger(e.message);
+    }
+
+    activeUrl = getActiveSubUrl(urlWithStates || urlWithHashes);
+    storageInstance.setItem(storageKey, activeUrl);
+  }
+
   function onMountApp() {
     unsubscribe();
     // track current hash when within app
     unsubscribeURLHistory = historyInstance.listen(location => {
-      const urlWithHashes = baseUrl + '#' + location.pathname + location.search;
-      let urlWithStates = '';
-      try {
-        urlWithStates = unhashUrl(urlWithHashes);
-      } catch (e) {
-        toastNotifications.addDanger(e.message);
+      if (shouldTrackUrlUpdate(location.pathname)) {
+        setActiveUrl(location.pathname + location.search);
       }
-
-      activeUrl = getActiveSubUrl(urlWithStates || urlWithHashes);
-      storageInstance.setItem(storageKey, activeUrl);
     });
   }
 
@@ -188,5 +208,6 @@ export function createKbnUrlTracker({
     stop() {
       unsubscribe();
     },
+    setActiveUrl,
   };
 }

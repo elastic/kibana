@@ -49,8 +49,54 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
+  index: ['auditbeat-*'],
   type: 'query',
   query: 'user.name: root or user.name: admin',
+});
+
+/**
+ * This is a representative ML rule payload as expected by the server
+ * @param ruleId
+ */
+export const getSimpleMlRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  name: 'Simple ML Rule',
+  description: 'Simple Machine Learning Rule',
+  anomaly_threshold: 44,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  machine_learning_job_id: 'some_job_id',
+  type: 'machine_learning',
+});
+
+export const getSignalStatus = () => ({
+  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+});
+
+export const setSignalStatus = ({
+  signalIds,
+  status,
+}: {
+  signalIds: string[];
+  status: 'open' | 'closed';
+}) => ({
+  signal_ids: signalIds,
+  status,
+});
+
+export const getSignalStatusEmptyResponse = () => ({
+  timed_out: false,
+  total: 0,
+  updated: 0,
+  deleted: 0,
+  batches: 0,
+  version_conflicts: 0,
+  noops: 0,
+  retries: { bulk: 0, search: 0 },
+  throttled_millis: 0,
+  requests_per_second: -1,
+  throttled_until_millis: 0,
+  failures: [],
 });
 
 /**
@@ -82,12 +128,14 @@ export const binaryToString = (res: any, callback: any): void => {
  * This is the typical output of a simple rule that Kibana will output with all the defaults.
  */
 export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  actions: [],
   created_by: 'elastic',
   description: 'Simple Rule Query',
   enabled: true,
   false_positives: [],
   from: 'now-6m',
   immutable: false,
+  index: ['auditbeat-*'],
   interval: '5m',
   rule_id: ruleId,
   language: 'kuery',
@@ -103,6 +151,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   to: 'now',
   type: 'query',
   threat: [],
+  lists: [],
   version: 1,
 });
 
@@ -115,6 +164,20 @@ export const getSimpleRuleOutputWithoutRuleId = (
   const rule = getSimpleRuleOutput(ruleId);
   const { rule_id, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
+};
+
+export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => {
+  const rule = getSimpleRuleOutput(ruleId);
+  const { query, language, index, ...rest } = rule;
+
+  return {
+    ...rest,
+    name: 'Simple ML Rule',
+    description: 'Simple Machine Learning Rule',
+    anomaly_threshold: 44,
+    machine_learning_job_id: 'some_job_id',
+    type: 'machine_learning',
+  };
 };
 
 /**
@@ -182,6 +245,7 @@ export const ruleToNdjson = (rule: Partial<OutputRuleAlertRest>): Buffer => {
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
 export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  actions: [],
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
   false_positives: [
@@ -255,6 +319,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
   ],
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
+  note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
 });
@@ -264,6 +329,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
 export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  actions: [],
   created_by: 'elastic',
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
@@ -340,6 +406,8 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
   updated_by: 'elastic',
+  note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
+  lists: [],
 });

@@ -19,18 +19,12 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from './legacy_imports';
-import { start as data } from '../../../data/public/legacy';
-import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { plugin } from './index';
 
 (async () => {
-  const instance = plugin({} as PluginInitializerContext);
+  const instance = plugin({
+    env: npSetup.plugins.kibanaLegacy.env,
+  } as PluginInitializerContext);
   instance.setup(npSetup.core, npSetup.plugins);
-  instance.start(npStart.core, {
-    ...npStart.plugins,
-    data,
-    npData: npStart.plugins.data,
-    embeddables,
-    navigation: npStart.plugins.navigation,
-  });
+  instance.start(npStart.core, npStart.plugins);
 })();

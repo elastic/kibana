@@ -4,33 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { patchRules } from '../../rules/patch_rules';
-import { PatchRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  PatchRuleAlertParamsRest,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
-import { ServerFacade } from '../../../../types';
-import { getIdError, transform } from './utils';
-import { transformError } from '../utils';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createPatchRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'PATCH',
-    path: DETECTION_ENGINE_RULES_URL,
-    options: {
-      tags: ['access:siem'],
+export const patchRulesRoute = (router: IRouter) => {
+  router.patch(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: patchRulesSchema,
+        body: buildRouteValidation<PatchRuleAlertParamsRest>(patchRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: PatchRulesRequest, headers) {
+    async (context, request, response) => {
       const {
+        actions,
         description,
         enabled,
         false_positives: falsePositives,
@@ -55,25 +55,30 @@ export const createPatchRulesRoute = (server: ServerFacade): Hapi.ServerRoute =>
         to,
         type,
         threat,
+        throttle,
         references,
+        note,
         version,
-      } = request.payload;
-
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
+      } = request.body;
+      const siemResponse = buildSiemResponse(response);
 
       try {
+        if (!context.alerting || !context.actions) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const alertsClient = context.alerting.getAlertsClient();
+        const actionsClient = context.actions.getActionsClient();
+        const savedObjectsClient = context.core.savedObjects.client;
+
+        if (!actionsClient || !alertsClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
         const rule = await patchRules({
-          alertsClient,
           actionsClient,
+          alertsClient,
+          actions,
           description,
           enabled,
           falsePositives,
@@ -99,7 +104,9 @@ export const createPatchRulesRoute = (server: ServerFacade): Hapi.ServerRoute =>
           to,
           type,
           threat,
+          throttle,
           references,
+          note,
           version,
         });
         if (rule != null) {
@@ -113,39 +120,27 @@ export const createPatchRulesRoute = (server: ServerFacade): Hapi.ServerRoute =>
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
-            return headers
-              .response({
-                message: 'Internal error transforming rules',
-                status_code: 500,
-              })
-              .code(500);
+
+          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
           } else {
-            return transformed;
+            return response.ok({ body: validated ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });
-          return headers
-            .response({
-              message: error.message,
-              status_code: error.statusCode,
-            })
-            .code(error.statusCode);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const patchRulesRoute = (server: ServerFacade) => {
-  server.route(createPatchRulesRoute(server));
+    }
+  );
 };

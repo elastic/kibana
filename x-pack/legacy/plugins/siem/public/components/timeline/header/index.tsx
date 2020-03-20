@@ -6,10 +6,9 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 import { IIndexPattern } from 'src/plugins/data/public';
+import deepEqual from 'fast-deep-equal';
 
-import { Sort } from '../body/sort';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
 import {
@@ -38,16 +37,9 @@ interface Props {
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
-  sort: Sort;
 }
 
-const TimelineHeaderContainer = styled.div`
-  width: 100%;
-`;
-
-TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
-
-export const TimelineHeaderComponent = ({
+const TimelineHeaderComponent: React.FC<Props> = ({
   browserFields,
   id,
   indexPattern,
@@ -60,8 +52,8 @@ export const TimelineHeaderComponent = ({
   onToggleDataProviderExcluded,
   show,
   showCallOutUnauthorizedMsg,
-}: Props) => (
-  <TimelineHeaderContainer data-test-subj="timelineHeader">
+}) => (
+  <>
     {showCallOutUnauthorizedMsg && (
       <EuiCallOut
         data-test-subj="timelineCallOutUnauthorized"
@@ -88,11 +80,22 @@ export const TimelineHeaderComponent = ({
       indexPattern={indexPattern}
       timelineId={id}
     />
-  </TimelineHeaderContainer>
+  </>
 );
 
-TimelineHeaderComponent.displayName = 'TimelineHeaderComponent';
-
-export const TimelineHeader = React.memo(TimelineHeaderComponent);
-
-TimelineHeader.displayName = 'TimelineHeader';
+export const TimelineHeader = React.memo(
+  TimelineHeaderComponent,
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
+    prevProps.id === nextProps.id &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+    prevProps.onChangeDataProviderKqlQuery === nextProps.onChangeDataProviderKqlQuery &&
+    prevProps.onChangeDroppableAndProvider === nextProps.onChangeDroppableAndProvider &&
+    prevProps.onDataProviderEdited === nextProps.onDataProviderEdited &&
+    prevProps.onDataProviderRemoved === nextProps.onDataProviderRemoved &&
+    prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&
+    prevProps.onToggleDataProviderExcluded === nextProps.onToggleDataProviderExcluded &&
+    prevProps.show === nextProps.show &&
+    prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg
+);

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';
-import { BarSeries, ScaleType, Axis } from '@elastic/charts';
+import { Chart, BarSeries, Axis, ScaleType } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
 
@@ -139,7 +139,7 @@ describe('BarChartBaseComponent', () => {
     });
 
     it('should render two bar series', () => {
-      expect(shallowWrapper.find('Chart')).toHaveLength(1);
+      expect(shallowWrapper.find(Chart)).toHaveLength(1);
     });
   });
 
@@ -167,7 +167,6 @@ describe('BarChartBaseComponent', () => {
     });
 
     it(`should ${mockBarChartData.length} render BarSeries`, () => {
-      expect(shallow).toMatchSnapshot();
       expect(shallowWrapper.find(BarSeries)).toHaveLength(mockBarChartData.length);
     });
 
@@ -265,7 +264,7 @@ describe('BarChartBaseComponent', () => {
     });
 
     it('should not render without height and width', () => {
-      expect(shallowWrapper.find('Chart')).toHaveLength(0);
+      expect(shallowWrapper.find(Chart)).toHaveLength(0);
     });
   });
 });
@@ -278,7 +277,7 @@ describe.each(chartDataSets)('BarChart with valid data [%o]', data => {
   });
 
   it(`should render chart`, () => {
-    expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
+    expect(shallowWrapper.find('BarChartBase')).toHaveLength(1);
     expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
   });
 });
@@ -290,8 +289,8 @@ describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', data => {
     shallowWrapper = shallow(<BarChartComponent configs={mockConfig} barChart={data} />);
   });
 
-  it(`should render chart holder`, () => {
-    expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
+  it(`should render a ChartPlaceHolder`, () => {
+    expect(shallowWrapper.find('BarChartBase')).toHaveLength(0);
     expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
   });
 });

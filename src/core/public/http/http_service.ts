@@ -39,9 +39,13 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
 
   public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
     const kibanaVersion = injectedMetadata.getKibanaVersion();
-    const basePath = new BasePath(injectedMetadata.getBasePath());
+    const basePath = new BasePath(
+      injectedMetadata.getBasePath(),
+      injectedMetadata.getServerBasePath()
+    );
     const fetchService = new Fetch({ basePath, kibanaVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
+    loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
 
     this.service = {
       basePath,

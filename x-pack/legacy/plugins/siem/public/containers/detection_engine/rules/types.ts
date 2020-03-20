@@ -6,26 +6,35 @@
 
 import * as t from 'io-ts';
 
+export const RuleTypeSchema = t.keyof({
+  query: null,
+  saved_query: null,
+  machine_learning: null,
+});
+export type RuleType = t.TypeOf<typeof RuleTypeSchema>;
+
 export const NewRuleSchema = t.intersection([
   t.type({
     description: t.string,
     enabled: t.boolean,
-    filters: t.array(t.unknown),
-    index: t.array(t.string),
     interval: t.string,
-    language: t.string,
     name: t.string,
-    query: t.string,
     risk_score: t.number,
     severity: t.string,
-    type: t.union([t.literal('query'), t.literal('saved_query')]),
+    type: RuleTypeSchema,
   }),
   t.partial({
+    anomaly_threshold: t.number,
     created_by: t.string,
     false_positives: t.array(t.string),
+    filters: t.array(t.unknown),
     from: t.string,
     id: t.string,
+    index: t.array(t.string),
+    language: t.string,
+    machine_learning_job_id: t.string,
     max_signals: t.number,
+    query: t.string,
     references: t.array(t.string),
     rule_id: t.string,
     saved_id: t.string,
@@ -33,6 +42,7 @@ export const NewRuleSchema = t.intersection([
     threat: t.array(t.unknown),
     to: t.string,
     updated_by: t.string,
+    note: t.string,
   }),
 ]);
 
@@ -55,37 +65,40 @@ export const RuleSchema = t.intersection([
     description: t.string,
     enabled: t.boolean,
     false_positives: t.array(t.string),
-    filters: t.array(t.unknown),
     from: t.string,
     id: t.string,
-    index: t.array(t.string),
     interval: t.string,
     immutable: t.boolean,
-    language: t.string,
     name: t.string,
     max_signals: t.number,
-    meta: MetaRule,
-    query: t.string,
     references: t.array(t.string),
     risk_score: t.number,
     rule_id: t.string,
     severity: t.string,
     tags: t.array(t.string),
-    type: t.string,
+    type: RuleTypeSchema,
     to: t.string,
     threat: t.array(t.unknown),
     updated_at: t.string,
     updated_by: t.string,
   }),
   t.partial({
+    anomaly_threshold: t.number,
+    filters: t.array(t.unknown),
+    index: t.array(t.string),
+    language: t.string,
     last_failure_at: t.string,
     last_failure_message: t.string,
+    meta: MetaRule,
+    machine_learning_job_id: t.string,
     output_index: t.string,
+    query: t.string,
     saved_id: t.string,
     status: t.string,
     status_date: t.string,
     timeline_id: t.string,
     timeline_title: t.string,
+    note: t.string,
     version: t.number,
   }),
 ]);
@@ -96,9 +109,12 @@ export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
 
 export interface RuleError {
-  rule_id: string;
+  id?: string;
+  rule_id?: string;
   error: { status_code: number; message: string };
 }
+
+export type BulkRuleResponse = Array<Rule | RuleError>;
 
 export interface RuleResponseBuckets {
   rules: Rule[];
@@ -175,8 +191,8 @@ export interface ImportRulesResponse {
   errors: ImportRulesResponseError[];
 }
 
-export interface ExportRulesProps {
-  ruleIds?: string[];
+export interface ExportDocumentsProps {
+  ids: string[];
   filename?: string;
   excludeExportDetails?: boolean;
   signal: AbortSignal;

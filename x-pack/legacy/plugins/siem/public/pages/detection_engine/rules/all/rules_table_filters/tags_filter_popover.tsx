@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,
@@ -19,9 +19,10 @@ import * as i18n from '../../translations';
 import { toggleSelectedGroup } from '../../../../../components/ml_popover/jobs_table/filters/toggle_selected_group';
 
 interface TagsFilterPopoverProps {
+  selectedTags: string[];
   tags: string[];
   onSelectedTagsChanged: Dispatch<SetStateAction<string[]>>;
-  isLoading: boolean;
+  isLoading: boolean; // TO DO reimplement?
 }
 
 const ScrollableDiv = styled.div`
@@ -37,14 +38,10 @@ const ScrollableDiv = styled.div`
  */
 export const TagsFilterPopoverComponent = ({
   tags,
+  selectedTags,
   onSelectedTagsChanged,
 }: TagsFilterPopoverProps) => {
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  useEffect(() => {
-    onSelectedTagsChanged(selectedTags);
-  }, [selectedTags.sort().join()]);
 
   return (
     <EuiPopover
@@ -70,7 +67,7 @@ export const TagsFilterPopoverComponent = ({
           <EuiFilterSelectItem
             checked={selectedTags.includes(tag) ? 'on' : undefined}
             key={`${index}-${tag}`}
-            onClick={() => toggleSelectedGroup(tag, selectedTags, setSelectedTags)}
+            onClick={() => toggleSelectedGroup(tag, selectedTags, onSelectedTagsChanged)}
           >
             {`${tag}`}
           </EuiFilterSelectItem>

@@ -32,8 +32,10 @@ import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_
 import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
-import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
-import { Vis } from '../../../visualizations/public/np_ready/public/vis';
+import {
+  setup as visualizationsSetup,
+  start as visualizationsStart,
+} from '../../../visualizations/public/np_ready/public/legacy';
 
 import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
@@ -86,9 +88,7 @@ describe('CoordinateMapsVisualizationTest', function() {
 
       if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(
-          createTileMapTypeDefinition(dependencies)
-        );
+        visualizationsSetup.createBaseVisualization(createTileMapTypeDefinition(dependencies));
       }
 
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -124,7 +124,7 @@ describe('CoordinateMapsVisualizationTest', function() {
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
-      vis = new Vis(indexPattern, {
+      vis = visualizationsStart.createVis(indexPattern, {
         type: 'tile_map',
       });
       vis.params = {

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import {
   Filter,
@@ -64,7 +64,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        if (payload.query != null && !isEqual(payload.query, filterQuery)) {
+        if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
           onSubmitQuery(payload.query);
         }
       },
@@ -73,7 +73,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     const onQueryChange = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        if (payload.query != null && !isEqual(payload.query, draftQuery)) {
+        if (payload.query != null && !deepEqual(payload.query, draftQuery)) {
           setDraftQuery(payload.query);
           onChangedQuery(payload.query);
         }

@@ -10,6 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'console', 'security']);
+  const config = getService('config');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const grokDebugger = getService('grokDebugger');
@@ -63,7 +64,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Dev Tools navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map(link => link.text)).to.eql(['Dev Tools', 'Stack Management']);
+        expect(navLinks.map(link => link.text)).to.eql(['Dev Tools', 'Management']);
       });
 
       describe('console', () => {
@@ -144,7 +145,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`shows 'Dev Tools' navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Dev Tools', 'Stack Management']);
+        expect(navLinks).to.eql(['Dev Tools', 'Management']);
       });
 
       describe('console', () => {
@@ -232,21 +233,21 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
 
       it(`navigating to search profiler redirect to homepage`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
 
       it(`navigating to grok debugger redirect to homepage`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });

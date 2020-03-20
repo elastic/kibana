@@ -19,7 +19,8 @@
 
 import { GTE_INTERVAL_RE } from '../../../../../plugins/vis_type_timeseries/common/interval_regexp';
 import { i18n } from '@kbn/i18n';
-import { parseInterval } from '../../../../../plugins/data/public';
+import { search } from '../../../../../plugins/data/public';
+const { parseInterval } = search.aggs;
 
 export function validateInterval(bounds, panel, maxBuckets) {
   const { interval } = panel;

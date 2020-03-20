@@ -6,7 +6,7 @@ exports[`Home component should render services 1`] = `
     Object {
       "config": Object {
         "indexPatternTitle": "apm-*",
-        "serviceMapEnabled": false,
+        "serviceMapEnabled": true,
         "ui": Object {
           "enabled": false,
         },
@@ -22,6 +22,7 @@ exports[`Home component should render services 1`] = `
         },
         "notifications": Object {
           "toasts": Object {
+            "addDanger": [Function],
             "addWarning": [Function],
           },
         },
@@ -45,7 +46,7 @@ exports[`Home component should render traces 1`] = `
     Object {
       "config": Object {
         "indexPatternTitle": "apm-*",
-        "serviceMapEnabled": false,
+        "serviceMapEnabled": true,
         "ui": Object {
           "enabled": false,
         },
@@ -61,6 +62,7 @@ exports[`Home component should render traces 1`] = `
         },
         "notifications": Object {
           "toasts": Object {
+            "addDanger": [Function],
             "addWarning": [Function],
           },
         },

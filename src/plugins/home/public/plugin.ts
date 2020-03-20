@@ -17,41 +17,91 @@
  * under the License.
  */
 
-import { CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'kibana/public';
 
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
-  EnvironmentServiceStart,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
-  FeatureCatalogueRegistryStart,
+  TutorialService,
+  TutorialServiceSetup,
 } from './services';
 import { ConfigSchema } from '../config';
+import { setServices } from './application/kibana_services';
+import { DataPublicPluginStart } from '../../data/public';
+import { TelemetryPluginStart } from '../../telemetry/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { KibanaLegacySetup } from '../../kibana_legacy/public';
 
-export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, HomePublicPluginStart> {
+export interface HomePluginStartDependencies {
+  data: DataPublicPluginStart;
+  telemetry?: TelemetryPluginStart;
+}
+
+export interface HomePluginSetupDependencies {
+  usageCollection?: UsageCollectionSetup;
+  kibanaLegacy: KibanaLegacySetup;
+}
+
+export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, void> {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
+  private readonly tutorialService = new TutorialService();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
-  public setup(): HomePublicPluginSetup {
+  public setup(
+    core: CoreSetup<HomePluginStartDependencies>,
+    { kibanaLegacy, usageCollection }: HomePluginSetupDependencies
+  ): HomePublicPluginSetup {
+    kibanaLegacy.registerLegacyApp({
+      id: 'home',
+      title: 'Home',
+      mount: async (params: AppMountParameters) => {
+        const trackUiMetric = usageCollection
+          ? usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home')
+          : () => {};
+        const [coreStart, { telemetry, data }] = await core.getStartServices();
+        setServices({
+          trackUiMetric,
+          kibanaVersion: this.initializerContext.env.packageInfo.version,
+          http: coreStart.http,
+          toastNotifications: core.notifications.toasts,
+          banners: coreStart.overlays.banners,
+          docLinks: coreStart.docLinks,
+          savedObjectsClient: coreStart.savedObjects.client,
+          chrome: coreStart.chrome,
+          telemetry,
+          uiSettings: core.uiSettings,
+          addBasePath: core.http.basePath.prepend,
+          getBasePath: core.http.basePath.get,
+          indexPatternService: data.indexPatterns,
+          environmentService: this.environmentService,
+          config: kibanaLegacy.config,
+          homeConfig: this.initializerContext.config.get(),
+          tutorialService: this.tutorialService,
+          featureCatalogue: this.featuresCatalogueRegistry,
+        });
+        const { renderApp } = await import('./application');
+        return await renderApp(params.element);
+      },
+    });
     return {
       featureCatalogue: { ...this.featuresCatalogueRegistry.setup() },
       environment: { ...this.environmentService.setup() },
-      config: this.initializerContext.config.get(),
+      tutorials: { ...this.tutorialService.setup() },
     };
   }
 
-  public start(core: CoreStart): HomePublicPluginStart {
-    return {
-      featureCatalogue: {
-        ...this.featuresCatalogueRegistry.start({
-          capabilities: core.application.capabilities,
-        }),
-      },
-      environment: { ...this.environmentService.start() },
-    };
+  public start({ application: { capabilities } }: CoreStart) {
+    this.featuresCatalogueRegistry.start({ capabilities });
   }
 }
 
@@ -59,16 +109,14 @@ export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, HomePubli
 export type FeatureCatalogueSetup = FeatureCatalogueRegistrySetup;
 
 /** @public */
-export type FeatureCatalogueStart = FeatureCatalogueRegistryStart;
-
-/** @public */
 export type EnvironmentSetup = EnvironmentServiceSetup;
 
 /** @public */
-export type EnvironmentStart = EnvironmentServiceStart;
+export type TutorialSetup = TutorialServiceSetup;
 
 /** @public */
 export interface HomePublicPluginSetup {
+  tutorials: TutorialServiceSetup;
   featureCatalogue: FeatureCatalogueSetup;
   /**
    * The environment service is only available for a transition period and will
@@ -76,11 +124,4 @@ export interface HomePublicPluginSetup {
    * @deprecated
    */
   environment: EnvironmentSetup;
-  config: ConfigSchema;
-}
-
-/** @public */
-export interface HomePublicPluginStart {
-  featureCatalogue: FeatureCatalogueStart;
-  environment: EnvironmentStart;
 }

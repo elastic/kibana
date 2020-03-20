@@ -69,7 +69,7 @@ export function updateLandingPage(version) {
               <h1>
                 <FormattedMessage
                   id="kbn.management.landing.header"
-                  defaultMessage="Welcome to Stack Management {version}"
+                  defaultMessage="Kibana {version} management"
                   values={{ version }}
                 />
               </h1>

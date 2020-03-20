@@ -21,18 +21,26 @@ import $ from 'jquery';
 import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import fixtures from 'fixtures/fake_hierarchical_data';
+import {
+  metricOnly,
+  threeTermBuckets,
+  oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
+} from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
-import { tabifyAggResponse, npStart } from '../../legacy_imports';
+import { npStart } from '../../legacy_imports';
+import { search } from '../../../../../../plugins/data/public';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { round } from 'lodash';
-
-import { Vis } from '../../../../visualizations/public';
 import { tableVisTypeDefinition } from '../../table_vis_type';
-import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
+import {
+  setup as visualizationsSetup,
+  start as visualizationsStart,
+} from '../../../../visualizations/public/np_ready/public/legacy';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tableVisResponseHandler } from '../../table_vis_response_handler';
+
+const { tabifyAggResponse } = search;
 
 describe('Table Vis - AggTable Directive', function() {
   let $rootScope;
@@ -42,10 +50,10 @@ describe('Table Vis - AggTable Directive', function() {
   const tabifiedData = {};
 
   const init = () => {
-    const vis1 = new Vis(indexPattern, 'table');
-    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, fixtures.metricOnly);
+    const vis1 = visualizationsStart.createVis(indexPattern, 'table');
+    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, metricOnly);
 
-    const vis2 = new Vis(indexPattern, {
+    const vis2 = visualizationsStart.createVis(indexPattern, {
       type: 'table',
       params: {
         showMetricsAtAllLevels: true,
@@ -60,11 +68,11 @@ describe('Table Vis - AggTable Directive', function() {
     vis2.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
-    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets, {
+    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, threeTermBuckets, {
       metricsAtAllLevels: true,
     });
 
-    const vis3 = new Vis(indexPattern, {
+    const vis3 = visualizationsStart.createVis(indexPattern, {
       type: 'table',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -93,7 +101,7 @@ describe('Table Vis - AggTable Directive', function() {
 
     tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = tabifyAggResponse(
       vis3.aggs,
-      fixtures.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative
+      oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative
     );
   };
 
@@ -105,7 +113,7 @@ describe('Table Vis - AggTable Directive', function() {
   beforeEach(initLocalAngular);
 
   ngMock.inject(function() {
-    visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
+    visualizationsSetup.createBaseVisualization(tableVisTypeDefinition);
   });
 
   beforeEach(ngMock.module('kibana/table_vis'));

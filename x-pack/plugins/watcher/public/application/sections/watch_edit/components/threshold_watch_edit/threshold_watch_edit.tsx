@@ -9,7 +9,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
-  EuiComboBoxOptionProps,
+  EuiComboBoxOptionOption,
   EuiExpression,
   EuiFieldNumber,
   EuiFieldText,
@@ -323,7 +323,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     value: anIndex,
                   };
                 })}
-                onChange={async (selected: EuiComboBoxOptionProps[]) => {
+                onChange={async (selected: EuiComboBoxOptionOption[]) => {
                   setWatchProperty(
                     'index',
                     selected.map(aSelected => aSelected.value)

@@ -29,6 +29,12 @@ export type EditorEvent =
   | 'change'
   | 'changeSelection';
 
+export type AutoCompleterFunction = (
+  pos: Position,
+  prefix: string,
+  callback: (...args: any[]) => void
+) => void;
+
 export interface Position {
   /**
    * The line number, not zero-indexed.
@@ -181,6 +187,10 @@ export interface CoreEditor {
 
   /**
    * Return the current line count in the buffer.
+   *
+   * @remark
+   * This function should be usable in a tight loop and must make used of a cached
+   * line count.
    */
   getLineCount(): number;
 
@@ -252,4 +262,10 @@ export interface CoreEditor {
    * Register a keyboard shortcut and provide a function to be called.
    */
   registerKeyboardShortcut(opts: { keys: any; fn: () => void; name: string }): void;
+
+  /**
+   * Register a completions function that will be called when the editor
+   * detects a change
+   */
+  registerAutocompleter(autocompleter: AutoCompleterFunction): void;
 }

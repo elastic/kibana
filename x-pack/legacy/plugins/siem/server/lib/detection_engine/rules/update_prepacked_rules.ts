@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
-import { AlertsClient } from '../../../../../alerting';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { patchRules } from './patch_rules';
 import { PrepackagedRules } from '../types';
 
@@ -19,6 +19,7 @@ export const updatePrepackagedRules = async (
 ): Promise<void> => {
   await rules.forEach(async rule => {
     const {
+      actions,
       description,
       false_positives: falsePositives,
       from,
@@ -39,8 +40,10 @@ export const updatePrepackagedRules = async (
       to,
       type,
       threat,
+      throttle,
       references,
       version,
+      note,
     } = rule;
 
     // Note: we do not pass down enabled as we do not want to suddenly disable
@@ -48,6 +51,7 @@ export const updatePrepackagedRules = async (
     return patchRules({
       alertsClient,
       actionsClient,
+      actions,
       description,
       falsePositives,
       from,
@@ -71,8 +75,10 @@ export const updatePrepackagedRules = async (
       to,
       type,
       threat,
+      throttle,
       references,
       version,
+      note,
     });
   });
 };

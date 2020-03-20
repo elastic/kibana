@@ -7,7 +7,8 @@
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { useUiFilters } from '../context/UrlParamsContext';
-import { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TransactionDistributionAPIResponse } from '../../../../../plugins/apm/server/lib/transactions/distribution';
 
 const INITIAL_DATA = {
   buckets: [] as TransactionDistributionAPIResponse['buckets'],

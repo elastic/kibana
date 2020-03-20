@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
 import rison from 'rison-node';
 import '../../doc_viewer';
@@ -33,6 +32,7 @@ import { dispatchRenderComplete } from '../../../../../../../../../plugins/kiban
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 import { esFilters } from '../../../../../../../../../plugins/data/public';
+import { getServices } from '../../../../kibana_services';
 
 // guesstimate at the minimum number of chars wide cells in the table should be
 const MIN_LINE_LENGTH = 20;
@@ -44,8 +44,7 @@ interface LazyScope extends ng.IScope {
 export function createTableRowDirective(
   $compile: ng.ICompileService,
   $httpParamSerializer: any,
-  kbnUrl: any,
-  config: IUiSettingsClient
+  kbnUrl: any
 ) {
   const cellTemplate = _.template(noWhiteSpace(cellTemplateHtml));
   const truncateByHeightTemplate = _.template(noWhiteSpace(truncateByHeightTemplateHtml));
@@ -55,7 +54,6 @@ export function createTableRowDirective(
     scope: {
       columns: '=',
       filter: '=',
-      filters: '=?',
       indexPattern: '=',
       row: '=kbnTableRow',
       onAddColumn: '=?',
@@ -116,12 +114,18 @@ export function createTableRowDirective(
           anchorId: $scope.row._id,
           indexPattern: $scope.indexPattern.id,
         });
+        const globalFilters: any = getServices().filterManager.getGlobalFilters();
+        const appFilters: any = getServices().filterManager.getAppFilters();
         const hash = $httpParamSerializer({
+          _g: rison.encode({
+            filters: globalFilters || [],
+          }),
           _a: rison.encode({
             columns: $scope.columns,
-            filters: ($scope.filters || []).map(esFilters.disableFilter),
+            filters: (appFilters || []).map(esFilters.disableFilter),
           }),
         });
+
         return `${path}?${hash}`;
       };
 
@@ -134,7 +138,7 @@ export function createTableRowDirective(
         const newHtmls = [openRowHtml];
 
         const mapping = indexPattern.fields.getByName;
-        const hideTimeColumn = config.get('doc_table:hideTimeColumn');
+        const hideTimeColumn = getServices().uiSettings.get('doc_table:hideTimeColumn');
         if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(
             cellTemplate({

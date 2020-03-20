@@ -14,8 +14,8 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTrackPageview } from '../../../../../infra/public';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { useTrackPageview } from '../../../../../../../plugins/observability/public';
+import { PROJECTION } from '../../../../../../../plugins/apm/common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 

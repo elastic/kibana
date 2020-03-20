@@ -14,8 +14,8 @@ import {
   EuiText
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Maybe } from '../../../../../typings/common';
-import { Annotation } from '../../../../../common/annotations';
+import { Maybe } from '../../../../../../../../plugins/apm/typings/common';
+import { Annotation } from '../../../../../../../../plugins/apm/common/annotations';
 import { PlotValues, SharedPlot } from './plotUtils';
 import { asAbsoluteDateTime } from '../../../../utils/formatters';
 

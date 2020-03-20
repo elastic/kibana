@@ -17,7 +17,7 @@ import {
   formatTimelineResultToModel,
 } from '../../../../components/open_timeline/helpers';
 import { convertKueryToElasticSearchQuery } from '../../../../lib/keury';
-import { timelineDefaults } from '../../../../store/timeline/model';
+import { timelineDefaults } from '../../../../store/timeline/defaults';
 import {
   replaceTemplateFieldFromQuery,
   replaceTemplateFieldFromMatchFilters,

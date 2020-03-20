@@ -15,7 +15,7 @@ import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
-import { configUtilsMock } from '../actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
@@ -60,7 +60,7 @@ describe('validateConfig()', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: url => {
           expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
         },
@@ -76,7 +76,7 @@ describe('validateConfig()', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: _ => {
           throw new Error(`target url is not whitelisted`);
         },
@@ -137,9 +137,9 @@ describe('validateParams()', () => {
       validateParams(actionType, { eventAction: 'ackynollage' });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action params: [eventAction]: types that failed validation:
-- [eventAction.0]: expected value to equal [trigger] but got [ackynollage]
-- [eventAction.1]: expected value to equal [resolve] but got [ackynollage]
-- [eventAction.2]: expected value to equal [acknowledge] but got [ackynollage]"
+- [eventAction.0]: expected value to equal [trigger]
+- [eventAction.1]: expected value to equal [resolve]
+- [eventAction.2]: expected value to equal [acknowledge]"
 `);
   });
 });

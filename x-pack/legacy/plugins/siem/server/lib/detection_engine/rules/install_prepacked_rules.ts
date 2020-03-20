@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Alert } from '../../../../../../../plugins/alerting/common';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
-import { AlertsClient } from '../../../../../alerting';
-import { Alert } from '../../../../../alerting/server/types';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { createRules } from './create_rules';
 import { PrepackagedRules } from '../types';
 
@@ -18,6 +18,8 @@ export const installPrepackagedRules = (
 ): Array<Promise<Alert>> =>
   rules.reduce<Array<Promise<Alert>>>((acc, rule) => {
     const {
+      actions,
+      anomaly_threshold: anomalyThreshold,
       description,
       enabled,
       false_positives: falsePositives,
@@ -25,6 +27,7 @@ export const installPrepackagedRules = (
       immutable,
       query,
       language,
+      machine_learning_job_id: machineLearningJobId,
       saved_id: savedId,
       timeline_id: timelineId,
       timeline_title: timelineTitle,
@@ -41,14 +44,19 @@ export const installPrepackagedRules = (
       to,
       type,
       threat,
+      throttle,
       references,
+      note,
       version,
+      lists,
     } = rule;
     return [
       ...acc,
       createRules({
         alertsClient,
         actionsClient,
+        actions,
+        anomalyThreshold,
         description,
         enabled,
         falsePositives,
@@ -56,6 +64,7 @@ export const installPrepackagedRules = (
         immutable,
         query,
         language,
+        machineLearningJobId,
         outputIndex,
         savedId,
         timelineId,
@@ -73,8 +82,11 @@ export const installPrepackagedRules = (
         to,
         type,
         threat,
+        throttle,
         references,
+        note,
         version,
+        lists,
       }),
     ];
   }, []);

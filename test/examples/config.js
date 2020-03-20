@@ -33,6 +33,13 @@ export default async function({ readConfigFile }) {
       ...functionalConfig.get('services'),
       ...services,
     },
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
+        'telemetry:optIn': false,
+      },
+    },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
     esTestCluster: functionalConfig.get('esTestCluster'),

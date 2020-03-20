@@ -22,7 +22,7 @@ import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentHeader } from '@ela
 import { first } from 'rxjs/operators';
 import { IInterpreterRenderHandlers, ExpressionValue } from 'src/plugins/expressions';
 import { RequestAdapter, DataAdapter } from '../../../../../../../../src/plugins/inspector';
-import { Adapters, ExpressionRenderHandler, ExpressionDataHandler } from '../../types';
+import { Adapters, ExpressionRenderHandler } from '../../types';
 import { getExpressions } from '../../services';
 
 declare global {
@@ -31,7 +31,7 @@ declare global {
       expressions: string,
       context?: ExpressionValue,
       initialContext?: ExpressionValue
-    ) => ReturnType<ExpressionDataHandler['getData']>;
+    ) => any;
     renderPipelineResponse: (context?: ExpressionValue) => Promise<any>;
   }
 }
@@ -61,12 +61,9 @@ class Main extends React.Component<{}, State> {
         data: new DataAdapter(),
       };
       return getExpressions()
-        .execute(expression, {
+        .execute(expression, context || { type: 'null' }, {
           inspectorAdapters: adapters,
-          context,
-          // TODO: naming / typing is confusing and doesn't match here
-          // searchContext is also a way to set initialContext and Context can't be set to SearchContext
-          searchContext: initialContext as any,
+          search: initialContext as any,
         })
         .getData();
     };

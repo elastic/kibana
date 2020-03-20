@@ -21,6 +21,7 @@ import { Observable } from 'rxjs';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
+import { TriggerContextMapping } from '../../../../ui_actions/public';
 
 export interface EmbeddableInput {
   viewMode?: ViewMode;
@@ -28,11 +29,21 @@ export interface EmbeddableInput {
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
-  isEmptyState?: boolean;
+
+  /**
+   * Reserved key for `ui_actions` events.
+   */
+  events?: unknown;
+
   /**
    * List of action IDs that this embeddable should not render.
    */
   disabledActions?: string[];
+
+  /**
+   * Whether this embeddable should not execute triggers.
+   */
+  disableTriggers?: boolean;
 }
 
 export interface EmbeddableOutput {
@@ -150,4 +161,9 @@ export interface IEmbeddable<
    * Cleans up subscriptions, destroy nodes mounted from calls to render.
    */
   destroy(): void;
+
+  /**
+   * List of triggers that this embeddable will execute.
+   */
+  supportedTriggers(): Array<keyof TriggerContextMapping>;
 }

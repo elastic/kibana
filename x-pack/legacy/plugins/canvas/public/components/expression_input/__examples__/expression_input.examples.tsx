@@ -7,7 +7,7 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
 
 import { ExpressionInput } from '../expression_input';
 import { language, LANGUAGE_ID } from '../../../lib/monaco_language_def';

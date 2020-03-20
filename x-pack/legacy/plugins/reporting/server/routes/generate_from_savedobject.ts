@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingSetupDeps } from '../plugin';
+import { ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';

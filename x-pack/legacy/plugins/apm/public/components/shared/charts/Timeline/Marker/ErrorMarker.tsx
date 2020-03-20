@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import {
   TRACE_ID,
   TRANSACTION_ID
-} from '../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { px, unit, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';

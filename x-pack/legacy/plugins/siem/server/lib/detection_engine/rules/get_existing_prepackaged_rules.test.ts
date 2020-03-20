@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
-import { AlertsClient } from '../../../../../alerting';
+import { alertsClientMock } from '../../../../../../../plugins/alerting/server/mocks';
 import {
   getResult,
   getFindResultWithSingleHit,
@@ -28,10 +27,7 @@ describe('get_existing_prepackaged_rules', () => {
     test('should return a single item in a single page', async () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rules = await getExistingPrepackagedRules({
-        alertsClient: unsafeCast,
-      });
+      const rules = await getExistingPrepackagedRules({ alertsClient });
       expect(rules).toEqual([getResult()]);
     });
 
@@ -70,10 +66,7 @@ describe('get_existing_prepackaged_rules', () => {
         })
       );
 
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rules = await getExistingPrepackagedRules({
-        alertsClient: unsafeCast,
-      });
+      const rules = await getExistingPrepackagedRules({ alertsClient });
       expect(rules).toEqual([result1, result2, result3]);
     });
   });
@@ -82,10 +75,7 @@ describe('get_existing_prepackaged_rules', () => {
     test('should return a single item in a single page', async () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rules = await getNonPackagedRules({
-        alertsClient: unsafeCast,
-      });
+      const rules = await getNonPackagedRules({ alertsClient });
       expect(rules).toEqual([getResult()]);
     });
 
@@ -113,10 +103,7 @@ describe('get_existing_prepackaged_rules', () => {
         getFindResultWithMultiHits({ data: [result1, result2], perPage: 2, page: 1, total: 2 })
       );
 
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rules = await getNonPackagedRules({
-        alertsClient: unsafeCast,
-      });
+      const rules = await getNonPackagedRules({ alertsClient });
       expect(rules).toEqual([result1, result2]);
     });
 
@@ -152,10 +139,7 @@ describe('get_existing_prepackaged_rules', () => {
         })
       );
 
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rules = await getNonPackagedRules({
-        alertsClient: unsafeCast,
-      });
+      const rules = await getNonPackagedRules({ alertsClient });
       expect(rules).toEqual([result1, result2, result3]);
     });
   });
@@ -164,11 +148,7 @@ describe('get_existing_prepackaged_rules', () => {
     test('should return a single item in a single page', async () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rules = await getRules({
-        alertsClient: unsafeCast,
-        filter: '',
-      });
+      const rules = await getRules({ alertsClient, filter: '' });
       expect(rules).toEqual([getResult()]);
     });
 
@@ -196,11 +176,7 @@ describe('get_existing_prepackaged_rules', () => {
         getFindResultWithMultiHits({ data: [result1, result2], perPage: 2, page: 1, total: 2 })
       );
 
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rules = await getRules({
-        alertsClient: unsafeCast,
-        filter: '',
-      });
+      const rules = await getRules({ alertsClient, filter: '' });
       expect(rules).toEqual([result1, result2]);
     });
   });
@@ -209,11 +185,7 @@ describe('get_existing_prepackaged_rules', () => {
     test('it returns a count', async () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rules = await getRulesCount({
-        alertsClient: unsafeCast,
-        filter: '',
-      });
+      const rules = await getRulesCount({ alertsClient, filter: '' });
       expect(rules).toEqual(1);
     });
   });
@@ -222,10 +194,7 @@ describe('get_existing_prepackaged_rules', () => {
     test('it returns a count', async () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
-      const rules = await getNonPackagedRulesCount({
-        alertsClient: unsafeCast,
-      });
+      const rules = await getNonPackagedRulesCount({ alertsClient });
       expect(rules).toEqual(1);
     });
   });

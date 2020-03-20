@@ -20,8 +20,7 @@
 import React from 'react';
 import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap } from 'rxjs/operators';
-
-import { PersistedState } from '../../../legacy_imports';
+import { PersistedState } from '../../../../../../../plugins/visualizations/public';
 import { Vis, VisualizationController } from '../vis';
 import { getUpdateStatus } from '../legacy/update_status';
 import { ResizeChecker } from '../../../../../../../plugins/kibana_utils/public';

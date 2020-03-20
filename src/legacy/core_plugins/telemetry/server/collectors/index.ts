@@ -23,3 +23,4 @@ export { registerUiMetricUsageCollector } from './ui_metric';
 export { registerLocalizationUsageCollector } from './localization';
 export { registerTelemetryPluginUsageCollector } from './telemetry_plugin';
 export { registerManagementUsageCollector } from './management';
+export { registerApplicationUsageCollector } from './application_usage';

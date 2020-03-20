@@ -130,7 +130,7 @@ describe('Executor', () => {
         const execution = executor.createExecution('foo bar="baz"');
 
         expect(execution).toBeInstanceOf(Execution);
-        expect(execution.params.ast.chain[0].function).toBe('foo');
+        expect(execution.state.get().ast.chain[0].function).toBe('foo');
       });
 
       test('returns Execution object from AST', () => {
@@ -139,7 +139,7 @@ describe('Executor', () => {
         const execution = executor.createExecution(ast);
 
         expect(execution).toBeInstanceOf(Execution);
-        expect(execution.params.ast.chain[0].function).toBe('foo');
+        expect(execution.state.get().ast.chain[0].function).toBe('foo');
       });
 
       test('Execution inherits context from Executor', () => {

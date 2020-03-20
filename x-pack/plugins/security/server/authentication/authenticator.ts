@@ -27,6 +27,7 @@ import {
   TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
   PKIAuthenticationProvider,
+  HTTPAuthenticationProvider,
   isSAMLRequestQuery,
 } from './providers';
 import { AuthenticationResult } from './authentication_result';
@@ -88,7 +89,6 @@ export interface AuthenticatorOptions {
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   sessionStorageFactory: SessionStorageFactory<ProviderSession>;
-  isSystemAPIRequest: (request: KibanaRequest) => boolean;
 }
 
 // Mapping between provider key defined in the config and authentication
@@ -207,6 +207,8 @@ export class Authenticator {
           ? (this.options.config.authc as Record<string, any>)[providerType]
           : undefined;
 
+        this.logger.debug(`Enabling "${providerType}" authentication provider.`);
+
         return [
           providerType,
           instantiateProvider(
@@ -217,6 +219,17 @@ export class Authenticator {
         ] as [string, BaseAuthenticationProvider];
       })
     );
+
+    // For the BWC reasons we always include HTTP authentication provider unless it's explicitly disabled.
+    if (this.options.config.authc.http.enabled) {
+      this.setupHTTPAuthenticationProvider(
+        Object.freeze({
+          ...providerCommonOptions,
+          logger: options.loggers.get(HTTPAuthenticationProvider.type),
+        })
+      );
+    }
+
     this.serverBasePath = this.options.basePath.serverBasePath || '/';
 
     this.idleTimeout = this.options.config.session.idleTimeout;
@@ -310,7 +323,7 @@ export class Authenticator {
 
       this.updateSessionValue(sessionStorage, {
         providerType,
-        isSystemAPIRequest: this.options.isSystemAPIRequest(request),
+        isSystemRequest: request.isSystemRequest,
         authenticationResult,
         existingSession: ownsSession ? existingSession : null,
       });
@@ -387,6 +400,41 @@ export class Authenticator {
   }
 
   /**
+   * Checks whether specified provider type is currently enabled.
+   * @param providerType Type of the provider (`basic`, `saml`, `pki` etc.).
+   */
+  isProviderEnabled(providerType: string) {
+    return this.providers.has(providerType);
+  }
+
+  /**
+   * Initializes HTTP Authentication provider and appends it to the end of the list of enabled
+   * authentication providers.
+   * @param options Common provider options.
+   */
+  private setupHTTPAuthenticationProvider(options: AuthenticationProviderOptions) {
+    const supportedSchemes = new Set(
+      this.options.config.authc.http.schemes.map(scheme => scheme.toLowerCase())
+    );
+
+    // If `autoSchemesEnabled` is set we should allow schemes that other providers use to
+    // authenticate requests with Elasticsearch.
+    if (this.options.config.authc.http.autoSchemesEnabled) {
+      for (const provider of this.providers.values()) {
+        const supportedScheme = provider.getHTTPAuthenticationScheme();
+        if (supportedScheme) {
+          supportedSchemes.add(supportedScheme.toLowerCase());
+        }
+      }
+    }
+
+    this.providers.set(
+      HTTPAuthenticationProvider.type,
+      new HTTPAuthenticationProvider(options, { supportedSchemes })
+    );
+  }
+
+  /**
    * Returns provider iterator where providers are sorted in the order of priority (based on the session ownership).
    * @param sessionValue Current session value.
    */
@@ -434,12 +482,12 @@ export class Authenticator {
       providerType,
       authenticationResult,
       existingSession,
-      isSystemAPIRequest,
+      isSystemRequest,
     }: {
       providerType: string;
       authenticationResult: AuthenticationResult;
       existingSession: ProviderSession | null;
-      isSystemAPIRequest: boolean;
+      isSystemRequest: boolean;
     }
   ) {
     if (!existingSession && !authenticationResult.shouldUpdateState()) {
@@ -451,7 +499,7 @@ export class Authenticator {
     // state we should store it in the session regardless of whether it's a system API request or not.
     const sessionCanBeUpdated =
       (authenticationResult.succeeded() || authenticationResult.redirected()) &&
-      (authenticationResult.shouldUpdateState() || !isSystemAPIRequest);
+      (authenticationResult.shouldUpdateState() || !isSystemRequest);
 
     // If provider owned the session, but failed to authenticate anyway, that likely means that
     // session is not valid and we should clear it. Also provider can specifically ask to clear

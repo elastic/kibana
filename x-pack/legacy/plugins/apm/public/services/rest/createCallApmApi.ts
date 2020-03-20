@@ -5,8 +5,10 @@
  */
 import { HttpSetup } from 'kibana/public';
 import { callApi, FetchOptions } from './callApi';
-import { APMAPI } from '../../../server/routes/create_apm_api';
-import { Client } from '../../../server/routes/typings';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { APMAPI } from '../../../../../../plugins/apm/server/routes/create_apm_api';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Client } from '../../../../../../plugins/apm/server/routes/typings';
 
 export type APMClient = Client<APMAPI['_S']>;
 export type APMClientOptions = Omit<FetchOptions, 'query' | 'body'> & {
@@ -17,8 +19,14 @@ export type APMClientOptions = Omit<FetchOptions, 'query' | 'body'> & {
   };
 };
 
-export const createCallApmApi = (http: HttpSetup) =>
-  ((options: APMClientOptions) => {
+export let callApmApi: APMClient = () => {
+  throw new Error(
+    'callApmApi has to be initialized before used. Call createCallApmApi first.'
+  );
+};
+
+export function createCallApmApi(http: HttpSetup) {
+  callApmApi = ((options: APMClientOptions) => {
     const { pathname, params = {}, ...opts } = options;
 
     const path = (params.path || {}) as Record<string, any>;
@@ -34,3 +42,4 @@ export const createCallApmApi = (http: HttpSetup) =>
       query: params.query
     });
   }) as APMClient;
+}

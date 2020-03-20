@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OptInDetailsComponent renders as expected 1`] = `
+<EuiCallOut
+  iconType="questionInCircle"
+  title={
+    <FormattedMessage
+      defaultMessage="Help us improve the Elastic Stack"
+      id="telemetry.welcomeBanner.title"
+      values={Object {}}
+    />
+  }
+>
+  <OptInMessage />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        data-test-subj="enable"
+        onClick={[Function]}
+        size="s"
+      >
+        <FormattedMessage
+          defaultMessage="Enable"
+          id="telemetry.welcomeBanner.enableButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        data-test-subj="disable"
+        onClick={[Function]}
+        size="s"
+      >
+        <FormattedMessage
+          defaultMessage="Disable"
+          id="telemetry.welcomeBanner.disableButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiCallOut>
+`;

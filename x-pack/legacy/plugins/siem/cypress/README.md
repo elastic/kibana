@@ -210,6 +210,30 @@ cd x-pack/legacy/plugins/siem
 CYPRESS_baseUrl=http://localhost:5601 CYPRESS_ELASTICSEARCH_USERNAME=elastic CYPRESS_ELASTICSEARCH_PASSWORD=<password> yarn cypress:run
 ```
 
+## Running (Headless) Tests on the Command Line as a Jenkins execution
+
+To run (headless) tests as a Jenkins execution.
+
+1. First bootstrap kibana changes from the Kibana root directory:
+
+```sh
+yarn kbn bootstrap
+```
+
+2. Launch Cypress command line test runner:
+
+```sh 
+cd x-pack/legacy/plugins/siem
+yarn cypress:run-as-ci
+```
+
+Note that with this type of execution you don't need to have running a kibana and elasticsearch instance. This is because
+ the command, as it would happen in the CI, will launch the instances. The elasticsearch instance will be fed with the data 
+ placed in: `x-pack/test/siem_cypress/es_archives`.
+ 
+As in this case we want to mimic a CI execution we want to execute the tests with the same set of data, this is why 
+in this case does not make sense to override Cypress environment variables.    
+
 ## Reporting
 
 When Cypress tests are run on the command line via `yarn cypress:run`,

@@ -23,7 +23,6 @@ import { FieldHook, FIELD_TYPES } from '../hook_form_lib';
 interface Props {
   field: FieldHook;
   euiFieldProps?: { [key: string]: any };
-  idAria?: string;
   [key: string]: any;
 }
 

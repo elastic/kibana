@@ -73,7 +73,7 @@ export const createVegaFn = (
       as: 'visualization',
       value: {
         visData: response,
-        visType: name,
+        visType: 'vega',
         visConfig: {
           spec: args.spec,
         },

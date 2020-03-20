@@ -37,6 +37,11 @@ export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
 export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
+  private readonly isESOUsingEphemeralEncryptionKey: boolean;
+
+  constructor({ isESOUsingEphemeralEncryptionKey }: { isESOUsingEphemeralEncryptionKey: boolean }) {
+    this.isESOUsingEphemeralEncryptionKey = isESOUsingEphemeralEncryptionKey;
+  }
 
   public initialize(actionExecutorContext: ActionExecutorContext) {
     if (this.isInitialized) {
@@ -55,6 +60,12 @@ export class ActionExecutor {
       throw new Error('ActionExecutor not initialized');
     }
 
+    if (this.isESOUsingEphemeralEncryptionKey === true) {
+      throw new Error(
+        `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+      );
+    }
+
     const {
       spaces,
       getServices,
@@ -71,11 +82,7 @@ export class ActionExecutor {
       attributes: { actionTypeId, config, name },
     } = await services.savedObjectsClient.get<RawAction>('action', actionId);
 
-    try {
-      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    } catch (err) {
-      return { status: 'error', actionId, message: err.message, retry: false };
-    }
+    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     // Only get encrypted attributes here, the remaining attributes can be fetched in
     // the savedObjectsClient call

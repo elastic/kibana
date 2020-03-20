@@ -30,27 +30,36 @@ export type TypeOf<RT extends Type<any>> = RT['type'];
 // this might not have perfect _rendering_ output, but it will be typed.
 export type ObjectResultType<P extends Props> = Readonly<{ [K in keyof P]: TypeOf<P[K]> }>;
 
+interface UnknownOptions {
+  /**
+   * Options for dealing with unknown keys:
+   * - allow: unknown keys will be permitted
+   * - ignore: unknown keys will not fail validation, but will be stripped out
+   * - forbid (default): unknown keys will fail validation
+   */
+  unknowns?: 'allow' | 'ignore' | 'forbid';
+}
+
 export type ObjectTypeOptions<P extends Props = any> = TypeOptions<
   { [K in keyof P]: TypeOf<P[K]> }
-> & {
-  allowUnknowns?: boolean;
-};
+> &
+  UnknownOptions;
 
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
   private props: Record<string, AnySchema>;
 
-  constructor(props: P, options: ObjectTypeOptions<P> = {}) {
+  constructor(props: P, { unknowns = 'forbid', ...typeOptions }: ObjectTypeOptions<P> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
     for (const [key, value] of Object.entries(props)) {
       schemaKeys[key] = value.getSchema();
     }
-    const { allowUnknowns, ...typeOptions } = options;
     const schema = internals
       .object()
       .keys(schemaKeys)
-      .optional()
       .default()
-      .unknown(Boolean(allowUnknowns));
+      .optional()
+      .unknown(unknowns === 'allow')
+      .options({ stripUnknown: { objects: unknowns === 'ignore' } });
 
     super(schema, typeOptions);
     this.props = schemaKeys;
@@ -62,7 +71,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       case 'object.base':
         return `expected a plain object value, but found [${typeDetect(value)}] instead.`;
       case 'object.parse':
-        return `could not parse object value from [${value}]`;
+        return `could not parse object value from json input`;
       case 'object.allowUnknown':
         return `definition for this key is missing`;
       case 'object.child':

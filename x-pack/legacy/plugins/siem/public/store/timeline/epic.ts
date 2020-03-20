@@ -29,7 +29,6 @@ import {
 } from 'rxjs/operators';
 
 import { esFilters, Filter, MatchAllFilter } from '../../../../../../../src/plugins/data/public';
-import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
   PersistTimelineMutation,
@@ -70,7 +69,7 @@ import {
   addTimeline,
   showCallOutUnauthorizedMsg,
 } from './actions';
-import { TimelineModel } from './model';
+import { ColumnHeaderOptions, TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
 import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
@@ -273,7 +272,7 @@ export const convertTimelineAsInput = (
       } else if (key === 'columns' && get(key, timeline) != null) {
         return set(
           key,
-          get(key, timeline).map((col: ColumnHeader) => omit(['width', '__typename'], col)),
+          get(key, timeline).map((col: ColumnHeaderOptions) => omit(['width', '__typename'], col)),
           acc
         );
       } else if (key === 'filters' && get(key, timeline) != null) {

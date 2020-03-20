@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import chrome from '../../np_imports/ui/chrome';
 import { capitalize } from 'lodash';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
@@ -21,7 +22,7 @@ const linkToCategories = {
   'kibana/instances': 'Kibana Instances',
   'logstash/instances': 'Logstash Nodes',
 };
-const getColumns = (kbnUrl, scope) => [
+const getColumns = (kbnUrl, scope, timezone) => [
   {
     name: i18n.translate('xpack.monitoring.alerts.statusColumnTitle', {
       defaultMessage: 'Status',
@@ -126,7 +127,7 @@ const getColumns = (kbnUrl, scope) => [
     }),
     field: 'update_timestamp',
     sortable: true,
-    render: timestamp => formatDateTimeLocal(timestamp),
+    render: timestamp => formatDateTimeLocal(timestamp, timezone),
   },
   {
     name: i18n.translate('xpack.monitoring.alerts.triggeredColumnTitle', {
@@ -151,11 +152,14 @@ export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) 
     category: alert.metadata.link,
   }));
 
+  const injector = chrome.dangerouslyGetActiveInjector();
+  const timezone = injector.get('config').get('dateFormat:tz');
+
   return (
     <EuiMonitoringTable
       className="alertsTable"
       rows={alertsFlattened}
-      columns={getColumns(angular.kbnUrl, angular.scope)}
+      columns={getColumns(angular.kbnUrl, angular.scope, timezone)}
       sorting={{
         ...sorting,
         sort: {

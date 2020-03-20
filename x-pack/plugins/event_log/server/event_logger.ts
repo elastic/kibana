@@ -171,7 +171,7 @@ function indexEventDoc(esContext: EsContext, doc: Doc): void {
 async function indexLogEventDoc(esContext: EsContext, doc: any) {
   esContext.logger.debug(`writing to event log: ${JSON.stringify(doc)}`);
   await esContext.waitTillReady();
-  await esContext.callEs('index', doc);
+  await esContext.esAdapter.indexDocument(doc);
   esContext.logger.debug(`writing to event log complete`);
 }
 
