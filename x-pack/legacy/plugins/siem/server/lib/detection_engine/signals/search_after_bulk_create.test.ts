@@ -43,6 +43,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -52,6 +53,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockService.callCluster).toHaveBeenCalledTimes(0);
     expect(result).toEqual(true);
@@ -99,6 +101,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -108,6 +111,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockService.callCluster).toHaveBeenCalledTimes(5);
     expect(result).toEqual(true);
@@ -126,6 +130,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -135,6 +140,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(result).toEqual(false);
@@ -160,6 +166,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -169,6 +176,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(result).toEqual(false);
@@ -194,6 +202,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -203,6 +212,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(result).toEqual(true);
   });
@@ -230,6 +240,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -239,6 +250,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(result).toEqual(true);
   });
@@ -266,6 +278,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -275,6 +288,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(result).toEqual(true);
   });
@@ -304,6 +318,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -313,6 +328,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(result).toEqual(false);
   });
