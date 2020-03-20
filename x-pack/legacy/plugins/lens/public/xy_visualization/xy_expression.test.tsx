@@ -22,9 +22,6 @@ import { mount, shallow, ReactWrapper } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
 import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
 
-jest.mock('ui/new_platform');
-import { npStart } from 'ui/new_platform';
-
 function sampleArgs() {
   const data: LensMultiTable = {
     type: 'lens_multitable',
@@ -261,6 +258,8 @@ describe('xy_expression', () => {
       };
 
       const { args, data } = sampleArgs();
+      const executeTriggerActions = jest.fn();
+
       const wrapper: ReactWrapper = mount(
         <XYChart
           data={data}
@@ -283,6 +282,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
 
@@ -291,27 +291,24 @@ describe('xy_expression', () => {
         .first()
         .prop('onElementClick')!([[geometry, series as SeriesIdentifier]]);
 
-      expect(npStart.plugins.uiActions.executeTriggerActions).toHaveBeenCalledWith(
-        'VALUE_CLICK_TRIGGER',
-        {
-          data: {
-            data: [
-              {
-                column: 1,
-                row: 1,
-                table: data.tables.first,
-                value: 5,
-              },
-              {
-                column: 1,
-                row: 0,
-                table: data.tables.first,
-                value: 2,
-              },
-            ],
-          },
-        }
-      );
+      expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
+        data: {
+          data: [
+            {
+              column: 1,
+              row: 1,
+              table: data.tables.first,
+              value: 5,
+            },
+            {
+              column: 1,
+              row: 0,
+              table: data.tables.first,
+              value: 2,
+            },
+          ],
+        },
+      });
     });
 
     test('it renders stacked bar', () => {

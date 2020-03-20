@@ -26,7 +26,6 @@ import {
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
 import { EmbeddableVisTriggerContext } from '../../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/embeddable/events';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
@@ -60,6 +59,7 @@ type XYChartRenderProps = XYChartProps & {
   chartTheme: PartialTheme;
   formatFactory: FormatFactory;
   timeZone: string;
+  executeTriggerActions: Function;
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -112,6 +112,7 @@ export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartTheme: PartialTheme;
   timeZone: string;
+  executeTriggerActions: Function;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -164,6 +165,7 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartTheme,
+  executeTriggerActions,
 }: XYChartRenderProps & {
   handlers?: IInterpreterRenderHandlers;
 }) {
@@ -226,7 +228,7 @@ export function XYChart({
         onElementClick={([[geometry, series]]) => {
           const layer = layers.find(l =>
             series.seriesKeys.some(key => l.accessors.includes(key as string))
-          )!;
+          );
           if (!layer) {
             return;
           }
@@ -256,6 +258,7 @@ export function XYChart({
           }
 
           const xAxisFieldName = xAxisColumn?.meta?.aggConfigParams?.field;
+
           const timeFieldName =
             xDomain && xAxisFieldName ? { timeFieldName: xAxisFieldName } : null;
 
@@ -271,7 +274,7 @@ export function XYChart({
             ...timeFieldName,
           };
 
-          npStart.plugins.uiActions.executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+          executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
         }}
       />
 

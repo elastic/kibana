@@ -7,6 +7,7 @@
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { CoreSetup, IUiSettingsClient } from 'src/core/public';
 import moment from 'moment-timezone';
+import { npStart } from 'ui/new_platform';
 import { FormatFactory } from '../legacy_imports';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { xyVisualization } from './xy_visualization';
@@ -48,6 +49,7 @@ export class XyVisualization {
           ? EUI_CHARTS_THEME_DARK.theme
           : EUI_CHARTS_THEME_LIGHT.theme,
         timeZone: getTimeZone(core.uiSettings),
+        executeTriggerActions: npStart.plugins.uiActions.executeTriggerActions,
       })
     );
 
