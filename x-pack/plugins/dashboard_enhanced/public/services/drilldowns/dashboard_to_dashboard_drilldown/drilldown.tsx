@@ -10,21 +10,18 @@ import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_reac
 import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
 import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
 import { VisualizeEmbeddableContract } from '../../../../../../../src/legacy/core_plugins/visualizations/public';
-import { FactoryContext, ActionContext, Config, CollectConfigProps } from './types';
+import { ActionContext, CollectConfigProps, Config, FactoryContext } from './types';
 import { CollectConfigContainer } from './collect_config';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { DrilldownsDrilldown as Drilldown } from '../../../../../drilldowns/public';
 import { txtGoToDashboard } from './i18n';
-import {
-  esFilters,
-  valueClickActionGetFilters,
-  selectRangeActionGetFilters,
-} from '../../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart, esFilters } from '../../../../../../../src/plugins/data/public';
 
 export interface Params {
   getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
   getNavigateToApp: () => Promise<CoreStart['application']['navigateToApp']>;
   getGetUrlGenerator: () => Promise<SharePluginStart['urlGenerators']['getUrlGenerator']>;
+  getDataPluginActions: () => Promise<DataPublicPluginStart['actions']>;
 }
 
 export class DashboardToDashboardDrilldown
@@ -65,6 +62,10 @@ export class DashboardToDashboardDrilldown
     console.log('drilldown execute'); // eslint-disable-line
     const getUrlGenerator = await this.params.getGetUrlGenerator();
     const navigateToApp = await this.params.getNavigateToApp();
+    const {
+      selectRangeActionGetFilters,
+      valueClickActionGetFilters,
+    } = await this.params.getDataPluginActions();
     const { timeRange, query, filters } = context.embeddable.getInput();
 
     // @ts-ignore

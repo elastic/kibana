@@ -54,7 +54,13 @@ import {
   VALUE_CLICK_TRIGGER,
   APPLY_FILTER_TRIGGER,
 } from '../../ui_actions/public';
-import { ACTION_GLOBAL_APPLY_FILTER, createFilterAction, createFiltersFromEvent } from './actions';
+import {
+  ACTION_GLOBAL_APPLY_FILTER,
+  createFilterAction,
+  createFiltersFromEvent,
+  selectRangeActionGetFilters,
+  valueClickActionGetFilters,
+} from './actions';
 import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
 import {
   selectRangeAction,
@@ -152,6 +158,8 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const dataServices = {
       actions: {
         createFiltersFromEvent,
+        selectRangeActionGetFilters,
+        valueClickActionGetFilters,
       },
       autocomplete: this.autocomplete.start(),
       fieldFormats,

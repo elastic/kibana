@@ -9,6 +9,7 @@ import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actio
 import { SharePluginStart, SharePluginSetup } from '../../../../src/plugins/share/public';
 import { DashboardDrilldownsService } from './services';
 import { DrilldownsSetupContract, DrilldownsStartContract } from '../../drilldowns/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export interface SetupDependencies {
   uiActions: UiActionsSetup;
@@ -20,6 +21,7 @@ export interface StartDependencies {
   uiActions: UiActionsStart;
   drilldowns: DrilldownsStartContract;
   share: SharePluginStart;
+  data: DataPublicPluginStart;
 }
 
 // eslint-disable-next-line
