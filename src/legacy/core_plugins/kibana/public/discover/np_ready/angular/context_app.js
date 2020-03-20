@@ -57,13 +57,13 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, config, Private) {
-  const { filterManager, indexpatterns } = getServices();
+function ContextAppController($scope, Private) {
+  const { filterManager, indexpatterns, uiSettings } = getServices();
   const queryParameterActions = getQueryParameterActions(filterManager, indexpatterns);
   const queryActions = Private(QueryActionsProvider);
   this.state = createInitialState(
-    parseInt(config.get('context:step'), 10),
-    getFirstSortableField(this.indexPattern, config.get('context:tieBreakerFields')),
+    parseInt(uiSettings.get('context:step'), 10),
+    getFirstSortableField(this.indexPattern, uiSettings.get('context:tieBreakerFields')),
     this.discoverUrl
   );
 

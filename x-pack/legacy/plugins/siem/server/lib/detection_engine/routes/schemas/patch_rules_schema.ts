@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
 import {
+  actions,
   enabled,
   description,
   false_positives,
@@ -31,6 +32,7 @@ import {
   to,
   type,
   threat,
+  throttle,
   references,
   note,
   id,
@@ -43,6 +45,7 @@ import { hasListsFeature } from '../../feature_flags';
 /* eslint-enable @typescript-eslint/camelcase */
 
 export const patchRulesSchema = Joi.object({
+  actions,
   anomaly_threshold,
   description,
   enabled,
@@ -69,6 +72,7 @@ export const patchRulesSchema = Joi.object({
   to,
   type,
   threat,
+  throttle,
   references,
   note: note.allow(''),
   version,
