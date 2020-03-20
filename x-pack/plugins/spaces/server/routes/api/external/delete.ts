@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
@@ -11,7 +12,7 @@ import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getSavedObjects, spacesService } = deps;
+  const { externalRouter, log, getSavedObjects, spacesService } = deps;
 
   externalRouter.delete(
     {
@@ -33,6 +34,13 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
       } catch (error) {
         if (SavedObjectsClient.errors.isNotFoundError(error)) {
           return response.notFound();
+        } else if (SavedObjectsClient.errors.isEsCannotExecuteScriptError(error)) {
+          log.error(
+            `Failed to delete space '${id}', cannot execute script in Elasticsearch query: ${error.message}`
+          );
+          return response.customError(
+            wrapError(Boom.notImplemented('Cannot execute script in Elasticsearch query'))
+          );
         }
         return response.customError(wrapError(error));
       }

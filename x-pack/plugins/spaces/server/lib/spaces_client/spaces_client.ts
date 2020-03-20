@@ -209,9 +209,9 @@ export class SpacesClient {
       throw Boom.badRequest('This Space cannot be deleted because it is reserved.');
     }
 
-    await repository.delete('space', id);
-
     await repository.deleteByNamespace(id);
+
+    await repository.delete('space', id);
   }
 
   private useRbac(): boolean {

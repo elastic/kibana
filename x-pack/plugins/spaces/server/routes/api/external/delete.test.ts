@@ -76,6 +76,7 @@ describe('Spaces Public API', () => {
     return {
       routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
+      savedObjectsRepositoryMock,
     };
   };
 
@@ -142,6 +143,26 @@ describe('Spaces Public API', () => {
     const { status } = response;
 
     expect(status).toEqual(404);
+  });
+
+  it(`returns http/501 when scripts cannot be executed in Elasticsearch`, async () => {
+    const { routeHandler, savedObjectsRepositoryMock } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'a-space',
+      },
+      method: 'delete',
+    });
+    // @ts-ignore
+    savedObjectsRepositoryMock.deleteByNamespace.mockRejectedValue(
+      new Error('cannot execute script')
+    );
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    const { status } = response;
+
+    expect(status).toEqual(501);
   });
 
   it(`DELETE spaces/{id}' cannot delete reserved spaces`, async () => {

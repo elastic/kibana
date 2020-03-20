@@ -264,6 +264,55 @@ describe('savedObjectsClient/errorTypes', () => {
       });
     });
   });
+  describe('EsCannotExecuteScript error', () => {
+    describe('decorateEsCannotExecuteScriptError', () => {
+      it('returns original object', () => {
+        const error = new Error();
+        expect(SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(error)).toBe(error);
+      });
+
+      it('makes the error identifiable as a EsCannotExecuteScript error', () => {
+        const error = new Error();
+        expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(false);
+        SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(error);
+        expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(true);
+      });
+
+      it('adds boom properties', () => {
+        const error = SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(new Error());
+        expect(typeof error.output).toBe('object');
+        expect(error.output.statusCode).toBe(501);
+      });
+
+      it('preserves boom properties of input', () => {
+        const error = Boom.badRequest();
+        SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(error);
+        expect(error.output.statusCode).toBe(400);
+      });
+
+      describe('error.output', () => {
+        it('defaults to message of error', () => {
+          const error = SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(
+            new Error('foobar')
+          );
+          expect(error.output.payload).toHaveProperty('message', 'foobar');
+        });
+        it('prefixes message with passed reason', () => {
+          const error = SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(
+            new Error('foobar'),
+            'biz'
+          );
+          expect(error.output.payload).toHaveProperty('message', 'biz: foobar');
+        });
+        it('sets statusCode to 501', () => {
+          const error = SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(
+            new Error('foo')
+          );
+          expect(error.output).toHaveProperty('statusCode', 501);
+        });
+      });
+    });
+  });
   describe('EsUnavailable error', () => {
     describe('decorateEsUnavailableError', () => {
       it('returns original object', () => {

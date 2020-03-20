@@ -95,6 +95,9 @@ export const createLegacyAPI = ({
       errors: {
         isNotFoundError: jest.fn((e: any) => e.message.startsWith('not found:')),
         isConflictError: jest.fn((e: any) => e.message.startsWith('conflict')),
+        isEsCannotExecuteScriptError: jest.fn((e: any) =>
+          e.message.startsWith('cannot execute script')
+        ),
       },
     },
   } as unknown) as jest.Mocked<SavedObjectsLegacyService>;

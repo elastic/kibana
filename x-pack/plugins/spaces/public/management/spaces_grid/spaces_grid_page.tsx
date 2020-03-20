@@ -178,10 +178,14 @@ export class SpacesGridPage extends Component<Props, State> {
       return;
     }
 
+    this.setState({
+      showConfirmDeleteModal: false,
+    });
+
     try {
       await spacesManager.deleteSpace(space);
     } catch (error) {
-      const { message: errorMessage = '' } = error.data || {};
+      const { message: errorMessage = '' } = error.data || error.body || {};
 
       this.props.notifications.toasts.addDanger(
         i18n.translate('xpack.spaces.management.spacesGridPage.errorDeletingSpaceErrorMessage', {
@@ -191,11 +195,8 @@ export class SpacesGridPage extends Component<Props, State> {
           },
         })
       );
+      return;
     }
-
-    this.setState({
-      showConfirmDeleteModal: false,
-    });
 
     this.loadGrid();
 

@@ -1836,6 +1836,8 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static decorateConflictError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
+    static decorateEsCannotExecuteScriptError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
     static decorateEsUnavailableError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
     static decorateForbiddenError(error: Error, reason?: string): DecoratedError;
@@ -1851,6 +1853,8 @@ export class SavedObjectsErrorHelpers {
     static isConflictError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isEsAutoCreateIndexError(error: Error | DecoratedError): boolean;
+    // (undocumented)
+    static isEsCannotExecuteScriptError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isEsUnavailableError(error: Error | DecoratedError): boolean;
     // (undocumented)
