@@ -149,7 +149,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         )}
         fieldLabel={i18n.translate(
           'xpack.apm.agentConfig.servicePage.environment.fieldLabel',
-          { defaultMessage: 'Service Environment' }
+          { defaultMessage: 'Service environment' }
         )}
         isLoading={environmentStatus === FETCH_STATUS.LOADING}
         options={environmentOptions}
