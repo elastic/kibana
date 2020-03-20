@@ -65,7 +65,7 @@ export abstract class Embeddable<
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
 
-  private storage = new EmbeddableActionStorage(this);
+  private storage = new EmbeddableActionStorage((this as unknown) as Embeddable);
 
   private cachedDynamicActions?: UiActionsDynamicActionManager;
   public get dynamicActions(): UiActionsDynamicActionManager | undefined {
