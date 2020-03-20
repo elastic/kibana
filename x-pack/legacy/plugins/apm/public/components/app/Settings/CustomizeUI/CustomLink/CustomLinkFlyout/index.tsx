@@ -21,6 +21,7 @@ import { FlyoutFooter } from './FlyoutFooter';
 import { LinkSection } from './LinkSection';
 import { saveCustomLink } from './saveCustomLink';
 import { convertFiltersToArray, convertFiltersToObject } from './helper';
+import { LinkPreview } from './LinkPreview';
 
 interface Props {
   onClose: () => void;
@@ -105,6 +106,10 @@ export const CustomLinkFlyout = ({
             <EuiSpacer size="l" />
 
             <FiltersSection filters={filters} onChangeFilters={setFilters} />
+
+            <EuiSpacer size="l" />
+
+            <LinkPreview label={label} url={url} filters={filters} />
           </EuiFlyoutBody>
 
           <FlyoutFooter

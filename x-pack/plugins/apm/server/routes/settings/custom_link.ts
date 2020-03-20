@@ -10,6 +10,19 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_or_update_custom_link';
 import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_link';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
+import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
+
+export const customLinkTransactionRoute = createRoute(core => ({
+  path: '/api/apm/settings/custom_links/transaction',
+  params: {
+    query: FilterOptionsRt
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { params } = context;
+    return await getTransaction({ setup, filters: params.query });
+  }
+}));
 
 export const listCustomLinksRoute = createRoute(core => ({
   path: '/api/apm/settings/custom_links',

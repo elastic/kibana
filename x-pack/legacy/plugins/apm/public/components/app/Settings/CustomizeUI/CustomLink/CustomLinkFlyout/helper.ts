@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import Mustache from 'mustache';
 import { isEmpty, pick } from 'lodash';
+import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   FilterOptions,
   FILTER_OPTIONS
@@ -109,4 +111,65 @@ export const getSelectOptions = (
         ([filterKey]) => filterKey === value && filterKey !== selectedKey
       )
   );
+};
+
+const getInvalidTemplateVariables = (
+  template: string,
+  transaction: Transaction
+) => {
+  return (Mustache.parse(template) as Array<[string, string]>)
+    .filter(([type]) => type === 'name')
+    .map(([, value]) => value)
+    .filter(templateVar => _.get(transaction, templateVar) == null);
+};
+
+const validateUrl = (url: string, transaction?: Transaction) => {
+  if (!transaction || isEmpty(transaction)) {
+    return i18n.translate(
+      'xpack.apm.settings.customizeUI.customLink.preview.transaction.notFound',
+      {
+        defaultMessage:
+          "We couldn't find a matching transaction documents based on the defined filters."
+      }
+    );
+  }
+  try {
+    const invalidVariables = getInvalidTemplateVariables(url, transaction);
+    if (!isEmpty(invalidVariables)) {
+      return i18n.translate(
+        'xpack.apm.settings.customizeUI.customLink.preview.contextVariable.noMatch',
+        {
+          defaultMessage:
+            "We couldn't find a value match for {variables} in the example transaction document.",
+          values: {
+            variables: invalidVariables
+              .map(variable => `{{${variable}}}`)
+              .join(', ')
+          }
+        }
+      );
+    }
+  } catch (e) {
+    return i18n.translate(
+      'xpack.apm.settings.customizeUI.customLink.preview.contextVariable.invalid',
+      {
+        defaultMessage:
+          "We couldn't find an example transaction document due to invalid variable(s) defined."
+      }
+    );
+  }
+};
+
+export const replaceTemplateVariables = (
+  url: string,
+  transaction?: Transaction
+) => {
+  const error = validateUrl(url, transaction);
+  let formattedUrl = url;
+  try {
+    formattedUrl = Mustache.render(url, transaction);
+  } catch (e) {
+    // errors will be caught on validateUrl function
+  }
+  return { formattedUrl, error };
 };
