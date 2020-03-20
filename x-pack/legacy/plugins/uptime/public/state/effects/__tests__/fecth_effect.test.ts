@@ -65,9 +65,9 @@ describe('fetch saga effect factory', () => {
       asyncAction.success,
       asyncAction.fail
     )(calledAction);
-    let next = fetchEffect.next().value;
+    let next = fetchEffect.next();
 
-    expect(next).toEqual(call(fetchStatus, calledAction.payload));
+    expect(next.value).toEqual(call(fetchStatus, calledAction.payload));
 
     const unexpectedErrorResult = put(asyncAction.fail(unExpectedError));
 
