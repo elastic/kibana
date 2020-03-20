@@ -11,16 +11,16 @@ export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
 export interface ConstructorOpts {
   logger: Logger;
-  clusterClient: EsClusterClient;
+  clusterClientPromise: Promise<EsClusterClient>;
 }
 
 export class ClusterClientAdapter {
   private readonly logger: Logger;
-  private readonly clusterClient: EsClusterClient;
+  private readonly clusterClientPromise: Promise<EsClusterClient>;
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
-    this.clusterClient = opts.clusterClient;
+    this.clusterClientPromise = opts.clusterClientPromise;
   }
 
   public async indexDocument(doc: any): Promise<void> {
@@ -110,7 +110,8 @@ export class ClusterClientAdapter {
   private async callEs(operation: string, body?: any): Promise<any> {
     try {
       this.debug(`callEs(${operation}) calls:`, body);
-      const result = await this.clusterClient.callAsInternalUser(operation, body);
+      const clusterClient = await this.clusterClientPromise;
+      const result = await clusterClient.callAsInternalUser(operation, body);
       this.debug(`callEs(${operation}) result:`, result);
       return result;
     } catch (err) {

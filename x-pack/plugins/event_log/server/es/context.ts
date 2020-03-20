@@ -32,7 +32,7 @@ export function createEsContext(params: EsContextCtorParams): EsContext {
 
 export interface EsContextCtorParams {
   logger: Logger;
-  clusterClient: EsClusterClient;
+  clusterClientPromise: Promise<EsClusterClient>;
   indexNameRoot: string;
 }
 
@@ -50,7 +50,7 @@ class EsContextImpl implements EsContext {
     this.initialized = false;
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
-      clusterClient: params.clusterClient,
+      clusterClientPromise: params.clusterClientPromise,
     });
   }
 
