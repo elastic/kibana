@@ -7,7 +7,6 @@
 import { sortBy } from 'lodash';
 
 import { RequestHandlerContext } from 'src/core/server';
-import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesSummaryBucket,
@@ -293,14 +292,14 @@ export interface LogEntryDocument {
   id: string;
   fields: Fields;
   highlights: Highlights;
-  cursor: TimeKey;
+  cursor: LogEntriesCursor;
 }
 
 export interface LogSummaryBucket {
   entriesCount: number;
   start: number;
   end: number;
-  topEntryKeys: TimeKey[];
+  topEntryKeys: LogEntriesCursor[];
 }
 
 const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>
