@@ -378,7 +378,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
-    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+    // (undocumented)
+    getStartServices: StartServicesAccessor<TPluginsStart>;
     // (undocumented)
     http: HttpSetup;
     // @deprecated
@@ -1234,6 +1235,11 @@ export class SimpleSavedObject<T = unknown> {
     // (undocumented)
     _version?: SavedObject<T>['version'];
 }
+
+// Warning: (ae-missing-release-tag) "StartServicesAccessor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<[CoreStart, TPluginsStart]>;
 
 // @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;

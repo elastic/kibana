@@ -629,7 +629,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
-    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+    // (undocumented)
+    getStartServices: StartServicesAccessor<TPluginsStart>;
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
@@ -2268,6 +2269,11 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
 }>;
+
+// Warning: (ae-missing-release-tag) "StartServicesAccessor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<[CoreStart, TPluginsStart]>;
 
 // @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
