@@ -6,6 +6,11 @@ kibanaLibrary.load()
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
   githubPr.withDefaultPrComments {
     catchError {
+      for (def i = 0; i < 10; i ++) {
+        catchError {
+          error "Testing error #${i}"
+        }
+      }
       retryable.enable()
       parallel([
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
