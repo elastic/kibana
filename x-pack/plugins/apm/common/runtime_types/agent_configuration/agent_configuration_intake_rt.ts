@@ -5,10 +5,10 @@
  */
 
 import * as t from 'io-ts';
-import { configSettingDefinitions } from './config_setting_definitions';
+import { settingDefinitions } from './setting_definitions';
 
 // retrieve validation from config definitions settings and validate on the server
-const knownSettings = configSettingDefinitions.reduce<
+const knownSettings = settingDefinitions.reduce<
   // TODO: is it possible to get rid of any?
   Record<string, t.Type<any, string, unknown>>
 >((acc, { key, validation }) => {

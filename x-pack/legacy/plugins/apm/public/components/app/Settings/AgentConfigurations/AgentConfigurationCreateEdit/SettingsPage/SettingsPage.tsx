@@ -25,9 +25,9 @@ import { history } from '../../../../../../utils/history';
 import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
 import {
   filterByAgent,
-  configSettingDefinitions,
+  settingDefinitions,
   isValid
-} from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/config_setting_definitions';
+} from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/setting_definitions';
 import { saveConfig } from './saveConfig';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useUiTracker } from '../../../../../../../../../../plugins/observability/public';
@@ -64,7 +64,7 @@ export function SettingsPage({
 
   const isFormValid = useMemo(() => {
     return (
-      configSettingDefinitions
+      settingDefinitions
         // only validate settings that are not empty
         .filter(({ key }) => {
           const value = newConfig.settings[key];
@@ -245,7 +245,7 @@ function renderSettings({
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
 }) {
   return (
-    configSettingDefinitions
+    settingDefinitions
 
       // filter out agent specific items that are not applicable
       // to the selected service

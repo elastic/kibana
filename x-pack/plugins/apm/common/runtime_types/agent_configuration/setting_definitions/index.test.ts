@@ -5,19 +5,16 @@
  */
 
 import { omit } from 'lodash';
-import {
-  filterByAgent,
-  ConfigSettingDefinition,
-  configSettingDefinitions
-} from '.';
+import { filterByAgent, settingDefinitions } from '.';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { SettingDefinition } from './types';
 
 describe('filterByAgent', () => {
   describe('when `excludeAgents` is dotnet and nodejs', () => {
     const setting = {
       key: 'my-setting',
       excludeAgents: ['dotnet', 'nodejs']
-    } as ConfigSettingDefinition;
+    } as SettingDefinition;
 
     it('should not include dotnet', () => {
       expect(filterByAgent('dotnet')(setting)).toBe(false);
@@ -32,7 +29,7 @@ describe('filterByAgent', () => {
     const setting = {
       key: 'my-setting',
       includeAgents: ['dotnet', 'nodejs']
-    } as ConfigSettingDefinition;
+    } as SettingDefinition;
 
     it('should not include go', () => {
       expect(filterByAgent('go')(setting)).toBe(false);
@@ -163,10 +160,10 @@ describe('filterByAgent', () => {
   });
 });
 
-describe('configSettingDefinitions', () => {
+describe('settingDefinitions', () => {
   it('should have correct default values', () => {
     expect(
-      configSettingDefinitions.map(def => {
+      settingDefinitions.map(def => {
         return {
           ...omit(def, [
             'defaultValue',
@@ -184,6 +181,6 @@ describe('configSettingDefinitions', () => {
 });
 
 function getSettingKeysForAgent(agentName: AgentName | undefined) {
-  const definitions = configSettingDefinitions.filter(filterByAgent(agentName));
+  const definitions = settingDefinitions.filter(filterByAgent(agentName));
   return definitions.map(def => def.key);
 }

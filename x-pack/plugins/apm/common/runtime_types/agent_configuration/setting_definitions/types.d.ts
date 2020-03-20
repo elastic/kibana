@@ -93,7 +93,7 @@ interface DurationSetting extends BaseSetting {
   units?: string[];
 }
 
-export type RawConfigSettingDefinition =
+export type RawSettingDefinition =
   | TextSetting
   | FloatSetting
   | IntegerSetting
@@ -102,6 +102,6 @@ export type RawConfigSettingDefinition =
   | BytesSetting
   | DurationSetting;
 
-export type ConfigSettingDefinition = RawConfigSettingDefinition & {
-  validation: NonNullable<RawConfigSettingDefinition['validation']>;
+export type SettingDefinition = RawSettingDefinition & {
+  validation: NonNullable<RawSettingDefinition['validation']>;
 };

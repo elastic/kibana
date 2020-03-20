@@ -15,14 +15,12 @@ import { isRumAgentName } from '../../../agent_name';
 import { numberFloatRt } from '../number_float';
 import { bytesRt, BYTE_UNITS } from '../bytes_rt';
 import { durationRt, DURATION_UNITS } from '../duration_rt';
-import { RawConfigSettingDefinition, ConfigSettingDefinition } from './types';
+import { RawSettingDefinition, SettingDefinition } from './types';
 import { generalSettings } from './general_settings';
 import { javaSettings } from './java_settings';
 
-function getDefaultsByType(
-  configSettingDefinition: RawConfigSettingDefinition
-) {
-  switch (configSettingDefinition.type) {
+function getDefaultsByType(settingDefinition: RawSettingDefinition) {
+  switch (settingDefinition.type) {
     case 'boolean':
       return { validation: booleanRt };
     case 'text':
@@ -65,7 +63,7 @@ function getDefaultsByType(
 }
 
 export function filterByAgent(agentName?: AgentName) {
-  return (setting: ConfigSettingDefinition) => {
+  return (setting: SettingDefinition) => {
     // agentName is missing if "All" was selected
     if (!agentName) {
       // options that only apply to certain agents will be filtered out
@@ -93,11 +91,11 @@ export function filterByAgent(agentName?: AgentName) {
   };
 }
 
-export function isValid(setting: ConfigSettingDefinition, value: unknown) {
+export function isValid(setting: SettingDefinition, value: unknown) {
   return isRight(setting.validation.decode(value));
 }
 
-export const configSettingDefinitions = sortBy(
+export const settingDefinitions = sortBy(
   [...generalSettings, ...javaSettings].map(def => {
     const defWithDefaults = {
       ...getDefaultsByType(def),
@@ -109,7 +107,7 @@ export const configSettingDefinitions = sortBy(
       throw new Error(`Missing validation for ${def.key}`);
     }
 
-    return defWithDefaults as ConfigSettingDefinition;
+    return defWithDefaults as SettingDefinition;
   }),
   'key'
 );

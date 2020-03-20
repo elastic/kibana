@@ -17,12 +17,12 @@ import {
   EuiIconTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isValid } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/config_setting_definitions';
+import { SettingDefinition } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/setting_definitions/types';
+import { isValid } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/setting_definitions';
 import {
   amountAndUnitToString,
   amountAndUnitToObject
 } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/amount_and_unit';
-import { ConfigSettingDefinition } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/config_setting_definitions';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
 function FormRow({
@@ -30,7 +30,7 @@ function FormRow({
   value,
   onChange
 }: {
-  setting: ConfigSettingDefinition;
+  setting: SettingDefinition;
   value?: string;
   onChange: (key: string, value: string) => void;
 }) {
@@ -126,9 +126,7 @@ function FormRow({
     }
 
     default:
-      throw new Error(
-        `Unknown type "${(setting as ConfigSettingDefinition).type}"`
-      );
+      throw new Error(`Unknown type "${(setting as SettingDefinition).type}"`);
   }
 }
 
@@ -139,7 +137,7 @@ export function SettingFormRow({
   onChange
 }: {
   isUnsaved: boolean;
-  setting: ConfigSettingDefinition;
+  setting: SettingDefinition;
   value?: string;
   onChange: (key: string, value: string) => void;
 }) {

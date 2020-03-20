@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RawConfigSettingDefinition } from './types';
+import { RawSettingDefinition } from './types';
 
-export const javaSettings: RawConfigSettingDefinition[] = [
+export const javaSettings: RawSettingDefinition[] = [
   // ENABLE_LOG_CORRELATION
   {
     key: 'enable_log_correlation',

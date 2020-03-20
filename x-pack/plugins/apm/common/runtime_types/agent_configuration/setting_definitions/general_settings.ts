@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { getIntegerRt } from '../integer_rt';
 import { captureBodyRt } from '../capture_body_rt';
-import { RawConfigSettingDefinition } from './types';
+import { RawSettingDefinition } from './types';
 
 /*
  * Settings added here will show up in the UI and will be validated on the client and server
  */
-export const generalSettings: RawConfigSettingDefinition[] = [
+export const generalSettings: RawSettingDefinition[] = [
   // Active
   {
     key: 'active',
