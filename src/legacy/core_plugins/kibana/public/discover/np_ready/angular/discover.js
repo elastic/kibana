@@ -64,7 +64,7 @@ const {
   share,
   timefilter,
   toastNotifications,
-  uiSettings,
+  uiSettings: config,
   visualizations,
 } = getServices();
 
@@ -131,7 +131,7 @@ app.config($routeProvider => {
                *
                *  @type {State}
                */
-              const id = getIndexPatternId(index, indexPatternList, uiSettings.get('defaultIndex'));
+              const id = getIndexPatternId(index, indexPatternList, config.get('defaultIndex'));
               return Promise.props({
                 list: indexPatternList,
                 loaded: indexPatterns.get(id),
@@ -184,7 +184,6 @@ function discoverController(
   $timeout,
   $window,
   Promise,
-  config,
   kbnUrl,
   localStorage,
   uiCapabilities
