@@ -48,7 +48,7 @@ export const ContextTab: FunctionComponent = () => {
         }
         labelAppend={
           <EuiText size="xs">
-            <EuiLink href={links.painlessExecuteAPI} target="_blank">
+            <EuiLink href={links.painlessExecuteAPIContexts} target="_blank">
               {i18n.translate('xpack.painlessLab.contextFieldDocLinkText', {
                 defaultMessage: 'Context docs',
               })}
