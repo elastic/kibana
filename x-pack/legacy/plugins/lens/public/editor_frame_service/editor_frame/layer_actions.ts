@@ -85,5 +85,6 @@ export function appendLayer({
       ...state.visualization,
       state: activeVisualization.appendLayer(state.visualization.state, layerId),
     },
+    stagedPreview: undefined,
   };
 }
