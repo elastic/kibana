@@ -12,8 +12,8 @@ import { LicenseCheck } from '../license_checks';
 import { spacesUtilsProvider, RequestFacade } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
 import { privilegesProvider, MlCapabilities } from '../../lib/check_privileges';
-import { MlInfoResponse } from '../../../../../legacy/plugins/ml/common/types/ml_server_info';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../../legacy/plugins/ml/common/constants/index_patterns';
+import { MlInfoResponse } from '../../../common/types/ml_server_info';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 
 export interface MlSystemProvider {
   mlSystemProvider(

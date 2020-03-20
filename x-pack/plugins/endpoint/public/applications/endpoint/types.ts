@@ -7,7 +7,7 @@
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
-  EndpointMetadata,
+  HostMetadata,
   AlertData,
   AlertResultList,
   Immutable,
@@ -25,22 +25,22 @@ export type MiddlewareFactory<S = GlobalState> = (
   api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
-export interface ManagementListState {
-  endpoints: EndpointMetadata[];
-  total: number;
+export interface HostListState {
+  hosts: HostMetadata[];
   pageSize: number;
   pageIndex: number;
+  total: number;
   loading: boolean;
   detailsError?: ServerApiError;
-  details?: Immutable<EndpointMetadata>;
+  details?: Immutable<HostMetadata>;
   location?: Immutable<EndpointAppLocation>;
 }
 
-export interface ManagementListPagination {
+export interface HostListPagination {
   pageIndex: number;
   pageSize: number;
 }
-export interface ManagingIndexUIQueryParams {
+export interface HostIndexUIQueryParams {
   selected_host?: string;
 }
 
@@ -56,6 +56,7 @@ export interface PolicyData {
   total: number;
   pending: number;
   failed: number;
+  id: string;
   created_by: string;
   created: string;
   updated_by: string;
@@ -78,10 +79,23 @@ export interface PolicyListState {
   isLoading: boolean;
 }
 
+/**
+ * Policy list store state
+ */
+export interface PolicyDetailsState {
+  /** A single policy item  */
+  policyItem: PolicyData | undefined;
+  /** data is being retrieved from server */
+  isLoading: boolean;
+  /** current location of the application */
+  location?: Immutable<EndpointAppLocation>;
+}
+
 export interface GlobalState {
-  readonly managementList: ManagementListState;
+  readonly hostList: HostListState;
   readonly alertList: AlertListState;
   readonly policyList: PolicyListState;
+  readonly policyDetails: PolicyDetailsState;
 }
 
 /**

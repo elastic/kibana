@@ -17,6 +17,10 @@
  * under the License.
  */
 
+export * from './aggs';
+export * from './expressions';
+export * from './tabify';
+
 export {
   ISearchSetup,
   ISearchStart,
@@ -51,5 +55,7 @@ export {
   EsQuerySortValue,
   SortDirection,
 } from './search_source';
+
+export { SearchInterceptor } from './search_interceptor';
 
 export { FetchOptions } from './fetch';

@@ -24,14 +24,14 @@ import {
   FilterableContainerInput,
   FILTERABLE_CONTAINER,
 } from './filterable_container';
-import { GetEmbeddableFactory } from '../../types';
 import { EmbeddableFactoryOptions } from '../../embeddables/embeddable_factory';
+import { EmbeddableStart } from '../../../plugin';
 
 export class FilterableContainerFactory extends EmbeddableFactory<FilterableContainerInput> {
   public readonly type = FILTERABLE_CONTAINER;
 
   constructor(
-    private readonly getFactory: GetEmbeddableFactory,
+    private readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
     options: EmbeddableFactoryOptions<any> = {}
   ) {
     super(options);
@@ -43,7 +43,7 @@ export class FilterableContainerFactory extends EmbeddableFactory<FilterableCont
     });
   }
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 

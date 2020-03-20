@@ -12,7 +12,7 @@ import {
   DatafeedOverride,
   JobOverride,
   DataRecognizerConfigResponse,
-} from '../../../../../legacy/plugins/ml/common/types/modules';
+} from '../../../common/types/modules';
 
 export interface ModulesProvider {
   modulesProvider(

@@ -4,7 +4,12 @@
 
 ## ElasticsearchServiceSetup.dataClient property
 
-A client for the `data` cluster. All Elasticsearch config value changes are processed under the hood. See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)<!-- -->.
+> Warning: This API is now obsolete.
+> 
+> Use [ElasticsearchServiceStart.legacy.client](./kibana-plugin-core-server.elasticsearchservicestart.legacy.md) instead.
+> 
+> A client for the `data` cluster. All Elasticsearch config value changes are processed under the hood. See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)<!-- -->.
+> 
 
 <b>Signature:</b>
 

@@ -25,17 +25,17 @@
  */
 
 export { npSetup, npStart } from 'ui/new_platform';
-export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+
 export { KbnUrl } from 'ui/url/kbn_url';
 // @ts-ignore
-export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url/index';
+export { KbnUrlProvider } from 'ui/url/index';
 export { IInjector } from 'ui/chrome';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export {
   configureAppAngularModule,
-  ensureDefaultIndexPattern,
   IPrivate,
   migrateLegacyQuery,
   PrivateProvider,
   PromiseServiceCreator,
+  subscribeWithScope,
 } from '../../../../../plugins/kibana_legacy/public';

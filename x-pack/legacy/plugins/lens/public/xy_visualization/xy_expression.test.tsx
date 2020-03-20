@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Axis } from '@elastic/charts';
-import { AreaSeries, BarSeries, Position, LineSeries, Settings, ScaleType } from '@elastic/charts';
+import {
+  AreaSeries,
+  Axis,
+  BarSeries,
+  Position,
+  LineSeries,
+  Settings,
+  ScaleType,
+} from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
 import React from 'react';

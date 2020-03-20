@@ -206,7 +206,7 @@ const mockCore = {
 
 const mockConfig: ConfigSchema = {
   indexPatternTitle: 'apm-*',
-  serviceMapEnabled: false,
+  serviceMapEnabled: true,
   ui: {
     enabled: false
   }

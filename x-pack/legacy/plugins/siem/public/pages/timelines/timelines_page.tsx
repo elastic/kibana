@@ -26,23 +26,25 @@ type OwnProps = TimelinesProps;
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => (
-  <>
-    <WrapperPage>
-      <HeaderPage border title={i18n.PAGE_TITLE} />
+const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
+  return (
+    <>
+      <WrapperPage>
+        <HeaderPage title={i18n.PAGE_TITLE} />
 
-      <TimelinesContainer>
-        <StatefulOpenTimeline
-          apolloClient={apolloClient}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isModal={false}
-          title={i18n.ALL_TIMELINES_PANEL_TITLE}
-        />
-      </TimelinesContainer>
-    </WrapperPage>
+        <TimelinesContainer>
+          <StatefulOpenTimeline
+            apolloClient={apolloClient}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            isModal={false}
+            title={i18n.ALL_TIMELINES_PANEL_TITLE}
+          />
+        </TimelinesContainer>
+      </WrapperPage>
 
-    <SpyRoute />
-  </>
-);
+      <SpyRoute />
+    </>
+  );
+};
 
 export const TimelinesPage = React.memo(TimelinesPageComponent);

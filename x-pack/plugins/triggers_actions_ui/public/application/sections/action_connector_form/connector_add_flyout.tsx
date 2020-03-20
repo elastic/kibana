@@ -18,6 +18,9 @@ import {
   EuiButton,
   EuiFlyoutBody,
   EuiBetaBadge,
+  EuiCallOut,
+  EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
@@ -27,6 +30,7 @@ import { connectorReducer } from './connector_reducer';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 
 export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
@@ -48,6 +52,7 @@ export const ConnectorAddFlyout = ({
     reloadConnectors,
   } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
+  const [hasActionsDisabledByLicense, setHasActionsDisabledByLicense] = useState<boolean>(false);
 
   // hooks
   const initialConnector = {
@@ -86,7 +91,11 @@ export const ConnectorAddFlyout = ({
   let actionTypeModel;
   if (!actionType) {
     currentForm = (
-      <ActionTypeMenu onActionTypeChange={onActionTypeChange} actionTypes={actionTypes} />
+      <ActionTypeMenu
+        onActionTypeChange={onActionTypeChange}
+        actionTypes={actionTypes}
+        setHasActionsDisabledByLicense={setHasActionsDisabledByLicense}
+      />
     );
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
@@ -104,6 +113,7 @@ export const ConnectorAddFlyout = ({
         dispatch={dispatch}
         errors={errors}
         actionTypeRegistry={actionTypeRegistry}
+        http={http}
       />
     );
   }
@@ -203,7 +213,11 @@ export const ConnectorAddFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{currentForm}</EuiFlyoutBody>
+      <EuiFlyoutBody
+        banner={!actionType && hasActionsDisabledByLicense && upgradeYourLicenseCallOut}
+      >
+        {currentForm}
+      </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -251,3 +265,24 @@ export const ConnectorAddFlyout = ({
     </EuiFlyout>
   );
 };
+
+const upgradeYourLicenseCallOut = (
+  <EuiCallOut
+    title={i18n.translate(
+      'xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerTitle',
+      { defaultMessage: 'Upgrade your plan to access more connector types' }
+    )}
+  >
+    <FormattedMessage
+      id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerMessage"
+      defaultMessage="With an upgraded license, you have the option to connect to more 3rd party services."
+    />
+    <EuiSpacer size="xs" />
+    <EuiLink href={VIEW_LICENSE_OPTIONS_LINK} target="_blank">
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerLinkTitle"
+        defaultMessage="Upgrade now"
+      />
+    </EuiLink>
+  </EuiCallOut>
+);

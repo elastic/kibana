@@ -26,8 +26,9 @@ import {
   RawConfigurationProvider,
   coreDeprecationProvider,
 } from './config';
+import { CoreApp } from './core_app';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService, InternalHttpServiceSetup } from './http';
+import { HttpService } from './http';
 import { RenderingService, RenderingServiceSetup } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
@@ -69,6 +70,7 @@ export class Server {
   private readonly uiSettings: UiSettingsService;
   private readonly uuid: UuidService;
   private readonly metrics: MetricsService;
+  private readonly coreApp: CoreApp;
 
   private coreStart?: InternalCoreStart;
 
@@ -92,6 +94,7 @@ export class Server {
     this.capabilities = new CapabilitiesService(core);
     this.uuid = new UuidService(core);
     this.metrics = new MetricsService(core);
+    this.coreApp = new CoreApp(core);
   }
 
   public async setup() {
@@ -121,8 +124,6 @@ export class Server {
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
     });
-
-    this.registerDefaultRoute(httpSetup);
 
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
@@ -168,6 +169,7 @@ export class Server {
     });
 
     this.registerCoreContext(coreSetup, renderingSetup);
+    this.coreApp.setup(coreSetup);
 
     return coreSetup;
   }
@@ -177,18 +179,16 @@ export class Server {
     const savedObjectsStart = await this.savedObjects.start({});
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-
-    const pluginsStart = await this.plugins.start({
-      capabilities: capabilitiesStart,
-      savedObjects: savedObjectsStart,
-      uiSettings: uiSettingsStart,
-    });
+    const elasticsearchStart = await this.elasticsearch.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
+      elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
     };
+
+    const pluginsStart = await this.plugins.start(this.coreStart!);
 
     await this.legacy.start({
       core: {
@@ -216,13 +216,6 @@ export class Server {
     await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();
-  }
-
-  private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
-    const router = httpSetup.createRouter('/core');
-    router.get({ path: '/', validate: false }, async (context, req, res) =>
-      res.ok({ body: { version: '0.0.1' } })
-    );
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup, rendering: RenderingServiceSetup) {
