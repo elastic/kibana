@@ -140,6 +140,7 @@ export class APIKeys {
     request: KibanaRequest,
     params: InvalidateAPIKeyParams
   ): Promise<InvalidateAPIKeyResult | null> {
+    // User needs `manage_api_key` privilege to use this API
     return await this.callClusterToInvalidate(
       params,
       this.clusterClient.asScoped(request).callAsCurrentUser
