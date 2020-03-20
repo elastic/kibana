@@ -83,13 +83,13 @@ export const AlertAdd = ({
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   const actionsErrors = alert.actions.reduce(
-    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
+    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction, i: number) => {
       const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
       if (!actionType) {
         return { ...acc };
       }
       const actionValidationErrors = actionType.validateParams(alertAction.params);
-      return { ...acc, [alertAction.id]: actionValidationErrors };
+      return { ...acc, [i]: actionValidationErrors };
     },
     {}
   ) as Record<string, { errors: IErrorObject }>;
