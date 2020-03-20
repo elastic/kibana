@@ -4,25 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { User } from '../../../../../../plugins/case/common/api';
+
 export interface Comment {
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
   comment: string;
-  updatedAt: string;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
   version: string;
 }
 
 export interface Case {
   id: string;
+  closedAt: string | null;
+  closedBy: ElasticUser | null;
   comments: Comment[];
+  commentIds: string[];
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
-  state: string;
+  status: string;
   tags: string[];
   title: string;
-  updatedAt: string;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
   version: string;
 }
 
@@ -35,11 +42,17 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  state: string;
+  status: string;
   tags: string[];
+  reporters: User[];
 }
 
-export interface AllCases {
+export interface CasesStatus {
+  countClosedCases: number | null;
+  countOpenCases: number | null;
+}
+
+export interface AllCases extends CasesStatus {
   cases: Case[];
   page: number;
   perPage: number;
@@ -48,15 +61,26 @@ export interface AllCases {
 
 export enum SortFieldCase {
   createdAt = 'createdAt',
-  updatedAt = 'updatedAt',
+  closedAt = 'closedAt',
 }
 
 export interface ElasticUser {
-  readonly username: string;
+  readonly email?: string | null;
   readonly fullName?: string | null;
+  readonly username: string;
 }
 
 export interface FetchCasesProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+}
+
+export interface ApiProps {
+  signal: AbortSignal;
+}
+
+export interface BulkUpdateStatus {
+  status: string;
+  id: string;
+  version: string;
 }

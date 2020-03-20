@@ -29,6 +29,11 @@ export interface ShowNewVisModalParams {
   onClose?: () => void;
 }
 
+/**
+ * shows modal dialog that allows you to create new visualization
+ * @param {string[]} editorParams
+ * @param {function} onClose - function that will be called when dialog is closed
+ */
 export function showNewVisModal({ editorParams = [], onClose }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
   let isClosed = false;

@@ -2,16 +2,6 @@
 
 exports[`EmptyState component does not render empty state with appropriate base path and no docs 1`] = `
 <EmptyStateComponent
-  data={
-    Object {
-      "statesIndexStatus": Object {
-        "docCount": Object {
-          "count": 0,
-        },
-        "indexExists": true,
-      },
-    }
-  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -115,6 +105,12 @@ exports[`EmptyState component does not render empty state with appropriate base 
     }
   }
   loading={false}
+  statesIndexStatus={
+    Object {
+      "docCount": 0,
+      "indexExists": true,
+    }
+  }
 >
   <DataMissing
     headingMessage="No uptime data found"
@@ -184,25 +180,11 @@ exports[`EmptyState component does not render empty state with appropriate base 
                       size="xxl"
                       type="uptimeApp"
                     >
-                      <EuiIconEmpty
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                        focusable="false"
-                        role="img"
-                        style={null}
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
+                      <div
+                        color="subdued"
+                        data-euiicon-type="uptimeApp"
+                        size="xxl"
+                      />
                     </EuiIcon>
                     <EuiSpacer
                       size="s"
@@ -297,7 +279,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
 </EmptyStateComponent>
 `;
 
-exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
+exports[`EmptyState component doesn't render child components when count is falsy 1`] = `
 <EmptyStateComponent
   intl={
     Object {
@@ -402,6 +384,7 @@ exports[`EmptyState component doesn't render child components when count is fals
     }
   }
   loading={false}
+  statesIndexStatus={null}
 >
   <EmptyStateLoading>
     <EuiEmptyPrompt
@@ -467,16 +450,6 @@ exports[`EmptyState component doesn't render child components when count is fals
 
 exports[`EmptyState component notifies when index does not exist 1`] = `
 <EmptyStateComponent
-  data={
-    Object {
-      "statesIndexStatus": Object {
-        "docCount": Object {
-          "count": 1,
-        },
-        "indexExists": false,
-      },
-    }
-  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -580,6 +553,12 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
     }
   }
   loading={false}
+  statesIndexStatus={
+    Object {
+      "docCount": 1,
+      "indexExists": false,
+    }
+  }
 >
   <DataMissing
     headingMessage="Uptime index not found"
@@ -649,25 +628,11 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                       size="xxl"
                       type="uptimeApp"
                     >
-                      <EuiIconEmpty
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                        focusable="false"
-                        role="img"
-                        style={null}
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
+                      <div
+                        color="subdued"
+                        data-euiicon-type="uptimeApp"
+                        size="xxl"
+                      />
                     </EuiIcon>
                     <EuiSpacer
                       size="s"
@@ -896,6 +861,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
     }
   }
   loading={false}
+  statesIndexStatus={null}
 >
   <EmptyStateError
     errors={
@@ -958,25 +924,11 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                       size="xxl"
                       type="securityApp"
                     >
-                      <EuiIconEmpty
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                        focusable="false"
-                        role="img"
-                        style={null}
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
+                      <div
+                        color="subdued"
+                        data-euiicon-type="securityApp"
+                        size="xxl"
+                      />
                     </EuiIcon>
                     <EuiSpacer
                       size="s"
@@ -1140,6 +1092,7 @@ exports[`EmptyState component renders loading state if no errors or doc count 1`
     }
   }
   loading={true}
+  statesIndexStatus={null}
 >
   <EmptyStateLoading>
     <EuiEmptyPrompt

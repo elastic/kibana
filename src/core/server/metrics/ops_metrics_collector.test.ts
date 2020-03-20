@@ -35,25 +35,43 @@ describe('OpsMetricsCollector', () => {
     mockOsCollector.collect.mockResolvedValue('osMetrics');
   });
 
-  it('gathers metrics from the underlying collectors', async () => {
-    mockOsCollector.collect.mockResolvedValue('osMetrics');
-    mockProcessCollector.collect.mockResolvedValue('processMetrics');
-    mockServerCollector.collect.mockResolvedValue({
-      requests: 'serverRequestsMetrics',
-      response_times: 'serverTimingMetrics',
+  describe('#collect', () => {
+    it('gathers metrics from the underlying collectors', async () => {
+      mockOsCollector.collect.mockResolvedValue('osMetrics');
+      mockProcessCollector.collect.mockResolvedValue('processMetrics');
+      mockServerCollector.collect.mockResolvedValue({
+        requests: 'serverRequestsMetrics',
+        response_times: 'serverTimingMetrics',
+      });
+
+      const metrics = await collector.collect();
+
+      expect(mockOsCollector.collect).toHaveBeenCalledTimes(1);
+      expect(mockProcessCollector.collect).toHaveBeenCalledTimes(1);
+      expect(mockServerCollector.collect).toHaveBeenCalledTimes(1);
+
+      expect(metrics).toEqual({
+        process: 'processMetrics',
+        os: 'osMetrics',
+        requests: 'serverRequestsMetrics',
+        response_times: 'serverTimingMetrics',
+      });
     });
+  });
 
-    const metrics = await collector.collect();
+  describe('#reset', () => {
+    it('call reset on the underlying collectors', () => {
+      collector.reset();
 
-    expect(mockOsCollector.collect).toHaveBeenCalledTimes(1);
-    expect(mockProcessCollector.collect).toHaveBeenCalledTimes(1);
-    expect(mockServerCollector.collect).toHaveBeenCalledTimes(1);
+      expect(mockOsCollector.reset).toHaveBeenCalledTimes(1);
+      expect(mockProcessCollector.reset).toHaveBeenCalledTimes(1);
+      expect(mockServerCollector.reset).toHaveBeenCalledTimes(1);
 
-    expect(metrics).toEqual({
-      process: 'processMetrics',
-      os: 'osMetrics',
-      requests: 'serverRequestsMetrics',
-      response_times: 'serverTimingMetrics',
+      collector.reset();
+
+      expect(mockOsCollector.reset).toHaveBeenCalledTimes(2);
+      expect(mockProcessCollector.reset).toHaveBeenCalledTimes(2);
+      expect(mockServerCollector.reset).toHaveBeenCalledTimes(2);
     });
   });
 });

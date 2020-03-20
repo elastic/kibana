@@ -129,7 +129,12 @@ const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
                   }
                   title={i18n.PAGE_TITLE}
                 >
-                  <EuiButton fill href={getRulesUrl()} iconType="gear">
+                  <EuiButton
+                    fill
+                    href={getRulesUrl()}
+                    iconType="gear"
+                    data-test-subj="manage-signal-detection-rules"
+                  >
                     {i18n.BUTTON_MANAGE_RULES}
                   </EuiButton>
                 </DetectionEngineHeaderPage>

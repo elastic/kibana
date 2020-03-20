@@ -9,6 +9,7 @@ import { deserializeCluster, serializeCluster } from './cluster_serialization';
 describe('cluster_serialization', () => {
   describe('deserializeCluster()', () => {
     it('should throw an error for invalid arguments', () => {
+      // @ts-ignore
       expect(() => deserializeCluster('foo', 'bar')).toThrowError();
     });
 
@@ -60,6 +61,39 @@ describe('cluster_serialization', () => {
       });
     });
 
+    it('should deserialize a cluster that contains a deprecated proxy address', () => {
+      expect(
+        deserializeCluster(
+          'test_cluster',
+          {
+            seeds: ['localhost:9300'],
+            connected: true,
+            num_nodes_connected: 1,
+            max_connections_per_cluster: 3,
+            initial_connect_timeout: '30s',
+            skip_unavailable: false,
+            transport: {
+              ping_schedule: '-1',
+              compress: false,
+            },
+          },
+          'localhost:9300'
+        )
+      ).toEqual({
+        name: 'test_cluster',
+        proxyAddress: 'localhost:9300',
+        mode: 'proxy',
+        hasDeprecatedProxySetting: true,
+        isConnected: true,
+        connectedNodesCount: 1,
+        maxConnectionsPerCluster: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+        transportPingSchedule: '-1',
+        transportCompress: false,
+      });
+    });
+
     it('should deserialize a cluster object with arbitrary missing properties', () => {
       expect(
         deserializeCluster('test_cluster', {
@@ -84,6 +118,7 @@ describe('cluster_serialization', () => {
 
   describe('serializeCluster()', () => {
     it('should throw an error for invalid arguments', () => {
+      // @ts-ignore
       expect(() => serializeCluster('foo')).toThrowError();
     });
 
@@ -105,8 +140,13 @@ describe('cluster_serialization', () => {
           cluster: {
             remote: {
               test_cluster: {
+                mode: null,
+                node_connections: null,
+                proxy_address: null,
+                proxy_socket_connections: null,
                 seeds: ['localhost:9300'],
                 skip_unavailable: false,
+                server_name: null,
               },
             },
           },
@@ -125,8 +165,13 @@ describe('cluster_serialization', () => {
           cluster: {
             remote: {
               test_cluster: {
+                mode: null,
+                node_connections: null,
+                proxy_address: null,
+                proxy_socket_connections: null,
                 seeds: ['localhost:9300'],
                 skip_unavailable: null,
+                server_name: null,
               },
             },
           },

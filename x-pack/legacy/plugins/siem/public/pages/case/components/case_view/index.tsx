@@ -4,26 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
-import {
-  EuiBadge,
-  EuiButtonToggle,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import * as i18n from './translations';
 import { Case } from '../../../../containers/case/types';
-import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
 import { HeaderPage } from '../../../../components/header_page';
 import { EditableTitle } from '../../../../components/header_page/editable_title';
-import { PropertyActions } from '../property_actions';
 import { TagList } from '../tag_list';
 import { useGetCase } from '../../../../containers/case/use_get_case';
 import { UserActionTree } from '../user_action_tree';
@@ -32,19 +21,13 @@ import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { getTypedPayload } from '../../../../containers/case/utils';
 import { WhitePageWrapper } from '../wrappers';
+import { useBasePath } from '../../../../lib/kibana';
+import { CaseStatus } from '../case_status';
+import { SpyRoute } from '../../../../utils/route/spy_routes';
 
 interface Props {
   caseId: string;
 }
-
-const MyDescriptionList = styled(EuiDescriptionList)`
-  ${({ theme }) => css`
-    & {
-      padding-right: ${theme.eui.euiSizeL};
-      border-right: ${theme.eui.euiBorderThin};
-    }
-  `}
-`;
 
 const MyWrapper = styled(WrapperPage)`
   padding-bottom: 0;
@@ -60,8 +43,11 @@ export interface CaseProps {
 }
 
 export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => {
+  const basePath = window.location.origin + useBasePath();
+  const caseLink = `${basePath}/app/siem#/case/${caseId}`;
   const { caseData, isLoading, updateKey, updateCaseProperty } = useUpdateCase(caseId, initialData);
 
+  // Update Fields
   const onUpdateField = useCallback(
     (newUpdateKey: keyof Case, updateValue: Case[keyof Case]) => {
       switch (newUpdateKey) {
@@ -90,47 +76,58 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             updateValue: tagsUpdate,
           });
           break;
-        case 'state':
-          const stateUpdate = getTypedPayload<string>(updateValue);
-          if (caseData.state !== updateValue) {
+        case 'status':
+          const statusUpdate = getTypedPayload<string>(updateValue);
+          if (caseData.status !== updateValue) {
             updateCaseProperty({
-              updateKey: 'state',
-              updateValue: stateUpdate,
+              updateKey: 'status',
+              updateValue: statusUpdate,
             });
           }
         default:
           return null;
       }
     },
-    [updateCaseProperty, caseData.state]
-  );
-
-  // TO DO refactor each of these const's into their own components
-  const propertyActions = [
-    {
-      iconType: 'trash',
-      label: 'Delete case',
-      onClick: () => null,
-    },
-    {
-      iconType: 'popout',
-      label: 'View ServiceNow incident',
-      onClick: () => null,
-    },
-    {
-      iconType: 'importAction',
-      label: 'Update ServiceNow incident',
-      onClick: () => null,
-    },
-  ];
-
-  const onSubmit = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
-  const toggleStateCase = useCallback(
-    e => onUpdateField('state', e.target.checked ? 'open' : 'closed'),
-    [onUpdateField]
+    [caseData.status]
   );
   const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
+  const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
+  const toggleStatusCase = useCallback(status => onUpdateField('status', status), [onUpdateField]);
 
+  const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
+
+  const caseStatusData = useMemo(
+    () =>
+      caseData.status === 'open'
+        ? {
+            'data-test-subj': 'case-view-createdAt',
+            value: caseData.createdAt,
+            title: i18n.CASE_OPENED,
+            buttonLabel: i18n.CLOSE_CASE,
+            status: caseData.status,
+            icon: 'checkInCircleFilled',
+            badgeColor: 'secondary',
+            isSelected: false,
+          }
+        : {
+            'data-test-subj': 'case-view-closedAt',
+            value: caseData.closedAt,
+            title: i18n.CASE_CLOSED,
+            buttonLabel: i18n.REOPEN_CASE,
+            status: caseData.status,
+            icon: 'magnet',
+            badgeColor: 'danger',
+            isSelected: true,
+          },
+    [caseData.closedAt, caseData.createdAt, caseData.status]
+  );
+  const emailContent = useMemo(
+    () => ({
+      subject: i18n.EMAIL_SUBJECT(caseData.title),
+      body: i18n.EMAIL_BODY(caseLink),
+    }),
+    [caseData.title]
+  );
   return (
     <>
       <MyWrapper>
@@ -144,56 +141,18 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             <EditableTitle
               isLoading={isLoading && updateKey === 'title'}
               title={caseData.title}
-              onSubmit={onSubmit}
+              onSubmit={onSubmitTitle}
             />
           }
           title={caseData.title}
         >
-          <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <MyDescriptionList compressed>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
-                    <EuiDescriptionListDescription>
-                      <EuiBadge
-                        color={caseData.state === 'open' ? 'secondary' : 'danger'}
-                        data-test-subj="case-view-state"
-                      >
-                        {caseData.state}
-                      </EuiBadge>
-                    </EuiDescriptionListDescription>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiDescriptionListTitle>{i18n.CASE_OPENED}</EuiDescriptionListTitle>
-                    <EuiDescriptionListDescription>
-                      <FormattedRelativePreferenceDate
-                        data-test-subj="case-view-createdAt"
-                        value={caseData.createdAt}
-                      />
-                    </EuiDescriptionListDescription>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </MyDescriptionList>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="l" alignItems="center">
-                <EuiFlexItem>
-                  <EuiButtonToggle
-                    data-test-subj="toggle-case-state"
-                    iconType={caseData.state === 'open' ? 'checkInCircleFilled' : 'magnet'}
-                    isLoading={isLoading && updateKey === 'state'}
-                    isSelected={caseData.state === 'open'}
-                    label={caseData.state === 'open' ? 'Close case' : 'Reopen case'}
-                    onChange={toggleStateCase}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <PropertyActions propertyActions={propertyActions} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <CaseStatus
+            caseId={caseData.id}
+            caseTitle={caseData.title}
+            isLoading={isLoading && updateKey === 'status'}
+            toggleStatusCase={toggleStatusCase}
+            {...caseStatusData}
+          />
         </HeaderPage>
       </MyWrapper>
       <WhitePageWrapper>
@@ -209,6 +168,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             <EuiFlexItem grow={2}>
               <UserList
                 data-test-subj="case-view-user-list"
+                email={emailContent}
                 headline={i18n.REPORTER}
                 users={[caseData.createdBy]}
               />
@@ -222,12 +182,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           </EuiFlexGroup>
         </MyWrapper>
       </WhitePageWrapper>
+      <SpyRoute state={spyState} />
     </>
   );
 });
 
 export const CaseView = React.memo(({ caseId }: Props) => {
-  const [{ data, isLoading, isError }] = useGetCase(caseId);
+  const { data, isLoading, isError } = useGetCase(caseId);
   if (isError) {
     return null;
   }
@@ -244,4 +205,5 @@ export const CaseView = React.memo(({ caseId }: Props) => {
   return <CaseComponent caseId={caseId} initialData={data} />;
 });
 
+CaseComponent.displayName = 'CaseComponent';
 CaseView.displayName = 'CaseView';

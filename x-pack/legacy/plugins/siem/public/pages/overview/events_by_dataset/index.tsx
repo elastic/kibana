@@ -28,6 +28,8 @@ import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 
 import * as i18n from '../translations';
 import { MatrixHisrogramConfigs } from '../../../components/matrix_histogram/types';
+import { useGetUrlSearch } from '../../../components/navigation/use_get_url_search';
+import { navTabs } from '../../home/home_navigations';
 
 const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
@@ -69,10 +71,15 @@ const EventsByDatasetComponent: React.FC<Props> = ({
 
   const kibana = useKibana();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+  const urlSearch = useGetUrlSearch(navTabs.hosts);
 
   const eventsCountViewEventsButton = useMemo(
-    () => <EuiButton href={getTabsOnHostsUrl(HostsTableType.events)}>{i18n.VIEW_EVENTS}</EuiButton>,
-    []
+    () => (
+      <EuiButton href={getTabsOnHostsUrl(HostsTableType.events, urlSearch)}>
+        {i18n.VIEW_EVENTS}
+      </EuiButton>
+    ),
+    [urlSearch]
   );
 
   const filterQuery = useMemo(

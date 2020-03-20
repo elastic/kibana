@@ -80,7 +80,7 @@ describe('ADD remote clusters', () => {
   };
 
   describe('success', () => {
-    addRemoteClustersTest('adds remote cluster', {
+    addRemoteClustersTest(`adds remote cluster with "sniff" mode`, {
       apiResponses: [
         async () => ({}),
         async () => ({
@@ -106,6 +106,7 @@ describe('ADD remote clusters', () => {
       payload: {
         name: 'test',
         seeds: ['127.0.0.1:9300'],
+        mode: 'sniff',
         skipUnavailable: false,
       },
       asserts: {
@@ -117,7 +118,79 @@ describe('ADD remote clusters', () => {
               body: {
                 persistent: {
                   cluster: {
-                    remote: { test: { seeds: ['127.0.0.1:9300'], skip_unavailable: false } },
+                    remote: {
+                      test: {
+                        seeds: ['127.0.0.1:9300'],
+                        skip_unavailable: false,
+                        mode: 'sniff',
+                        node_connections: null,
+                        proxy_address: null,
+                        proxy_socket_connections: null,
+                        server_name: null,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        ],
+        statusCode: 200,
+        result: {
+          acknowledged: true,
+        },
+      },
+    });
+    addRemoteClustersTest(`adds remote cluster with "proxy" mode`, {
+      apiResponses: [
+        async () => ({}),
+        async () => ({
+          acknowledged: true,
+          persistent: {
+            cluster: {
+              remote: {
+                test: {
+                  connected: true,
+                  mode: 'proxy',
+                  seeds: ['127.0.0.1:9300'],
+                  num_sockets_connected: 1,
+                  max_socket_connections: 18,
+                  initial_connect_timeout: '30s',
+                  skip_unavailable: false,
+                },
+              },
+            },
+          },
+          transient: {},
+        }),
+      ],
+      payload: {
+        name: 'test',
+        proxyAddress: '127.0.0.1:9300',
+        mode: 'proxy',
+        skipUnavailable: false,
+        serverName: 'foobar',
+      },
+      asserts: {
+        apiArguments: [
+          ['cluster.remoteInfo'],
+          [
+            'cluster.putSettings',
+            {
+              body: {
+                persistent: {
+                  cluster: {
+                    remote: {
+                      test: {
+                        seeds: null,
+                        skip_unavailable: false,
+                        mode: 'proxy',
+                        node_connections: null,
+                        proxy_address: '127.0.0.1:9300',
+                        proxy_socket_connections: null,
+                        server_name: 'foobar',
+                      },
+                    },
                   },
                 },
               },
@@ -151,6 +224,7 @@ describe('ADD remote clusters', () => {
         name: 'test',
         seeds: ['127.0.0.1:9300'],
         skipUnavailable: false,
+        mode: 'sniff',
       },
       asserts: {
         apiArguments: [['cluster.remoteInfo']],
@@ -167,6 +241,7 @@ describe('ADD remote clusters', () => {
         name: 'test',
         seeds: ['127.0.0.1:9300'],
         skipUnavailable: false,
+        mode: 'sniff',
       },
       asserts: {
         apiArguments: [
@@ -177,7 +252,17 @@ describe('ADD remote clusters', () => {
               body: {
                 persistent: {
                   cluster: {
-                    remote: { test: { seeds: ['127.0.0.1:9300'], skip_unavailable: false } },
+                    remote: {
+                      test: {
+                        seeds: ['127.0.0.1:9300'],
+                        skip_unavailable: false,
+                        mode: 'sniff',
+                        node_connections: null,
+                        proxy_address: null,
+                        proxy_socket_connections: null,
+                        server_name: null,
+                      },
+                    },
                   },
                 },
               },

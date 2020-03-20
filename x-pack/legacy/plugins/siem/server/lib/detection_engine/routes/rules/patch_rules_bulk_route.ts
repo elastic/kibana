@@ -46,6 +46,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
           const {
+            actions,
             description,
             enabled,
             false_positives: falsePositives,
@@ -70,7 +71,9 @@ export const patchRulesBulkRoute = (router: IRouter) => {
             to,
             type,
             threat,
+            throttle,
             references,
+            note,
             version,
           } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
@@ -78,6 +81,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
             const rule = await patchRules({
               alertsClient,
               actionsClient,
+              actions,
               description,
               enabled,
               falsePositives,
@@ -103,7 +107,9 @@ export const patchRulesBulkRoute = (router: IRouter) => {
               to,
               type,
               threat,
+              throttle,
               references,
+              note,
               version,
             });
             if (rule != null) {

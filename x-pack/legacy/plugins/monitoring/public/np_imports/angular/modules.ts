@@ -19,7 +19,6 @@ import {
   StateManagementConfigProvider,
   AppStateProvider,
   KbnUrlProvider,
-  RedirectWhenMissingProvider,
   npStart,
 } from '../legacy_imports';
 
@@ -79,8 +78,7 @@ function createLocalStateModule() {
 function createLocalKbnUrlModule() {
   angular
     .module('monitoring/KbnUrl', ['monitoring/Private', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
+    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
 }
 
 function createLocalConfigModule(core: AppMountContext['core']) {

@@ -290,7 +290,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
     return (
       <EuiPanel>
         <HeaderSection title={i18n.SIGNALS_TABLE_TITLE} />
-        <EuiLoadingContent />
+        <EuiLoadingContent data-test-subj="loading-signals-panel" />
       </EuiPanel>
     );
   }

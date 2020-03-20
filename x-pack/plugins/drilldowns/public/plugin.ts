@@ -7,7 +7,12 @@
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { DrilldownService } from './service';
-import { FlyoutCreateDrilldownActionContext, OPEN_FLYOUT_ADD_DRILLDOWN } from './actions';
+import {
+  FlyoutCreateDrilldownActionContext,
+  FlyoutEditDrilldownActionContext,
+  OPEN_FLYOUT_ADD_DRILLDOWN,
+  OPEN_FLYOUT_EDIT_DRILLDOWN,
+} from './actions';
 
 export interface DrilldownsSetupDependencies {
   uiActions: UiActionsSetup;
@@ -25,6 +30,7 @@ export interface DrilldownsStartContract {}
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [OPEN_FLYOUT_ADD_DRILLDOWN]: FlyoutCreateDrilldownActionContext;
+    [OPEN_FLYOUT_EDIT_DRILLDOWN]: FlyoutEditDrilldownActionContext;
   }
 }
 

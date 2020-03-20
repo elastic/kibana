@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { darken, transparentize } from 'polished';
 import React, { memo, useState, useCallback, useMemo } from 'react';
 
 import { euiStyled } from '../../../../../observability/public';
-import {
-  LogEntry,
-  LogEntryHighlight,
-  LogEntryHighlightColumn,
-  isTimestampColumn,
-} from '../../../utils/log_entry';
+import { isTimestampColumn } from '../../../utils/log_entry';
 import {
   LogColumnConfiguration,
   isTimestampLogColumnConfiguration,
@@ -27,16 +21,17 @@ import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle } from './text_styles';
+import { LogEntry, LogColumn } from '../../../../common/http_api';
 
 interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidths;
-  highlights: LogEntryHighlight[];
+  highlights: LogEntry[];
   isActiveHighlight: boolean;
   isHighlighted: boolean;
   logEntry: LogEntry;
-  openFlyoutWithItem: (id: string) => void;
+  openFlyoutWithItem?: (id: string) => void;
   scale: TextScale;
   wrap: boolean;
 }
@@ -64,9 +59,9 @@ export const LogEntryRow = memo(
       setIsHovered(false);
     }, []);
 
-    const openFlyout = useCallback(() => openFlyoutWithItem(logEntry.gid), [
+    const openFlyout = useCallback(() => openFlyoutWithItem?.(logEntry.id), [
       openFlyoutWithItem,
-      logEntry.gid,
+      logEntry.id,
     ]);
 
     const logEntryColumnsById = useMemo(
@@ -86,7 +81,7 @@ export const LogEntryRow = memo(
     const highlightsByColumnId = useMemo(
       () =>
         highlights.reduce<{
-          [columnId: string]: LogEntryHighlightColumn[];
+          [columnId: string]: LogColumn[];
         }>(
           (columnsById, highlight) =>
             highlight.columns.reduce(
@@ -149,7 +144,7 @@ export const LogEntryRow = memo(
                     isHighlighted={isHighlighted}
                     isActiveHighlight={isActiveHighlight}
                     isHovered={isHovered}
-                    isWrapped={wrap}
+                    wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
                 ) : null}
               </LogEntryColumn>
@@ -171,7 +166,7 @@ export const LogEntryRow = memo(
                     isActiveHighlight={isActiveHighlight}
                     isHighlighted={isHighlighted}
                     isHovered={isHovered}
-                    isWrapped={wrap}
+                    wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
                 ) : null}
               </LogEntryColumn>
@@ -197,7 +192,7 @@ interface LogEntryRowWrapperProps {
   scale: TextScale;
 }
 
-const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
+export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   role: 'row',
 }))<LogEntryRowWrapperProps>`
   align-items: stretch;

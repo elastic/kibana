@@ -42,7 +42,7 @@ import '../../data/public/legacy';
 import './services/saved_sheet_register';
 
 import rootTemplate from 'plugins/timelion/index.html';
-import { createSavedVisLoader, TypesService } from '../../visualizations/public';
+import { start as visualizations } from '../../visualizations/public/np_ready/public/legacy';
 
 import { loadKbnTopNavDirectives } from '../../../../plugins/kibana_legacy/public';
 loadKbnTopNavDirectives(npStart.plugins.navigation.ui);
@@ -127,13 +127,7 @@ app.controller('timelion', function(
   timefilter.enableAutoRefreshSelector();
   timefilter.enableTimeRangeSelector();
 
-  const savedVisualizations = createSavedVisLoader({
-    savedObjectsClient: npStart.core.savedObjects.client,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-    visualizationTypes: new TypesService().start(),
-  });
+  const savedVisualizations = visualizations.savedVisualizationsLoader;
   const timezone = Private(timezoneProvider)();
 
   const defaultExpression = '.es(*)';

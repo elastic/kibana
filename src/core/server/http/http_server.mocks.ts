@@ -36,6 +36,7 @@ import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 
 interface RequestFixtureOptions<P = any, Q = any, B = any> {
+  auth?: { isAuthenticated: boolean };
   headers?: Record<string, string>;
   params?: Record<string, any>;
   body?: Record<string, any>;
@@ -65,11 +66,13 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   routeAuthRequired,
   validation = {},
   kibanaRouteState = { xsrfRequired: true },
+  auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}) {
   const queryString = stringify(query, { sort: false });
 
   return KibanaRequest.from<P, Q, B>(
     createRawRequestMock({
+      auth,
       headers,
       params,
       query,
@@ -113,6 +116,9 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
     {},
     {
       app: { xsrfRequired: true } as any,
+      auth: {
+        isAuthenticated: true,
+      },
       headers: {},
       path: '/',
       route: { settings: {} },
