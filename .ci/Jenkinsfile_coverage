@@ -34,8 +34,7 @@ kibanaPipeline(timeoutMinutes: 180) {
       workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
         kibanaPipeline.downloadCoverageArtifacts()
 
-//        def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
-        def timestamp = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC")).previous().previous()
+        def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
         withEnv([
           "TIME_STAMP=${timestamp}",
           "QA_TEAM_ROCKS=true"
