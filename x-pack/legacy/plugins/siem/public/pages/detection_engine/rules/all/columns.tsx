@@ -219,7 +219,7 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
     },
     {
       field: 'current_status.bulk_create_time_durations',
-      name: 'indexing time (ms)',
+      name: i18n.COLUMN_INDEXING_TIMES,
       render: (value: RuleStatus['current_status']['bulk_create_time_durations']) => (
         <EuiText data-test-subj="bulk_create_time_durations" size="s">
           {value?.join(',')}
@@ -230,7 +230,7 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
     },
     {
       field: 'current_status.search_after_time_durations',
-      name: 'query time (ms)',
+      name: i18n.COLUMN_QUERY_TIMES,
       render: (value: RuleStatus['current_status']['search_after_time_durations']) => (
         <EuiText data-test-subj="search_after_time_durations" size="s">
           {value?.join(',')}
@@ -241,7 +241,7 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
     },
     {
       field: 'current_status.gap',
-      name: 'gap',
+      name: i18n.COLUMN_GAP,
       render: (value: RuleStatus['current_status']['gap']) => (
         <EuiText data-test-subj="gap" size="s">
           {value}
@@ -252,7 +252,7 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
     },
     {
       field: 'current_status.last_look_back_date',
-      name: 'last look back date',
+      name: i18n.COLUMN_LAST_LOOKBACK_DATE,
       render: (value: RuleStatus['current_status']['last_look_back_date']) => {
         return value == null ? (
           getEmptyTagValue()

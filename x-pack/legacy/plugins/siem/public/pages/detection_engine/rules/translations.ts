@@ -255,6 +255,31 @@ export const COLUMN_ACTIVATE = i18n.translate(
   }
 );
 
+export const COLUMN_INDEXING_TIMES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.indexingTimes',
+  {
+    defaultMessage: 'Indexing Time (ms)',
+  }
+);
+
+export const COLUMN_QUERY_TIMES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.queryTimes',
+  {
+    defaultMessage: 'Query Time (ms)',
+  }
+);
+
+export const COLUMN_GAP = i18n.translate('xpack.siem.detectionEngine.rules.allRules.columns.gap', {
+  defaultMessage: 'Gap (if any)',
+});
+
+export const COLUMN_LAST_LOOKBACK_DATE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.lastLookBackDate',
+  {
+    defaultMessage: 'Last Look-Back Date',
+  }
+);
+
 export const CUSTOM_RULES = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.filters.customRulesTitle',
   {
