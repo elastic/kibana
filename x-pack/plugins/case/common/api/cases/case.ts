@@ -24,6 +24,8 @@ export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
   rt.type({
     comment_ids: rt.array(rt.string),
+    closed_at: rt.union([rt.string, rt.null]),
+    closed_by: rt.union([UserRT, rt.null]),
     created_at: rt.string,
     created_by: UserRT,
     updated_at: rt.union([rt.string, rt.null]),
