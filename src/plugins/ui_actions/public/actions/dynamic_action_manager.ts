@@ -142,7 +142,7 @@ export class DynamicActionManager {
    * 1. Loads all events from  @type {DynamicActionStorage} storage.
    * 2. Creates actions for each event in `ui_actions` registry.
    * 3. Adds events to UI state.
-   * 4. Does nothing if dynamic action manager was stopped of if event fetching
+   * 4. Does nothing if dynamic action manager was stopped or if event fetching
    *    is already taking place.
    */
   public async start() {
