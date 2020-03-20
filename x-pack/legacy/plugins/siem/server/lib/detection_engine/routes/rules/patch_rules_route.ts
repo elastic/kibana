@@ -30,6 +30,7 @@ export const patchRulesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const {
+        actions,
         description,
         enabled,
         false_positives: falsePositives,
@@ -54,6 +55,7 @@ export const patchRulesRoute = (router: IRouter) => {
         to,
         type,
         threat,
+        throttle,
         references,
         note,
         version,
@@ -76,6 +78,7 @@ export const patchRulesRoute = (router: IRouter) => {
         const rule = await patchRules({
           actionsClient,
           alertsClient,
+          actions,
           description,
           enabled,
           falsePositives,
@@ -101,6 +104,7 @@ export const patchRulesRoute = (router: IRouter) => {
           to,
           type,
           threat,
+          throttle,
           references,
           note,
           version,
