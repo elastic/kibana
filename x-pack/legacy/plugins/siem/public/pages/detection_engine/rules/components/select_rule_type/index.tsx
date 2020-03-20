@@ -14,9 +14,10 @@ import { isMlRule } from '../../helpers';
 
 interface SelectRuleTypeProps {
   field: FieldHook;
+  isReadOnly: boolean;
 }
 
-export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({ field }) => {
+export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({ field, isReadOnly = false }) => {
   const ruleType = field.value as RuleType;
   const setType = useCallback(
     (type: RuleType) => {
@@ -37,6 +38,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({ field }) => {
             description={i18n.QUERY_TYPE_DESCRIPTION}
             icon={<EuiIcon size="l" type="search" />}
             selectable={{
+              isDisabled: isReadOnly,
               onClick: setQuery,
               isSelected: !isMlRule(ruleType),
             }}
@@ -49,6 +51,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({ field }) => {
             isDisabled={!license}
             icon={<EuiIcon size="l" type="machineLearningApp" />}
             selectable={{
+              isDisabled: isReadOnly,
               onClick: setMl,
               isSelected: isMlRule(ruleType),
             }}
