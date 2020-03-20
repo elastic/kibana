@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Agent, AgentAction, AgentEvent, AgentStatus, AgentType } from '../models';
+import { Agent, AgentAction, AgentEvent, AgentStatus, AgentType, NewAgentAction } from '../models';
 
 export interface GetAgentsRequest {
   query: {
@@ -69,11 +69,30 @@ export interface PostAgentEnrollResponse {
 
 export interface PostAgentAcksRequest {
   body: {
-    action_ids: string[];
+    events: AgentEvent[];
   };
   params: {
     agentId: string;
   };
+}
+
+export interface PostAgentAcksResponse {
+  action: string;
+  success: boolean;
+}
+
+export interface PostNewAgentActionRequest {
+  body: {
+    action: NewAgentAction;
+  };
+  params: {
+    agentId: string;
+  };
+}
+
+export interface PostNewAgentActionResponse {
+  success: boolean;
+  item: AgentAction;
 }
 
 export interface PostAgentUnenrollRequest {

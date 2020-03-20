@@ -14,7 +14,7 @@ import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
 
 import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
-import { indexPatternService } from '../../../../kibana_services';
+import { getIndexPatternService } from '../../../../kibana_services';
 
 export class Join extends Component {
   state = {
@@ -39,7 +39,7 @@ export class Join extends Component {
 
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(indexPatternId);
+      indexPattern = await getIndexPatternService().get(indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({

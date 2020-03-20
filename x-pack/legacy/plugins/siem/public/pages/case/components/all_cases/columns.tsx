@@ -36,7 +36,8 @@ const Spacer = styled.span`
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 export const getCasesColumns = (
-  actions: Array<DefaultItemIconButtonAction<Case>>
+  actions: Array<DefaultItemIconButtonAction<Case>>,
+  filterStatus: string
 ): CasesColumns[] => [
   {
     name: i18n.NAME,
@@ -113,22 +114,39 @@ export const getCasesColumns = (
     render: (comments: Case['commentIds']) =>
       renderStringField(`${comments.length}`, `case-table-column-commentCount`),
   },
-  {
-    field: 'createdAt',
-    name: i18n.OPENED_ON,
-    sortable: true,
-    render: (createdAt: Case['createdAt']) => {
-      if (createdAt != null) {
-        return (
-          <FormattedRelativePreferenceDate
-            value={createdAt}
-            data-test-subj={`case-table-column-createdAt`}
-          />
-        );
+  filterStatus === 'open'
+    ? {
+        field: 'createdAt',
+        name: i18n.OPENED_ON,
+        sortable: true,
+        render: (createdAt: Case['createdAt']) => {
+          if (createdAt != null) {
+            return (
+              <FormattedRelativePreferenceDate
+                value={createdAt}
+                data-test-subj={`case-table-column-createdAt`}
+              />
+            );
+          }
+          return getEmptyTagValue();
+        },
       }
-      return getEmptyTagValue();
-    },
-  },
+    : {
+        field: 'closedAt',
+        name: i18n.CLOSED_ON,
+        sortable: true,
+        render: (closedAt: Case['closedAt']) => {
+          if (closedAt != null) {
+            return (
+              <FormattedRelativePreferenceDate
+                value={closedAt}
+                data-test-subj={`case-table-column-closedAt`}
+              />
+            );
+          }
+          return getEmptyTagValue();
+        },
+      },
   {
     name: 'Actions',
     actions,

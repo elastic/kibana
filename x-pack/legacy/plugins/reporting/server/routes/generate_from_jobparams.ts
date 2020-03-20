@@ -82,15 +82,20 @@ export function registerGenerateFromJobParams(
       }
 
       const { exportType } = request.params;
+      let jobParams;
       let response;
       try {
-        const jobParams = rison.decode(jobParamsRison) as object | null;
+        jobParams = rison.decode(jobParamsRison) as object | null;
         if (!jobParams) {
           throw new Error('missing jobParams!');
         }
-        response = await handler(exportType, jobParams, legacyRequest, h);
       } catch (err) {
         throw boom.badRequest(`invalid rison: ${jobParamsRison}`);
+      }
+      try {
+        response = await handler(exportType, jobParams, legacyRequest, h);
+      } catch (err) {
+        throw handleError(exportType, err);
       }
       return response;
     },

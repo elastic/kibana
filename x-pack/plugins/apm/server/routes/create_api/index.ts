@@ -71,7 +71,7 @@ export function createApi() {
           body: bodyRt || t.null
         };
 
-        const anyObject = schema.object({}, { allowUnknowns: true });
+        const anyObject = schema.object({}, { unknowns: 'allow' });
 
         (router[routerMethod] as RouteRegistrar<typeof routerMethod>)(
           {

@@ -6,8 +6,9 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import React, { FC } from 'react';
-import { isEqual } from 'lodash';
+import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
@@ -96,6 +97,10 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             num_top_feature_importance_values: {
               optional: true,
+            },
+            class_assignment_objective: {
+              optional: true,
+              defaultValue: 'maximize_minimum_recall',
             },
           },
         }
@@ -257,20 +262,25 @@ export type CloneDataFrameAnalyticsConfig = Omit<
   'id' | 'version' | 'create_time'
 >;
 
-export function extractCloningConfig(
-  originalConfig: DataFrameAnalyticsConfig
-): CloneDataFrameAnalyticsConfig {
-  const {
-    // Omit non-relevant props from the configuration
-    id,
-    version,
-    create_time,
-    ...cloneConfig
-  } = originalConfig;
-
-  // Reset the destination index
-  cloneConfig.dest.index = '';
-  return cloneConfig;
+/**
+ * Gets complete original configuration as an input
+ * and returns the config for cloning omitting
+ * non-relevant parameters and resetting the destination index.
+ */
+export function extractCloningConfig({
+  id,
+  version,
+  create_time,
+  ...configToClone
+}: DeepReadonly<DataFrameAnalyticsConfig>): CloneDataFrameAnalyticsConfig {
+  return (cloneDeep({
+    ...configToClone,
+    dest: {
+      ...configToClone.dest,
+      // Reset the destination index
+      index: '',
+    },
+  }) as unknown) as CloneDataFrameAnalyticsConfig;
 }
 
 export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
@@ -280,7 +290,7 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
 
   const { actions } = createAnalyticsForm;
 
-  const onClick = async (item: DataFrameAnalyticsListRow) => {
+  const onClick = async (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
     await actions.setJobClone(item.config);
   };
 
@@ -294,7 +304,7 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
 }
 
 interface CloneActionProps {
-  item: DataFrameAnalyticsListRow;
+  item: DeepReadonly<DataFrameAnalyticsListRow>;
   createAnalyticsForm: CreateAnalyticsFormProps;
 }
 

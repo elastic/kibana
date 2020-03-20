@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsBulkCreateObject } from 'src/core/server/';
+import { SavedObject, SavedObjectsBulkCreateObject } from 'src/core/server';
 import { AssetType } from '../../../types';
 import * as Registry from '../registry';
 
