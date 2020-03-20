@@ -7,7 +7,7 @@
 import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
-import { FactoryContext, ActionContext, Config, CollectConfigProps } from './types';
+import { PlaceContext, ActionContext, Config, CollectConfigProps } from './types';
 import { CollectConfigContainer } from './collect_config';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { DrilldownDefinition as Drilldown } from '../../../../../drilldowns/public';
@@ -18,7 +18,7 @@ export interface Params {
 }
 
 export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, FactoryContext, ActionContext> {
+  implements Drilldown<Config, PlaceContext, ActionContext> {
   constructor(protected readonly params: Params) {}
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
@@ -37,8 +37,8 @@ export class DashboardToDashboardDrilldown
 
   public readonly createConfig = () => ({
     dashboardId: '123',
-    useCurrentDashboardDataRange: true,
-    useCurrentDashboardFilters: true,
+    useCurrentFilters: true,
+    useCurrentDateRange: true,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
