@@ -8,17 +8,16 @@ import { fireEvent, render, wait } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { CustomLinkOverview } from '../';
-import * as hooks from '../../../../../../hooks/useFetcher';
-import {
-  expectTextsInDocument,
-  MockApmPluginContextWrapper,
-  expectTextsNotInDocument
-} from '../../../../../../utils/testHelpers';
-import * as saveCustomLink from '../CustomLinkFlyout/saveCustomLink';
-import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 import { License } from '../../../../../../../../../../plugins/licensing/common/license';
 import { LicenseContext } from '../../../../../../context/LicenseContext';
-import { ApmPluginContextValue } from '../../../../../../context/ApmPluginContext';
+import * as hooks from '../../../../../../hooks/useFetcher';
+import * as apmApi from '../../../../../../services/rest/createCallApmApi';
+import {
+  expectTextsInDocument,
+  expectTextsNotInDocument,
+  MockApmPluginContextWrapper
+} from '../../../../../../utils/testHelpers';
+import * as saveCustomLink from '../CustomLinkFlyout/saveCustomLink';
 
 const data = [
   {
@@ -36,6 +35,13 @@ const data = [
 ];
 
 describe('CustomLink', () => {
+  let callApmApiSpy: Function;
+  beforeAll(() => {
+    callApmApiSpy = spyOn(apmApi, 'callApmApi').and.returnValue({});
+  });
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
   const goldLicense = new License({
     signature: 'test signature',
     license: {
@@ -66,20 +72,9 @@ describe('CustomLink', () => {
       expectTextsInDocument(component, ['No links found.']);
     });
     it('opens flyout when click to create new link', () => {
-      const contextMock = ({
-        core: {
-          http: { basePath: { prepend: () => {} } },
-          notifications: {
-            toasts: {
-              addWarning: () => {},
-              addDanger: () => {}
-            }
-          }
-        }
-      } as unknown) as ApmPluginContextValue;
       const { queryByText, getByText } = render(
         <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper value={contextMock}>
+          <MockApmPluginContextWrapper>
             <CustomLinkOverview />
           </MockApmPluginContextWrapper>
         </LicenseContext.Provider>
@@ -138,10 +133,8 @@ describe('CustomLink', () => {
 
   describe('Flyout', () => {
     const refetch = jest.fn();
-    let callApmApiSpy: Function;
     let saveCustomLinkSpy: Function;
     beforeAll(() => {
-      callApmApiSpy = spyOn(apmApi, 'callApmApi');
       saveCustomLinkSpy = spyOn(saveCustomLink, 'saveCustomLink');
       spyOn(hooks, 'useFetcher').and.returnValue({
         data,

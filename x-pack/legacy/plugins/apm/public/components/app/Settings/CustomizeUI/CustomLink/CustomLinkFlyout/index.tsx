@@ -22,6 +22,7 @@ import { LinkSection } from './LinkSection';
 import { saveCustomLink } from './saveCustomLink';
 import { convertFiltersToArray, convertFiltersToObject } from './helper';
 import { LinkPreview } from './LinkPreview';
+import { Documentation } from './Documentation';
 
 interface Props {
   onClose: () => void;
@@ -88,9 +89,17 @@ export const CustomLinkFlyout = ({
                   'xpack.apm.settings.customizeUI.customLink.flyout.label',
                   {
                     defaultMessage:
-                      'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. Learn more about it in the docs.'
+                      'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the'
                   }
-                )}
+                )}{' '}
+                <Documentation
+                  label={i18n.translate(
+                    'xpack.apm.settings.customizeUI.customLink.flyout.label.doc',
+                    {
+                      defaultMessage: 'documentation.'
+                    }
+                  )}
+                />
               </p>
             </EuiText>
 
