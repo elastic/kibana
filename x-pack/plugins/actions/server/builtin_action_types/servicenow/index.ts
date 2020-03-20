@@ -56,6 +56,7 @@ export function getActionType({
   return {
     id: ACTION_TYPE_ID,
     name: i18n.NAME,
+    minimumLicenseRequired: 'platinum',
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),
