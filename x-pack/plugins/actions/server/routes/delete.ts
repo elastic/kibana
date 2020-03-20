@@ -17,14 +17,13 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess } from '../lib';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const deleteActionRoute = (router: IRouter, licenseState: LicenseState) => {
+export const deleteActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.delete(
     {
       path: `/api/action/{id}`,
