@@ -342,7 +342,7 @@ export class Authenticator {
     if (useLoginSelector) {
       this.logger.debug('Redirecting request to Login Selector.');
       return AuthenticationResult.redirectTo(
-        `${this.serverBasePath}login?next=${encodeURIComponent(
+        `${this.options.basePath.serverBasePath}/login?next=${encodeURIComponent(
           `${this.options.basePath.get(request)}${request.url.path}`
         )}`
       );
