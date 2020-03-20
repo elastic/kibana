@@ -392,4 +392,26 @@ describe('setupAuthentication()', () => {
       expect(apiKeysInstance.invalidate).toHaveBeenCalledWith(request, params);
     });
   });
+
+  describe('invalidateAPIKeyAsInternalUser()', () => {
+    let invalidateAPIKeyAsInternalUser: (
+      params: InvalidateAPIKeyParams
+    ) => Promise<InvalidateAPIKeyResult | null>;
+
+    beforeEach(async () => {
+      invalidateAPIKeyAsInternalUser = (await setupAuthentication(mockSetupAuthenticationParams)).invalidateAPIKeyAsInternalUser;
+    });
+
+    it('calls invalidateAPIKeyAsInternalUser with given arguments', async () => {
+      const apiKeysInstance = jest.requireMock('./api_keys').APIKeys.mock.instances[0];
+      const params = {
+        id: '123',
+      };
+      apiKeysInstance.invalidateAsInternalUser.mockResolvedValueOnce({ success: true });
+      await expect(invalidateAPIKeyAsInternalUser(params)).resolves.toEqual({
+        success: true,
+      });
+      expect(apiKeysInstance.invalidateAsInternalUser).toHaveBeenCalledWith(params);
+    });
+  });
 });

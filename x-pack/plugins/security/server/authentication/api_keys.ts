@@ -140,22 +140,40 @@ export class APIKeys {
     request: KibanaRequest,
     params: InvalidateAPIKeyParams
   ): Promise<InvalidateAPIKeyResult | null> {
+    return await this.callClusterToInvalidate(
+      params,
+      this.clusterClient.asScoped(request).callAsCurrentUser
+    );
+  }
+
+  /**
+   * Tries to invalidate an API key by using the internal user.
+   * @param params The params to invalidate an API key.
+   */
+  async invalidateAsInternalUser(
+    params: InvalidateAPIKeyParams
+  ): Promise<InvalidateAPIKeyResult | null> {
+    // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
+    return await this.callClusterToInvalidate(params, this.clusterClient.callAsInternalUser);
+  }
+
+  private async callClusterToInvalidate(
+    params: InvalidateAPIKeyParams,
+    callCluster: (endpoint: string, params: Record<string, any>) => Promise<any>
+  ): Promise<InvalidateAPIKeyResult | null> {
     if (!this.license.isEnabled()) {
       return null;
     }
 
     this.logger.debug('Trying to invalidate an API key');
 
-    // User needs `manage_api_key` privilege to use this API
     let result: InvalidateAPIKeyResult;
     try {
-      result = (await this.clusterClient
-        .asScoped(request)
-        .callAsCurrentUser('shield.invalidateAPIKey', {
-          body: {
-            id: params.id,
-          },
-        })) as InvalidateAPIKeyResult;
+      result = (await callCluster('shield.invalidateAPIKey', {
+        body: {
+          id: params.id,
+        },
+      })) as InvalidateAPIKeyResult;
       this.logger.debug('API key was invalidated successfully');
     } catch (e) {
       this.logger.error(`Failed to invalidate API key: ${e.message}`);
