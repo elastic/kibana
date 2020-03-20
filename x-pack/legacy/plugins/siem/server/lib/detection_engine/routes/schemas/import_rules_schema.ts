@@ -9,6 +9,7 @@ import Joi from 'joi';
 /* eslint-disable @typescript-eslint/camelcase */
 import {
   id,
+  actions,
   created_at,
   updated_at,
   created_by,
@@ -37,6 +38,7 @@ import {
   to,
   type,
   threat,
+  throttle,
   references,
   note,
   version,
@@ -65,6 +67,7 @@ export const importRulesSchema = Joi.object({
     otherwise: Joi.forbidden(),
   }),
   id,
+  actions: actions.default([]),
   description: description.required(),
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
@@ -106,6 +109,7 @@ export const importRulesSchema = Joi.object({
   to: to.default('now'),
   type: type.required(),
   threat: threat.default([]),
+  throttle: throttle.default(null),
   references: references.default([]),
   note: note.allow(''),
   version: version.default(1),

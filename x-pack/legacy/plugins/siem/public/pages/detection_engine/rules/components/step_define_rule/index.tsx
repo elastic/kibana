@@ -186,6 +186,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             componentProps={{
               describedByIds: ['detectionEngineStepDefineRuleType'],
               hasValidLicense: mlCapabilities.isPlatinumOrTrialLicense,
+              isReadOnly: isUpdateView,
             }}
           />
           <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'none' : 'flex' }}>

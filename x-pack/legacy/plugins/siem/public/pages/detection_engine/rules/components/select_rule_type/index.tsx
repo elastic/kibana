@@ -48,12 +48,14 @@ interface SelectRuleTypeProps {
   describedByIds: string[];
   field: FieldHook;
   hasValidLicense: boolean;
+  isReadOnly: boolean;
 }
 
 export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   describedByIds = [],
   field,
   hasValidLicense = false,
+  isReadOnly = false,
 }) => {
   const ruleType = field.value as RuleType;
   const setType = useCallback(
@@ -79,6 +81,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             description={i18n.QUERY_TYPE_DESCRIPTION}
             icon={<EuiIcon size="l" type="search" />}
             selectable={{
+              isDisabled: isReadOnly,
               onClick: setQuery,
               isSelected: !isMlRule(ruleType),
             }}
@@ -90,7 +93,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             description={<MlCardDescription hasValidLicense={hasValidLicense} />}
             icon={<EuiIcon size="l" type="machineLearningApp" />}
             selectable={{
-              isDisabled: !hasValidLicense,
+              isDisabled: isReadOnly || !hasValidLicense,
               onClick: setMl,
               isSelected: isMlRule(ruleType),
             }}
