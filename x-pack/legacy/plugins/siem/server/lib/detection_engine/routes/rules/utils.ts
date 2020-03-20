@@ -29,6 +29,7 @@ import {
   OutputError,
 } from '../utils';
 import { hasListsFeature } from '../../feature_flags';
+import { transformAlertToRuleAction } from '../../rules/transform_actions';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -102,6 +103,7 @@ export const transformAlertToRule = (
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+    actions: alert.actions.map(transformAlertToRuleAction),
     created_at: alert.createdAt.toISOString(),
     updated_at: alert.updatedAt.toISOString(),
     created_by: alert.createdBy,
@@ -134,6 +136,7 @@ export const transformAlertToRule = (
     to: alert.params.to,
     type: alert.params.type,
     threat: alert.params.threat,
+    throttle: alert.throttle,
     note: alert.params.note,
     version: alert.params.version,
     status: ruleStatus?.attributes.status,
