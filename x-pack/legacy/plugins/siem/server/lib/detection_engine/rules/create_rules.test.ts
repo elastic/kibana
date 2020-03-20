@@ -8,7 +8,7 @@ import { alertsClientMock } from '../../../../../../../plugins/alerting/server/m
 import { actionsClientMock } from '../../../../../../../plugins/actions/server/mocks';
 import { getMlResult } from '../routes/__mocks__/request_responses';
 import { createRules } from './create_rules';
-
+import { CreateRuleParams } from './types';
 describe('createRules', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let alertsClient: ReturnType<typeof alertsClientMock.create>;
@@ -34,7 +34,7 @@ describe('createRules', () => {
       interval: '',
       name: '',
       tags: [],
-    } as Unknown) as CreateRuleParams);
+    } as unknown) as CreateRuleParams);
 
     expect(alertsClient.create).toHaveBeenCalledWith(
       expect.objectContaining({

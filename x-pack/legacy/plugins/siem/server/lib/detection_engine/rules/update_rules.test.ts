@@ -9,6 +9,7 @@ import { alertsClientMock } from '../../../../../../../plugins/alerting/server/m
 import { actionsClientMock } from '../../../../../../../plugins/actions/server/mocks';
 import { getMlResult } from '../routes/__mocks__/request_responses';
 import { updateRules } from './update_rules';
+import { UpdateRuleParams } from './types';
 
 describe('updateRules', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
