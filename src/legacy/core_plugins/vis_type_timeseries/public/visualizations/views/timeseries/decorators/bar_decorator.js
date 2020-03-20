@@ -42,7 +42,6 @@ export function BarSeriesDecorator({
 }) {
   const id = seriesId;
   const groupId = seriesGroupId;
-  const customSeriesColors = [color];
   const barSeriesStyle = getBarStyles(bars, color);
 
   const seriesSettings = {
@@ -50,7 +49,7 @@ export function BarSeriesDecorator({
     name,
     groupId,
     data,
-    customSeriesColors,
+    color,
     hideInLegend,
     xAccessor: X_ACCESSOR_INDEX,
     yAccessors: Y_ACCESSOR_INDEXES,
