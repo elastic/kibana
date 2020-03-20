@@ -12,6 +12,7 @@ import { Either, fold, right, left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { checkTypeDependents } from './check_type_dependents';
 import {
+  actions,
   anomaly_threshold,
   description,
   enabled,
@@ -42,6 +43,7 @@ import {
   timeline_title,
   type,
   threat,
+  throttle,
   job_status,
   status_date,
   last_success_at,
@@ -117,6 +119,8 @@ export const dependentRulesSchema = t.partial({
  * Instead use dependentRulesSchema and check_type_dependents for how to do those.
  */
 export const partialRulesSchema = t.partial({
+  actions,
+  throttle,
   status: job_status,
   status_date,
   last_success_at,

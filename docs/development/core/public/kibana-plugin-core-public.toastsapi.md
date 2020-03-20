@@ -23,10 +23,11 @@ export declare class ToastsApi implements IToasts
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [add(toastOrTitle)](./kibana-plugin-core-public.toastsapi.add.md) |  | Adds a new toast to current array of toast. |
-|  [addDanger(toastOrTitle)](./kibana-plugin-core-public.toastsapi.adddanger.md) |  | Adds a new toast pre-configured with the danger color and alert icon. |
+|  [addDanger(toastOrTitle, options)](./kibana-plugin-core-public.toastsapi.adddanger.md) |  | Adds a new toast pre-configured with the danger color and alert icon. |
 |  [addError(error, options)](./kibana-plugin-core-public.toastsapi.adderror.md) |  | Adds a new toast that displays an exception message with a button to open the full stacktrace in a modal. |
-|  [addSuccess(toastOrTitle)](./kibana-plugin-core-public.toastsapi.addsuccess.md) |  | Adds a new toast pre-configured with the success color and check icon. |
-|  [addWarning(toastOrTitle)](./kibana-plugin-core-public.toastsapi.addwarning.md) |  | Adds a new toast pre-configured with the warning color and help icon. |
+|  [addInfo(toastOrTitle, options)](./kibana-plugin-core-public.toastsapi.addinfo.md) |  | Adds a new toast pre-configured with the info color and info icon. |
+|  [addSuccess(toastOrTitle, options)](./kibana-plugin-core-public.toastsapi.addsuccess.md) |  | Adds a new toast pre-configured with the success color and check icon. |
+|  [addWarning(toastOrTitle, options)](./kibana-plugin-core-public.toastsapi.addwarning.md) |  | Adds a new toast pre-configured with the warning color and help icon. |
 |  [get$()](./kibana-plugin-core-public.toastsapi.get_.md) |  | Observable of the toast messages to show to the user. |
 |  [remove(toastOrId)](./kibana-plugin-core-public.toastsapi.remove.md) |  | Removes a toast from the current array of toasts if present. |
 
