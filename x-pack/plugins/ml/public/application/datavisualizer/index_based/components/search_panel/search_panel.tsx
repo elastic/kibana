@@ -96,7 +96,7 @@ export const SearchPanel: FC<Props> = ({
       const toastNotifications = getToastNotifications();
       toastNotifications.addError(e, {
         title: i18n.translate('xpack.ml.datavisualizer.invalidSyntaxErrorMessage', {
-          defaultMessage: 'Invalid syntax in search bar.',
+          defaultMessage: 'Invalid syntax in search bar',
         }),
         toastMessage: e.message ? e.message : e,
       });
