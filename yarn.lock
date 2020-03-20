@@ -26682,17 +26682,17 @@ rx@^4.1.0:
   resolved "https://registry.yarnpkg.com/rx/-/rx-4.1.0.tgz#a5f13ff79ef3b740fe30aa803fb09f98805d4782"
   integrity sha1-pfE/957zt0D+MKqAP7CfmIBdR4I=
 
-rxjs-marbles@^5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/rxjs-marbles/-/rxjs-marbles-5.0.3.tgz#d3ca62a4e02d032b1b4ffd558e93336ad78fd100"
-  integrity sha512-JK6EvLe9uReJxBmUgdKrpMB2JswV+fDcKDg97x20LErLQ7Gi0FG3YEr2Uq9hvgHJjgZXGCvonpzcxARLzKsT4A==
+rxjs-marbles@^5.0.5:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/rxjs-marbles/-/rxjs-marbles-5.0.5.tgz#374aa289f5488b6c6a99d7d164d96a8db1df40e1"
+  integrity sha512-Ni1AAVdq28CEIZaAQpD2+WhoaaRQ7FOObLVf26rc7g7S/QEc6GmfoG8lZicyy2KKxsExhJzTnyUCcLBG28/0zA==
   dependencies:
     fast-equals "^2.0.0"
 
-rxjs@6.5.2:
-  version "6.5.2"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.5.2.tgz#2e35ce815cd46d84d02a209fb4e5921e051dbec7"
-  integrity sha512-HUb7j3kvb7p7eCUHE3FqjoDsC1xfZQ4AHFWfTKSpZ+sAhhz5X1WX0ZuUqWbzB2QhSLp3DoLUG+hMdEDKqWo2Zg==
+rxjs@6.5.4, rxjs@^6.5.4:
+  version "6.5.4"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.5.4.tgz#e0777fe0d184cec7872df147f303572d414e211c"
+  integrity sha512-naMQXcgEo3csAEGvw/NydRA0fuS2nDZJiw1YUWFKU7aPPAPGZEsD4Iimit96qwCieH6y614MCLYwdkrWx7z/7Q==
   dependencies:
     tslib "^1.9.0"
 
@@ -26703,7 +26703,7 @@ rxjs@^5.5.2:
   dependencies:
     symbol-observable "1.0.1"
 
-rxjs@^6.1.0, rxjs@^6.3.3, rxjs@^6.4.0, rxjs@^6.5.1, rxjs@^6.5.3:
+rxjs@^6.1.0, rxjs@^6.3.3, rxjs@^6.4.0, rxjs@^6.5.1:
   version "6.5.3"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.5.3.tgz#510e26317f4db91a7eb1de77d9dd9ba0a4899a3a"
   integrity sha512-wuYsAYYFdWTAnAaPoKGNhfpWwKZbJW+HgAJ+mImp+Epl7BG8oNWBCTyRM8gba9k4lk8BgWdoYm21Mo/RYhhbgA==
