@@ -10,7 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 
-import { AggName, PivotAggsConfig, PivotAggsConfigWithUiSupportDict } from '../../../../common';
+import {
+  AggName,
+  isPivotAggsConfigPercentiles,
+  PivotAggsConfig,
+  PivotAggsConfigWithUiSupportDict,
+} from '../../../../common';
 
 import { PopoverForm } from './popover_form';
 
