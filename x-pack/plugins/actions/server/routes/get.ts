@@ -12,15 +12,14 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const getActionRoute = (router: IRouter, licenseState: LicenseState) => {
+export const getActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/{id}`,

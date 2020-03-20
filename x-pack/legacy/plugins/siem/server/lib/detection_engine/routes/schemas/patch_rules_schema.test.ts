@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertAction } from '../../../../../../../../plugins/alerting/common';
 import { patchRulesSchema } from './patch_rules_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
-import { ThreatParams } from '../../types';
+import { ThreatParams, RuleAlertAction } from '../../types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('patch rules schema', () => {
@@ -1061,6 +1062,148 @@ describe('patch rules schema', () => {
         }).error.message
       ).toEqual('child "note" fails because ["note" must be a string]');
     });
+  });
+
+  test('You cannot send in an array of actions that are missing "group"', () => {
+    expect(
+      patchRulesSchema.validate<
+        Partial<
+          Omit<PatchRuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'group'>>;
+          }
+        >
+      >({
+        actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "group" fails because ["group" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "id"', () => {
+    expect(
+      patchRulesSchema.validate<
+        Partial<
+          Omit<PatchRuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'id'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "id" fails because ["id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
+    expect(
+      patchRulesSchema.validate<
+        Partial<
+          Omit<PatchRuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'action_type_id'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', id: 'id', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "params"', () => {
+    expect(
+      patchRulesSchema.validate<
+        Partial<
+          Omit<PatchRuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'params'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "params" fails because ["params" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are including "actionTypeId', () => {
+    expect(
+      patchRulesSchema.validate<
+        Partial<
+          Omit<PatchRuleAlertParamsRest, 'actions'> & {
+            actions: AlertAction[];
+          }
+        >
+      >({
+        actions: [
+          {
+            group: 'group',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
+    );
   });
 
   // TODO: (LIST-FEATURE) We can enable this once we change the schema's to not be global per module but rather functions that can create the schema

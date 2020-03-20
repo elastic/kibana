@@ -13,8 +13,7 @@ import {
   KibanaResponseFactory,
 } from 'kibana/server';
 import { FindOptions } from '../../../alerting/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
 
 // config definition
@@ -27,6 +26,7 @@ const querySchema = schema.object({
   }),
   search_fields: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
   sort_field: schema.maybe(schema.string()),
+  sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   has_reference: schema.maybe(
     // use nullable as maybe is currently broken
     // in config-schema
@@ -41,7 +41,7 @@ const querySchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
 
-export const findActionRoute = (router: IRouter, licenseState: LicenseState) => {
+export const findActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/_find`,
@@ -71,6 +71,7 @@ export const findActionRoute = (router: IRouter, licenseState: LicenseState) => 
         sortField: query.sort_field,
         fields: query.fields,
         filter: query.filter,
+        sortOrder: query.sort_order,
       };
 
       if (query.search_fields) {

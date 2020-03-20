@@ -31,6 +31,7 @@ export const createRulesRoute = (router: IRouter): void => {
     },
     async (context, request, response) => {
       const {
+        actions,
         anomaly_threshold: anomalyThreshold,
         description,
         enabled,
@@ -54,6 +55,7 @@ export const createRulesRoute = (router: IRouter): void => {
         severity,
         tags,
         threat,
+        throttle,
         to,
         type,
         references,
@@ -96,6 +98,7 @@ export const createRulesRoute = (router: IRouter): void => {
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
+          actions,
           anomalyThreshold,
           description,
           enabled,
@@ -119,6 +122,7 @@ export const createRulesRoute = (router: IRouter): void => {
           name,
           severity,
           tags,
+          throttle,
           to,
           type,
           threat,
