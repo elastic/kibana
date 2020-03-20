@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './styles/_index.scss';
-import { PainlessLabUIPlugin } from './plugin';
-
-export function plugin() {
-  return new PainlessLabUIPlugin();
-}
+export { monacoPainlessLang } from './monaco_painless_lang';

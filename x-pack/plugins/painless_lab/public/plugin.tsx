@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreStart, CoreSetup, PluginInitializerContext } from 'kibana/public';
+import { Plugin, CoreStart, CoreSetup } from 'kibana/public';
 import { first } from 'rxjs/operators';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -14,12 +14,13 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { LICENSE_CHECK_STATE } from '../../licensing/public';
 
 import { PLUGIN } from '../common/constants';
+
 import { PluginDependencies } from './types';
-import { registerPainless } from './application/register_painless';
 import { getLinks } from './links';
+import { LanguageService } from './services';
 
 export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencies> {
-  constructor(ctx: PluginInitializerContext) {}
+  languageService = new LanguageService();
 
   async setup(
     { http, getStartServices, uiSettings }: CoreSetup,
@@ -73,7 +74,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           docLinks,
         } = core;
 
-        registerPainless();
+        this.languageService.setup();
 
         const license = await licensing.license$.pipe(first()).toPromise();
         const { state, message: invalidLicenseMessage } = license.check(
@@ -96,5 +97,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
 
   async start(core: CoreStart, plugins: any) {}
 
-  async stop() {}
+  async stop() {
+    this.languageService.stop();
+  }
 }
