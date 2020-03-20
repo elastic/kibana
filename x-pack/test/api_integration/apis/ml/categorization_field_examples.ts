@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
             message: 'The median length for the field values analyzed is over 400 characters.',
           },
           {
-            id: 0,
+            id: 2,
             valid: 'invalid',
             message:
               'Tokenization of field value examples has failed due to more than 10000 tokens being found in a sample of 50 values.',
