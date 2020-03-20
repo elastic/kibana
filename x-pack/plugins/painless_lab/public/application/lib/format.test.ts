@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PayloadFormat } from '../common/types';
+import { PayloadFormat } from '../types';
 import { formatRequestPayload } from './format';
 
 describe('formatRequestPayload', () => {

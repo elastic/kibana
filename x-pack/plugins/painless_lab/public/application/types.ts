@@ -4,6 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export interface Store {
+  context: string;
+  code: string;
+  parameters: string;
+  index: string;
+  document: string;
+  query: string;
+}
+
 // This should be an enumerated list
 export type Context = string;
 

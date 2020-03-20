@@ -9,9 +9,8 @@ import { HttpSetup } from 'kibana/public';
 import { debounce } from 'lodash';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { Response, PayloadFormat } from '../common/types';
+import { Response, PayloadFormat, Store } from '../types';
 import { formatRequestPayload } from '../lib/format';
-import { Store } from '../store';
 
 const DEBOUNCE_MS = 800;
 

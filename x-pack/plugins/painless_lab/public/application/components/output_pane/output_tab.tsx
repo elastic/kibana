@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 
 import { formatResponse } from '../../lib/format';
-import { Response } from '../../common/types';
+import { Response } from '../../types';
 
 interface Props {
   response?: Response;

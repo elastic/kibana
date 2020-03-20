@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Response, ExecutionError, PayloadFormat } from '../common/types';
-import { Store } from '../store';
+import { Response, ExecutionError, PayloadFormat, Store } from '../types';
 
 function prettifyPayload(payload = '', indentationLevel = 0) {
   const indentation = new Array(indentationLevel + 1).join(' ');

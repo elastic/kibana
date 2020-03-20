@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
-import { painlessContextOptions } from '../../common/constants';
+import { painlessContextOptions } from '../../constants';
 import { useAppContext } from '../../context';
 
 export const ContextTab: FunctionComponent = () => {

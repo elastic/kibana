@@ -8,10 +8,33 @@ import React, { createContext, ReactNode, useState, useContext } from 'react';
 import { HttpSetup } from 'src/core/public';
 
 import { Links } from '../links';
+import { exampleScript, painlessContextOptions } from './constants';
+import { Store } from './types';
 
-import { initialState, Store } from './store';
+interface AppContextProviderArgs {
+  children: ReactNode;
+  value: {
+    http: HttpSetup;
+    links: Links;
+  };
+}
 
 const PAINLESS_LAB_KEY = 'painlessLabState';
+
+const initialState = {
+  context: painlessContextOptions[0].value,
+  code: exampleScript,
+  parameters: `{
+  "string-parameter": "yay",
+  "number-parameter": 1.5,
+  "boolean-parameter": true
+}`,
+  index: 'default-index',
+  document: `{
+  "my-field": "field-value"
+}`,
+  query: '',
+};
 
 interface ContextValue {
   state: Store;
@@ -23,14 +46,6 @@ interface ContextValue {
 }
 
 const AppContext = createContext<ContextValue>(undefined as any);
-
-interface AppContextProviderArgs {
-  children: ReactNode;
-  value: {
-    http: HttpSetup;
-    links: Links;
-  };
-}
 
 export const AppContextProvider = ({
   children,
