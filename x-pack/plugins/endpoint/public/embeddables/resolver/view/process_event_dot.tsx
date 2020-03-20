@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiKeyboardAccessible } from '@elastic/eui';
 import { applyMatrix3 } from '../lib/vector2';
-import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
+import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
 import { SymbolIds, NamedColors, PaintServerIds } from './defs';
 import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
@@ -93,15 +93,21 @@ export const ProcessEventDot = styled(
 
       const selfId = adjacentNodeMap?.self;
 
-      const nodeViewportStyle = {
-        left: `${left}px`,
-        top: `${top}px`,
-        width: `${360 * magFactorX}px`,
-        height: `${120 * magFactorX}px`,
-        transform: `translateX(-${0.172413 * 360 * magFactorX + 10}px) translateY(-${0.73684 *
-          120 *
-          magFactorX}px)`,
-      };
+      const nodeViewportStyle = useMemo(
+        () => ({
+          left: `${left}px`,
+          top: `${top}px`,
+          // TODO, explain magic numbers
+          width: `${360 * magFactorX}px`,
+          // TODO, explain magic numbers
+          height: `${120 * magFactorX}px`,
+          // TODO, explain magic numbers
+          transform: `translateX(-${0.172413 * 360 * magFactorX + 10}px) translateY(-${0.73684 *
+            120 *
+            magFactorX}px)`,
+        }),
+        [left, magFactorX, top]
+      );
 
       const markerBaseSize = 15;
       const markerSize = (magFactor: number) => {
@@ -132,22 +138,7 @@ export const ProcessEventDot = styled(
           }
         : {};
 
-      const nodeType = ((processEvent: ResolverEvent) => {
-        const processType = processModel.eventType(processEvent);
-        const processTypeToCube = {
-          processCreated: 'terminatedProcessCube',
-          processRan: 'runningProcessCube',
-          processTerminated: 'terminatedProcessCube',
-          unknownProcessEvent: 'runningProcessCube',
-          processCausedAlert: 'runningTriggerCube',
-          unknownEvent: 'runningProcessCube',
-        };
-        if (processType in processTypeToCube) {
-          return processTypeToCube[processType];
-        }
-        return 'runningProcessCube';
-      })(event) as keyof typeof nodeAssets;
-
+      const nodeType = getNodeType(event);
       const clickTargetRef: { current: SVGAnimationElement | null } = React.createRef();
       const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[nodeType];
       const resolverNodeIdGenerator = htmlIdGenerator('resolverNode');
@@ -158,15 +149,28 @@ export const ProcessEventDot = styled(
       ] as string[];
 
       const dispatch = useResolverDispatch();
-      const handleFocus = (focusEvent: React.FocusEvent<SVGSVGElement>) => {
-        dispatch({
-          type: 'userFocusedOnResolverNode',
-          payload: {
-            nodeId,
-          },
-        });
-        focusEvent.currentTarget.setAttribute('aria-current', 'true');
-      };
+
+      const handleFocus = useCallback(
+        (focusEvent: React.FocusEvent<SVGSVGElement>) => {
+          dispatch({
+            type: 'userFocusedOnResolverNode',
+            payload: {
+              nodeId,
+            },
+          });
+          focusEvent.currentTarget.setAttribute('aria-current', 'true');
+        },
+        [dispatch, nodeId]
+      );
+
+      const handleClick = useCallback(
+        (clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+          if (clickTargetRef.current !== null) {
+            (clickTargetRef.current as any).beginElement();
+          }
+        },
+        [clickTargetRef]
+      );
 
       return (
         <EuiKeyboardAccessible>
@@ -183,11 +187,7 @@ export const ProcessEventDot = styled(
             aria-haspopup={'true'}
             style={nodeViewportStyle}
             id={nodeId}
-            onClick={(clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-              if (clickTargetRef.current !== null) {
-                (clickTargetRef.current as any).beginElement();
-              }
-            }}
+            onClick={handleClick}
             onFocus={handleFocus}
             tabIndex={-1}
           >
@@ -272,3 +272,21 @@ export const ProcessEventDot = styled(
   will-change: left, top, width, height;
   contain: strict;
 `;
+
+const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = {
+  processCreated: 'terminatedProcessCube',
+  processRan: 'runningProcessCube',
+  processTerminated: 'terminatedProcessCube',
+  unknownProcessEvent: 'runningProcessCube',
+  processCausedAlert: 'runningTriggerCube',
+  unknownEvent: 'runningProcessCube',
+};
+
+function getNodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
+  const processType = processModel.eventType(processEvent);
+
+  if (processType in processTypeToCube) {
+    return processTypeToCube[processType];
+  }
+  return 'runningProcessCube';
+}
