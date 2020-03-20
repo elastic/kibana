@@ -36,13 +36,13 @@ export const initLogEntriesSummaryRoute = ({ framework, logEntries }: InfraBacke
           logEntriesSummaryRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const { sourceId, startDate, endDate, bucketSize, query } = payload;
+        const { sourceId, startTimestamp, endTimestamp, bucketSize, query } = payload;
 
         const buckets = await logEntries.getLogSummaryBucketsBetween(
           requestContext,
           sourceId,
-          startDate,
-          endDate,
+          startTimestamp,
+          endTimestamp,
           bucketSize,
           parseFilterQuery(query)
         );
@@ -50,8 +50,8 @@ export const initLogEntriesSummaryRoute = ({ framework, logEntries }: InfraBacke
         return response.ok({
           body: logEntriesSummaryResponseRT.encode({
             data: {
-              start: startDate,
-              end: endDate,
+              start: startTimestamp,
+              end: endTimestamp,
               buckets,
             },
           }),
