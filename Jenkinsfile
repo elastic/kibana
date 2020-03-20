@@ -11,6 +11,8 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
           error "Testing error #${i}"
         }
       }
+      error "Fail the build"
+
       retryable.enable()
       parallel([
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
