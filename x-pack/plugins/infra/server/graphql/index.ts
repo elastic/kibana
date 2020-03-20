@@ -6,14 +6,7 @@
 
 import { rootSchema } from '../../common/graphql/root/schema.gql';
 import { sharedSchema } from '../../common/graphql/shared/schema.gql';
-import { logEntriesSchema } from './log_entries/schema.gql';
 import { sourceStatusSchema } from './source_status/schema.gql';
 import { sourcesSchema } from './sources/schema.gql';
 
-export const schemas = [
-  rootSchema,
-  sharedSchema,
-  logEntriesSchema,
-  sourcesSchema,
-  sourceStatusSchema,
-];
+export const schemas = [rootSchema, sharedSchema, sourcesSchema, sourceStatusSchema];

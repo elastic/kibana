@@ -10,7 +10,7 @@ import { EuiFormRow, EuiSelect, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/e
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
-import { indexPatternService } from '../../../kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
 import { SORT_ORDER } from '../../../../common/constants';
@@ -51,7 +51,7 @@ export class UpdateSourceEditor extends Component {
   async loadFields() {
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(this.props.indexPatternId);
+      indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({

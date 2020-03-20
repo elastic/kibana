@@ -10,7 +10,10 @@ import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { indexPatternService } from '../../../kibana_services';
+import {
+  getIndexPatternService,
+  getIndexPatternSelectComponent,
+} from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
 import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
@@ -18,9 +21,6 @@ import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 import { ScalingForm } from './scaling_form';
 import { getTermsFields } from '../../../index_pattern_util';
-
-import { npStart } from 'ui/new_platform';
-const { IndexPatternSelect } = npStart.plugins.data.ui;
 
 function getGeoFields(fields) {
   return fields.filter(field => {
@@ -97,7 +97,7 @@ export class CreateSourceEditor extends Component {
 
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(indexPatternId);
+      indexPattern = await getIndexPatternService().get(indexPatternId);
     } catch (err) {
       // index pattern no longer exists
       return;
@@ -247,6 +247,8 @@ export class CreateSourceEditor extends Component {
   }
 
   render() {
+    const IndexPatternSelect = getIndexPatternSelectComponent();
+
     return (
       <Fragment>
         {this._renderNoIndexPatternWarning()}
