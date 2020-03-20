@@ -8,7 +8,6 @@ import { alertsClientMock } from '../../../../../../../plugins/alerting/server/m
 import { actionsClientMock } from '../../../../../../../plugins/actions/server/mocks';
 import { getMlResult } from '../routes/__mocks__/request_responses';
 import { createRules } from './create_rules';
-import { CreateRuleParams } from './types';
 
 describe('createRules', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -20,20 +19,22 @@ describe('createRules', () => {
   });
 
   it('calls the alertsClient with ML params', async () => {
-    const params: CreateRuleParams = {
-      alertsClient,
-      actionsClient,
+    const params = {
       ...getMlResult().params,
       anomalyThreshold: 55,
       machineLearningJobId: 'new_job_id',
+    };
+
+    await createRules(({
+      alertsClient,
+      actionsClient,
+      ...params,
       ruleId: 'new-rule-id',
       enabled: true,
       interval: '',
       name: '',
       tags: [],
-    };
-
-    await createRules(params);
+    } as Unknown) as CreateRuleParams);
 
     expect(alertsClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
