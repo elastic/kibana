@@ -28,7 +28,7 @@ describe('createRules', () => {
     await createRules({
       alertsClient,
       actionsClient,
-      acttions: [],
+      actions: [],
       ...params,
       ruleId: 'new-rule-id',
       enabled: true,
