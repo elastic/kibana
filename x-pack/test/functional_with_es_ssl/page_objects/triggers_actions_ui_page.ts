@@ -19,14 +19,14 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       return await testSubjects.getVisibleText('appTitle');
     },
     async clickCreateFirstConnectorButton() {
-      const createBtn = await find.byCssSelector('[data-test-subj="createFirstActionButton"]');
+      const createBtn = await testSubjects.find('createFirstActionButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();
       }
     },
     async clickCreateConnectorButton() {
-      const createBtn = await find.byCssSelector('[data-test-subj="createActionButton"]');
+      const createBtn = await testSubjects.find('createActionButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();
