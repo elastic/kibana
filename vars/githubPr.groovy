@@ -169,7 +169,15 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
       ## :broken_heart: Build Failed
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      * [Pipeline Steps](${env.BUILD_URL}flowGraphTable) (look for red circles / failed steps)
+      * [Interpreting CI Failures](https://www.elastic.co/guide/en/kibana/current/interpreting-ci-failures.html)
     """
+
+    def steps = jenkinsApi.getFailedSteps()
+    if (steps?.size() > 0) {
+      def list = steps.collect { "* [${it.displayName}](${it.logs})" }.join("\n")
+      messages << "### Failed CI Steps\n${list}"
+    }
   }
 
   messages << getTestFailuresMessage()
