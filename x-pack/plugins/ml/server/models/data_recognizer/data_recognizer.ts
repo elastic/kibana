@@ -8,6 +8,7 @@ import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
 import { CallAPIOptions, APICaller, SavedObjectsClientContract } from 'kibana/server';
+import moment from 'moment';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
 import { AnalysisLimits, CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
@@ -937,21 +938,22 @@ export class DataRecognizer {
   }
 
   /**
-   * Checks if the time range is provided and fallbacks
-   * to the last 3 month of data
+   * Provides a time range of the last 3 months of data
    */
   async getFallbackTimeRange(
     timeField: string,
     query?: any
   ): Promise<{ start: number; end: number }> {
     const fieldsService = fieldsServiceProvider(this.callAsCurrentUser);
+
     const timeFieldRange = await fieldsService.getTimeFieldRange(
       this.indexPatternName,
       timeField,
       query
     );
+
     return {
-      start: timeFieldRange.start.epoch,
+      start: timeFieldRange.end.epoch - moment.duration(3, 'months').asMilliseconds(),
       end: timeFieldRange.end.epoch,
     };
   }
