@@ -63,7 +63,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await fieldOptions[1].click();
       // need this two out of popup clicks to close them
       await nameInput.click();
-      await testSubjects.click('intervalInput');
 
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
