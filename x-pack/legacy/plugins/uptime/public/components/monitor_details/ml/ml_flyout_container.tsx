@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import {
   canCreateMLJobSelector,
+  hasMLJobSelector,
   hasNewMLJobSelector,
   isMLJobCreatingSelector,
 } from '../../../state/selectors';
@@ -74,6 +75,10 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
 
   const canCreateMLJob = useSelector(canCreateMLJobSelector);
 
+  const { data: uptimeJobs } = useSelector(hasMLJobSelector);
+
+  const hasExistingMLJob = !!uptimeJobs?.jobsExist;
+
   const [isCreatingJob, setIsCreatingJob] = useState(false);
 
   useEffect(() => {
@@ -114,7 +119,14 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
     basePath,
   ]);
 
-  if (!isOpen) {
+  useEffect(() => {
+    if (hasExistingMLJob) {
+      setIsCreatingJob(true);
+      dispatch(createMLJobAction.get({ monitorId: monitorId as string }));
+    }
+  }, [dispatch, hasExistingMLJob, monitorId]);
+
+  if (!isOpen || hasExistingMLJob) {
     return null;
   }
 
@@ -126,7 +138,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
   return (
     <>
       <MLFlyoutView
-        canCreateMLJob={canCreateMLJob}
+        canCreateMLJob={!!canCreateMLJob}
         isCreatingJob={isMLJobCreating}
         onClickCreate={createAnomalyJob}
         onClose={onClose}

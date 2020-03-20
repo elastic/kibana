@@ -52,7 +52,12 @@ describe('ML Flyout component', () => {
 
   it('renders without errors', () => {
     const wrapper = shallowWithIntl(
-      <MLFlyoutView isCreatingJob={false} onClickCreate={createJob} onClose={onClose} />
+      <MLFlyoutView
+        isCreatingJob={false}
+        onClickCreate={createJob}
+        onClose={onClose}
+        canCreateMLJob={true}
+      />
     );
     expect(wrapper).toMatchSnapshot();
   });
@@ -68,7 +73,12 @@ describe('ML Flyout component', () => {
     };
     const wrapper = renderWithIntl(
       <UptimeSettingsContext.Provider value={value}>
-        <MLFlyoutView isCreatingJob={false} onClickCreate={createJob} onClose={onClose} />
+        <MLFlyoutView
+          isCreatingJob={false}
+          onClickCreate={createJob}
+          onClose={onClose}
+          canCreateMLJob={true}
+        />
       </UptimeSettingsContext.Provider>
     );
     const licenseComponent = wrapper.find('.license-info-trial');
@@ -88,7 +98,12 @@ describe('ML Flyout component', () => {
     };
     const wrapper = renderWithIntl(
       <UptimeSettingsContext.Provider value={value}>
-        <MLFlyoutView isCreatingJob={false} onClickCreate={createJob} onClose={onClose} />
+        <MLFlyoutView
+          isCreatingJob={false}
+          onClickCreate={createJob}
+          onClose={onClose}
+          canCreateMLJob={true}
+        />
       </UptimeSettingsContext.Provider>
     );
 
