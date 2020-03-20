@@ -399,7 +399,8 @@ describe('setupAuthentication()', () => {
     ) => Promise<InvalidateAPIKeyResult | null>;
 
     beforeEach(async () => {
-      invalidateAPIKeyAsInternalUser = (await setupAuthentication(mockSetupAuthenticationParams)).invalidateAPIKeyAsInternalUser;
+      invalidateAPIKeyAsInternalUser = (await setupAuthentication(mockSetupAuthenticationParams))
+        .invalidateAPIKeyAsInternalUser;
     });
 
     it('calls invalidateAPIKeyAsInternalUser with given arguments', async () => {
