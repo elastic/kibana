@@ -39,39 +39,34 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
         },
       };
     }
-    const parentAdjacencyMap =
-      (uniqueParentPid && idToAdjacent.get(uniqueParentPid)) ||
-      emptyAdjacencyMap(uniqueParentPid || 'root');
+
     const currentProcessAdjacencyMap: AdjacentProcessMap =
       idToAdjacent.get(uniqueProcessPid) || emptyAdjacencyMap(uniqueProcessPid);
 
+    idToAdjacent.set(uniqueProcessPid, currentProcessAdjacencyMap);
     if (processChildren) {
       const previousProcessId = uniquePidForProcess(processChildren[processChildren.length - 1]);
-
       processChildren.push(process);
-
       /**
        * Update adjacency maps for current and previous entries
        */
-      const previousAdjacencyMap = idToAdjacent.get(previousProcessId) as AdjacentProcessMap;
-
-      previousAdjacencyMap.nextSibling = uniqueProcessPid;
-      idToAdjacent.set(previousProcessId, previousAdjacencyMap);
+      idToAdjacent.get(previousProcessId)!.nextSibling = uniqueProcessPid;
       currentProcessAdjacencyMap.previousSibling = previousProcessId;
       if (uniqueParentPid) {
         currentProcessAdjacencyMap.parent = uniqueParentPid;
       }
-      idToAdjacent.set(uniqueProcessPid, currentProcessAdjacencyMap);
     } else {
       idToChildren.set(uniqueParentPid, [process]);
 
-      // set up, down
       if (uniqueParentPid) {
+        const parentAdjacencyMap =
+          idToAdjacent.get(uniqueParentPid) || emptyAdjacencyMap(uniqueParentPid);
+        // set firstChild for parent
         parentAdjacencyMap.firstChild = uniqueProcessPid;
         idToAdjacent.set(uniqueParentPid, parentAdjacencyMap);
+        // set parent for current
+        currentProcessAdjacencyMap.parent = uniqueParentPid || null;
       }
-      currentProcessAdjacencyMap.parent = uniqueParentPid || null;
-      idToAdjacent.set(uniqueProcessPid, currentProcessAdjacencyMap);
     }
   }
 
