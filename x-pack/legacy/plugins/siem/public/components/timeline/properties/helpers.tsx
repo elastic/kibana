@@ -17,7 +17,7 @@ import {
   EuiOverlayMask,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
