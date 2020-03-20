@@ -82,6 +82,7 @@ export const getOutputRuleAlertForRest = (): Omit<
   OutputRuleAlertRest,
   'machine_learning_job_id' | 'anomaly_threshold'
 > => ({
+  actions: [],
   created_by: 'elastic',
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',

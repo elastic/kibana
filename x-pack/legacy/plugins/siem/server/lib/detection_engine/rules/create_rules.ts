@@ -9,10 +9,12 @@ import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { hasListsFeature } from '../feature_flags';
+import { transformRuleToAlertAction } from './transform_actions';
 
 export const createRules = ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
+  actions,
   anomalyThreshold,
   description,
   enabled,
@@ -37,6 +39,7 @@ export const createRules = ({
   severity,
   tags,
   threat,
+  throttle,
   to,
   type,
   references,
@@ -82,8 +85,8 @@ export const createRules = ({
       },
       schedule: { interval },
       enabled,
-      actions: [], // TODO: Create and add actions here once we have email, etc...
-      throttle: null,
+      actions: actions?.map(transformRuleToAlertAction),
+      throttle,
     },
   });
 };

@@ -47,6 +47,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
           const {
+            actions,
             anomaly_threshold: anomalyThreshold,
             description,
             enabled,
@@ -73,6 +74,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             to,
             type,
             threat,
+            throttle,
             references,
             note,
             version,
@@ -84,6 +86,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             const rule = await updateRules({
               alertsClient,
               actionsClient,
+              actions,
               anomalyThreshold,
               description,
               enabled,
@@ -112,6 +115,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               to,
               type,
               threat,
+              throttle,
               references,
               note,
               version,

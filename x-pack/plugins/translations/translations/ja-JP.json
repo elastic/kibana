@@ -7677,7 +7677,6 @@
     "xpack.ml.datavisualizer.page.fieldsPanelTitle": "フィールド",
     "xpack.ml.datavisualizer.page.metricsPanelTitle": "メトリック",
     "xpack.ml.datavisualizer.searchPanel.allOptionLabel": "すべて",
-    "xpack.ml.datavisualizer.searchPanel.kqlEditOnlyLabel": "現在 KQAL で保存された検索のみ編集できます。",
     "xpack.ml.datavisualizer.searchPanel.queryBarPlaceholder": "小さいサンプルサイズを選択することで、クエリの実行時間を短縮しクラスターへの負荷を軽減できます。",
     "xpack.ml.datavisualizer.searchPanel.queryBarPlaceholderText": "検索… (例: status:200 AND extension:\"PHP\")",
     "xpack.ml.datavisualizer.searchPanel.sampleSizeAriaLabel": "サンプリングするドキュメント数を選択してください",
