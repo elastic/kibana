@@ -157,6 +157,7 @@ export class InfraLogEntriesDomain {
             }
           }
         ),
+        context: {},
       };
     });
 
