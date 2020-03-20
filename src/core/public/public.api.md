@@ -1236,8 +1236,6 @@ export class SimpleSavedObject<T = unknown> {
     _version?: SavedObject<T>['version'];
 }
 
-// Warning: (ae-missing-release-tag) "StartServicesAccessor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<[CoreStart, TPluginsStart]>;
 

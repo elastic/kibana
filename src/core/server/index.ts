@@ -361,6 +361,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
  * Promise will not resolve until Core and plugin dependencies have completed `start`.
  * This should only be used inside handlers registered during `setup` that will only be executed
  * after `start` lifecycle.
+ *
+ * @public
  */
 export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<
   [CoreStart, TPluginsStart]
