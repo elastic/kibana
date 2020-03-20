@@ -56,9 +56,7 @@ export class InfraLogEntriesDomain {
     private readonly libs: { sources: InfraSources }
   ) {}
 
-  /* Name is temporary until we can clean up the GraphQL implementation */
-  /* eslint-disable-next-line @typescript-eslint/camelcase */
-  public async getLogEntriesAround__new(
+  public async getLogEntriesAround(
     requestContext: RequestHandlerContext,
     sourceId: string,
     params: LogEntriesAroundParams
