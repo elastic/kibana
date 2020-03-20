@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CoreStart } from 'src/core/public';
+import { SharePluginStart } from 'src/plugins/share/public';
 import {
   EmbeddableVisTriggerContext,
   EmbeddableContext,
@@ -17,7 +19,19 @@ export type ActionContext<T extends IEmbeddable = IEmbeddable> = EmbeddableVisTr
 export interface Config {
   dashboardId?: string;
   useCurrentDashboardFilters: boolean;
-  useCurrentDashboardDateRange: boolean;
+  useCurrentDashboardDataRange: boolean;
 }
 
-export type CollectConfigProps = UiActionsCollectConfigProps<Config>;
+export interface CollectConfigProps extends UiActionsCollectConfigProps<Config> {
+  deps: {
+    getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
+    getNavigateToApp: () => Promise<CoreStart['application']['navigateToApp']>;
+    getGetUrlGenerator: () => Promise<SharePluginStart['urlGenerators']['getUrlGenerator']>;
+  };
+  context: {
+    place: string;
+    placeContext: {
+      embeddable: IEmbeddable;
+    };
+  };
+}

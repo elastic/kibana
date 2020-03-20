@@ -34,12 +34,44 @@ export interface SelectRangeActionContext {
 }
 
 async function isCompatible(context: SelectRangeActionContext) {
-  try {
-    return Boolean(await onBrushEvent(context.data));
-  } catch {
-    return false;
-  }
+  // try {
+  return Boolean(await onBrushEvent(context.data));
+  // } catch {
+  //  return false;
+  // }
 }
+
+export const selectRangeActionGetFilters = async ({
+  timeFieldName,
+  data,
+}: SelectRangeActionContext) => {
+  if (!(await isCompatible({ timeFieldName, data }))) {
+    throw new IncompatibleActionError();
+  }
+
+  const filter = await onBrushEvent(data);
+
+  if (!filter) {
+    return;
+  }
+
+  const selectedFilters = esFilters.mapAndFlattenFilters([filter]);
+
+  return esFilters.extractTimeFilter(timeFieldName || '', selectedFilters);
+};
+
+const selectRangeActionExecute = (
+  filterManager: FilterManager,
+  timeFilter: TimefilterContract
+) => async ({ timeFieldName, data }: SelectRangeActionContext) => {
+  const { timeRangeFilter, restOfFilters } =
+    (await selectRangeActionGetFilters({ timeFieldName, data })) || {};
+
+  filterManager.addFilters(restOfFilters || []);
+  if (timeRangeFilter) {
+    esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
+  }
+};
 
 export function selectRangeAction(
   filterManager: FilterManager,
@@ -54,31 +86,6 @@ export function selectRangeAction(
       });
     },
     isCompatible,
-    execute: async ({ timeFieldName, data }: SelectRangeActionContext) => {
-      if (!(await isCompatible({ timeFieldName, data }))) {
-        throw new IncompatibleActionError();
-      }
-
-      const filter = await onBrushEvent(data);
-
-      if (!filter) {
-        return;
-      }
-
-      const selectedFilters = esFilters.mapAndFlattenFilters([filter]);
-
-      if (timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-          timeFieldName,
-          selectedFilters
-        );
-        filterManager.addFilters(restOfFilters);
-        if (timeRangeFilter) {
-          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
-        }
-      } else {
-        filterManager.addFilters(selectedFilters);
-      }
-    },
+    execute: selectRangeActionExecute(filterManager, timeFilter),
   });
 }

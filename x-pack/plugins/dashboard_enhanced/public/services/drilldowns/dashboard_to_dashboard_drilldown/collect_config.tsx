@@ -9,9 +9,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce, findIndex } from 'lodash';
 import { CollectConfigProps } from './types';
 import { DashboardDrilldownConfig } from '../../../components/dashboard_drilldown_config';
-import { Params } from './drilldown';
 import { SimpleSavedObject } from '../../../../../../../src/core/public';
-import { IEmbeddable } from '../../../../../../../src/plugins/embeddable/public';
 
 const mergeDashboards = (
   dashboards: Array<EuiComboBoxOptionOption<string>>,
@@ -33,16 +31,6 @@ const dashboardSavedObjectToMenuItem = (
   label: savedObject.attributes.title,
 });
 
-export interface CollectConfigContainerProps extends CollectConfigProps {
-  params: Params;
-  context: {
-    place: string;
-    placeContext: {
-      embeddable: IEmbeddable;
-    };
-  };
-}
-
 interface CollectConfigContainerState {
   dashboards: Array<EuiComboBoxOptionOption<string>>;
   searchString?: string;
@@ -52,7 +40,7 @@ interface CollectConfigContainerState {
 }
 
 export class CollectConfigContainer extends React.Component<
-  CollectConfigContainerProps,
+  CollectConfigProps,
   CollectConfigContainerState
 > {
   state = {
@@ -70,7 +58,7 @@ export class CollectConfigContainer extends React.Component<
 
   loadSelectedDashboard() {
     const { config } = this.props;
-    this.props.params.getSavedObjectsClient().then(savedObjectsClient => {
+    this.props.deps.getSavedObjectsClient().then(savedObjectsClient => {
       if (config.dashboardId) {
         savedObjectsClient
           .get<{ title: string }>('dashboard', config.dashboardId)
@@ -85,7 +73,7 @@ export class CollectConfigContainer extends React.Component<
     // const currentDashboard = this.props.context.placeContext.embeddable.parent;
     // const currentDashboardId = currentDashboard && currentDashboard.id;
     this.setState({ searchString, isLoading: true });
-    this.props.params.getSavedObjectsClient().then(savedObjectsClient => {
+    this.props.deps.getSavedObjectsClient().then(savedObjectsClient => {
       savedObjectsClient
         .find<{ title: string }>({
           type: 'dashboard',
@@ -114,7 +102,7 @@ export class CollectConfigContainer extends React.Component<
         activeDashboardId={config.dashboardId}
         dashboards={mergeDashboards(dashboards, selectedDashboard)}
         currentFilters={config.useCurrentDashboardFilters}
-        keepRange={config.useCurrentDashboardDateRange}
+        keepRange={config.useCurrentDashboardDataRange}
         isLoading={isLoading}
         onDashboardSelect={dashboardId => {
           onConfig({ ...config, dashboardId });
@@ -129,7 +117,7 @@ export class CollectConfigContainer extends React.Component<
         onKeepRangeToggle={() =>
           onConfig({
             ...config,
-            useCurrentDashboardDateRange: !config.useCurrentDashboardDateRange,
+            useCurrentDashboardDataRange: !config.useCurrentDashboardDataRange,
           })
         }
       />

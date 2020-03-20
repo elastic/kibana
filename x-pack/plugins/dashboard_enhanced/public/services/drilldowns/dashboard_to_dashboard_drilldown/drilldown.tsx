@@ -15,7 +15,11 @@ import { CollectConfigContainer } from './collect_config';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { DrilldownsDrilldown as Drilldown } from '../../../../../drilldowns/public';
 import { txtGoToDashboard } from './i18n';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  valueClickActionGetFilters,
+  selectRangeActionGetFilters,
+} from '../../../../../../../src/plugins/data/public';
 
 export interface Params {
   getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
@@ -38,14 +42,14 @@ export class DashboardToDashboardDrilldown
   public readonly euiIcon = 'dashboardApp';
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = props => (
-    <CollectConfigContainer {...props} params={this.params} />
+    <CollectConfigContainer {...props} deps={this.params} />
   );
 
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
     dashboardId: '',
-    useCurrentDashboardDateRange: true,
+    useCurrentDashboardDataRange: true,
     useCurrentDashboardFilters: true,
   });
 
@@ -58,19 +62,42 @@ export class DashboardToDashboardDrilldown
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
   ) => {
+    console.log('drilldown execute'); // eslint-disable-line
     const getUrlGenerator = await this.params.getGetUrlGenerator();
     const navigateToApp = await this.params.getNavigateToApp();
     const { timeRange, query, filters } = context.embeddable.getInput();
 
+    // @ts-ignore
+    if (context.data.range) {
+      // look up by range
+      const { restOfFilters, timeRangeFilter } =
+        (await selectRangeActionGetFilters({
+          timeFieldName: context.timeFieldName,
+          data: context.data,
+        })) || {};
+      console.log('select range action filters', restOfFilters, timeRangeFilter); // eslint-disable-line
+      // selectRangeActionGetFilters
+    } else {
+      const { restOfFilters, timeRangeFilter } = await valueClickActionGetFilters({
+        timeFieldName: context.timeFieldName,
+        data: context.data,
+      });
+      console.log('value click action filters', restOfFilters, timeRangeFilter); // eslint-disable-line
+    }
+
     const dashboardPath = await getUrlGenerator(DASHBOARD_APP_URL_GENERATOR).createUrl({
       dashboardId: config.dashboardId,
       query,
-      timeRange: config.useCurrentDashboardDateRange ? timeRange : undefined,
+      // todo - how to get destination dashboard timerange?
+      timeRange: config.useCurrentDashboardDataRange ? timeRange : undefined,
       filters: config.useCurrentDashboardFilters
         ? filters
         : filters?.filter(f => esFilters.isFilterPinned(f)),
     });
+
     const dashboardHash = dashboardPath.split('#')[1];
+
+    console.log('dashboard hash', dashboardHash); // eslint-disable-line
     await navigateToApp('kibana', {
       path: `#${dashboardHash}`,
     });

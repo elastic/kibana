@@ -450,6 +450,8 @@ export {
   getKbnTypeNames,
 } from '../common';
 
+export { valueClickActionGetFilters, selectRangeActionGetFilters } from './actions';
+
 /*
  * Plugin setup
  */
