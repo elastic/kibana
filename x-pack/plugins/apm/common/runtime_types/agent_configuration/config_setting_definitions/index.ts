@@ -5,23 +5,19 @@
  */
 
 import * as t from 'io-ts';
+import { sortBy } from 'lodash';
 import { isRight } from 'fp-ts/lib/Either';
 import { i18n } from '@kbn/i18n';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import {
-  rawConfigSettingDefinitions,
-  RawConfigSettingDefinition
-} from './config_setting_definitions';
 import { booleanRt } from '../boolean_rt';
 import { integerRt } from '../integer_rt';
 import { isRumAgentName } from '../../../agent_name';
 import { numberFloatRt } from '../number_float';
 import { bytesRt, BYTE_UNITS } from '../bytes_rt';
 import { durationRt, DURATION_UNITS } from '../duration_rt';
-
-export type ConfigSettingDefinition = RawConfigSettingDefinition & {
-  validation: NonNullable<RawConfigSettingDefinition['validation']>;
-};
+import { RawConfigSettingDefinition, ConfigSettingDefinition } from './types';
+import { generalSettings } from './general_settings';
+import { javaSettings } from './java_settings';
 
 function getDefaultsByType(
   configSettingDefinition: RawConfigSettingDefinition
@@ -101,16 +97,19 @@ export function isValid(setting: ConfigSettingDefinition, value: unknown) {
   return isRight(setting.validation.decode(value));
 }
 
-export const configSettingDefinitions = rawConfigSettingDefinitions.map(def => {
-  const defWithDefaults = {
-    ...getDefaultsByType(def),
-    ...def
-  };
+export const configSettingDefinitions = sortBy(
+  [...generalSettings, ...javaSettings].map(def => {
+    const defWithDefaults = {
+      ...getDefaultsByType(def),
+      ...def
+    };
 
-  // ensure every option has validation
-  if (!defWithDefaults.validation) {
-    throw new Error(`Missing validation for ${def.key}`);
-  }
+    // ensure every option has validation
+    if (!defWithDefaults.validation) {
+      throw new Error(`Missing validation for ${def.key}`);
+    }
 
-  return defWithDefaults as ConfigSettingDefinition;
-});
+    return defWithDefaults as ConfigSettingDefinition;
+  }),
+  'key'
+);
