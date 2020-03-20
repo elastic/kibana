@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
 import rison from 'rison-node';
 import '../../doc_viewer';
@@ -42,11 +41,7 @@ interface LazyScope extends ng.IScope {
   [key: string]: any;
 }
 
-export function createTableRowDirective(
-  $compile: ng.ICompileService,
-  $httpParamSerializer: any,
-  config: IUiSettingsClient
-) {
+export function createTableRowDirective($compile: ng.ICompileService, $httpParamSerializer: any) {
   const cellTemplate = _.template(noWhiteSpace(cellTemplateHtml));
   const truncateByHeightTemplate = _.template(noWhiteSpace(truncateByHeightTemplateHtml));
 
@@ -138,7 +133,7 @@ export function createTableRowDirective(
         const newHtmls = [openRowHtml];
 
         const mapping = indexPattern.fields.getByName;
-        const hideTimeColumn = config.get('doc_table:hideTimeColumn');
+        const hideTimeColumn = getServices().uiSettings.get('doc_table:hideTimeColumn');
         if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(
             cellTemplate({

@@ -206,7 +206,7 @@ export class AlertingPlugin {
       logger,
       getServices: this.getServicesFactory(core.savedObjects),
       spaceIdToNamespace: this.spaceIdToNamespace,
-      executeAction: plugins.actions.execute,
+      actionsPlugin: plugins.actions,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
     });
