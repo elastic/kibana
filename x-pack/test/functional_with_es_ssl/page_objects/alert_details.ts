@@ -106,6 +106,11 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
       const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
       return (await viewInAppButton.getAttribute('disabled')) !== 'disabled';
     },
+    async printViewInAppNav() {
+      const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+      // eslint-disable-next-line no-console
+      console.log(`printViewInAppNav: ${await viewInAppButton.getAttribute('data-navigation')}`);
+    },
     async clickViewInApp() {
       return await testSubjects.click('alertDetails-viewInApp');
     },

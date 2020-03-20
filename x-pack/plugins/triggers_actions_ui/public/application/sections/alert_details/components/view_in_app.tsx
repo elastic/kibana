@@ -85,6 +85,7 @@ function getNavigationHandler(
 ): object {
   return hasNavigation(alertNavigation)
     ? {
+        ['data-navigation']: JSON.stringify(alertNavigation),
         onClick: () => {
           // eslint-disable-next-line no-console
           console.log(

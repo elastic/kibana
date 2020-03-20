@@ -170,12 +170,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await pageObjects.alertDetailsUI.isViewInAppEnabled()).to.be(true);
 
-        await retry.try(async () => {
-          await pageObjects.alertDetailsUI.clickViewInApp();
-          expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(
-            `View Alert ${alert.id}`
-          );
-        });
+        await pageObjects.alertDetailsUI.printViewInAppNav();
+        await pageObjects.alertDetailsUI.clickViewInApp();
+        await pageObjects.alertDetailsUI.printViewInAppNav();
+
+        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);
       });
     });
 
