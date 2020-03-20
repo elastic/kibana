@@ -54,9 +54,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   constructor(
-    private readonly getServices: () => Promise<
-      [unknown, Pick<VisualizationsStartDeps, 'uiActions'>]
-    >
+    private readonly getServices: () => Promise<Pick<VisualizationsStartDeps, 'uiActions'>>
   ) {
     super({
       savedObjectMetaData: {
@@ -119,7 +117,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 
       const indexPattern = await getIndexPattern(savedObject);
       const indexPatterns = indexPattern ? [indexPattern] : [];
-      const [, { uiActions }] = await this.getServices();
+      const { uiActions } = await this.getServices();
 
       const editable = await this.isEditable();
       return new VisualizeEmbeddable(

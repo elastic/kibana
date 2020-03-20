@@ -114,7 +114,9 @@ export class VisualizationsPlugin
     expressions.registerFunction(visualizationFunction);
     expressions.registerRenderer(visualizationRenderer);
 
-    const embeddableFactory = new VisualizeEmbeddableFactory(core.getStartServices);
+    const embeddableFactory = new VisualizeEmbeddableFactory(
+      async () => (await core.getStartServices())[1]
+    );
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {
