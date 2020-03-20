@@ -35,6 +35,7 @@ import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../../store/policy_list';
 import { PolicyData } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { PageView } from '../../components/page_view';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -165,42 +166,59 @@ export const PolicyList = React.memo(() => {
   );
 
   return (
-    <EuiPage data-test-subj="policyListPage">
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle size="l">
-                <h1 data-test-subj="policyViewTitle">
-                  <FormattedMessage
-                    id="xpack.endpoint.policyList.viewTitle"
-                    defaultMessage="Policies"
-                  />
-                </h1>
-              </EuiTitle>
-              <h2>
-                <EuiText color="subdued" data-test-subj="policyTotalCount" size="s">
-                  <FormattedMessage
-                    id="xpack.endpoint.policyList.viewTitleTotalCount"
-                    defaultMessage="{totalItemCount} Policies"
-                    values={{ totalItemCount }}
-                  />
-                </EuiText>
-              </h2>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-          <EuiPageContentBody>
-            <EuiBasicTable
-              items={policyItems}
-              columns={columns}
-              loading={loading}
-              pagination={paginationSetup}
-              onChange={handleTableChange}
-              data-test-subj="policyTable"
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <PageView
+      headerLeft={i18n.translate('xpack.endpoint.policyList.viewTitle', {
+        defaultMessage: 'Policies',
+      })}
+    >
+      <EuiBasicTable
+        items={policyItems}
+        columns={columns}
+        loading={loading}
+        pagination={paginationSetup}
+        onChange={handleTableChange}
+        data-test-subj="policyTable"
+      />
+    </PageView>
   );
+
+  // return (
+  //   <EuiPage data-test-subj="policyListPage">
+  //     <EuiPageBody>
+  //       <EuiPageContent>
+  //         <EuiPageContentHeader>
+  //           <EuiPageContentHeaderSection>
+  //             <EuiTitle size="l">
+  //               <h1 data-test-subj="policyViewTitle">
+  //                 <FormattedMessage
+  //                   id="xpack.endpoint.policyList.viewTitle"
+  //                   defaultMessage="Policies"
+  //                 />
+  //               </h1>
+  //             </EuiTitle>
+  //             <h2>
+  //               <EuiText color="subdued" data-test-subj="policyTotalCount" size="s">
+  //                 <FormattedMessage
+  //                   id="xpack.endpoint.policyList.viewTitleTotalCount"
+  //                   defaultMessage="{totalItemCount} Policies"
+  //                   values={{ totalItemCount }}
+  //                 />
+  //               </EuiText>
+  //             </h2>
+  //           </EuiPageContentHeaderSection>
+  //         </EuiPageContentHeader>
+  //         <EuiPageContentBody>
+  //           <EuiBasicTable
+  //             items={policyItems}
+  //             columns={columns}
+  //             loading={loading}
+  //             pagination={paginationSetup}
+  //             onChange={handleTableChange}
+  //             data-test-subj="policyTable"
+  //           />
+  //         </EuiPageContentBody>
+  //       </EuiPageContent>
+  //     </EuiPageBody>
+  //   </EuiPage>
+  // );
 });
