@@ -29,3 +29,5 @@ export {
 } from './request/np_ready_request';
 
 export { indices } from './indices';
+
+export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';

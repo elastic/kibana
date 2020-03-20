@@ -18,6 +18,7 @@ export const installPrepackagedRules = (
 ): Array<Promise<Alert>> =>
   rules.reduce<Array<Promise<Alert>>>((acc, rule) => {
     const {
+      actions,
       anomaly_threshold: anomalyThreshold,
       description,
       enabled,
@@ -43,6 +44,7 @@ export const installPrepackagedRules = (
       to,
       type,
       threat,
+      throttle,
       references,
       note,
       version,
@@ -53,6 +55,7 @@ export const installPrepackagedRules = (
       createRules({
         alertsClient,
         actionsClient,
+        actions,
         anomalyThreshold,
         description,
         enabled,
@@ -79,6 +82,7 @@ export const installPrepackagedRules = (
         to,
         type,
         threat,
+        throttle,
         references,
         note,
         version,
