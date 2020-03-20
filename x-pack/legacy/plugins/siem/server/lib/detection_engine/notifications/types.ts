@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Readable } from 'stream';
-
-import { SavedObjectsClientContract } from 'kibana/server';
 import {
   AlertsClient,
   PartialAlert,
@@ -14,68 +11,15 @@ import {
   State,
   AlertExecutorOptions,
 } from '../../../../../../../plugins/alerting/server';
-import { Alert, AlertAction } from '../../../../../../../plugins/alerting/common';
+import { Alert } from '../../../../../../../plugins/alerting/common';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
-import { LegacyRequest } from '../../../types';
-import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
-
-export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
-  id: string | undefined;
-  notification_id: RuleAlertParams['notificationId'] | undefined;
-};
-
-export type UpdateRuleAlertParamsRest = RuleAlertParamsRest & {
-  id: string | undefined;
-  notification_id: RuleAlertParams['notificationId'] | undefined;
-};
-
-export interface FindParamsRest {
-  per_page: number;
-  page: number;
-  sort_field: string;
-  sort_order: 'asc' | 'desc';
-  fields: string[];
-  filter: string;
-}
-
-export interface PatchRulesRequest extends LegacyRequest {
-  payload: PatchRuleAlertParamsRest;
-}
-
-export interface UpdateRulesRequest extends LegacyRequest {
-  payload: UpdateRuleAlertParamsRest;
-}
+import { RuleAlertAction } from '../types';
 
 export interface RuleNotificationAlertType extends Alert {
-  params: RuleTypeParams;
-}
-
-export interface HapiReadableStream extends Readable {
-  hapi: {
-    filename: string;
+  params: {
+    ruleAlertId: string;
   };
 }
-export interface ImportRulesRequestParams {
-  query: { overwrite: boolean };
-  body: { file: HapiReadableStream };
-}
-
-export interface ExportRulesRequestParams {
-  body: { objects: Array<{ notification_id: string }> | null | undefined };
-  query: {
-    file_name: string;
-    exclude_export_details: boolean;
-  };
-}
-
-export interface RuleRequestParams {
-  id: string | undefined;
-  notification_id: string | undefined;
-}
-
-export type ReadNotificationRequestParams = RuleRequestParams;
-export type DeleteRuleRequestParams = RuleRequestParams;
-export type DeleteRulesRequestParams = RuleRequestParams[];
 
 export interface FindNotificationParams {
   alertsClient: AlertsClient;
@@ -101,30 +45,23 @@ export interface Clients {
   alertsClient: AlertsClient;
 }
 
-export type PatchNotificationParams = Partial<RuleAlertParams> & {
-  id: string | undefined | null;
-  savedObjectsClient: SavedObjectsClientContract;
-} & Clients;
-
-export type UpdateNotificationParams = Omit<NotificationAlertParams, 'interval', 'actions'> & {
-  actions?: AlertAction[];
+export type UpdateNotificationParams = Omit<NotificationAlertParams, 'interval' | 'actions'> & {
+  actions: RuleAlertAction[];
   id?: string;
-  ruleId: string;
   tags?: string[];
   interval: string | null;
   ruleAlertId: string;
 } & Clients;
 
 export type DeleteNotificationParams = Clients & {
-  id?: string | undefined;
-  ruleId?: string | undefined | null;
+  id?: string;
+  ruleAlertId?: string;
 };
 
 export interface NotificationAlertParams {
-  actions: AlertAction[];
+  actions: RuleAlertAction[];
   enabled: boolean;
   ruleAlertId: string;
-  ruleId: string;
   interval: string;
   name: string;
   tags?: string[];
@@ -135,8 +72,8 @@ export type CreateNotificationParams = NotificationAlertParams & Clients;
 
 export interface ReadNotificationParams {
   alertsClient: AlertsClient;
-  id?: string | undefined | null;
-  ruleId?: string | undefined | null;
+  id?: string | null;
+  ruleAlertId?: string | null;
 }
 
 export const isAlertTypes = (

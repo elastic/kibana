@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
+import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
-import { AlertAction } from '../../../../../../../plugins/alerting/common';
 
 import { NotificationAlertTypeDefinition } from './types';
 import { buildSignalsSearchQuery } from './build_signals_query';
@@ -19,7 +18,6 @@ interface AlertAttributes {
   enabled: boolean;
   name: string;
   tags: string[];
-  actions: AlertAction[];
   createdBy: string;
   createdAt: string;
   updatedBy: string;
@@ -30,10 +28,8 @@ interface AlertAttributes {
 }
 export const rulesNotificationAlertType = ({
   logger,
-  version,
 }: {
   logger: Logger;
-  version: string;
 }): NotificationAlertTypeDefinition => ({
   id: NOTIFICATIONS_ID,
   name: 'SIEM Notifications',
@@ -52,7 +48,6 @@ export const rulesNotificationAlertType = ({
   validate: {
     params: schema.object({
       ruleAlertId: schema.string(),
-      ruleId: schema.string(),
     }),
   },
   async executor({ previousStartedAt, alertId, services, params }) {
@@ -60,43 +55,38 @@ export const rulesNotificationAlertType = ({
       'alert',
       params.ruleAlertId
     );
-    logger.warn(`ruleAlertSavedObject ${JSON.stringify(ruleAlertSavedObject, null, 2)}`);
-    const fromInMs = moment(previousStartedAt ?? undefined).format('x');
+    const { params: ruleParams } = ruleAlertSavedObject.attributes;
+    const fromInMs = previousStartedAt ? moment(previousStartedAt).format('x') : 'now-1h';
     const toInMs = moment().format('x');
-    const resultsLink = getNotificationResultsLink({
-      id: ruleAlertSavedObject.id,
-      from: fromInMs,
-      to: toInMs,
-    });
-    logger.warn(`resultsLink ${resultsLink}`);
-    logger.warn(`notification params ${JSON.stringify(params)}`);
 
     const query = buildSignalsSearchQuery({
-      index: ruleAlertSavedObject.attributes.params.outputIndex,
-      ruleIds: [ruleAlertSavedObject.attributes.params.ruleId],
+      index: ruleParams.outputIndex,
+      ruleId: ruleParams.ruleId,
       to: toInMs,
-      from: previousStartedAt ? moment(previousStartedAt).format('x') : `now-1h`,
+      from: fromInMs,
     });
 
     const signalsQueryResult = await services.callCluster('search', query);
     const signalsCount = signalsQueryResult.hits.total.value;
+    logger.info(
+      `Found ${signalsCount} signals using signal rule name: "${ruleParams.name}", id: "${params.ruleAlertId}", rule_id: "${ruleParams.ruleId}" in "${ruleParams.outputIndex}" index`
+    );
 
-    // // if (signalsCount) {
-    const alertInstance = services.alertInstanceFactory(alertId);
-    alertInstance
-      .replaceState({
-        signalsCount,
-      })
-      .scheduleActions('default', {
-        resultsLink,
-        rule: ruleAlertSavedObject.attributes.params,
+    if (signalsCount) {
+      const resultsLink = getNotificationResultsLink({
+        id: ruleAlertSavedObject.id,
+        from: fromInMs,
+        to: toInMs,
       });
-    // }
-
-    logger.warn('SIEM NOTIFICATIONS');
-    // logger.warn(signalsQueryResult);
-    logger.warn(`previousStartedAt ${previousStartedAt}`);
-    logger.warn(`alertId ${alertId}`);
-    logger.warn(`params ${JSON.stringify(params, null, 2)}`);
+      const alertInstance = services.alertInstanceFactory(alertId);
+      alertInstance
+        .replaceState({
+          signalsCount,
+        })
+        .scheduleActions('default', {
+          resultsLink,
+          rule: ruleParams,
+        });
+    }
   },
 });

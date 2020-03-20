@@ -12,7 +12,6 @@ import { RuleTypeParams, RuleAlertAction } from '../types';
 import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
-import { AlertAction } from '../../../../../../../plugins/alerting/common';
 
 interface SingleBulkCreateParams {
   someResult: SignalSearchResponse;

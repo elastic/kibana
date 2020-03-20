@@ -206,7 +206,7 @@ export const signalRulesAlertType = ({
             const actionsInterval = throttle ?? savedObject.attributes.schedule.interval;
 
             const singalsQuery = buildSignalsSearchQuery({
-              ruleIds: [ruleId!],
+              ruleId: ruleParams.ruleId,
               index: [outputIndex],
               from: `now-${actionsInterval}`,
               to: 'now',

@@ -120,7 +120,6 @@ export const updateRulesRoute = (router: IRouter) => {
         });
 
         if (rule != null) {
-          // console.log(`aaa ${JSON.stringify(rule, null, 2)}`);
           await updateNotifications({
             alertsClient,
             actions,
