@@ -20,7 +20,7 @@ import {
 import React, { useCallback, useState } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
@@ -120,26 +120,20 @@ interface NewCaseProps {
 }
 
 export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, timelineTitle }) => {
-  const [createCase, setCreateCase] = useState(false);
+  const history = useHistory();
   const handleClick = useCallback(() => {
-    setCreateCase(true);
     onClosePopover();
-  }, [onClosePopover]);
-  if (createCase) {
-    return (
-      <Redirect
-        to={{
-          pathname: `/${SiemPageName.case}/create`,
-          state: {
-            insertTimeline: {
-              timelineId,
-              timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-            },
-          },
-        }}
-      />
-    );
-  }
+    history.push({
+      pathname: `/${SiemPageName.case}/create`,
+      state: {
+        insertTimeline: {
+          timelineId,
+          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+        },
+      },
+    });
+  }, [onClosePopover, history, timelineId, timelineTitle]);
+
   return (
     <EuiButtonEmpty
       data-test-subj="attach-timeline-case"
