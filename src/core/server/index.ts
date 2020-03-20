@@ -352,14 +352,19 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   uuid: UuidServiceSetup;
   /** {@link MetricsServiceSetup} */
   metrics: MetricsServiceSetup;
-  /**
-   * Allows plugins to get access to APIs available in start inside async handlers.
-   * Promise will not resolve until Core and plugin dependencies have completed `start`.
-   * This should only be used inside handlers registered during `setup` that will only be executed
-   * after `start` lifecycle.
-   */
-  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart>;
 }
+
+/**
+ * Allows plugins to get access to APIs available in start inside async handlers.
+ * Promise will not resolve until Core and plugin dependencies have completed `start`.
+ * This should only be used inside handlers registered during `setup` that will only be executed
+ * after `start` lifecycle.
+ */
+export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<
+  [CoreStart, TPluginsStart]
+>;
 
 /**
  * Context passed to the plugins `start` method.
