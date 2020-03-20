@@ -11,8 +11,6 @@ import { interval } from 'rxjs';
 import {
   AnnotationDomainTypes,
   Axis,
-  getAxisId,
-  getSpecId,
   Chart,
   LineAnnotation,
   LineSeries,
@@ -265,25 +263,21 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
               theme={[customTheme(), chartsTheme]}
               xDomain={domain}
               showLegend={!!termField}
+              showLegendExtra
               legendPosition={Position.Bottom}
             />
             <Axis
-              id={getAxisId('bottom')}
+              id="bottom"
               position={Position.Bottom}
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis
-              domain={{ max: maxY }}
-              id={getAxisId('left')}
-              title={aggLabel}
-              position={Position.Left}
-            />
+            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
             {alertVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries
                   key={key}
-                  id={getSpecId(key)}
+                  id={key}
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   data={visualizationData[key]}

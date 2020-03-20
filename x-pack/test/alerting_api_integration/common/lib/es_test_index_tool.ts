@@ -41,6 +41,10 @@ export class ESTestIndexTool {
               type: 'date',
               format: 'strict_date_time',
             },
+            date_epoch_millis: {
+              type: 'date',
+              format: 'epoch_millis',
+            },
             testedValue: {
               type: 'long',
             },
