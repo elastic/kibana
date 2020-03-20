@@ -233,6 +233,12 @@ export default async function({ readConfigFile }) {
           },
           kibana: [],
         },
+
+        test_api_keys: {
+          elasticsearch: {
+            cluster: ['manage_security', 'manage_api_key'],
+          },
+        },
       },
       defaultRoles: ['superuser'],
     },
