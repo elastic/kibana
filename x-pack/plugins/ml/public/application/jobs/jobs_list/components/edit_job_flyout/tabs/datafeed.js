@@ -79,11 +79,11 @@ export class Datafeed extends Component {
 
   render() {
     const { query, queryDelay, frequency, scrollSize, defaults } = this.state;
-    const disabled = this.props.datafeedRunning;
+    const { datafeedRunning } = this.props;
     return (
       <React.Fragment>
         <EuiSpacer size="m" />
-        {disabled && (
+        {datafeedRunning && (
           <>
             <EuiCallOut color="warning">
               <FormattedMessage
@@ -109,7 +109,7 @@ export class Datafeed extends Component {
               value={query}
               onChange={this.onQueryChange}
               height="200px"
-              readOnly={disabled}
+              readOnly={datafeedRunning}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -124,7 +124,7 @@ export class Datafeed extends Component {
               value={queryDelay}
               placeholder={defaults.queryDelay}
               onChange={this.onQueryDelayChange}
-              disabled={disabled}
+              disabled={datafeedRunning}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -139,7 +139,7 @@ export class Datafeed extends Component {
               value={frequency}
               placeholder={defaults.frequency}
               onChange={this.onFrequencyChange}
-              disabled={disabled}
+              disabled={datafeedRunning}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -154,7 +154,7 @@ export class Datafeed extends Component {
               value={scrollSize}
               placeholder={defaults.scrollSize}
               onChange={this.onScrollSizeChange}
-              disabled={disabled}
+              disabled={datafeedRunning}
             />
           </EuiFormRow>
         </EuiForm>
