@@ -16,18 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
-export function KibanaSupertestProvider({ getService }) {
+export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
   return supertestAsPromised(kibanaServerUrl);
 }
 
-export function ElasticsearchSupertestProvider({ getService }) {
+export function ElasticsearchSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const elasticSearchServerUrl = formatUrl(config.get('servers.elasticsearch'));
   return supertestAsPromised(elasticSearchServerUrl);
