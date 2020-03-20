@@ -88,7 +88,7 @@ export const TimeSeries = ({
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = getUISettings();
   const timeZone = timezoneProvider(uiSettings)();
-  const hasBarChart = series.some(({ bars }) => bars.show);
+  const hasBarChart = series.some(({ bars }) => bars?.show);
 
   // compute the theme based on the bg color
   const theme = getTheme(darkMode, backgroundColor);
@@ -162,7 +162,7 @@ export const TimeSeries = ({
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const key = `${id}-${label}`;
 
-          if (bars.show) {
+          if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}

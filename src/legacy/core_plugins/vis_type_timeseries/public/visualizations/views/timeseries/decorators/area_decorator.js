@@ -21,7 +21,7 @@ import React from 'react';
 import { ScaleType, AreaSeries } from '@elastic/charts';
 import { getAreaStyles } from '../utils/series_styles';
 import { ChartsEntities } from '../model/charts';
-import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
+import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES, Y0_ACCESSOR_INDEXES } from '../../../constants';
 
 export function AreaSeriesDecorator({
   seriesId,
@@ -55,6 +55,7 @@ export function AreaSeriesDecorator({
     hideInLegend,
     xAccessor: X_ACCESSOR_INDEX,
     yAccessors: Y_ACCESSOR_INDEXES,
+    y0Accessors: lines.mode === 'band' ? Y0_ACCESSOR_INDEXES : undefined,
     stackAccessors,
     stackAsPercentage,
     xScaleType,

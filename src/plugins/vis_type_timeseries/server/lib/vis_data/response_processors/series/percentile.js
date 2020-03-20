@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { getAggValue } from '../../helpers/get_agg_value';
 import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { getSplits } from '../../helpers/get_splits';
@@ -37,31 +36,23 @@ export function percentile(resp, panel, series, meta) {
         const percentileValue = percentile.value ? percentile.value : 0;
         const label = `${split.label} (${percentileValue})`;
         const data = split.timeseries.buckets.map(bucket => {
-          const m = _.assign({}, metric, { percent: percentileValue });
-          return [bucket.key, getAggValue(bucket, m)];
+          const higherMetric = { ...metric, percent: percentileValue };
+          const serieData = [bucket.key, getAggValue(bucket, higherMetric)];
+
+          if (percentile.mode === 'band') {
+            const lowerMetric = { ...metric, percent: percentile.percentile };
+            serieData.push(getAggValue(bucket, lowerMetric));
+          }
+
+          return serieData;
         });
         if (percentile.mode === 'band') {
-          const fillData = split.timeseries.buckets.map(bucket => {
-            const m = _.assign({}, metric, { percent: percentile.percentile });
-            return [bucket.key, getAggValue(bucket, m)];
-          });
           results.push({
             id: `${split.id}:${percentile.id}`,
             color: split.color,
             label,
             data,
-            lines: { show: true, fill: percentile.shade, lineWidth: 0 },
-            points: { show: false },
-            legend: false,
-            fillBetween: `${split.id}:${percentile.id}:${percentile.percentile}`,
-          });
-          results.push({
-            id: `${split.id}:${percentile.id}:${percentile.percentile}`,
-            color: split.color,
-            label,
-            data: fillData,
-            lines: { show: true, fill: false, lineWidth: 0 },
-            legend: false,
+            lines: { show: true, fill: percentile.shade, lineWidth: 0, mode: 'band' },
             points: { show: false },
           });
         } else {
