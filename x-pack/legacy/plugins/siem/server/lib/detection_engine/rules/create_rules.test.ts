@@ -28,10 +28,12 @@ describe('createRules', () => {
     await createRules({
       alertsClient,
       actionsClient,
+      acttions: [],
       ...params,
       ruleId: 'new-rule-id',
       enabled: true,
       interval: '',
+      thrttole: null,
       name: '',
       tags: [],
     });
