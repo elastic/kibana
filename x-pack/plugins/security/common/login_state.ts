@@ -6,7 +6,7 @@
 
 import { LoginLayout } from './licensing';
 
-interface LoginSelector {
+export interface LoginSelector {
   enabled: boolean;
   providers: Array<{ type: string; name: string; description?: string }>;
 }

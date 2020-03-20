@@ -7,7 +7,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from '@testing-library/react';
-import { EuiFlexGroup } from '@elastic/eui';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { LoginState } from '../../../common/login_state';
 import { LoginPage } from './login_page';
@@ -250,73 +249,6 @@ describe('LoginPage', () => {
       });
 
       expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
-    });
-  });
-
-  describe('login selector', () => {
-    it('renders as expected with login form', async () => {
-      const coreStartMock = coreMock.createStart();
-      httpMock.get.mockResolvedValue(
-        createLoginState({
-          selector: {
-            enabled: true,
-            providers: [
-              { type: 'saml', name: 'saml1', description: 'Login w/SAML' },
-              { type: 'pki', name: 'pki1', description: 'Login w/PKI' },
-            ],
-          },
-        })
-      );
-
-      const wrapper = shallow(
-        <LoginPage
-          http={httpMock}
-          notifications={coreStartMock.notifications}
-          fatalErrors={coreStartMock.fatalErrors}
-          loginAssistanceMessage=""
-        />
-      );
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
-      });
-
-      expect(wrapper.find(EuiFlexGroup)).toMatchSnapshot();
-    });
-
-    it('renders as expected without login form', async () => {
-      const coreStartMock = coreMock.createStart();
-      httpMock.get.mockResolvedValue(
-        createLoginState({
-          showLoginForm: false,
-          selector: {
-            enabled: true,
-            providers: [
-              { type: 'saml', name: 'saml1', description: 'Login w/SAML' },
-              { type: 'pki', name: 'pki1', description: 'Login w/PKI' },
-            ],
-          },
-        })
-      );
-
-      const wrapper = shallow(
-        <LoginPage
-          http={httpMock}
-          notifications={coreStartMock.notifications}
-          fatalErrors={coreStartMock.fatalErrors}
-          loginAssistanceMessage=""
-        />
-      );
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
-      });
-
-      expect(wrapper.find(EuiFlexGroup)).toMatchSnapshot();
     });
   });
 

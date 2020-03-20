@@ -104,6 +104,26 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
     }
   }
   loginAssistanceMessage=""
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  selector={
+    Object {
+      "enabled": false,
+      "providers": Array [],
+    }
+  }
+  showLoginForm={true}
 />
 `;
 
@@ -117,6 +137,26 @@ exports[`LoginPage enabled form state renders as expected when info message is s
   }
   infoMessage="Your session has timed out. Please log in again."
   loginAssistanceMessage=""
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  selector={
+    Object {
+      "enabled": false,
+      "providers": Array [],
+    }
+  }
+  showLoginForm={true}
 />
 `;
 
@@ -130,86 +170,27 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
   }
   infoMessage="Your session has timed out. Please log in again."
   loginAssistanceMessage="This is an *important* message"
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  selector={
+    Object {
+      "enabled": false,
+      "providers": Array [],
+    }
+  }
+  showLoginForm={true}
 />
-`;
-
-exports[`LoginPage login selector renders as expected with login form 1`] = `
-<EuiFlexGroup
-  gutterSize="l"
->
-  <EuiFlexItem>
-    <EuiButton
-      className="loginWelcome__selectorButton"
-      fullWidth={true}
-      iconType="user"
-      key="0"
-      onClick={[Function]}
-    >
-      Login w/SAML
-    </EuiButton>
-    <EuiButton
-      className="loginWelcome__selectorButton"
-      fullWidth={true}
-      iconType="user"
-      key="1"
-      onClick={[Function]}
-    >
-      Login w/PKI
-    </EuiButton>
-    <EuiText
-      color="subdued"
-      textAlign="center"
-    >
-      ―――  
-      <FormattedMessage
-        defaultMessage="OR"
-        id="xpack.security.loginPage.loginSelectorOR"
-        values={Object {}}
-      />
-        ―――
-    </EuiText>
-    <EuiSpacer
-      size="m"
-    />
-    <BasicLoginForm
-      http={
-        Object {
-          "addLoadingCountSource": [MockFunction],
-          "get": [MockFunction],
-        }
-      }
-      infoMessage="Your session has timed out. Please log in again."
-      loginAssistanceMessage=""
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>
-`;
-
-exports[`LoginPage login selector renders as expected without login form 1`] = `
-<EuiFlexGroup
-  gutterSize="l"
->
-  <EuiFlexItem>
-    <EuiButton
-      className="loginWelcome__selectorButton"
-      fullWidth={true}
-      iconType="user"
-      key="0"
-      onClick={[Function]}
-    >
-      Login w/SAML
-    </EuiButton>
-    <EuiButton
-      className="loginWelcome__selectorButton"
-      fullWidth={true}
-      iconType="user"
-      key="1"
-      onClick={[Function]}
-    >
-      Login w/PKI
-    </EuiButton>
-  </EuiFlexItem>
-</EuiFlexGroup>
 `;
 
 exports[`LoginPage page renders as expected 1`] = `
@@ -278,6 +259,26 @@ exports[`LoginPage page renders as expected 1`] = `
             }
           }
           loginAssistanceMessage=""
+          notifications={
+            Object {
+              "toasts": Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              },
+            }
+          }
+          selector={
+            Object {
+              "enabled": false,
+              "providers": Array [],
+            }
+          }
+          showLoginForm={true}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

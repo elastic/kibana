@@ -1,21 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`BasicLoginForm renders as expected 1`] = `
+exports[`BasicLoginForm login selector renders as expected with login form 1`] = `
 <Fragment>
-  <EuiText
-    size="s"
+  <EuiButton
+    className="loginWelcome__selectorButton"
+    fullWidth={true}
+    iconType="user"
+    isDisabled={false}
+    isLoading={false}
+    key="saml1"
+    onClick={[Function]}
   >
-    <ReactMarkdown
-      astPlugins={Array []}
-      escapeHtml={true}
-      plugins={Array []}
-      rawSourcePos={false}
-      renderers={Object {}}
-      skipHtml={false}
-      sourcePos={false}
-      transformLinkUri={[Function]}
+    Login w/SAML
+  </EuiButton>
+  <EuiButton
+    className="loginWelcome__selectorButton"
+    fullWidth={true}
+    iconType="user"
+    isDisabled={false}
+    isLoading={false}
+    key="pki1"
+    onClick={[Function]}
+  >
+    Login w/PKI
+  </EuiButton>
+  <EuiText
+    color="subdued"
+    textAlign="center"
+  >
+    ―――  
+    <FormattedMessage
+      defaultMessage="OR"
+      id="xpack.security.loginPage.loginSelectorOR"
+      values={Object {}}
     />
+      ―――
   </EuiText>
+  <EuiSpacer
+    size="m"
+  />
   <EuiPanel>
     <form
       onSubmit={[Function]}
@@ -79,6 +102,115 @@ exports[`BasicLoginForm renders as expected 1`] = `
         color="primary"
         data-test-subj="loginSubmit"
         fill={true}
+        isDisabled={false}
+        isLoading={false}
+        onClick={[Function]}
+        type="submit"
+      >
+        <FormattedMessage
+          defaultMessage="Log in"
+          id="xpack.security.login.basicLoginForm.logInButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </form>
+  </EuiPanel>
+</Fragment>
+`;
+
+exports[`BasicLoginForm login selector renders as expected without login form 1`] = `
+<Fragment>
+  <EuiButton
+    className="loginWelcome__selectorButton"
+    fullWidth={true}
+    iconType="user"
+    isDisabled={false}
+    isLoading={false}
+    key="saml1"
+    onClick={[Function]}
+  >
+    Login w/SAML
+  </EuiButton>
+  <EuiButton
+    className="loginWelcome__selectorButton"
+    fullWidth={true}
+    iconType="user"
+    isDisabled={false}
+    isLoading={false}
+    key="pki1"
+    onClick={[Function]}
+  >
+    Login w/PKI
+  </EuiButton>
+</Fragment>
+`;
+
+exports[`BasicLoginForm renders as expected 1`] = `
+<Fragment>
+  <EuiPanel>
+    <form
+      onSubmit={[Function]}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Username"
+            id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-required={true}
+          data-test-subj="loginUsername"
+          disabled={false}
+          id="username"
+          inputRef={[Function]}
+          isInvalid={false}
+          name="username"
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Password"
+            id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-required={true}
+          autoComplete="off"
+          data-test-subj="loginPassword"
+          disabled={false}
+          id="password"
+          isInvalid={false}
+          name="password"
+          onChange={[Function]}
+          type="password"
+          value=""
+        />
+      </EuiFormRow>
+      <EuiButton
+        color="primary"
+        data-test-subj="loginSubmit"
+        fill={true}
+        isDisabled={false}
         isLoading={false}
         onClick={[Function]}
         type="submit"

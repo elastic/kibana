@@ -9,15 +9,7 @@ import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import { BehaviorSubject } from 'rxjs';
 import { parse } from 'url';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
@@ -130,8 +122,9 @@ export class LoginPage extends Component<Props, State> {
     selector,
     showLoginForm,
   }: LoginState & { isSecureConnection: boolean }) => {
-    const showLoginSelector = selector.providers.length > 0;
-    if (!showLoginSelector && !showLoginForm) {
+    const isLoginExplicitlyDisabled =
+      !showLoginForm && (!selector.enabled || selector.providers.length === 0);
+    if (isLoginExplicitlyDisabled) {
       return (
         <DisabledLoginForm
           title={
@@ -226,72 +219,16 @@ export class LoginPage extends Component<Props, State> {
       );
     }
 
-    const loginSelector =
-      showLoginSelector &&
-      selector.providers.map((provider, index) => (
-        <EuiButton
-          key={index}
-          className="loginWelcome__selectorButton"
-          iconType="user"
-          fullWidth={true}
-          onClick={() => this.login(provider.type, provider.name)}
-        >
-          {provider.description ?? (
-            <FormattedMessage
-              id="xpack.security.loginPage.loginProviderDescription"
-              defaultMessage="Login with {providerType}/{providerName}"
-              values={{
-                providerType: provider.type,
-                providerName: provider.name,
-              }}
-            />
-          )}
-        </EuiButton>
-      ));
-
-    const loginSelectorAndLoginFormSeparator = showLoginSelector && showLoginForm && (
-      <>
-        <EuiText textAlign="center" color="subdued">
-          ―――&nbsp;&nbsp;
-          <FormattedMessage id="xpack.security.loginPage.loginSelectorOR" defaultMessage="OR" />
-          &nbsp;&nbsp;―――
-        </EuiText>
-        <EuiSpacer size="m" />
-      </>
-    );
-
-    const loginForm = showLoginForm && (
+    return (
       <BasicLoginForm
         http={this.props.http}
+        notifications={this.props.notifications}
+        showLoginForm={showLoginForm}
+        selector={selector}
         infoMessage={infoMessageMap.get(parse(window.location.href, true).query.msg?.toString())}
         loginAssistanceMessage={this.props.loginAssistanceMessage}
       />
     );
-
-    return (
-      <>
-        {loginSelector}
-        {loginSelectorAndLoginFormSeparator}
-        {loginForm}
-      </>
-    );
-  };
-
-  private login = async (providerType: string, providerName: string) => {
-    try {
-      const { location } = await this.props.http.post<{ location: string }>(
-        '/internal/security/login_with',
-        { body: JSON.stringify({ providerType, providerName, currentURL: window.location.href }) }
-      );
-
-      window.location.href = location;
-    } catch (err) {
-      this.props.notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.security.loginPage.loginSelectorErrorMessage', {
-          defaultMessage: 'Could not perform login.',
-        }),
-      });
-    }
   };
 }
 

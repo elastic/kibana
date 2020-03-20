@@ -25,19 +25,30 @@ describe('BasicLoginForm', () => {
   });
 
   it('renders as expected', () => {
+    const coreStartMock = coreMock.createStart();
     expect(
       shallowWithIntl(
-        <BasicLoginForm http={coreMock.createStart().http} loginAssistanceMessage="" />
+        <BasicLoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginAssistanceMessage=""
+          showLoginForm={true}
+          selector={{ enabled: false, providers: [] }}
+        />
       )
     ).toMatchSnapshot();
   });
 
   it('renders an info message when provided.', () => {
+    const coreStartMock = coreMock.createStart();
     const wrapper = shallowWithIntl(
       <BasicLoginForm
-        http={coreMock.createStart().http}
+        http={coreStartMock.http}
+        notifications={coreStartMock.notifications}
         infoMessage={'Hey this is an info message'}
         loginAssistanceMessage=""
+        showLoginForm={true}
+        selector={{ enabled: false, providers: [] }}
       />
     );
 
@@ -45,10 +56,18 @@ describe('BasicLoginForm', () => {
   });
 
   it('renders an invalid credentials message', async () => {
-    const mockHTTP = coreMock.createStart({ basePath: '/some-base-path' }).http;
-    mockHTTP.post.mockRejectedValue({ response: { status: 401 } });
+    const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+    coreStartMock.http.post.mockRejectedValue({ response: { status: 401 } });
 
-    const wrapper = mountWithIntl(<BasicLoginForm http={mockHTTP} loginAssistanceMessage="" />);
+    const wrapper = mountWithIntl(
+      <BasicLoginForm
+        http={coreStartMock.http}
+        notifications={coreStartMock.notifications}
+        loginAssistanceMessage=""
+        showLoginForm={true}
+        selector={{ enabled: false, providers: [] }}
+      />
+    );
 
     wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username' } });
     wrapper.find('input[name="password"]').simulate('change', { target: { value: 'password' } });
@@ -65,10 +84,18 @@ describe('BasicLoginForm', () => {
   });
 
   it('renders unknown error message', async () => {
-    const mockHTTP = coreMock.createStart({ basePath: '/some-base-path' }).http;
-    mockHTTP.post.mockRejectedValue({ response: { status: 500 } });
+    const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+    coreStartMock.http.post.mockRejectedValue({ response: { status: 500 } });
 
-    const wrapper = mountWithIntl(<BasicLoginForm http={mockHTTP} loginAssistanceMessage="" />);
+    const wrapper = mountWithIntl(
+      <BasicLoginForm
+        http={coreStartMock.http}
+        notifications={coreStartMock.notifications}
+        loginAssistanceMessage=""
+        showLoginForm={true}
+        selector={{ enabled: false, providers: [] }}
+      />
+    );
 
     wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username' } });
     wrapper.find('input[name="password"]').simulate('change', { target: { value: 'password' } });
@@ -86,10 +113,18 @@ describe('BasicLoginForm', () => {
     window.location.href = `https://some-host/login?next=${encodeURIComponent(
       '/some-base-path/app/kibana#/home?_g=()'
     )}`;
-    const mockHTTP = coreMock.createStart({ basePath: '/some-base-path' }).http;
-    mockHTTP.post.mockResolvedValue({});
+    const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+    coreStartMock.http.post.mockResolvedValue({});
 
-    const wrapper = mountWithIntl(<BasicLoginForm http={mockHTTP} loginAssistanceMessage="" />);
+    const wrapper = mountWithIntl(
+      <BasicLoginForm
+        http={coreStartMock.http}
+        notifications={coreStartMock.notifications}
+        loginAssistanceMessage=""
+        showLoginForm={true}
+        selector={{ enabled: false, providers: [] }}
+      />
+    );
 
     wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username1' } });
     wrapper.find('input[name="password"]').simulate('change', { target: { value: 'password1' } });
@@ -100,12 +135,100 @@ describe('BasicLoginForm', () => {
       wrapper.update();
     });
 
-    expect(mockHTTP.post).toHaveBeenCalledTimes(1);
-    expect(mockHTTP.post).toHaveBeenCalledWith('/internal/security/login', {
+    expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+    expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
       body: JSON.stringify({ username: 'username1', password: 'password1' }),
     });
 
     expect(window.location.href).toBe('/some-base-path/app/kibana#/home?_g=()');
     expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+  });
+
+  describe('login selector', () => {
+    it('renders as expected with login form', async () => {
+      const coreStartMock = coreMock.createStart();
+      expect(
+        shallowWithIntl(
+          <BasicLoginForm
+            http={coreStartMock.http}
+            notifications={coreStartMock.notifications}
+            loginAssistanceMessage=""
+            showLoginForm={true}
+            selector={{
+              enabled: true,
+              providers: [
+                { type: 'saml', name: 'saml1', description: 'Login w/SAML' },
+                { type: 'pki', name: 'pki1', description: 'Login w/PKI' },
+              ],
+            }}
+          />
+        )
+      ).toMatchSnapshot();
+    });
+
+    it('renders as expected without login form', async () => {
+      const coreStartMock = coreMock.createStart();
+      expect(
+        shallowWithIntl(
+          <BasicLoginForm
+            http={coreStartMock.http}
+            notifications={coreStartMock.notifications}
+            loginAssistanceMessage=""
+            showLoginForm={false}
+            selector={{
+              enabled: true,
+              providers: [
+                { type: 'saml', name: 'saml1', description: 'Login w/SAML' },
+                { type: 'pki', name: 'pki1', description: 'Login w/PKI' },
+              ],
+            }}
+          />
+        )
+      ).toMatchSnapshot();
+    });
+
+    it('properly redirects after successful login', async () => {
+      const currentURL = `https://some-host/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStartMock.http.post.mockResolvedValue({
+        location: 'https://external-idp/login?optional-arg=2#optional-hash',
+      });
+
+      window.location.href = currentURL;
+      const wrapper = mountWithIntl(
+        <BasicLoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginAssistanceMessage=""
+          showLoginForm={true}
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'saml', name: 'saml1', description: 'Login w/SAML' },
+              { type: 'pki', name: 'pki1', description: 'Login w/PKI' },
+            ],
+          }}
+        />
+      );
+
+      wrapper.findWhere(node => node.key() === 'saml1').simulate('click');
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login_with', {
+        body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
+      });
+
+      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
+      expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+      expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
+    });
   });
 });
