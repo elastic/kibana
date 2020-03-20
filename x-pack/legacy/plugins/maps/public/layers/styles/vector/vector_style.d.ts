@@ -7,17 +7,18 @@ import { IStyleProperty } from './properties/style_property';
 import { IDynamicStyleProperty } from './properties/dynamic_style_property';
 import { IVectorLayer } from '../../vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
+import { VectorStyleDescriptor } from '../../../../common/style_property_descriptor_types';
 
 export interface IVectorStyle {
   getAllStyleProperties(): IStyleProperty[];
-  getDescriptor(): object;
+  getDescriptor(): VectorStyleDescriptor;
   getDynamicPropertiesArray(): IDynamicStyleProperty[];
 }
 
 export class VectorStyle implements IVectorStyle {
-  constructor(descriptor: unknown, source: IVectorSource, layer: IVectorLayer);
+  constructor(descriptor: VectorStyleDescriptor, source: IVectorSource, layer: IVectorLayer);
 
   getAllStyleProperties(): IStyleProperty[];
-  getDescriptor(): object;
+  getDescriptor(): VectorStyleDescriptor;
   getDynamicPropertiesArray(): IDynamicStyleProperty[];
 }
