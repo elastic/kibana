@@ -6,9 +6,11 @@ based on your specific APM data.
 Custom links can be filtered to only appear in the APM app for relevant services,
 environments, transaction types, or transaction names.
 
+Ready to dive in? Jump straight to the <<custom-links-examples,examples>>.
+
 [float]
 [[custom-links-create]]
-==== Create a link
+=== Create a link
 
 Each custom link consists of a label, url, and optional filter.
 The easiest way to create a custom link is from within the actions dropdown in the transaction detail page.
@@ -20,7 +22,7 @@ and selecting **Create custom link**.
 
 [float]
 [[custom-links-label]]
-===== Label
+==== Label
 
 The name of your custom link.
 This text will be shown in the actions context menu,
@@ -30,7 +32,7 @@ TIP: Custom links are displayed alphabetically in the actions menu.
 
 [float]
 [[custom-links-url]]
-===== URL
+==== URL
 
 The URL your link points to.
 URLs support dynamic field name variables, encapsulated in double curly brackets: `{{field.name}}`.
@@ -45,7 +47,7 @@ image::apm/images/example-metadata.png[Example metadata]
 
 [float]
 [[custom-links-filters]]
-===== Filters
+==== Filters
 
 Filter each link to only appear so it only appears for specific services or transactions.
 You can filter on the following fields:
@@ -59,7 +61,7 @@ Multiple values are allowed when comma separated.
 
 [float]
 [[custom-links-examples]]
-==== Custom link examples
+=== Custom link examples
 
 // Relevant documentation links
 :jira-query-params: https://confluence.atlassian.com/jirakb/how-to-create-issues-using-direct-html-links-in-jira-server-159474.html
@@ -68,105 +70,149 @@ Multiple values are allowed when comma separated.
 Not sure where to start with custom links?
 Take a look at the examples below, and customize them to your liking!
 
-**Email**
+[float]
+[[custom-links-examples-email]]
+==== Email
 
-Create a custom link that emails the owner of a service.
+Email the owner of a service.
 
-Label: "Email {{service.name}} engineer"
-Link: mailto:TEAM@COMPANY_NAME.com
-Filters: `service.name` : `SERVICE_NAME`
+|====
+|Label |`Email <SERVICE_NAME> engineer`
+|Link |`mailto:<TEAM_OR_ENGINEER>@<COMPANY_NAME>.com`
+|Filters |`service.name:<SERVICE_NAME>`
+|====
 
-Example
-This link creates an email addressed to the owner of the python service.
-It only appears on relevant services.
+**Example**
 
-Label: `Email {{service.name}} engineer`
-Link: `mailto:python_team@COMPANY_NAME.com`
-Filters: `service.name` : `python`
+This link opens an email addressed to the team or owner of `python-backend`.
+It will only appear on services with the name `python-backend`.
 
+|====
+|Label |`Email python-backend engineers`
+|Link |`mailto:python_team@elastic.co`
+|Filters |`service.name:python-backend`
+|====
 
-**GitHub issue**
+[float]
+[[custom-links-examples-gh]]
+==== GitHub issue
 
-Open a GitHub issue with pre-populated metadata from the current transaction.
-See the {github-query-params}[GitHub automation documentation] for a full list of supported query parameters. 
+Open a GitHub issue with pre-populated metadata from the selected trace sample.
 
-Label: `Open an issue in REPO_NAME`
-Link: `https://github.com/ORG/REPO/issues/new?title=Test+title&body=Test+post`
-Filters: `service.name` : `client`
+|====
+|Label |`Open an issue in <REPO_NAME>`
+|Link |`https://github.com/<ORG>/<REPO>/issues/new?title=<TITLE>&body=<BODY>`
+|Filters |`service.name:client`
+|====
 
-Example
+**Example**
+
 This link opens a new GitHub issue in the apm-agent-rum repository.
 It populates the issue body with relevant metadata from the currently active trace.
-
-Label: `Open an issue in apm-rum-js`
-Link: `https://github.com/elastic/apm-agent-rum-js/issues/new?title=Investigate+APM+trace&body=Investigate+the+following+APM+trace%3A%0D%0A%0D%0A---%0D%0A%0D%0Aservice.name%3A+%7B%7Bservice.name%7D%7D%0D%0Atransaction.id%3A+%7B%7Btransaction.id%7D%7D%0D%0Acontainer.id%3A+%7B%7Bcontainer.id%7D%7D%0D%0Aurl.full%3A+%7B%7Burl.full%7D%7D`
-Filters: `service.name` : `client`
+Clicking this link results in the following issue being created:
 
 [role="screenshot"]
 image::apm/images/create-github-issue.png[Example github issue]
 
-**Jira issue**
+|====
+|Label |`Open an issue in apm-rum-js`
+|Link |`https://github.com/elastic/apm-agent-rum-js/issues/new?title=Investigate+APM+trace&body=Investigate+the+following+APM+trace%3A%0D%0A%0D%0A---%0D%0A%0D%0Aservice.name%3A+%7B%7Bservice.name%7D%7D%0D%0Atransaction.id%3A+%7B%7Btransaction.id%7D%7D%0D%0Acontainer.id%3A+%7B%7Bcontainer.id%7D%7D%0D%0Aurl.full%3A+%7B%7Burl.full%7D%7D`
+|Filters |`service.name:client`
+|====
 
-Create a Jira issue with metadata from the current transaction.
-See the {jira-query-parans}[Jira application administration knowledge base]
-for a full list of supported query parameters.
+See the {github-query-params}[GitHub automation documentation] for a full list of supported query parameters. 
 
-Label: `Open an issue in Jira`
-Link: `https://JIRA_BASE_URL/secure/CreateIssueDetails!init.jspa?ARGUMENTS`
+[float]
+[[custom-links-examples-jira]]
+==== Jira task
 
-Example
-This link opens a new issue in Jira.
+Create a Jira task with pre-populated metadata from the selected trace sample.
+
+|====
+|Label |`Open an issue in Jira`
+|Link |`https://<JIRA_BASE_URL>/secure/CreateIssueDetails!init.jspa?<ARGUMENTS>`
+|====
+
+**Example**
+
+This link creates a new task on the Engineering board in Jira.
 It populates the issue body with relevant metadata from the currently active trace.
-
-Label: `Open an issue in Jira`
-Link: `https://test-site-33.atlassian.net/secure/CreateIssueDetails!init.jspa?pid=10000&issuetype=10001&summary=Created+via+APM&description=Investigate+the+following+APM+trace%3A%0D%0A%0D%0A---%0D%0A%0D%0Aservice.name%3A+%7B%7Bservice.name%7D%7D%0D%0Atransaction.id%3A+%7B%7Btransaction.id%7D%7D%0D%0Acontainer.id%3A+%7B%7Bcontainer.id%7D%7D%0D%0Aurl.full%3A+%7B%7Burl.full%7D%7D`
+Clicking this link results in the following task being created in Jira:
 
 [role="screenshot"]
 image::apm/images/create-jira-issue.png[Example jira issue]
 
+|====
+|Label |`Open an task in Jira`
+|Link |`https://test-site-33.atlassian.net/secure/CreateIssueDetails!init.jspa?pid=10000&issuetype=10001&summary=Created+via+APM&description=Investigate+the+following+APM+trace%3A%0D%0A%0D%0A---%0D%0A%0D%0Aservice.name%3A+%7B%7Bservice.name%7D%7D%0D%0Atransaction.id%3A+%7B%7Btransaction.id%7D%7D%0D%0Acontainer.id%3A+%7B%7Bcontainer.id%7D%7D%0D%0Aurl.full%3A+%7B%7Burl.full%7D%7D`
+|====
 
-**Kibana dashboard**
+See the {jira-query-params}[Jira application administration knowledge base]
+for a full list of supported query parameters.
 
-Link to custom dashboards (filtered via the URL) in Kibana?
+[float]
+[[custom-links-examples-kib]]
+==== Kibana dashboards
 
-Label: `Open transaction in custom visualization`
-Link: `https://kibana-instance/app/kibana#/dashboard?_g=query:(language:kuery,query:'transaction.id:{{transaction.id}}'...`
+Link to a custom dashboard in Kibana.
 
-Example
-This link opens the current transaction.id in a custom kibana dashboard.
+|====
+|Label |`Open transaction in custom visualization`
+|Link |`https://kibana-instance/app/kibana#/dashboard?_g=query:(language:kuery,query:'transaction.id:{{transaction.id}}'...`
+|====
+
+**Example**
+
+This link opens the current `transaction.id` in a custom kibana dashboard.
 There are no filters set.
 
-Label: `Open transaction in Python drilldown viz`
-URL: `https://kibana-instance/app/kibana#/dashboard?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!((embeddableConfig:(),gridData:(h:15,i:cb79c1c0-1af8-472c-aaf7-d158a76946fb,w:24,x:0,y:0),id:c8c74b20-6a30-11ea-92ab-b5d3feff11df,panelIndex:cb79c1c0-1af8-472c-aaf7-d158a76946fb,type:visualization,version:'7.7')),query:(language:kuery,query:'transaction.id:{{transaction.id}}'),timeRestore:!f,title:'',viewMode:edit)`
+|====
+|Label |`Open transaction in Python drilldown viz`
+|URL |`https://kibana-instance/app/kibana#/dashboard?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!((embeddableConfig:(),gridData:(h:15,i:cb79c1c0-1af8-472c-aaf7-d158a76946fb,w:24,x:0,y:0),id:c8c74b20-6a30-11ea-92ab-b5d3feff11df,panelIndex:cb79c1c0-1af8-472c-aaf7-d158a76946fb,type:visualization,version:'7.7')),query:(language:kuery,query:'transaction.id:{{transaction.id}}'),timeRestore:!f,title:'',viewMode:edit)`
+|====
 
-**Slack**
+[float]
+[[custom-links-examples-slack]]
+==== Slack channel
 
-Create a custom link that opens a slack channel.
+Open a specified slack channel.
 
-Label: `Open SLACK_CHANNEL`
-Link: `https://COMPANY_SLACK.slack.com/archives/SLACK_CHANNEL`
-Filters: `service.name` : `SERVICE_NAME`
+|====
+|Label |`Open SLACK_CHANNEL`
+|Link |`https://COMPANY_SLACK.slack.com/archives/SLACK_CHANNEL`
+|Filters |`service.name` : `SERVICE_NAME`
+|====
 
-Example
-This link opens a company slack channel.
+**Example**
+
+This link opens a company slack channel, #apm-support.
 It only appears when {{TODO: ENTER CRITERIA FOR WHEN THIS LINK WOULD APPEAR}}.
 
-Label: `Open #apm-support`
-Link: `https://microsoft.slack.com/archives/efk52kt23k`
-Filters: `{{TODO: ENTER CRITERIA}}` : `{{TODO: ENTER CRITERIA}}`
+|====
+|Label |`Open #apm-support`
+|Link |`https://microsoft.slack.com/archives/efk52kt23k`
+|Filters |`{{TODO: ENTER CRITERIA}}` : `{{TODO: ENTER CRITERIA}}`
+|====
 
-**Website**
+[float]
+[[custom-links-examples-web]]
+==== Website
 
-Create a custom link that opens an internal company site.
+Open an internal or external website.
 
-Label: `Open SLACK_CHANNEL`
-Link: `https://COMPANY_SLACK.slack.com/archives/SLACK_CHANNEL`
-Filters: `service.name` : `SERVICE_NAME`
+|====
+|Label |`Open <WEBSITE>`
+|Link |`https://<COMPANY_SLACK>.slack.com/archives/<SLACK_CHANNEL>`
+|Filters |`service.name:<SERVICE_NAME>`
+|====
 
-Example
+**Example**
+
 This link opens more data on a specific `user.email`.
 It only appears on front-end transactions.
 
-Label: `View user internally`
-Link: `https://internal-site.company.com/user/{{user.email}}`
-Filters: `service.name` : `client`
+|====
+|Label |`View user internally`
+|Link |`https://internal-site.company.com/user/{{user.email}}`
+|Filters |`service.name:client`
+|====
