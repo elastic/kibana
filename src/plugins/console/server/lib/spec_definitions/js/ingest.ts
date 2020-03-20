@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { SpecDefinitionsService } from '../../../services';
+
+/* eslint-disable @typescript-eslint/camelcase */
 const commonPipelineParams = {
   on_failure: [],
   ignore_failure: {
@@ -427,27 +430,23 @@ const pipelineDefinition = {
   version: 123,
 };
 
-export const register = api => {
+export const ingest = (specService: SpecDefinitionsService) => {
   // Note: this isn't an actual API endpoint. It exists so the forEach processor's "processor" field
   // may recursively use the autocomplete rules for any processor.
-  api.addEndpointDescription('_processor', {
+  specService.addEndpointDescription('_processor', {
     data_autocomplete_rules: processorDefinition,
   });
 
-  api.addEndpointDescription('ingest.put_pipeline', {
+  specService.addEndpointDescription('ingest.put_pipeline', {
     methods: ['PUT'],
     patterns: ['_ingest/pipeline/{id}'],
     data_autocomplete_rules: pipelineDefinition,
   });
 
-  api.addEndpointDescription('ingest.simulate', {
+  specService.addEndpointDescription('ingest.simulate', {
     data_autocomplete_rules: {
       pipeline: pipelineDefinition,
       docs: [],
     },
   });
-};
-
-export const addProcessorDefinition = processor => {
-  processorDefinition.__one_of.push(processor);
 };

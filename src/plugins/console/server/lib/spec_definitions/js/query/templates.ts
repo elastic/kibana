@@ -17,23 +17,28 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/camelcase */
 export const regexpTemplate = {
   FIELD: 'REGEXP',
 };
+
 export const fuzzyTemplate = {
   FIELD: {},
 };
+
 export const prefixTemplate = {
   FIELD: {
     value: '',
   },
 };
+
 export const rangeTemplate = {
   FIELD: {
     gte: 10,
     lte: 20,
   },
 };
+
 export const spanFirstTemplate = {
   match: {
     span_term: {
@@ -42,6 +47,7 @@ export const spanFirstTemplate = {
   },
   end: 3,
 };
+
 export const spanNearTemplate = {
   clauses: [
     {
@@ -55,11 +61,13 @@ export const spanNearTemplate = {
   slop: 12,
   in_order: false,
 };
+
 export const spanTermTemplate = {
   FIELD: {
     value: 'VALUE',
   },
 };
+
 export const spanNotTemplate = {
   include: {
     span_term: {
@@ -76,6 +84,7 @@ export const spanNotTemplate = {
     },
   },
 };
+
 export const spanOrTemplate = {
   clauses: [
     {
@@ -87,6 +96,7 @@ export const spanOrTemplate = {
     },
   ],
 };
+
 export const spanContainingTemplate = {
   little: {
     span_term: {
@@ -118,6 +128,7 @@ export const spanContainingTemplate = {
     },
   },
 };
+
 export const spanWithinTemplate = {
   little: {
     span_term: {
@@ -149,6 +160,7 @@ export const spanWithinTemplate = {
     },
   },
 };
+
 export const wildcardTemplate = {
   FIELD: {
     value: 'VALUE',

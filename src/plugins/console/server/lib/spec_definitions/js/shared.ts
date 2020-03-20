@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import es from './es';
-
-export function resolveApi() {
-  return {
-    es: es.asJson(),
-  };
-}
+/* eslint-disable @typescript-eslint/camelcase */
+export const BOOLEAN = Object.freeze({
+  __one_of: [true, false],
+});
