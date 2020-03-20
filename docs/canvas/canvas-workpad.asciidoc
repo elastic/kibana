@@ -69,11 +69,11 @@ Each of the sample data sets comes with a Canvas workpad that you can use for yo
 
 . Add a {kibana-ref}/add-sample-data.html[sample data set].
 
-. On the *Add Data* page, click the *View data* dropdown list, then select *Canvas*.
+. On the *Add Data* page, click *View data*, then select *Canvas*.
 
 [float]
 [[apply-workpad-styles]]
-== Apply a set of styles to the entire workpad
+=== Apply a set of styles to the entire workpad
 
 To make your workpad look exactly the way you want, use the editor to apply CSS overrides.
 
@@ -94,7 +94,7 @@ background-color: #3990e6;
 
 [float]
 [[configure-auto-refresh-interval]]
-== Change the auto-refresh interval
+=== Change the auto-refresh interval
 
 Increase or decrease how often the data refreshes on your workpad.
 
@@ -109,7 +109,7 @@ TIP: To manually refresh the data, click the *Refresh data* icon.
 
 [float]
 [[zoom-in-out]]
-== Use the zoom options
+=== Use the zoom options
 
 In the upper left corner, click the *Zoom controls* icon, then select one of the options.
 
@@ -118,9 +118,9 @@ image::images/canvas-zoom-controls.png[Zoom controls]
 
 [float]
 [[add-more-pages]]
-== Add pages
+=== Add pages
 
-Add more pages when you've run out of room, or for when you'd like to separate your ideas across several pages.
+Organize your ideas onto separate pages by adding more pages.
 
 . Click *Page 1*, then click *+*.
 
