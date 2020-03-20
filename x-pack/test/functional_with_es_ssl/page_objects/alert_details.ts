@@ -102,9 +102,19 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
       const nextButton = await testSubjects.find(`pagination-button-next`);
       nextButton.click();
     },
+    async isViewInAppDisabled() {
+      await retry.try(async () => {
+        const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+        expect(await viewInAppButton.getAttribute('disabled')).to.eql('true');
+      });
+      return true;
+    },
     async isViewInAppEnabled() {
-      const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
-      return (await viewInAppButton.getAttribute('disabled')) !== 'disabled';
+      await retry.try(async () => {
+        const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+        expect(await viewInAppButton.getAttribute('disabled')).to.not.eql('true');
+      });
+      return true;
     },
     async printViewInAppNav() {
       const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
