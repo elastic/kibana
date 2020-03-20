@@ -15,6 +15,7 @@ import { ConfigSchema, ConfigType } from './schema';
 export function createConfig$(core: CoreSetup, context: PluginInitializerContext, logger: Logger) {
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
     map(config => {
+      // encryption key
       let encryptionKey = config.encryptionKey;
       if (encryptionKey === undefined) {
         logger.warn(
@@ -30,23 +31,21 @@ export function createConfig$(core: CoreSetup, context: PluginInitializerContext
       const { kibanaServer: reportingServer } = config;
       const serverInfo = core.http.getServerInfo();
 
-      // kibanaServer.hostname, default to server.host
+      // kibanaServer.hostname, default to server.host, don't allow "0"
       let kibanaServerHostname = reportingServer.hostname
         ? reportingServer.hostname
         : serverInfo.host;
-
-      // don't allow "0"
       if (kibanaServerHostname === '0') {
         logger.warn(
           i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {
             defaultMessage:
-              `Found 'server.host: "0"' in Kibana configuration. This is incompatible with Reporting. ` +
+              `Found 'server.host: "0" in Kibana configuration. This is incompatible with Reporting. ` +
               `To enable Reporting to work, '{configKey}: 0.0.0.0' is being automatically to the configuration. ` +
               `You can change the setting to 'server.host: 0.0.0.0' or add '{configKey}: 0.0.0.0' in kibana.yml to prevent this message.`,
             values: { configKey: 'xpack.reporting.kibanaServer.hostname' },
           })
         );
-        kibanaServerHostname = crypto.randomBytes(16).toString('hex');
+        kibanaServerHostname = '0.0.0.0';
       }
 
       // kibanaServer.port, default to server.port
