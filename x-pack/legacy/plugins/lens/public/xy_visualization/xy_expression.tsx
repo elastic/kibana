@@ -207,7 +207,13 @@ export function XYChart({
   const shouldRotate = isHorizontalChart(layers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
-
+  const xDomain =
+    data.dateRange && layers.every(l => l.xScaleType === 'time')
+      ? {
+          min: data.dateRange.fromDate.getTime(),
+          max: data.dateRange.toDate.getTime(),
+        }
+      : undefined;
   return (
     <Chart>
       <Settings
@@ -216,14 +222,7 @@ export function XYChart({
         showLegendDisplayValue={false}
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
-        xDomain={
-          data.dateRange && layers.every(l => l.xScaleType === 'time')
-            ? {
-                min: data.dateRange.fromDate.getTime(),
-                max: data.dateRange.toDate.getTime(),
-              }
-            : undefined
-        }
+        xDomain={xDomain}
         onElementClick={([[geometry, series]]) => {
           const layer = layers.find(l =>
             series.seriesKeys.some(key => l.accessors.includes(key as string))
@@ -256,6 +255,8 @@ export function XYChart({
             });
           }
 
+          const timeFieldName = xDomain ? { timeFieldName: args.xTitle } : null;
+
           const context: EmbeddableVisTriggerContext = {
             data: {
               data: points.map(point => ({
@@ -265,7 +266,7 @@ export function XYChart({
                 table,
               })),
             },
-            timeFieldName: args.xTitle,
+            ...timeFieldName,
           };
 
           npStart.plugins.uiActions.executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
