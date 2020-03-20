@@ -258,7 +258,7 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
-            id: accessors.join(','),
+            id: splitAccessor || accessors.join(','),
             xAccessor,
             yAccessors: accessors,
             data: table.rows,
@@ -266,13 +266,13 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
-            name: d => {
+            name(d) {
               if (accessors.length > 1) {
                 return d.seriesKeys
                   .map((key: string | number) => columnToLabelMap[key] || key)
                   .join(' - ');
               }
-              return columnToLabelMap[d.seriesKeys[0]] ?? '';
+              return columnToLabelMap[d.seriesKeys[0]] ?? d.seriesKeys[0];
             },
           };
 
