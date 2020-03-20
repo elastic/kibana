@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { WithHeaderLayout } from '../../../../layouts';
 import { AgentConfig, PackageInfo } from '../../../../types';
-import { PackageIcon } from '../../../epm/components';
+import { PackageIcon } from '../../../../components/package_icon';
 import { CreateDatasourceFrom, CreateDatasourceStep } from '../types';
 import { CreateDatasourceStepsNavigation } from './navigation';
 
@@ -94,7 +94,12 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
                     <EuiDescriptionListDescription>
                       <EuiFlexGroup alignItems="center" gutterSize="s">
                         <EuiFlexItem grow={false}>
-                          <PackageIcon packageName={packageInfo?.name || ''} size="m" />
+                          <PackageIcon
+                            packageName={packageInfo?.name || ''}
+                            version={packageInfo?.version || ''}
+                            icons={packageInfo?.icons}
+                            size="m"
+                          />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           {packageInfo?.title || packageInfo?.name || '-'}

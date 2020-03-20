@@ -21,10 +21,9 @@ import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import _ from 'lodash';
 import { BaseStateContainer } from '../../../../kibana_utils/public';
-import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
-import { FilterStateStore } from '../../../common/es_query/filters';
+import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
 
 /**
  * Helper to setup two-way syncing of global data and a state container

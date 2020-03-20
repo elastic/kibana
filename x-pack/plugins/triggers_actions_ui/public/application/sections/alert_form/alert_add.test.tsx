@@ -43,7 +43,6 @@ describe('alert_add', () => {
     const mockes = coreMock.createSetup();
     deps = {
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       dataPlugin: dataPluginMock.createStartContract(),

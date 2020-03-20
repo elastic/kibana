@@ -9,6 +9,7 @@ import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionParamsProps } from '../../../types';
 import { IndexActionParams, EsIndexActionConnector } from './types';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 
 const ACTION_TYPE_ID = '.index';
 let actionTypeModel: ActionTypeModel;
@@ -38,16 +39,15 @@ describe('index connector validation', () => {
       name: 'es_index',
       config: {
         index: 'test_es_index',
+        refresh: false,
+        executionTimeField: '1',
       },
     } as EsIndexActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {},
-    });
-
-    delete actionConnector.config.index;
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {},
+      errors: {
+        index: [],
+      },
     });
   });
 });
@@ -55,9 +55,6 @@ describe('index connector validation', () => {
 describe('action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      index: 'test',
-      refresh: false,
-      executionTimeField: '1',
       documents: ['test'],
     };
 
@@ -75,6 +72,8 @@ describe('action params validation', () => {
 
 describe('IndexActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
+    const mocks = coreMock.createSetup();
+
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
       return;
@@ -87,23 +86,21 @@ describe('IndexActionConnectorFields renders', () => {
       name: 'es_index',
       config: {
         index: 'test',
+        refresh: false,
+        executionTimeField: 'test1',
       },
     } as EsIndexActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
-        errors={{}}
+        errors={{ index: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
+        http={mocks.http}
       />
     );
-    expect(wrapper.find('[data-test-subj="indexInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="indexInput"]')
-        .first()
-        .prop('value')
-    ).toBe('test');
+    expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').length > 0).toBeTruthy();
   });
 });
 
@@ -117,8 +114,6 @@ describe('IndexParamsFields renders', () => {
       ActionParamsProps<IndexActionParams>
     >;
     const actionParams = {
-      index: 'test_index',
-      refresh: false,
       documents: ['test'],
     };
     const wrapper = mountWithIntl(
@@ -129,13 +124,11 @@ describe('IndexParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="indexInput"]').length > 0).toBeTruthy();
     expect(
       wrapper
-        .find('[data-test-subj="indexInput"]')
+        .find('[data-test-subj="actionIndexDoc"]')
         .first()
         .prop('value')
-    ).toBe('test_index');
-    expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').length > 0).toBeTruthy();
+    ).toBe('"test"');
   });
 });
