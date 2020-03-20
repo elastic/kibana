@@ -46,14 +46,14 @@ describe('filterByAgent', () => {
         'active',
         'api_request_size',
         'api_request_time',
-        'capture_headers',
         'capture_body',
+        'capture_headers',
         'log_level',
         'server_timeout',
         'span_frames_min_duration',
         'stack_trace_limit',
-        'transaction_sample_rate',
-        'transaction_max_spans'
+        'transaction_max_spans',
+        'transaction_sample_rate'
       ]);
     });
 
@@ -62,27 +62,27 @@ describe('filterByAgent', () => {
         'active',
         'api_request_size',
         'api_request_time',
-        'capture_headers',
         'capture_body',
+        'capture_headers',
+        'circuit_breaker_enabled',
         'enable_log_correlation',
         'log_level',
+        'profiling_inferred_spans_enabled',
+        'profiling_inferred_spans_excluded_classes',
+        'profiling_inferred_spans_included_classes',
+        'profiling_inferred_spans_min_duration',
+        'profiling_inferred_spans_sampling_interval',
         'server_timeout',
         'span_frames_min_duration',
         'stack_trace_limit',
-        'trace_methods_duration_threshold',
-        'transaction_sample_rate',
-        'transaction_max_spans',
-        'circuit_breaker_enabled',
-        'stress_monitor_gc_stress_threshold',
-        'stress_monitor_gc_relief_threshold',
         'stress_monitor_cpu_duration_threshold',
-        'stress_monitor_system_cpu_stress_threshold',
+        'stress_monitor_gc_relief_threshold',
+        'stress_monitor_gc_stress_threshold',
         'stress_monitor_system_cpu_relief_threshold',
-        'profiling_inferred_spans_enabled',
-        'profiling_inferred_spans_sampling_interval',
-        'profiling_inferred_spans_min_duration',
-        'profiling_inferred_spans_included_classes',
-        'profiling_inferred_spans_excluded_classes'
+        'stress_monitor_system_cpu_stress_threshold',
+        'trace_methods_duration_threshold',
+        'transaction_max_spans',
+        'transaction_sample_rate'
       ]);
     });
 
@@ -103,13 +103,13 @@ describe('filterByAgent', () => {
         'active',
         'api_request_size',
         'api_request_time',
-        'capture_headers',
         'capture_body',
+        'capture_headers',
         'log_level',
         'server_timeout',
         'stack_trace_limit',
-        'transaction_sample_rate',
-        'transaction_max_spans'
+        'transaction_max_spans',
+        'transaction_sample_rate'
       ]);
     });
 
@@ -117,11 +117,11 @@ describe('filterByAgent', () => {
       expect(getSettingKeysForAgent('python')).toEqual([
         'api_request_size',
         'api_request_time',
-        'capture_headers',
         'capture_body',
+        'capture_headers',
         'span_frames_min_duration',
-        'transaction_sample_rate',
-        'transaction_max_spans'
+        'transaction_max_spans',
+        'transaction_sample_rate'
       ]);
     });
 
@@ -131,8 +131,8 @@ describe('filterByAgent', () => {
         'log_level',
         'span_frames_min_duration',
         'stack_trace_limit',
-        'transaction_sample_rate',
-        'transaction_max_spans'
+        'transaction_max_spans',
+        'transaction_sample_rate'
       ]);
     });
 
@@ -141,20 +141,20 @@ describe('filterByAgent', () => {
         'active',
         'api_request_size',
         'api_request_time',
-        'capture_headers',
         'capture_body',
+        'capture_headers',
         'log_level',
         'span_frames_min_duration',
-        'transaction_sample_rate',
-        'transaction_max_spans'
+        'transaction_max_spans',
+        'transaction_sample_rate'
       ]);
     });
 
     it('"All" services (no agent name)', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual([
         'capture_headers',
-        'transaction_sample_rate',
-        'transaction_max_spans'
+        'transaction_max_spans',
+        'transaction_sample_rate'
       ]);
     });
   });
@@ -166,12 +166,13 @@ describe('settingDefinitions', () => {
       settingDefinitions.map(def => {
         return {
           ...omit(def, [
+            'category',
             'defaultValue',
-            'validation',
-            'label',
             'description',
+            'excludeAgents',
             'includeAgents',
-            'excludeAgents'
+            'label',
+            'validation'
           ]),
           validationName: def.validation.name
         };
