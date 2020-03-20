@@ -52,14 +52,10 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
 
-      /* TODO these functions should be made available in the export types registry:
-       *
-       *     const { createJobFn, executeJobFn } = exportTypesRegistry.getById(CSV_FROM_SAVEDOBJECT_JOB_TYPE)
-       *
-       * Calling an execute job factory requires passing a browserDriverFactory option, so we should not call the factory from here
-       */
-      const createJobFn = await createJobFactory(reporting, logger);
-      const executeJobFn = await executeJobFactory(reporting, logger);
+      const [createJobFn, executeJobFn] = await Promise.all([
+        createJobFactory(reporting, logger),
+        executeJobFactory(reporting, logger),
+      ]);
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
         jobParams,
         request.headers,
