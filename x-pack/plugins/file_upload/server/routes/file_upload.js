@@ -28,12 +28,12 @@ export const bodySchema = schema.object(
         {},
         {
           defaultValue: {},
-          allowUnknowns: true,
+          unknowns: 'allow',
         }
       )
     ),
   },
-  { allowUnknowns: true }
+  { unknowns: 'allow' }
 );
 
 const options = {
@@ -48,7 +48,7 @@ export const idConditionalValidation = (body, boolHasId) =>
     .object(
       {
         data: boolHasId
-          ? schema.arrayOf(schema.object({}, { allowUnknowns: true }), { minSize: 1 })
+          ? schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { minSize: 1 })
           : schema.any(),
         settings: boolHasId
           ? schema.any()
@@ -58,7 +58,7 @@ export const idConditionalValidation = (body, boolHasId) =>
                 defaultValue: {
                   number_of_shards: 1,
                 },
-                allowUnknowns: true,
+                unknowns: 'allow',
               }
             ),
         mappings: boolHasId
@@ -67,11 +67,11 @@ export const idConditionalValidation = (body, boolHasId) =>
               {},
               {
                 defaultValue: {},
-                allowUnknowns: true,
+                unknowns: 'allow',
               }
             ),
       },
-      { allowUnknowns: true }
+      { unknowns: 'allow' }
     )
     .validate(body);
 

@@ -29,10 +29,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import {
-  GetEmbeddableFactory,
-  EmbeddableFactoryRenderer,
-} from '../../../src/plugins/embeddable/public';
+import { EmbeddableFactoryRenderer, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
   TODO_EMBEDDABLE,
@@ -42,7 +39,7 @@ import {
 } from '../../embeddable_examples/public';
 
 interface Props {
-  getEmbeddableFactory: GetEmbeddableFactory;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
 }
 
 export function ListContainerExample({ getEmbeddableFactory }: Props) {

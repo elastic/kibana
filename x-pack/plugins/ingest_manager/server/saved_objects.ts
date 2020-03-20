@@ -32,7 +32,8 @@ export const savedObjectMappings = {
       config_id: { type: 'keyword' },
       last_updated: { type: 'date' },
       last_checkin: { type: 'date' },
-      config_updated_at: { type: 'date' },
+      config_revision: { type: 'integer' },
+      config_newest_revision: { type: 'integer' },
       // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       default_api_key: { type: 'keyword' },
       updated_at: { type: 'date' },
@@ -101,8 +102,8 @@ export const savedObjectMappings = {
       ca_sha256: { type: 'keyword' },
       // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       api_key: { type: 'keyword' },
-      admin_username: { type: 'binary' },
-      admin_password: { type: 'binary' },
+      fleet_enroll_username: { type: 'binary' },
+      fleet_enroll_password: { type: 'binary' },
       config: { type: 'flattened' },
     },
   },
@@ -127,6 +128,7 @@ export const savedObjectMappings = {
           type: { type: 'keyword' },
           enabled: { type: 'boolean' },
           processors: { type: 'keyword' },
+          config: { type: 'flattened' },
           streams: {
             type: 'nested',
             properties: {

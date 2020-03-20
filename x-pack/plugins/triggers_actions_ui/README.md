@@ -7,12 +7,6 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 - Create and register a new Action Type.
 - Embed the Create Alert flyout within any Kibana plugin.
 
-To enable Alerts and Actions UIs, the following configuration settings are needed:
-```
-xpack.triggers_actions_ui.enabled: true
-xpack.triggers_actions_ui.createAlertUiEnabled: true
-```
-
 -----
 
 

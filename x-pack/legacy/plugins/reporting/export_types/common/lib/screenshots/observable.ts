@@ -23,7 +23,6 @@ import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
-import { skipTelemetry } from './skip_telemetry';
 import { ScreenSetupData, ScreenshotObservableOpts, ScreenshotResults } from './types';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
@@ -59,7 +58,6 @@ export function screenshotsObservableFactory(
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               takeUntil(exit$),
               mergeMap(() => openUrl(server, driver, url, conditionalHeaders, logger)),
-              mergeMap(() => skipTelemetry(driver, logger)),
               mergeMap(() => getNumberOfItems(server, driver, layout, logger)),
               mergeMap(async itemsCount => {
                 const viewport = layout.getViewport(itemsCount);

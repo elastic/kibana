@@ -36,8 +36,6 @@ export function Header(props: HeaderProps) {
   const { iconType, name, title, version } = props;
   const hasWriteCapabilites = useCapabilities().write;
   const { toListView } = useLinks();
-  // useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
-
   const ADD_DATASOURCE_URI = useLink(`${EPM_PATH}/${name}-${version}/add-datasource`);
 
   return (

@@ -10,5 +10,4 @@ export const CONTEXT_WAITFORRENDER = 'WaitForRender';
 export const CONTEXT_GETTIMERANGE = 'GetTimeRange';
 export const CONTEXT_ELEMENTATTRIBUTES = 'ElementPositionAndAttributes';
 export const CONTEXT_WAITFORELEMENTSTOBEINDOM = 'WaitForElementsToBeInDOM';
-export const CONTEXT_SKIPTELEMETRY = 'SkipTelemetry';
 export const CONTEXT_READMETADATA = 'ReadVisualizationsMetadata';

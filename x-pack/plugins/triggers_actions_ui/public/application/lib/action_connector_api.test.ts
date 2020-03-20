@@ -25,6 +25,9 @@ describe('loadActionTypes', () => {
         id: 'test',
         name: 'Test',
         enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
@@ -57,6 +60,8 @@ describe('loadAllActions', () => {
         Object {
           "query": Object {
             "per_page": 10000,
+            "sort_field": "name.keyword",
+            "sort_order": "asc",
           },
         },
       ]
