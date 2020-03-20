@@ -28,6 +28,9 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
           username: {
             type: 'keyword',
           },
+          email: {
+            type: 'keyword',
+          },
         },
       },
       updated_at: {
@@ -39,6 +42,9 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           full_name: {
+            type: 'keyword',
+          },
+          email: {
             type: 'keyword',
           },
         },
