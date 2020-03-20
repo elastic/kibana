@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { Router } from 'react-router-dom';
 import { mount } from 'enzyme';
 import { CaseComponent } from './';
 import { caseProps, caseClosedProps, data, dataClosed } from './__mock__';
@@ -12,6 +13,27 @@ import { TestProviders } from '../../../../mock';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
 jest.mock('../../../../containers/case/use_update_case');
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
+type Action = 'PUSH' | 'POP' | 'REPLACE';
+const pop: Action = 'POP';
+const location = {
+  pathname: '/network',
+  search: '',
+  state: '',
+  hash: '',
+};
+const mockHistory = {
+  length: 2,
+  location,
+  action: pop,
+  push: jest.fn(),
+  replace: jest.fn(),
+  go: jest.fn(),
+  goBack: jest.fn(),
+  goForward: jest.fn(),
+  block: jest.fn(),
+  createHref: jest.fn(),
+  listen: jest.fn(),
+};
 
 describe('CaseView ', () => {
   const updateCaseProperty = jest.fn();
@@ -42,7 +64,9 @@ describe('CaseView ', () => {
   it('should render CaseComponent', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseComponent {...caseProps} />
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
       </TestProviders>
     );
     expect(
@@ -83,6 +107,7 @@ describe('CaseView ', () => {
         .prop('raw')
     ).toEqual(data.description);
   });
+
   it('should show closed indicators in header when case is closed', () => {
     useUpdateCaseMock.mockImplementation(() => ({
       ...defaultUpdateCaseState,
@@ -90,7 +115,9 @@ describe('CaseView ', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <CaseComponent {...caseClosedProps} />
+        <Router history={mockHistory}>
+          <CaseComponent {...caseClosedProps} />
+        </Router>
       </TestProviders>
     );
     expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
@@ -111,7 +138,9 @@ describe('CaseView ', () => {
   it('should dispatch update state when button is toggled', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseComponent {...caseProps} />
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
       </TestProviders>
     );
 
@@ -128,7 +157,9 @@ describe('CaseView ', () => {
   it('should render comments', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseComponent {...caseProps} />
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
       </TestProviders>
     );
     expect(

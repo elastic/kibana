@@ -4,34 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get } from 'lodash';
-import moment from 'moment';
-import React, { Component } from 'react';
-import { Subscription } from 'rxjs';
-
 import {
-  EuiBasicTable,
-  EuiButtonIcon,
+  EuiInMemoryTable,
   EuiPageContent,
   EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
-
-import { ToastsSetup, ApplicationStart } from 'src/core/public';
-import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { get } from 'lodash';
+import moment from 'moment';
+import { Component, default as React } from 'react';
+import { Subscription } from 'rxjs';
+import { ApplicationStart, ToastsSetup } from 'src/core/public';
+import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
 import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';
-import { ReportingAPIClient, JobQueueEntry } from '../lib/reporting_api_client';
 import { checkLicense } from '../lib/license_check';
-import { ReportErrorButton } from './report_error_button';
-import { ReportInfoButton } from './report_info_button';
+import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
+import {
+  ReportDeleteButton,
+  ReportDownloadButton,
+  ReportErrorButton,
+  ReportInfoButton,
+} from './buttons';
 
-interface Job {
+export interface Job {
   id: string;
   type: string;
   object_type: string;
@@ -49,7 +49,7 @@ interface Job {
   warnings: string[];
 }
 
-interface Props {
+export interface Props {
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
   license$: LicensingPluginSetup['license$'];
@@ -61,6 +61,7 @@ interface State {
   page: number;
   total: number;
   jobs: Job[];
+  selectedJobs: Job[];
   isLoading: boolean;
   showLinks: boolean;
   enableLinks: boolean;
@@ -113,6 +114,7 @@ class ReportListingUi extends Component<Props, State> {
       page: 0,
       total: 0,
       jobs: [],
+      selectedJobs: [],
       isLoading: false,
       showLinks: false,
       enableLinks: false,
@@ -181,6 +183,140 @@ class ReportListingUi extends Component<Props, State> {
       badLicenseMessage,
     });
   };
+
+  private onSelectionChange = (jobs: Job[]) => {
+    this.setState(current => ({ ...current, selectedJobs: jobs }));
+  };
+
+  private removeRecord = (record: Job) => {
+    const { jobs } = this.state;
+    const filtered = jobs.filter(j => j.id !== record.id);
+    this.setState(current => ({ ...current, jobs: filtered }));
+  };
+
+  private renderDeleteButton = () => {
+    const { selectedJobs } = this.state;
+    if (selectedJobs.length === 0) return null;
+
+    const performDelete = async () => {
+      for (const record of selectedJobs) {
+        try {
+          await this.props.apiClient.deleteReport(record.id);
+          this.removeRecord(record);
+          this.props.toasts.addSuccess(
+            this.props.intl.formatMessage(
+              {
+                id: 'xpack.reporting.listing.table.deleteConfim',
+                defaultMessage: `The {reportTitle} report was deleted`,
+              },
+              { reportTitle: record.object_title }
+            )
+          );
+        } catch (error) {
+          this.props.toasts.addDanger(
+            this.props.intl.formatMessage(
+              {
+                id: 'xpack.reporting.listing.table.deleteFailedErrorMessage',
+                defaultMessage: `The report was not deleted: {error}`,
+              },
+              { error }
+            )
+          );
+          throw error;
+        }
+      }
+    };
+
+    return (
+      <ReportDeleteButton
+        jobsToDelete={selectedJobs}
+        performDelete={performDelete}
+        {...this.props}
+      />
+    );
+  };
+
+  private onTableChange = ({ page }: { page: { index: number } }) => {
+    const { index: pageIndex } = page;
+    this.setState(() => ({ page: pageIndex }), this.fetchJobs);
+  };
+
+  private fetchJobs = async () => {
+    // avoid page flicker when poller is updating table - only display loading screen on first load
+    if (this.isInitialJobsFetch) {
+      this.setState(() => ({ isLoading: true }));
+    }
+
+    let jobs: JobQueueEntry[];
+    let total: number;
+    try {
+      jobs = await this.props.apiClient.list(this.state.page);
+      total = await this.props.apiClient.total();
+      this.isInitialJobsFetch = false;
+    } catch (fetchError) {
+      if (!this.licenseAllowsToShowThisPage()) {
+        this.props.toasts.addDanger(this.state.badLicenseMessage);
+        this.props.redirect('kibana#/management');
+        return;
+      }
+
+      if (fetchError.message === 'Failed to fetch') {
+        this.props.toasts.addDanger(
+          fetchError.message ||
+            this.props.intl.formatMessage({
+              id: 'xpack.reporting.listing.table.requestFailedErrorMessage',
+              defaultMessage: 'Request failed',
+            })
+        );
+      }
+      if (this.mounted) {
+        this.setState(() => ({ isLoading: false, jobs: [], total: 0 }));
+      }
+      return;
+    }
+
+    if (this.mounted) {
+      this.setState(() => ({
+        isLoading: false,
+        total,
+        jobs: jobs.map(
+          (job: JobQueueEntry): Job => {
+            const { _source: source } = job;
+            return {
+              id: job._id,
+              type: source.jobtype,
+              object_type: source.payload.objectType,
+              object_title: source.payload.title,
+              created_by: source.created_by,
+              created_at: source.created_at,
+              started_at: source.started_at,
+              completed_at: source.completed_at,
+              status: source.status,
+              statusLabel: jobStatusLabelsMap.get(source.status as JobStatuses) || source.status,
+              max_size_reached: source.output ? source.output.max_size_reached : false,
+              attempts: source.attempts,
+              max_attempts: source.max_attempts,
+              csv_contains_formulas: get(source, 'output.csv_contains_formulas'),
+              warnings: source.output ? source.output.warnings : undefined,
+            };
+          }
+        ),
+      }));
+    }
+  };
+
+  private licenseAllowsToShowThisPage = () => {
+    return this.state.showLinks && this.state.enableLinks;
+  };
+
+  private formatDate(timestamp: string) {
+    try {
+      return moment(timestamp).format('YYYY-MM-DD @ hh:mm A');
+    } catch (error) {
+      // ignore parse error and display unformatted value
+      return timestamp;
+    }
+  }
 
   private renderTable() {
     const { intl } = this.props;
@@ -317,9 +453,9 @@ class ReportListingUi extends Component<Props, State> {
             render: (record: Job) => {
               return (
                 <div>
-                  {this.renderDownloadButton(record)}
-                  {this.renderReportErrorButton(record)}
-                  {this.renderInfoButton(record)}
+                  <ReportDownloadButton {...this.props} record={record} />
+                  <ReportErrorButton {...this.props} record={record} />
+                  <ReportInfoButton {...this.props} jobId={record.id} />
                 </div>
               );
             },
@@ -335,13 +471,22 @@ class ReportListingUi extends Component<Props, State> {
       hidePerPageOptions: true,
     };
 
+    const selection = {
+      itemId: 'id',
+      onSelectionChange: this.onSelectionChange,
+    };
+
+    const search = {
+      toolsRight: this.renderDeleteButton(),
+    };
+
     return (
-      <EuiBasicTable
-        itemId={'id'}
+      <EuiInMemoryTable
+        itemId="id"
         items={this.state.jobs}
         loading={this.state.isLoading}
         columns={tableColumns}
-        noItemsMessage={
+        message={
           this.state.isLoading
             ? intl.formatMessage({
                 id: 'xpack.reporting.listing.table.loadingReportsDescription',
@@ -353,153 +498,13 @@ class ReportListingUi extends Component<Props, State> {
               })
         }
         pagination={pagination}
+        selection={selection}
+        search={search}
+        isSelectable={true}
         onChange={this.onTableChange}
         data-test-subj="reportJobListing"
       />
     );
-  }
-
-  private renderDownloadButton = (record: Job) => {
-    if (record.status !== JobStatuses.COMPLETED) {
-      return;
-    }
-
-    const { intl } = this.props;
-    const button = (
-      <EuiButtonIcon
-        onClick={() => this.props.apiClient.downloadReport(record.id)}
-        iconType="importAction"
-        aria-label={intl.formatMessage({
-          id: 'xpack.reporting.listing.table.downloadReportAriaLabel',
-          defaultMessage: 'Download report',
-        })}
-      />
-    );
-
-    if (record.csv_contains_formulas) {
-      return (
-        <EuiToolTip
-          position="top"
-          content={intl.formatMessage({
-            id: 'xpack.reporting.listing.table.csvContainsFormulas',
-            defaultMessage:
-              'Your CSV contains characters which spreadsheet applications can interpret as formulas.',
-          })}
-        >
-          {button}
-        </EuiToolTip>
-      );
-    }
-
-    if (record.max_size_reached) {
-      return (
-        <EuiToolTip
-          position="top"
-          content={intl.formatMessage({
-            id: 'xpack.reporting.listing.table.maxSizeReachedTooltip',
-            defaultMessage: 'Max size reached, contains partial data.',
-          })}
-        >
-          {button}
-        </EuiToolTip>
-      );
-    }
-
-    return button;
-  };
-
-  private renderReportErrorButton = (record: Job) => {
-    if (record.status !== JobStatuses.FAILED) {
-      return;
-    }
-
-    return <ReportErrorButton apiClient={this.props.apiClient} jobId={record.id} />;
-  };
-
-  private renderInfoButton = (record: Job) => {
-    return <ReportInfoButton apiClient={this.props.apiClient} jobId={record.id} />;
-  };
-
-  private onTableChange = ({ page }: { page: { index: number } }) => {
-    const { index: pageIndex } = page;
-    this.setState(() => ({ page: pageIndex }), this.fetchJobs);
-  };
-
-  private fetchJobs = async () => {
-    // avoid page flicker when poller is updating table - only display loading screen on first load
-    if (this.isInitialJobsFetch) {
-      this.setState(() => ({ isLoading: true }));
-    }
-
-    let jobs: JobQueueEntry[];
-    let total: number;
-    try {
-      jobs = await this.props.apiClient.list(this.state.page);
-      total = await this.props.apiClient.total();
-      this.isInitialJobsFetch = false;
-    } catch (fetchError) {
-      if (!this.licenseAllowsToShowThisPage()) {
-        this.props.toasts.addDanger(this.state.badLicenseMessage);
-        this.props.redirect('kibana#/management');
-        return;
-      }
-
-      if (fetchError.message === 'Failed to fetch') {
-        this.props.toasts.addDanger(
-          fetchError.message ||
-            this.props.intl.formatMessage({
-              id: 'xpack.reporting.listing.table.requestFailedErrorMessage',
-              defaultMessage: 'Request failed',
-            })
-        );
-      }
-      if (this.mounted) {
-        this.setState(() => ({ isLoading: false, jobs: [], total: 0 }));
-      }
-      return;
-    }
-
-    if (this.mounted) {
-      this.setState(() => ({
-        isLoading: false,
-        total,
-        jobs: jobs.map(
-          (job: JobQueueEntry): Job => {
-            const { _source: source } = job;
-            return {
-              id: job._id,
-              type: source.jobtype,
-              object_type: source.payload.objectType,
-              object_title: source.payload.title,
-              created_by: source.created_by,
-              created_at: source.created_at,
-              started_at: source.started_at,
-              completed_at: source.completed_at,
-              status: source.status,
-              statusLabel: jobStatusLabelsMap.get(source.status as JobStatuses) || source.status,
-              max_size_reached: source.output ? source.output.max_size_reached : false,
-              attempts: source.attempts,
-              max_attempts: source.max_attempts,
-              csv_contains_formulas: get(source, 'output.csv_contains_formulas'),
-              warnings: source.output ? source.output.warnings : undefined,
-            };
-          }
-        ),
-      }));
-    }
-  };
-
-  private licenseAllowsToShowThisPage = () => {
-    return this.state.showLinks && this.state.enableLinks;
-  };
-
-  private formatDate(timestamp: string) {
-    try {
-      return moment(timestamp).format('YYYY-MM-DD @ hh:mm A');
-    } catch (error) {
-      // ignore parse error and display unformatted value
-      return timestamp;
-    }
   }
 }
 
