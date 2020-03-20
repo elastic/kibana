@@ -255,7 +255,9 @@ export function XYChart({
             });
           }
 
-          const timeFieldName = xDomain ? { timeFieldName: args.xTitle } : null;
+          const xAxisFieldName = xAxisColumn?.meta?.aggConfigParams?.field;
+          const timeFieldName =
+            xDomain && xAxisFieldName ? { timeFieldName: xAxisFieldName } : null;
 
           const context: EmbeddableVisTriggerContext = {
             data: {
