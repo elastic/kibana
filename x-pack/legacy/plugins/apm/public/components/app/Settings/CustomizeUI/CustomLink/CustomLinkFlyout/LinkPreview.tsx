@@ -62,6 +62,7 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
         size="s"
         color={getTextColor(label)}
         className="eui-textBreakWord"
+        data-test-subj="preview-label"
       >
         {label
           ? label
@@ -71,9 +72,18 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
             )}
       </EuiText>
 
-      <EuiText size="s" color={getTextColor(url)} className="eui-textBreakWord">
+      <EuiText
+        size="s"
+        color={getTextColor(url)}
+        className="eui-textBreakWord"
+        data-test-subj="preview-url"
+      >
         {url ? (
-          <EuiLink href={formattedUrl} target="_blank">
+          <EuiLink
+            href={formattedUrl}
+            target="_blank"
+            data-test-subj="preview-link"
+          >
             {formattedUrl}
           </EuiLink>
         ) : (
@@ -100,7 +110,11 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
         <EuiFlexItem grow={false}>
           {error && (
             <EuiToolTip position="top" content={error}>
-              <EuiIcon type="alert" color="warning" />
+              <EuiIcon
+                type="alert"
+                color="warning"
+                data-test-subj="preview-warning"
+              />
             </EuiToolTip>
           )}
         </EuiFlexItem>

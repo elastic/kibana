@@ -76,7 +76,7 @@ export const LinkSection = ({
             'xpack.apm.settings.customizeUI.customLink.flyout.link.url.helpText',
             {
               defaultMessage:
-                'Add fieldname variables to your URL to apply values e.g. {sample}.',
+                'Add field name variables to your URL to apply values e.g. {sample}.',
               values: { sample: '{{trace.id}}' }
             }
           )}{' '}

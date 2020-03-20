@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { CustomLinkPopover } from '../CustomLinkPopover';
-import { expectTextsInDocument } from '../../../../../utils/testHelpers';
-import { CustomLink } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
-import { Transaction } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { render, act, fireEvent } from '@testing-library/react';
+import { CustomLink } from '../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { CustomLinkPopover } from './CustomLinkPopover';
+import { expectTextsInDocument } from '../../../../utils/testHelpers';
 
 describe('CustomLinkPopover', () => {
   const customLinks = [

@@ -7,17 +7,17 @@
 import { fireEvent, render, wait } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { CustomLinkOverview } from '../';
-import { License } from '../../../../../../../../../../plugins/licensing/common/license';
-import { LicenseContext } from '../../../../../../context/LicenseContext';
-import * as hooks from '../../../../../../hooks/useFetcher';
-import * as apmApi from '../../../../../../services/rest/createCallApmApi';
+import * as apmApi from '../../../../../services/rest/createCallApmApi';
+import { License } from '../../../../../../../../../plugins/licensing/common/license';
+import * as hooks from '../../../../../hooks/useFetcher';
+import { LicenseContext } from '../../../../../context/LicenseContext';
+import { CustomLinkOverview } from '.';
 import {
+  MockApmPluginContextWrapper,
   expectTextsInDocument,
-  expectTextsNotInDocument,
-  MockApmPluginContextWrapper
-} from '../../../../../../utils/testHelpers';
-import * as saveCustomLink from '../CustomLinkFlyout/saveCustomLink';
+  expectTextsNotInDocument
+} from '../../../../../utils/testHelpers';
+import * as saveCustomLink from './CustomLinkFlyout/saveCustomLink';
 
 const data = [
   {

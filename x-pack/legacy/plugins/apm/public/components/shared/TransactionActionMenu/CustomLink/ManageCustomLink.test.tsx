@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { ManageCustomLink } from '../ManageCustomLink';
 import { render, act, fireEvent } from '@testing-library/react';
+import { ManageCustomLink } from './ManageCustomLink';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument
-} from '../../../../../utils/testHelpers';
+} from '../../../../utils/testHelpers';
 
 describe('ManageCustomLink', () => {
   it('renders with create button', () => {

@@ -5,15 +5,15 @@
  */
 
 import React from 'react';
-import { CustomLink } from '../';
 import { render, act, fireEvent } from '@testing-library/react';
-import { Transaction } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
-import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
+import { CustomLink } from '.';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument
-} from '../../../../../utils/testHelpers';
-import { CustomLink as CustomLinkType } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
+} from '../../../../utils/testHelpers';
+import { CustomLink as CustomLinkType } from '../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {
