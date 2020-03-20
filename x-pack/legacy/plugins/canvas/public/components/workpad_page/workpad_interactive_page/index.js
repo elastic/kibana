@@ -19,6 +19,7 @@ import {
 } from '../../../state/actions/elements';
 import { selectToplevelNodes } from '../../../state/actions/transient';
 import { crawlTree, globalStateUpdater, shapesForNodes } from '../integration_utils';
+import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../../common/lib';
 import { InteractiveWorkpadPage as InteractiveComponent } from './interactive_workpad_page';
 import { eventHandlers } from './event_handlers';
 
@@ -79,9 +80,14 @@ const isEmbeddableBody = element => {
   const hasClosest = typeof element.closest === 'function';
 
   if (hasClosest) {
-    return element.closest('.embeddable') && !element.closest('.embPanel__header');
+    return (
+      element.closest(`.${CANVAS_EMBEDDABLE_CLASSNAME}`) && !element.closest('.embPanel__header')
+    );
   } else {
-    return closest.call(element, '.embeddable') && !closest.call(element, '.embPanel__header');
+    return (
+      closest.call(element, `.${CANVAS_EMBEDDABLE_CLASSNAME}`) &&
+      !closest.call(element, '.embPanel__header')
+    );
   }
 };
 
