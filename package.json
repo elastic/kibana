@@ -273,7 +273,7 @@
     "val-loader": "^1.1.1",
     "validate-npm-package-name": "2.2.2",
     "vega": "^5.9.1",
-    "vega-lite": "^4.4.0",
+    "vega-lite": "^2.7.0",
     "vega-schema-url-parser": "1.1.0",
     "vega-tooltip": "^0.20.1",
     "vision": "^5.3.3",
