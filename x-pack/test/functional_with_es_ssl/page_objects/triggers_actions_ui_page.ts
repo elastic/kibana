@@ -102,6 +102,23 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
           };
         });
     },
+    async isAlertsListDisplayed() {
+      const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+      return table.isDisplayed();
+    },
+    async isAnEmptyAlertsListDisplayed() {
+      await retry.try(async () => {
+        const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+        const $ = await table.parseDomContent();
+        const rows = $.findTestSubjects('alert-row').toArray();
+        expect(rows.length).not.to.eql(0);
+        const emptyRow = await find.byCssSelector(
+          '[data-test-subj="alertsList"] table .euiTableRow'
+        );
+        expect(await emptyRow.getVisibleText()).not.to.eql('No items found');
+      });
+      return true;
+    },
     async clickOnAlertInAlertsList(name: string) {
       await this.searchAlerts(name);
       await find.clickDisplayedByCssSelector(`[data-test-subj="alertsList"] [title="${name}"]`);

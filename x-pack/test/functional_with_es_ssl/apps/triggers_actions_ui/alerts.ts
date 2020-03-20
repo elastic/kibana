@@ -241,6 +241,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
+    it('should display an empty list when search removes all alerts', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(`An Alert That For Sure Doesn't Exist!`);
+
+      expect(await pageObjects.triggersActionsUI.isAlertsListDisplayed()).to.eql(true);
+    });
+
     it('should disable single alert', async () => {
       const createdAlert = await createAlert();
       await pageObjects.common.navigateToApp('triggersActions');
@@ -333,10 +340,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('deleteAlert');
-      const emptyPrompt = await find.byCssSelector(
-        '[data-test-subj="createFirstAlertEmptyPrompt"]'
-      );
-      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
+
+      expect(await pageObjects.triggersActionsUI.isAnEmptyAlertsListDisplayed()).to.be(true);
     });
 
     it('should mute all selection', async () => {
@@ -446,10 +451,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('deleteAll');
 
-      const emptyPrompt = await find.byCssSelector(
-        '[data-test-subj="createFirstAlertEmptyPrompt"]'
-      );
-      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
+      expect(await pageObjects.triggersActionsUI.isAnEmptyAlertsListDisplayed()).to.be(true);
     });
   });
 };
