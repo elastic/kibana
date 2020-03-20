@@ -5,19 +5,7 @@
  */
 
 import React, { SyntheticEvent, useCallback, useEffect, useMemo } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiTitle,
-  EuiBasicTable,
-  EuiText,
-  EuiTableFieldDataColumnType,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiText, EuiTableFieldDataColumnType, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
@@ -167,9 +155,19 @@ export const PolicyList = React.memo(() => {
 
   return (
     <PageView
+      data-test-subj="policyListPage"
       headerLeft={i18n.translate('xpack.endpoint.policyList.viewTitle', {
         defaultMessage: 'Policies',
       })}
+      bodyHeader={
+        <EuiText color="subdued" data-test-subj="policyTotalCount">
+          <FormattedMessage
+            id="xpack.endpoint.policyList.viewTitleTotalCount"
+            defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
+            values={{ totalItemCount }}
+          />
+        </EuiText>
+      }
     >
       <EuiBasicTable
         items={policyItems}
@@ -181,44 +179,4 @@ export const PolicyList = React.memo(() => {
       />
     </PageView>
   );
-
-  // return (
-  //   <EuiPage data-test-subj="policyListPage">
-  //     <EuiPageBody>
-  //       <EuiPageContent>
-  //         <EuiPageContentHeader>
-  //           <EuiPageContentHeaderSection>
-  //             <EuiTitle size="l">
-  //               <h1 data-test-subj="policyViewTitle">
-  //                 <FormattedMessage
-  //                   id="xpack.endpoint.policyList.viewTitle"
-  //                   defaultMessage="Policies"
-  //                 />
-  //               </h1>
-  //             </EuiTitle>
-  //             <h2>
-  //               <EuiText color="subdued" data-test-subj="policyTotalCount" size="s">
-  //                 <FormattedMessage
-  //                   id="xpack.endpoint.policyList.viewTitleTotalCount"
-  //                   defaultMessage="{totalItemCount} Policies"
-  //                   values={{ totalItemCount }}
-  //                 />
-  //               </EuiText>
-  //             </h2>
-  //           </EuiPageContentHeaderSection>
-  //         </EuiPageContentHeader>
-  //         <EuiPageContentBody>
-  //           <EuiBasicTable
-  //             items={policyItems}
-  //             columns={columns}
-  //             loading={loading}
-  //             pagination={paginationSetup}
-  //             onChange={handleTableChange}
-  //             data-test-subj="policyTable"
-  //           />
-  //         </EuiPageContentBody>
-  //       </EuiPageContent>
-  //     </EuiPageBody>
-  //   </EuiPage>
-  // );
 });
