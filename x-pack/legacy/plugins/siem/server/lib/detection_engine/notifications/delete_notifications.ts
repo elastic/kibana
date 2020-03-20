@@ -10,9 +10,9 @@ import { DeleteNotificationParams } from './types';
 export const deleteNotifications = async ({
   alertsClient,
   id,
-  ruleId,
+  ruleAlertId,
 }: DeleteNotificationParams) => {
-  const notification = await readNotifications({ alertsClient, id, ruleId });
+  const notification = await readNotifications({ alertsClient, id, ruleAlertId });
   if (notification == null) {
     return null;
   }

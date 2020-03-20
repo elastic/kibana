@@ -15,26 +15,24 @@ export const updateNotifications = async ({
   actions,
   enabled,
   id,
-  ruleId,
   ruleAlertId,
   name,
   tags,
   interval,
 }: UpdateNotificationParams): Promise<PartialAlert | null> => {
-  const notification = await readNotifications({ alertsClient, id, ruleId });
+  const notification = await readNotifications({ alertsClient, id, ruleAlertId });
 
   if (interval && notification) {
     const result = await alertsClient.update({
       id: notification.id,
       data: {
-        tags: addTags(tags, ruleId),
+        tags: addTags(tags, ruleAlertId),
         name,
         schedule: {
           interval,
         },
         actions,
         params: {
-          ruleId,
           ruleAlertId,
         },
         throttle: null,
@@ -51,7 +49,6 @@ export const updateNotifications = async ({
       name,
       interval,
       actions,
-      ruleId,
       ruleAlertId,
     });
     return result;

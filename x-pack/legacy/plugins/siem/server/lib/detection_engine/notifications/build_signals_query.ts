@@ -5,7 +5,7 @@
  */
 
 interface BuildSignalsSearchQuery {
-  ruleIds?: string[];
+  ruleId: string;
   index: string[];
   from: string;
   to: string;
@@ -13,54 +13,47 @@ interface BuildSignalsSearchQuery {
 }
 
 export const buildSignalsSearchQuery = ({
-  ruleIds,
+  ruleId,
   index,
   from,
   to,
   size = 10000,
-}: BuildSignalsSearchQuery) => {
-  const queryFilter: object[] = [
-    {
-      range: {
-        '@timestamp': {
-          gte: from,
-          lte: to,
-        },
-      },
-    },
-  ];
-
-  if (ruleIds?.length) {
-    queryFilter.push({
+}: BuildSignalsSearchQuery) => ({
+  allowNoIndices: true,
+  index,
+  size,
+  ignoreUnavailable: true,
+  body: {
+    query: {
       bool: {
-        should: ruleIds.map(id => ({
-          match: {
-            'signal.rule.rule_id': id,
+        filter: [
+          {
+            bool: {
+              should: {
+                match: {
+                  'signal.rule.rule_id': ruleId,
+                },
+              },
+              minimum_should_match: 1,
+            },
           },
-        })),
-        minimum_should_match: 1,
-      },
-    });
-  }
-
-  return {
-    allowNoIndices: true,
-    index,
-    size,
-    ignoreUnavailable: true,
-    body: {
-      query: {
-        bool: {
-          filter: queryFilter,
-        },
-      },
-      sort: [
-        {
-          '@timestamp': {
-            order: 'asc',
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
+              },
+            },
           },
-        },
-      ],
+        ],
+      },
     },
-  };
-};
+    sort: [
+      {
+        '@timestamp': {
+          order: 'asc',
+        },
+      },
+    ],
+  },
+});

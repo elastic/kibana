@@ -140,7 +140,6 @@ export const createRulesRoute = (router: IRouter): void => {
             name,
             interval,
             actions,
-            ruleId: createdRule.params.ruleId,
             ruleAlertId: createdRule.id,
           });
         }

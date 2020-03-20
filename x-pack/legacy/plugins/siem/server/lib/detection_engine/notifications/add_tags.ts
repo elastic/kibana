@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INTERNAL_NOTIFICATION_RULE_ID_KEY } from '../../../../common/constants';
+import { INTERNAL_RULE_ALERT_ID_KEY } from '../../../../common/constants';
 
-export const addTags = (tags: string[] = [], ruleId: string): string[] =>
-  Array.from(new Set([...tags, `${INTERNAL_NOTIFICATION_RULE_ID_KEY}:${ruleId}`]));
+export const addTags = (tags: string[] = [], ruleAlertId: string): string[] =>
+  Array.from(new Set([...tags, `${INTERNAL_RULE_ALERT_ID_KEY}:${ruleAlertId}`]));

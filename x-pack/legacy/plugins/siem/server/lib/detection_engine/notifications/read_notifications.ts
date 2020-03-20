@@ -7,12 +7,12 @@
 import { SanitizedAlert } from '../../../../../../../plugins/alerting/common';
 import { ReadNotificationParams, isAlertType } from './types';
 import { findNotifications } from './find_notifications';
-import { INTERNAL_NOTIFICATION_RULE_ID_KEY } from '../../../../common/constants';
+import { INTERNAL_RULE_ALERT_ID_KEY } from '../../../../common/constants';
 
 export const readNotifications = async ({
   alertsClient,
   id,
-  ruleId,
+  ruleAlertId,
 }: ReadNotificationParams): Promise<SanitizedAlert | null> => {
   if (id != null) {
     try {
@@ -30,10 +30,10 @@ export const readNotifications = async ({
         throw err;
       }
     }
-  } else if (ruleId != null) {
+  } else if (ruleAlertId != null) {
     const notificationFromFind = await findNotifications({
       alertsClient,
-      filter: `alert.attributes.tags: "${INTERNAL_NOTIFICATION_RULE_ID_KEY}:${ruleId}"`,
+      filter: `alert.attributes.tags: "${INTERNAL_RULE_ALERT_ID_KEY}:${ruleAlertId}"`,
       page: 1,
     });
     if (notificationFromFind.data.length === 0) {

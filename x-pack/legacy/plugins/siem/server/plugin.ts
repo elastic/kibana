@@ -159,7 +159,6 @@ export class Plugin {
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
-        version: this.context.env.packageInfo.version,
       });
 
       if (isAlertExecutor(signalRuleType)) {
