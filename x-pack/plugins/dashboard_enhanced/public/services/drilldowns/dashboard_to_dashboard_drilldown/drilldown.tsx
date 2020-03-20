@@ -21,8 +21,6 @@ export class DashboardToDashboardDrilldown
   implements Drilldown<Config, FactoryContext, ActionContext> {
   constructor(protected readonly params: Params) {}
 
-  // TODO: public readonly places = ['dashboard'];
-
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
 
   public readonly order = 100;

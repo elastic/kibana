@@ -37,7 +37,6 @@ export class DrilldownService {
       ExecutionContext extends object = object
     >({
       id: factoryId,
-      places,
       CollectConfig,
       createConfig,
       isConfigValid,
@@ -56,7 +55,7 @@ export class DrilldownService {
         isConfigValid,
         getDisplayName,
         getIconType: () => euiIcon,
-        isCompatible: async ({ place }: any) => (!places ? true : places.indexOf(place) > -1),
+        isCompatible: async () => true,
         create: serializedAction => ({
           id: '',
           type: factoryId,

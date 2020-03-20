@@ -17,12 +17,6 @@ export interface Drilldown<
   id: string;
 
   /**
-   * List of places where this drilldown should be available, e.g "dashboard", "graph".
-   * If omitted, the drilldown will be shown in all places.
-   */
-  places?: string[];
-
-  /**
    * Function that returns default config for this drilldown.
    */
   createConfig: ActionFactoryDefinition<
