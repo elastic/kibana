@@ -20,6 +20,8 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/sea
 
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
+import { ErrorBoundary } from './error_boundary';
+
 interface ExplorationQueryBarProps {
   indexPattern: IIndexPattern;
   setSearchQuery: Dispatch<SetStateAction<SavedSearchQuery>>;
@@ -53,26 +55,28 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   };
 
   return (
-    <QueryStringInput
-      bubbleSubmitEvent={true}
-      query={searchInput}
-      indexPatterns={[indexPattern]}
-      onChange={searchChangeHandler}
-      onSubmit={searchSubmitHandler}
-      placeholder={
-        searchInput.language === SEARCH_QUERY_LANGUAGE.KUERY
-          ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
-              defaultMessage: 'e.g. {example}',
-              values: { example: 'method : "GET" or status : "404"' },
-            })
-          : i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderLucene', {
-              defaultMessage: 'e.g. {example}',
-              values: { example: 'method:GET OR status:404' },
-            })
-      }
-      disableAutoFocus={true}
-      dataTestSubj="transformQueryInput"
-      languageSwitcherPopoverAnchorPosition="rightDown"
-    />
+    <ErrorBoundary>
+      <QueryStringInput
+        bubbleSubmitEvent={true}
+        query={searchInput}
+        indexPatterns={[indexPattern]}
+        onChange={searchChangeHandler}
+        onSubmit={searchSubmitHandler}
+        placeholder={
+          searchInput.language === SEARCH_QUERY_LANGUAGE.KUERY
+            ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
+                defaultMessage: 'e.g. {example}',
+                values: { example: 'method : "GET" or status : "404"' },
+              })
+            : i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderLucene', {
+                defaultMessage: 'e.g. {example}',
+                values: { example: 'method:GET OR status:404' },
+              })
+        }
+        disableAutoFocus={true}
+        dataTestSubj="transformQueryInput"
+        languageSwitcherPopoverAnchorPosition="rightDown"
+      />
+    </ErrorBoundary>
   );
 };
