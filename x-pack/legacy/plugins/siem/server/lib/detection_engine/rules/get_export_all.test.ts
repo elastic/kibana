@@ -30,6 +30,7 @@ describe('getExportAll', () => {
     const exports = await getExportAll(alertsClient);
     expect(exports).toEqual({
       rulesNdjson: `${JSON.stringify({
+        actions: [],
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
         created_by: 'elastic',
