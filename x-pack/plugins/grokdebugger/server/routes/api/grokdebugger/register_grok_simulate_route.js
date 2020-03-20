@@ -11,8 +11,6 @@ import { GrokdebuggerResponse } from '../../../models/grokdebugger_response';
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export function registerGrokSimulateRoute(framework) {
-  // TODO: Handle license check here
-  //const licensePreRouting = licensePreRoutingFactory(server);
   framework.registerRoute(
     {
       method: 'post',

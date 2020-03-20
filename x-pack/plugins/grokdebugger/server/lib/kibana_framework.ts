@@ -6,54 +6,82 @@
 
 /* eslint-disable @typescript-eslint/array-type */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   CoreSetup,
   IRouter,
-  KibanaRequest,
   RequestHandlerContext,
-  KibanaResponseFactory,
   RouteMethod,
   RouteConfig,
-  APICaller,
   RequestHandler,
 } from 'src/core/server';
+
+import { ILicense } from '../../../licensing/server';
 
 type GrokDebuggerRouteConfig<params, query, body, method extends RouteMethod> = {
   method: RouteMethod;
 } & RouteConfig<params, query, body, method>;
 
-// TODO: type properly
-type GrokDebuggerPluginDeps = any;
-
 export class KibanaFramework {
   public router: IRouter;
-  public plugins: GrokDebuggerPluginDeps;
+  public license?: ILicense;
 
-  constructor(core: CoreSetup, plugins: GrokDebuggerPluginDeps) {
+  constructor(core: CoreSetup) {
     this.router = core.http.createRouter();
-    this.plugins = plugins;
+  }
+
+  public setLicense(license: ILicense) {
+    this.license = license;
+  }
+
+  private hasActiveLicense() {
+    if (!this.license) {
+      throw new Error(
+        "Please set license information in the plugin's setup method before trying to check the status"
+      );
+    }
+    return this.license.isActive;
   }
 
   public registerRoute<params = any, query = any, body = any, method extends RouteMethod = any>(
     config: GrokDebuggerRouteConfig<params, query, body, method>,
     handler: RequestHandler<params, query, body>
   ) {
+    // Automatically wrap all route registrations with license checking
+    const wrappedHandler: RequestHandler<params, query, body> = async (
+      requestContext,
+      request,
+      response
+    ) => {
+      if (this.hasActiveLicense()) {
+        return await handler(requestContext, request, response);
+      } else {
+        return response.forbidden({
+          body: i18n.translate('xpack.grokDebugger.inactiveLicenseError', {
+            defaultMessage: 'You cannot use the Grok Debugger without an active license.',
+          }),
+        });
+      }
+    };
+
     const routeConfig = {
       path: config.path,
       validate: config.validate,
     };
+
     switch (config.method) {
       case 'get':
-        this.router.get(routeConfig, handler);
+        this.router.get(routeConfig, wrappedHandler);
         break;
       case 'post':
-        this.router.post(routeConfig, handler);
+        this.router.post(routeConfig, wrappedHandler);
         break;
       case 'delete':
-        this.router.delete(routeConfig, handler);
+        this.router.delete(routeConfig, wrappedHandler);
         break;
       case 'put':
-        this.router.put(routeConfig, handler);
+        this.router.put(routeConfig, wrappedHandler);
         break;
     }
   }
@@ -66,7 +94,7 @@ export class KibanaFramework {
     }
   ): Promise<any>;
 
-  public async callWithRequest<Hit = {}, Aggregation = undefined>(
+  public async callWithRequest(
     requestContext: RequestHandlerContext,
     endpoint: string,
     options?: any

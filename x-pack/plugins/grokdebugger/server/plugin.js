@@ -15,18 +15,16 @@ export const config = {
 };
 
 export class Plugin {
-  constructor(initializerContext) {
-    this.config$ = initializerContext.config.create();
-  }
-
-  setup(coreSetup) {
-    console.log('STARTING: Grok Debugger');
-    // TODO: Add license checking setup
+  setup(coreSetup, plugins) {
     const framework = new KibanaFramework(coreSetup);
+
+    plugins.licensing.license$.subscribe(license => {
+      framework.setLicense(license);
+    });
+
     registerGrokdebuggerRoutes(framework);
   }
 
   start() {}
-
   stop() {}
 }
