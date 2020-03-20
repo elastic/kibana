@@ -44,7 +44,6 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  intervalOptions,
   unhashUrl,
   subscribeWithScope,
   tabifyAggResponse,
@@ -76,6 +75,7 @@ import {
   connectToQueryState,
   syncQueryStateWithUrl,
   getDefaultQuery,
+  search,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../../../../plugins/kibana_legacy/public';
@@ -286,7 +286,7 @@ function discoverController(
       mode: 'absolute',
     });
   };
-  $scope.intervalOptions = intervalOptions;
+  $scope.intervalOptions = search.aggs.intervalOptions;
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;

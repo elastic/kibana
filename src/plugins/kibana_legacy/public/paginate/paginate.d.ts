@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { npSetup, npStart } from 'ui/new_platform';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+export function PaginateDirectiveProvider($parse: any, $compile: any): any;
+export function PaginateControlsDirectiveProvider(): any;

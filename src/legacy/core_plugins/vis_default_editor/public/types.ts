@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export { npSetup, npStart } from 'ui/new_platform';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+
+export interface VisDefaultEditorKibanaServices {
+  data: DataPublicPluginStart;
+}
