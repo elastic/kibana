@@ -54,7 +54,7 @@ export class TelemetryCollectionManagerPlugin
   private readonly version: string;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get('telemetry', 'collection');
+    this.logger = initializerContext.logger.get();
     this.isDev = initializerContext.env.mode.dev;
     this.version = initializerContext.env.packageInfo.version;
   }

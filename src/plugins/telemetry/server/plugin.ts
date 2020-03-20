@@ -67,7 +67,7 @@ export class TelemetryPlugin implements Plugin {
   private uiSettingsClient?: IUiSettingsClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
-    this.logger = initializerContext.logger.get('telemetry');
+    this.logger = initializerContext.logger.get();
     this.isDev = initializerContext.env.mode.dev;
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
     this.config$ = initializerContext.config.create();

@@ -24,17 +24,18 @@ import {
   CoreSetup,
   CoreStart,
   ISavedObjectsRepository,
+  Plugin,
 } from 'kibana/server';
 import { ConfigType } from './config';
 import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
 
 export type UsageCollectionSetup = CollectorSet;
-export class UsageCollectionPlugin {
-  logger: Logger;
+export class UsageCollectionPlugin implements Plugin<CollectorSet> {
+  private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.logger = this.initializerContext.logger.get('usage-collector');
+    this.logger = this.initializerContext.logger.get();
   }
 
   public async setup(core: CoreSetup) {
@@ -44,7 +45,7 @@ export class UsageCollectionPlugin {
       .toPromise();
 
     const collectorSet = new CollectorSet({
-      logger: this.logger,
+      logger: this.logger.get('collector-set'),
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
