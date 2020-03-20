@@ -121,7 +121,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it.skip('Add more fields from sidebar', async () => {
+    it('Add more fields from sidebar', async () => {
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
