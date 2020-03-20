@@ -24,7 +24,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core
 import { SharePluginSetup } from 'src/plugins/share/public';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, EmbeddableSetup, EmbeddableStart } from './embeddable_plugin';
-import { ExpandPanelAction, ReplacePanelAction } from '.';
+import { EmptyPanelEmbeddableFactory, ExpandPanelAction, ReplacePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
 import { getSavedObjectFinder } from '../../../plugins/saved_objects/public';
@@ -119,6 +119,8 @@ export class DashboardEmbeddableContainerPublicPlugin
 
     const factory = new DashboardContainerFactory(getStartServices);
     embeddable.registerEmbeddableFactory(factory.type, factory);
+    const emptyPanelFactory = new EmptyPanelEmbeddableFactory();
+    embeddable.registerEmbeddableFactory(emptyPanelFactory.type, emptyPanelFactory);
   }
 
   public start(core: CoreStart, plugins: StartDependencies): Start {

@@ -253,10 +253,13 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       const expandPanel =
         expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
       const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
+      const isEmptyPanel = panel.type === 'EMPTY_PANEL_EMBEDDABLE';
       const classes = classNames({
         'dshDashboardGrid__item--expanded': expandPanel,
         'dshDashboardGrid__item--hidden': hidePanel,
+        'dshDashboardGrid__item--non-resizeable': isEmptyPanel,
       });
+
       return (
         <div
           style={{ zIndex: focusedPanelIndex === panel.explicitInput.id ? 2 : 'auto' }}
@@ -277,6 +280,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             notifications={this.props.kibana.services.notifications}
             inspector={this.props.kibana.services.inspector}
             SavedObjectFinder={this.props.kibana.services.SavedObjectFinder}
+            hideHeader={isEmptyPanel}
           />
         </div>
       );

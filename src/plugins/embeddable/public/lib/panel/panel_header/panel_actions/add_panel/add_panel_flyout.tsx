@@ -41,6 +41,7 @@ interface Props {
   getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   notifications: CoreSetup['notifications'];
   SavedObjectFinder: React.ComponentType<any>;
+  onAddPanel?: (id: string, type: string, name: string) => void;
 }
 
 interface State {
@@ -99,9 +100,14 @@ export class AddPanelFlyout extends React.Component<Props, State> {
   };
 
   public onAddPanel = async (id: string, type: string, name: string) => {
-    this.props.container.addSavedObjectEmbeddable(type, id);
+    const { container, onAddPanel } = this.props;
+    if (onAddPanel) {
+      onAddPanel(id, type, name);
+    } else {
+      container.addSavedObjectEmbeddable(type, id);
 
-    this.showToast(name);
+      this.showToast(name);
+    }
   };
 
   private getCreateMenuItems(): ReactElement[] {

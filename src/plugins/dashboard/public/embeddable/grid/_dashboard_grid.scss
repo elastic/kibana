@@ -48,6 +48,15 @@
   display: none;
 }
 
+.dshDashboardGrid__item--non-resizeable {
+  touch-action: none;
+
+  .react-resizable-handle {
+    touch-action: none;
+    display: none;
+  }
+}
+
 /**
  * 1. We need to mark this as important because react grid layout sets the width and height of the panels inline.
  */

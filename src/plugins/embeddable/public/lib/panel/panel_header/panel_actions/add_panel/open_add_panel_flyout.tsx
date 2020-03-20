@@ -30,6 +30,7 @@ export async function openAddPanelFlyout(options: {
   overlays: OverlayStart;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
+  onAddPanel?: (id: string, type: string, name: string) => void;
 }) {
   const {
     embeddable,
@@ -38,6 +39,7 @@ export async function openAddPanelFlyout(options: {
     overlays,
     notifications,
     SavedObjectFinder,
+    onAddPanel,
   } = options;
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
@@ -52,6 +54,7 @@ export async function openAddPanelFlyout(options: {
         getAllFactories={getAllFactories}
         notifications={notifications}
         SavedObjectFinder={SavedObjectFinder}
+        onAddPanel={onAddPanel}
       />
     ),
     {

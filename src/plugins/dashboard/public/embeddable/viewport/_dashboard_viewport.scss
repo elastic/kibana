@@ -5,3 +5,17 @@
 .dshDashboardViewport-withMargins {
   width: 100%;
 }
+
+#dashboardViewport {
+  .embPanel {
+    background-color: transparent;
+
+    .visualization {
+      background-color: $euiColorEmptyShade;
+    }
+
+    &__header {
+      background-color: $euiColorEmptyShade;
+    }
+  }
+}

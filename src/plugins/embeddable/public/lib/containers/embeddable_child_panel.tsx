@@ -42,6 +42,7 @@ export interface EmbeddableChildPanelProps {
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
+  hideHeader?: boolean;
 }
 
 interface State {
@@ -104,6 +105,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
             notifications={this.props.notifications}
             inspector={this.props.inspector}
             SavedObjectFinder={this.props.SavedObjectFinder}
+            hideHeader={this.props.hideHeader}
           />
         )}
       </div>

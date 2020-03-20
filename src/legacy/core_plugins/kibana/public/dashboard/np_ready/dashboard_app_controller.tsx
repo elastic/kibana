@@ -167,6 +167,16 @@ export class DashboardAppController {
         filters: esFilters.FilterStateStore.APP_STATE,
       }
     );
+    const emptyPanelType = 'EMPTY_PANEL_EMBEDDABLE';
+    const getEmptyPanelId = () => {
+      const emptyPanelEmbeddale = dashboardStateManager
+        .getPanels()
+        .find(panel => panel.type === emptyPanelType);
+      if (!emptyPanelEmbeddale) {
+        return undefined;
+      }
+      return emptyPanelEmbeddale.panelIndex;
+    };
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
@@ -374,7 +384,12 @@ export class DashboardAppController {
           if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
             const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
             const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
+            const emptyPanelId = getEmptyPanelId();
+            if (emptyPanelId) {
+              container.removeEmbeddable(emptyPanelId);
+            }
             container.addSavedObjectEmbeddable(type, id);
+            container.addNewEmbeddable(emptyPanelType, { hidePanelTitles: true });
             removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
             removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
           }
@@ -529,6 +544,28 @@ export class DashboardAppController {
       setTimeout(() => {
         queryFilter.setFilters(queryFilter.getGlobalFilters());
       }, 0);
+    };
+
+    const onAddPanel = async (id: string, type: string, name: string) => {
+      const emptyPanelId = getEmptyPanelId();
+      if (!dashboardContainer) {
+        return;
+      }
+      if (emptyPanelId) {
+        await dashboardContainer.removeEmbeddable(emptyPanelId);
+      }
+      await dashboardContainer.addSavedObjectEmbeddable(type, id);
+      await dashboardContainer.addNewEmbeddable(emptyPanelType, { hidePanelTitles: true });
+      notifications.toasts.addSuccess({
+        title: i18n.translate(
+          'kbn.dashboard.addPanel.savedObjectAddedToContainerSuccessMessageTitle',
+          {
+            defaultMessage: `{savedObjectName} was added`,
+            values: { savedObjectName: name },
+          }
+        ),
+        'data-test-subj': 'addObjectToContainerSuccess',
+      });
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
@@ -799,12 +836,19 @@ export class DashboardAppController {
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
+        const emptyPanelId = getEmptyPanelId();
+        if (emptyPanelId && dashboardContainer) {
+          dashboardContainer.removeEmbeddable(emptyPanelId);
+        }
         return save(saveOptions).then((response: SaveResult) => {
           // If the save wasn't successful, put the original values back.
           if (!(response as { id: string }).id) {
             dashboardStateManager.setTitle(currentTitle);
             dashboardStateManager.setDescription(currentDescription);
             dashboardStateManager.setTimeRestore(currentTimeRestore);
+            if (dashboardContainer) {
+              dashboardContainer.addNewEmbeddable(emptyPanelType, { hidePanelTitles: true });
+            }
           }
           return response;
         });
@@ -856,6 +900,7 @@ export class DashboardAppController {
           notifications,
           overlays,
           SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
+          onAddPanel,
         });
       }
     };

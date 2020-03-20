@@ -28,6 +28,7 @@ interface Props {
 
 export function SavedObjectFinderCreateNew({ menuItems }: Props) {
   const [isCreateMenuOpen, setCreateMenuOpen] = useState(false);
+  const menuItemsToRender = menuItems.filter(item => item.key !== 'EMPTY_PANEL_EMBEDDABLE');
   const toggleCreateMenu = () => {
     setCreateMenuOpen(!isCreateMenuOpen);
   };
@@ -56,7 +57,7 @@ export function SavedObjectFinderCreateNew({ menuItems }: Props) {
       panelPaddingSize="none"
       anchorPosition="downRight"
     >
-      <EuiContextMenuPanel items={menuItems} />
+      <EuiContextMenuPanel items={menuItemsToRender} />
     </EuiPopover>
   );
 }
