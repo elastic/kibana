@@ -42,7 +42,17 @@ export async function generateAccessApiKey(
   configId: string
 ) {
   const key = await createAPIKey(soClient, agentId, {
-    'fleet-agent': {},
+    // Useless role to avoid to have the privilege of the user that created the key
+    'fleet-apikey-access': {
+      cluster: [],
+      applications: [
+        {
+          application: '.fleet',
+          privileges: ['no-privileges'],
+          resources: ['*'],
+        },
+      ],
+    },
   });
 
   if (!key) {

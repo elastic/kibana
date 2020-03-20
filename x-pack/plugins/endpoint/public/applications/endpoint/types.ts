@@ -7,7 +7,7 @@
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
-  EndpointMetadata,
+  HostMetadata,
   AlertData,
   AlertResultList,
   Immutable,
@@ -25,22 +25,22 @@ export type MiddlewareFactory<S = GlobalState> = (
   api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
-export interface ManagementListState {
-  endpoints: EndpointMetadata[];
-  total: number;
+export interface HostListState {
+  hosts: HostMetadata[];
   pageSize: number;
   pageIndex: number;
+  total: number;
   loading: boolean;
   detailsError?: ServerApiError;
-  details?: Immutable<EndpointMetadata>;
+  details?: Immutable<HostMetadata>;
   location?: Immutable<EndpointAppLocation>;
 }
 
-export interface ManagementListPagination {
+export interface HostListPagination {
   pageIndex: number;
   pageSize: number;
 }
-export interface ManagingIndexUIQueryParams {
+export interface HostIndexUIQueryParams {
   selected_host?: string;
 }
 
@@ -92,7 +92,7 @@ export interface PolicyDetailsState {
 }
 
 export interface GlobalState {
-  readonly managementList: ManagementListState;
+  readonly hostList: HostListState;
   readonly alertList: AlertListState;
   readonly policyList: PolicyListState;
   readonly policyDetails: PolicyDetailsState;

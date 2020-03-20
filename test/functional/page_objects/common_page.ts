@@ -100,7 +100,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     private async loginIfPrompted(appUrl: string) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
+      await testSubjects.find('kibanaChrome', 6 * defaultFindTimeout); // 60 sec waiting
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -513,6 +513,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           throw new Error('save modal still open');
         }
       });
+    }
+
+    async setFileInputPath(path: string) {
+      log.debug(`Setting the path '${path}' on the file input`);
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
     }
   }
 
