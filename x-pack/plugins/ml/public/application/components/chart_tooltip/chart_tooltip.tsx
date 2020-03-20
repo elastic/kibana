@@ -60,7 +60,7 @@ const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFo
     return null;
   }
 
-  return formatter ? formatter(headerData) : headerData.name;
+  return formatter ? formatter(headerData) : headerData.label;
 };
 
 export const ChartTooltip: FC = () => {
@@ -85,20 +85,20 @@ export const ChartTooltip: FC = () => {
         <div className="mlChartTooltip__list">
           {tooltipData
             .slice(1)
-            .map(({ name, value, color, isHighlighted, seriesKey, yAccessor }) => {
+            .map(({ label, value, color, isHighlighted, seriesIdentifier, valueAccessor }) => {
               const classes = classNames('mlChartTooltip__item', {
                 /* eslint @typescript-eslint/camelcase:0 */
                 echTooltip__rowHighlighted: isHighlighted,
               });
               return (
                 <div
-                  key={`${seriesKey}--${yAccessor}`}
+                  key={`${seriesIdentifier.key}__${valueAccessor}`}
                   className={classes}
                   style={{
                     borderLeftColor: color,
                   }}
                 >
-                  <span className="mlChartTooltip__label">{name}</span>
+                  <span className="mlChartTooltip__label">{label}</span>
                   <span className="mlChartTooltip__value">{value}</span>
                 </div>
               );
