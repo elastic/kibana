@@ -7,6 +7,7 @@
 import * as rt from 'io-ts';
 
 export const UserRT = rt.type({
+  email: rt.union([rt.undefined, rt.string]),
   full_name: rt.union([rt.undefined, rt.string]),
   username: rt.string,
 });

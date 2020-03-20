@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ThreatParams, PrepackagedRules, AlertAction } from '../../types';
+import { AlertAction } from '../../../../../../../../plugins/alerting/common';
+import { ThreatParams, PrepackagedRules, RuleAlertAction } from '../../types';
 import { addPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
@@ -1307,13 +1308,13 @@ describe('add prepackaged rules schema', () => {
     expect(
       addPrepackagedRulesSchema.validate<
         Partial<Omit<PrepackagedRules, 'actions'>> & {
-          actions: Array<Omit<AlertAction, 'group'>>;
+          actions: Array<Omit<RuleAlertAction, 'group'>>;
         }
       >({
         actions: [
           {
             id: 'id',
-            actionTypeId: 'actionTypeId',
+            action_type_id: 'actionTypeId',
             params: {},
           },
         ],
@@ -1321,7 +1322,7 @@ describe('add prepackaged rules schema', () => {
         risk_score: 50,
         description: 'some description',
         name: 'some-name',
-        severity: 'junk',
+        severity: 'low',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
@@ -1338,13 +1339,13 @@ describe('add prepackaged rules schema', () => {
     expect(
       addPrepackagedRulesSchema.validate<
         Partial<Omit<PrepackagedRules, 'actions'>> & {
-          actions: Array<Omit<AlertAction, 'id'>>;
+          actions: Array<Omit<RuleAlertAction, 'id'>>;
         }
       >({
         actions: [
           {
             group: 'group',
-            actionTypeId: 'actionTypeId',
+            action_type_id: 'action_type_id',
             params: {},
           },
         ],
@@ -1352,7 +1353,7 @@ describe('add prepackaged rules schema', () => {
         risk_score: 50,
         description: 'some description',
         name: 'some-name',
-        severity: 'junk',
+        severity: 'low',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
@@ -1365,11 +1366,11 @@ describe('add prepackaged rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of actions that are missing "actionTypeId"', () => {
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
     expect(
       addPrepackagedRulesSchema.validate<
         Partial<Omit<PrepackagedRules, 'actions'>> & {
-          actions: Array<Omit<AlertAction, 'actionTypeId'>>;
+          actions: Array<Omit<RuleAlertAction, 'action_type_id'>>;
         }
       >({
         actions: [
@@ -1383,7 +1384,7 @@ describe('add prepackaged rules schema', () => {
         risk_score: 50,
         description: 'some description',
         name: 'some-name',
-        severity: 'junk',
+        severity: 'low',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
@@ -1392,7 +1393,7 @@ describe('add prepackaged rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "actionTypeId" fails because ["actionTypeId" is required]]]'
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
     );
   });
 
@@ -1400,21 +1401,21 @@ describe('add prepackaged rules schema', () => {
     expect(
       addPrepackagedRulesSchema.validate<
         Partial<Omit<PrepackagedRules, 'actions'>> & {
-          actions: Array<Omit<AlertAction, 'params'>>;
+          actions: Array<Omit<RuleAlertAction, 'params'>>;
         }
       >({
         actions: [
           {
             group: 'group',
             id: 'id',
-            actionTypeId: 'actionTypeId',
+            action_type_id: 'action_type_id',
           },
         ],
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
         name: 'some-name',
-        severity: 'junk',
+        severity: 'low',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
@@ -1427,18 +1428,18 @@ describe('add prepackaged rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of actions that are including "action_type_id', () => {
+  test('You cannot send in an array of actions that are including "actionTypeId', () => {
     expect(
       addPrepackagedRulesSchema.validate<
         Partial<Omit<PrepackagedRules, 'actions'>> & {
-          actions: Array<Omit<AlertAction, 'actionTypeId'> & { action_type_id: string }>;
+          actions: AlertAction[];
         }
       >({
         actions: [
           {
             group: 'group',
             id: 'id',
-            action_type_id: 'action_type_id',
+            actionTypeId: 'actionTypeId',
             params: {},
           },
         ],
@@ -1446,7 +1447,7 @@ describe('add prepackaged rules schema', () => {
         risk_score: 50,
         description: 'some description',
         name: 'some-name',
-        severity: 'junk',
+        severity: 'low',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
@@ -1455,7 +1456,7 @@ describe('add prepackaged rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "actionTypeId" fails because ["actionTypeId" is required]]]'
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
     );
   });
 

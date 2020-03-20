@@ -101,7 +101,7 @@ export const updateRulesSchema = Joi.object({
   to: to.default('now'),
   type: type.required(),
   threat: threat.default([]),
-  throttle,
+  throttle: throttle.default(null),
   references: references.default([]),
   note: note.allow(''),
   version,

@@ -8,14 +8,13 @@ import { SignalSourceHit, SignalHit } from './types';
 import { buildRule } from './build_rule';
 import { buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
-import { RuleTypeParams } from '../types';
-import { AlertAction } from '../../../../../../../plugins/alerting/common';
+import { RuleTypeParams, RuleAlertAction } from '../types';
 
 interface BuildBulkBodyParams {
   doc: SignalSourceHit;
   ruleParams: RuleTypeParams;
   id: string;
-  actions: AlertAction[];
+  actions: RuleAlertAction[];
   name: string;
   createdAt: string;
   createdBy: string;

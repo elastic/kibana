@@ -15,6 +15,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../../../plugins/triggers_actions_ui/public';
+import { SecurityPluginSetup } from '../../../../plugins/security/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
@@ -33,16 +34,18 @@ import { getRulesNotificationAlertType } from './lib/rules_notification_alert_ty
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
-  usageCollection: UsageCollectionSetup;
+  security: SecurityPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
-  uiActions: UiActionsStart;
+  security: SecurityPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 export type StartServices = CoreStart & StartPlugins;
 
@@ -62,6 +65,8 @@ export class Plugin implements IPlugin<Setup, Start> {
   public setup(core: CoreSetup, plugins: SetupPlugins) {
     initTelemetry(plugins.usageCollection, this.id);
 
+    const security = plugins.security;
+
     core.application.register({
       id: this.id,
       title: this.name,
@@ -72,7 +77,7 @@ export class Plugin implements IPlugin<Setup, Start> {
         plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
         plugins.triggers_actions_ui.alertTypeRegistry.register(getRulesNotificationAlertType());
 
-        return renderApp(coreStart, startPlugins as StartPlugins, params);
+        return renderApp(coreStart, { ...startPlugins, security } as StartPlugins, params);
       },
     });
 

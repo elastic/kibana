@@ -29,12 +29,16 @@ export const filters = t.array(t.unknown); // Filters are not easily type-able y
  * Params is an "object", since it is a type of AlertActionParams which is action templates.
  * @see x-pack/plugins/alerting/common/alert.ts
  */
+export const action_group = t.string;
+export const action_id = t.string;
+export const action_action_type_id = t.string;
+export const action_params = t.object;
 export const action = t.exact(
   t.type({
-    group: t.string,
-    id: t.string,
-    actionTypeId: t.string,
-    params: t.object,
+    group: action_group,
+    id: action_id,
+    action_type_id: action_action_type_id,
+    params: action_params,
   })
 );
 

@@ -402,7 +402,7 @@ describe('Detections Rules API', () => {
 
     test('check parameter url, body and query when exporting rules', async () => {
       await exportRules({
-        ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
+        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
@@ -419,7 +419,7 @@ describe('Detections Rules API', () => {
     test('check parameter url, body and query when exporting rules with excludeExportDetails', async () => {
       await exportRules({
         excludeExportDetails: true,
-        ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
+        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
@@ -436,7 +436,7 @@ describe('Detections Rules API', () => {
     test('check parameter url, body and query when exporting rules with fileName', async () => {
       await exportRules({
         filename: 'myFileName.ndjson',
-        ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
+        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
@@ -454,7 +454,7 @@ describe('Detections Rules API', () => {
       await exportRules({
         excludeExportDetails: true,
         filename: 'myFileName.ndjson',
-        ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
+        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_export', {
@@ -470,7 +470,7 @@ describe('Detections Rules API', () => {
 
     test('happy path', async () => {
       const resp = await exportRules({
-        ruleIds: ['mySuperRuleId', 'mySuperRuleId_II'],
+        ids: ['mySuperRuleId', 'mySuperRuleId_II'],
         signal: abortCtrl.signal,
       });
       expect(resp).toEqual(blob);

@@ -197,6 +197,7 @@ export interface JobDocPayload<JobParamsType> {
 
 export interface JobSource<JobParamsType> {
   _id: string;
+  _index: string;
   _source: {
     jobtype: string;
     output: JobDocOutput;

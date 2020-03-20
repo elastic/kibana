@@ -8,7 +8,7 @@ import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { SignalSearchResponse, BulkResponse } from './types';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RuleAlertAction } from '../types';
 import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
@@ -21,7 +21,7 @@ interface SingleBulkCreateParams {
   logger: Logger;
   id: string;
   signalsIndex: string;
-  actions: AlertAction[];
+  actions: RuleAlertAction[];
   name: string;
   createdAt: string;
   createdBy: string;

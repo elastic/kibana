@@ -109,7 +109,7 @@ describe('buildRule', () => {
     expect(rule).toEqual(expected);
   });
 
-  test('it omits a null value such as if enabled is null if is present', () => {
+  test('it omits a null value such as if "enabled" is null if is present', () => {
     const ruleParams = sampleRuleAlertParams();
     ruleParams.filters = undefined;
     const rule = buildRule({
@@ -184,7 +184,7 @@ describe('buildRule', () => {
     expect(rule).toEqual(expected);
   });
 
-  test('it omits a null value such as if filters is undefined if is present', () => {
+  test('it omits a null value such as if "filters" is undefined if is present', () => {
     const ruleParams = sampleRuleAlertParams();
     ruleParams.filters = undefined;
     const rule = buildRule({
@@ -259,7 +259,7 @@ describe('buildRule', () => {
     expect(rule).toEqual(expected);
   });
 
-  test('it omits a null value such as if throttle is undefined if is present', () => {
+  test('it omits a null value such as if "throttle" is undefined if is present', () => {
     const ruleParams = sampleRuleAlertParams();
     const rule = buildRule({
       actions: [],

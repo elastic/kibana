@@ -6,13 +6,13 @@
 
 import { AbstractVectorSource } from './vector_source';
 import {
-  autocompleteService,
+  getAutocompleteService,
   fetchSearchSourceAndRecordWithInspector,
-  indexPatternService,
+  getIndexPatternService,
   SearchSource,
+  getTimeFilter,
 } from '../../kibana_services';
 import { createExtentFilter } from '../../elasticsearch_geo_utils';
-import { timefilter } from 'ui/timefilter';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
@@ -125,7 +125,7 @@ export class AbstractESSource extends AbstractVectorSource {
       allFilters.push(createExtentFilter(buffer, geoField.name, geoField.type));
     }
     if (isTimeAware) {
-      allFilters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
+      allFilters.push(getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters));
     }
 
     const searchSource = new SearchSource(initialSearchContext);
@@ -208,7 +208,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
 
     try {
-      this.indexPattern = await indexPatternService.get(this.getIndexPatternId());
+      this.indexPattern = await getIndexPatternService().get(this.getIndexPatternId());
       return this.indexPattern;
     } catch (error) {
       throw new Error(
@@ -305,7 +305,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
     if (style.isTimeAware() && (await this.isTimeAware())) {
       searchSource.setField('filter', [
-        timefilter.createFilter(indexPattern, searchFilters.timeFilters),
+        getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters),
       ]);
     }
 
@@ -332,7 +332,7 @@ export class AbstractESSource extends AbstractVectorSource {
   getValueSuggestions = async (field, query) => {
     try {
       const indexPattern = await this.getIndexPattern();
-      return await autocompleteService.getValueSuggestions({
+      return await getAutocompleteService().getValueSuggestions({
         indexPattern,
         field: indexPattern.fields.getByName(field.getRootName()),
         query,

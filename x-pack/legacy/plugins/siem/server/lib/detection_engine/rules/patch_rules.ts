@@ -11,6 +11,7 @@ import { PatchRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './ty
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion, calculateName, calculateInterval } from './utils';
+import { transformRuleToAlertAction } from './transform_actions';
 
 export const patchRules = async ({
   alertsClient,
@@ -47,6 +48,8 @@ export const patchRules = async ({
   note,
   version,
   lists,
+  anomalyThreshold,
+  machineLearningJobId,
 }: PatchRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -54,6 +57,7 @@ export const patchRules = async ({
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
+    actions,
     description,
     falsePositives,
     query,
@@ -73,12 +77,15 @@ export const patchRules = async ({
     severity,
     tags,
     threat,
+    throttle,
     to,
     type,
     references,
     version,
     note,
     lists,
+    anomalyThreshold,
+    machineLearningJobId,
   });
 
   const nextParams = defaults(
@@ -109,6 +116,8 @@ export const patchRules = async ({
       note,
       version: calculatedVersion,
       lists,
+      anomalyThreshold,
+      machineLearningJobId,
     }
   );
 
@@ -116,12 +125,12 @@ export const patchRules = async ({
     id: rule.id,
     data: {
       tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
-      throttle: throttle ?? throttle === null ? null : rule.throttle,
+      throttle: throttle !== undefined ? throttle : rule.throttle,
       name: calculateName({ updatedName: name, originalName: rule.name }),
       schedule: {
         interval: calculateInterval(interval, rule.schedule.interval),
       },
-      actions: actions ?? rule.actions,
+      actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
       params: nextParams,
     },
   });

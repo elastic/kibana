@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertAction } from '../../../../../../../../plugins/alerting/common';
 import { createRulesSchema } from './create_rules_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
-import { ThreatParams, RuleAlertParamsRest, AlertAction } from '../../types';
+import { ThreatParams, RuleAlertParamsRest, RuleAlertAction } from '../../types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('create rules schema', () => {
@@ -1257,16 +1258,16 @@ describe('create rules schema', () => {
       createRulesSchema.validate<
         Partial<
           Omit<RuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'group'>>;
+            actions: Array<Omit<RuleAlertAction, 'group'>>;
           }
         >
       >({
-        actions: [{ id: 'id', actionTypeId: 'actionTypeId', params: {} }],
+        actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
         name: 'some-name',
-        severity: 'junk',
+        severity: 'low',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
@@ -1284,16 +1285,16 @@ describe('create rules schema', () => {
       createRulesSchema.validate<
         Partial<
           Omit<RuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'id'>>;
+            actions: Array<Omit<RuleAlertAction, 'id'>>;
           }
         >
       >({
-        actions: [{ group: 'group', actionTypeId: 'actionTypeId', params: {} }],
+        actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
         name: 'some-name',
-        severity: 'junk',
+        severity: 'low',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
@@ -1306,12 +1307,12 @@ describe('create rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of actions that are missing "actionTypeId"', () => {
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
     expect(
       createRulesSchema.validate<
         Partial<
           Omit<RuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'actionTypeId'>>;
+            actions: Array<Omit<RuleAlertAction, 'action_type_id'>>;
           }
         >
       >({
@@ -1320,7 +1321,7 @@ describe('create rules schema', () => {
         risk_score: 50,
         description: 'some description',
         name: 'some-name',
-        severity: 'junk',
+        severity: 'low',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
@@ -1329,7 +1330,7 @@ describe('create rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "actionTypeId" fails because ["actionTypeId" is required]]]'
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
     );
   });
 
@@ -1338,16 +1339,16 @@ describe('create rules schema', () => {
       createRulesSchema.validate<
         Partial<
           Omit<RuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'params'>>;
+            actions: Array<Omit<RuleAlertAction, 'params'>>;
           }
         >
       >({
-        actions: [{ group: 'group', id: 'id', actionTypeId: 'actionTypeId' }],
+        actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
         name: 'some-name',
-        severity: 'junk',
+        severity: 'low',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
@@ -1360,12 +1361,12 @@ describe('create rules schema', () => {
     );
   });
 
-  test('You cannot send in an array of actions that are including "action_type_id', () => {
+  test('You cannot send in an array of actions that are including "actionTypeId"', () => {
     expect(
       createRulesSchema.validate<
         Partial<
           Omit<RuleAlertParamsRest, 'actions'> & {
-            actions: Array<Omit<AlertAction, 'actionTypeId'> & { action_type_id: string }>;
+            actions: AlertAction[];
           }
         >
       >({
@@ -1373,7 +1374,7 @@ describe('create rules schema', () => {
           {
             group: 'group',
             id: 'id',
-            action_type_id: 'action_type_id',
+            actionTypeId: 'actionTypeId',
             params: {},
           },
         ],
@@ -1381,7 +1382,7 @@ describe('create rules schema', () => {
         risk_score: 50,
         description: 'some description',
         name: 'some-name',
-        severity: 'junk',
+        severity: 'low',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
@@ -1390,7 +1391,7 @@ describe('create rules schema', () => {
         version: 1,
       }).error.message
     ).toEqual(
-      'child "actions" fails because ["actions" at position 0 fails because [child "actionTypeId" fails because ["actionTypeId" is required]]]'
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
     );
   });
 

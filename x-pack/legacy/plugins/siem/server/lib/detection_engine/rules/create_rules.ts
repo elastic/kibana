@@ -9,6 +9,7 @@ import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { hasListsFeature } from '../feature_flags';
+import { transformRuleToAlertAction } from './transform_actions';
 
 export const createRules = async ({
   alertsClient,
@@ -84,7 +85,7 @@ export const createRules = async ({
       },
       schedule: { interval },
       enabled,
-      actions: actions ?? [],
+      actions: actions?.map(transformRuleToAlertAction),
       throttle,
     },
   });

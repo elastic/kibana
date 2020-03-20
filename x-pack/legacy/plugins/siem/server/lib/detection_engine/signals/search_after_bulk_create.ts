@@ -5,8 +5,7 @@
  */
 
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
-import { AlertAction } from '../../../../../../../plugins/alerting/common';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RuleAlertAction } from '../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -21,7 +20,7 @@ interface SearchAfterAndBulkCreateParams {
   inputIndexPattern: string[];
   signalsIndex: string;
   name: string;
-  actions: AlertAction[];
+  actions: RuleAlertAction[];
   createdAt: string;
   createdBy: string;
   updatedBy: string;
