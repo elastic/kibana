@@ -99,7 +99,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <EuiTitle size="xs">
         <h3>
           {i18n.translate('xpack.apm.agentConfig.servicePage.title', {
-            defaultMessage: 'Choose Service'
+            defaultMessage: 'Choose service'
           })}
         </h3>
       </EuiTitle>
