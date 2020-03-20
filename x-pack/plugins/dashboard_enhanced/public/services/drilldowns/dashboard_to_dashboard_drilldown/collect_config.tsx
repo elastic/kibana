@@ -33,21 +33,21 @@ export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
     <DashboardDrilldownConfig
       activeDashboardId={config.dashboardId}
       dashboards={dashboards}
-      currentFilters={config.useCurrentDashboardFilters}
-      keepRange={config.useCurrentDashboardDataRange}
+      currentFilters={config.useCurrentFilters}
+      keepRange={config.useCurrentDateRange}
       onDashboardSelect={dashboardId => {
         onConfig({ ...config, dashboardId });
       }}
       onCurrentFiltersToggle={() =>
         onConfig({
           ...config,
-          useCurrentDashboardFilters: !config.useCurrentDashboardFilters,
+          useCurrentFilters: !config.useCurrentFilters,
         })
       }
       onKeepRangeToggle={() =>
         onConfig({
           ...config,
-          useCurrentDashboardDataRange: !config.useCurrentDashboardDataRange,
+          useCurrentDateRange: !config.useCurrentDateRange,
         })
       }
     />
