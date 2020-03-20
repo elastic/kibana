@@ -23,8 +23,10 @@ import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
 import {
   setFieldFormats,
-  setNotifications,
+  setHttp,
   setIndexPatterns,
+  setNotifications,
+  setOverlays,
   setQueryService,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
@@ -60,12 +62,17 @@ export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDe
   public setup(core: CoreSetup) {}
 
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
-    // This is required for when Angular code uses Field and FieldList.
-    setFieldFormats(data.fieldFormats);
-    setQueryService(data.query);
-    setIndexPatterns(data.indexPatterns);
-    setFieldFormats(data.fieldFormats);
+    /**
+     * We need to call all of the same setters in the legacy world, because instances
+     * set in the new platform `data/public/services` are not accessible in legacy.
+     * This can cause legacy code which relies on services utilizing these to fail.
+     */
+    setHttp(core.http);
     setNotifications(core.notifications);
+    setOverlays(core.overlays);
+    setFieldFormats(data.fieldFormats);
+    setIndexPatterns(data.indexPatterns);
+    setQueryService(data.query);
 
     return {
       search: this.search.start(core),
