@@ -5,11 +5,8 @@
  */
 
 import { LevelLogger } from '../../../../server/lib';
-import { ReportingConfigType } from '../../../../server/types';
 import { ConditionalHeaders, ElementPosition } from '../../../../types';
 import { LayoutInstance } from '../../layouts/layout';
-
-export type CaptureConfig = ReportingConfigType['capture'];
 
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;

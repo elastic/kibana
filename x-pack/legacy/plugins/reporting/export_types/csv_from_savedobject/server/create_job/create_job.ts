@@ -32,7 +32,7 @@ export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
 >> = async function createJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
   const config = await reporting.getConfig();
-  const crypto = cryptoFactory(config);
+  const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(

@@ -35,7 +35,7 @@ export async function createQueueFactory<JobParamsType, JobPayloadType>(
 
   if (queueConfig.pollEnabled) {
     // create workers to poll the index for idle jobs waiting to be claimed and executed
-    const createWorker = await createWorkerFactory(reporting, logger);
+    const createWorker = await createWorkerFactory(reporting, config, logger);
     await createWorker(queue);
   } else {
     logger.info(

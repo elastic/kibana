@@ -28,8 +28,10 @@ const mockLoggerFactory = {
   })),
 };
 const getMockLogger = () => new LevelLogger(mockLoggerFactory);
-const encryptHeaders = async (config, headers) => {
-  const crypto = cryptoFactory(config);
+
+const mockEncryptionKey = 'abcabcsecuresecret';
+const encryptHeaders = async headers => {
+  const crypto = cryptoFactory(mockEncryptionKey);
   return await crypto.encrypt(headers);
 };
 
@@ -40,7 +42,7 @@ beforeEach(async () => {
     'server.basePath': '/sbp',
   };
   const reportingConfig = {
-    encryptionKey: 'testencryptionkey',
+    encryptionKey: mockEncryptionKey,
     'kibanaServer.hostname': 'localhost',
     'kibanaServer.port': 5601,
     'kibanaServer.protocol': 'http',
@@ -69,7 +71,7 @@ beforeEach(async () => {
 afterEach(() => generatePngObservableFactory.mockReset());
 
 test(`passes browserTimezone to generatePng`, async () => {
-  const encryptedHeaders = await encryptHeaders(mockReportingConfig, {});
+  const encryptedHeaders = await encryptHeaders({});
 
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
@@ -93,7 +95,7 @@ test(`passes browserTimezone to generatePng`, async () => {
 
 test(`returns content_type of application/png`, async () => {
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
-  const encryptedHeaders = await encryptHeaders(mockReportingConfig, {});
+  const encryptedHeaders = await encryptHeaders({});
 
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
@@ -113,7 +115,7 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   generatePngObservable.mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
-  const encryptedHeaders = await encryptHeaders(mockReportingConfig, {});
+  const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pngJobId',
     { relativeUrl: '/app/kibana#/something', timeRange: {}, headers: encryptedHeaders },

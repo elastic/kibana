@@ -5,9 +5,7 @@
  */
 
 import nodeCrypto from '@elastic/node-crypto';
-import { ReportingConfig } from '../types';
 
-export function cryptoFactory(config: ReportingConfig) {
-  const encryptionKey = config.get('encryptionKey');
+export function cryptoFactory(encryptionKey: string | undefined) {
   return nodeCrypto({ encryptionKey });
 }

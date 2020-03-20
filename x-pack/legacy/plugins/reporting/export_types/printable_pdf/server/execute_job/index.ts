@@ -26,14 +26,17 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
   parentLogger: Logger
 ) {
   const config = await reporting.getConfig();
+  const captureConfig = config.get('capture');
+  const encryptionKey = config.get('encryptionKey');
+
   const browserDriverFactory = await reporting.getBrowserDriverFactory();
-  const generatePdfObservable = generatePdfObservableFactory(config, browserDriverFactory);
+  const generatePdfObservable = generatePdfObservableFactory(captureConfig, browserDriverFactory);
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
   return function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders({ config, job, logger })),
+      mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
       map(filteredHeaders => getConditionalHeaders({ config, job, filteredHeaders })),
       mergeMap(conditionalHeaders => getCustomLogo({ reporting, config, job, conditionalHeaders })),

@@ -28,8 +28,10 @@ const mockLoggerFactory = {
   })),
 };
 const getMockLogger = () => new LevelLogger(mockLoggerFactory);
-const encryptHeaders = async (config, headers) => {
-  const crypto = cryptoFactory(config);
+
+const mockEncryptionKey = 'testencryptionkey';
+const encryptHeaders = async headers => {
+  const crypto = cryptoFactory(mockEncryptionKey);
   return await crypto.encrypt(headers);
 };
 
@@ -40,7 +42,7 @@ beforeEach(async () => {
     'server.basePath': '/sbp',
   };
   const reportingConfig = {
-    encryptionKey: 'testencryptionkey',
+    encryptionKey: mockEncryptionKey,
     'kibanaServer.hostname': 'localhost',
     'kibanaServer.port': 5601,
     'kibanaServer.protocol': 'http',
@@ -70,7 +72,7 @@ afterEach(() => generatePdfObservableFactory.mockReset());
 
 test(`returns content_type of application/pdf`, async () => {
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
-  const encryptedHeaders = await encryptHeaders(mockReportingConfig, {});
+  const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
@@ -90,7 +92,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   generatePdfObservable.mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
-  const encryptedHeaders = await encryptHeaders(mockReportingConfig, {});
+  const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pdfJobId',
     { relativeUrls: [], timeRange: {}, headers: encryptedHeaders },

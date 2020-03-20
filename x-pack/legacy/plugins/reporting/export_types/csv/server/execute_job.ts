@@ -23,7 +23,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     reporting.getConfig(),
     reporting.getElasticsearchService(),
   ]);
-  const crypto = cryptoFactory(config);
+  const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.kbnConfig.get('server', 'basePath');
 

@@ -8,7 +8,7 @@ import path from 'path';
 import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { HeadlessChromiumDriver } from '../../../server/browsers';
 import { LevelLogger } from '../../../server/lib';
-import { ReportingConfig } from '../../../server/types';
+import { ReportingConfigType } from '../../../server/core';
 import { LayoutTypes } from '../constants';
 import { getDefaultLayoutSelectors, Layout, LayoutSelectorDictionary, Size } from './layout';
 import { CaptureConfig } from './types';
@@ -21,9 +21,9 @@ export class PrintLayout extends Layout {
   public readonly groupCount = 2;
   private captureConfig: CaptureConfig;
 
-  constructor(config: ReportingConfig) {
+  constructor(captureConfig: ReportingConfigType['capture']) {
     super(LayoutTypes.PRINT);
-    this.captureConfig = config.get('capture');
+    this.captureConfig = captureConfig;
   }
 
   public getCssOverridesPath() {

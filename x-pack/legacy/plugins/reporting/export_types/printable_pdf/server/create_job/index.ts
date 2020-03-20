@@ -19,7 +19,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
 >> = async function createJobFactoryFn(reporting: ReportingCore) {
   const config = await reporting.getConfig();
-  const crypto = cryptoFactory(config);
+  const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJobFn(
     { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,

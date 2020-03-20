@@ -23,7 +23,7 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
 >> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
   const config = await reporting.getConfig();
-  const crypto = cryptoFactory(config);
+  const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
   const generateCsv = await createGenerateCsv(reporting, parentLogger);
 

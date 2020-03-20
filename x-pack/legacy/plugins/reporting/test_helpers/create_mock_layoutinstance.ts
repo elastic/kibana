@@ -7,10 +7,10 @@
 import { LayoutTypes } from '../export_types/common/constants';
 import { createLayout } from '../export_types/common/layouts';
 import { LayoutInstance } from '../export_types/common/layouts/layout';
-import { ReportingConfig } from '../server/types';
+import { CaptureConfig } from '../server/types';
 
-export const createMockLayoutInstance = (config: ReportingConfig) => {
-  const mockLayout = createLayout(config, {
+export const createMockLayoutInstance = (captureConfig: CaptureConfig) => {
+  const mockLayout = createLayout(captureConfig, {
     id: LayoutTypes.PRESERVE_LAYOUT,
     dimensions: { height: 12, width: 12 },
   }) as LayoutInstance;

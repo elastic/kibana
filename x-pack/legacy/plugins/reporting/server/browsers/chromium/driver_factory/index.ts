@@ -20,7 +20,7 @@ import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { BROWSER_TYPE } from '../../../../common/constants';
-import { ReportingConfigType } from '../../../../server/types';
+import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
@@ -29,7 +29,6 @@ import { puppeteerLaunch } from '../puppeteer';
 import { args } from './args';
 
 type binaryPath = string;
-type CaptureConfig = ReportingConfigType['capture'];
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 type ViewportConfig = CaptureConfig['viewport'];
 

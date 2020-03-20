@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReportingConfigType } from '../../../../server/types';
+import { CaptureConfig } from '../../../../server/types';
 
-type ViewportConfig = ReportingConfigType['capture']['viewport'];
-type BrowserConfig = ReportingConfigType['capture']['browser']['chromium'];
+type ViewportConfig = CaptureConfig['viewport'];
+type BrowserConfig = CaptureConfig['browser']['chromium'];
 
 interface LaunchArgs {
   userDataDir: BrowserConfig['userDataDir'];

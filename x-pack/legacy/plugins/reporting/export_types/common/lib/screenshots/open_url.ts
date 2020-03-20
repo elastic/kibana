@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
+import { CaptureConfig } from '../../../../server/types';
 import { ConditionalHeaders } from '../../../../types';
 import { PAGELOAD_SELECTOR } from '../../constants';
-import { CaptureConfig } from './types';
 
 export const openUrl = async (
   captureConfig: CaptureConfig,

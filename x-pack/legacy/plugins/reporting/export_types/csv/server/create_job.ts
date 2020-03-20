@@ -18,7 +18,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsDiscoverCsv
 >> = async function createJobFactoryFn(reporting: ReportingCore) {
   const config = await reporting.getConfig();
-  const crypto = cryptoFactory(config);
+  const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJob(
     jobParams: JobParamsDiscoverCsv,

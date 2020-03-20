@@ -58,7 +58,7 @@ export class ReportingPlugin
     setFieldFormats(plugins.data.fieldFormats);
 
     const config = await reportingCore.getConfig();
-    logConfiguration(config, this.logger);
+    logConfiguration(config.get('capture'), this.logger);
 
     return {};
   }

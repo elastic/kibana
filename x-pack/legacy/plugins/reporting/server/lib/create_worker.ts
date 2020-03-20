@@ -6,6 +6,7 @@
 
 import { CancellationToken } from '../../common/cancellation_token';
 import { PLUGIN_ID } from '../../common/constants';
+import { ReportingConfig } from '../../server/types';
 import {
   ESQueueInstance,
   ESQueueWorkerExecuteFn,
@@ -20,10 +21,13 @@ import { ReportingCore } from '../core';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 
-export async function createWorkerFactory<JobParamsType>(reporting: ReportingCore, logger: Logger) {
+export async function createWorkerFactory<JobParamsType>(
+  reporting: ReportingCore,
+  config: ReportingConfig,
+  logger: Logger
+) {
   type JobDocPayloadType = JobDocPayload<JobParamsType>;
 
-  const config = await reporting.getConfig();
   const queueConfig = config.get('queue');
   const kibanaName = config.kbnConfig.get('server', 'name');
   const kibanaId = config.kbnConfig.get('server', 'uuid');

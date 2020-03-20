@@ -7,19 +7,22 @@
 import getosSync, { LinuxOs } from 'getos';
 import { promisify } from 'util';
 import { BROWSER_TYPE } from './common/constants';
-import { ReportingConfig } from './server';
+import { CaptureConfig } from './server/types';
 import { Logger } from './types';
 
 const getos = promisify(getosSync);
 
-export async function logConfiguration(config: ReportingConfig, logger: Logger) {
-  const browserType = config.get('capture', 'browser', 'type');
-  logger.debug(`Browser type: ${browserType}`);
+export async function logConfiguration(captureConfig: CaptureConfig, logger: Logger) {
+  const {
+    browser: {
+      type: browserType,
+      chromium: { disableSandbox },
+    },
+  } = captureConfig;
 
+  logger.debug(`Browser type: ${browserType}`);
   if (browserType === BROWSER_TYPE) {
-    logger.debug(
-      `Chromium sandbox disabled: ${config.get('capture', 'browser', 'chromium', 'disableSandbox')}`
-    );
+    logger.debug(`Chromium sandbox disabled: ${disableSandbox}`);
   }
 
   const os = await getos();

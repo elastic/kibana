@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReportingConfigType } from '../../../server/types';
+import { CaptureConfig } from '../../../server/types';
 import { LevelLogger } from '../../lib';
 import { HeadlessChromiumDriverFactory } from './driver_factory';
 
@@ -13,7 +13,7 @@ export { paths } from './paths';
 export async function createDriverFactory(
   binaryPath: string,
   logger: LevelLogger,
-  captureConfig: ReportingConfigType['capture']
+  captureConfig: CaptureConfig
 ): Promise<HeadlessChromiumDriverFactory> {
   return new HeadlessChromiumDriverFactory(binaryPath, logger, captureConfig);
 }

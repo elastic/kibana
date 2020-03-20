@@ -16,13 +16,12 @@ jest.mock('../../../../server/browsers/chromium/puppeteer', () => ({
 }));
 
 import * as Rx from 'rxjs';
-import { get } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
 import { LevelLogger } from '../../../../server/lib';
 import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../../../test_helpers';
 import { ConditionalHeaders, HeadlessChromiumDriver } from '../../../../types';
-import { ReportingConfig } from '../../../../server/types';
+import { CaptureConfig } from '../../../../server/types';
 import { screenshotsObservableFactory } from './observable';
 import { ElementsPositionAndAttribute } from './types';
 
@@ -32,10 +31,7 @@ import { ElementsPositionAndAttribute } from './types';
 const mockLogger = jest.fn(loggingServiceMock.create);
 const logger = new LevelLogger(mockLogger());
 
-const mockConfig = {
-  get: (key: string) => get({ capture: { timeouts: { openUrl: 13 } } }, key, null),
-  kbnConfig: { get: jest.fn() },
-} as ReportingConfig;
+const mockConfig = { timeouts: { openUrl: 13 } } as CaptureConfig;
 const mockLayout = createMockLayoutInstance(mockConfig);
 
 /*

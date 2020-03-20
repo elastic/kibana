@@ -19,7 +19,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPNG
 >> = async function createJobFactoryFn(reporting: ReportingCore) {
   const config = await reporting.getConfig();
-  const crypto = cryptoFactory(config);
+  const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJob(
     { objectType, title, relativeUrl, browserTimezone, layout }: JobParamsPNG,

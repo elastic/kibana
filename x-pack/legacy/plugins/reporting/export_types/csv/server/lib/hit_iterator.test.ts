@@ -7,11 +7,9 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { CancellationToken } from '../../../../common/cancellation_token';
-import { ReportingConfigType } from '../../../../server/types';
+import { ScrollConfig } from '../../../../server/types';
 import { Logger } from '../../../../types';
 import { createHitIterator } from './hit_iterator';
-
-type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 const mockLogger = {
   error: new Function(),

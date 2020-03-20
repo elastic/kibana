@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReportingConfig } from '../../../server/types';
+import { CaptureConfig } from '../../../server/types';
 import { LayoutTypes } from '../constants';
 import { Layout, LayoutParams } from './layout';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';
 
-export function createLayout(config: ReportingConfig, layoutParams?: LayoutParams): Layout {
+export function createLayout(captureConfig: CaptureConfig, layoutParams?: LayoutParams): Layout {
   if (layoutParams && layoutParams.id === LayoutTypes.PRESERVE_LAYOUT) {
     return new PreserveLayout(layoutParams.dimensions);
   }
 
   // this is the default because some jobs won't have anything specified
-  return new PrintLayout(config);
+  return new PrintLayout(captureConfig);
 }

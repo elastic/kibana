@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SearchParams, SearchResponse } from 'elasticsearch';
-import { ReportingConfigType } from '../../../../server/types';
+import { ScrollConfig } from '../../../../server/types';
 import { CancellationToken, Logger } from '../../../../types';
 
 async function parseResponse(request: SearchResponse<any>) {
@@ -37,7 +37,7 @@ async function parseResponse(request: SearchResponse<any>) {
 
 export function createHitIterator(logger: Logger) {
   return async function* hitIterator(
-    scrollSettings: ReportingConfigType['csv']['scroll'],
+    scrollSettings: ScrollConfig,
     callEndpoint: Function,
     searchRequest: SearchParams,
     cancellationToken: CancellationToken

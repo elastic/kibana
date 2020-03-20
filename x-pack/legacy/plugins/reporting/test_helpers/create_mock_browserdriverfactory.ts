@@ -10,10 +10,8 @@ import * as contexts from '../export_types/common/lib/screenshots/constants';
 import { ElementsPositionAndAttribute } from '../export_types/common/lib/screenshots/types';
 import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../server/browsers';
 import { createDriverFactory } from '../server/browsers/chromium';
-import { ReportingConfigType } from '../server/types';
+import { CaptureConfig } from '../server/types';
 import { Logger } from '../types';
-
-type CaptureConfig = ReportingConfigType['capture'];
 
 interface CreateMockBrowserDriverFactoryOpts {
   evaluate: jest.Mock<Promise<any>, any[]>;

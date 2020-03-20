@@ -6,7 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
-import { ReportingConfig } from '../../../../server';
+import { CaptureConfig } from '../../../../server/types';
 import { HeadlessChromiumDriverFactory } from '../../../../types';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
@@ -19,11 +19,9 @@ import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
 export function screenshotsObservableFactory(
-  config: ReportingConfig,
+  captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory
 ) {
-  const captureConfig = config.get('capture');
-
   return function screenshotsObservable({
     logger,
     urls,

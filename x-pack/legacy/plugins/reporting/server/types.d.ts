@@ -11,7 +11,7 @@ import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { ReportingPluginSpecOptions } from '../types';
-import { ReportingConfig } from './core';
+import { ReportingConfig, ReportingConfigType } from './core';
 
 export interface ReportingSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
@@ -40,4 +40,7 @@ export interface LegacySetup {
   route: Legacy.Server['route'];
 }
 
-export { ReportingConfig, ReportingConfigType, ReportingCore } from './core';
+export { ReportingConfig, ReportingCore } from './core';
+
+export type CaptureConfig = ReportingConfigType['capture'];
+export type ScrollConfig = ReportingConfigType['csv']['scroll'];

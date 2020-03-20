@@ -5,7 +5,7 @@
  */
 
 import { CancellationToken } from '../../common/cancellation_token';
-import { ReportingConfigType } from '../../server/types';
+import { ScrollConfig } from '../../server/types';
 import { JobDocPayload, JobParamPostPayload } from '../../types';
 
 interface DocValueField {
@@ -107,7 +107,7 @@ export interface GenerateCsvParams {
     quoteValues: boolean;
     timezone: string | null;
     maxSizeBytes: number;
-    scroll: ReportingConfigType['csv']['scroll'];
+    scroll: ScrollConfig;
     checkForFormulas?: boolean;
   };
 }
