@@ -6,15 +6,6 @@ kibanaLibrary.load()
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
   githubPr.withDefaultPrComments {
     catchError {
-      node('linux && immutable') {
-        for (def i = 0; i < 10; i ++) {
-          catchError {
-            sh(script: "date; exit 1", label: "Test Script #${i+1}")
-          }
-        }
-      }
-      error "Fail the build"
-
       retryable.enable()
       parallel([
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
