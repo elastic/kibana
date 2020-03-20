@@ -11,7 +11,7 @@ import { ml } from '../../../../services/ml_api_service';
 import {
   NUMBER_OF_CATEGORY_EXAMPLES,
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
-} from '../../../../../../common/constants/new_job';
+} from '../../../../../../common/constants/categorization_job';
 
 export class CategorizationExamplesLoader {
   private _jobCreator: CategorizationJobCreator;

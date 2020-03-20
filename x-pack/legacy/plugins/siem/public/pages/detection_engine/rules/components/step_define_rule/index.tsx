@@ -178,7 +178,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
-          <UseField path="ruleType" component={SelectRuleType} />
+          <UseField
+            path="ruleType"
+            component={SelectRuleType}
+            componentProps={{
+              isReadOnly: isUpdateView,
+            }}
+          />
           <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'none' : 'flex' }}>
             <>
               <CommonUseField

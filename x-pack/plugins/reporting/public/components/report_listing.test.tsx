@@ -5,11 +5,14 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { ReportListing } from './report_listing';
 import { Observable } from 'rxjs';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ILicense } from '../../../licensing/public';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+
+jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'generated-id');
+
+import { ReportListing } from './report_listing';
 
 const reportingAPIClient = {
   list: () =>
