@@ -11,7 +11,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { Results } from '../../../../../common/results_loader';
 import { ml } from '../../../../../../../services/ml_api_service';
-import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../../../../common/constants/new_job';
+import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../../../../common/constants/categorization_job';
 
 export const TopCategories: FC = () => {
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
