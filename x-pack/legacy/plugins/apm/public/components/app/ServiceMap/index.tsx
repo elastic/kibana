@@ -28,33 +28,27 @@ interface ServiceMapProps {
 export function ServiceMap({ serviceName }: ServiceMapProps) {
   const license = useLicense();
   const { urlParams, uiFilters } = useUrlParams();
-  const params = useDeepObjectIdentity({
-    start: urlParams.start,
-    end: urlParams.end,
-    environment: urlParams.environment,
-    serviceName,
-    uiFilters: {
-      ...uiFilters,
-      environment: undefined
-    }
-  });
 
   const { data } = useFetcher(() => {
-    const { start, end } = params;
+    const { start, end, environment } = urlParams;
     if (start && end) {
       return callApmApi({
         pathname: '/api/apm/service-map',
         params: {
           query: {
-            ...params,
             start,
             end,
-            uiFilters: JSON.stringify(params.uiFilters)
+            environment,
+            serviceName,
+            uiFilters: JSON.stringify({
+              ...uiFilters,
+              environment: undefined
+            })
           }
         }
       });
     }
-  }, [params]);
+  }, [serviceName, uiFilters, urlParams]);
 
   const { ref, height, width } = useRefDimensions();
 
