@@ -16,11 +16,11 @@ import {
   ES_GEO_GRID,
   LAYER_TYPE,
   AGG_TYPE,
-  SOURCE_DATA_ID_ORIGIN,
   RENDER_AS,
   STYLE_TYPE,
   VECTOR_STYLES,
   LAYER_STYLE_TYPE,
+  FIELD_ORIGIN,
 } from '../../common/constants';
 import { ESGeoGridSource } from './sources/es_geo_grid_source/es_geo_grid_source';
 // @ts-ignore
@@ -79,7 +79,7 @@ function getClusterStyleDescriptor(
           ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]!.options,
           field: {
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
         },
       },
@@ -89,7 +89,7 @@ function getClusterStyleDescriptor(
           ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
           field: {
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
         },
       },
