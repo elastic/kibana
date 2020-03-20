@@ -18,6 +18,7 @@ import * as saveCustomLink from '../CustomLinkFlyout/saveCustomLink';
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 import { License } from '../../../../../../../../../../plugins/licensing/common/license';
 import { LicenseContext } from '../../../../../../context/LicenseContext';
+import { ApmPluginContextValue } from '../../../../../../context/ApmPluginContext';
 
 const data = [
   {
@@ -65,9 +66,20 @@ describe('CustomLink', () => {
       expectTextsInDocument(component, ['No links found.']);
     });
     it('opens flyout when click to create new link', () => {
+      const contextMock = ({
+        core: {
+          http: { basePath: { prepend: () => {} } },
+          notifications: {
+            toasts: {
+              addWarning: () => {},
+              addDanger: () => {}
+            }
+          }
+        }
+      } as unknown) as ApmPluginContextValue;
       const { queryByText, getByText } = render(
         <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper>
+          <MockApmPluginContextWrapper value={contextMock}>
             <CustomLinkOverview />
           </MockApmPluginContextWrapper>
         </LicenseContext.Provider>

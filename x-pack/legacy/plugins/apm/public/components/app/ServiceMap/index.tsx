@@ -22,6 +22,7 @@ import { cytoscapeDivStyle } from './cytoscapeOptions';
 import { EmptyBanner } from './EmptyBanner';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
+import { BetaBadge } from './BetaBadge';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -87,9 +88,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         grow={false}
         style={{ width: 600, textAlign: 'center' as const }}
       >
-        <EuiPanel grow={false} hasShadow={true} paddingSize="none">
-          <LicensePrompt text={invalidLicenseMessage} />
-        </EuiPanel>
+        <LicensePrompt text={invalidLicenseMessage} showBetaBadge />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibanaUrl } from '../../../hooks/useKibanaUrl';
 
 interface Props {
   text: string;
+  showBetaBadge?: boolean;
 }
 
-export const LicensePrompt = ({ text }: Props) => {
+export const LicensePrompt = ({ text, showBetaBadge = false }: Props) => {
   const licensePageUrl = useKibanaUrl(
     '/app/kibana',
     '/management/elasticsearch/license_management/home'
   );
-  return (
+
+  const renderLicenseBody = (
     <EuiEmptyPrompt
       iconType="iInCircle"
       iconColor="subdued"
@@ -39,4 +41,23 @@ export const LicensePrompt = ({ text }: Props) => {
       }
     />
   );
+
+  const renderWithBetaBadge = (
+    <EuiPanel
+      betaBadgeLabel={i18n.translate('xpack.apm.license.betaBadge', {
+        defaultMessage: 'Beta'
+      })}
+      betaBadgeTooltipContent={i18n.translate(
+        'xpack.apm.license.betaTooltipMessage',
+        {
+          defaultMessage:
+            'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.'
+        }
+      )}
+    >
+      {renderLicenseBody}
+    </EuiPanel>
+  );
+
+  return <>{showBetaBadge ? renderWithBetaBadge : renderLicenseBody}</>;
 };
