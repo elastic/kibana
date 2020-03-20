@@ -280,6 +280,17 @@ export const COLUMN_LAST_LOOKBACK_DATE = i18n.translate(
   }
 );
 
+export const RULES_TAB = i18n.translate('xpack.siem.detectionEngine.rules.allRules.tabs.rules', {
+  defaultMessage: 'Rules',
+});
+
+export const MONITORING_TAB = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.tabs.monitoring',
+  {
+    defaultMessage: 'Monitoring',
+  }
+);
+
 export const CUSTOM_RULES = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.filters.customRulesTitle',
   {

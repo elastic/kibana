@@ -93,14 +93,12 @@ enum AllRulesTabs {
 const allRulesTabs = [
   {
     id: AllRulesTabs.rules,
-    // name: detectionI18n.SIGNAL,
-    name: 'Rules',
+    name: i18n.RULES_TAB,
     disabled: false,
   },
   {
     id: AllRulesTabs.monitoring,
-    // name: i18n.FAILURE_HISTORY_TAB,
-    name: 'Monitoring',
+    name: i18n.MONITORING_TAB,
     disabled: false,
   },
 ];
