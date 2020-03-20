@@ -10,10 +10,7 @@ import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import {
-  getIndexPatternService,
-  getIndexPatternSelectComponent,
-} from '../../../kibana_services';
+import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
 import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
