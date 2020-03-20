@@ -49,7 +49,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.alerts.length).to.eql(defaultPageSize);
         expect(body.request_page_size).to.eql(defaultPageSize);
         /**
-         * No page_index was specified. It should return page 0.
+         * No page_index was speciied. It should return page 0.
          */
         expect(body.request_page_index).to.eql(0);
         /**
@@ -155,7 +155,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.alerts.length).to.eql(0);
       });
 
-      it('should return no results when `after` is requested past end of last page', async () => {
+      it('should return no results when `after` is requested past end of last page, descending', async () => {
         const { body } = await supertest
           .get(
             `/api/endpoint/alerts?${nextPrevPrefix}&after=1584044338612&after=6d75d498-3cca-45ad-a304-525b95ae0412`
@@ -165,16 +165,69 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.alerts.length).to.eql(0);
       });
 
-      it('should return 400 when using `before` by custom sort parameter', async () => {
-        await supertest
+      it('alerts api should return data using `before` by custom sort parameter, descending', async () => {
+        const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=process.pid&before=1&before=66008e21-2493-4b15-a937-939ea228064a`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=process.name&before=malware%20writer&before=4d7afd81-26ec-47c0-9741-ae16d331f73d`
           )
           .set('kbn-xsrf', 'xxx')
-          .expect(400);
+          .expect(200);
+        let valid: boolean = true;
+        body.alerts.forEach(alert => {
+          if (alert.process?.name > 'malware writer') {
+            valid = false;
+          }
+        });
+        expect(valid).to.eql(true);
       });
 
-      it('should return data using `after` by custom sort parameter', async () => {
+      it('alerts api should return data using `before` on undefined primary sort values by custom sort parameter, descending', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&order=desc&sort=process.parent.entity_id&before=&before=504dc351-5325-45ad-b406-8e4b28c63e2d&empty_string_is_undefined=true`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        let lastSeen: string = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
+        let valid: boolean = true;
+        body.alerts.forEach(alert => {
+          const entityId = alert.process?.parent?.entity_id;
+          if (entityId === undefined && alert.event.id > '504dc351-5325-45ad-b406-8e4b28c63e2d') {
+            valid = false;
+          }
+          if (entityId > lastSeen) {
+            valid = false;
+          } else {
+            lastSeen = entityId;
+          }
+        });
+        expect(valid).to.eql(true);
+      });
+
+      it('alerts api should return data using `before` on undefined primary sort values by custom sort parameter, ascending', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&page_size=25&order=asc&sort=process.parent.entity_id&before=&before=504dc351-5325-45ad-b406-8e4b28c63e2d&empty_string_is_undefined=true`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        let lastSeen: string = '1';
+        let valid: boolean = true;
+        body.alerts.forEach(alert => {
+          const entityId = alert.process?.parent?.entity_id;
+          if (entityId === undefined && alert.event.id < '504dc351-5325-45ad-b406-8e4b28c63e2d') {
+            valid = false;
+          }
+          if (entityId < lastSeen) {
+            valid = false;
+          } else {
+            lastSeen = entityId;
+          }
+        });
+        expect(valid).to.eql(true);
+      });
+
+      it('should return data using `after` by custom sort parameter, descending', async () => {
         const { body } = await supertest
           .get(
             `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=process.pid&after=3&after=66008e21-2493-4b15-a937-939ea228064a`
@@ -183,6 +236,58 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.alerts.length).to.eql(10);
         expect(body.alerts[0].process.pid).to.eql(2);
+      });
+
+      it('alerts api should return data using `after` on undefined primary sort values by custom sort parameter, descending', async () => {
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&sort=process.parent.entity_id&order=desc&after=&after=504dc351-5325-45ad-b406-8e4b28c63e2d&empty_string_is_undefined=true`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        let lastSeen: string = 'zzzzzzzzzzzzzzzzzzzzzzzzzzz';
+        let valid: boolean = true;
+        body.alerts.forEach(alert => {
+          const entityId = alert.process?.parent?.entity_id;
+          if (entityId === undefined && alert.event.id < '504dc351-5325-45ad-b406-8e4b28c63e2d') {
+            valid = false;
+          }
+          if (entityId > lastSeen) {
+            valid = false;
+          } else {
+            lastSeen = entityId;
+          }
+        });
+        expect(valid).to.eql(true);
+      });
+
+      it('alerts api should return data using `after` on undefined primary sort values by custom sort parameter, ascending', async () => {
+        const args: AlertListRequestQuery = {
+          sort: 'process.thread.id',
+          order: 'asc',
+          after: ['', 'b5b16e38-371d-43af-bd35-72da230cbde5'],
+          empty_string_is_undefined: true,
+        };
+        const { body } = await supertest
+          .get(
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&sort=process.parent.entity_id&order=asc&after=&after=504dc351-5325-45ad-b406-8e4b28c63e2d&empty_string_is_undefined=true`
+          )
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        let lastSeen: string = '1';
+        let valid: boolean = true;
+        body.alerts.forEach(alert => {
+          const entityId = alert.process?.parent?.entity_id;
+          if (entityId === undefined && alert.event.id < '504dc351-5325-45ad-b406-8e4b28c63e2d') {
+            valid = false;
+          }
+          if (entityId < lastSeen) {
+            valid = false;
+          } else {
+            lastSeen = entityId;
+          }
+        });
+        expect(valid).to.eql(true);
       });
 
       it('should filter results of alert data using rison-encoded filters', async () => {
