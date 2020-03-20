@@ -6,6 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
@@ -15,11 +16,8 @@ import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 import { withKibana, WithKibanaProps } from '../../../lib/kibana';
 
-import {
-  GetHostOverviewQuery,
-  GetHostOverviewQueryComponent,
-  HostItem,
-} from '../../../graphql/types';
+import { HostOverviewQuery } from './host_overview.gql_query';
+import { GetHostOverviewQuery, HostItem } from '../../../graphql/types';
 
 const ID = 'hostOverviewQuery';
 
@@ -38,7 +36,7 @@ export interface HostOverviewReduxProps {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children: (args: HostOverviewArgs) => React.ReactElement;
+  children: (args: HostOverviewArgs) => React.ReactNode;
   hostName: string;
   startDate: number;
   endDate: number;
@@ -64,7 +62,8 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
       endDate,
     } = this.props;
     return (
-      <GetHostOverviewQueryComponent
+      <Query<GetHostOverviewQuery.Query, GetHostOverviewQuery.Variables>
+        query={HostOverviewQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
@@ -92,7 +91,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
             endDate,
           });
         }}
-      </GetHostOverviewQueryComponent>
+      </Query>
     );
   }
 }

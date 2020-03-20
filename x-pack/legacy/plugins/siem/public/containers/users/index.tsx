@@ -6,22 +6,19 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 import { compose } from 'redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import {
-  GetUsersQuery,
-  FlowTarget,
-  PageInfoPaginated,
-  UsersEdges,
-  GetUsersQueryComponent,
-} from '../../graphql/types';
+import { GetUsersQuery, FlowTarget, PageInfoPaginated, UsersEdges } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
+
+import { usersQuery } from './index.gql_query';
 
 const ID = 'usersQuery';
 
@@ -38,7 +35,7 @@ export interface UsersArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: UsersArgs) => React.ReactElement;
+  children: (args: UsersArgs) => React.ReactNode;
   flowTarget: FlowTarget;
   ip: string;
   type: networkModel.NetworkType;
@@ -84,7 +81,8 @@ class UsersComponentQuery extends QueryTemplatePaginated<
       },
     };
     return (
-      <GetUsersQueryComponent
+      <Query<GetUsersQuery.Query, GetUsersQuery.Variables>
+        query={usersQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
@@ -126,7 +124,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
             users,
           });
         }}
-      </GetUsersQueryComponent>
+      </Query>
     );
   }
 }

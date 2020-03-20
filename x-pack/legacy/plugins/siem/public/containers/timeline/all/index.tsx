@@ -3,24 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React, { useCallback } from 'react';
 import { getOr } from 'lodash/fp';
-import React from 'react';
 import memoizeOne from 'memoize-one';
 
+import { Query } from 'react-apollo';
+
+import { ApolloQueryResult } from 'apollo-client';
 import { OpenTimelineResult } from '../../../components/open_timeline/types';
 import {
   GetAllTimeline,
-  GetAllTimelineComponent,
   PageInfoTimeline,
   SortTimeline,
   TimelineResult,
 } from '../../../graphql/types';
+import { allTimelinesQuery } from './index.gql_query';
 
 export interface AllTimelinesArgs {
   timelines: OpenTimelineResult[];
   loading: boolean;
   totalCount: number;
+  refetch: () => void;
 }
 
 export interface AllTimelinesVariables {
@@ -31,8 +34,12 @@ export interface AllTimelinesVariables {
 }
 
 interface OwnProps extends AllTimelinesVariables {
-  children?: (args: AllTimelinesArgs) => React.ReactElement;
+  children?: (args: AllTimelinesArgs) => React.ReactNode;
 }
+
+type Refetch = (
+  variables: GetAllTimeline.Variables | undefined
+) => Promise<ApolloQueryResult<GetAllTimeline.Query>>;
 
 const getAllTimeline = memoizeOne(
   (variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
@@ -82,15 +89,19 @@ const AllTimelinesQueryComponent: React.FC<OwnProps> = ({
     search,
     sort,
   };
+  const handleRefetch = useCallback((refetch: Refetch) => refetch(variables), [variables]);
+
   return (
-    <GetAllTimelineComponent
+    <Query<GetAllTimeline.Query, GetAllTimeline.Variables>
+      query={allTimelinesQuery}
       fetchPolicy="network-only"
       notifyOnNetworkStatusChange
       variables={variables}
     >
-      {({ data, loading }) =>
+      {({ data, loading, refetch }) =>
         children!({
           loading,
+          refetch: handleRefetch.bind(null, refetch),
           totalCount: getOr(0, 'getAllTimeline.totalCount', data),
           timelines: getAllTimeline(
             JSON.stringify(variables),
@@ -98,7 +109,7 @@ const AllTimelinesQueryComponent: React.FC<OwnProps> = ({
           ),
         })
       }
-    </GetAllTimelineComponent>
+    </Query>
   );
 };
 

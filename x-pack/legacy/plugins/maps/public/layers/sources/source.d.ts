@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ISourceDescriptor } from '../../../common/descriptor_types';
+import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layer';
 
 export interface ISource {
   createDefaultLayer(): ILayer;
   getDisplayName(): Promise<string>;
+  destroy(): void;
+  getInspectorAdapters(): object;
 }
 
 export class AbstractSource implements ISource {
-  constructor(sourceDescriptor: ISourceDescriptor, inspectorAdapters: object);
+  constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object);
   createDefaultLayer(): ILayer;
   getDisplayName(): Promise<string>;
+  destroy(): void;
+  getInspectorAdapters(): object;
 }

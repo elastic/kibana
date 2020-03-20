@@ -5,8 +5,20 @@
  */
 
 import { SourceResolvers } from '../../graphql/types';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { Overview } from '../../lib/overview';
 import { createOptions } from '../../utils/build_query/create_options';
+import { QuerySourceResolver } from '../sources/resolvers';
+
+export type QueryOverviewNetworkResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.OverviewNetworkResolver>,
+  QuerySourceResolver
+>;
+
+export type QueryOverviewHostResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.OverviewHostResolver>,
+  QuerySourceResolver
+>;
 
 export interface OverviewResolversDeps {
   overview: Overview;
@@ -16,8 +28,8 @@ export const createOverviewResolvers = (
   libs: OverviewResolversDeps
 ): {
   Source: {
-    OverviewHost: SourceResolvers['OverviewHost'];
-    OverviewNetwork: SourceResolvers['OverviewNetwork'];
+    OverviewHost: QueryOverviewHostResolver;
+    OverviewNetwork: QueryOverviewNetworkResolver;
   };
 } => ({
   Source: {

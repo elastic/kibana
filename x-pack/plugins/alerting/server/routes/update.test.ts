@@ -116,6 +116,7 @@ describe('updateAlertRoute', () => {
             "tags": Array [
               "bar",
             ],
+            "throttle": null,
           },
           "id": "1",
         },

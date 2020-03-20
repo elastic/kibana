@@ -6,6 +6,8 @@
 
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
 
+export const DETECTIONS = '[data-test-subj="navigation-detections"]';
+
 export const HOSTS = '[data-test-subj="navigation-hosts"]';
 
 export const KQL_INPUT = '[data-test-subj="queryInput"]';

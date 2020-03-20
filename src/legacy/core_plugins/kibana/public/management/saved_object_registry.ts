@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from '../../../../../plugins/saved_objects/public';
 import { createSavedDashboardLoader } from '../dashboard';
-import { TypesService, createSavedVisLoader } from '../../../visualizations/public';
+import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { createSavedSearchesLoader } from '../../../../../plugins/discover/public';
 
 /**
@@ -35,9 +35,15 @@ interface SavedObjectRegistryEntry {
   title: string;
 }
 
+export interface ISavedObjectsManagementRegistry {
+  register(service: SavedObjectRegistryEntry): void;
+  all(): SavedObjectRegistryEntry[];
+  get(id: string): SavedObjectRegistryEntry | undefined;
+}
+
 const registry: SavedObjectRegistryEntry[] = [];
 
-export const savedObjectManagementRegistry = {
+export const savedObjectManagementRegistry: ISavedObjectsManagementRegistry = {
   register: (service: SavedObjectRegistryEntry) => {
     registry.push(service);
   },
@@ -58,10 +64,7 @@ const services = {
 
 savedObjectManagementRegistry.register({
   id: 'savedVisualizations',
-  service: createSavedVisLoader({
-    ...services,
-    ...{ visualizationTypes: new TypesService().start() },
-  }),
+  service: visualizations.savedVisualizationsLoader,
   title: 'visualizations',
 });
 

@@ -85,6 +85,7 @@ export {
   KibanaContext,
   KibanaDatatable,
   KibanaDatatableColumn,
+  KibanaDatatableColumnMeta,
   KibanaDatatableRow,
   KnownTypeToString,
   Overflow,

@@ -62,7 +62,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     }
 
     return assignCategoriesToPalette({
-      categories: _.get(this.getFieldMeta(), 'categories', []),
+      categories: _.get(this.getCategoryFieldMeta(), 'categories', []),
       paletteValues: getIconPalette(this._options.iconPaletteId),
     });
   }

@@ -8,22 +8,21 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { encode } from 'rison-node';
-import url from 'url';
-import { stringify } from 'query-string';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
-import { url as urlUtils } from '../../../../../../../src/plugins/kibana_utils/public';
+import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
 
 export const AnalyzeInMlButton: React.FunctionComponent<{
   jobId: string;
   partition?: string;
   timeRange: TimeRange;
 }> = ({ jobId, partition, timeRange }) => {
-  const prependBasePath = useKibana().services.http?.basePath?.prepend;
-  if (!prependBasePath) {
-    return null;
-  }
-  const pathname = prependBasePath('/app/ml');
+  const linkProps = useLinkProps(
+    typeof partition === 'string'
+      ? getEntitySpecificSingleMetricViewerLink(jobId, timeRange, {
+          'event.dataset': partition,
+        })
+      : getOverallAnomalyExplorerLinkDescriptor(jobId, timeRange)
+  );
   const buttonLabel = (
     <FormattedMessage
       id="xpack.infra.logs.analysis.analyzeInMlButtonLabel"
@@ -31,25 +30,20 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
     />
   );
   return typeof partition === 'string' ? (
-    <EuiButton
-      fill={false}
-      size="s"
-      href={getPartitionSpecificSingleMetricViewerLink(pathname, jobId, partition, timeRange)}
-    >
+    <EuiButton fill={false} size="s" {...linkProps}>
       {buttonLabel}
     </EuiButton>
   ) : (
-    <EuiButton
-      fill={true}
-      size="s"
-      href={getOverallAnomalyExplorerLink(pathname, jobId, timeRange)}
-    >
+    <EuiButton fill={true} size="s" {...linkProps}>
       {buttonLabel}
     </EuiButton>
   );
 };
 
-const getOverallAnomalyExplorerLink = (pathname: string, jobId: string, timeRange: TimeRange) => {
+const getOverallAnomalyExplorerLinkDescriptor = (
+  jobId: string,
+  timeRange: TimeRange
+): LinkDescriptor => {
   const { from, to } = convertTimeRangeToParams(timeRange);
 
   const _g = encode({
@@ -62,20 +56,18 @@ const getOverallAnomalyExplorerLink = (pathname: string, jobId: string, timeRang
     },
   });
 
-  const hash = `/explorer?${stringify(urlUtils.encodeQuery({ _g }), { encode: false })}`;
-
-  return url.format({
-    pathname,
-    hash,
-  });
+  return {
+    app: 'ml',
+    hash: '/explorer',
+    search: { _g },
+  };
 };
 
-const getPartitionSpecificSingleMetricViewerLink = (
-  pathname: string,
+export const getEntitySpecificSingleMetricViewerLink = (
   jobId: string,
-  partition: string,
-  timeRange: TimeRange
-) => {
+  timeRange: TimeRange,
+  entities: Record<string, string>
+): LinkDescriptor => {
   const { from, to } = convertTimeRangeToParams(timeRange);
 
   const _g = encode({
@@ -91,19 +83,15 @@ const getPartitionSpecificSingleMetricViewerLink = (
 
   const _a = encode({
     mlTimeSeriesExplorer: {
-      entities: { 'event.dataset': partition },
+      entities,
     },
   });
 
-  const hash = `/timeseriesexplorer?${stringify(urlUtils.encodeQuery({ _g, _a }), {
-    sort: false,
-    encode: false,
-  })}`;
-
-  return url.format({
-    pathname,
-    hash,
-  });
+  return {
+    app: 'ml',
+    hash: '/timeseriesexplorer',
+    search: { _g, _a },
+  };
 };
 
 const convertTimeRangeToParams = (timeRange: TimeRange): { from: string; to: string } => {

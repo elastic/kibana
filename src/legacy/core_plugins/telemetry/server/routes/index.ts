@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Legacy } from 'kibana';
 import { CoreSetup } from 'src/core/server';
 import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
 import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
@@ -26,11 +27,12 @@ import { registerTelemetryUserHasSeenNotice } from './telemetry_user_has_seen_no
 interface RegisterRoutesParams {
   core: CoreSetup;
   currentKibanaVersion: string;
+  server: Legacy.Server;
 }
 
-export function registerRoutes({ core, currentKibanaVersion }: RegisterRoutesParams) {
-  registerTelemetryOptInRoutes({ core, currentKibanaVersion });
-  registerTelemetryUsageStatsRoutes(core);
-  registerTelemetryOptInStatsRoutes(core);
-  registerTelemetryUserHasSeenNotice(core);
+export function registerRoutes({ core, currentKibanaVersion, server }: RegisterRoutesParams) {
+  registerTelemetryOptInRoutes({ core, currentKibanaVersion, server });
+  registerTelemetryUsageStatsRoutes(server);
+  registerTelemetryOptInStatsRoutes(server);
+  registerTelemetryUserHasSeenNotice(server);
 }

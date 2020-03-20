@@ -52,4 +52,4 @@ const UseUrlStateComponent: React.FC<UrlStateProps> = props => {
   return <UrlStateRedux {...urlStateReduxProps} />;
 };
 
-export const UseUrlState = React.memo(UseUrlStateComponent, deepEqual);
+export const UseUrlState = React.memo(UseUrlStateComponent);

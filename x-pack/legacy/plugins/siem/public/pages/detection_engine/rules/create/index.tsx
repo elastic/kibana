@@ -17,7 +17,7 @@ import { displaySuccessToast, useStateToaster } from '../../../../components/toa
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
 import { AccordionTitle } from '../components/accordion_title';
-import { FormData, FormHook } from '../../../shared_imports';
+import { FormData, FormHook } from '../../../../shared_imports';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
@@ -98,7 +98,6 @@ const CreateRulePageComponent: React.FC = () => {
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {
       stepsData.current[step] = { ...stepsData.current[step], data, isValid };
@@ -138,12 +137,10 @@ const CreateRulePageComponent: React.FC = () => {
     [isStepRuleInReadOnlyView, openAccordionId, stepsData.current, setRule]
   );
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setStepsForm = useCallback((step: RuleStep, form: FormHook<FormData>) => {
     stepsForm.current[step] = form;
   }, []);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const getAccordionType = useCallback(
     (accordionId: RuleStep) => {
       if (accordionId === openAccordionId) {
@@ -286,7 +283,7 @@ const CreateRulePageComponent: React.FC = () => {
               isLoading={isLoading || loading}
               setForm={setStepsForm}
               setStepData={setStepData}
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
             />
           </StepDefineRuleAccordion>
         </MyEuiPanel>
@@ -315,7 +312,7 @@ const CreateRulePageComponent: React.FC = () => {
             <StepAboutRule
               addPadding={true}
               defaultValues={(stepsData.current[RuleStep.aboutRule].data as AboutStepRule) ?? null}
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
@@ -350,7 +347,7 @@ const CreateRulePageComponent: React.FC = () => {
               defaultValues={
                 (stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule) ?? null
               }
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}

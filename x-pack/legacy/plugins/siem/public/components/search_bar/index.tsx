@@ -11,8 +11,14 @@ import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { FilterManager, IIndexPattern, TimeRange, Query, Filter } from 'src/plugins/data/public';
-import { SavedQuery } from 'src/legacy/core_plugins/data/public';
+import {
+  FilterManager,
+  IIndexPattern,
+  TimeRange,
+  Query,
+  Filter,
+  SavedQuery,
+} from 'src/plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 
@@ -372,7 +378,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

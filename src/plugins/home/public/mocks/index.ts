@@ -29,13 +29,6 @@ const createSetupContract = () => ({
   config: configSchema.validate({}),
 });
 
-const createStartContract = () => ({
-  featureCatalogue: featureCatalogueRegistryMock.createStart(),
-  environment: environmentServiceMock.createStart(),
-  tutorials: tutorialServiceMock.createStart(),
-});
-
 export const homePluginMock = {
   createSetupContract,
-  createStartContract,
 };

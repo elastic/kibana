@@ -21,17 +21,14 @@ import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'reac
 
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { NumberRow, NumberRowModel } from './number_row';
 import {
   parse,
   EMPTY_STRING,
   getRange,
-  validateOrder,
-  validateValue,
   getNextModel,
   getInitModelList,
-  getUpdatedModels,
+  getValidatedModels,
   hasInvalidValues,
 } from './utils';
 import { useValidation } from '../../utils';
@@ -41,6 +38,7 @@ export interface NumberListProps {
   numberArray: Array<number | undefined>;
   range?: string;
   showValidation: boolean;
+  disallowDuplicates?: boolean;
   unitName: string;
   validateAscendingOrder?: boolean;
   onChange(list: Array<number | undefined>): void;
@@ -54,31 +52,27 @@ function NumberList({
   range,
   showValidation,
   unitName,
-  validateAscendingOrder = true,
+  validateAscendingOrder = false,
+  disallowDuplicates = false,
   onChange,
   setTouched,
   setValidity,
 }: NumberListProps) {
   const numberRange = useMemo(() => getRange(range), [range]);
   const [models, setModels] = useState(getInitModelList(numberArray));
-  const [ascendingError, setAscendingError] = useState(EMPTY_STRING);
 
   // set up validity for each model
   useEffect(() => {
-    let id: number | undefined;
-    if (validateAscendingOrder) {
-      const { isValidOrder, modelIndex } = validateOrder(numberArray);
-      id = isValidOrder ? undefined : modelIndex;
-      setAscendingError(
-        isValidOrder
-          ? EMPTY_STRING
-          : i18n.translate('visDefaultEditor.controls.numberList.invalidAscOrderErrorMessage', {
-              defaultMessage: 'The values should be in ascending order.',
-            })
-      );
-    }
-    setModels(state => getUpdatedModels(numberArray, state, numberRange, id));
-  }, [numberArray, numberRange, validateAscendingOrder]);
+    setModels(state =>
+      getValidatedModels(
+        numberArray,
+        state,
+        numberRange,
+        validateAscendingOrder,
+        disallowDuplicates
+      )
+    );
+  }, [numberArray, numberRange, validateAscendingOrder, disallowDuplicates]);
 
   // responsible for setting up an initial value ([0]) when there is no default value
   useEffect(() => {
@@ -105,12 +99,10 @@ function NumberList({
       onUpdate(
         models.map(model => {
           if (model.id === id) {
-            const { isInvalid, error } = validateValue(parsedValue, numberRange);
             return {
               id,
               value: parsedValue,
-              isInvalid,
-              error,
+              isInvalid: false,
             };
           }
           return model;
@@ -155,7 +147,6 @@ function NumberList({
           {models.length - 1 !== arrayIndex && <EuiSpacer size="s" />}
         </Fragment>
       ))}
-      {showValidation && ascendingError && <EuiFormErrorText>{ascendingError}</EuiFormErrorText>}
       <EuiSpacer size="s" />
       <EuiFlexItem>
         <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">

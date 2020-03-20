@@ -29,6 +29,7 @@ import {
   ApmPluginContextValue
 } from '../context/ApmPluginContext';
 import { ConfigSchema } from '../new-platform/plugin';
+import { createCallApmApi } from '../services/rest/createCallApmApi';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -118,6 +119,7 @@ interface MockSetup {
     'apm_oss.transactionIndices': string;
     'apm_oss.metricsIndices': string;
     apmAgentConfigurationIndex: string;
+    apmCustomLinkIndex: string;
   };
 }
 
@@ -162,7 +164,8 @@ export async function inspectSearchParams(
       'apm_oss.spanIndices': 'myIndex',
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
-      apmAgentConfigurationIndex: 'myIndex'
+      apmAgentConfigurationIndex: 'myIndex',
+      apmCustomLinkIndex: 'myIndex'
     },
     dynamicIndexPattern: null as any
   };
@@ -195,14 +198,15 @@ const mockCore = {
   },
   notifications: {
     toasts: {
-      addWarning: () => {}
+      addWarning: () => {},
+      addDanger: () => {}
     }
   }
 };
 
 const mockConfig: ConfigSchema = {
   indexPatternTitle: 'apm-*',
-  serviceMapEnabled: false,
+  serviceMapEnabled: true,
   ui: {
     enabled: false
   }
@@ -222,6 +226,9 @@ export function MockApmPluginContextWrapper({
   children?: ReactNode;
   value?: ApmPluginContextValue;
 }) {
+  if (value.core?.http) {
+    createCallApmApi(value.core?.http);
+  }
   return (
     <ApmPluginContext.Provider
       value={{

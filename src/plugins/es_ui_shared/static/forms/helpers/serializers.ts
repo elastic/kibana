@@ -36,7 +36,7 @@
  * ````
  */
 
-import { Option } from '@elastic/eui/src/components/selectable/types';
+import { EuiSelectableOption } from '@elastic/eui';
 import { SerializerFunc } from '../hook_form_lib';
 
 export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
@@ -45,7 +45,7 @@ export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
    *
    * @param value The Eui Selectable options array
    */
-  optionsToSelectedValue(options: Option[]): string[] {
+  optionsToSelectedValue(options: EuiSelectableOption[]): string[] {
     return options.filter(option => option.checked === 'on').map(option => option.label);
   },
 };
