@@ -97,7 +97,8 @@ def uploadCoverageArtifacts(prefix, pattern) {
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
-    'target/kibana-*/**/*.png',
+    'target/kibana-*',
+    'target/kibana-siem/**/*.png',
     'target/junit/**/*',
     'test/**/screenshots/**/*.png',
     'test/functional/failure_debug/html/*.html',
