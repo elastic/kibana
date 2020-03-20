@@ -22,8 +22,8 @@ import { getPackageInfo } from './epm/packages';
 import { datasourceService } from './datasource';
 import { generateEnrollmentAPIKey } from './api_keys';
 
-const FLEET_ADMIN_USERNAME = 'fleet_enroll';
-const FLEET_ADMIN_ROLE = 'fleet_enroll';
+const FLEET_ENROLL_USERNAME = 'fleet_enroll';
+const FLEET_ENROLL_ROLE = 'fleet_enroll';
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
@@ -73,7 +73,7 @@ export async function setupFleet(
   // This should be done directly in ES at some point
   await callCluster('transport.request', {
     method: 'PUT',
-    path: `/_security/role/${FLEET_ADMIN_ROLE}`,
+    path: `/_security/role/${FLEET_ENROLL_ROLE}`,
     body: {
       cluster: ['monitor', 'manage_api_key'],
       indices: [
@@ -88,17 +88,17 @@ export async function setupFleet(
   // Create fleet enroll user
   await callCluster('transport.request', {
     method: 'PUT',
-    path: `/_security/user/${FLEET_ADMIN_USERNAME}`,
+    path: `/_security/user/${FLEET_ENROLL_USERNAME}`,
     body: {
       password,
-      roles: [FLEET_ADMIN_ROLE],
+      roles: [FLEET_ENROLL_ROLE],
     },
   });
 
   // save fleet admin user
   await outputService.updateOutput(soClient, await outputService.getDefaultOutputId(soClient), {
-    admin_username: FLEET_ADMIN_USERNAME,
-    admin_password: password,
+    fleet_enroll_username: FLEET_ENROLL_USERNAME,
+    fleet_enroll_password: password,
   });
 
   // Generate default enrollment key
