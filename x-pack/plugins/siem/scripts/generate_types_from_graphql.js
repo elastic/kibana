@@ -8,7 +8,7 @@ require('../../../../src/setup_node_env');
 
 const { join, resolve } = require('path');
 // eslint-disable-next-line import/no-extraneous-dependencies, import/no-unresolved
-const { generate } = require('graphql-code-generator');
+const { generate } = require('@graphql-codegen/cli');
 
 const GRAPHQL_GLOBS = [
   join('public', 'containers', '**', '*.gql_query.ts{,x}'),
@@ -85,9 +85,8 @@ async function main() {
                     */
                   `,
             },
-            'typescript-common',
-            'typescript-server',
-            'typescript-client',
+            'typescript',
+            'typescript-operations',
           ],
         },
         [OUTPUT_SERVER_TYPES_PATH]: {
@@ -127,8 +126,7 @@ async function main() {
                 import { SiemContext } from '../lib/types';
                 `,
             },
-            'typescript-common',
-            'typescript-server',
+            'typescript',
             'typescript-resolvers',
           ],
         },
