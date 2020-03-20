@@ -7,7 +7,7 @@ import { httpServerMock, loggingServiceMock } from '../../../../../../src/core/s
 import { EndpointConfigSchema } from '../../config';
 import {
   kibanaRequestToMetadataListESQuery,
-  kibanaRequestToMetadataGetESQuery,
+  getESQueryHostMetadataByID,
 } from './metadata_query_builders';
 import { EndpointAppConstants } from '../../../common/types';
 
@@ -118,15 +118,7 @@ describe('query builder', () => {
   describe('MetadataGetQuery', () => {
     it('searches for the correct ID', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: {
-          id: mockID,
-        },
-      });
-      const query = kibanaRequestToMetadataGetESQuery(mockRequest, {
-        logFactory: loggingServiceMock.create(),
-        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
-      });
+      const query = getESQueryHostMetadataByID(mockID);
       expect(query).toEqual({
         body: {
           query: { match: { 'host.id.keyword': mockID } },

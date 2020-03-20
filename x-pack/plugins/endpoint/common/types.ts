@@ -238,10 +238,18 @@ interface AlertMetadata {
   prev: string | null;
 }
 
+interface AlertState {
+  state: {
+    host: HostMetadata;
+  };
+}
+
 /**
  * Union of alert data and metadata.
  */
 export type AlertData = AlertEvent & AlertMetadata;
+
+export type AlertDetails = AlertData & AlertState;
 
 export type HostMetadata = Immutable<{
   '@timestamp': number;
@@ -259,6 +267,15 @@ export type HostMetadata = Immutable<{
   };
   host: HostFields;
 }>;
+
+type HostStats = Immutable<{
+  alerts: {
+    open: number;
+    closed: number;
+  };
+}>;
+
+export type HostData = HostMetadata & HostStats;
 
 /**
  * Represents `total` response from Elasticsearch after ES 7.0.
