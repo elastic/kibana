@@ -211,7 +211,6 @@ export function XYChart({
   return (
     <Chart>
       <Settings
-        data-test-subj="lnsChart-xyExpression-settings"
         showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}

@@ -5,7 +5,16 @@
  */
 
 import { Axis } from '@elastic/charts';
-import { AreaSeries, BarSeries, Position, LineSeries, Settings, ScaleType } from '@elastic/charts';
+import {
+  AreaSeries,
+  BarSeries,
+  Position,
+  LineSeries,
+  Settings,
+  ScaleType,
+  GeometryValue,
+  SeriesIdentifier,
+} from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
 import React from 'react';
@@ -242,7 +251,7 @@ describe('xy_expression', () => {
     });
 
     test('onElementClick returns correct context data', () => {
-      const geometry = { x: 5, y: 1, accessor: 'y1' };
+      const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1' };
       const series = {
         key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
         specId: 'd',
@@ -277,12 +286,10 @@ describe('xy_expression', () => {
         />
       );
 
-      // TODO: fix it
-      // @ts-ignore
       wrapper
-        .find('[data-test-subj="lnsChart-xyExpression-settings"]')
+        .find(Settings)
         .first()
-        .prop('onElementClick')!([[geometry, series]]);
+        .prop('onElementClick')!([[geometry, series as SeriesIdentifier]]);
 
       expect(npStart.plugins.uiActions.executeTriggerActions).toHaveBeenCalledWith(
         'VALUE_CLICK_TRIGGER',
@@ -292,97 +299,13 @@ describe('xy_expression', () => {
               {
                 column: 1,
                 row: 1,
-                table: {
-                  columns: [
-                    {
-                      formatHint: { id: 'number', params: { pattern: '0,0.000' } },
-                      id: 'a',
-                      name: 'a',
-                    },
-                    {
-                      formatHint: { id: 'number', params: { pattern: '000,0' } },
-                      id: 'b',
-                      name: 'b',
-                    },
-                    {
-                      formatHint: {
-                        id: 'string',
-                      },
-                      id: 'c',
-                      name: 'c',
-                    },
-                    {
-                      formatHint: {
-                        id: 'string',
-                      },
-                      id: 'd',
-                      name: 'ColD',
-                    },
-                  ],
-                  rows: [
-                    {
-                      a: 1,
-                      b: 2,
-                      c: 'I',
-                      d: 'Foo',
-                    },
-                    {
-                      a: 1,
-                      b: 5,
-                      c: 'J',
-                      d: 'Bar',
-                    },
-                  ],
-                  type: 'kibana_datatable',
-                },
+                table: data.tables.first,
                 value: 5,
               },
               {
                 column: 1,
                 row: 0,
-                table: {
-                  columns: [
-                    {
-                      formatHint: { id: 'number', params: { pattern: '0,0.000' } },
-                      id: 'a',
-                      name: 'a',
-                    },
-                    {
-                      formatHint: { id: 'number', params: { pattern: '000,0' } },
-                      id: 'b',
-                      name: 'b',
-                    },
-                    {
-                      formatHint: {
-                        id: 'string',
-                      },
-                      id: 'c',
-                      name: 'c',
-                    },
-                    {
-                      formatHint: {
-                        id: 'string',
-                      },
-                      id: 'd',
-                      name: 'ColD',
-                    },
-                  ],
-                  rows: [
-                    {
-                      a: 1,
-                      b: 2,
-                      c: 'I',
-                      d: 'Foo',
-                    },
-                    {
-                      a: 1,
-                      b: 5,
-                      c: 'J',
-                      d: 'Bar',
-                    },
-                  ],
-                  type: 'kibana_datatable',
-                },
+                table: data.tables.first,
                 value: 2,
               },
             ],
