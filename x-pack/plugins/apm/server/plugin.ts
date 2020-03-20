@@ -3,7 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  Logger
+} from 'src/core/server';
 import { Observable, combineLatest, AsyncSubject } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { Server } from 'hapi';
@@ -33,6 +39,8 @@ export interface APMPluginContract {
 }
 
 export class APMPlugin implements Plugin<APMPluginContract> {
+  private currentConfig?: APMConfig;
+  private logger?: Logger;
   legacySetup$: AsyncSubject<LegacySetup>;
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -49,30 +57,23 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       usageCollection?: UsageCollectionSetup;
     }
   ) {
-    const logger = this.initContext.logger.get('apm');
+    const logger = (this.logger = this.initContext.logger.get('apm'));
     const config$ = this.initContext.config.create<APMXPackConfig>();
     const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
     );
 
     this.legacySetup$.subscribe(__LEGACY => {
-      createApmApi().init(core, { config$: mergedConfig$, logger, __LEGACY });
+      createApmApi().init(core, {
+        config$: mergedConfig$,
+        logger,
+        __LEGACY
+      });
     });
 
-    const currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
-
-    // create agent configuration index without blocking setup lifecycle
-    createApmAgentConfigurationIndex({
-      esClient: core.elasticsearch.dataClient,
-      config: currentConfig,
-      logger
-    });
-    // create custom action index without blocking setup lifecycle
-    createApmCustomLinkIndex({
-      esClient: core.elasticsearch.dataClient,
-      config: currentConfig,
-      logger
-    });
+    const currentConfig = (this.currentConfig = await mergedConfig$
+      .pipe(take(1))
+      .toPromise());
 
     plugins.home.tutorials.registerTutorial(
       tutorialProvider({
@@ -115,6 +116,23 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     };
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    if (this.currentConfig == null || this.logger == null) {
+      throw new Error('APMPlugin needs to be setup before calling start()');
+    }
+
+    // create agent configuration index without blocking setup lifecycle
+    createApmAgentConfigurationIndex({
+      esClient: core.elasticsearch.legacy.client,
+      config: this.currentConfig,
+      logger: this.logger
+    });
+    // create custom action index without blocking setup lifecycle
+    createApmCustomLinkIndex({
+      esClient: core.elasticsearch.legacy.client,
+      config: this.currentConfig,
+      logger: this.logger
+    });
+  }
   public stop() {}
 }
