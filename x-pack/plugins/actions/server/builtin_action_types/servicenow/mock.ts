@@ -69,6 +69,8 @@ const params: ExecutorParams = {
 const incidentResponse = {
   incidentId: 'c816f79cc0a8016401c5a33be04be441',
   number: 'INC0010001',
+  pushedDate: '2020-03-13T08:34:53.450Z',
+  url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
 };
 
 const userId = '2e9a0a5e2f79001016ab51172799b670';

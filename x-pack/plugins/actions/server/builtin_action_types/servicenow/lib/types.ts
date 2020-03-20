@@ -21,6 +21,7 @@ export interface IncidentResponse {
   number: string;
   incidentId: string;
   pushedDate: string;
+  url: string;
 }
 
 export interface CommentResponse {

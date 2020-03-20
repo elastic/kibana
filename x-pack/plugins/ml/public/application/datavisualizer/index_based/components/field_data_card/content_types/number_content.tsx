@@ -157,7 +157,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         buttonSize="compressed"
       />
       <EuiSpacer size="m" />
-      {detailsMode === DETAILS_MODE.DISTRIBUTION && (
+      {distribution && detailsMode === DETAILS_MODE.DISTRIBUTION && (
         <Fragment>
           <EuiFlexGroup justifyContent="spaceAround" gutterSize="xs">
             <EuiFlexItem grow={false}>

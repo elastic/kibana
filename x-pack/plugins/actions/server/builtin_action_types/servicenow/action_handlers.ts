@@ -47,11 +47,11 @@ export const handleCreateIncident = async ({
     fields,
   });
 
-  const { incidentId, number, pushedDate } = await serviceNow.createIncident({
+  const createdIncident = await serviceNow.createIncident({
     ...incident,
   });
 
-  const res: HandlerResponse = { incidentId, number, pushedDate };
+  const res: HandlerResponse = { ...createdIncident };
 
   if (
     comments &&
@@ -61,7 +61,12 @@ export const handleCreateIncident = async ({
   ) {
     comments = transformComments(comments, params, ['informationAdded']);
     res.comments = [
-      ...(await createComments(serviceNow, incidentId, mapping.get('comments').target, comments)),
+      ...(await createComments(
+        serviceNow,
+        res.incidentId,
+        mapping.get('comments').target,
+        comments
+      )),
     ];
   }
 
@@ -88,11 +93,11 @@ export const handleUpdateIncident = async ({
     currentIncident,
   });
 
-  const { number, pushedDate } = await serviceNow.updateIncident(incidentId, {
+  const updatedIncident = await serviceNow.updateIncident(incidentId, {
     ...incident,
   });
 
-  const res: HandlerResponse = { incidentId, number, pushedDate };
+  const res: HandlerResponse = { ...updatedIncident };
 
   if (
     comments &&

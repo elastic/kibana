@@ -22,6 +22,7 @@ import {
   PostAgentAcksRequestSchema,
   PostAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
+  PostNewAgentActionRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -37,6 +38,7 @@ import {
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import * as AgentService from '../../services/agents';
+import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 
 export const registerRoutes = (router: IRouter) => {
   // Get one
@@ -108,6 +110,19 @@ export const registerRoutes = (router: IRouter) => {
       getAgentByAccessAPIKeyId: AgentService.getAgentByAccessAPIKeyId,
       getSavedObjectsClientContract: getInternalUserSOClient,
       saveAgentEvents: AgentService.saveAgentEvents,
+    })
+  );
+
+  // Agent actions
+  router.post(
+    {
+      path: AGENT_API_ROUTES.ACTIONS_PATTERN,
+      validate: PostNewAgentActionRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postNewAgentActionHandlerBuilder({
+      getAgent: AgentService.getAgent,
+      updateAgentActions: AgentService.updateAgentActions,
     })
   );
 
