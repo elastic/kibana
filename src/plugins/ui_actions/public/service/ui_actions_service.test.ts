@@ -186,7 +186,7 @@ describe('UiActionsService', () => {
       service.registerAction(helloWorldAction);
 
       expect(actions.size - length).toBe(1);
-      expect((actions.get(helloWorldAction.id) as any).id).toBe(helloWorldAction.id);
+      expect(actions.get(helloWorldAction.id)!.id).toBe(helloWorldAction.id);
     });
 
     test('getTriggerCompatibleActions returns attached actions', async () => {
@@ -503,14 +503,14 @@ describe('UiActionsService', () => {
       id: 'test-factory-1',
       CollectConfig: {} as any,
       createConfig: () => ({}),
-      isConfigValid: (() => true) as any,
+      isConfigValid: () => true,
       create: () => ({} as any),
     };
     const factoryDefinition2: ActionFactoryDefinition = {
       id: 'test-factory-2',
       CollectConfig: {} as any,
       createConfig: () => ({}),
-      isConfigValid: (() => true) as any,
+      isConfigValid: () => true,
       create: () => ({} as any),
     };
 

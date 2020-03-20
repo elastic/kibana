@@ -60,6 +60,7 @@ export class DrilldownService {
           id: '',
           type: factoryId,
           getIconType: () => euiIcon,
+          getDisplayName: () => serializedAction.name,
           execute: async context => await execute(serializedAction.config, context),
         }),
       } as ActionFactoryDefinition<
