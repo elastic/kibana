@@ -46,7 +46,7 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
       idToAdjacent.get(uniqueProcessPid) || emptyAdjacencyMap(uniqueProcessPid);
 
     if (processChildren) {
-      const previousProcessId = uniquePidForProcess(processChildren[processChildren.length - 2]);
+      const previousProcessId = uniquePidForProcess(processChildren[processChildren.length - 1]);
 
       processChildren.push(process);
 
