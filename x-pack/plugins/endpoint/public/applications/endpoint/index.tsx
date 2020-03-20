@@ -31,7 +31,6 @@ export function renderApp(
   depsStart: EndpointPluginStartDependencies,
   { element, history }: AppMountParameters
 ) {
-  coreStart.http.get('/api/endpoint/hello-world');
   const store = appStoreFactory({ coreStart, depsStart });
   ReactDOM.render(
     <AppRoot history={history} store={store} coreStart={coreStart} depsStart={depsStart} />,
