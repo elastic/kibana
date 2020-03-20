@@ -38,7 +38,7 @@ function getInvalidEsMessage(interval: string) {
   );
 }
 
-function isValidEsInterval(interval: string) {
+function isValidCalendarInterval(interval: string) {
   try {
     parseEsInterval(interval);
     return true;
@@ -62,7 +62,7 @@ function validate(value?: string, definedOption?: ComboBoxOption, timeBase?: str
 
   // we check if Elasticsearch interval is valid ES interval to show a user appropriate error message
   // we don't check if there is timeBase
-  const isValidIntervalValue = !!timeBase || value === '0ms' || isValidEsInterval(value);
+  const isValidIntervalValue = !!timeBase || value === '0ms' || isValidCalendarInterval(value);
 
   if (!isValidIntervalValue) {
     return { isValidValue: false, errorMessage: getInvalidEsMessage(value) };
@@ -120,7 +120,7 @@ function TimeIntervalParamEditor({
     if (
       !invalidEsMessage &&
       interval.expression !== '0ms' &&
-      !isValidEsInterval(interval.expression)
+      !isValidCalendarInterval(interval.expression)
     ) {
       isValid = false;
       invalidEsMessage = getInvalidEsMessage(interval.expression);
