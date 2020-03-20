@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getRelationships } from '../get_relationships';
+import { getRelationships } from './get_relationships';
 
 describe('getRelationships', () => {
   it('should make an http request', async () => {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { importLegacyFile } from '../import_legacy_file';
+import { importLegacyFile } from './import_legacy_file';
 
 describe('importFile', () => {
   it('should import a file with valid json format', async () => {

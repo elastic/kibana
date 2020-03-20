@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Capabilities } from '../../../../../../../../../core/public';
-import { canViewInApp } from '../in_app_url';
+import { Capabilities } from '../../../../../../../../core/public';
+import { canViewInApp } from './in_app_url';
 
 const createCapabilities = (sections: Record<string, any>): Capabilities => {
   return {

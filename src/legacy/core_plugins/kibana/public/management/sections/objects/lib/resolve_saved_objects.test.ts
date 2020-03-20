@@ -22,12 +22,12 @@ import {
   resolveIndexPatternConflicts,
   saveObjects,
   saveObject,
-} from '../resolve_saved_objects';
+} from './resolve_saved_objects';
 import {
   SavedObject,
   SavedObjectLoader,
-} from '../../../../../../../../../plugins/saved_objects/public';
-import { IndexPatternsContract } from '../../../../../../../../../plugins/data/public';
+} from '../../../../../../../../plugins/saved_objects/public';
+import { IndexPatternsContract } from '../../../../../../../../plugins/data/public';
 
 class SavedObjectNotFound extends Error {
   constructor(options: Record<string, any>) {

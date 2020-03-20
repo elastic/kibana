@@ -21,7 +21,7 @@ jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
 import { SavedObjectsImportUnknownError } from 'src/core/public';
 import { kfetch } from 'ui/kfetch';
-import { resolveImportErrors } from '../resolve_import_errors';
+import { resolveImportErrors } from './resolve_import_errors';
 
 const kfetchMock = kfetch as jest.Mock;
 

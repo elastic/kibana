@@ -22,7 +22,7 @@ import {
   SavedObjectsImportUnknownError,
   SavedObjectsImportMissingReferencesError,
 } from 'src/core/public';
-import { processImportResponse } from '../process_import_response';
+import { processImportResponse } from './process_import_response';
 
 describe('processImportResponse()', () => {
   test('works when no errors exist in the response', () => {
