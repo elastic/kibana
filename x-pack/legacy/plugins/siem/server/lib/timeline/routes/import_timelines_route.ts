@@ -164,7 +164,7 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                           version: null,
                           timeline: timeline ?? parsedTimelineObject,
                         });
-                        console.log('------2------');
+                        console.log('------2------', pinnedEventIds);
                         if (pinnedEventIds.length !== 0) {
                           await Promise.all(
                             pinnedEventIds.map(eventId => {
@@ -213,7 +213,13 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                         console.log('------5------');
                         await Promise.all(
                           [...eventNotes, ...globalNotes].map(note => {
-                            return persistNote(savedObjectsClient, request, null, version, note);
+                            return persistNote(
+                              savedObjectsClient,
+                              request,
+                              null,
+                              null,
+                              omit('timelineId', note)
+                            );
                           })
                         );
                         console.log('------6------');

@@ -84,21 +84,27 @@ export const readTimeline = async ({
   let savedObject;
   try {
     savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
+    console.log('read timeline from saved obj');
+    console.log(savedObject);
   } catch (error) {
+    console.log('read timeline error', error);
     return null;
   }
-
+  console.log('read timeline -1', savedObject);
   const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
-
+  console.log('read timeline -2', timelineSaveObject);
   const timelineWithNotesAndPinnedEvents = await Promise.all([
-    getNotesByTimelineId(savedObjectsClient, timelineSaveObject.savedObjectId),
+    getAllSavedNotesByTimelineId(savedObjectsClient, timelineSaveObject.savedObjectId),
     getAllPinnedEventsByTimelineId(savedObjectsClient, timelineSaveObject.savedObjectId),
     Promise.resolve(timelineSaveObject),
   ]);
+  console.log('read timeline -3', timelineWithNotesAndPinnedEvents);
 
   const [notes, pinnedEvents, timeline] = timelineWithNotesAndPinnedEvents;
 
-  return timelineWithReduxProperties(notes, pinnedEvents, timeline, userName);
+  console.log('read timeline -4', notes, pinnedEvents);
+
+  return timelineWithReduxProperties(notes ?? [], pinnedEvents ?? [], timeline, userName);
 };
 
 export const createTimelines = ({
@@ -142,14 +148,14 @@ const getSavedTimeline = async (
   const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
   const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
   const timelineWithNotesAndPinnedEvents = await Promise.all([
-    getNotesByTimelineId(savedObjectsClient, timelineSaveObject.savedObjectId),
+    getAllSavedNotesByTimelineId(savedObjectsClient, timelineSaveObject.savedObjectId),
     getAllPinnedEventsByTimelineId(savedObjectsClient, timelineSaveObject.savedObjectId),
     Promise.resolve(timelineSaveObject),
   ]);
 
   const [notes, pinnedEvents, timeline] = timelineWithNotesAndPinnedEvents;
 
-  return timelineWithReduxProperties(notes, pinnedEvents, timeline, userName);
+  return timelineWithReduxProperties(notes ?? [], pinnedEvents ?? [], timeline, userName);
 };
 
 const deletePinnedEventOnTimeline = async (
@@ -200,24 +206,28 @@ const persistTimeline = async ({
         version: version || undefined,
       }
     );
+    console.log('update timeline -1');
     return {
       code: 200,
       message: 'success',
       timeline: await getSavedTimeline(savedObjectsClient, request, timelineId),
     };
   } catch (err) {
+    console.log('update timeline -2.0');
     if (timelineId != null && savedObjectsClient.errors.isConflictError(err)) {
       return {
         code: 409,
         message: err.message,
         timeline: await getSavedTimeline(savedObjectsClient, request, timelineId),
       };
+      console.log('update timeline -2');
     } else if (getOr(null, 'output.statusCode', err) === 403) {
       const timelineToReturn: TimelineResult = {
         ...timeline,
         savedObjectId: '',
         version: '',
       };
+      console.log('update timeline -3');
       return {
         code: 403,
         message: err.message,
@@ -250,20 +260,24 @@ export const persistPinnedEventOnTimeline = async (
               return timelineResult.version;
             })()
           : null;
-
+      console.log('persist timeline -1');
+      let allPinnedEventId = [];
       if (timelineId != null) {
-        const allPinnedEventId = await getAllPinnedEventsByTimelineId(
-          savedObjectsClient,
-          timelineId
-        );
+        try {
+          allPinnedEventId = await getAllPinnedEventsByTimelineId(savedObjectsClient, timelineId);
+        } catch (e) {}
+
+        console.log('persist timeline -2');
         const isPinnedAlreadyExisting = allPinnedEventId.filter(
           pinnedEvent => pinnedEvent.eventId === eventId
         );
+        console.log('persist timeline -3');
         if (isPinnedAlreadyExisting.length === 0) {
           const savedPinnedEvent: SavedPinnedEvent = {
             eventId,
             timelineId,
           };
+          console.log('persist timeline -4');
           // create Pinned Event on Timeline
           return convertSavedObjectToSavedPinnedEvent(
             await savedObjectsClient.create(
@@ -273,6 +287,7 @@ export const persistPinnedEventOnTimeline = async (
             timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
           );
         }
+        console.log('persist timeline -5');
         return isPinnedAlreadyExisting[0];
       }
       throw new Error('You can NOT pinned event without a timelineID');
@@ -312,7 +327,7 @@ export const persistNote = async (
 ): Promise<ResponseNote> => {
   try {
     if (noteId == null) {
-      console.log('create note------', noteId, version);
+      console.log('create note------', noteId, version, note.timelineId);
 
       const timelineVersionSavedObject =
         note.timelineId == null
@@ -418,7 +433,7 @@ const getAllSavedPinnedEvents = (
   pinnedEventsSavedObjects: SavedObjectsFindResponse<PinnedEventSavedObject>
 ): PinnedEventSavedObject[] => {
   return pinnedEventsSavedObjects != null
-    ? pinnedEventsSavedObjects.saved_objects.map(savedObject =>
+    ? (pinnedEventsSavedObjects?.saved_objects ?? []).map(savedObject =>
         convertSavedObjectToSavedPinnedEvent(savedObject)
       )
     : [];
@@ -455,6 +470,16 @@ const getNotesByTimelineId = (
   };
 
   return savedObjectsClient.find(options);
+};
+
+const getAllSavedNotesByTimelineId = async (
+  savedObjectsClient: ExportTimelineSavedObjectsClient,
+  timelineId: string
+): Promise<NoteSavedObject[]> => {
+  const noteSavedObject = await Promise.resolve(
+    getNotesByTimelineId(savedObjectsClient, timelineId)
+  );
+  return getAllSavedNote(noteSavedObject);
 };
 
 const getGlobalEventNotesByTimelineId = (currentNotes: NoteSavedObject[]): ExportedNotes => {
@@ -569,4 +594,90 @@ export const getExportTimelineByObjectIds = async ({
 }) => {
   const timeline = await getTimelinesFromObjects(client, request);
   return transformDataToNdjson(timeline);
+};
+
+const obj = {
+  savedObjectId: '6d0d0240-6a92-11ea-a94d-4d5d586870c6',
+  version: 'WzE5NCwxXQ==',
+  columns: [
+    {
+      indexes: null,
+      name: null,
+      columnHeaderType: 'not-filtered',
+      id: '@timestamp',
+      searchable: null,
+    },
+    {
+      indexes: null,
+      name: null,
+      columnHeaderType: 'not-filtered',
+      id: 'message',
+      searchable: null,
+    },
+    {
+      indexes: null,
+      name: null,
+      columnHeaderType: 'not-filtered',
+      id: 'event.category',
+      searchable: null,
+    },
+    {
+      indexes: null,
+      name: null,
+      columnHeaderType: 'not-filtered',
+      id: 'event.action',
+      searchable: null,
+    },
+    {
+      indexes: null,
+      name: null,
+      columnHeaderType: 'not-filtered',
+      id: 'host.name',
+      searchable: null,
+    },
+    {
+      indexes: null,
+      name: null,
+      columnHeaderType: 'not-filtered',
+      id: 'source.ip',
+      searchable: null,
+    },
+    {
+      indexes: null,
+      name: null,
+      columnHeaderType: 'not-filtered',
+      id: 'destination.ip',
+      searchable: null,
+    },
+    {
+      indexes: null,
+      name: null,
+      columnHeaderType: 'not-filtered',
+      id: 'user.name',
+      searchable: null,
+    },
+  ],
+  dataProviders: [],
+  description: 'description',
+  eventType: 'all',
+  filters: [],
+  kqlMode: 'filter',
+  kqlQuery: {
+    filterQuery: {
+      kuery: { kind: 'kuery', expression: '@timestamp : * ' },
+      serializedQuery:
+        '{"bool":{"should":[{"exists":{"field":"@timestamp"}}],"minimum_should_match":1}}',
+    },
+  },
+  title: 'My duplicate timeline',
+  dateRange: { start: 1584523907294, end: 1584610307294 },
+  savedQueryId: null,
+  sort: { columnId: '@timestamp', sortDirection: 'desc' },
+  created: 1584698771424,
+  createdBy: 'Unauthenticated',
+  updated: 1584698771424,
+  updatedBy: 'Unauthenticated',
+  eventNotes: [],
+  globalNotes: [],
+  pinnedEventIds: ['k-gi8nABm-sIqJ_scOoS'],
 };
