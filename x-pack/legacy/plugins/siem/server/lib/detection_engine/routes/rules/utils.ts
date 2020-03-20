@@ -147,10 +147,10 @@ export const transformAlertToRule = (
   });
 };
 
-export const transformRulesToNdjson = (rules: Array<Partial<OutputRuleAlertRest>>): string => {
-  if (rules.length !== 0) {
-    const rulesString = rules.map(rule => JSON.stringify(rule)).join('\n');
-    return `${rulesString}\n`;
+export const transformDataToNdjson = (data: unknown[]): string => {
+  if (data.length !== 0) {
+    const dataString = data.map(rule => JSON.stringify(rule)).join('\n');
+    return `${dataString}\n`;
   } else {
     return '';
   }

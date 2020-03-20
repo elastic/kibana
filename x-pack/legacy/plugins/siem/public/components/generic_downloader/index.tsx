@@ -7,18 +7,28 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { isFunction } from 'lodash/fp';
-import { exportRules } from '../../../../../containers/detection_engine/rules';
-import { useStateToaster, errorToToaster } from '../../../../../components/toasters';
 import * as i18n from './translations';
+
+import { ExportDocumentsProps } from '../../containers/detection_engine/rules';
+import { useStateToaster, errorToToaster } from '../toasters';
 
 const InvisibleAnchor = styled.a`
   display: none;
 `;
 
-export interface RuleDownloaderProps {
+export type ExportSelectedData = ({
+  excludeExportDetails,
+  filename,
+  ids,
+  signal,
+}: ExportDocumentsProps) => Promise<Blob>;
+
+export interface GenericDownloaderProps {
   filename: string;
-  ruleIds?: string[];
-  onExportComplete: (exportCount: number) => void;
+  ids?: string[];
+  exportSelectedData: ExportSelectedData;
+  onExportSuccess?: (exportCount: number) => void;
+  onExportFailure?: () => void;
 }
 
 /**
@@ -28,11 +38,14 @@ export interface RuleDownloaderProps {
  * @param payload Rule[]
  *
  */
-export const RuleDownloaderComponent = ({
+
+export const GenericDownloaderComponent = ({
+  exportSelectedData,
   filename,
-  ruleIds,
-  onExportComplete,
-}: RuleDownloaderProps) => {
+  ids,
+  onExportSuccess,
+  onExportFailure,
+}: GenericDownloaderProps) => {
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const [, dispatchToaster] = useStateToaster();
 
@@ -40,11 +53,11 @@ export const RuleDownloaderComponent = ({
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function exportData() {
-      if (anchorRef && anchorRef.current && ruleIds != null && ruleIds.length > 0) {
+    const exportData = async () => {
+      if (anchorRef && anchorRef.current && ids != null && ids.length > 0) {
         try {
-          const exportResponse = await exportRules({
-            ruleIds,
+          const exportResponse = await exportSelectedData({
+            ids,
             signal: abortCtrl.signal,
           });
 
@@ -61,15 +74,20 @@ export const RuleDownloaderComponent = ({
               window.URL.revokeObjectURL(objectURL);
             }
 
-            onExportComplete(ruleIds.length);
+            if (onExportSuccess != null) {
+              onExportSuccess(ids.length);
+            }
           }
         } catch (error) {
           if (isSubscribed) {
+            if (onExportFailure != null) {
+              onExportFailure();
+            }
             errorToToaster({ title: i18n.EXPORT_FAILURE, error, dispatchToaster });
           }
         }
       }
-    }
+    };
 
     exportData();
 
@@ -77,13 +95,13 @@ export const RuleDownloaderComponent = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [ruleIds]);
+  }, [ids]);
 
   return <InvisibleAnchor ref={anchorRef} />;
 };
 
-RuleDownloaderComponent.displayName = 'RuleDownloaderComponent';
+GenericDownloaderComponent.displayName = 'GenericDownloaderComponent';
 
-export const RuleDownloader = React.memo(RuleDownloaderComponent);
+export const GenericDownloader = React.memo(GenericDownloaderComponent);
 
-RuleDownloader.displayName = 'RuleDownloader';
+GenericDownloader.displayName = 'GenericDownloader';
