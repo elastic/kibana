@@ -6,11 +6,11 @@
 
 import { getActionRoute } from './get';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { licenseStateMock } from '../lib/license_state.mock';
+import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -20,7 +20,7 @@ beforeEach(() => {
 
 describe('getActionRoute', () => {
   it('gets an action with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     getActionRoute(router, licenseState);
@@ -74,7 +74,7 @@ describe('getActionRoute', () => {
   });
 
   it('ensures the license allows getting actions', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     getActionRoute(router, licenseState);
@@ -104,7 +104,7 @@ describe('getActionRoute', () => {
   });
 
   it('ensures the license check prevents getting actions', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
