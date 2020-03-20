@@ -59,16 +59,30 @@ export class DashboardToDashboardDrilldown
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
   ) => {
-    console.log('drilldown execute'); // eslint-disable-line
     const getUrlGenerator = await this.params.getGetUrlGenerator();
     const navigateToApp = await this.params.getNavigateToApp();
     const {
       selectRangeActionGetFilters,
       valueClickActionGetFilters,
     } = await this.params.getDataPluginActions();
-    const { timeRange, query, filters } = context.embeddable.getInput();
+    const {
+      timeRange: currentTimeRange,
+      query,
+      filters: currentFilters,
+    } = context.embeddable.getInput();
 
-    // @ts-ignore
+    // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
+    // otherwise preserve only pinned
+    const filters =
+      (config.useCurrentDashboardFilters
+        ? currentFilters
+        : currentFilters?.filter(f => esFilters.isFilterPinned(f))) ?? [];
+
+    // if useCurrentDashboardDataRange is enabled, then preserve current time range
+    // if undefined is passed, then destination dashboard will figure out time range itself
+    // for brush event this time range would be overwritten
+    let timeRange = config.useCurrentDashboardDataRange ? currentTimeRange : undefined;
+
     if (context.data.range) {
       // look up by range
       const { restOfFilters, timeRangeFilter } =
@@ -76,29 +90,30 @@ export class DashboardToDashboardDrilldown
           timeFieldName: context.timeFieldName,
           data: context.data,
         })) || {};
-      console.log('select range action filters', restOfFilters, timeRangeFilter); // eslint-disable-line
-      // selectRangeActionGetFilters
+      filters.push(...(restOfFilters || []));
+      if (timeRangeFilter) {
+        timeRange = esFilters.convertRangeFilterToTimeRangeString(timeRangeFilter);
+      }
     } else {
       const { restOfFilters, timeRangeFilter } = await valueClickActionGetFilters({
         timeFieldName: context.timeFieldName,
         data: context.data,
       });
-      console.log('value click action filters', restOfFilters, timeRangeFilter); // eslint-disable-line
+      filters.push(...(restOfFilters || []));
+      if (timeRangeFilter) {
+        timeRange = esFilters.convertRangeFilterToTimeRangeString(timeRangeFilter);
+      }
     }
 
     const dashboardPath = await getUrlGenerator(DASHBOARD_APP_URL_GENERATOR).createUrl({
       dashboardId: config.dashboardId,
       query,
-      // todo - how to get destination dashboard timerange?
-      timeRange: config.useCurrentDashboardDataRange ? timeRange : undefined,
-      filters: config.useCurrentDashboardFilters
-        ? filters
-        : filters?.filter(f => esFilters.isFilterPinned(f)),
+      timeRange,
+      filters,
     });
 
     const dashboardHash = dashboardPath.split('#')[1];
 
-    console.log('dashboard hash', dashboardHash); // eslint-disable-line
     await navigateToApp('kibana', {
       path: `#${dashboardHash}`,
     });
