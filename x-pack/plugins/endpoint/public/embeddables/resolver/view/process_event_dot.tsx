@@ -171,6 +171,7 @@ export const ProcessEventDot = styled(
       return (
         <EuiKeyboardAccessible>
           <svg
+            data-test-subj={'resolverNode'}
             className={className}
             viewBox="-15 -15 90 30"
             preserveAspectRatio="xMidYMid meet"

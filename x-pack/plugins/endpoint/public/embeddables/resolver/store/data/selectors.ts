@@ -28,7 +28,7 @@ import {
 } from '../../models/indexed_process_tree';
 
 const unit = 100;
-const distanceBetweenNodesInUnits = 3;
+const distanceBetweenNodesInUnits = 2;
 
 export function isLoading(state: DataState) {
   return state.isLoading;
