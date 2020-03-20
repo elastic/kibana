@@ -124,6 +124,9 @@ describe('alert_details', () => {
           id: '.server-log',
           name: 'Server log',
           enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
         },
       ];
 
@@ -173,11 +176,17 @@ describe('alert_details', () => {
           id: '.server-log',
           name: 'Server log',
           enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
         },
         {
           id: '.email',
           name: 'Send email',
           enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
         },
       ];
 

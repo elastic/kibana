@@ -205,10 +205,10 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(response.statusCode).to.eql(400);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
+                statusCode: 403,
+                error: 'Forbidden',
                 message:
                   'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
               });
