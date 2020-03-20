@@ -17,7 +17,9 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'src/core/public';
+import { BUCKET_TYPES } from './buckets/bucket_agg_types';
 
 import { countMetricAgg } from './metrics/count';
 import { avgMetricAgg } from './metrics/avg';
@@ -86,7 +88,24 @@ export function getAggTypes(deps: { uiSettings: IUiSettingsClient }) {
       ipRangeBucketAgg,
       termsBucketAgg,
       filterBucketAgg,
-      getFiltersBucketAgg({ uiSettings }),
+      getFiltersBucketAgg({
+        uiSettings,
+        name: BUCKET_TYPES.FILTERS,
+        title: i18n.translate('data.search.aggs.buckets.filtersTitle', {
+          defaultMessage: 'Filters',
+          description:
+            'The name of an aggregation, that allows to specify multiple individual filters to group data by.',
+        }),
+      }),
+      getFiltersBucketAgg({
+        uiSettings,
+        name: BUCKET_TYPES.ADJACENCY_MATRIX,
+        title: i18n.translate('data.search.aggs.buckets.adjacencyMatrixTitle', {
+          defaultMessage: 'Adjacency Matrix',
+          description:
+            'The name of an aggregation, that allows to specify multiple individual filters to group data by.',
+        }),
+      }),
       significantTermsBucketAgg,
       geoHashBucketAgg,
       geoTileBucketAgg,

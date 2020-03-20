@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 
 import { IUiSettingsClient } from 'src/core/public';
 
@@ -31,23 +30,21 @@ import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import { getEsQueryConfig, buildEsQuery, Query } from '../../../../common';
 import { getQueryLog } from '../../../query';
 
-const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
-  defaultMessage: 'Filters',
-  description:
-    'The name of an aggregation, that allows to specify multiple individual filters to group data by.',
-});
-
 interface FilterValue {
   input: Query;
   label: string;
   id: string;
 }
 
-export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
+export function getFiltersBucketAgg(deps: {
+  name: BUCKET_TYPES;
+  title: string;
+  uiSettings: IUiSettingsClient;
+}) {
   const { uiSettings } = deps;
   return new BucketAggType({
-    name: BUCKET_TYPES.FILTERS,
-    title: filtersTitle,
+    name: deps.name,
+    title: deps.title,
     createFilter: createFilterFilters,
     customLabels: false,
     params: [
@@ -95,7 +92,8 @@ export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
                 (typeof filter.input.query === 'string'
                   ? filter.input.query
                   : toAngularJSON(filter.input.query));
-              filters[label] = { query };
+              // Adjacency matrix fails if the query is wrapped by the key "query"
+              filters[label] = deps.name === BUCKET_TYPES.ADJACENCY_MATRIX ? query : { query };
             },
             {}
           );
