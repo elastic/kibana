@@ -12,6 +12,7 @@ import { AppMountParameters, CoreSetup, CoreStart } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 import { isObject } from 'lodash';
+import { npStart } from 'ui/new_platform';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { EditorFrameService } from './editor_frame_service';
 import { IndexPatternDatasource } from './indexpattern_datasource';
@@ -40,7 +41,6 @@ import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/emb
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { VisualizationsSetup } from './legacy_imports';
-
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
   expressions: ExpressionsSetup;
@@ -97,6 +97,7 @@ export class LensPlugin {
       data,
       editorFrame: editorFrameSetupInterface,
       formatFactory,
+      executeTriggerActions: npStart.plugins.uiActions.executeTriggerActions,
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
