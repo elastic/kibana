@@ -13,7 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const find = getService('find');
 
-  describe.only('Home page', function() {
+  describe('Home page', function() {
     this.tags('smoke');
     before(async () => {
       await security.testUser.setRoles(['kibana_admin']);
@@ -38,7 +38,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       log.debug('Checking for section header');
       const headerText = await (await pageObjects.apiKeys.noAPIKeysHeading()).getVisibleText();
       expect(headerText).to.be('No API keys');
-
       const goToConsoleButton = await pageObjects.apiKeys.getGoToConsoleButton();
       expect(await goToConsoleButton.isDisplayed()).to.be(true);
     });
