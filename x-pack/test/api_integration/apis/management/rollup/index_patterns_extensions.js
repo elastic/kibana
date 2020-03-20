@@ -78,7 +78,7 @@ export default function({ getService }) {
           uri = `${BASE_URI}?${stringify(params, { sort: false })}`;
           ({ body } = await supertest.get(uri).expect(400));
           expect(body.message).to.contain(
-            '[request query.meta_fields]: could not parse array value from [stringValue]'
+            '[request query.meta_fields]: could not parse array value from json input'
           );
         });
 

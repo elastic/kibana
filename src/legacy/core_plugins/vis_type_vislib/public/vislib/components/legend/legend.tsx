@@ -18,20 +18,18 @@
  */
 import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
 import classNames from 'classnames';
-import { compact, uniq, map } from 'lodash';
+import { compact, uniq, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
-import { IAggConfig } from '../../../../../data/public';
 
-// @ts-ignore
-import { createFiltersFromEvent } from '../../../../../data/public/actions/filters/create_filters_from_event';
+import { IAggConfig } from '../../../../../../../plugins/data/public';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
 
 import { Vis } from '../../../../../visualizations/public';
-import { tabifyGetColumns } from '../../../legacy_imports';
+import { createFiltersFromEvent, tabifyGetColumns } from '../../../legacy_imports';
 
 const getTableAggs = (vis: Vis): IAggConfig[] => {
   if (!vis.aggs || !vis.aggs.getResponseAggs) {
@@ -111,7 +109,12 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     if (CUSTOM_LEGEND_VIS_TYPES.includes(this.props.vislibVis.visConfigArgs.type)) {
       return false;
     }
-    const filters = await createFiltersFromEvent({ data: item.values });
+
+    if (item.values && every(item.values, isUndefined)) {
+      return false;
+    }
+
+    const filters = await createFiltersFromEvent(item.values);
     return Boolean(filters.length);
   };
 

@@ -26,14 +26,16 @@ import {
   RawConfigurationProvider,
   coreDeprecationProvider,
 } from './config';
+import { CoreApp } from './core_app';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService, InternalHttpServiceSetup } from './http';
+import { HttpService } from './http';
 import { RenderingService, RenderingServiceSetup } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
+import { MetricsService, opsConfig } from './metrics';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -67,6 +69,8 @@ export class Server {
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly uuid: UuidService;
+  private readonly metrics: MetricsService;
+  private readonly coreApp: CoreApp;
 
   private coreStart?: InternalCoreStart;
 
@@ -89,6 +93,8 @@ export class Server {
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
     this.uuid = new UuidService(core);
+    this.metrics = new MetricsService(core);
+    this.coreApp = new CoreApp(core);
   }
 
   public async setup() {
@@ -119,15 +125,9 @@ export class Server {
       context: contextServiceSetup,
     });
 
-    this.registerDefaultRoute(httpSetup);
-
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
-      http: httpSetup,
-    });
-
-    const uiSettingsSetup = await this.uiSettings.setup({
       http: httpSetup,
     });
 
@@ -137,6 +137,13 @@ export class Server {
       legacyPlugins,
     });
 
+    const uiSettingsSetup = await this.uiSettings.setup({
+      http: httpSetup,
+      savedObjects: savedObjectsSetup,
+    });
+
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -145,6 +152,7 @@ export class Server {
       uiSettings: uiSettingsSetup,
       savedObjects: savedObjectsSetup,
       uuid: uuidSetup,
+      metrics: metricsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -161,6 +169,7 @@ export class Server {
     });
 
     this.registerCoreContext(coreSetup, renderingSetup);
+    this.coreApp.setup(coreSetup);
 
     return coreSetup;
   }
@@ -170,18 +179,16 @@ export class Server {
     const savedObjectsStart = await this.savedObjects.start({});
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-
-    const pluginsStart = await this.plugins.start({
-      capabilities: capabilitiesStart,
-      savedObjects: savedObjectsStart,
-      uiSettings: uiSettingsStart,
-    });
+    const elasticsearchStart = await this.elasticsearch.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
+      elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
     };
+
+    const pluginsStart = await this.plugins.start(this.coreStart!);
 
     await this.legacy.start({
       core: {
@@ -193,6 +200,7 @@ export class Server {
 
     await this.http.start();
     await this.rendering.start();
+    await this.metrics.start();
 
     return this.coreStart;
   }
@@ -207,13 +215,7 @@ export class Server {
     await this.http.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
-  }
-
-  private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
-    const router = httpSetup.createRouter('/core');
-    router.get({ path: '/', validate: false }, async (context, req, res) =>
-      res.ok({ body: { version: '0.0.1' } })
-    );
+    await this.metrics.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup, rendering: RenderingServiceSetup) {
@@ -234,6 +236,7 @@ export class Server {
           },
           savedObjects: {
             client: savedObjectsClient,
+            typeRegistry: this.coreStart!.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
             adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
@@ -260,6 +263,7 @@ export class Server {
       [savedObjectsConfig.path, savedObjectsConfig.schema],
       [savedObjectsMigrationConfig.path, savedObjectsMigrationConfig.schema],
       [uiSettingsConfig.path, uiSettingsConfig.schema],
+      [opsConfig.path, opsConfig.schema],
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

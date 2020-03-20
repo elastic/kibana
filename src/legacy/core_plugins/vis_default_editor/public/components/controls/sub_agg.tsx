@@ -35,6 +35,7 @@ function SubAggParamEditor({
   setValue,
   setValidity,
   setTouched,
+  schemas,
 }: AggParamEditorProps<IAggConfig, AggParamType>) {
   useEffect(() => {
     // we aren't creating a custom aggConfig
@@ -61,6 +62,7 @@ function SubAggParamEditor({
       <EuiSpacer size="m" />
       <DefaultEditorAggParams
         agg={agg.params.customMetric}
+        allowedAggs={aggParam.allowedAggs}
         groupName={AggGroupNames.Metrics}
         className="visEditorAgg__subAgg"
         formIsTouched={formIsTouched}
@@ -71,6 +73,8 @@ function SubAggParamEditor({
         onAggTypeChange={onAggTypeChange}
         setValidity={setValidity}
         setTouched={setTouched}
+        schemas={schemas}
+        hideCustomLabel={true}
       />
     </>
   );

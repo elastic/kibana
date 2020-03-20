@@ -17,6 +17,8 @@ export {
   getCaseDetailsUrl,
   getCaseUrl,
   getCreateCaseUrl,
+  getConfigureCasesUrl,
   RedirectToCasePage,
   RedirectToCreatePage,
+  RedirectToConfigureCasesPage,
 } from './redirect_to_case';

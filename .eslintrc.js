@@ -49,6 +49,11 @@ const ELASTIC_LICENSE_HEADER = `
  */
 `;
 
+const allMochaRulesOff = {};
+Object.keys(require('eslint-plugin-mocha').rules).forEach(k => {
+  allMochaRulesOff['mocha/' + k] = 'off';
+});
+
 module.exports = {
   root: true,
 
@@ -72,12 +77,6 @@ module.exports = {
     },
     {
       files: ['src/legacy/core_plugins/expressions/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/vis_type_vislib/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -143,7 +142,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/ml/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/ml/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -323,6 +322,7 @@ module.exports = {
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
+        'test/*/config_open.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
@@ -518,6 +518,14 @@ module.exports = {
       rules: {
         'jest/valid-describe': 'error',
       },
+    },
+
+    /**
+     * Harden specific rules
+     */
+    {
+      files: ['test/harden/*.js'],
+      rules: allMochaRulesOff,
     },
 
     /**

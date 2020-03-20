@@ -34,7 +34,7 @@ const filtersByName = {
   },
   podName: {
     title: i18n.translate('xpack.apm.localFilters.titles.podName', {
-      defaultMessage: 'Pod'
+      defaultMessage: 'Kubernetes pod'
     }),
     fieldName: POD_NAME
   },

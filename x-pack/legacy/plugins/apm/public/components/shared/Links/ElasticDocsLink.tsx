@@ -23,7 +23,7 @@ export function ElasticDocsLink({ section, path, children, ...rest }: Props) {
     children(href)
   ) : (
     <EuiLink href={href} {...rest}>
-      children
+      {children}
     </EuiLink>
   );
 }

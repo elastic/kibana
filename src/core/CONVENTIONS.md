@@ -148,8 +148,8 @@ import { MyAppRoot } from './components/app.ts';
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
-export const renderApp = (core: CoreStart, deps: MyPluginDepsStart, { element, appBasePath }: AppMountParams) => {
-  ReactDOM.render(<MyAppRoot core={core} deps={deps} routerBasePath={appBasePath} />, element);
+export const renderApp = (core: CoreStart, deps: MyPluginDepsStart, { element, history }: AppMountParams) => {
+  ReactDOM.render(<MyAppRoot core={core} deps={deps} routerHistory={history} />, element);
   return () => ReactDOM.unmountComponentAtNode(element);
 }
 ```

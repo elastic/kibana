@@ -31,6 +31,10 @@ export function createApi({
 }) {
   const api: IRouteHandlerSearchContext = {
     search: async (request, options, strategyName) => {
+      if (request.debug) {
+        // eslint-disable-next-line
+        console.log(JSON.stringify(request, null, 2));
+      }
       const name = strategyName ?? DEFAULT_SEARCH_STRATEGY;
       const strategyProvider = searchStrategies[name];
       if (!strategyProvider) {

@@ -19,19 +19,34 @@ describe('extractPropertiesFromBucket', () => {
     });
   });
 
-  test('Should extract bucket aggregation values', () => {
+  test('Should extract top bucket aggregation value and percentage', () => {
     const properties = extractPropertiesFromBucket({
+      doc_count: 3,
       'terms_of_machine.os.keyword': {
         buckets: [
           {
             key: 'win xp',
-            doc_count: 16,
+            doc_count: 1,
           },
         ],
       },
     });
     expect(properties).toEqual({
+      doc_count: 3,
       'terms_of_machine.os.keyword': 'win xp',
+      'terms_of_machine.os.keyword__percentage': 33,
+    });
+  });
+
+  test('Should handle empty top bucket aggregation', () => {
+    const properties = extractPropertiesFromBucket({
+      doc_count: 3,
+      'terms_of_machine.os.keyword': {
+        buckets: [],
+      },
+    });
+    expect(properties).toEqual({
+      doc_count: 3,
     });
   });
 });

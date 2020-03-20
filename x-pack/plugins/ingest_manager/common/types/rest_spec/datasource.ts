@@ -3,28 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NewDatasourceSchema } from '../models';
-import { ListWithKuerySchema } from './common';
+import { Datasource, NewDatasource } from '../models';
+import { ListWithKuery } from './common';
 
-export interface GetDatasourcesRequestSchema {
-  query: ListWithKuerySchema;
+export interface GetDatasourcesRequest {
+  query: ListWithKuery;
 }
 
-export interface GetOneDatasourceRequestSchema {
+export interface GetOneDatasourceRequest {
   params: {
     datasourceId: string;
   };
 }
 
-export interface CreateDatasourceRequestSchema {
-  body: NewDatasourceSchema;
+export interface CreateDatasourceRequest {
+  body: NewDatasource;
 }
 
-export type UpdateDatasourceRequestSchema = GetOneDatasourceRequestSchema & {
-  body: NewDatasourceSchema;
+export interface CreateDatasourceResponse {
+  item: Datasource;
+  success: boolean;
+}
+
+export type UpdateDatasourceRequest = GetOneDatasourceRequest & {
+  body: NewDatasource;
 };
 
-export interface DeleteDatasourcesRequestSchema {
+export interface DeleteDatasourcesRequest {
   body: {
     datasourceIds: string[];
   };

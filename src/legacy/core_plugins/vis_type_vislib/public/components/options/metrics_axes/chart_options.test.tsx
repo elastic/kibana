@@ -22,20 +22,10 @@ import { shallow } from 'enzyme';
 import { ChartOptions, ChartOptionsParams } from './chart_options';
 import { SeriesParam } from '../../../types';
 import { LineOptions } from './line_options';
-import {
-  ChartTypes,
-  ChartModes,
-  getInterpolationModes,
-  getChartTypes,
-  getChartModes,
-} from '../../../utils/collections';
-import { valueAxis, seriesParam } from './mocks';
+import { ChartTypes, ChartModes } from '../../../utils/collections';
+import { valueAxis, seriesParam, vis } from './mocks';
 
 jest.mock('ui/new_platform');
-
-const interpolationModes = getInterpolationModes();
-const chartTypes = getChartTypes();
-const chartModes = getChartModes();
 
 describe('ChartOptions component', () => {
   let setParamByIndex: jest.Mock;
@@ -51,19 +41,11 @@ describe('ChartOptions component', () => {
     defaultProps = {
       index: 0,
       chart,
-      vis: {
-        type: {
-          editorConfig: {
-            collections: { interpolationModes, chartTypes, chartModes },
-          },
-        },
-      },
-      stateParams: {
-        valueAxes: [valueAxis],
-      },
+      vis,
+      valueAxes: [valueAxis],
       setParamByIndex,
       changeValueAxis,
-    } as any;
+    };
   });
 
   it('should init with the default set of props', () => {

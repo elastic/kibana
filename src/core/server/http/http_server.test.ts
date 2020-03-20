@@ -811,6 +811,7 @@ test('exposes route details of incoming request to a route handler', async () =>
       path: '/',
       options: {
         authRequired: true,
+        xsrfRequired: false,
         tags: [],
       },
     });
@@ -923,6 +924,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       path: '/',
       options: {
         authRequired: true,
+        xsrfRequired: true,
         tags: [],
         body: {
           parse: true, // hapi populates the default

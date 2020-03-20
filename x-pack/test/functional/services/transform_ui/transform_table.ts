@@ -61,17 +61,17 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       return rows;
     }
 
-    async parseEuiInMemoryTable(tableSubj: string) {
+    async parseEuiDataGrid(tableSubj: string) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
       const rows = [];
 
       // For each row, get the content of each cell and
       // add its values as an array to each row.
-      for (const tr of $.findTestSubjects(`~${tableSubj}Row`).toArray()) {
+      for (const tr of $.findTestSubjects(`~dataGridRow`).toArray()) {
         rows.push(
           $(tr)
-            .find('.euiTableCellContent')
+            .find('.euiDataGridRowCell__truncate')
             .toArray()
             .map(cell =>
               $(cell)
@@ -84,14 +84,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       return rows;
     }
 
-    async assertEuiInMemoryTableColumnValues(
+    async assertEuiDataGridColumnValues(
       tableSubj: string,
       column: number,
       expectedColumnValues: string[]
     ) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rows = await this.parseEuiInMemoryTable(tableSubj);
+        const rows = await this.parseEuiDataGrid(tableSubj);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
@@ -148,17 +148,17 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
       await testSubjects.existOrFail('transformPreviewTab');
       await testSubjects.click('transformPreviewTab');
-      await testSubjects.existOrFail('~transformPreviewTabContent');
+      await testSubjects.existOrFail('~transformPivotPreview');
     }
 
     public async waitForTransformsExpandedRowPreviewTabToLoad() {
-      await testSubjects.existOrFail('~transformPreviewTabContent', { timeout: 60 * 1000 });
-      await testSubjects.existOrFail('transformPreviewTabContent loaded', { timeout: 30 * 1000 });
+      await testSubjects.existOrFail('~transformPivotPreview', { timeout: 60 * 1000 });
+      await testSubjects.existOrFail('transformPivotPreview loaded', { timeout: 30 * 1000 });
     }
 
     async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
       await this.waitForTransformsExpandedRowPreviewTabToLoad();
-      await this.assertEuiInMemoryTableColumnValues('transformPreviewTabContent', column, values);
+      await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
     }
   })();
 }

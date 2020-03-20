@@ -17,17 +17,16 @@ import {
   VECTOR_STYLES,
 } from '../../styles/vector/vector_style_defaults';
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
-import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { GRID_RESOLUTION } from '../../grid_resolution';
 import {
-  AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
   SOURCE_DATA_ID_ORIGIN,
   ES_GEO_GRID,
   COUNT_PROP_NAME,
   COLOR_MAP_TYPE,
+  RENDER_AS,
+  GRID_RESOLUTION,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -36,7 +35,7 @@ import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_sty
 import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
 import { DataRequestAbortError } from '../../util/data_request';
 
-const MAX_GEOTILE_LEVEL = 29;
+export const MAX_GEOTILE_LEVEL = 29;
 
 export class ESGeoGridSource extends AbstractESAggSource {
   static type = ES_GEO_GRID;
@@ -76,7 +75,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   renderSourceSettingsEditor({ onChange }) {
     return (
       <UpdateSourceEditor
-        indexPatternId={this._descriptor.indexPatternId}
+        indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
@@ -86,7 +85,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   async getImmutableProperties() {
-    let indexPatternTitle = this._descriptor.indexPatternId;
+    let indexPatternTitle = this.getIndexPatternId();
     try {
       const indexPattern = await this.getIndexPattern();
       indexPatternTitle = indexPattern.title;
@@ -293,14 +292,11 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback, isRequestStillActive) {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
 
     let bucketsPerGrid = 1;
     this.getMetricFields().forEach(metricField => {
-      if (metricField.getAggType() === AGG_TYPE.TERMS) {
-        // each terms aggregation increases the overall number of buckets per grid
-        bucketsPerGrid++;
-      }
+      bucketsPerGrid += metricField.getBucketCount();
     });
 
     const features =
@@ -329,6 +325,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       },
       meta: {
         areResultsTrimmed: false,
+        sourceType: ES_GEO_GRID,
       },
     };
   }

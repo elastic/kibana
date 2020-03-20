@@ -32,6 +32,18 @@ export const EDITED_DESCRIPTION = i18n.translate(
   }
 );
 
+export const EDIT_DESCRIPTION = i18n.translate('xpack.siem.case.caseView.edit.description', {
+  defaultMessage: 'Edit description',
+});
+
+export const EDIT_COMMENT = i18n.translate('xpack.siem.case.caseView.edit.comment', {
+  defaultMessage: 'Edit comment',
+});
+
+export const ON = i18n.translate('xpack.siem.case.caseView.actionLabel.on', {
+  defaultMessage: 'on',
+});
+
 export const ADDED_COMMENT = i18n.translate('xpack.siem.case.caseView.actionLabel.addComment', {
   defaultMessage: 'added comment',
 });
@@ -43,3 +55,19 @@ export const STATUS = i18n.translate('xpack.siem.case.caseView.statusLabel', {
 export const CASE_OPENED = i18n.translate('xpack.siem.case.caseView.caseOpened', {
   defaultMessage: 'Case opened',
 });
+
+export const CASE_CLOSED = i18n.translate('xpack.siem.case.caseView.caseClosed', {
+  defaultMessage: 'Case closed',
+});
+
+export const EMAIL_SUBJECT = (caseTitle: string) =>
+  i18n.translate('xpack.siem.case.caseView.emailSubject', {
+    values: { caseTitle },
+    defaultMessage: 'SIEM Case - {caseTitle}',
+  });
+
+export const EMAIL_BODY = (caseUrl: string) =>
+  i18n.translate('xpack.siem.case.caseView.emailBody', {
+    values: { caseUrl },
+    defaultMessage: 'Case reference: {caseUrl}',
+  });

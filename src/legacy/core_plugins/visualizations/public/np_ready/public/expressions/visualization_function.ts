@@ -19,12 +19,14 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { VisResponseValue } from '../../../../../../../plugins/visualizations/public';
+import {
+  VisResponseValue,
+  PersistedState,
+} from '../../../../../../../plugins/visualizations/public';
 import {
   ExpressionFunctionDefinition,
   Render,
 } from '../../../../../../../plugins/expressions/public';
-import { PersistedState } from '../../../legacy_imports';
 import { getTypes, getIndexPatterns, getFilterManager } from '../services';
 
 interface Arguments {

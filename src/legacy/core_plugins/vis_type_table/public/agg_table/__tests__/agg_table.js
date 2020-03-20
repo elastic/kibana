@@ -47,10 +47,10 @@ describe('Table Vis - AggTable Directive', function() {
   const tabifiedData = {};
 
   const init = () => {
-    const vis1 = new visualizationsStart.Vis(indexPattern, 'table');
+    const vis1 = visualizationsStart.createVis(indexPattern, 'table');
     tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, metricOnly);
 
-    const vis2 = new visualizationsStart.Vis(indexPattern, {
+    const vis2 = visualizationsStart.createVis(indexPattern, {
       type: 'table',
       params: {
         showMetricsAtAllLevels: true,
@@ -69,7 +69,7 @@ describe('Table Vis - AggTable Directive', function() {
       metricsAtAllLevels: true,
     });
 
-    const vis3 = new visualizationsStart.Vis(indexPattern, {
+    const vis3 = visualizationsStart.createVis(indexPattern, {
       type: 'table',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -110,7 +110,7 @@ describe('Table Vis - AggTable Directive', function() {
   beforeEach(initLocalAngular);
 
   ngMock.inject(function() {
-    visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
+    visualizationsSetup.createBaseVisualization(tableVisTypeDefinition);
   });
 
   beforeEach(ngMock.module('kibana/table_vis'));

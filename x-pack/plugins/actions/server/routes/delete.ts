@@ -17,14 +17,13 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess } from '../lib';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const deleteActionRoute = (router: IRouter, licenseState: LicenseState) => {
+export const deleteActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.delete(
     {
       path: `/api/action/{id}`,
@@ -41,6 +40,9 @@ export const deleteActionRoute = (router: IRouter, licenseState: LicenseState) =
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
       const actionsClient = context.actions.getActionsClient();
       const { id } = req.params;
       await actionsClient.delete({ id });

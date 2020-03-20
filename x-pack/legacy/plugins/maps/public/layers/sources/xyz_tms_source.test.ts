@@ -8,9 +8,9 @@ import { XYZTMSSource } from './xyz_tms_source';
 import { ILayer } from '../layer';
 import { TileLayer } from '../tile_layer';
 import { EMS_XYZ } from '../../../common/constants';
-import { IXYZTMSSourceDescriptor } from '../../../common/descriptor_types';
+import { XYZTMSSourceDescriptor } from '../../../common/descriptor_types';
 
-const descriptor: IXYZTMSSourceDescriptor = {
+const descriptor: XYZTMSSourceDescriptor = {
   type: EMS_XYZ,
   urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
   id: 'foobar',

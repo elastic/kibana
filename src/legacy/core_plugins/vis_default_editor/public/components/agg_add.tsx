@@ -29,7 +29,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { IAggConfig, AggGroupNames, Schema } from '../legacy_imports';
+import { IAggConfig, AggGroupNames } from '../legacy_imports';
+import { Schema } from '../schemas';
 
 interface DefaultEditorAggAddProps {
   group?: IAggConfig[];
@@ -72,7 +73,7 @@ function DefaultEditorAggAdd({
       : i18n.translate('visDefaultEditor.aggAdd.metricLabel', { defaultMessage: 'metric' });
 
   const isSchemaDisabled = (schema: Schema): boolean => {
-    const count = group.filter(agg => agg.schema.name === schema.name).length;
+    const count = group.filter(agg => agg.schema === schema.name).length;
     return count >= schema.max;
   };
 

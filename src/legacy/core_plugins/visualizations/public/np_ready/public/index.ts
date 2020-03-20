@@ -43,19 +43,11 @@ export { Vis, VisParams, VisState } from './vis';
 import { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
+export { TypesService } from './vis_types/types_service';
+export { Status } from './legacy/update_status'; // should remove
+export { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from './embeddable';
+export { SchemaConfig } from './legacy/build_pipeline';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);
 }
-
-/** @public static code */
-export { TypesService } from './vis_types/types_service';
-export { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from './embeddable';
-
-export { Status } from './legacy/update_status';
-export { buildPipeline, buildVislibDimensions, SchemaConfig } from './legacy/build_pipeline';
-
-// @ts-ignore
-export { updateOldState } from './legacy/vis_update_state';
-export { calculateObjectHash } from './legacy/calculate_object_hash';
-export { createSavedVisLoader } from './saved_visualizations/saved_visualizations';

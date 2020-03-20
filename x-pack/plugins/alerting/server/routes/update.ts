@@ -57,13 +57,16 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
+      if (!context.alerting) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+      }
       const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
-      const { name, actions, params, schedule, tags } = req.body;
+      const { name, actions, params, schedule, tags, throttle } = req.body;
       return res.ok({
         body: await alertsClient.update({
           id,
-          data: { name, actions, params, schedule, tags },
+          data: { name, actions, params, schedule, tags, throttle },
         }),
       });
     })

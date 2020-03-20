@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertParams, OutputRuleAlertRest } from '../types';
+import { RuleAlertParams, OutputRuleAlertRest, RuleAlertAction } from '../types';
 import { SearchResponse } from '../../types';
-import { LegacyRequest } from '../../../types';
 import {
   AlertType,
   State,
@@ -38,14 +37,6 @@ export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
 };
 
 export type SignalsQueryRestParams = SignalQueryParams;
-
-export interface SignalsStatusRequest extends LegacyRequest {
-  payload: SignalsStatusRestParams;
-}
-
-export interface SignalsQueryRequest extends LegacyRequest {
-  payload: SignalsQueryRestParams;
-}
 
 export type SearchTypes =
   | string
@@ -113,7 +104,7 @@ export interface GetResponse {
 }
 
 export type SignalSearchResponse = SearchResponse<SignalSource>;
-export type SignalSourceHit = SignalSearchResponse['hits']['hits'][0];
+export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
 
 export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
   params: RuleAlertParams & {
@@ -153,4 +144,18 @@ export interface SignalHit {
   '@timestamp': string;
   event: object;
   signal: Partial<Signal>;
+}
+
+export interface AlertAttributes {
+  actions: RuleAlertAction[];
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  schedule: {
+    interval: string;
+  };
+  throttle: string | null;
 }

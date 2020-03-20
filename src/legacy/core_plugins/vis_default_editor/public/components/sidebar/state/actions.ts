@@ -18,8 +18,9 @@
  */
 
 import { Vis, VisParams } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, Schema } from '../../../legacy_imports';
+import { IAggConfig } from '../../../legacy_imports';
 import { EditorStateActionTypes } from './constants';
+import { Schema } from '../../../schemas';
 
 export interface ActionType<T, P> {
   type: T;
@@ -47,7 +48,7 @@ type SetStateParamValue<T extends keyof AggParams = keyof AggParams> = ActionTyp
   EditorStateActionTypes.SET_STATE_PARAM_VALUE,
   { paramName: T; value: AggParams[T] }
 >;
-type RemoveAgg = ActionType<EditorStateActionTypes.REMOVE_AGG, { aggId: AggId }>;
+type RemoveAgg = ActionType<EditorStateActionTypes.REMOVE_AGG, { aggId: AggId; schemas: Schema[] }>;
 type ReorderAggs = ActionType<
   EditorStateActionTypes.REORDER_AGGS,
   { sourceAgg: IAggConfig; destinationAgg: IAggConfig }
@@ -85,7 +86,7 @@ export interface EditorActions {
     paramName: T,
     value: AggParams[T]
   ): SetStateParamValue<T>;
-  removeAgg(aggId: AggId): RemoveAgg;
+  removeAgg(aggId: AggId, schemas: Schema[]): RemoveAgg;
   reorderAggs(sourceAgg: IAggConfig, destinationAgg: IAggConfig): ReorderAggs;
   toggleEnabledAgg(aggId: AggId, enabled: IAggConfig['enabled']): ToggleEnabledAgg;
   updateStateParams(params: VisParams): UpdateStateParams;
@@ -128,10 +129,11 @@ const setStateParamValue: EditorActions['setStateParamValue'] = (paramName, valu
   },
 });
 
-const removeAgg: EditorActions['removeAgg'] = aggId => ({
+const removeAgg: EditorActions['removeAgg'] = (aggId, schemas) => ({
   type: EditorStateActionTypes.REMOVE_AGG,
   payload: {
     aggId,
+    schemas,
   },
 });
 

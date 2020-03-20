@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export * from './agent_config';
+export * from './agent';
 export * from './datasource';
 export * from './output';
+export * from './enrollment_api_key';

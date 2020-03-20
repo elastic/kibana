@@ -90,7 +90,7 @@ export const getEditableValue = (
 };
 
 export class Field extends PureComponent<FieldProps> {
-  private changeImageForm: EuiFilePicker | undefined = React.createRef();
+  private changeImageForm = React.createRef<EuiFilePicker>();
 
   getDisplayedDefaultValue(
     type: UiSettingsType,
@@ -138,7 +138,7 @@ export class Field extends PureComponent<FieldProps> {
     }
   }
 
-  onCodeEditorChange = (value: UiSettingsType) => {
+  onCodeEditorChange = (value: string) => {
     const { defVal, type } = this.props.setting;
 
     let newUnsavedValue;
@@ -212,7 +212,9 @@ export class Field extends PureComponent<FieldProps> {
     });
   };
 
-  onImageChange = async (files: any[]) => {
+  onImageChange = async (files: FileList | null) => {
+    if (files == null) return;
+
     if (!files.length) {
       this.setState({
         unsavedValue: null,
@@ -278,9 +280,9 @@ export class Field extends PureComponent<FieldProps> {
   };
 
   cancelChangeImage = () => {
-    if (this.changeImageForm.current) {
-      this.changeImageForm.current.fileInput.value = null;
-      this.changeImageForm.current.handleChange({});
+    if (this.changeImageForm.current?.fileInput) {
+      this.changeImageForm.current.fileInput.value = '';
+      this.changeImageForm.current.handleChange();
     }
     if (this.props.clearChange) {
       this.props.clearChange(this.props.setting.name);
@@ -352,7 +354,6 @@ export class Field extends PureComponent<FieldProps> {
                 $blockScrolling: Infinity,
               }}
               showGutter={false}
-              fullWidth
             />
           </div>
         );
@@ -450,9 +451,24 @@ export class Field extends PureComponent<FieldProps> {
   }
 
   renderTitle(setting: FieldSetting) {
+    const { unsavedChanges } = this.props;
+    const isInvalid = unsavedChanges?.isInvalid;
+
+    const unsavedIconLabel = unsavedChanges
+      ? isInvalid
+        ? i18n.translate('advancedSettings.field.invalidIconLabel', {
+            defaultMessage: 'Invalid',
+          })
+        : i18n.translate('advancedSettings.field.unsavedIconLabel', {
+            defaultMessage: 'Unsaved',
+          })
+      : undefined;
+
     return (
       <h3>
-        {setting.displayName || setting.name}
+        <span className="mgtAdvancedSettings__fieldTitle">
+          {setting.displayName || setting.name}
+        </span>
         {setting.isCustom ? (
           <EuiIconTip
             type="asterisk"
@@ -466,6 +482,18 @@ export class Field extends PureComponent<FieldProps> {
                 defaultMessage="Custom setting"
               />
             }
+          />
+        ) : (
+          ''
+        )}
+
+        {unsavedChanges ? (
+          <EuiIconTip
+            anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+            type={isInvalid ? 'alert' : 'dot'}
+            color={isInvalid ? 'danger' : 'warning'}
+            aria-label={unsavedIconLabel}
+            content={unsavedIconLabel}
           />
         ) : (
           ''

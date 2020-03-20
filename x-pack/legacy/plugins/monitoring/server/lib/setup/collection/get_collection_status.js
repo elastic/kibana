@@ -226,16 +226,25 @@ function isBeatFromAPM(bucket) {
 }
 
 async function hasNecessaryPermissions(req) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const response = await callWithRequest(req, 'transport.request', {
-    method: 'POST',
-    path: '/_security/user/_has_privileges',
-    body: {
-      cluster: ['monitor'],
-    },
-  });
-  // If there is some problem, assume they do not have access
-  return get(response, 'has_all_requested', false);
+  try {
+    const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+    const response = await callWithRequest(req, 'transport.request', {
+      method: 'POST',
+      path: '/_security/user/_has_privileges',
+      body: {
+        cluster: ['monitor'],
+      },
+    });
+    // If there is some problem, assume they do not have access
+    return get(response, 'has_all_requested', false);
+  } catch (err) {
+    if (
+      err.message === 'no handler found for uri [/_security/user/_has_privileges] and method [POST]'
+    ) {
+      return true;
+    }
+    return false;
+  }
 }
 
 /**
