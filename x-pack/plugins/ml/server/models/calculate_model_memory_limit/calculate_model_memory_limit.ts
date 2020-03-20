@@ -33,9 +33,10 @@ export interface ModelMemoryEstimate {
 }
 
 /**
- * Retrieves overall and max bucket cardinalities.
+ * Caches cardinality fields values to avoid
+ * unnecessary aggregations on elasticsearch
  */
-const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
+const initCardinalityFieldsCache = () => {
   const cardinalityCache = new Map<
     string,
     {
@@ -44,55 +45,75 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
     }
   >();
 
-  const updateCache = (
-    indexPattern: string,
-    timeField: string,
-    earliestMs: number,
-    latestMs: number,
-    update: {
-      overallCardinality?: { [field: string]: number };
-      maxBucketCardinality?: { [field: string]: number };
-    }
-  ): void => {
-    const cacheKey = indexPattern + timeField + earliestMs + latestMs;
-    const cachedValues = cardinalityCache.get(cacheKey);
-    if (cachedValues === undefined) {
-      cardinalityCache.set(cacheKey, {
-        overallCardinality: update.overallCardinality ?? {},
-        maxBucketCardinality: update.maxBucketCardinality ?? {},
-      });
-      return;
-    }
+  return {
+    /**
+     * Gets requested values from cache
+     * @param indexPattern
+     * @param timeField
+     * @param earliestMs
+     * @param latestMs
+     * @param overallCardinalityFields - array of overall cardinality fields to retrieve form cache
+     * @param maxBucketCardinalityFields - array of max bucket cardinality field to retrieve from cache
+     */
+    getValues(
+      indexPattern: string,
+      timeField: string,
+      earliestMs: number,
+      latestMs: number,
+      overallCardinalityFields: string[],
+      maxBucketCardinalityFields: string[]
+    ): {
+      overallCardinality: { [field: string]: number };
+      maxBucketCardinality: { [field: string]: number };
+    } | null {
+      const cacheKey = indexPattern + timeField + earliestMs + latestMs;
+      const cached = cardinalityCache.get(cacheKey);
+      if (!cached) {
+        return null;
+      }
 
-    Object.assign(cachedValues.overallCardinality, update.overallCardinality);
-    Object.assign(cachedValues.maxBucketCardinality, update.maxBucketCardinality);
+      const overallCardinality = pick(cached.overallCardinality, overallCardinalityFields);
+      const maxBucketCardinality = pick(cached.maxBucketCardinality, maxBucketCardinalityFields);
+
+      return {
+        overallCardinality,
+        maxBucketCardinality,
+      };
+    },
+    /**
+     * Extends cache with provided values
+     */
+    updateValues(
+      indexPattern: string,
+      timeField: string,
+      earliestMs: number,
+      latestMs: number,
+      update: {
+        overallCardinality?: { [field: string]: number };
+        maxBucketCardinality?: { [field: string]: number };
+      }
+    ): void {
+      const cacheKey = indexPattern + timeField + earliestMs + latestMs;
+      const cachedValues = cardinalityCache.get(cacheKey);
+      if (cachedValues === undefined) {
+        cardinalityCache.set(cacheKey, {
+          overallCardinality: update.overallCardinality ?? {},
+          maxBucketCardinality: update.maxBucketCardinality ?? {},
+        });
+        return;
+      }
+
+      Object.assign(cachedValues.overallCardinality, update.overallCardinality);
+      Object.assign(cachedValues.maxBucketCardinality, update.maxBucketCardinality);
+    },
   };
+};
 
-  const getCacheValue = (
-    indexPattern: string,
-    timeField: string,
-    earliestMs: number,
-    latestMs: number,
-    overallCardinalityFields: string[],
-    maxBucketCardinalityFields: string[]
-  ): {
-    overallCardinality: { [field: string]: number };
-    maxBucketCardinality: { [field: string]: number };
-  } | null => {
-    const cacheKey = indexPattern + timeField + earliestMs + latestMs;
-    const cached = cardinalityCache.get(cacheKey);
-    if (!cached) {
-      return null;
-    }
-
-    const overallCardinality = pick(cached.overallCardinality, overallCardinalityFields);
-    const maxBucketCardinality = pick(cached.maxBucketCardinality, maxBucketCardinalityFields);
-
-    return {
-      overallCardinality,
-      maxBucketCardinality,
-    };
-  };
+/**
+ * Retrieves overall and max bucket cardinalities.
+ */
+const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
+  const cardinalityFieldsCache = initCardinalityFieldsCache();
 
   return async (
     analysisConfig: AnalysisConfig,
@@ -151,7 +172,7 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
     ) as string[];
 
     // Check if some of the values are already cached
-    const cachedValues = getCacheValue(
+    const cachedValues = cardinalityFieldsCache.getValues(
       indexPattern,
       timeFieldName,
       earliestMs,
@@ -175,8 +196,8 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
         latestMs
       );
       overallCardinality = { ...overallCardinality, ...overallCardinalitResp };
-      // update cache
-      updateCache(indexPattern, timeFieldName, earliestMs, latestMs, {
+
+      cardinalityFieldsCache.updateValues(indexPattern, timeFieldName, earliestMs, latestMs, {
         overallCardinality: overallCardinalitResp,
       });
     }
@@ -195,8 +216,8 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
         bucketSpan
       );
       maxBucketCardinality = { ...maxBucketCardinality, ...maxBucketCardinalityResp };
-      // update cache
-      updateCache(indexPattern, timeFieldName, earliestMs, latestMs, {
+
+      cardinalityFieldsCache.updateValues(indexPattern, timeFieldName, earliestMs, latestMs, {
         maxBucketCardinality: maxBucketCardinalityResp,
       });
     }
