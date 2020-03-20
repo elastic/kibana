@@ -58,16 +58,11 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
 
   return (
     <EuiPanel betaBadgeLabel="Preview" paddingSize="l">
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          {error && (
-            <EuiToolTip position="top" content={error}>
-              <EuiIcon type="alert" />
-            </EuiToolTip>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiText size="s" color={getTextColor(label)}>
+      <EuiText
+        size="s"
+        color={getTextColor(label)}
+        className="eui-textBreakWord"
+      >
         {label
           ? label
           : i18n.translate(
@@ -75,7 +70,8 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
               { defaultMessage: 'Elastic.co' }
             )}
       </EuiText>
-      <EuiText size="s" color={getTextColor(url)}>
+
+      <EuiText size="s" color={getTextColor(url)} className="eui-textBreakWord">
         {url ? (
           <EuiLink href={formattedUrl} target="_blank">
             {formattedUrl}
@@ -88,15 +84,27 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
         )}
       </EuiText>
       <EuiSpacer />
-      <EuiText size="s">
-        {i18n.translate(
-          'xpack.apm.settings.customizeUI.customLink.linkPreview.descrition',
-          {
-            defaultMessage:
-              'Test your link with values from an example transaction document based on the filters above.'
-          }
-        )}
-      </EuiText>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            {i18n.translate(
+              'xpack.apm.settings.customizeUI.customLink.linkPreview.descrition',
+              {
+                defaultMessage:
+                  'Test your link with values from an example transaction document based on the filters above.'
+              }
+            )}
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          {error && (
+            <EuiToolTip position="top" content={error}>
+              <EuiIcon type="alert" color="warning" />
+            </EuiToolTip>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
