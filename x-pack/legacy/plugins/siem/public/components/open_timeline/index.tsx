@@ -74,7 +74,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     defaultPageSize,
     hideActions = [],
     isModal = false,
+    importCompleteToggle,
     onOpenTimeline,
+    setImportCompleteToggle,
     timeline,
     title,
     updateTimeline,
@@ -264,6 +266,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               defaultPageSize={defaultPageSize}
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+              importCompleteToggle={importCompleteToggle}
               onAddTimelinesToFavorites={undefined}
               onDeleteSelected={onDeleteSelected}
               onlyFavorites={onlyFavorites}
@@ -278,6 +281,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               query={search}
               refetch={refetch}
               searchResults={timelines}
+              setImportCompleteToggle={setImportCompleteToggle}
+              refetch={refetch}
               selectedItems={selectedItems}
               sortDirection={sortDirection}
               sortField={sortField}

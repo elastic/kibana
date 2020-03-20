@@ -79,8 +79,14 @@ export const readTimeline = async ({
   timelineId: string;
 }) => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
-
-  const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
+  console.log('read timeline');
+  console.log(timelineId);
+  let savedObject;
+  try {
+    savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
+  } catch (error) {
+    return null;
+  }
 
   const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
 
@@ -306,6 +312,8 @@ export const persistNote = async (
 ): Promise<ResponseNote> => {
   try {
     if (noteId == null) {
+      console.log('create note------', noteId, version);
+
       const timelineVersionSavedObject =
         note.timelineId == null
           ? await (async () => {

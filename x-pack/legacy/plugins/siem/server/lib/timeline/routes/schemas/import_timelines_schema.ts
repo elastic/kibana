@@ -13,6 +13,7 @@ import {
   description,
   eventNotes,
   eventType,
+  favorite,
   filters,
   globalNotes,
   kqlMode,

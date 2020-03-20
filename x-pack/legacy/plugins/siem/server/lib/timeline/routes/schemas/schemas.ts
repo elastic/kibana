@@ -9,7 +9,7 @@ const columnHeaderType = Joi.string();
 export const created = Joi.number().allow(null);
 export const createdBy = Joi.string();
 export const dataProviders = Joi.array();
-export const description = Joi.string().allow(null);
+export const description = Joi.string().allow([null, '']);
 export const end = Joi.number();
 export const eventId = Joi.string();
 export const eventType = Joi.string();
@@ -19,15 +19,15 @@ export const filters = Joi.array();
 const id = Joi.string();
 export const kqlMode = Joi.string();
 
-export const noteId = Joi.string();
+export const noteId = Joi.string().allow([null, '']);
 export const note = Joi.string();
 
 export const start = Joi.number();
 export const savedQueryId = Joi.string().allow(null);
-export const savedObjectId = Joi.string().allow(null);
+export const savedObjectId = Joi.string();
 
 export const timelineId = Joi.string().allow(null);
-export const title = Joi.string().allow(null);
+export const title = Joi.string().allow([null, '']);
 
 export const updated = Joi.number().allow(null);
 export const updatedBy = Joi.string().allow(null);
@@ -35,15 +35,24 @@ export const version = Joi.string().allow(null);
 
 export const columns = Joi.array().items(
   Joi.object({
+    indexes: Joi.string().allow(null),
+    name: Joi.string().allow(null),
     columnHeaderType,
-    id,
+    id: Joi.string(),
+    searchable: Joi.boolean().allow(null),
   }).required()
 );
 export const dateRange = Joi.object({
   start,
   end,
 });
-export const eventNotes = Joi.array().items({
+export const favorite = Joi.object({
+  keySearch: Joi.string(),
+  fullName: Joi.string(),
+  userName: Joi.string(),
+  favoriteDate: Joi.number(),
+});
+const noteItem = Joi.object({
   noteId,
   version,
   eventId,
@@ -54,16 +63,8 @@ export const eventNotes = Joi.array().items({
   updated,
   updatedBy,
 });
-export const globalNotes = Joi.array().items({
-  noteId,
-  version,
-  note,
-  timelineId,
-  created,
-  createdBy,
-  updated,
-  updatedBy,
-});
+export const eventNotes = Joi.array().items(noteItem);
+export const globalNotes = Joi.array().items(noteItem);
 export const kqlQuery = Joi.object({
   filterQuery: Joi.object({
     kuery: Joi.object({

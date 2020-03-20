@@ -14,8 +14,6 @@ import { StatefulOpenTimeline } from '../../components/open_timeline';
 import { WrapperPage } from '../../components/wrapper_page';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import * as i18n from './translations';
-import { ImportRuleModal } from '../detection_engine/rules/components/import_rule_modal';
-import { importTimelines } from '../../containers/timeline/all/api';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -31,27 +29,15 @@ export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
   const [importCompleteToggle, setImportCompleteToggle] = useState(false);
+  const onImportTimelineBtnClick = useCallback(() => {
+    setImportCompleteToggle(true);
+  }, [setImportCompleteToggle]);
   return (
     <>
-      <ImportRuleModal
-        showModal={importCompleteToggle}
-        closeModal={() => setImportCompleteToggle(false)}
-        importComplete={useCallback(() => {
-          setImportCompleteToggle(!importCompleteToggle);
-        }, [setImportCompleteToggle])}
-        importData={importTimelines}
-      />
-
       <WrapperPage>
         <HeaderPage border title={i18n.PAGE_TITLE}>
-          <EuiButton
-            iconType="indexOpen"
-            isDisabled={false}
-            onClick={() => {
-              setImportCompleteToggle(true);
-            }}
-          >
-            {'Import Timeline'}
+          <EuiButton iconType="indexOpen" isDisabled={false} onClick={onImportTimelineBtnClick}>
+            {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
           </EuiButton>
         </HeaderPage>
 
@@ -60,6 +46,8 @@ const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
             apolloClient={apolloClient}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             isModal={false}
+            importCompleteToggle={importCompleteToggle}
+            setImportCompleteToggle={setImportCompleteToggle}
             title={i18n.ALL_TIMELINES_PANEL_TITLE}
           />
         </TimelinesContainer>

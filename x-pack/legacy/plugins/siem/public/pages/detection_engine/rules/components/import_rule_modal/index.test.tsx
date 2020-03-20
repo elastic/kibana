@@ -10,7 +10,7 @@ import { ImportRuleModalComponent } from './index';
 
 jest.mock('../../../../../lib/kibana');
 
-describe('ImportRuleModal', () => {
+describe('ImportDataModal', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <ImportRuleModalComponent

@@ -28,6 +28,7 @@ import {
   patchTimelines,
   persistPinnedEventOnTimeline,
   persistNote,
+  getTupleDuplicateErrorsAndUniqueTimeline,
 } from './utils';
 import { LegacyServices } from '../../../types';
 import { IMPORT_TIMELINES_URL } from '../../../../common/constants';
@@ -104,7 +105,7 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
         ]);
         console.log('-------a------');
         console.log(parsedObjects);
-        const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueRules(
+        const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueTimeline(
           parsedObjects,
           request.query.overwrite
         );
@@ -140,12 +141,17 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                       globalNotes,
                       eventNotes,
                     } = parsedTimeline;
+                    const parsedTimelineObject = omit(
+                      ['globalNotes', 'eventNotes', 'pinnedEventIds', 'version', 'savedObjectId'],
+                      parsedTimeline
+                    );
                     try {
                       const timeline = await readTimeline({
                         request,
                         savedObjectsClient,
                         timelineId: savedObjectId,
                       });
+
                       console.log('------1------');
                       console.log(timeline);
                       if (timeline == null) {
@@ -155,27 +161,31 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                           request,
                           savedObjectsClient,
                           timelineId: null,
-                          version,
-                          timeline: parsedTimeline,
+                          version: null,
+                          timeline: timeline ?? parsedTimelineObject,
                         });
                         console.log('------2------');
-                        await Promise.all(
-                          pinnedEventIds.map(eventId => {
-                            return persistPinnedEventOnTimeline(
-                              savedObjectsClient,
-                              request,
-                              null,
-                              eventId,
-                              newSavedObjectId
-                            );
-                          })
-                        );
+                        if (pinnedEventIds.length !== 0) {
+                          await Promise.all(
+                            pinnedEventIds.map(eventId => {
+                              return persistPinnedEventOnTimeline(
+                                savedObjectsClient,
+                                request,
+                                null,
+                                eventId,
+                                newSavedObjectId
+                              );
+                            })
+                          );
+                        }
                         console.log('------3------');
-                        await Promise.all(
-                          [...eventNotes, ...globalNotes].map(note => {
-                            return persistNote(savedObjectsClient, request, null, version, note);
-                          })
-                        );
+                        if (eventNotes.length !== 0 || globalNotes.length !== 0) {
+                          await Promise.all(
+                            [...eventNotes, ...globalNotes].map(note => {
+                              return persistNote(savedObjectsClient, request, null, null, note);
+                            })
+                          );
+                        }
 
                         resolve({ timeline_id: newSavedObjectId, status_code: 200 });
                       } else if (timeline != null && request.query.overwrite) {
@@ -186,16 +196,7 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                           savedObjectsClient,
                           timelineId: savedObjectId,
                           version,
-                          timeline: omit(
-                            [
-                              'globalNotes',
-                              'eventNotes',
-                              'pinnedEventIds',
-                              'version',
-                              'savedObjectId',
-                            ],
-                            parsedTimeline
-                          ),
+                          timeline: parsedTimelineObject,
                         });
                         console.log('------4------');
                         await Promise.all(

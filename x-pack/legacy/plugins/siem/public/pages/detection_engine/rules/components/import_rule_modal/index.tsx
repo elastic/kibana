@@ -21,7 +21,10 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import { ImportRulesResponse } from '../../../../../containers/detection_engine/rules';
+import {
+  ImportRulesResponse,
+  ImportRulesProps,
+} from '../../../../../containers/detection_engine/rules';
 import {
   displayErrorToast,
   displaySuccessToast,
@@ -31,20 +34,36 @@ import {
 import * as i18n from './translations';
 
 interface ImportRuleModalProps {
-  showModal: boolean;
+  checkBoxLabel: string;
   closeModal: () => void;
+  description: string;
+  errorMessage: string;
+  failedDetailed: (id: string, statusCode: number, message: string) => string;
   importComplete: () => void;
-  importData: (ImportRulesProps) => Promise<ImportRulesResponse>;
+  importData: (arg: ImportRulesProps) => Promise<ImportRulesResponse>;
+  showModal: boolean;
+  submitBtnText: string;
+  subtitle: string;
+  successMessage: (totalCount: number) => string;
+  title: string;
 }
 
 /**
  * Modal component for importing Rules from a json file
  */
 export const ImportRuleModalComponent = ({
-  showModal,
+  checkBoxLabel,
   closeModal,
+  description,
+  errorMessage,
+  failedDetailed,
   importComplete,
   importData,
+  showModal,
+  submitBtnText,
+  subtitle,
+  successMessage,
+  title,
 }: ImportRuleModalProps) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
@@ -72,23 +91,20 @@ export const ImportRuleModalComponent = ({
         // TODO: Improve error toast details for better debugging failed imports
         // e.g. When success == true && success_count === 0 that means no rules were overwritten, etc
         if (importResponse.success) {
-          displaySuccessToast(
-            i18n.SUCCESSFULLY_IMPORTED_RULES(importResponse.success_count),
-            dispatchToaster
-          );
+          displaySuccessToast(successMessage(importResponse.success_count), dispatchToaster);
         }
         if (importResponse.errors.length > 0) {
           const formattedErrors = importResponse.errors.map(e =>
-            i18n.IMPORT_FAILED_DETAILED(e.rule_id, e.error.status_code, e.error.message)
+            failedDetailed(e.rule_id, e.error.status_code, e.error.message)
           );
-          displayErrorToast(i18n.IMPORT_FAILED, formattedErrors, dispatchToaster);
+          displayErrorToast(errorMessage, formattedErrors, dispatchToaster);
         }
 
         importComplete();
         cleanupAndCloseModal();
       } catch (error) {
         cleanupAndCloseModal();
-        errorToToaster({ title: i18n.IMPORT_FAILED, error, dispatchToaster });
+        errorToToaster({ title: errorMessage, error, dispatchToaster });
       }
     }
   }, [selectedFiles, overwrite]);
@@ -104,18 +120,18 @@ export const ImportRuleModalComponent = ({
         <EuiOverlayMask>
           <EuiModal onClose={closeModal} maxWidth={'750px'}>
             <EuiModalHeader>
-              <EuiModalHeaderTitle>{i18n.IMPORT_RULE}</EuiModalHeaderTitle>
+              <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
             </EuiModalHeader>
 
             <EuiModalBody>
               <EuiText size="s">
-                <h4>{i18n.SELECT_RULE}</h4>
+                <h4>{description}</h4>
               </EuiText>
 
               <EuiSpacer size="s" />
               <EuiFilePicker
                 id="rule-file-picker"
-                initialPromptText={i18n.INITIAL_PROMPT_TEXT}
+                initialPromptText={subtitle}
                 onChange={(files: FileList | null) => {
                   setSelectedFiles(files && files.length > 0 ? files : null);
                 }}
@@ -126,7 +142,7 @@ export const ImportRuleModalComponent = ({
               <EuiSpacer size="s" />
               <EuiCheckbox
                 id="rule-overwrite-saved-object"
-                label={i18n.OVERWRITE_WITH_SAME_NAME}
+                label={checkBoxLabel}
                 checked={overwrite}
                 onChange={() => setOverwrite(!overwrite)}
               />
@@ -139,7 +155,7 @@ export const ImportRuleModalComponent = ({
                 disabled={selectedFiles == null || isImporting}
                 fill
               >
-                {i18n.IMPORT_RULE}
+                {submitBtnText}
               </EuiButton>
             </EuiModalFooter>
           </EuiModal>
@@ -151,6 +167,6 @@ export const ImportRuleModalComponent = ({
 
 ImportRuleModalComponent.displayName = 'ImportRuleModalComponent';
 
-export const ImportRuleModal = React.memo(ImportRuleModalComponent);
+export const ImportDataModal = React.memo(ImportRuleModalComponent);
 
-ImportRuleModal.displayName = 'ImportRuleModal';
+ImportDataModal.displayName = 'ImportDataModal';

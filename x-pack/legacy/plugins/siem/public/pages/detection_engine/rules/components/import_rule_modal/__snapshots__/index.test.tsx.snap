@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ImportRuleModal renders correctly against snapshot 1`] = `
+exports[`ImportDataModal renders correctly against snapshot 1`] = `
 <Fragment>
   <EuiOverlayMask>
     <EuiModal
