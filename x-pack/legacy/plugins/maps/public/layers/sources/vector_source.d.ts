@@ -13,7 +13,7 @@ import { ESSearchSourceResponseMeta } from '../../../common/data_request_descrip
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
 export type GeoJsonWithMeta = {
-  data: unknown; // geojson feature collection
+  data: FeatureCollection;
   meta?: GeoJsonFetchMeta;
 };
 
