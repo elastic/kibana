@@ -26,16 +26,21 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
-import { DataPublicPluginStart } from '../../types';
+import React from 'react';
+import { toMountPoint } from '../../../../kibana_react/public';
 
 interface Props {
-  data?: DataPublicPluginStart;
+  cancel?: () => void;
+  runBeyondTimeout?: () => void;
+}
+
+export function getLongQueryNotification(props: Props) {
+  return toMountPoint(
+    <LongQueryNotification cancel={props.cancel} runBeyondTimeout={props.runBeyondTimeout} />
+  );
 }
 
 export function LongQueryNotification(props: Props) {
-  const { data } = props;
-  const [actionsDisabled] = useState(!data?.search.isAsyncEnabled());
   return (
     <div>
       <FormattedMessage
@@ -57,10 +62,10 @@ export function LongQueryNotification(props: Props) {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"
-            disabled={actionsDisabled}
+            disabled={!props.cancel}
             onClick={() => {
-              if (data) {
-                data.search.cancel();
+              if (props.cancel) {
+                props.cancel();
               }
             }}
           >
@@ -71,10 +76,10 @@ export function LongQueryNotification(props: Props) {
           <EuiButton
             size="s"
             fill
-            disabled={actionsDisabled}
+            disabled={!props.runBeyondTimeout}
             onClick={() => {
-              if (data) {
-                data.search.runBeyondTimeout();
+              if (props.runBeyondTimeout) {
+                props.runBeyondTimeout();
               }
             }}
           >

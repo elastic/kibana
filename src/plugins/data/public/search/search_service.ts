@@ -58,7 +58,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private esClient?: LegacyApiCaller;
   private readonly aggTypesRegistry = new AggTypesRegistry();
-  private isAsyncEnabled: boolean = false;
 
   private registerSearchStrategyProvider = <T extends TStrategyTypes>(
     name: T,
@@ -100,6 +99,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      * their own search collector instances
      */
     const searchInterceptor = new SearchInterceptor(
+      core.notifications.toasts,
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
 
@@ -115,15 +115,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         },
         types: aggTypesStart,
       },
-      enableAsync: () => {
-        this.isAsyncEnabled = true;
-      },
-      isAsyncEnabled: () => {
-        return this.isAsyncEnabled;
-      },
-      cancel: () => searchInterceptor.cancelPending(),
-      getPendingCount$: () => searchInterceptor.getPendingCount$(),
-      runBeyondTimeout: () => searchInterceptor.runBeyondTimeout(),
       search: (request, options, strategyName) => {
         const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
         const { search } = strategyProvider({

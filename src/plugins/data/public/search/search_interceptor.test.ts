@@ -18,6 +18,8 @@
  */
 
 import { Observable, Subject } from 'rxjs';
+import { CoreStart } from '../../../../core/public';
+import { coreMock } from '../../../../core/public/mocks';
 import { IKibanaSearchRequest } from '../../common/search';
 import { RequestTimeoutError } from './request_timeout_error';
 import { SearchInterceptor } from './search_interceptor';
@@ -27,11 +29,13 @@ jest.useFakeTimers();
 const flushPromises = () => new Promise(resolve => setImmediate(resolve));
 const mockSearch = jest.fn();
 let searchInterceptor: SearchInterceptor;
+let mockCoreStart: MockedKeys<CoreStart>;
 
 describe('SearchInterceptor', () => {
   beforeEach(() => {
+    mockCoreStart = coreMock.createStart();
     mockSearch.mockClear();
-    searchInterceptor = new SearchInterceptor(1000);
+    searchInterceptor = new SearchInterceptor(mockCoreStart.notifications.toasts, 1000);
   });
 
   describe('search', () => {
