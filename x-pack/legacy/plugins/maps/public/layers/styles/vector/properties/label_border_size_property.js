@@ -6,7 +6,8 @@
 
 import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
-import { DEFAULT_LABEL_SIZE, LABEL_BORDER_SIZES } from '../vector_style_defaults';
+import { DEFAULT_LABEL_SIZE } from '../vector_style_defaults';
+import { LABEL_BORDER_SIZES } from '../../../../../common/constants';
 
 const SMALL_SIZE = 1 / 16;
 const MEDIUM_SIZE = 1 / 8;

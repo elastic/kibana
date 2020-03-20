@@ -40,11 +40,6 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-// TODO: can't import from '../../../../legacy/core_plugins/visualizations/public/' directly,
-// because yarn build:types fails after trying to emit type declarations for whole visualizations plugin
-// Bunch of errors like this: 'Return type of exported function has or is using private name 'SavedVis''
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../legacy/core_plugins/visualizations/public/np_ready/public/embeddable/constants';
-
 export interface OnSaveProps {
   newTitle: string;
   newCopyOnSave: boolean;
@@ -62,6 +57,7 @@ interface Props {
   confirmButtonLabel?: React.ReactNode;
   options?: React.ReactNode;
   description?: string;
+  showDescription: boolean;
 }
 
 interface State {
@@ -112,7 +108,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
               {this.renderDuplicateTitleCallout(duplicateWarningId)}
 
               <EuiForm>
-                {this.props.objectType !== VISUALIZE_EMBEDDABLE_TYPE && this.props.description && (
+                {!this.props.showDescription && this.props.description && (
                   <EuiFormRow>
                     <EuiText color="subdued">{this.props.description}</EuiText>
                   </EuiFormRow>
@@ -164,7 +160,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
   }
 
   private renderViewDescription = () => {
-    if (this.props.objectType !== VISUALIZE_EMBEDDABLE_TYPE) {
+    if (!this.props.showDescription) {
       return;
     }
 

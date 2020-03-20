@@ -5,8 +5,10 @@
  */
 
 import { pickBy, countBy } from 'lodash/fp';
-import { SavedObject } from 'kibana/server';
+import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
+
+import { PartialAlert, FindResult } from '../../../../../../../../plugins/alerting/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -26,6 +28,8 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
+import { hasListsFeature } from '../../feature_flags';
+import { transformAlertToRuleAction } from '../../rules/transform_actions';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -99,11 +103,13 @@ export const transformAlertToRule = (
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+    actions: alert.actions.map(transformAlertToRuleAction),
     created_at: alert.createdAt.toISOString(),
     updated_at: alert.updatedAt.toISOString(),
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
+    anomaly_threshold: alert.params.anomalyThreshold,
     false_positives: alert.params.falsePositives,
     filters: alert.params.filters,
     from: alert.params.from,
@@ -115,6 +121,7 @@ export const transformAlertToRule = (
     language: alert.params.language,
     output_index: alert.params.outputIndex,
     max_signals: alert.params.maxSignals,
+    machine_learning_job_id: alert.params.machineLearningJobId,
     risk_score: alert.params.riskScore,
     name: alert.name,
     query: alert.params.query,
@@ -129,6 +136,8 @@ export const transformAlertToRule = (
     to: alert.params.to,
     type: alert.params.type,
     threat: alert.params.threat,
+    throttle: alert.throttle,
+    note: alert.params.note,
     version: alert.params.version,
     status: ruleStatus?.attributes.status,
     status_date: ruleStatus?.attributes.statusDate,
@@ -136,13 +145,15 @@ export const transformAlertToRule = (
     last_success_at: ruleStatus?.attributes.lastSuccessAt,
     last_failure_message: ruleStatus?.attributes.lastFailureMessage,
     last_success_message: ruleStatus?.attributes.lastSuccessMessage,
+    // TODO: (LIST-FEATURE) Remove hasListsFeature() check once we have lists available for a release
+    lists: hasListsFeature() ? alert.params.lists : null,
   });
 };
 
-export const transformRulesToNdjson = (rules: Array<Partial<OutputRuleAlertRest>>): string => {
-  if (rules.length !== 0) {
-    const rulesString = rules.map(rule => JSON.stringify(rule)).join('\n');
-    return `${rulesString}\n`;
+export const transformDataToNdjson = (data: unknown[]): string => {
+  if (data.length !== 0) {
+    const dataString = data.map(rule => JSON.stringify(rule)).join('\n');
+    return `${dataString}\n`;
   } else {
     return '';
   }
@@ -155,26 +166,38 @@ export const transformAlertsToRules = (
 };
 
 export const transformFindAlerts = (
-  findResults: { data: unknown[] },
-  ruleStatuses?: unknown[]
-): unknown | null => {
+  findResults: FindResult,
+  ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
+): {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Array<Partial<OutputRuleAlertRest>>;
+} | null => {
   if (!ruleStatuses && isAlertTypes(findResults.data)) {
-    findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
-    return findResults;
-  }
-  if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
-    findResults.data = findResults.data.map((alert, idx) =>
-      transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
-    );
-    return findResults;
+    return {
+      page: findResults.page,
+      perPage: findResults.perPage,
+      total: findResults.total,
+      data: findResults.data.map(alert => transformAlertToRule(alert)),
+    };
+  } else if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
+    return {
+      page: findResults.page,
+      perPage: findResults.perPage,
+      total: findResults.total,
+      data: findResults.data.map((alert, idx) =>
+        transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
+      ),
+    };
   } else {
     return null;
   }
 };
 
 export const transform = (
-  alert: unknown,
-  ruleStatus?: unknown
+  alert: PartialAlert,
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> | null => {
   if (!ruleStatus && isAlertType(alert)) {
     return transformAlertToRule(alert);
@@ -188,7 +211,7 @@ export const transform = (
 
 export const transformOrBulkError = (
   ruleId: string,
-  alert: unknown,
+  alert: PartialAlert,
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
@@ -208,7 +231,7 @@ export const transformOrBulkError = (
 
 export const transformOrImportError = (
   ruleId: string,
-  alert: unknown,
+  alert: PartialAlert,
   existingImportSuccessError: ImportSuccessError
 ): ImportSuccessError => {
   if (isAlertType(alert)) {

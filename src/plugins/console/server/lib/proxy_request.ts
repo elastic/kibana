@@ -57,19 +57,24 @@ export const proxyRequest = ({
     reject = rej;
   });
 
+  const finalUserHeaders = { ...headers };
+  const hasHostHeader = Object.keys(finalUserHeaders).some(key => key.toLowerCase() === 'host');
+  if (!hasHostHeader) {
+    finalUserHeaders.host = hostname;
+  }
+
   const req = client.request({
     method: method.toUpperCase(),
     // We support overriding this on a per request basis to support legacy proxy config. See ./proxy_config.
     rejectUnauthorized: typeof rejectUnauthorized === 'boolean' ? rejectUnauthorized : undefined,
     host: hostname,
-    port: port === '' ? undefined : Number(port),
+    port: port === '' ? undefined : parseInt(port, 10),
     protocol,
     path: `${pathname}${search || ''}`,
     headers: {
-      ...headers,
+      ...finalUserHeaders,
       'content-type': 'application/json',
       'transfer-encoding': 'chunked',
-      host: hostname,
     },
     agent,
   });

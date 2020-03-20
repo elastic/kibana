@@ -8,7 +8,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
-import { clientFunctions } from '../public/functions';
+import { initFunctions } from '../public/functions';
 
 /**
  * A `ExpressionFunctionFactory` is a powerful type used for any function that produces
@@ -87,7 +87,9 @@ export type FunctionFactory<FnFactory> =
 type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
 type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
 type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
-type ClientFunctions = FunctionFactory<typeof clientFunctions[number]>;
+type ClientFunctions = FunctionFactory<
+  ReturnType<typeof initFunctions> extends Array<infer U> ? U : never
+>;
 
 /**
  * A collection of all Canvas Functions.

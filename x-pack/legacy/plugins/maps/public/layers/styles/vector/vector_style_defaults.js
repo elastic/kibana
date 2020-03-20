@@ -5,29 +5,22 @@
  */
 
 import { VectorStyle } from './vector_style';
-import { DEFAULT_ICON, SYMBOLIZE_AS_TYPES } from '../../../../common/constants';
+import { DEFAULT_ICON, LABEL_BORDER_SIZES, SYMBOLIZE_AS_TYPES } from '../../../../common/constants';
 import {
   COLOR_GRADIENTS,
   COLOR_PALETTES,
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS,
 } from '../color_utils';
-import chrome from 'ui/chrome';
+import { getUiSettings } from '../../../kibana_services';
 
 export const MIN_SIZE = 1;
 export const MAX_SIZE = 64;
-export const DEFAULT_MIN_SIZE = 4;
+export const DEFAULT_MIN_SIZE = 7; // Make default large enough to fit default label size
 export const DEFAULT_MAX_SIZE = 32;
 export const DEFAULT_SIGMA = 3;
 export const DEFAULT_LABEL_SIZE = 14;
 export const DEFAULT_ICON_SIZE = 6;
-
-export const LABEL_BORDER_SIZES = {
-  NONE: 'NONE',
-  SMALL: 'SMALL',
-  MEDIUM: 'MEDIUM',
-  LARGE: 'LARGE',
-};
 
 export const VECTOR_STYLES = {
   SYMBOLIZE_AS: 'symbolizeAs',
@@ -74,7 +67,7 @@ export function getDefaultStaticProperties(mapColors = []) {
   const nextFillColor = DEFAULT_FILL_COLORS[nextColorIndex];
   const nextLineColor = DEFAULT_LINE_COLORS[nextColorIndex];
 
-  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode', false);
+  const isDarkMode = getUiSettings().get('theme:darkMode', false);
 
   return {
     [VECTOR_STYLES.ICON]: {
@@ -147,6 +140,9 @@ export function getDefaultDynamicProperties() {
       options: {
         iconPaletteId: 'filledShapes',
         field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+        },
       },
     },
     [VECTOR_STYLES.FILL_COLOR]: {

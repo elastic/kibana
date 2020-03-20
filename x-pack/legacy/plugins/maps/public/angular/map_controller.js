@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
+import rison from 'rison-node';
 import 'ui/directives/listen';
 import 'ui/directives/storage';
 import React from 'react';
@@ -14,9 +15,10 @@ import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
+import { getTimeFilter, getIndexPatternService, getInspector } from '../kibana_services';
 import { Provider } from 'react-redux';
-import { createMapStore } from '../reducers/store';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
 import { GisMap } from '../connected_components/gis_map';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
@@ -27,7 +29,11 @@ import {
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
 } from '../actions/map_actions';
-import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../reducers/ui';
+import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
+  FLYOUT_STATE,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/reducers/ui';
 import {
   enableFullScreen,
   updateFlyout,
@@ -36,15 +42,17 @@ import {
   setOpenTOCDetails,
 } from '../actions/ui_actions';
 import { getIsFullScreen } from '../selectors/ui_selectors';
-import { copyPersistentState } from '../reducers/util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';
 import {
   getQueryableUniqueIndexPatternIds,
   hasDirtyState,
   getLayerListRaw,
 } from '../selectors/map_selectors';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { docTitle } from 'ui/doc_title';
-import { indexPatternService, getInspector } from '../kibana_services';
+
 import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
@@ -65,6 +73,32 @@ const savedQueryService = npStart.plugins.data.query.savedQueries;
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get(MAP_APP_PATH, []);
+
+function getInitialLayersFromUrlParam() {
+  const locationSplit = window.location.href.split('?');
+  if (locationSplit.length <= 1) {
+    return [];
+  }
+  const mapAppParams = new URLSearchParams(locationSplit[1]);
+  if (!mapAppParams.has('initialLayers')) {
+    return [];
+  }
+
+  try {
+    return rison.decode_array(mapAppParams.get('initialLayers'));
+  } catch (e) {
+    toastNotifications.addWarning({
+      title: i18n.translate('xpack.maps.initialLayers.unableToParseTitle', {
+        defaultMessage: `Inital layers not added to map`,
+      }),
+      text: i18n.translate('xpack.maps.initialLayers.unableToParseMessage', {
+        defaultMessage: `Unable to parse contents of 'initialLayers' parameter. Error: {errorMsg}`,
+        values: { errorMsg: e.message },
+      }),
+    });
+    return [];
+  }
+}
 
 app.controller(
   'GisMapController',
@@ -333,7 +367,7 @@ app.controller(
         store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
       }
 
-      const layerList = getInitialLayers(savedMap.layerListJSON);
+      const layerList = getInitialLayers(savedMap.layerListJSON, getInitialLayersFromUrlParam());
       initialLayerListConfig = copyPersistentState(layerList);
       store.dispatch(replaceLayerList(layerList));
       store.dispatch(setRefreshConfig($scope.refreshConfig));
@@ -362,7 +396,7 @@ app.controller(
       const indexPatterns = [];
       const getIndexPatternPromises = nextIndexPatternIds.map(async indexPatternId => {
         try {
-          const indexPattern = await indexPatternService.get(indexPatternId);
+          const indexPattern = await getIndexPatternService().get(indexPatternId);
           indexPatterns.push(indexPattern);
         } catch (err) {
           // unable to fetch index pattern
@@ -485,8 +519,8 @@ app.controller(
     }
 
     // Hide angular timepicer/refresh UI from top nav
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
+    getTimeFilter().disableTimeRangeSelector();
+    getTimeFilter().disableAutoRefreshSelector();
     $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
     $scope.topNavMenu = [
       {
@@ -568,6 +602,7 @@ app.controller(
                     title={savedMap.title}
                     showCopyOnSave={savedMap.id ? true : false}
                     objectType={MAP_SAVED_OBJECT_TYPE}
+                    showDescription={false}
                   />
                 );
                 showSaveModal(saveModal, npStart.core.i18n.Context);

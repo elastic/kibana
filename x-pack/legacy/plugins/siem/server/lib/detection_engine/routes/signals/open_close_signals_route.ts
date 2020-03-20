@@ -4,34 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
-import { LegacyServices } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
-import { SignalsStatusRequest } from '../../signals/types';
+import { SignalsStatusRestParams } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
-import { transformError, getIndex } from '../utils';
+import { transformError, buildRouteValidation, buildSiemResponse } from '../utils';
 
-export const setSignalsStatusRouteDef = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-    options: {
-      tags: ['access:siem'],
+export const setSignalsStatusRoute = (router: IRouter) => {
+  router.post(
+    {
+      path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: setSignalsStatusSchema,
+        body: buildRouteValidation<SignalsStatusRestParams>(setSignalsStatusSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: SignalsStatusRequest, headers) {
-      const { signal_ids: signalIds, query, status } = request.payload;
-      const { clusterClient, spacesClient } = await getClients(request);
-      const index = getIndex(spacesClient.getSpaceId, config);
+    async (context, request, response) => {
+      const { signal_ids: signalIds, query, status } = request.body;
+      const clusterClient = context.core.elasticsearch.dataClient;
+      const siemClient = context.siem.getSiemClient();
+      const siemResponse = buildSiemResponse(response);
 
       let queryObject;
       if (signalIds) {
@@ -45,8 +39,8 @@ export const setSignalsStatusRouteDef = (
         };
       }
       try {
-        const updateByQueryResponse = await clusterClient.callAsCurrentUser('updateByQuery', {
-          index,
+        const result = await clusterClient.callAsCurrentUser('updateByQuery', {
+          index: siemClient.signalsIndex,
           body: {
             script: {
               source: `ctx._source.signal.status = '${status}'`,
@@ -56,24 +50,15 @@ export const setSignalsStatusRouteDef = (
           },
           ignoreUnavailable: true,
         });
-        return updateByQueryResponse;
+        return response.ok({ body: result });
       } catch (err) {
+        // error while getting or updating signal with id: id in signal index .siem-signals
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const setSignalsStatusRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-) => {
-  route(setSignalsStatusRouteDef(config, getClients));
+    }
+  );
 };

@@ -44,7 +44,7 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibP
 export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'heatmap',
   title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
-  icon: 'visHeatmap',
+  icon: 'heatmap',
   description: i18n.translate('visTypeVislib.heatmap.heatmapDescription', {
     defaultMessage: 'Shade cells within a matrix',
   }),

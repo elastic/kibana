@@ -4,41 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  UpdateRuleAlertParamsRest,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { LegacyServices } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
-import { getIdError, transform } from './utils';
-import { transformError, getIndex } from '../utils';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
 
-export const createUpdateRulesRoute = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'PUT',
-    path: DETECTION_ENGINE_RULES_URL,
-    options: {
-      tags: ['access:siem'],
+export const updateRulesRoute = (router: IRouter) => {
+  router.put(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: updateRulesSchema,
+        body: buildRouteValidation<UpdateRuleAlertParamsRest>(updateRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: UpdateRulesRequest, headers) {
+    async (context, request, response) => {
       const {
+        actions,
+        anomaly_threshold: anomalyThreshold,
         description,
         enabled,
         false_positives: falsePositives,
         from,
         query,
         language,
+        machine_learning_job_id: machineLearningJobId,
         output_index: outputIndex,
         saved_id: savedId,
         timeline_id: timelineId,
@@ -57,23 +57,33 @@ export const createUpdateRulesRoute = (
         to,
         type,
         threat,
+        throttle,
         references,
+        note,
         version,
-      } = request.payload;
+        lists,
+      } = request.body;
+      const siemResponse = buildSiemResponse(response);
 
       try {
-        const { alertsClient, actionsClient, savedObjectsClient, spacesClient } = await getClients(
-          request
-        );
+        if (!context.alerting || !context.actions) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+        const alertsClient = context.alerting.getAlertsClient();
+        const actionsClient = context.actions.getActionsClient();
+        const savedObjectsClient = context.core.savedObjects.client;
+        const siemClient = context.siem.getSiemClient();
 
         if (!actionsClient || !alertsClient) {
-          return headers.response().code(404);
+          return siemResponse.error({ statusCode: 404 });
         }
 
-        const finalIndex = outputIndex ?? getIndex(spacesClient.getSpaceId, config);
+        const finalIndex = outputIndex ?? siemClient.signalsIndex;
         const rule = await updateRules({
           alertsClient,
           actionsClient,
+          actions,
+          anomalyThreshold,
           description,
           enabled,
           falsePositives,
@@ -81,6 +91,7 @@ export const createUpdateRulesRoute = (
           immutable: false,
           query,
           language,
+          machineLearningJobId,
           outputIndex: finalIndex,
           savedId,
           savedObjectsClient,
@@ -100,8 +111,11 @@ export const createUpdateRulesRoute = (
           to,
           type,
           threat,
+          throttle,
           references,
+          note,
           version,
+          lists,
         });
         if (rule != null) {
           const ruleStatuses = await savedObjectsClient.find<
@@ -114,43 +128,26 @@ export const createUpdateRulesRoute = (
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
-            return headers
-              .response({
-                message: 'Internal error transforming rules',
-                status_code: 500,
-              })
-              .code(500);
+          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
           } else {
-            return transformed;
+            return response.ok({ body: validated ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });
-          return headers
-            .response({
-              message: error.message,
-              status_code: error.statusCode,
-            })
-            .code(error.statusCode);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const updateRulesRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-) => {
-  route(createUpdateRulesRoute(config, getClients));
+    }
+  );
 };

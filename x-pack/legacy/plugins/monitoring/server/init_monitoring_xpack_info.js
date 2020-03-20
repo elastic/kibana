@@ -7,15 +7,26 @@
 import { checkLicenseGenerator } from './cluster_alerts/check_license';
 import { hasMonitoringCluster } from './es_client/instantiate_client';
 import { LOGGING_TAG } from '../common/constants';
+import { XPackInfo } from '../../xpack_main/server/lib/xpack_info';
 
 /*
  * Expose xpackInfo for the Monitoring cluster as server.plugins.monitoring.info
  */
-export const initMonitoringXpackInfo = async ({ config, xpackMainPlugin, expose, log }) => {
+export const initMonitoringXpackInfo = async ({
+  config,
+  server,
+  client,
+  xpackMainPlugin,
+  licensing,
+  expose,
+  log,
+}) => {
   const xpackInfo = hasMonitoringCluster(config)
-    ? xpackMainPlugin.createXPackInfo({
-        clusterSource: 'monitoring',
-        pollFrequencyInMillis: config.get('monitoring.xpack_api_polling_frequency_millis'),
+    ? new XPackInfo(server, {
+        licensing: licensing.createLicensePoller(
+          client,
+          config.get('monitoring.xpack_api_polling_frequency_millis')
+        ),
       })
     : xpackMainPlugin.info;
 

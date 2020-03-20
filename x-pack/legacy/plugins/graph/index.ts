@@ -4,31 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
 import migrations from './migrations';
 import mappings from './mappings.json';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export const graph: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     id: 'graph',
     configPrefix: 'xpack.graph',
-    publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
-      app: {
-        title: 'Graph',
-        order: 9000,
-        icon: 'plugins/graph/icon.png',
-        euiIconType: 'graphApp',
-        main: 'plugins/graph/index',
-        category: DEFAULT_APP_CATEGORIES.analyze,
-      },
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
       migrations,
     },

@@ -192,9 +192,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
-              value: 0.009285714285714286,
-              max: 0.009285714285714286,
-              avg: 0.0015476190476190477,
+              value: 0.0032,
+              max: 0.0038333333333333336,
+              avg: 0.0027944444444444444,
             });
           }
         });
@@ -231,9 +231,9 @@ export default function({ getService }: FtrProviderContext) {
           expect(firstNode).to.have.property('metric');
           expect(firstNode.metric).to.eql({
             name: 'custom',
-            value: 0.0041964285714285714,
-            max: 0.0041964285714285714,
-            avg: 0.0006994047619047619,
+            value: 0.0016,
+            max: 0.0018333333333333333,
+            avg: 0.0013666666666666669,
           });
         }
       });
@@ -320,9 +320,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
-              value: 0.009285714285714286,
-              max: 0.009285714285714286,
-              avg: 0.0015476190476190477,
+              value: 0.0032,
+              max: 0.0038333333333333336,
+              avg: 0.0027944444444444444,
             });
             const secondNode = nodes[1];
             expect(secondNode).to.have.property('path');
@@ -332,9 +332,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(secondNode).to.have.property('metric');
             expect(secondNode.metric).to.eql({
               name: 'cpu',
-              value: 0.009285714285714286,
-              max: 0.009285714285714286,
-              avg: 0.0015476190476190477,
+              value: 0.0032,
+              max: 0.0038333333333333336,
+              avg: 0.0027944444444444444,
             });
           }
         });

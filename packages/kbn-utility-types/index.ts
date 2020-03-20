@@ -18,7 +18,7 @@
  */
 
 import { PromiseType } from 'utility-types';
-export { $Values, Required, Optional, Class } from 'utility-types';
+export { $Values, Assign, Class, Optional, Required } from 'utility-types';
 
 /**
  * A type that may or may not be a `Promise`.

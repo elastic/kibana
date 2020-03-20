@@ -20,27 +20,34 @@
 import { findIndex, isEmpty } from 'lodash';
 import { IAggConfig } from '../legacy_imports';
 import { AggsState } from './agg_group_state';
+import { Schema, getSchemaByName } from '../schemas';
 
-const isAggRemovable = (agg: IAggConfig, group: IAggConfig[]) => {
+const isAggRemovable = (agg: IAggConfig, group: IAggConfig[], schemas: Schema[]) => {
+  const schema = getSchemaByName(schemas, agg.schema);
   const metricCount = group.reduce(
-    (count, aggregation: IAggConfig) =>
-      aggregation.schema.name === agg.schema.name ? ++count : count,
+    (count, aggregation: IAggConfig) => (aggregation.schema === agg.schema ? ++count : count),
     0
   );
   // make sure the the number of these aggs is above the min
-  return metricCount > agg.schema.min;
+  return metricCount > schema.min;
 };
 
 const getEnabledMetricAggsCount = (group: IAggConfig[]) => {
   return group.reduce(
     (count, aggregation: IAggConfig) =>
-      aggregation.schema.name === 'metric' && aggregation.enabled ? ++count : count,
+      aggregation.schema === 'metric' && aggregation.enabled ? ++count : count,
     0
   );
 };
 
-const calcAggIsTooLow = (agg: IAggConfig, aggIndex: number, group: IAggConfig[]) => {
-  if (!agg.schema.mustBeFirst) {
+const calcAggIsTooLow = (
+  agg: IAggConfig,
+  aggIndex: number,
+  group: IAggConfig[],
+  schemas: Schema[]
+) => {
+  const schema = getSchemaByName(schemas, agg.schema);
+  if (!schema.mustBeFirst) {
     return false;
   }
 

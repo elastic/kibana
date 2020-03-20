@@ -32,6 +32,7 @@ const MessageDeprecation: FunctionComponent<{ deprecation: EnrichedDeprecationIn
 
   return (
     <DeprecationCell
+      reindexBlocker={deprecation.blockerForReindexing}
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
       reindexIndexName={deprecation.reindex ? deprecation.index! : undefined}
@@ -53,7 +54,13 @@ const SimpleMessageDeprecation: FunctionComponent<{ deprecation: EnrichedDepreca
     items.push({ body: deprecation.details });
   }
 
-  return <DeprecationCell items={items} docUrl={deprecation.url} />;
+  return (
+    <DeprecationCell
+      reindexBlocker={deprecation.blockerForReindexing}
+      items={items}
+      docUrl={deprecation.url}
+    />
+  );
 };
 
 interface IndexDeprecationProps {
@@ -89,6 +96,7 @@ export const DeprecationList: FunctionComponent<{
       index: dep.index!,
       details: dep.details,
       reindex: dep.reindex === true,
+      blockerForReindexing: dep.blockerForReindexing,
     }));
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else if (currentGroupBy === GroupByOption.index) {

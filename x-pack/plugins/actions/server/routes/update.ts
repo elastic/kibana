@@ -12,8 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -25,7 +24,7 @@ const bodySchema = schema.object({
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
-export const updateActionRoute = (router: IRouter, licenseState: LicenseState) => {
+export const updateActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.put(
     {
       path: `/api/action/{id}`,
@@ -43,15 +42,26 @@ export const updateActionRoute = (router: IRouter, licenseState: LicenseState) =
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
       const actionsClient = context.actions.getActionsClient();
       const { id } = req.params;
       const { name, config, secrets } = req.body;
-      return res.ok({
-        body: await actionsClient.update({
-          id,
-          action: { name, config, secrets },
-        }),
-      });
+
+      try {
+        return res.ok({
+          body: await actionsClient.update({
+            id,
+            action: { name, config, secrets },
+          }),
+        });
+      } catch (e) {
+        if (isErrorThatHandlesItsOwnResponse(e)) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };

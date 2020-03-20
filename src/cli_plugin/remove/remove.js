@@ -37,7 +37,7 @@ export default function remove(settings, logger) {
     }
 
     logger.log(`Removing ${settings.plugin}...`);
-    del.sync(settings.pluginPath);
+    del.sync(settings.pluginPath, { force: true });
     logger.log('Plugin removal complete');
   } catch (err) {
     logger.error(`Unable to remove plugin because of error: "${err.message}"`);

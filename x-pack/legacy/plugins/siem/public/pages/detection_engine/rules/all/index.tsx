@@ -21,6 +21,8 @@ import {
   CreatePreBuiltRules,
   FilterOptions,
   Rule,
+  PaginationOptions,
+  exportRules,
 } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../components/header_section';
 import {
@@ -29,12 +31,12 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../components/detection_engine/utility_bar';
+} from '../../../../components/utility_bar';
 import { useStateToaster } from '../../../../components/toasters';
 import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
 import { PrePackagedRulesPrompt } from '../components/pre_packaged_rules/load_empty_prompt';
-import { RuleDownloader } from '../components/rule_downloader';
+import { GenericDownloader } from '../../../../components/generic_downloader';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
@@ -118,10 +120,11 @@ export const AllRules = React.memo<AllRulesProps>(
     const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
 
-    const setRules = useCallback((newRules: Rule[]) => {
+    const setRules = useCallback((newRules: Rule[], newPagination: Partial<PaginationOptions>) => {
       dispatch({
         type: 'setRules',
         rules: newRules,
+        pagination: newPagination,
       });
     }, []);
 
@@ -242,10 +245,10 @@ export const AllRules = React.memo<AllRulesProps>(
 
     return (
       <>
-        <RuleDownloader
+        <GenericDownloader
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-          ruleIds={exportRuleIds}
-          onExportComplete={exportCount => {
+          ids={exportRuleIds}
+          onExportSuccess={exportCount => {
             dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
             dispatchToaster({
               type: 'addToaster',
@@ -257,6 +260,7 @@ export const AllRules = React.memo<AllRulesProps>(
               },
             });
           }}
+          exportSelectedData={exportRules}
         />
         <EuiSpacer />
 
@@ -315,6 +319,7 @@ export const AllRules = React.memo<AllRulesProps>(
                   </UtilityBarSection>
                 </UtilityBar>
                 <MyEuiBasicTable
+                  data-test-subj="rules-table"
                   columns={columns}
                   isSelectable={!hasNoPermissions ?? false}
                   itemId="id"

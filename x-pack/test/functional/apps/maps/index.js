@@ -30,6 +30,7 @@ export default function({ loadTestFile, getService }) {
     describe('', function() {
       this.tags('ciGroup7');
       loadTestFile(require.resolve('./documents_source'));
+      loadTestFile(require.resolve('./blended_vector_layer'));
       loadTestFile(require.resolve('./saved_object_management'));
       loadTestFile(require.resolve('./sample_data'));
       loadTestFile(require.resolve('./feature_controls/maps_security'));
@@ -45,6 +46,8 @@ export default function({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./import_geojson'));
       loadTestFile(require.resolve('./layer_errors'));
       loadTestFile(require.resolve('./embeddable'));
+      loadTestFile(require.resolve('./visualize_create_menu'));
+      loadTestFile(require.resolve('./discover'));
     });
   });
 }

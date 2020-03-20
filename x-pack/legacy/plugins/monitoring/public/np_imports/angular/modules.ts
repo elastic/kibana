@@ -18,10 +18,7 @@ import {
   GlobalStateProvider,
   StateManagementConfigProvider,
   AppStateProvider,
-  EventsProvider,
-  PersistedState,
   KbnUrlProvider,
-  RedirectWhenMissingProvider,
   npStart,
 } from '../legacy_imports';
 
@@ -43,7 +40,6 @@ export const localAppModule = (core: AppMountContext['core']) => {
   createLocalConfigModule(core);
   createLocalKbnUrlModule();
   createLocalStateModule();
-  createLocalPersistedStateModule();
   createLocalTopNavModule(npStart.plugins.navigation);
   createHrefModule(core);
 
@@ -52,7 +48,6 @@ export const localAppModule = (core: AppMountContext['core']) => {
     'monitoring/Config',
     'monitoring/I18n',
     'monitoring/Private',
-    'monitoring/PersistedState',
     'monitoring/TopNav',
     'monitoring/State',
     'monitoring/Storage',
@@ -71,7 +66,6 @@ function createLocalStateModule() {
       'monitoring/Config',
       'monitoring/KbnUrl',
       'monitoring/Promise',
-      'monitoring/PersistedState',
     ])
     .factory('AppState', function(Private: IPrivate) {
       return Private(AppStateProvider);
@@ -81,24 +75,10 @@ function createLocalStateModule() {
     });
 }
 
-function createLocalPersistedStateModule() {
-  angular
-    .module('monitoring/PersistedState', ['monitoring/Private', 'monitoring/Promise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: string) {
-          super(value, path, Events);
-        }
-      };
-    });
-}
-
 function createLocalKbnUrlModule() {
   angular
     .module('monitoring/KbnUrl', ['monitoring/Private', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
+    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
 }
 
 function createLocalConfigModule(core: AppMountContext['core']) {

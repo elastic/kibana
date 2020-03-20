@@ -35,6 +35,7 @@ describe('state selectors', () => {
       loading: false,
     },
     ui: {
+      alertFlyoutVisible: false,
       basePath: 'yyz',
       esKuery: '',
       integrationsPopoverOpen: null,
@@ -53,6 +54,16 @@ describe('state selectors', () => {
     ping: {
       pingHistogram: null,
       loading: false,
+      errors: [],
+    },
+    monitorDuration: {
+      monitor_duration: null,
+      loading: false,
+      errors: [],
+    },
+    indexStatus: {
+      loading: false,
+      data: null,
       errors: [],
     },
   };

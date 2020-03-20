@@ -66,6 +66,8 @@ exports[`Error SERVICE_AGENT_NAME 1`] = `"java"`;
 
 exports[`Error SERVICE_ENVIRONMENT 1`] = `undefined`;
 
+exports[`Error SERVICE_FRAMEWORK_NAME 1`] = `undefined`;
+
 exports[`Error SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Error SERVICE_NODE_NAME 1`] = `undefined`;
@@ -176,6 +178,8 @@ exports[`Span SERVICE_AGENT_NAME 1`] = `"java"`;
 
 exports[`Span SERVICE_ENVIRONMENT 1`] = `undefined`;
 
+exports[`Span SERVICE_FRAMEWORK_NAME 1`] = `undefined`;
+
 exports[`Span SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Span SERVICE_NODE_NAME 1`] = `undefined`;
@@ -285,6 +289,8 @@ exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 exports[`Transaction SERVICE_AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction SERVICE_ENVIRONMENT 1`] = `undefined`;
+
+exports[`Transaction SERVICE_FRAMEWORK_NAME 1`] = `undefined`;
 
 exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
 
