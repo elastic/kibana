@@ -4,14 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
+// @ts-ignore
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { isRefreshOnlyQuery } from './is_refresh_only_query';
+import { ISource } from '../sources/source';
+import { DataMeta } from '../../../common/data_request_descriptor_types';
+import { DataRequest } from './data_request';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
 
-export function updateDueToExtent(source, prevMeta = {}, nextMeta = {}) {
+export function updateDueToExtent(
+  source: ISource,
+  prevMeta: DataMeta = {},
+  nextMeta: DataMeta = {}
+) {
   const extentAware = source.isFilterByMapBounds();
   if (!extentAware) {
     return NO_SOURCE_UPDATE_REQUIRED;
@@ -20,7 +28,7 @@ export function updateDueToExtent(source, prevMeta = {}, nextMeta = {}) {
   const { buffer: previousBuffer } = prevMeta;
   const { buffer: newBuffer } = nextMeta;
 
-  if (!previousBuffer) {
+  if (!previousBuffer || !previousBuffer || !newBuffer) {
     return SOURCE_UPDATE_REQUIRED;
   }
 
@@ -51,7 +59,15 @@ export function updateDueToExtent(source, prevMeta = {}, nextMeta = {}) {
     : SOURCE_UPDATE_REQUIRED;
 }
 
-export async function canSkipSourceUpdate({ source, prevDataRequest, nextMeta }) {
+export async function canSkipSourceUpdate({
+  source,
+  prevDataRequest,
+  nextMeta,
+}: {
+  source: ISource;
+  prevDataRequest: DataRequest | undefined;
+  nextMeta: DataMeta;
+}): Promise<boolean> {
   const timeAware = await source.isTimeAware();
   const refreshTimerAware = await source.isRefreshTimerAware();
   const extentAware = source.isFilterByMapBounds();
@@ -67,7 +83,7 @@ export async function canSkipSourceUpdate({ source, prevDataRequest, nextMeta })
     !isQueryAware &&
     !isGeoGridPrecisionAware
   ) {
-    return prevDataRequest && prevDataRequest.hasDataOrRequestInProgress();
+    return !!prevDataRequest && prevDataRequest.hasDataOrRequestInProgress();
   }
 
   if (!prevDataRequest) {
@@ -136,7 +152,13 @@ export async function canSkipSourceUpdate({ source, prevDataRequest, nextMeta })
   );
 }
 
-export function canSkipStyleMetaUpdate({ prevDataRequest, nextMeta }) {
+export function canSkipStyleMetaUpdate({
+  prevDataRequest,
+  nextMeta,
+}: {
+  prevDataRequest: DataRequest | undefined;
+  nextMeta: DataMeta;
+}): boolean {
   if (!prevDataRequest) {
     return false;
   }
@@ -159,7 +181,13 @@ export function canSkipStyleMetaUpdate({ prevDataRequest, nextMeta }) {
   );
 }
 
-export function canSkipFormattersUpdate({ prevDataRequest, nextMeta }) {
+export function canSkipFormattersUpdate({
+  prevDataRequest,
+  nextMeta,
+}: {
+  prevDataRequest: DataRequest | undefined;
+  nextMeta: DataMeta;
+}): boolean {
   if (!prevDataRequest) {
     return false;
   }

@@ -22,7 +22,6 @@ import {
   STYLE_TYPE,
 } from '../../common/constants';
 import { ESGeoGridSource } from './sources/es_geo_grid_source/es_geo_grid_source';
-// @ts-ignore
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
 import { IVectorLayer, VectorLayerArguments } from './vector_layer';
 import { IESSource } from './sources/es_source';
