@@ -43,6 +43,7 @@ import { OpenClosedStats } from '../open_closed_stats';
 
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
+import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
 
 const CONFIGURE_CASES_URL = getConfigureCasesUrl();
 const CREATE_CASE_URL = getCreateCaseUrl();
@@ -71,8 +72,8 @@ const ProgressLoader = styled(EuiProgress)`
 const getSortField = (field: string): SortFieldCase => {
   if (field === SortFieldCase.createdAt) {
     return SortFieldCase.createdAt;
-  } else if (field === SortFieldCase.updatedAt) {
-    return SortFieldCase.updatedAt;
+  } else if (field === SortFieldCase.closedAt) {
+    return SortFieldCase.closedAt;
   }
   return SortFieldCase.createdAt;
 };
@@ -106,13 +107,20 @@ export const AllCases = React.memo(() => {
     isDisplayConfirmDeleteModal,
   } = useDeleteCases();
 
+  const { dispatchResetIsUpdated, isUpdated, updateBulkStatus } = useUpdateCases();
+
   useEffect(() => {
     if (isDeleted) {
       refetchCases(filterOptions, queryParams);
       fetchCasesStatus();
       dispatchResetIsDeleted();
     }
-  }, [isDeleted, filterOptions, queryParams]);
+    if (isUpdated) {
+      refetchCases(filterOptions, queryParams);
+      fetchCasesStatus();
+      dispatchResetIsUpdated();
+    }
+  }, [isDeleted, isUpdated, filterOptions, queryParams]);
 
   const [deleteThisCase, setDeleteThisCase] = useState({
     title: '',
@@ -135,36 +143,38 @@ export const AllCases = React.memo(() => {
     [deleteBulk, deleteThisCase, isDisplayConfirmDeleteModal]
   );
 
-  const toggleDeleteModal = useCallback(
-    (deleteCase: Case) => {
-      handleToggleModal();
-      setDeleteThisCase(deleteCase);
-    },
-    [isDisplayConfirmDeleteModal]
-  );
+  const toggleDeleteModal = useCallback((deleteCase: Case) => {
+    handleToggleModal();
+    setDeleteThisCase(deleteCase);
+  }, []);
 
-  const toggleBulkDeleteModal = useCallback(
-    (deleteCases: string[]) => {
-      handleToggleModal();
-      setDeleteBulk(deleteCases);
+  const toggleBulkDeleteModal = useCallback((deleteCases: string[]) => {
+    handleToggleModal();
+    setDeleteBulk(deleteCases);
+  }, []);
+
+  const handleUpdateCaseStatus = useCallback(
+    (status: string) => {
+      updateBulkStatus(selectedCases, status);
     },
-    [isDisplayConfirmDeleteModal]
+    [selectedCases]
   );
 
   const selectedCaseIds = useMemo(
-    (): string[] =>
-      selectedCases.reduce((arr: string[], caseObj: Case) => [...arr, caseObj.id], []),
+    (): string[] => selectedCases.map((caseObj: Case) => caseObj.id),
     [selectedCases]
   );
 
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void) => (
       <EuiContextMenuPanel
+        data-test-subj="cases-bulk-actions"
         items={getBulkItems({
+          caseStatus: filterOptions.status,
           closePopover,
           deleteCasesAction: toggleBulkDeleteModal,
           selectedCaseIds,
-          caseStatus: filterOptions.status,
+          updateCaseStatus: handleUpdateCaseStatus,
         })}
       />
     ),
@@ -206,17 +216,25 @@ export const AllCases = React.memo(() => {
       }
       setQueryParams(newQueryParams);
     },
-    [setQueryParams, queryParams]
+    [queryParams]
   );
 
   const onFilterChangedCallback = useCallback(
     (newFilterOptions: Partial<FilterOptions>) => {
+      if (newFilterOptions.status && newFilterOptions.status === 'closed') {
+        setQueryParams({ ...queryParams, sortField: SortFieldCase.closedAt });
+      } else if (newFilterOptions.status && newFilterOptions.status === 'open') {
+        setQueryParams({ ...queryParams, sortField: SortFieldCase.createdAt });
+      }
       setFilters({ ...filterOptions, ...newFilterOptions });
     },
-    [filterOptions, setFilters]
+    [filterOptions, queryParams]
   );
 
-  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [actions]);
+  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions, filterOptions.status), [
+    actions,
+    filterOptions.status,
+  ]);
   const memoizedPagination = useMemo(
     () => ({
       pageIndex: queryParams.page - 1,
@@ -231,10 +249,7 @@ export const AllCases = React.memo(() => {
     sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
   };
   const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
-    () => ({
-      selectable: (item: Case) => true,
-      onSelectionChange: setSelectedCases,
-    }),
+    () => ({ onSelectionChange: setSelectedCases }),
     [selectedCases]
   );
   const isCasesLoading = useMemo(
@@ -305,6 +320,7 @@ export const AllCases = React.memo(() => {
                     {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
                   </UtilityBarText>
                   <UtilityBarAction
+                    data-test-subj="case-table-bulk-actions"
                     iconSide="right"
                     iconType="arrowDown"
                     popoverContent={getBulkItemsPopoverContent}
@@ -316,6 +332,7 @@ export const AllCases = React.memo(() => {
             </UtilityBar>
             <EuiBasicTable
               columns={memoizedGetCasesColumns}
+              data-test-subj="cases-table"
               isSelectable
               itemId="id"
               items={data.cases}

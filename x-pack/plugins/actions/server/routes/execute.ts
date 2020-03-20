@@ -11,8 +11,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 
 import { ActionExecutorContract } from '../lib';
 import { ActionTypeExecutorResult } from '../types';
@@ -27,7 +26,7 @@ const bodySchema = schema.object({
 
 export const executeActionRoute = (
   router: IRouter,
-  licenseState: LicenseState,
+  licenseState: ILicenseState,
   actionExecutor: ActionExecutorContract
 ) => {
   router.post(
@@ -49,16 +48,23 @@ export const executeActionRoute = (
       verifyApiAccess(licenseState);
       const { params } = req.body;
       const { id } = req.params;
-      const body: ActionTypeExecutorResult = await actionExecutor.execute({
-        params,
-        request: req,
-        actionId: id,
-      });
-      return body
-        ? res.ok({
-            body,
-          })
-        : res.noContent();
+      try {
+        const body: ActionTypeExecutorResult = await actionExecutor.execute({
+          params,
+          request: req,
+          actionId: id,
+        });
+        return body
+          ? res.ok({
+              body,
+            })
+          : res.noContent();
+      } catch (e) {
+        if (isErrorThatHandlesItsOwnResponse(e)) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };
