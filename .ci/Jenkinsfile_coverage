@@ -8,59 +8,39 @@ kibanaPipeline(timeoutMinutes: 180) {
     withEnv([
       'CODE_COVERAGE=1', // Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
-
-      def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
-
-      withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
-        withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
-          withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-            kibanaPipeline.bash(
-              """
-              source src/dev/ci_setup/setup_env.sh
-
-              if [ -z ${HOST_FROM_VAULT} ]; then
-                echo "### HOST_FROM_VAULT is undefined"
-                exit 1
-              fi
-
-              """, "### Fail fast without vault"
-            )
-          }
-        }
-      }
-
-
-      parallel([
-        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh')
-        ,
-        'x-pack-intake-agent': {
-          withEnv([
-            'NODE_ENV=test' // Needed for jest tests only
-          ]) {
-            workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
-          }
-        },
-        'kibana-oss-agent'   : workers.functional(
-          'kibana-oss-tests',
-          { kibanaPipeline.buildOss() },
-          ossProks()
-        ),
-        'kibana-xpack-agent' : workers.functional(
-          'kibana-xpack-tests',
-          { kibanaPipeline.buildXpack() },
-          xpackProks()
-        )
-      ])
+//      parallel([
+//        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
+//        'x-pack-intake-agent': {
+//          withEnv([
+//            'NODE_ENV=test' // Needed for jest tests only
+//          ]) {
+//            workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
+//          }
+//        },
+//        'kibana-oss-agent'   : workers.functional(
+//          'kibana-oss-tests',
+//          { kibanaPipeline.buildOss() },
+//          ossProks()
+//        ),
+//        'kibana-xpack-agent' : workers.functional(
+//          'kibana-xpack-tests',
+//          { kibanaPipeline.buildXpack() },
+//          xpackProks()
+//        ),
+//      ])
 
 
       workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
-        kibanaPipeline.downloadCoverageArtifacts()
 
+        maybeFailFast()
+
+        def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
         withEnv([
-          "TIME_STAMP=${timestamp()}",
+          "TIME_STAMP=${timestamp}",
           "QA_TEAM_ROCKS=true"
         ]) {
 
+          def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
           withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
             withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
               withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
@@ -113,10 +93,6 @@ kibanaPipeline(timeoutMinutes: 180) {
   kibanaPipeline.sendMail()
 }
 
-def timestamp() {
-  return new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
-}
-
 def ossProks() {
   return [
     'oss-ciGroup1': kibanaPipeline.ossCiGroupProcess(1),
@@ -147,4 +123,26 @@ def xpackProks() {
     'xpack-ciGroup9' : kibanaPipeline.xpackCiGroupProcess(9),
     'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
   ]
+}
+
+def maybeFailFast() {
+  def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
+
+  withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+    withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+      withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+        kibanaPipeline.bash(
+          """
+              source src/dev/ci_setup/setup_env.sh
+
+              if [ -z ${HOST_FROM_VAULT} ]; then
+                echo "### HOST_FROM_VAULT is undefined"
+                exit 1
+              fi
+
+              """, "### Fail fast without vault"
+        )
+      }
+    }
+  }
 }
