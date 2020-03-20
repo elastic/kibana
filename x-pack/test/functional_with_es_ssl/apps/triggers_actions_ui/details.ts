@@ -171,8 +171,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await pageObjects.alertDetailsUI.isViewInAppEnabled()).to.be(true);
 
-        await pageObjects.alertDetailsUI.printViewInAppNav();
-
         await pageObjects.alertDetailsUI.clickViewInApp();
 
         expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);

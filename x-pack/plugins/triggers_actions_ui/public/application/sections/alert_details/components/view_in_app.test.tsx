@@ -35,7 +35,7 @@ jest.mock('../../../lib/capabilities', () => ({
   hasSaveAlertsCapability: jest.fn(() => true),
 }));
 
-describe.skip('view in app', () => {
+describe('view in app', () => {
   describe('link to the app that created the alert', () => {
     it('is disabled when there is no navigation', async () => {
       const alert = mockAlert();
