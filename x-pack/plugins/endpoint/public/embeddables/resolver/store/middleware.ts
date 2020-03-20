@@ -17,6 +17,12 @@ type MiddlewareFactory<S = ResolverState> = (
   api: MiddlewareAPI<Dispatch<ResolverAction>, S>
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
+function flattenEvents(events: ResolverEvent[][]): ResolverEvent[] {
+  return events
+    .map((child: any) => child.lifecycle)
+    .reduce((acc: any, val: any) => acc.concat(val), []);
+}
+
 export const resolverMiddlewareFactory: MiddlewareFactory = context => {
   return api => next => async (action: ResolverAction) => {
     next(action);
@@ -47,7 +53,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
               query: { legacyEndpointID },
             }),
           ]);
-          childEvents = children.length > 0 ? children.map((child: any) => child.lifecycle) : [];
+          childEvents = children.length > 0 ? flattenEvents(children) : [];
         } else {
           const uniquePid = action.payload.selectedEvent.process.entity_id;
           const ppid = action.payload.selectedEvent.process.parent?.entity_id;
@@ -67,7 +73,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
             getAncestors(ppid),
           ]);
         }
-        childEvents = children.length > 0 ? children.map((child: any) => child.lifecycle) : [];
+        childEvents = children.length > 0 ? flattenEvents(children) : [];
         response = [...lifecycle, ...childEvents, ...relatedEvents, ...ancestors];
         api.dispatch({
           type: 'serverReturnedResolverData',
