@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { CustomLink as CustomLinkType } from '../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import {
@@ -26,8 +27,8 @@ import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { LoadingStatePrompt } from '../../LoadingStatePrompt';
 import { px } from '../../../../style/variables';
 
-const SeeMoreButton = styled.button`
-  display: flex;
+const SeeMoreButton = styled.button<{ show: boolean }>`
+  display: ${props => (props.show ? 'flex' : 'none')};
   align-items: center;
   width: 100%;
   justify-content: space-between;
@@ -49,6 +50,40 @@ export const CustomLink = ({
   onSeeMoreClick: () => void;
   transaction: Transaction;
 }) => {
+  const renderEmptyPrompt = (
+    <>
+      <EuiText size="xs" grow={false} style={{ width: px(300) }}>
+        {i18n.translate('xpack.apm.customLink.empty', {
+          defaultMessage:
+            'No custom links found. Set up your own custom links i.e. a link to a specific Dashboard or external link.'
+        })}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiButtonEmpty
+        iconType="plusInCircle"
+        size="xs"
+        onClick={onCreateCustomLinkClick}
+      >
+        {i18n.translate('xpack.apm.customLink.buttom.create', {
+          defaultMessage: 'Create custom link'
+        })}
+      </EuiButtonEmpty>
+    </>
+  );
+
+  const renderCustomLinkBottomSection = isEmpty(customLinks) ? (
+    renderEmptyPrompt
+  ) : (
+    <SeeMoreButton onClick={onSeeMoreClick} show={customLinks.length > 3}>
+      <EuiText size="s">
+        {i18n.translate('xpack.apm.transactionActionMenu.customLink.seeMore', {
+          defaultMessage: 'See more'
+        })}
+      </EuiText>
+      <EuiIcon type="arrowRight" />
+    </SeeMoreButton>
+  );
+
   return (
     <>
       <ActionMenuDivider />
@@ -75,7 +110,7 @@ export const CustomLink = ({
       <EuiSpacer size="s" />
       <SectionSubtitle>
         {i18n.translate('xpack.apm.transactionActionMenu.customLink.subtitle', {
-          defaultMessage: 'Links will always open in a new window/tab.'
+          defaultMessage: 'Links will open in a new window.'
         })}
       </SectionSubtitle>
       <CustomLinkSection
@@ -85,39 +120,8 @@ export const CustomLink = ({
       <EuiSpacer size="s" />
       {status === FETCH_STATUS.LOADING ? (
         <LoadingStatePrompt />
-      ) : customLinks.length ? (
-        customLinks.length > 3 && (
-          <SeeMoreButton onClick={onSeeMoreClick}>
-            <EuiText size="s">
-              {i18n.translate(
-                'xpack.apm.transactionActionMenu.customLink.seeMore',
-                {
-                  defaultMessage: 'See more'
-                }
-              )}
-            </EuiText>
-            <EuiIcon type="arrowRight" />
-          </SeeMoreButton>
-        )
       ) : (
-        <>
-          <EuiText size="xs" grow={false} style={{ width: px(300) }}>
-            {i18n.translate('xpack.apm.customLink.empty', {
-              defaultMessage:
-                'No custom links found. Set up your own custom links i.e. a link to a specific Dashboard or external link.'
-            })}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiButtonEmpty
-            iconType="plusInCircle"
-            size="xs"
-            onClick={onCreateCustomLinkClick}
-          >
-            {i18n.translate('xpack.apm.customLink.buttom.create', {
-              defaultMessage: 'Create custom link'
-            })}
-          </EuiButtonEmpty>
-        </>
+        renderCustomLinkBottomSection
       )}
     </>
   );
