@@ -16,25 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Action, createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
 
-import { resolve } from 'path';
+// Casting to ActionType is a hack - in a real situation use
+// declare module and add this id to ActionContextMapping.
+export const SAMPLE_PANEL_LINK = 'samplePanelLink' as ActionType;
 
-// TODO: use something better once https://github.com/elastic/kibana/issues/26555 is
-// figured out.
-type KibanaPlugin = any;
-
-function samplePanelAction(kibana: KibanaPlugin) {
-  return new kibana.Plugin({
-    publicDir: resolve(__dirname, './public'),
-    uiExports: {
-      embeddableActions: [
-        'plugins/kbn_tp_sample_panel_action/sample_panel_action',
-        'plugins/kbn_tp_sample_panel_action/sample_panel_link',
-      ],
-    },
+export const createSamplePanelLink = (): Action =>
+  createAction<typeof SAMPLE_PANEL_LINK>({
+    type: SAMPLE_PANEL_LINK,
+    getDisplayName: () => 'Sample panel Link',
+    execute: async () => {},
+    getHref: () => 'https://example.com/kibana/test',
   });
-}
-
-module.exports = (kibana: KibanaPlugin) => {
-  return [samplePanelAction(kibana)];
-};

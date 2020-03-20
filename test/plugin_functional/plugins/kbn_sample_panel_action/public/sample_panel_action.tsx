@@ -16,23 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CoreSetup } from 'kibana/public';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { npStart, npSetup } from 'ui/new_platform';
 
-import { CONTEXT_MENU_TRIGGER, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
+import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 import { createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 // Casting to ActionType is a hack - in a real situation use
 // declare module and add this id to ActionContextMapping.
-export const SAMPLE_PANEL_ACTION = 'SAMPLE_PANEL_ACTION' as ActionType;
+export const SAMPLE_PANEL_ACTION = 'samplePanelAction' as ActionType;
 
 export interface SamplePanelActionContext {
   embeddable: IEmbeddable;
 }
 
-function createSamplePanelAction() {
+export function createSamplePanelAction(getStartServices: CoreSetup['getStartServices']) {
   return createAction<typeof SAMPLE_PANEL_ACTION>({
     type: SAMPLE_PANEL_ACTION,
     getDisplayName: () => 'Sample Panel Action',
@@ -40,7 +40,8 @@ function createSamplePanelAction() {
       if (!embeddable) {
         return;
       }
-      npStart.core.overlays.openFlyout(
+      const openFlyout = (await getStartServices())[0].overlays.openFlyout;
+      openFlyout(
         toMountPoint(
           <React.Fragment>
             <EuiFlyoutHeader>
@@ -60,7 +61,3 @@ function createSamplePanelAction() {
     },
   });
 }
-
-const action = createSamplePanelAction();
-npSetup.plugins.uiActions.registerAction(action);
-npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);
