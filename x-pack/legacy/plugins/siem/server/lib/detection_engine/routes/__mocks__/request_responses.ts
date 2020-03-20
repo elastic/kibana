@@ -455,6 +455,24 @@ export const getResult = (): RuleAlertType => ({
   scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
 });
 
+export const getMlResult = (): RuleAlertType => {
+  const result = getResult();
+
+  return {
+    ...result,
+    params: {
+      ...result.params,
+      query: undefined,
+      language: undefined,
+      filters: undefined,
+      index: undefined,
+      type: 'machine_learning',
+      anomalyThreshold: 44,
+      machineLearningJobId: 'some_job_id',
+    },
+  };
+};
+
 export const updateActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',

@@ -234,6 +234,8 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         references,
                         note,
                         version,
+                        anomalyThreshold,
+                        machineLearningJobId,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
                     } else if (rule != null) {

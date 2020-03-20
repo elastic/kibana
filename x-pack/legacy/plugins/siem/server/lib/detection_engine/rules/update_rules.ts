@@ -48,6 +48,8 @@ export const updateRules = async ({
   version,
   note,
   lists,
+  anomalyThreshold,
+  machineLearningJobId,
 }: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -81,6 +83,8 @@ export const updateRules = async ({
     references,
     version,
     note,
+    anomalyThreshold,
+    machineLearningJobId,
   });
 
   // TODO: Remove this and use regular lists once the feature is stable for a release
@@ -118,6 +122,8 @@ export const updateRules = async ({
         references,
         note,
         version: calculatedVersion,
+        anomalyThreshold,
+        machineLearningJobId,
         ...listsParam,
       },
     },

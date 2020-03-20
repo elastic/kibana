@@ -8,15 +8,16 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { EuiThemeProvider } from '../../../../../observability/public';
-import { LogEntryColumn } from '../../../utils/log_entry';
 import { LogEntryFieldColumn } from './log_entry_field_column';
+import { LogColumn } from '../../../../common/http_api';
 
 describe('LogEntryFieldColumn', () => {
   it('should output a <ul> when displaying an Array of values', () => {
-    const column: LogEntryColumn = {
+    const column: LogColumn = {
       columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
-      value: JSON.stringify(['a', 'b', 'c']),
+      value: ['a', 'b', 'c'],
+      highlights: [],
     };
 
     const component = mount(
@@ -42,13 +43,14 @@ describe('LogEntryFieldColumn', () => {
   });
 
   it('should output a text representation of a passed complex value', () => {
-    const column: LogEntryColumn = {
+    const column: LogColumn = {
       columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
-      value: JSON.stringify({
+      value: {
         lat: 1,
         lon: 2,
-      }),
+      },
+      highlights: [],
     };
 
     const component = mount(
@@ -67,10 +69,11 @@ describe('LogEntryFieldColumn', () => {
   });
 
   it('should output just text when passed a non-Array', () => {
-    const column: LogEntryColumn = {
+    const column: LogColumn = {
       columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
-      value: JSON.stringify('foo'),
+      value: 'foo',
+      highlights: [],
     };
 
     const component = mount(
