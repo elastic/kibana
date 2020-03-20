@@ -380,7 +380,7 @@ export class DataRecognizer {
     end: number | undefined,
     jobOverrides: JobOverride[],
     datafeedOverrides: DatafeedOverride[],
-    estimateModelMemory: boolean | undefined
+    estimateModelMemory?: boolean
   ) {
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, jobPrefix);
