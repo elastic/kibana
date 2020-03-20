@@ -111,7 +111,9 @@ export function createTableRowDirective(
       };
 
       $scope.getContextAppHref = () => {
-        const path = `#/discover/context/${$scope.indexPattern.id}/${$scope.row._id}`;
+        const path = `#/discover/context/${encodeURIComponent(
+          $scope.indexPattern.id
+        )}/${encodeURIComponent($scope.row._id)}`;
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
         const hash = $httpParamSerializer({

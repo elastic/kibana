@@ -391,7 +391,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: searchId => `#/discover/${searchId}`,
+          makeUrl: searchId => `#/discover/${encodeURIComponent(searchId)}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -749,7 +749,7 @@ function discoverController(
           });
 
           if (savedSearch.id !== $route.current.params.id) {
-            history.push(`/discover/${savedSearch.id}`);
+            history.push(`/discover/${encodeURIComponent(savedSearch.id)}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
@@ -919,7 +919,7 @@ function discoverController(
   };
 
   $scope.resetQuery = function() {
-    history.push(`/discover/${$route.current.params.id}`);
+    history.push(`/discover/${encodeURIComponent($route.current.params.id)}`);
   };
 
   $scope.newQuery = function() {

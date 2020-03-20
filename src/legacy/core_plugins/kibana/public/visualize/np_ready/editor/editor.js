@@ -630,7 +630,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               const savedVisualizationParsedUrl = new KibanaParsedUrl({
                 basePath: getBasePath(),
                 appId: kbnBaseUrl.slice('/app/'.length),
-                appPath: `${VisualizeConstants.EDIT_PATH}/${savedVis.id}`,
+                appPath: `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(savedVis.id)}`,
               });
               // Manually insert a new url so the back button will open the saved visualization.
               history.replace(savedVisualizationParsedUrl.appPath);
