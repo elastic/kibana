@@ -19,7 +19,7 @@ export interface DatasourceInputStream {
     string,
     {
       type?: string;
-      value: any;
+      value?: any;
     }
   >;
 }
