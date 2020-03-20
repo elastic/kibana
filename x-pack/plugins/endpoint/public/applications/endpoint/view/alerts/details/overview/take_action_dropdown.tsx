@@ -7,6 +7,10 @@
 import React, { memo, useState, useCallback } from 'react';
 import { EuiPopover, EuiFormRow, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useDispatch } from 'react-redux';
+import { AlertAction } from '../../../../store/alerts';
+import { useAlertListSelector } from '../../hooks/use_alerts_selector';
+import * as selectors from '../../../../store/alerts/selectors';
 
 const TakeActionButton = memo(({ onClick }: { onClick: () => void }) => (
   <EuiButton
@@ -23,6 +27,9 @@ const TakeActionButton = memo(({ onClick }: { onClick: () => void }) => (
 ));
 
 export const TakeActionDropdown = memo(() => {
+  const dispatch = useDispatch<(action: AlertAction) => void>();
+  const alertDetails = useAlertListSelector(selectors.selectedAlertDetailsData);
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const onClick = useCallback(() => {
@@ -32,6 +39,15 @@ export const TakeActionDropdown = memo(() => {
   const closePopover = useCallback(() => {
     setIsDropdownOpen(false);
   }, []);
+
+  const closeAlert = useCallback(() => {
+    if (alertDetails) {
+      dispatch({
+        type: 'userClosedAlert',
+        payload: alertDetails.id,
+      });
+    }
+  }, [alertDetails, dispatch]);
 
   return (
     <EuiPopover
@@ -46,6 +62,7 @@ export const TakeActionDropdown = memo(() => {
           data-test-subj="alertDetailTakeActionCloseAlertButton"
           color="text"
           iconType="folderCheck"
+          onClick={closeAlert}
         >
           <FormattedMessage
             id="xpack.endpoint.application.endpoint.alertDetails.takeAction.close"

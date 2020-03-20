@@ -45,5 +45,25 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
       );
       api.dispatch({ type: 'serverReturnedAlertDetailsData', payload: response });
     }
+
+    if (action.type === 'userClosedAlert') {
+      const id = action.payload;
+      const body = {
+        state: {
+          active: false,
+        },
+      };
+      // const response = await coreStart.http.patch(
+      //   `/api/endpoint/alerts/${id}`,
+      //   {
+      //     body: JSON.stringify(body),
+      //   }
+      // );
+      try {
+        api.dispatch({ type: 'serverSuccessfullyClosedAlert' });
+      } catch (error) {
+        api.dispatch({ type: 'serverFailedToCloseAlert', payload: error });
+      }
+    }
   };
 };

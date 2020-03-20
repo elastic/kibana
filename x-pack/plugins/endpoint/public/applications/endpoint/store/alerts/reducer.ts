@@ -19,6 +19,7 @@ const initialState = (): AlertListState => {
     searchBar: {
       patterns: [],
     },
+    error: undefined,
   };
 };
 
@@ -59,6 +60,11 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
         ...state.searchBar,
         patterns: action.payload,
       },
+    };
+  } else if (action.type === 'serverFailedToCloseAlert') {
+    return {
+      ...state,
+      error: action.payload,
     };
   }
 

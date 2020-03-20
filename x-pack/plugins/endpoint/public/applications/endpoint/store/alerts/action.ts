@@ -19,11 +19,28 @@ interface ServerReturnedAlertDetailsData {
 }
 
 interface ServerReturnedSearchBarIndexPatterns {
-  type: 'serverReturnedSearchBarIndexPatterns';
-  payload: IIndexPattern[];
+  readonly type: 'serverReturnedSearchBarIndexPatterns';
+  readonly payload: IIndexPattern[];
+}
+
+interface UserClosedAlert {
+  readonly type: 'userClosedAlert';
+  readonly payload: string;
+}
+
+interface ServerSuccessfullyClosedAlert {
+  readonly type: 'serverSuccessfullyClosedAlert';
+}
+
+interface ServerFailedToCloseAlert {
+  type: 'serverFailedToCloseAlert';
+  payload: ServerApiError;
 }
 
 export type AlertAction =
   | ServerReturnedAlertsData
   | ServerReturnedAlertDetailsData
-  | ServerReturnedSearchBarIndexPatterns;
+  | ServerReturnedSearchBarIndexPatterns
+  | UserClosedAlert
+  | ServerSuccessfullyClosedAlert
+  | ServerFailedToCloseAlert;

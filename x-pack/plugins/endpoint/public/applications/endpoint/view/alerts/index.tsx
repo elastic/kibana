@@ -76,9 +76,9 @@ export const AlertIndex = memo(() => {
         }),
       },
       {
-        id: 'archived',
-        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.archived', {
-          defaultMessage: 'Archived',
+        id: 'closed',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.closed', {
+          defaultMessage: 'Closed',
         }),
       },
       {
@@ -180,7 +180,7 @@ export const AlertIndex = memo(() => {
             </EuiBadge>
           );
         }
-      } else if (columnId === 'archived') {
+      } else if (columnId === 'closed') {
         return null;
       } else if (columnId === 'malware_score') {
         return row.file.malware_classifier.score;

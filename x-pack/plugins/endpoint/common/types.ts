@@ -237,6 +237,10 @@ interface AlertMetadata {
   // Alert Details Pagination
   next: string | null;
   prev: string | null;
+
+  state?: {
+    active: boolean;
+  };
 }
 
 interface AlertState {
