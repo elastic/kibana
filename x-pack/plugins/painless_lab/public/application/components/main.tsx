@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'kibana/public';
 import React, { useState, useEffect, FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,15 +17,11 @@ import { Editor } from './editor';
 import { RequestFlyout } from './request_flyout';
 import { useAppContext } from '../context';
 
-interface Props {
-  http: HttpSetup;
-}
-
-export const Main: FunctionComponent<Props> = ({ http }) => {
-  const { state, updateState } = useAppContext();
+export const Main: FunctionComponent = () => {
+  const { state, updateState, services, links } = useAppContext();
 
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
-  const { inProgress, response, submit } = useSubmitCode(http);
+  const { inProgress, response, submit } = useSubmitCode(services.http);
 
   // Live-update the output and persist state as the user changes it.
   useEffect(() => {
@@ -61,6 +56,7 @@ export const Main: FunctionComponent<Props> = ({ http }) => {
       </EuiFlexGroup>
 
       <MainControls
+        links={links}
         isLoading={inProgress}
         toggleRequestFlyout={toggleRequestFlyout}
         isRequestFlyoutOpen={isRequestFlyoutOpen}
@@ -69,6 +65,7 @@ export const Main: FunctionComponent<Props> = ({ http }) => {
 
       {isRequestFlyoutOpen && (
         <RequestFlyout
+          links={links}
           onClose={() => setRequestFlyoutOpen(false)}
           requestBody={formatRequestPayload(state, PayloadFormat.PRETTY)}
           response={response ? formatJson(response.result || response.error) : ''}

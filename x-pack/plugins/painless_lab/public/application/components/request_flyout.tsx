@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import {
   EuiCodeBlock,
   EuiTabbedContent,
@@ -17,16 +17,21 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Links } from '../../links';
 
-export function RequestFlyout({
+interface Props {
+  onClose: any;
+  requestBody: string;
+  links: Links;
+  response?: string;
+}
+
+export const RequestFlyout: FunctionComponent<Props> = ({
   onClose,
   requestBody,
   response,
-}: {
-  onClose: any;
-  requestBody: string;
-  response?: string;
-}) {
+  links,
+}) => {
   return (
     <EuiFlyout onClose={onClose} maxWidth={640}>
       <EuiFlyoutHeader>
@@ -48,7 +53,7 @@ export function RequestFlyout({
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href="https://www.elastic.co/guide/en/elasticsearch/painless/current/painless-execute-api.html"
+              href={links.painlessExecuteAPI}
               target="_blank"
               iconType="help"
             >
@@ -90,4 +95,4 @@ export function RequestFlyout({
       </EuiFlyoutBody>
     </EuiFlyout>
   );
-}
+};

@@ -21,7 +21,7 @@ import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public
 import { useAppContext } from '../../context';
 
 export const ParametersTab: FunctionComponent = () => {
-  const { state, updateState } = useAppContext();
+  const { state, updateState, links } = useAppContext();
   return (
     <>
       <EuiSpacer size="m" />
@@ -44,10 +44,7 @@ export const ParametersTab: FunctionComponent = () => {
         fullWidth
         labelAppend={
           <EuiText size="xs">
-            <EuiLink
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-using.html#prefer-params"
-              target="_blank"
-            >
+            <EuiLink href={links.modulesScriptingPreferParams} target="_blank">
               {i18n.translate('xpack.painlessLab.parametersFieldDocLinkText', {
                 defaultMessage: 'Parameters docs',
               })}

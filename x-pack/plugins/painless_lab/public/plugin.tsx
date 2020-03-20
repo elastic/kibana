@@ -14,7 +14,9 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { LICENSE_CHECK_STATE } from '../../licensing/public';
 
 import { PLUGIN } from '../common/constants';
+
 import { PluginDependencies } from './types';
+import { getLinks } from './links';
 import { LanguageService } from './services';
 
 export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencies> {
@@ -69,6 +71,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         const {
           i18n: { Context: I18nContext },
           notifications,
+          docLinks,
         } = core;
 
         this.languageService.setup();
@@ -87,7 +90,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         }
 
         const { renderApp } = await import('./application');
-        return renderApp(element, { I18nContext, http, uiSettings });
+        return renderApp(element, { I18nContext, http, uiSettings, links: getLinks(docLinks) });
       },
     });
   }
