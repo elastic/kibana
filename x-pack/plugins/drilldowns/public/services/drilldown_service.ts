@@ -6,7 +6,7 @@
 
 import { CoreSetup } from 'src/core/public';
 import { AdvancedUiActionsSetup } from '../../../advanced_ui_actions/public';
-import { Drilldown, DrilldownFactoryContext } from '../types';
+import { DrilldownDefinition, DrilldownFactoryContext } from '../types';
 import { UiActionsActionFactoryDefinition as ActionFactoryDefinition } from '../../../../../src/plugins/ui_actions/public';
 
 export interface DrilldownServiceSetupDeps {
@@ -22,7 +22,7 @@ export interface DrilldownServiceSetupContract {
     CreationContext extends object = object,
     ExecutionContext extends object = object
   >(
-    drilldown: Drilldown<Config, CreationContext, ExecutionContext>
+    drilldown: DrilldownDefinition<Config, CreationContext, ExecutionContext>
   ) => void;
 }
 
@@ -43,7 +43,7 @@ export class DrilldownService {
       getDisplayName,
       euiIcon,
       execute,
-    }: Drilldown<Config, CreationContext, ExecutionContext>) => {
+    }: DrilldownDefinition<Config, CreationContext, ExecutionContext>) => {
       const actionFactory: ActionFactoryDefinition<
         Config,
         DrilldownFactoryContext<CreationContext>,

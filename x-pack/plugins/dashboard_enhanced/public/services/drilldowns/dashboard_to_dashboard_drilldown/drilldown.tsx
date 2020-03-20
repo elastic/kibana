@@ -10,7 +10,7 @@ import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_reac
 import { FactoryContext, ActionContext, Config, CollectConfigProps } from './types';
 import { CollectConfigContainer } from './collect_config';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
-import { DrilldownsDrilldown as Drilldown } from '../../../../../drilldowns/public';
+import { DrilldownDefinition as Drilldown } from '../../../../../drilldowns/public';
 import { txtGoToDashboard } from './i18n';
 
 export interface Params {

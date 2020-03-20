@@ -6,9 +6,27 @@
 
 import { AdvancedUiActionsActionFactoryDefinition as ActionFactoryDefinition } from '../../advanced_ui_actions/public';
 
-export interface Drilldown<
+/**
+ * This is a convenience interface to register a drilldown. Drilldown has
+ * ability to collect configuration from user. Once drilldown is executed it
+ * receives the collected information together with the context of the
+ * user's interaction.
+ *
+ * `Config` is a serializable object containing the configuration that the
+ * drilldown is able to collect using UI.
+ *
+ * `PlaceContext` is an object that the app that opens drilldown management
+ * flyout provides to the React component, specifying the contextual information
+ * about that app. For example, on Dashboard app this context contains
+ * information about the current embeddable and dashboard.
+ *
+ * `ExecutionContext` is an object created in response to user's interaction
+ * and provided to the `execute` function of the drilldown. This object contains
+ * information about the action user performed.
+ */
+export interface DrilldownDefinition<
   Config extends object = object,
-  CreationContext extends object = object,
+  PlaceContext extends object = object,
   ExecutionContext extends object = object
 > {
   /**
@@ -21,7 +39,7 @@ export interface Drilldown<
    */
   createConfig: ActionFactoryDefinition<
     Config,
-    DrilldownFactoryContext<CreationContext>,
+    DrilldownFactoryContext<PlaceContext>,
     ExecutionContext
   >['createConfig'];
 
@@ -46,7 +64,7 @@ export interface Drilldown<
    */
   CollectConfig: ActionFactoryDefinition<
     Config,
-    DrilldownFactoryContext<CreationContext>,
+    DrilldownFactoryContext<PlaceContext>,
     ExecutionContext
   >['CollectConfig'];
 
@@ -56,7 +74,7 @@ export interface Drilldown<
    */
   isConfigValid: ActionFactoryDefinition<
     Config,
-    DrilldownFactoryContext<CreationContext>,
+    DrilldownFactoryContext<PlaceContext>,
     ExecutionContext
   >['isConfigValid'];
 
