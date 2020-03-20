@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
-import { isEmpty, pick } from 'lodash';
+import { isEmpty, pick, get } from 'lodash';
 import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   FilterOptions,
@@ -120,7 +120,7 @@ const getInvalidTemplateVariables = (
   return (Mustache.parse(template) as Array<[string, string]>)
     .filter(([type]) => type === 'name')
     .map(([, value]) => value)
-    .filter(templateVar => _.get(transaction, templateVar) == null);
+    .filter(templateVar => get(transaction, templateVar) == null);
 };
 
 const validateUrl = (url: string, transaction?: Transaction) => {
@@ -129,7 +129,7 @@ const validateUrl = (url: string, transaction?: Transaction) => {
       'xpack.apm.settings.customizeUI.customLink.preview.transaction.notFound',
       {
         defaultMessage:
-          "We couldn't find a matching transaction documents based on the defined filters."
+          "We couldn't find a matching transaction document based on the defined filters."
       }
     );
   }
@@ -165,11 +165,10 @@ export const replaceTemplateVariables = (
   transaction?: Transaction
 ) => {
   const error = validateUrl(url, transaction);
-  let formattedUrl = url;
   try {
-    formattedUrl = Mustache.render(url, transaction);
+    return { formattedUrl: Mustache.render(url, transaction), error };
   } catch (e) {
     // errors will be caught on validateUrl function
+    return { formattedUrl: url, error };
   }
-  return { formattedUrl, error };
 };

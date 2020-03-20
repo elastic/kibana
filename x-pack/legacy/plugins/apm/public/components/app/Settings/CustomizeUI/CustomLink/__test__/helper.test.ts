@@ -6,9 +6,11 @@
 import {
   convertFiltersToArray,
   convertFiltersToObject,
-  getSelectOptions
+  getSelectOptions,
+  replaceTemplateVariables
 } from '../CustomLinkFlyout/helper';
 import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
+import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 
 describe('Custom link helper', () => {
   describe('convertFiltersToArray', () => {
@@ -134,6 +136,70 @@ describe('Custom link helper', () => {
           ''
         )
       ).toEqual([{ value: 'DEFAULT', text: 'Select field...' }]);
+    });
+  });
+
+  describe('replaceTemplateVariables', () => {
+    const transaction = ({
+      service: { name: 'foo' },
+      trace: { id: '123' }
+    } as unknown) as Transaction;
+
+    it('replaces template variables', () => {
+      expect(
+        replaceTemplateVariables(
+          'https://elastic.co?service.name={{service.name}}&trace.id={{trace.id}}',
+          transaction
+        )
+      ).toEqual({
+        error: undefined,
+        formattedUrl: 'https://elastic.co?service.name=foo&trace.id=123'
+      });
+    });
+
+    it('returnes error when transaction is not defined', () => {
+      const expectedResult = {
+        error:
+          "We couldn't find a matching transaction document based on the defined filters.",
+        formattedUrl: 'https://elastic.co?service.name=&trace.id='
+      };
+      expect(
+        replaceTemplateVariables(
+          'https://elastic.co?service.name={{service.name}}&trace.id={{trace.id}}'
+        )
+      ).toEqual(expectedResult);
+      expect(
+        replaceTemplateVariables(
+          'https://elastic.co?service.name={{service.name}}&trace.id={{trace.id}}',
+          ({} as unknown) as Transaction
+        )
+      ).toEqual(expectedResult);
+    });
+
+    it('returns error when could not replace variables', () => {
+      expect(
+        replaceTemplateVariables(
+          'https://elastic.co?service.name={{service.nam}}&trace.id={{trace.i}}',
+          transaction
+        )
+      ).toEqual({
+        error:
+          "We couldn't find a value match for {{service.nam}}, {{trace.i}} in the example transaction document.",
+        formattedUrl: 'https://elastic.co?service.name=&trace.id='
+      });
+    });
+
+    it('returns error when variable is invalid', () => {
+      expect(
+        replaceTemplateVariables(
+          'https://elastic.co?service.name={{service.name}',
+          transaction
+        )
+      ).toEqual({
+        error:
+          "We couldn't find an example transaction document due to invalid variable(s) defined.",
+        formattedUrl: 'https://elastic.co?service.name={{service.name}'
+      });
     });
   });
 });
