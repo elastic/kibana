@@ -12,7 +12,7 @@ import { createKibanaReactContext } from '../../../../../src/plugins/kibana_reac
 import { Links } from '../links';
 
 import { AppContextProvider } from './context';
-import { Main } from './components/main';
+import { Main, Props as MainProps } from './components/main';
 
 interface AppDependencies {
   http: CoreSetup['http'];
@@ -23,7 +23,8 @@ interface AppDependencies {
 
 export function renderApp(
   element: HTMLElement | null,
-  { http, I18nContext, uiSettings, links }: AppDependencies
+  { http, I18nContext, uiSettings, links }: AppDependencies,
+  props: MainProps
 ) {
   if (!element) {
     return () => undefined;
@@ -36,7 +37,7 @@ export function renderApp(
     <I18nContext>
       <KibanaReactContextProvider>
         <AppContextProvider value={{ http, links }}>
-          <Main />
+          <Main {...props} />
         </AppContextProvider>
       </KibanaReactContextProvider>
     </I18nContext>,

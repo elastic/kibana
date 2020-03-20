@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, FunctionComponent } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Observable } from 'rxjs';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatRequestPayload, formatJson } from '../lib/format';
@@ -17,7 +18,11 @@ import { Editor } from './editor';
 import { RequestFlyout } from './request_flyout';
 import { useAppContext } from '../context';
 
-export const Main: FunctionComponent = () => {
+export interface Props {
+  getIsNavDrawerLocked$: () => Observable<boolean>;
+}
+
+export const Main = ({ getIsNavDrawerLocked$ }: Props) => {
   const { state, updateState, services, links } = useAppContext();
 
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
@@ -31,6 +36,16 @@ export const Main: FunctionComponent = () => {
   const toggleRequestFlyout = () => {
     setRequestFlyoutOpen(!isRequestFlyoutOpen);
   };
+
+  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
+
+  useEffect(() => {
+    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
+      setIsNavDrawerLocked(newIsNavDrawerLocked);
+    });
+
+    return () => subscription.unsubscribe();
+  });
 
   return (
     <div className="painlessLabMainContainer">
@@ -61,6 +76,7 @@ export const Main: FunctionComponent = () => {
         toggleRequestFlyout={toggleRequestFlyout}
         isRequestFlyoutOpen={isRequestFlyoutOpen}
         reset={() => updateState(() => ({ code: exampleScript }))}
+        isNavDrawerLocked={isNavDrawerLocked}
       />
 
       {isRequestFlyoutOpen && (
