@@ -11,7 +11,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { LoginState } from '../../../common/login_state';
 import { LoginPage } from './login_page';
 import { coreMock } from '../../../../../../src/core/public/mocks';
-import { DisabledLoginForm, BasicLoginForm } from './components';
+import { DisabledLoginForm, LoginForm } from './components';
 
 const createLoginState = (options?: Partial<LoginState>) => {
   return {
@@ -203,7 +203,7 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
+      expect(wrapper.find(LoginForm)).toMatchSnapshot();
     });
 
     it('renders as expected when info message is set', async () => {
@@ -226,7 +226,7 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
+      expect(wrapper.find(LoginForm)).toMatchSnapshot();
     });
 
     it('renders as expected when loginAssistanceMessage is set', async () => {
@@ -248,7 +248,7 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
+      expect(wrapper.find(LoginForm)).toMatchSnapshot();
     });
   });
 

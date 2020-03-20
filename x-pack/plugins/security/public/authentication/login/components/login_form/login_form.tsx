@@ -54,7 +54,7 @@ enum MessageType {
   Danger,
 }
 
-export class BasicLoginForm extends Component<Props, State> {
+export class LoginForm extends Component<Props, State> {
   public state: State = {
     loadingState: { type: LoadingStateType.None },
     username: '',

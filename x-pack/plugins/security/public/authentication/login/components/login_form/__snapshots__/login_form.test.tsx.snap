@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`BasicLoginForm login selector renders as expected with login form 1`] = `
+exports[`LoginForm login selector renders as expected with login form 1`] = `
 <Fragment>
   <EuiButton
     className="loginWelcome__selectorButton"
@@ -118,7 +118,7 @@ exports[`BasicLoginForm login selector renders as expected with login form 1`] =
 </Fragment>
 `;
 
-exports[`BasicLoginForm login selector renders as expected without login form 1`] = `
+exports[`LoginForm login selector renders as expected without login form 1`] = `
 <Fragment>
   <EuiButton
     className="loginWelcome__selectorButton"
@@ -145,7 +145,7 @@ exports[`BasicLoginForm login selector renders as expected without login form 1`
 </Fragment>
 `;
 
-exports[`BasicLoginForm renders as expected 1`] = `
+exports[`LoginForm renders as expected 1`] = `
 <Fragment>
   <EuiPanel>
     <form

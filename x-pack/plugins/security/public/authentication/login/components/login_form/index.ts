@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { BasicLoginForm } from './basic_login_form';
+export { LoginForm } from './login_form';

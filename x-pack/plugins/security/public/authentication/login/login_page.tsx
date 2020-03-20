@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
 import { LoginState } from '../../../common/login_state';
-import { BasicLoginForm, DisabledLoginForm } from './components';
+import { LoginForm, DisabledLoginForm } from './components';
 
 interface Props {
   http: HttpStart;
@@ -220,7 +220,7 @@ export class LoginPage extends Component<Props, State> {
     }
 
     return (
-      <BasicLoginForm
+      <LoginForm
         http={this.props.http}
         notifications={this.props.notifications}
         showLoginForm={showLoginForm}

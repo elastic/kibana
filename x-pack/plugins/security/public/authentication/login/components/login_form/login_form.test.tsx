@@ -8,11 +8,11 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { mountWithIntl, nextTick, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { BasicLoginForm } from './basic_login_form';
+import { LoginForm } from './login_form';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
-describe('BasicLoginForm', () => {
+describe('LoginForm', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       value: { href: 'https://some-host/bar' },
@@ -28,7 +28,7 @@ describe('BasicLoginForm', () => {
     const coreStartMock = coreMock.createStart();
     expect(
       shallowWithIntl(
-        <BasicLoginForm
+        <LoginForm
           http={coreStartMock.http}
           notifications={coreStartMock.notifications}
           loginAssistanceMessage=""
@@ -42,7 +42,7 @@ describe('BasicLoginForm', () => {
   it('renders an info message when provided.', () => {
     const coreStartMock = coreMock.createStart();
     const wrapper = shallowWithIntl(
-      <BasicLoginForm
+      <LoginForm
         http={coreStartMock.http}
         notifications={coreStartMock.notifications}
         infoMessage={'Hey this is an info message'}
@@ -60,7 +60,7 @@ describe('BasicLoginForm', () => {
     coreStartMock.http.post.mockRejectedValue({ response: { status: 401 } });
 
     const wrapper = mountWithIntl(
-      <BasicLoginForm
+      <LoginForm
         http={coreStartMock.http}
         notifications={coreStartMock.notifications}
         loginAssistanceMessage=""
@@ -88,7 +88,7 @@ describe('BasicLoginForm', () => {
     coreStartMock.http.post.mockRejectedValue({ response: { status: 500 } });
 
     const wrapper = mountWithIntl(
-      <BasicLoginForm
+      <LoginForm
         http={coreStartMock.http}
         notifications={coreStartMock.notifications}
         loginAssistanceMessage=""
@@ -117,7 +117,7 @@ describe('BasicLoginForm', () => {
     coreStartMock.http.post.mockResolvedValue({});
 
     const wrapper = mountWithIntl(
-      <BasicLoginForm
+      <LoginForm
         http={coreStartMock.http}
         notifications={coreStartMock.notifications}
         loginAssistanceMessage=""
@@ -149,7 +149,7 @@ describe('BasicLoginForm', () => {
       const coreStartMock = coreMock.createStart();
       expect(
         shallowWithIntl(
-          <BasicLoginForm
+          <LoginForm
             http={coreStartMock.http}
             notifications={coreStartMock.notifications}
             loginAssistanceMessage=""
@@ -170,7 +170,7 @@ describe('BasicLoginForm', () => {
       const coreStartMock = coreMock.createStart();
       expect(
         shallowWithIntl(
-          <BasicLoginForm
+          <LoginForm
             http={coreStartMock.http}
             notifications={coreStartMock.notifications}
             loginAssistanceMessage=""
@@ -199,7 +199,7 @@ describe('BasicLoginForm', () => {
 
       window.location.href = currentURL;
       const wrapper = mountWithIntl(
-        <BasicLoginForm
+        <LoginForm
           http={coreStartMock.http}
           notifications={coreStartMock.notifications}
           loginAssistanceMessage=""

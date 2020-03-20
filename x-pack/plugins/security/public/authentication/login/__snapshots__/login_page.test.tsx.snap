@@ -96,7 +96,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
 `;
 
 exports[`LoginPage enabled form state renders as expected 1`] = `
-<BasicLoginForm
+<LoginForm
   http={
     Object {
       "addLoadingCountSource": [MockFunction],
@@ -128,7 +128,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
 `;
 
 exports[`LoginPage enabled form state renders as expected when info message is set 1`] = `
-<BasicLoginForm
+<LoginForm
   http={
     Object {
       "addLoadingCountSource": [MockFunction],
@@ -161,7 +161,7 @@ exports[`LoginPage enabled form state renders as expected when info message is s
 `;
 
 exports[`LoginPage enabled form state renders as expected when loginAssistanceMessage is set 1`] = `
-<BasicLoginForm
+<LoginForm
   http={
     Object {
       "addLoadingCountSource": [MockFunction],
@@ -251,7 +251,7 @@ exports[`LoginPage page renders as expected 1`] = `
       gutterSize="l"
     >
       <EuiFlexItem>
-        <BasicLoginForm
+        <LoginForm
           http={
             Object {
               "addLoadingCountSource": [MockFunction],
