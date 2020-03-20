@@ -24,6 +24,7 @@ import {
 import {
   IFieldType,
   KBN_FIELD_TYPES,
+  Query,
   esQuery,
   esKuery,
 } from '../../../../../../../src/plugins/data/public';
@@ -36,7 +37,7 @@ import { checkPermission } from '../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
-import { useMlContext, SavedSearchQuery } from '../../contexts/ml';
+import { useMlContext } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 import { useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
@@ -49,8 +50,8 @@ import { SearchPanel } from './components/search_panel';
 import { DataLoader } from './data_loader';
 
 interface DataVisualizerPageState {
-  searchQuery: string | SavedSearchQuery;
-  searchString: string | SavedSearchQuery;
+  searchQuery: Query['query'];
+  searchString: Query['query'];
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE;
   samplerShardSize: number;
   overallStats: any;
@@ -160,7 +161,7 @@ export const Page: FC = () => {
 
   const [searchString, setSearchString] = useState(initSearchString);
   const [searchQuery, setSearchQuery] = useState(initSearchQuery);
-  const [searchQueryLanguage] = useState(initQueryLanguage);
+  const [searchQueryLanguage, setSearchQueryLanguage] = useState(initQueryLanguage);
   const [samplerShardSize, setSamplerShardSize] = useState(defaults.samplerShardSize);
 
   // TODO - type overallStats and stats
@@ -676,6 +677,7 @@ export const Page: FC = () => {
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
                     searchQueryLanguage={searchQueryLanguage}
+                    setSearchQueryLanguage={setSearchQueryLanguage}
                     samplerShardSize={samplerShardSize}
                     setSamplerShardSize={setSamplerShardSize}
                     totalCount={overallStats.totalCount}
