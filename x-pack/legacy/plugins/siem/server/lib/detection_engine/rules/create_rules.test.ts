@@ -33,7 +33,7 @@ describe('createRules', () => {
       ruleId: 'new-rule-id',
       enabled: true,
       interval: '',
-      thrttole: null,
+      throttle: null,
       name: '',
       tags: [],
     });
