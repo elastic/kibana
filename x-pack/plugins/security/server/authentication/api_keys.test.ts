@@ -154,7 +154,7 @@ describe('API Keys', () => {
 
     it('throw error for other schemes', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      expect(
+      await expect(
         apiKeys.grantAsInternalUser(
           httpServerMock.createKibanaRequest({
             headers: {

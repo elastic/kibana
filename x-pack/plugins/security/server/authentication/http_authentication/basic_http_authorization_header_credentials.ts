@@ -11,7 +11,7 @@ export class BasicHTTPAuthorizationHeaderCredentials {
   readonly username: string;
 
   /**
-   * Password use to authenticate
+   * Password used to authenticate
    */
   readonly password: string;
 

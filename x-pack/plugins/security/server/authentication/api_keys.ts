@@ -159,7 +159,7 @@ export class APIKeys {
    * Tries to grant an API key for the current user.
    * @param request Request instance.
    */
-  async grantAsInternalUser(request: KibanaRequest): Promise<GrantAPIKeyResult | null> {
+  async grantAsInternalUser(request: KibanaRequest) {
     if (!this.license.isEnabled()) {
       return null;
     }
@@ -173,7 +173,7 @@ export class APIKeys {
     }
     const params = this.getGrantParams(authorizationHeader);
 
-    // User needs `manage_api_key` privilege to use this API
+    // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
       result = (await this.clusterClient
