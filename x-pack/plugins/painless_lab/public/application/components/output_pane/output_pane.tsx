@@ -27,7 +27,7 @@ interface Props {
 
 export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) => {
   const outputTabLabel = (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         {isLoading ? (
           <EuiLoadingSpinner size="m" />

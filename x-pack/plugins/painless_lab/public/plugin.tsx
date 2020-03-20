@@ -44,7 +44,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       id: 'painless_lab',
       order: 7,
       title: (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.painlessLab.displayName', {
               defaultMessage: 'Painless Lab',
