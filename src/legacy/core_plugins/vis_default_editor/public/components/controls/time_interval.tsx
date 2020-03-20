@@ -51,6 +51,26 @@ function isValidEsInterval(interval: string) {
   }
 }
 
+function validate(value?: string, definedOption?: ComboBoxOption, timeBase?: string) {
+  if (definedOption) {
+    return { isValidValue: true };
+  }
+
+  if (!value) {
+    return { isValidValue: false };
+  }
+
+  // we check if Elasticsearch interval is valid ES interval to show a user appropriate error message
+  // we don't check if there is timeBase
+  const isValidIntervalValue = !!timeBase || value === '0ms' || isValidEsInterval(value);
+
+  if (!isValidIntervalValue) {
+    return { isValidValue: false, errorMessage: getInvalidEsMessage(value) };
+  }
+
+  return { isValidValue: isValidInterval(value, timeBase) };
+}
+
 interface ComboBoxOption extends EuiComboBoxOptionOption {
   key: string;
 }
@@ -80,23 +100,15 @@ function TimeIntervalParamEditor({
 
   let selectedOptions: ComboBoxOption[] = [];
   let definedOption: ComboBoxOption | undefined;
-  let isValid = false;
-  let invalidEsMessage = '';
-  let errors = '';
+  let error = '';
   if (value) {
     definedOption = find(options, { key: value });
     selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
-
-    // we check if Elasticsearch interval is valid ES interval to show a user appropriate error message
-    // we don't check if there is timeBase
-    const isValidIntervalValue = !!timeBase || isValidEsInterval(value);
-
-    if (!isValidIntervalValue) {
-      invalidEsMessage = getInvalidEsMessage(value);
-    }
-
-    isValid = !!definedOption || (isValidIntervalValue && isValidInterval(value, timeBase));
   }
+
+  const { isValidValue, errorMessage } = validate(value, definedOption, timeBase);
+  let invalidEsMessage = errorMessage;
+  let isValid = isValidValue;
 
   let interval: { scaled: boolean; scale: number; expression: string } = {} as any;
   if (isValid) {
@@ -104,14 +116,19 @@ function TimeIntervalParamEditor({
 
     // we check if Elasticsearch interval is valid to show a user appropriate error message
     // e.g. there is the case when a user inputs '14d' but it's '2w' in expression equivalent and the request will fail
-    if (!invalidEsMessage && !isValidEsInterval(interval.expression)) {
+    // we don't check it for 0ms because the overall time range has not yet been set
+    if (
+      !invalidEsMessage &&
+      interval.expression !== '0ms' &&
+      !isValidEsInterval(interval.expression)
+    ) {
       isValid = false;
       invalidEsMessage = getInvalidEsMessage(interval.expression);
     }
   }
 
   if (!isValid) {
-    errors =
+    error =
       invalidEsMessage ||
       i18n.translate('visDefaultEditor.controls.timeInterval.invalidFormatErrorMessage', {
         defaultMessage: 'Invalid interval format.',
@@ -155,7 +172,7 @@ function TimeIntervalParamEditor({
   return (
     <EuiFormRow
       compressed
-      error={errors}
+      error={error}
       fullWidth={true}
       helpText={helpText}
       isInvalid={showValidation ? !isValid : false}
