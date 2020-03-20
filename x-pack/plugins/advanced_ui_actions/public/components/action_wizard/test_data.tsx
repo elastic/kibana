@@ -146,7 +146,7 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
       openInNewTab: false,
     };
   },
-  isConfigValid: (config: any): config is UrlDrilldownConfig => {
+  isConfigValid: (config: UrlDrilldownConfig): config is UrlDrilldownConfig => {
     if (!config.url) return false;
     return true;
   },
