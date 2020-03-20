@@ -102,11 +102,6 @@ export interface Drilldown<
  */
 export interface DrilldownFactoryContext<T> {
   /**
-   * Place where factory is being rendered.
-   */
-  place?: string;
-
-  /**
    * Context provided to the drilldown factory by the place where the UI is
    * rendered. For example, for the "dashboard" place, this context contains
    * the ID of the current dashboard, which could be used for filtering it out

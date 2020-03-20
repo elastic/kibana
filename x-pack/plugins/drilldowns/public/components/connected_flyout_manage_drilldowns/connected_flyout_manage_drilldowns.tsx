@@ -76,7 +76,6 @@ export function createFlyoutManageDrilldowns({
 
     const factoryContext: DrilldownFactoryContext<unknown> = React.useMemo(
       () => ({
-        place: '',
         placeContext: props.context,
         triggers: [],
       }),
