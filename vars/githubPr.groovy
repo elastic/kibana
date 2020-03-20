@@ -173,7 +173,7 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
       * [Interpreting CI Failures](https://www.elastic.co/guide/en/kibana/current/interpreting-ci-failures.html)
     """
 
-    def steps = jenkinsApi.getFailedSteps()
+    def steps = getFailedSteps()
     if (steps?.size() > 0) {
       def list = steps.collect { "* [${it.displayName}](${it.logs})" }.join("\n")
       messages << "### Failed CI Steps\n${list}"
@@ -227,4 +227,10 @@ def deleteComment(commentId) {
 
 def getCommitHash() {
   return env.ghprbActualCommit
+}
+
+def getFailedSteps() {
+  return jenkinsApi.getFailedSteps()?.findAll { step ->
+    step.displayName != 'Check out from version control'
+  }
 }
