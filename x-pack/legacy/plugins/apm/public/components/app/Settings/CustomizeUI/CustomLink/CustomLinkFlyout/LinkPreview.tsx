@@ -34,13 +34,13 @@ interface Props {
 const fetchTransaction = debounce(
   async (
     filters: FilterKeyValue[],
-    setTransaction: (transaction: Transaction) => void
+    callback: (transaction: Transaction) => void
   ) => {
     const transaction = await callApmApi({
       pathname: '/api/apm/settings/custom_links/transaction',
       params: { query: convertFiltersToObject(filters) }
     });
-    setTransaction(transaction);
+    callback(transaction);
   },
   1000
 );
