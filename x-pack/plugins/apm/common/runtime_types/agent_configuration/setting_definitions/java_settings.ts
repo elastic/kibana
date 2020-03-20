@@ -95,7 +95,7 @@ export const javaSettings: RawSettingDefinition[] = [
     category: 'Circuit-Breaker',
     defaultValue: '0.75',
     description: i18n.translate(
-      'xpack.apm.agentConfig.stressMonitorGcReliefThreshold.label',
+      'xpack.apm.agentConfig.stressMonitorGcReliefThreshold.description',
       {
         defaultMessage:
           'The threshold used by the GC monitor to rely on for identifying when the heap is not under stress .\nIf `stress_monitor_gc_stress_threshold` has been crossed, the agent will consider it a heap-stress state. \nIn order to determine that the stress state is over, percentage of occupied memory in ALL heap pools should \nbe lower than this threshold. The GC monitor relies only on memory consumption measured after a recent GC.'
@@ -113,7 +113,7 @@ export const javaSettings: RawSettingDefinition[] = [
     category: 'Circuit-Breaker',
     defaultValue: '1m',
     description: i18n.translate(
-      'xpack.apm.agentConfig.stressMonitorCpuDurationThreshold.label',
+      'xpack.apm.agentConfig.stressMonitorCpuDurationThreshold.description',
       {
         defaultMessage:
           'The minimal time required in order to determine whether the system is \neither currently under stress, or that the stress detected previously has been relieved. \nAll measurements during this time must be consistent in comparison to the relevant threshold in \norder to detect a change of stress state. Must be at least `1m`.'
@@ -131,7 +131,7 @@ export const javaSettings: RawSettingDefinition[] = [
     category: 'Circuit-Breaker',
     defaultValue: '0.95',
     description: i18n.translate(
-      'xpack.apm.agentConfig.stressMonitorSystemCpuStressThreshold.label',
+      'xpack.apm.agentConfig.stressMonitorSystemCpuStressThreshold.description',
       {
         defaultMessage:
           'The threshold used by the system CPU monitor to detect system CPU stress. \nIf the system CPU crosses this threshold for a duration of at least `stress_monitor_cpu_duration_threshold`, \nthe monitor considers this as a stress state.'
@@ -149,7 +149,7 @@ export const javaSettings: RawSettingDefinition[] = [
     category: 'Circuit-Breaker',
     defaultValue: '0.8',
     description: i18n.translate(
-      'xpack.apm.agentConfig.stressMonitorSystemCpuReliefThreshold.label',
+      'xpack.apm.agentConfig.stressMonitorSystemCpuReliefThreshold.description',
       {
         defaultMessage:
           'The threshold used by the system CPU monitor to determine that the system is \nnot under CPU stress. If the monitor detected a CPU stress, the measured system CPU needs to be below \nthis threshold for a duration of at least `stress_monitor_cpu_duration_threshold` in order for the \nmonitor to decide that the CPU stress has been relieved.'
