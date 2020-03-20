@@ -17,12 +17,30 @@
  * under the License.
  */
 import { IRouter, RequestHandler } from 'kibana/server';
-import { resolveApi } from '../../../../lib/spec_definitions';
+import { SpecDefinitionsService } from '../../../../services';
 
-export const registerSpecDefinitionsRoute = ({ router }: { router: IRouter }) => {
+interface SpecDefinitionsRouteResponse {
+  es: {
+    name: string;
+    globals: Record<string, any>;
+    endpoints: Record<string, any>;
+  };
+}
+
+export const registerSpecDefinitionsRoute = ({
+  router,
+  services,
+}: {
+  router: IRouter;
+  services: { specDefinitions: SpecDefinitionsService };
+}) => {
   const handler: RequestHandler = async (ctx, request, response) => {
+    const specResponse: SpecDefinitionsRouteResponse = {
+      es: services.specDefinitions.asJson(),
+    };
+
     return response.ok({
-      body: resolveApi(),
+      body: specResponse,
       headers: {
         'Content-Type': 'application/json',
       },

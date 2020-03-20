@@ -6,7 +6,8 @@
 
 import { ImportRulesProps, ImportRulesResponse } from '../../detection_engine/rules';
 import { KibanaServices } from '../../../lib/kibana';
-import { IMPORT_TIMELINES_URL } from '../../../../common/constants';
+import { IMPORT_TIMELINES_URL, TIMELINE_EXPORT_URL } from '../../../../common/constants';
+import { ExportSelectedData } from '../../../components/generic_downloader';
 
 export const importTimelines = async ({
   fileToImport,
@@ -23,4 +24,25 @@ export const importTimelines = async ({
     body: formData,
     signal,
   });
+
+
+export const exportSelectedTimeline: ExportSelectedData = async ({
+  excludeExportDetails = false,
+  filename = `timelines_export.ndjson`,
+  ids = [],
+  signal,
+}): Promise<Blob> => {
+  const body = ids.length > 0 ? JSON.stringify({ ids }) : undefined;
+  const response = await KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
+    method: 'POST',
+    body,
+    query: {
+      exclude_export_details: excludeExportDetails,
+      file_name: filename,
+    },
+    signal,
+    asResponse: true,
+  });
+
+  return response.body!;
 };

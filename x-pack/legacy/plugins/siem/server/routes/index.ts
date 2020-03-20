@@ -30,6 +30,7 @@ import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_ru
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
+import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
 
 export const initRoutes = (
   router: IRouter,
@@ -56,6 +57,7 @@ export const initRoutes = (
   exportRulesRoute(router, config);
 
   importTimelinesRoute(router, config);
+  exportTimelinesRoute(router, config);
 
   findRulesStatusesRoute(router);
 

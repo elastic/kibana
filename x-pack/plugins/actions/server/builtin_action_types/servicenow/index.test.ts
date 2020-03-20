@@ -231,8 +231,10 @@ describe('execute()', () => {
       services,
     };
 
+    handleIncidentMock.mockImplementation(() => incidentResponse);
+
     const actionResponse = await actionType.executor(executorOptions);
-    expect(actionResponse).toEqual({ actionId, status: 'ok' });
+    expect(actionResponse).toEqual({ actionId, status: 'ok', data: incidentResponse });
   });
 
   test('should throw an error when failed to update an incident', async () => {

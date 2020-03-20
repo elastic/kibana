@@ -78,3 +78,9 @@ export const sort = Joi.object({
   columnId: Joi.string(),
   sortDirection: Joi.string(),
 });
+/* eslint-disable @typescript-eslint/camelcase */
+
+export const ids = Joi.array().items(Joi.string());
+
+export const exclude_export_details = Joi.boolean();
+export const file_name = Joi.string();

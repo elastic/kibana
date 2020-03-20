@@ -193,7 +193,7 @@ export class RemoteClusterEdit extends Component {
             >
               <FormattedMessage
                 id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
-                defaultMessage="This remote cluster contains deprecated settings. We have attempted to resolve them. Please verify all changes before saving."
+                defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
               />
             </EuiCallOut>
             <EuiSpacer />
