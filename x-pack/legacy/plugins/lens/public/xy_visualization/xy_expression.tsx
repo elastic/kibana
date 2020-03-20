@@ -257,7 +257,8 @@ export function XYChart({
             });
           }
 
-          const xAxisFieldName = xAxisColumn?.meta?.aggConfigParams?.field;
+          const xAxisFieldName = table.columns.find(col => col.id === layer.xAccessor)?.meta
+            ?.aggConfigParams?.field;
 
           const timeFieldName =
             xDomain && xAxisFieldName ? { timeFieldName: xAxisFieldName } : null;
