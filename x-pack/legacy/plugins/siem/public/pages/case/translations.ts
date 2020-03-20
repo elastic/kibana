@@ -86,8 +86,28 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.case.pageTitle', {
   defaultMessage: 'Cases',
 });
 
-export const CREATE_CASE = i18n.translate('xpack.siem.case.caseView.createCase', {
-  defaultMessage: 'Create case',
+export const CLOSED_CASE = i18n.translate('xpack.siem.case.caseView.closedCase', {
+  defaultMessage: 'Closed case',
+});
+
+export const CLOSE_CASE = i18n.translate('xpack.siem.case.caseView.closeCase', {
+  defaultMessage: 'Close case',
+});
+
+export const REOPEN_CASE = i18n.translate('xpack.siem.case.caseView.reopenCase', {
+  defaultMessage: 'Reopen case',
+});
+
+export const REOPENED_CASE = i18n.translate('xpack.siem.case.caseView.reopenedCase', {
+  defaultMessage: 'Reopened case',
+});
+
+export const CASE_NAME = i18n.translate('xpack.siem.case.caseView.caseName', {
+  defaultMessage: 'Case name',
+});
+
+export const TO = i18n.translate('xpack.siem.case.caseView.to', {
+  defaultMessage: 'to',
 });
 
 export const TAGS = i18n.translate('xpack.siem.case.caseView.tags', {

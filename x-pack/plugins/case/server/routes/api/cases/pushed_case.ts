@@ -16,7 +16,7 @@ import { CasePushRequestRt, CaseResponseRt, throwErrors } from '../../../../comm
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 
-export function initPostCaseApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPushedCaseUserActionApi({ caseService, router, userActionService }: RouteDeps) {
   router.post(
     {
       path: '/api/cases/{case_id}/_pushed',

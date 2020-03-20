@@ -4,27 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import styled from 'styled-components';
+
 import * as i18n from '../case_view/translations';
 
-import { Case } from '../../../../containers/case/types';
+import { Case, CaseUserActions, Comment } from '../../../../containers/case/types';
 import { useUpdateComment } from '../../../../containers/case/use_update_comment';
+import { useCurrentUser } from '../../../../lib/kibana';
+import { AddComment } from '../add_comment';
+import { getLabelTitle } from './helpers';
 import { UserActionItem } from './user_action_item';
 import { UserActionMarkdown } from './user_action_markdown';
-import { AddComment } from '../add_comment';
-import { useCurrentUser } from '../../../../lib/kibana';
 
 export interface UserActionTreeProps {
   data: Case;
+  caseUserActions: CaseUserActions[];
   isLoadingDescription: boolean;
+  isLoadingUserActions: boolean;
+  fetchUserActions: () => void;
   onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
 }
+
+const MyEuiFlexGroup = styled(EuiFlexGroup)`
+  margin-bottom: 8px;
+`;
 
 const DescriptionId = 'description';
 const NewId = 'newComment';
 
 export const UserActionTree = React.memo(
-  ({ data: caseData, onUpdateField, isLoadingDescription }: UserActionTreeProps) => {
+  ({
+    data: caseData,
+    caseUserActions,
+    fetchUserActions,
+    isLoadingDescription,
+    isLoadingUserActions,
+    onUpdateField,
+  }: UserActionTreeProps) => {
+    const handlerTimeoutId = useRef(0);
+    const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { comments, isLoadingIds, updateComment, addPostedComment } = useUpdateComment(
       caseData.comments
     );
@@ -45,9 +65,34 @@ export const UserActionTree = React.memo(
     const handleSaveComment = useCallback(
       (id: string, content: string) => {
         handleManageMarkdownEditId(id);
-        updateComment(caseData.id, id, content);
+        updateComment({
+          caseId: caseData.id,
+          commentId: id,
+          commentUpdate: content,
+          fetchUserActions,
+        });
       },
       [handleManageMarkdownEditId, updateComment]
+    );
+
+    const handleOutlineComment = useCallback(
+      (id: string) => {
+        window.clearTimeout(handlerTimeoutId.current);
+        setSelectedOutlineCommentId(id);
+        handlerTimeoutId.current = window.setTimeout(() => {
+          setSelectedOutlineCommentId('');
+          window.clearTimeout(handlerTimeoutId.current);
+        }, 2400);
+      },
+      [handlerTimeoutId.current]
+    );
+
+    const handleUpdate = useCallback(
+      (comment: Comment) => {
+        addPostedComment(comment);
+        fetchUserActions();
+      },
+      [addPostedComment, fetchUserActions]
     );
 
     const MarkdownDescription = useMemo(
@@ -67,8 +112,15 @@ export const UserActionTree = React.memo(
     );
 
     const MarkdownNewComment = useMemo(
-      () => <AddComment caseId={caseData.id} onCommentPosted={addPostedComment} />,
-      [caseData.id]
+      () => (
+        <AddComment
+          caseId={caseData.id}
+          onCommentPosted={handleUpdate}
+          onCommentSaving={handleManageMarkdownEditId.bind(null, NewId)}
+          showLoading={false}
+        />
+      ),
+      [caseData.id, handleUpdate]
     );
 
     return (
@@ -85,29 +137,68 @@ export const UserActionTree = React.memo(
           onEdit={handleManageMarkdownEditId.bind(null, DescriptionId)}
           userName={caseData.createdBy.username}
         />
-        {comments.map(comment => (
-          <UserActionItem
-            key={comment.id}
-            createdAt={comment.createdAt}
-            id={comment.id}
-            isEditable={manageMarkdownEditIds.includes(comment.id)}
-            isLoading={isLoadingIds.includes(comment.id)}
-            labelEditAction={i18n.EDIT_COMMENT}
-            labelTitle={i18n.ADDED_COMMENT}
-            fullName={comment.createdBy.fullName ?? comment.createdBy.username}
-            markdown={
-              <UserActionMarkdown
-                id={comment.id}
-                content={comment.comment}
-                isEditable={manageMarkdownEditIds.includes(comment.id)}
-                onChangeEditable={handleManageMarkdownEditId}
-                onSaveContent={handleSaveComment.bind(null, comment.id)}
-              />
+        {caseUserActions.map(action => {
+          if (action.commentId != null && action.action === 'create') {
+            const comment = comments.find(c => c.id === action.commentId);
+            if (comment != null) {
+              return (
+                <UserActionItem
+                  key={action.actionId}
+                  createdAt={comment.createdAt}
+                  id={comment.id}
+                  idToOutline={selectedOutlineCommentId}
+                  isEditable={manageMarkdownEditIds.includes(comment.id)}
+                  isLoading={isLoadingIds.includes(comment.id)}
+                  labelEditAction={i18n.EDIT_COMMENT}
+                  labelTitle={<>{i18n.ADDED_COMMENT}</>}
+                  fullName={comment.createdBy.fullName ?? comment.createdBy.username}
+                  markdown={
+                    <UserActionMarkdown
+                      id={comment.id}
+                      content={comment.comment}
+                      isEditable={manageMarkdownEditIds.includes(comment.id)}
+                      onChangeEditable={handleManageMarkdownEditId}
+                      onSaveContent={handleSaveComment.bind(null, comment.id)}
+                    />
+                  }
+                  onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
+                  outlineComment={handleOutlineComment}
+                  userName={comment.createdBy.username}
+                  updatedAt={comment.updatedAt}
+                />
+              );
             }
-            onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
-            userName={comment.createdBy.username}
-          />
-        ))}
+          }
+          if (action.actionField.length === 1) {
+            const myField = action.actionField[0];
+            const labelTitle: string | JSX.Element = getLabelTitle(myField, action);
+
+            return (
+              <UserActionItem
+                key={action.actionId}
+                createdAt={action.actionAt}
+                id={action.actionId}
+                isEditable={false}
+                isLoading={false}
+                labelTitle={<>{labelTitle}</>}
+                linkId={
+                  action.action === 'update' && action.commentId != null ? action.commentId : null
+                }
+                fullName={action.actionBy.fullName ?? action.actionBy.username}
+                outlineComment={handleOutlineComment}
+                userName={action.actionBy.username}
+              />
+            );
+          }
+          return null;
+        })}
+        {(isLoadingUserActions || isLoadingIds.includes(NewId)) && (
+          <MyEuiFlexGroup justifyContent="center" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </MyEuiFlexGroup>
+        )}
         <UserActionItem
           createdAt={new Date().toISOString()}
           id={NewId}

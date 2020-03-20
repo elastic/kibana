@@ -13,6 +13,7 @@ import {
   CommentRequest,
   CommentResponse,
   User,
+  CaseUserActionsResponse,
 } from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
 import {
@@ -23,16 +24,19 @@ import {
   Comment,
   FetchCasesProps,
   SortFieldCase,
+  CaseUserActions,
 } from './types';
 import { CASES_URL } from './constants';
 import {
   convertToCamelCase,
   convertAllCasesToCamel,
+  convertArrayToCamelCase,
   decodeCaseResponse,
   decodeCasesResponse,
   decodeCasesFindResponse,
   decodeCasesStatusResponse,
   decodeCommentResponse,
+  decodeCaseUserActionsResponse,
 } from './utils';
 
 export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
@@ -69,6 +73,20 @@ export const getReporters = async (signal: AbortSignal): Promise<User[]> => {
     signal,
   });
   return response ?? [];
+};
+
+export const getCaseUserActions = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<CaseUserActions[]> => {
+  const response = await KibanaServices.get().http.fetch<CaseUserActionsResponse>(
+    `${CASES_URL}/${caseId}/user_actions`,
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+  return convertArrayToCamelCase(decodeCaseUserActionsResponse(response)) as CaseUserActions[];
 };
 
 export const getCases = async ({

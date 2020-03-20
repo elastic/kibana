@@ -21,13 +21,11 @@ const CaseBasicRt = rt.type({
 });
 
 const CasePushBasicRt = rt.type({
-  at: rt.union([rt.string, rt.null]),
-  by: rt.union([UserRT, rt.null]),
-  connector_id: rt.union([rt.string, rt.null]),
-  connector_name: rt.union([rt.string, rt.null]),
-  external_id: rt.union([rt.string, rt.null]),
-  external_title: rt.union([rt.string, rt.null]),
-  external_url: rt.union([rt.string, rt.null]),
+  connector_id: rt.string,
+  connector_name: rt.string,
+  external_id: rt.string,
+  external_title: rt.string,
+  external_url: rt.string,
 });
 
 export const CaseAttributesRt = rt.intersection([
@@ -37,7 +35,16 @@ export const CaseAttributesRt = rt.intersection([
     closed_by: rt.union([UserRT, rt.null]),
     created_at: rt.string,
     created_by: UserRT,
-    pushed: rt.union([CasePushBasicRt, rt.null]),
+    pushed: rt.union([
+      rt.intersection([
+        CasePushBasicRt,
+        rt.type({
+          at: rt.string,
+          by: UserRT,
+        }),
+      ]),
+      rt.null,
+    ]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRT, rt.null]),
   }),

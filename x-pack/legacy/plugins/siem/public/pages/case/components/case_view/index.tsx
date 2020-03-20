@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import styled, { css } from 'styled-components';
+import { Redirect } from 'react-router-dom';
 
-import styled from 'styled-components';
 import * as i18n from './translations';
 import { Case } from '../../../../containers/case/types';
 import { getCaseUrl } from '../../../../components/link_to';
@@ -24,6 +25,10 @@ import { WhitePageWrapper } from '../wrappers';
 import { useBasePath } from '../../../../lib/kibana';
 import { CaseStatus } from '../case_status';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
+import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
+import { SiemPageName } from '../../../home/types';
+import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 
 interface Props {
   caseId: string;
@@ -45,6 +50,12 @@ export interface CaseProps {
 export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => {
   const basePath = window.location.origin + useBasePath();
   const caseLink = `${basePath}/app/siem#/case/${caseId}`;
+  const [initLoadingData, setInitLoadingData] = useState(true);
+  const {
+    caseUserActions,
+    isLoading: isLoadingUserActions,
+    fetchCaseUserActions,
+  } = useGetCaseUserActions(caseId);
   const { caseData, isLoading, updateKey, updateCaseProperty } = useUpdateCase(caseId, initialData);
 
   // Update Fields
@@ -55,6 +66,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           const titleUpdate = getTypedPayload<string>(updateValue);
           if (titleUpdate.length > 0) {
             updateCaseProperty({
+              fetchCaseUserActions,
               updateKey: 'title',
               updateValue: titleUpdate,
             });
@@ -64,6 +76,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           const descriptionUpdate = getTypedPayload<string>(updateValue);
           if (descriptionUpdate.length > 0) {
             updateCaseProperty({
+              fetchCaseUserActions,
               updateKey: 'description',
               updateValue: descriptionUpdate,
             });
@@ -72,6 +85,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
         case 'tags':
           const tagsUpdate = getTypedPayload<string[]>(updateValue);
           updateCaseProperty({
+            fetchCaseUserActions,
             updateKey: 'tags',
             updateValue: tagsUpdate,
           });
@@ -80,6 +94,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           const statusUpdate = getTypedPayload<string>(updateValue);
           if (caseData.status !== updateValue) {
             updateCaseProperty({
+              fetchCaseUserActions,
               updateKey: 'status',
               updateValue: statusUpdate,
             });
@@ -88,7 +103,12 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           return null;
       }
     },
-    [caseData.status]
+    [fetchCaseUserActions, updateCaseProperty, caseData.status]
+  );
+
+  const toggleStatusCase = useCallback(
+    e => onUpdateField('status', e.target.checked ? 'open' : 'closed'),
+    [onUpdateField]
   );
   const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
   const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
@@ -128,6 +148,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     }),
     [caseData.title]
   );
+
+  useEffect(() => {
+    if (initLoadingData && !isLoadingUserActions) {
+      setInitLoadingData(false);
+    }
+  }, [initLoadingData, isLoadingUserActions]);
+
   return (
     <>
       <MyWrapper>
@@ -159,11 +186,17 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
         <MyWrapper>
           <EuiFlexGroup>
             <EuiFlexItem grow={6}>
-              <UserActionTree
-                data={caseData}
-                isLoadingDescription={isLoading && updateKey === 'description'}
-                onUpdateField={onUpdateField}
-              />
+              {initLoadingData && <EuiLoadingContent lines={8} />}
+              {!initLoadingData && (
+                <UserActionTree
+                  caseUserActions={caseUserActions}
+                  data={caseData}
+                  fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
+                  isLoadingDescription={isLoading && updateKey === 'description'}
+                  isLoadingUserActions={isLoadingUserActions}
+                  onUpdateField={onUpdateField}
+                />
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <UserList

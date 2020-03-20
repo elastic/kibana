@@ -6,8 +6,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React from 'react';
-
 import styled, { css } from 'styled-components';
+
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionTitle } from './user_action_title';
 
@@ -17,11 +17,15 @@ interface UserActionItemProps {
   isEditable: boolean;
   isLoading: boolean;
   labelEditAction?: string;
-  labelTitle?: string;
+  labelTitle?: JSX.Element;
+  linkId?: string | null;
   fullName: string;
-  markdown: React.ReactNode;
-  onEdit: (id: string) => void;
+  markdown?: React.ReactNode;
+  onEdit?: (id: string) => void;
   userName: string;
+  updatedAt?: string | null;
+  outlineComment?: (id: string) => void;
+  idToOutline?: string | null;
 }
 
 const UserActionItemContainer = styled(EuiFlexGroup)`
@@ -66,17 +70,32 @@ const UserActionItemContainer = styled(EuiFlexGroup)`
   `}
 `;
 
+const MyEuiPanel = styled(EuiPanel)<{ showoutline: string }>`
+  ${({ theme, showoutline }) =>
+    showoutline === 'true'
+      ? `
+      outline: solid 5px ${theme.eui.euiColorVis1_behindText};
+      margin: 0.5em;
+      transition: 0.8s;
+    `
+      : ''}
+`;
+
 export const UserActionItem = ({
   createdAt,
   id,
+  idToOutline,
   isEditable,
   isLoading,
   labelEditAction,
   labelTitle,
+  linkId,
   fullName,
   markdown,
   onEdit,
+  outlineComment,
   userName,
+  updatedAt,
 }: UserActionItemProps) => (
   <UserActionItemContainer gutterSize={'none'}>
     <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
@@ -89,18 +108,25 @@ export const UserActionItem = ({
     <EuiFlexItem data-test-subj={`user-action-${id}`}>
       {isEditable && markdown}
       {!isEditable && (
-        <EuiPanel className="userAction__panel" paddingSize="none">
+        <MyEuiPanel
+          className="userAction__panel"
+          paddingSize="none"
+          showoutline={id === idToOutline ? 'true' : 'false'}
+        >
           <UserActionTitle
             createdAt={createdAt}
             id={id}
             isLoading={isLoading}
-            labelEditAction={labelEditAction ?? ''}
-            labelTitle={labelTitle ?? ''}
+            labelEditAction={labelEditAction}
+            labelTitle={labelTitle ?? <></>}
+            linkId={linkId}
             userName={userName}
+            updatedAt={updatedAt}
             onEdit={onEdit}
+            outlineComment={outlineComment}
           />
           {markdown}
-        </EuiPanel>
+        </MyEuiPanel>
       )}
     </EuiFlexItem>
   </UserActionItemContainer>

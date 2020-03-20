@@ -8,6 +8,9 @@ import * as rt from 'io-ts';
 
 import { UserRT } from '../user';
 
+/* To the next developer, if you add/removed fields here
+ * make sure to check this file (x-pack/plugins/case/server/services/user_actions/helpers.ts) too
+ */
 const UserActionFieldRt = rt.array(
   rt.union([
     rt.literal('comment'),
@@ -38,6 +41,7 @@ const CaseUserActionBasicRT = rt.type({
 const CaseUserActionResponseRT = rt.intersection([
   CaseUserActionBasicRT,
   rt.type({
+    action_id: rt.string,
     case_id: rt.string,
     comment_id: rt.union([rt.string, rt.null]),
   }),

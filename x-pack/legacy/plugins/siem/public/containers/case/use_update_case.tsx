@@ -25,6 +25,7 @@ interface NewCaseState {
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CaseRequest[UpdateKey];
+  fetchCaseUserActions: (caseId: string) => void;
 }
 
 type Action =
@@ -75,7 +76,7 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
   const [, dispatchToaster] = useStateToaster();
 
   const dispatchUpdateCaseProperty = useCallback(
-    async ({ updateKey, updateValue }: UpdateByKey) => {
+    async ({ fetchCaseUserActions, updateKey, updateValue }: UpdateByKey) => {
       let cancel = false;
       try {
         dispatch({ type: 'FETCH_INIT', payload: updateKey });
@@ -85,6 +86,7 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
           state.caseData.version
         );
         if (!cancel) {
+          fetchCaseUserActions(caseId);
           dispatch({ type: 'FETCH_SUCCESS', payload: response[0] });
         }
       } catch (error) {

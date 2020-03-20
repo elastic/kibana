@@ -4,18 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { User } from '../../../../../../plugins/case/common/api';
+import { User, UserActionField, UserAction } from '../../../../../../plugins/case/common/api';
 
 export interface Comment {
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
   comment: string;
+  pushedAt: string | null;
+  pushedBy: string | null;
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;
 }
+export interface CaseUserActions {
+  actionId: string;
+  actionField: UserActionField;
+  action: UserAction;
+  actionAt: string;
+  actionBy: ElasticUser;
+  caseId: string;
+  commentId: string | null;
+  newValue: string | null;
+  oldValue: string | null;
+}
 
+export interface CasePush {
+  at: string;
+  by: string;
+  connectorId: string;
+  connectorName: string;
+  externalId: string;
+  externalTitle: string;
+  externalUrl: string;
+}
 export interface Case {
   id: string;
   closedAt: string | null;
@@ -24,6 +46,7 @@ export interface Case {
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
+  pushed: CasePush;
   status: string;
   tags: string[];
   title: string;

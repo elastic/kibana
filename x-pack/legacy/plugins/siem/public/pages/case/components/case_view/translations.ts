@@ -18,17 +18,26 @@ export const SHOWING_CASES = (actionDate: string, actionName: string, userName: 
     defaultMessage: '{userName} {actionName} on {actionDate}',
   });
 
+export const ADDED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabel.addedField', {
+  defaultMessage: 'added',
+});
+
+export const CHANGED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabel.changededField', {
+  defaultMessage: 'changed',
+});
+
+export const EDITED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabel.editedField', {
+  defaultMessage: 'edited',
+});
+
+export const REMOVED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabel.removedField', {
+  defaultMessage: 'removed',
+});
+
 export const ADDED_DESCRIPTION = i18n.translate(
   'xpack.siem.case.caseView.actionLabel.addDescription',
   {
     defaultMessage: 'added description',
-  }
-);
-
-export const EDITED_DESCRIPTION = i18n.translate(
-  'xpack.siem.case.caseView.actionLabel.editDescription',
-  {
-    defaultMessage: 'edited description',
   }
 );
 
@@ -50,6 +59,14 @@ export const ADDED_COMMENT = i18n.translate('xpack.siem.case.caseView.actionLabe
 
 export const STATUS = i18n.translate('xpack.siem.case.caseView.statusLabel', {
   defaultMessage: 'Status',
+});
+
+export const CASE = i18n.translate('xpack.siem.case.caseView.case', {
+  defaultMessage: 'case',
+});
+
+export const COMMENT = i18n.translate('xpack.siem.case.caseView.comment', {
+  defaultMessage: 'comment',
 });
 
 export const CASE_OPENED = i18n.translate('xpack.siem.case.caseView.caseOpened', {

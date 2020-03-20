@@ -54,7 +54,7 @@ export class CaseUserActionService {
           hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
           page: 1,
           perPage: caseUserActionInfo.total,
-          sortField: 'action_date',
+          sortField: 'action_at',
           sortOrder: 'asc',
         });
       } catch (error) {

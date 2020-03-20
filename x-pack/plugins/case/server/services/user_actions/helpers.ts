@@ -143,6 +143,13 @@ const compareArray = ({
 
   return result;
 };
+const userActionFieldsAllowed: UserActionField = [
+  'comment',
+  'description',
+  'tags',
+  'title',
+  'status',
+];
 
 export const buildCaseUserActions = ({
   actionDate,
@@ -159,54 +166,56 @@ export const buildCaseUserActions = ({
     const originalItem = originalCases.find(oItem => oItem.id === updatedItem.id);
     if (originalItem != null) {
       let userActions: UserActionItem[] = [];
-      const updatedFields = Object.keys(updatedItem.attributes);
+      const updatedFields = Object.keys(updatedItem.attributes) as UserActionField;
       updatedFields.forEach(field => {
-        const origValue = get(originalItem, ['attributes', field]);
-        const updatedValue = get(updatedItem, ['attributes', field]);
-        if (isTwoArraysDifference(origValue, updatedValue)) {
-          const arrayDiff = compareArray({
-            originalValue: origValue as string[],
-            updatedValue: updatedValue as string[],
-          });
-          if (arrayDiff.addedItems.length > 0) {
+        if (userActionFieldsAllowed.includes(field)) {
+          const origValue = get(originalItem, ['attributes', field]);
+          const updatedValue = get(updatedItem, ['attributes', field]);
+          if (isTwoArraysDifference(origValue, updatedValue)) {
+            const arrayDiff = compareArray({
+              originalValue: origValue as string[],
+              updatedValue: updatedValue as string[],
+            });
+            if (arrayDiff.addedItems.length > 0) {
+              userActions = [
+                ...userActions,
+                buildCaseUserActionItem({
+                  action: 'add',
+                  actionAt: actionDate,
+                  actionBy,
+                  caseId: updatedItem.id,
+                  fields: [field],
+                  newValue: arrayDiff.addedItems.join(', '),
+                }),
+              ];
+            }
+            if (arrayDiff.deletedItems.length > 0) {
+              userActions = [
+                ...userActions,
+                buildCaseUserActionItem({
+                  action: 'delete',
+                  actionAt: actionDate,
+                  actionBy,
+                  caseId: updatedItem.id,
+                  fields: [field],
+                  newValue: arrayDiff.deletedItems.join(', '),
+                }),
+              ];
+            }
+          } else if (origValue !== updatedValue) {
             userActions = [
               ...userActions,
               buildCaseUserActionItem({
-                action: 'add',
+                action: 'update',
                 actionAt: actionDate,
                 actionBy,
                 caseId: updatedItem.id,
                 fields: [field],
-                newValue: arrayDiff.addedItems.join(', '),
+                newValue: updatedValue,
+                oldValue: origValue,
               }),
             ];
           }
-          if (arrayDiff.deletedItems.length > 0) {
-            userActions = [
-              ...userActions,
-              buildCaseUserActionItem({
-                action: 'delete',
-                actionAt: actionDate,
-                actionBy,
-                caseId: updatedItem.id,
-                fields: [field],
-                newValue: arrayDiff.deletedItems.join(', '),
-              }),
-            ];
-          }
-        } else if (origValue !== updatedValue) {
-          userActions = [
-            ...userActions,
-            buildCaseUserActionItem({
-              action: 'update',
-              actionAt: actionDate,
-              actionBy,
-              caseId: updatedItem.id,
-              fields: [field],
-              newValue: updatedValue,
-              oldValue: origValue,
-            }),
-          ];
         }
       });
       return [...acc, ...userActions];
