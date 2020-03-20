@@ -35,7 +35,7 @@ const DatasourceBaseSchema = {
             schema.string(),
             schema.object({
               type: schema.maybe(schema.string()),
-              value: schema.any(),
+              value: schema.maybe(schema.any()),
             })
           ),
         })
