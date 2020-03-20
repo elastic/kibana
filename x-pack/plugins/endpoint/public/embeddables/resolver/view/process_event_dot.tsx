@@ -126,9 +126,9 @@ export const ProcessEventDot = styled(
           }
         : {};
 
-      const flowToAttribute = adjacentNodeMap?.next
+      const flowToAttribute = adjacentNodeMap?.nextSibling
         ? {
-            'aria-flowto': adjacentNodeMap.next,
+            'aria-flowto': adjacentNodeMap.nextSibling,
           }
         : {};
 

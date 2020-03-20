@@ -26,15 +26,15 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
     function emptyAdjacencyMap(id: string): AdjacentProcessMap {
       return {
         self: id,
-        up: null,
-        down: null,
-        previous: null,
-        next: null,
+        parent: null,
+        firstChild: null,
+        previousSibling: null,
+        nextSibling: null,
         get level(): number {
-          if (!this.up) {
+          if (!this.parent) {
             return 1;
           }
-          const mapAbove = idToAdjacent.get(this.up!);
+          const mapAbove = idToAdjacent.get(this.parent!);
           return mapAbove ? mapAbove.level + 1 : 1;
         },
       };
@@ -55,11 +55,11 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
        */
       const previousAdjacencyMap = idToAdjacent.get(previousProcessId) as AdjacentProcessMap;
 
-      previousAdjacencyMap.next = uniqueProcessPid;
+      previousAdjacencyMap.nextSibling = uniqueProcessPid;
       idToAdjacent.set(previousProcessId, previousAdjacencyMap);
-      adjacencyMapToUpdate.previous = previousProcessId;
+      adjacencyMapToUpdate.previousSibling = previousProcessId;
       if (uniqueParentPid) {
-        adjacencyMapToUpdate.up = uniqueParentPid;
+        adjacencyMapToUpdate.parent = uniqueParentPid;
       }
       idToAdjacent.set(uniqueProcessPid, adjacencyMapToUpdate);
     } else {
@@ -67,10 +67,10 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
 
       // set up, down
       if (uniqueParentPid) {
-        parentAdjacencyMap.down = uniqueProcessPid;
+        parentAdjacencyMap.firstChild = uniqueProcessPid;
         idToAdjacent.set(uniqueParentPid, parentAdjacencyMap);
       }
-      adjacencyMapToUpdate.up = uniqueParentPid || null;
+      adjacencyMapToUpdate.parent = uniqueParentPid || null;
       idToAdjacent.set(uniqueProcessPid, adjacencyMapToUpdate);
     }
   }

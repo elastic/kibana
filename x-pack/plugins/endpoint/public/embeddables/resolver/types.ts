@@ -199,10 +199,10 @@ export interface ProcessEvent {
  */
 export interface AdjacentProcessMap {
   readonly self: string;
-  up: string | null;
-  down: string | null;
-  previous: string | null;
-  next: string | null;
+  parent: string | null;
+  firstChild: string | null;
+  previousSibling: string | null;
+  nextSibling: string | null;
   /**
    * To support aria-level, this must be >= 1
    */

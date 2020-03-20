@@ -405,14 +405,7 @@ export const processAdjacencies = createSelector(
 
     for (const graphableProcess of graphableProcesses) {
       const processPid = uniquePidForProcess(graphableProcess);
-      const adjacencyMap = idToAdjacent.get(processPid) || {
-        self: processPid,
-        up: null,
-        down: null,
-        previous: null,
-        next: null,
-        level: 1,
-      };
+      const adjacencyMap = idToAdjacent.get(processPid)!;
       processToAdjacencyMap.set(graphableProcess, adjacencyMap);
     }
     return { processToAdjacencyMap };
