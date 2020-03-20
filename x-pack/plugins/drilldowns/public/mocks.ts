@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DrilldownsSetupContract, DrilldownsStartContract } from '.';
+import { DrilldownsSetup, DrilldownsStart } from '.';
 
-export type Setup = jest.Mocked<DrilldownsSetupContract>;
-export type Start = jest.Mocked<DrilldownsStartContract>;
+export type Setup = jest.Mocked<DrilldownsSetup>;
+export type Start = jest.Mocked<DrilldownsStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
