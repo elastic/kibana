@@ -159,7 +159,7 @@ text.align: center;
 
 Increase or decrease how often your Canvas element data refreshes on your workpad.
 
-. In the top left corner, click the *Control settings* icon.
+. Click the *Control settings* icon.
 
 . Under *Change auto-refresh interval*, select the interval you want to use.
 +
@@ -253,7 +253,7 @@ Change the order of how the elements are displayed on your workpad.
 [[zoom-in-out]]
 === Use the zoom options
 
-In the upper left corner, click the *Zoom controls* icon, then select one of the options.
+Click the *Zoom controls* icon, then select one of the options.
 
 [role="screenshot"]
 image::images/canvas-zoom-controls.png[Zoom controls]
