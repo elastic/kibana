@@ -31,6 +31,8 @@ interface OwnProps {
 
 export type Props = OwnProps & PropsFromRedux;
 
+const PAGE_SIZE = 3;
+
 const StatefulRecentTimelinesComponent = React.memo<Props>(
   ({ apolloClient, filterBy, updateIsLoading, updateTimeline }) => {
     const onOpenTimeline: OnOpenTimeline = useCallback(
@@ -58,7 +60,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
       <AllTimelinesQuery
         pageInfo={{
           pageIndex: 1,
-          pageSize: 5,
+          pageSize: PAGE_SIZE,
         }}
         search={''}
         sort={{
@@ -70,7 +72,10 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
         {({ timelines, loading }) => (
           <>
             {loading ? (
-              <LoadingPlaceholders lines={2} placeholders={filterBy === 'favorites' ? 1 : 5} />
+              <LoadingPlaceholders
+                lines={2}
+                placeholders={filterBy === 'favorites' ? 1 : PAGE_SIZE}
+              />
             ) : (
               <RecentTimelines
                 noTimelinesMessage={noTimelinesMessage}

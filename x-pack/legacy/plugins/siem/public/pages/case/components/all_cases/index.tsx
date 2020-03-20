@@ -26,6 +26,7 @@ import { useGetCases, UpdateCase } from '../../../../containers/case/use_get_cas
 import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
+import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { Panel } from '../../../../components/panel';
 import {
   UtilityBar,
@@ -35,18 +36,15 @@ import {
   UtilityBarText,
 } from '../../../../components/utility_bar';
 import { getConfigureCasesUrl, getCreateCaseUrl } from '../../../../components/link_to';
-
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { OpenClosedStats } from '../open_closed_stats';
+import { navTabs } from '../../../home/home_navigations';
 
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
 import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
-
-const CONFIGURE_CASES_URL = getConfigureCasesUrl();
-const CREATE_CASE_URL = getCreateCaseUrl();
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -78,6 +76,10 @@ const getSortField = (field: string): SortFieldCase => {
   return SortFieldCase.createdAt;
 };
 export const AllCases = React.memo(() => {
+  const search = useGetUrlSearch(navTabs.case);
+  const CONFIGURE_CASES_URL = useMemo(() => getConfigureCasesUrl(search), [search]);
+  const CREATE_CASE_URL = useMemo(() => getCreateCaseUrl(search), [search]);
+
   const {
     countClosedCases,
     countOpenCases,
