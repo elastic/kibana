@@ -28,6 +28,10 @@ export {
   CreateAPIKeyParams,
   InvalidateAPIKeyParams,
 } from './api_keys';
+export {
+  BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
+} from './http_authentication';
 
 interface SetupAuthenticationParams {
   http: CoreSetup['http'];
