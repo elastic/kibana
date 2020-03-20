@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.8>>
 * <<release-notes-6.8.7>>
 * <<release-notes-6.8.6>>
 * <<release-notes-6.8.5>>
@@ -93,6 +94,21 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.8.8]]
+== {kib} 6.8.8
+
+[float]
+[[enhancement-6.8.8]]
+=== Enhancement
+Security::
+* {kib} now allows Identity Provider initiated SAML login even if saml authentication provider is not configured as the first one in xpack.security.authProviders {pull}60240[#60240]
+
+[float]
+[[bug-6.8.8]]
+=== Bug fix
+Security::
+* {kib} now automatically re-initiates login when session access/refresh token pair used for Token and SAML authentication is removed from Elasticsearch (typically after 24 hours of user inactivity) {pull}33777[#33777]
 
 [[release-notes-6.8.7]]
 == {kib} 6.8.7
