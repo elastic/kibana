@@ -21,6 +21,7 @@ import { useConnectors } from '../../../../containers/case/configure/use_connect
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
 import {
   ActionsConnectorsContextProvider,
+  ActionType,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
 } from '../../../../../../../../plugins/triggers_actions_ui/public';
@@ -60,11 +61,14 @@ const initialState: State = {
   mapping: null,
 };
 
-const actionTypes = [
+const actionTypes: ActionType[] = [
   {
     id: '.servicenow',
     name: 'ServiceNow',
     enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+    minimumLicenseRequired: 'platinum',
   },
 ];
 

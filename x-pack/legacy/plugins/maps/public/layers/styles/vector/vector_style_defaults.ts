@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import {
   DEFAULT_ICON,
   LABEL_BORDER_SIZES,
@@ -20,6 +19,8 @@ import {
   // @ts-ignore
 } from '../color_utils';
 import { VectorStylePropertiesDescriptor } from '../../../../common/style_property_descriptor_types';
+// @ts-ignore
+import { getUiSettings } from '../../../kibana_services';
 
 export const MIN_SIZE = 1;
 export const MAX_SIZE = 64;
@@ -63,7 +64,7 @@ export function getDefaultStaticProperties(
   const nextFillColor = DEFAULT_FILL_COLORS[nextColorIndex];
   const nextLineColor = DEFAULT_LINE_COLORS[nextColorIndex];
 
-  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode', false);
+  const isDarkMode = getUiSettings().get('theme:darkMode', false);
 
   return {
     [VECTOR_STYLES.ICON]: {

@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
 import { PackageInfo, PackageListItem } from '../../../types';
 import { useLinks } from '../hooks';
-import { PackageIcon } from './package_icon';
+import { PackageIcon } from '../../../components/package_icon';
 
 export interface BadgeProps {
   showInstalledBadge?: boolean;
@@ -40,7 +40,7 @@ export function PackageCard({
       layout="horizontal"
       title={title || ''}
       description={description}
-      icon={<PackageIcon icons={icons} packageName={name} size="l" />}
+      icon={<PackageIcon icons={icons} packageName={name} version={version} size="l" />}
       href={url}
     />
   );

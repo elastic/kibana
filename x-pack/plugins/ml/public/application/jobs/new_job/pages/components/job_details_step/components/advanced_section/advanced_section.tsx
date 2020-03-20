@@ -19,7 +19,7 @@ import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 
-const ButtonContent = i18n.translate(
+const buttonContent = i18n.translate(
   'xpack.ml.newJob.wizard.jobDetailsStep.advancedSectionButton',
   {
     defaultMessage: 'Advanced',
@@ -55,7 +55,7 @@ export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpand
       <EuiSpacer size="xl" />
       <EuiAccordion
         id="advanced-section"
-        buttonContent={ButtonContent}
+        buttonContent={buttonContent}
         onToggle={setAdvancedExpanded}
         initialIsOpen={advancedExpanded}
         data-test-subj="mlJobWizardToggleAdvancedSection"

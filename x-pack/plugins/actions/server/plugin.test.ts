@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionsPlugin, ActionsPluginsSetup, ActionsPluginsStart } from './plugin';
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
@@ -12,6 +11,13 @@ import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ActionType } from './types';
+import {
+  ActionsPlugin,
+  ActionsPluginsSetup,
+  ActionsPluginsStart,
+  PluginSetupContract,
+} from './plugin';
 
 describe('Actions Plugin', () => {
   const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = ({
@@ -95,6 +101,54 @@ describe('Actions Plugin', () => {
         expect(() => actionsContextHandler.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
         );
+      });
+    });
+
+    describe('registerType()', () => {
+      let setup: PluginSetupContract;
+      const sampleActionType: ActionType = {
+        id: 'test',
+        name: 'test',
+        minimumLicenseRequired: 'basic',
+        async executor() {},
+      };
+
+      beforeEach(async () => {
+        setup = await plugin.setup(coreSetup, pluginsSetup);
+      });
+
+      it('should throw error when license type is invalid', async () => {
+        expect(() =>
+          setup.registerType({
+            ...sampleActionType,
+            minimumLicenseRequired: 'foo' as any,
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
+      });
+
+      it('should throw error when license type is less than gold', async () => {
+        expect(() =>
+          setup.registerType({
+            ...sampleActionType,
+            minimumLicenseRequired: 'basic',
+          })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Third party action type \\"test\\" can only set minimumLicenseRequired to a gold license or higher"`
+        );
+      });
+
+      it('should not throw when license type is gold', async () => {
+        setup.registerType({
+          ...sampleActionType,
+          minimumLicenseRequired: 'gold',
+        });
+      });
+
+      it('should not throw when license type is higher than gold', async () => {
+        setup.registerType({
+          ...sampleActionType,
+          minimumLicenseRequired: 'platinum',
+        });
       });
     });
   });
