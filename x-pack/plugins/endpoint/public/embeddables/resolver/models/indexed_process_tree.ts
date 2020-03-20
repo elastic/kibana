@@ -22,7 +22,7 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
     idToValue.set(uniqueProcessPid, process);
 
     const uniqueParentPid = uniqueParentPidForProcess(process);
-    const processChildren = idToChildren.get(uniqueParentPid);
+    const currentProcessSiblings = idToChildren.get(uniqueParentPid);
     function emptyAdjacencyMap(id: string): AdjacentProcessMap {
       return {
         self: id,
@@ -44,9 +44,11 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
       idToAdjacent.get(uniqueProcessPid) || emptyAdjacencyMap(uniqueProcessPid);
 
     idToAdjacent.set(uniqueProcessPid, currentProcessAdjacencyMap);
-    if (processChildren) {
-      const previousProcessId = uniquePidForProcess(processChildren[processChildren.length - 1]);
-      processChildren.push(process);
+    if (currentProcessSiblings) {
+      const previousProcessId = uniquePidForProcess(
+        currentProcessSiblings[currentProcessSiblings.length - 1]
+      );
+      currentProcessSiblings.push(process);
       /**
        * Update adjacency maps for current and previous entries
        */
@@ -82,8 +84,8 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
  */
 export function children(tree: IndexedProcessTree, process: ResolverEvent): ResolverEvent[] {
   const id = uniquePidForProcess(process);
-  const processChildren = tree.idToChildren.get(id);
-  return processChildren === undefined ? [] : processChildren;
+  const currentProcessSiblings = tree.idToChildren.get(id);
+  return currentProcessSiblings === undefined ? [] : currentProcessSiblings;
 }
 
 /**
