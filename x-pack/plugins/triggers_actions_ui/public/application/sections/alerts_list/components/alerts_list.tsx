@@ -431,35 +431,38 @@ export const AlertsList: React.FunctionComponent = () => {
   return (
     <section data-test-subj="alertsList">
       <DeleteModalConfirmation
-        callback={(deleted?: string[]) => {
-          if (deleted) {
-            if (selectedIds.length === 0 || selectedIds.length === deleted.length) {
-              const updatedAlerts = alertsState.data.filter(
-                alert => alert.id && !alertsToDelete.includes(alert.id)
-              );
-              setAlertsState({
-                isLoading: false,
-                data: updatedAlerts,
-                totalItemCount: alertsState.totalItemCount - deleted.length,
-              });
-              setSelectedIds([]);
-            } else {
-              toastNotifications.addDanger({
-                title: i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertsList.failedToDeleteAlertsMessage',
-                  { defaultMessage: 'Failed to delete alert(s)' }
-                ),
-              });
-              // Refresh the alerts from the server, some alerts may have beend deleted
-              loadAlertsData();
-            }
+        onDeleted={(deleted: string[]) => {
+          if (selectedIds.length === 0 || selectedIds.length === deleted.length) {
+            const updatedAlerts = alertsState.data.filter(
+              alert => alert.id && !alertsToDelete.includes(alert.id)
+            );
+            setAlertsState({
+              isLoading: false,
+              data: updatedAlerts,
+              totalItemCount: alertsState.totalItemCount - deleted.length,
+            });
+            setSelectedIds([]);
           }
           setAlertsToDelete([]);
         }}
+        onCancel={async () => {
+          toastNotifications.addDanger({
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.alertsList.failedToDeleteAlertsMessage',
+              { defaultMessage: 'Failed to delete alert(s)' }
+            ),
+          });
+          // Refresh the alerts from the server, some alerts may have beend deleted
+          await loadAlertsData();
+        }}
         apiDeleteCall={deleteAlerts}
         idsToDelete={alertsToDelete}
-        singleTitle={'alert'}
-        multiplyTitle={'alerts'}
+        singleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.singleTitle', {
+          defaultMessage: 'alert',
+        })}
+        multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.multipleTitle', {
+          defaultMessage: 'alerts',
+        })}
       />
       <EuiSpacer size="m" />
       {loadedItems.length || isFilterApplied ? (

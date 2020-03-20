@@ -379,31 +379,37 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   return (
     <section data-test-subj="actionsList">
       <DeleteModalConfirmation
-        callback={async (deleted?: string[]) => {
-          if (deleted) {
-            if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
-              const updatedActions = actions.filter(
-                action => action.id && !connectorsToDelete.includes(action.id)
-              );
-              setActions(updatedActions);
-              setSelectedItems([]);
-            } else {
-              toastNotifications.addDanger({
-                title: i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.failedToDeleteActionsMessage',
-                  { defaultMessage: 'Failed to delete action(s)' }
-                ),
-              });
-              // Refresh the actions from the server, some actions may have beend deleted
-              await loadActions();
-            }
+        onDeleted={(deleted: string[]) => {
+          if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
+            const updatedActions = actions.filter(
+              action => action.id && !connectorsToDelete.includes(action.id)
+            );
+            setActions(updatedActions);
+            setSelectedItems([]);
           }
+          setConnectorsToDelete([]);
+        }}
+        onCancel={async () => {
+          toastNotifications.addDanger({
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.actionsConnectorsList.failedToDeleteActionsMessage',
+              { defaultMessage: 'Failed to delete action(s)' }
+            ),
+          });
+          // Refresh the actions from the server, some actions may have beend deleted
+          await loadActions();
           setConnectorsToDelete([]);
         }}
         apiDeleteCall={deleteActions}
         idsToDelete={connectorsToDelete}
-        singleTitle={'connector'}
-        multiplyTitle={'connectors'}
+        singleTitle={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.singleTitle',
+          { defaultMessage: 'connector' }
+        )}
+        multipleTitle={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
+          { defaultMessage: 'connectors' }
+        )}
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}

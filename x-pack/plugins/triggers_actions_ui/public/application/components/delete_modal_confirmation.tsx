@@ -12,9 +12,10 @@ import { useAppDependencies } from '../app_context';
 export const DeleteModalConfirmation = ({
   idsToDelete,
   apiDeleteCall,
-  callback,
+  onDeleted,
+  onCancel,
   singleTitle,
-  multiplyTitle,
+  multipleTitle,
 }: {
   idsToDelete: string[];
   apiDeleteCall: ({
@@ -24,9 +25,10 @@ export const DeleteModalConfirmation = ({
     ids: string[];
     http: HttpSetup;
   }) => Promise<{ successes: string[]; errors: string[] }>;
-  callback: (deleted?: string[]) => void;
+  onDeleted: (deleted: string[]) => void;
+  onCancel: () => void;
   singleTitle: string;
-  multiplyTitle: string;
+  multipleTitle: string;
 }) => {
   const { http, toastNotifications } = useAppDependencies();
   const numIdsToDelete = idsToDelete.length;
@@ -37,16 +39,16 @@ export const DeleteModalConfirmation = ({
     'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.descriptionText',
     {
       defaultMessage:
-        "You can't recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multiplyTitle}}}.",
-      values: { numIdsToDelete, singleTitle, multiplyTitle },
+        "You can't recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multipleTitle}}}.",
+      values: { numIdsToDelete, singleTitle, multipleTitle },
     }
   );
   const confirmButtonText = i18n.translate(
     'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.deleteButtonLabel',
     {
       defaultMessage:
-        'Delete {numIdsToDelete, plural, one {{singleTitle}} other {# {multiplyTitle}}} ',
-      values: { numIdsToDelete, singleTitle, multiplyTitle },
+        'Delete {numIdsToDelete, plural, one {{singleTitle}} other {# {multipleTitle}}} ',
+      values: { numIdsToDelete, singleTitle, multipleTitle },
     }
   );
   const cancelButtonText = i18n.translate(
@@ -61,20 +63,20 @@ export const DeleteModalConfirmation = ({
         buttonColor="danger"
         data-test-subj="deleteIdsConfirmation"
         title={confirmButtonText}
-        onCancel={() => callback()}
+        onCancel={() => onCancel()}
         onConfirm={async () => {
           const { successes, errors } = await apiDeleteCall({ ids: idsToDelete, http });
           const numSuccesses = successes.length;
           const numErrors = errors.length;
-          callback(successes);
+          onDeleted(successes);
           if (numSuccesses > 0) {
             toastNotifications.addSuccess(
               i18n.translate(
                 'xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText',
                 {
                   defaultMessage:
-                    'Deleted {numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} other {{multiplyTitle}}}',
-                  values: { numSuccesses, singleTitle, multiplyTitle },
+                    'Deleted {numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}',
+                  values: { numSuccesses, singleTitle, multipleTitle },
                 }
               )
             );
@@ -86,8 +88,8 @@ export const DeleteModalConfirmation = ({
                 'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
                 {
                   defaultMessage:
-                    'Failed to delete {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multiplyTitle}}}',
-                  values: { numErrors, singleTitle, multiplyTitle },
+                    'Failed to delete {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}',
+                  values: { numErrors, singleTitle, multipleTitle },
                 }
               )
             );
