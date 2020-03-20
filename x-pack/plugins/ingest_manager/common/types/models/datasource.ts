@@ -12,7 +12,7 @@ export interface DatasourcePackage {
 
 export interface DatasourceConfigRecordEntry {
   type?: string;
-  value: any;
+  value?: any;
 }
 
 export type DatasourceConfigRecord = Record<string, DatasourceConfigRecordEntry>;

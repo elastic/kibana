@@ -9,6 +9,7 @@ import { DataRequest } from '../../util/data_request';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 
+jest.mock('../../../kibana_services');
 jest.mock('ui/new_platform');
 
 class MockField {
@@ -65,7 +66,13 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     },
   };
 
-  it('Should return no changes when next oridinal fields contain existing style property fields', () => {
+  beforeEach(() => {
+    require('../../../kibana_services').getUiSettings = () => ({
+      get: jest.fn(),
+    });
+  });
+
+  it('Should return no changes when next ordinal fields contain existing style property fields', () => {
     const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
     const nextFields = [new MockField({ fieldName })];
@@ -73,7 +80,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     expect(hasChanges).toBe(false);
   });
 
-  it('Should clear missing fields when next oridinal fields do not contain existing style property fields', () => {
+  it('Should clear missing fields when next ordinal fields do not contain existing style property fields', () => {
     const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
     const nextFields = [];

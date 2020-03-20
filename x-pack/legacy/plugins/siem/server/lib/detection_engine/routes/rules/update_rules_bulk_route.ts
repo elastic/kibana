@@ -47,6 +47,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
           const {
+            actions,
             anomaly_threshold: anomalyThreshold,
             description,
             enabled,
@@ -73,9 +74,11 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             to,
             type,
             threat,
+            throttle,
             references,
             note,
             version,
+            lists,
           } = payloadRule;
           const finalIndex = outputIndex ?? siemClient.signalsIndex;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
@@ -83,6 +86,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             const rule = await updateRules({
               alertsClient,
               actionsClient,
+              actions,
               anomalyThreshold,
               description,
               enabled,
@@ -111,9 +115,11 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               to,
               type,
               threat,
+              throttle,
               references,
               note,
               version,
+              lists,
             });
             if (rule != null) {
               const ruleStatuses = await savedObjectsClient.find<
