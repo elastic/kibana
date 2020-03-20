@@ -57,6 +57,8 @@ describe('loadAllActions', () => {
         Object {
           "query": Object {
             "per_page": 10000,
+            "sort_field": "name.keyword",
+            "sort_order": "asc",
           },
         },
       ]
