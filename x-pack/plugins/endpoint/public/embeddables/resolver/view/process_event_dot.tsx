@@ -172,7 +172,7 @@ export const ProcessEventDot = styled(
         <EuiKeyboardAccessible>
           <svg
             data-test-subj={'resolverNode'}
-            className={className}
+            className={className + ' kbn-resetFocusState'}
             viewBox="-15 -15 90 30"
             preserveAspectRatio="xMidYMid meet"
             role="treeitem"
