@@ -24,7 +24,7 @@ export const importTimelines = async ({
     body: formData,
     signal,
   });
-
+};
 
 export const exportSelectedTimeline: ExportSelectedData = async ({
   excludeExportDetails = false,

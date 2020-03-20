@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { getOr, set as _set } from 'lodash/fp';
 import uuid from 'uuid';
 import {
   noteSavedObjectType,
@@ -29,8 +29,6 @@ import {
   SavedObjectsFindResponse,
 } from '../../../../../../../../src/core/server';
 import { BulkError, createBulkErrorObject } from '../../detection_engine/routes/utils';
-import { set as _set } from 'lodash/fp';
-
 
 import {
   ExportedTimelines,
@@ -59,44 +57,6 @@ interface TimelineResult {}
 interface ImportTimelineRequest {}
 interface PinnedEventResponse {}
 
-const getAllSavedNote = async (
-  savedObjectsClient: TimelineSavedObjectsClient,
-  options: SavedObjectsFindOptions
-) => {
-  const savedObjects = await savedObjectsClient.find(options);
-
-  return {
-    totalCount: savedObjects.total,
-    notes: savedObjects.saved_objects.map(savedObject =>
-      convertSavedObjectToSavedNote(savedObject)
-    ),
-  };
-};
-
-const getNotesByTimelineId = async (
-  savedObjectsClient: TimelineSavedObjectsClient,
-  timelineId: string
-): Promise<NoteSavedObject[]> => {
-  const options: SavedObjectsFindOptions = {
-    type: noteSavedObjectType,
-    search: timelineId,
-    searchFields: ['timelineId'],
-  };
-  const notesByTimelineId = await getAllSavedNote(savedObjectsClient, options);
-  return notesByTimelineId.notes;
-};
-
-const getAllSavedPinnedEvents = async (
-  savedObjectsClient: TimelineSavedObjectsClient,
-  options: SavedObjectsFindOptions
-) => {
-  const savedObjects = await savedObjectsClient.find(options);
-
-  return savedObjects.saved_objects.map(savedObject =>
-    convertSavedObjectToSavedPinnedEvent(savedObject)
-  );
-};
-
 const getAllPinnedEventsByTimelineId = async (
   savedObjectsClient: TimelineSavedObjectsClient,
   timelineId: string
@@ -121,11 +81,9 @@ export const readTimeline = async ({
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
 
   const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
-  console.log('read timeline');
-  console.log(savedObject);
+
   const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
-  console.log('read timeline 2');
-  console.log(timelineSaveObject);
+
   const timelineWithNotesAndPinnedEvents = await Promise.all([
     getNotesByTimelineId(savedObjectsClient, timelineSaveObject.savedObjectId),
     getAllPinnedEventsByTimelineId(savedObjectsClient, timelineSaveObject.savedObjectId),
@@ -227,7 +185,7 @@ const persistTimeline = async ({
       };
     }
     // Update Timeline
-    console.log('update -0-', timelineId, version, request.user, timeline);
+
     await savedObjectsClient.update(
       timelineSavedObjectType,
       timelineId,
@@ -243,14 +201,12 @@ const persistTimeline = async ({
     };
   } catch (err) {
     if (timelineId != null && savedObjectsClient.errors.isConflictError(err)) {
-      console.log('update -1-');
       return {
         code: 409,
         message: err.message,
         timeline: await getSavedTimeline(savedObjectsClient, request, timelineId),
       };
     } else if (getOr(null, 'output.statusCode', err) === 403) {
-      console.log('update -2-');
       const timelineToReturn: TimelineResult = {
         ...timeline,
         savedObjectId: '',
@@ -448,7 +404,7 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
   );
 
   return [Array.from(errors.values()), Array.from(timelinesAcc.values())];
-
+};
 
 const getAllSavedPinnedEvents = (
   pinnedEventsSavedObjects: SavedObjectsFindResponse<PinnedEventSavedObject>
