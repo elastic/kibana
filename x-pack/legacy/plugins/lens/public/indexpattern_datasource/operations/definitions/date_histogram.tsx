@@ -8,9 +8,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-// TODO: make this new-platform compatible
-import { isValidInterval } from 'ui/agg_types';
-
 import {
   EuiForm,
   EuiFormRow,
@@ -26,8 +23,12 @@ import {
 import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
-import { IndexPatternAggRestrictions } from '../../../../../../../../src/plugins/data/public';
+import {
+  IndexPatternAggRestrictions,
+  search,
+} from '../../../../../../../../src/plugins/data/public';
 
+const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
 

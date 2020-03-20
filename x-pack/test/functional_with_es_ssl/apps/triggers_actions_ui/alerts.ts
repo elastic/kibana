@@ -63,7 +63,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await fieldOptions[1].click();
       // need this two out of popup clicks to close them
       await nameInput.click();
-      await testSubjects.click('intervalInput');
 
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
@@ -84,7 +83,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('slackAddVariableButton');
       const variableMenuButton = await testSubjects.find('variableMenuButton-0');
       await variableMenuButton.click();
-      await find.clickByCssSelector('[data-test-subj="saveAlertButton"]');
+      await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Saved '${alertName}'`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -333,9 +332,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('deleteAlert');
-      const emptyPrompt = await find.byCssSelector(
-        '[data-test-subj="createFirstAlertEmptyPrompt"]'
-      );
+      const emptyPrompt = await testSubjects.find('createFirstAlertEmptyPrompt');
       expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
     });
 
@@ -446,9 +443,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('deleteAll');
 
-      const emptyPrompt = await find.byCssSelector(
-        '[data-test-subj="createFirstAlertEmptyPrompt"]'
-      );
+      const emptyPrompt = await testSubjects.find('createFirstAlertEmptyPrompt');
       expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
     });
   });
