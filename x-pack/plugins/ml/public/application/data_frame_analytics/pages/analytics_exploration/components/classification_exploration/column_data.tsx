@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
 import { ConfusionMatrix } from '../../../../common/analytics';
 
@@ -72,7 +73,12 @@ export function getTrailingControlColumns(numColumns: number, setShowFullColumns
           >
             <EuiButtonEmpty onClick={() => setShowFullColumns(true)}>
               <EuiText size="s" grow={false} textAlign="center">
-                Show all columns
+                {i18n.translate(
+                  'xpack.ml.dataframe.analytics.classificationExploration.showAllColumns',
+                  {
+                    defaultMessage: 'Show all columns',
+                  }
+                )}
               </EuiText>
             </EuiButtonEmpty>
           </EuiPopover>
