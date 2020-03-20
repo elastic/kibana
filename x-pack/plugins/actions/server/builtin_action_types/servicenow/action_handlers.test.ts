@@ -78,11 +78,13 @@ beforeAll(() => {
           incidentId: '123',
           number: 'INC01',
           pushedDate: '2020-03-10T12:24:20.000Z',
+          url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
         }),
         updateIncident: jest.fn().mockResolvedValue({
           incidentId: '123',
           number: 'INC01',
           pushedDate: '2020-03-10T12:24:20.000Z',
+          url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
         }),
         batchCreateComments: jest
           .fn()
@@ -107,6 +109,7 @@ describe('handleIncident', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
       comments: [
         {
           commentId: '456',
@@ -129,6 +132,7 @@ describe('handleIncident', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
       comments: [
         {
           commentId: '456',
@@ -161,6 +165,7 @@ describe('handleCreateIncident', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
 
@@ -203,6 +208,7 @@ describe('handleCreateIncident', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
       comments: [
         {
           commentId: '456',
@@ -236,6 +242,7 @@ describe('handleUpdateIncident', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
 
@@ -326,6 +333,7 @@ describe('handleUpdateIncident', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
       comments: [
         {
           commentId: '456',
@@ -383,8 +391,10 @@ describe('handleUpdateIncident: different action types', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
+
   test('nothing & append', async () => {
     const { serviceNow } = new ServiceNowMock();
     finalMapping.set('title', {
@@ -426,8 +436,10 @@ describe('handleUpdateIncident: different action types', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
+
   test('append & append', async () => {
     const { serviceNow } = new ServiceNowMock();
     finalMapping.set('title', {
@@ -471,8 +483,10 @@ describe('handleUpdateIncident: different action types', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
+
   test('nothing & nothing', async () => {
     const { serviceNow } = new ServiceNowMock();
     finalMapping.set('title', {
@@ -511,8 +525,10 @@ describe('handleUpdateIncident: different action types', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
+
   test('overwrite & nothing', async () => {
     const { serviceNow } = new ServiceNowMock();
     finalMapping.set('title', {
@@ -553,8 +569,10 @@ describe('handleUpdateIncident: different action types', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
+
   test('overwrite & overwrite', async () => {
     const { serviceNow } = new ServiceNowMock();
     finalMapping.set('title', {
@@ -596,8 +614,10 @@ describe('handleUpdateIncident: different action types', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
+
   test('nothing & overwrite', async () => {
     const { serviceNow } = new ServiceNowMock();
     finalMapping.set('title', {
@@ -638,8 +658,10 @@ describe('handleUpdateIncident: different action types', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
+
   test('append & overwrite', async () => {
     const { serviceNow } = new ServiceNowMock();
     finalMapping.set('title', {
@@ -682,8 +704,10 @@ describe('handleUpdateIncident: different action types', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
+
   test('append & nothing', async () => {
     const { serviceNow } = new ServiceNowMock();
     finalMapping.set('title', {
@@ -725,6 +749,7 @@ describe('handleUpdateIncident: different action types', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
 });
