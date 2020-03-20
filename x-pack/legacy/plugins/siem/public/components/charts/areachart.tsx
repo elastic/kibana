@@ -100,7 +100,7 @@ export const AreaChartBaseComponent = ({
               xAccessor="x"
               yAccessors={['y']}
               areaSeriesStyle={getSeriesLineStyle()}
-              customSeriesColors={series.color ? [series.color] : undefined}
+              color={series.color ? series.color : undefined}
             />
           ) : null;
         })}

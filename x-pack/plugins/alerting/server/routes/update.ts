@@ -15,6 +15,7 @@ import {
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
+import { BASE_ALERT_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -42,7 +43,7 @@ const bodySchema = schema.object({
 export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.put(
     {
-      path: '/api/alert/{id}',
+      path: `${BASE_ALERT_API_PATH}/{id}`,
       validate: {
         body: bodySchema,
         params: paramSchema,
