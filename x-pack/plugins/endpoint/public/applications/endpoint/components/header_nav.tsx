@@ -62,7 +62,10 @@ export const HeaderNavigation: React.FunctionComponent<{ basename: string }> = R
               event.preventDefault();
               history.push(tab.href);
             }}
-            isSelected={tab.href === location.pathname}
+            isSelected={
+              tab.href === location.pathname ||
+              (tab.href !== '/' && location.pathname.startsWith(tab.href))
+            }
           >
             {tab.name}
           </EuiTab>
