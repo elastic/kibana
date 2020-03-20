@@ -5,19 +5,12 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { PluginsSetup, PluginsStart } from 'ui/new_platform/new_platform';
 
 import { PluginInitializerContext } from '../../../../../src/core/public';
 import { plugin } from './';
-import {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-} from '../../../../plugins/triggers_actions_ui/public';
+import { SetupPlugins, StartPlugins } from './plugin';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-type myPluginsSetup = PluginsSetup & { triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup };
-type myPluginsStart = PluginsStart & { triggers_actions_ui: TriggersAndActionsUIPublicPluginStart };
-
-pluginInstance.setup(npSetup.core, npSetup.plugins as myPluginsSetup);
-pluginInstance.start(npStart.core, npStart.plugins as myPluginsStart);
+pluginInstance.setup(npSetup.core, (npSetup.plugins as unknown) as SetupPlugins);
+pluginInstance.start(npStart.core, (npStart.plugins as unknown) as StartPlugins);

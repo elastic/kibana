@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AckEventSchema, AgentEventSchema, AgentTypeSchema } from '../models';
+import { AckEventSchema, AgentEventSchema, AgentTypeSchema, NewAgentActionSchema } from '../models';
 
 export const GetAgentsRequestSchema = {
   query: schema.object({
@@ -46,6 +46,15 @@ export const PostAgentEnrollRequestSchema = {
 export const PostAgentAcksRequestSchema = {
   body: schema.object({
     events: schema.arrayOf(AckEventSchema),
+  }),
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+};
+
+export const PostNewAgentActionRequestSchema = {
+  body: schema.object({
+    action: NewAgentActionSchema,
   }),
   params: schema.object({
     agentId: schema.string(),
