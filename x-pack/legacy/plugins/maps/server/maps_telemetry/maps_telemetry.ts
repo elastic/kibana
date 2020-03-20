@@ -16,7 +16,6 @@ import {
   ES_GEO_FIELD_TYPE,
   MAP_SAVED_OBJECT_TYPE,
   TELEMETRY_TYPE,
-  // @ts-ignore
 } from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapSavedObject } from '../../../../../plugins/maps/common/map_saved_object_type';
