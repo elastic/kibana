@@ -6,8 +6,17 @@
 
 import { setSignalsStatusSchema } from './set_signal_status_schema';
 import { SignalsStatusRestParams } from '../../signals/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('set signal status schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('signal_ids and status is valid', () => {
     expect(
       setSignalsStatusSchema.validate<Partial<SignalsStatusRestParams>>({

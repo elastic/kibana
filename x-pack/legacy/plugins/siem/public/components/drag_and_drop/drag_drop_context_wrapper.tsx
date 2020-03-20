@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, noop } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { connect, ConnectedProps } from 'react-redux';
@@ -103,10 +103,7 @@ DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 const emptyDataProviders: dragAndDropModel.IdToDataProvider = {}; // stable reference
 
 const mapStateToProps = (state: State) => {
-  const dataProviders = defaultTo(
-    emptyDataProviders,
-    dragAndDropSelectors.dataProvidersSelector(state)
-  );
+  const dataProviders = dragAndDropSelectors.dataProvidersSelector(state) ?? emptyDataProviders;
 
   return { dataProviders };
 };

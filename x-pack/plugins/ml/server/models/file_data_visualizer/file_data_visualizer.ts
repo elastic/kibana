@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { APICaller } from 'kibana/server';
-import { FindFileStructureResponse } from '../../../../../legacy/plugins/ml/common/types/file_datavisualizer';
+import { FindFileStructureResponse } from '../../../common/types/file_datavisualizer';
 
 export type InputData = any[];
 

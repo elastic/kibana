@@ -63,7 +63,7 @@ export const usePostCase = (): UsePostCase => {
     let cancel = false;
     try {
       dispatch({ type: 'FETCH_INIT' });
-      const response = await postCase({ ...data, state: 'open' });
+      const response = await postCase({ ...data, status: 'open' });
       if (!cancel) {
         dispatch({
           type: 'FETCH_SUCCESS',

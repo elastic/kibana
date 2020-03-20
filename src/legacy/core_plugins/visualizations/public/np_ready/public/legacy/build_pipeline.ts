@@ -22,11 +22,13 @@ import moment from 'moment';
 import { SerializedFieldFormat } from '../../../../../../../plugins/expressions/public';
 import {
   fieldFormats,
+  IAggConfig,
   ISearchSource,
+  search,
   TimefilterContract,
 } from '../../../../../../../plugins/data/public';
+const { isDateHistogramBucketAggConfig } = search.aggs;
 import { Vis, VisParams } from '../types';
-import { IAggConfig, isDateHistogramBucketAggConfig } from '../../../../../data/public';
 
 interface SchemaConfigParams {
   precision?: number;

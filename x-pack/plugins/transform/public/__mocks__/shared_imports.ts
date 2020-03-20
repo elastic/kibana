@@ -11,5 +11,5 @@ export const useRequest = jest.fn(() => ({
   error: null,
   data: undefined,
 }));
-export { mlInMemoryTableBasicFactory } from '../../../../legacy/plugins/ml/public/application/components/ml_in_memory_table';
+export { mlInMemoryTableBasicFactory } from '../../../ml/public/application/components/ml_in_memory_table';
 export const SORT_DIRECTION = { ASC: 'asc' };

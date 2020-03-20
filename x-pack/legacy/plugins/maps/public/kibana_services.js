@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../../../../src/legacy/core_plugins/data/public';
-import { esFilters } from '../../../../../src/plugins/data/public';
+import { esFilters, search } from '../../../../../src/plugins/data/public';
+const { getRequestInspectorStats, getResponseInspectorStats } = search;
 import { npStart } from 'ui/new_platform';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;

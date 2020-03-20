@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { listAgents } from './crud';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentStatus, Agent } from '../../types';

@@ -12,32 +12,36 @@ import {
   SavedObject,
   SavedObjectsFindResponse,
 } from 'kibana/server';
+
 import {
   CaseRequest,
   CaseResponse,
-  CasesResponse,
+  CasesFindResponse,
   CaseAttributes,
   CommentResponse,
   CommentsResponse,
   CommentAttributes,
 } from '../../../common/api';
-
 import { SortFieldCase } from './types';
 
 export const transformNewCase = ({
   createdDate,
-  newCase,
+  email,
   full_name,
+  newCase,
   username,
 }: {
   createdDate: string;
+  email?: string;
+  full_name?: string;
   newCase: CaseRequest;
-  full_name?: string | null;
-  username: string | null;
+  username: string;
 }): CaseAttributes => ({
+  closed_at: newCase.status === 'closed' ? createdDate : null,
+  closed_by: newCase.status === 'closed' ? { email, full_name, username } : null,
   comment_ids: [],
   created_at: createdDate,
-  created_by: { full_name, username },
+  created_by: { email, full_name, username },
   updated_at: null,
   updated_by: null,
   ...newCase,
@@ -46,24 +50,27 @@ export const transformNewCase = ({
 interface NewCommentArgs {
   comment: string;
   createdDate: string;
-  full_name?: string | null;
-  username: string | null;
+  email?: string;
+  full_name?: string;
+  username: string;
 }
 export const transformNewComment = ({
   comment,
   createdDate,
+  email,
   full_name,
   username,
 }: NewCommentArgs): CommentAttributes => ({
   comment,
   created_at: createdDate,
-  created_by: { full_name, username },
+  created_by: { email, full_name, username },
   updated_at: null,
   updated_by: null,
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
-  const boom = isBoom(error) ? error : boomify(error);
+  const options = { statusCode: error.statusCode ?? 500 };
+  const boom = isBoom(error) ? error : boomify(error, options);
   return {
     body: boom,
     headers: boom.output.headers,
@@ -71,11 +78,17 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
   };
 }
 
-export const transformCases = (cases: SavedObjectsFindResponse<CaseAttributes>): CasesResponse => ({
+export const transformCases = (
+  cases: SavedObjectsFindResponse<CaseAttributes>,
+  countOpenCases: number,
+  countClosedCases: number
+): CasesFindResponse => ({
   page: cases.page,
   per_page: cases.per_page,
   total: cases.total,
   cases: flattenCaseSavedObjects(cases.saved_objects),
+  count_open_cases: countOpenCases,
+  count_closed_cases: countClosedCases,
 });
 
 export const flattenCaseSavedObjects = (
@@ -121,17 +134,17 @@ export const flattenCommentSavedObject = (
 
 export const sortToSnake = (sortField: string): SortFieldCase => {
   switch (sortField) {
-    case 'state':
-      return SortFieldCase.state;
+    case 'status':
+      return SortFieldCase.status;
     case 'createdAt':
     case 'created_at':
       return SortFieldCase.createdAt;
-    case 'updatedAt':
-    case 'updated_at':
-      return SortFieldCase.updatedAt;
+    case 'closedAt':
+    case 'closed_at':
+      return SortFieldCase.closedAt;
     default:
       return SortFieldCase.createdAt;
   }
 };
 
-export const escapeHatch = schema.object({}, { allowUnknowns: true });
+export const escapeHatch = schema.object({}, { unknowns: 'allow' });

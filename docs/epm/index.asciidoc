@@ -47,12 +47,12 @@ A user-specified string that will be used to part of the index name in Elasticse
 
 ==== Package
 
-A package contains all the assets for the Elastic Stack. A more detailed definition of a package can be found under https://github.com/elastic/package-registry .
+A package contains all the assets for the Elastic Stack. A more detailed definition of a package can be found under https://github.com/elastic/package-registry.
 
 
 == Indexing Strategy
 
-Ingest Management enforces an indexing strategy to allow the system to automically detect indices and run queries on it. In short the indexing strategy looks as following:
+Ingest Management enforces an indexing strategy to allow the system to automatically detect indices and run queries on it. In short the indexing strategy looks as following:
 
 ```
 {type}-{dataset}-{namespace}
@@ -85,7 +85,7 @@ The version is included in each pipeline to allow upgrades. The pipeline itself 
 
 === Templates & ILM Policies
 
-To make the above strategy possible, alias templates are required. For each type there is a basic alias template with a default ILM policy. These default templates apply to all indices which follow the indexing strategy and do not have a more specific dataset alias template. 
+To make the above strategy possible, alias templates are required. For each type there is a basic alias template with a default ILM policy. These default templates apply to all indices which follow the indexing strategy and do not have a more specific dataset alias template.
 
 The `metrics` and `logs` alias template contain all the basic fields from ECS.
 
@@ -109,7 +109,7 @@ Filtering for data in queries for example in visualizations or dashboards should
 
 === Security permissions
 
-Security permissions can be set on different levels. To set special permissions for the access on the prod namespace an index pattern as below can be used:
+Security permissions can be set on different levels. To set special permissions for the access on the prod namespace, use the following index pattern:
 
 ```
 /(logs|metrics)-[^-]+-prod-$/
@@ -142,5 +142,3 @@ The new ingest pipeline is expected to still work with the data coming from olde
 In case of a breaking change in the data structure, the new ingest pipeline is also expected to deal with this change. In case there are breaking changes which cannot be dealt with in an ingest pipeline, a new package has to be created.
 
 Each package lists its minimal required agent version. In case there are agents enrolled with an older version, the user is notified to upgrade these agents as otherwise the new configs cannot be rolled out.
-
-

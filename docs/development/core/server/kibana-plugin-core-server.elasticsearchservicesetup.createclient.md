@@ -4,7 +4,12 @@
 
 ## ElasticsearchServiceSetup.createClient property
 
-Create application specific Elasticsearch cluster API client with customized config. See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)<!-- -->.
+> Warning: This API is now obsolete.
+> 
+> Use [ElasticsearchServiceStart.legacy.createClient](./kibana-plugin-core-server.elasticsearchservicestart.legacy.md) instead.
+> 
+> Create application specific Elasticsearch cluster API client with customized config. See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)<!-- -->.
+> 
 
 <b>Signature:</b>
 

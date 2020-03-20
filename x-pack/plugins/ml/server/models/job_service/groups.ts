@@ -6,8 +6,8 @@
 
 import { APICaller } from 'kibana/server';
 import { CalendarManager } from '../calendar';
-import { GLOBAL_CALENDAR } from '../../../../../legacy/plugins/ml/common/constants/calendars';
-import { Job } from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
+import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import { Job } from '../../../common/types/anomaly_detection_jobs';
 import { MlJobsResponse } from './jobs';
 
 interface Group {
