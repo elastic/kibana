@@ -20,6 +20,8 @@ import { writeGapErrorToSavedObject } from './write_gap_error_to_saved_object';
 import { getRuleStatusSavedObjects } from './get_rule_status_saved_objects';
 import { getCurrentStatusSavedObject } from './get_current_status_saved_object';
 import { writeCurrentStatusSucceeded } from './write_current_status_succeeded';
+import { findMlSignals } from './find_ml_signals';
+import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 
 export const signalRulesAlertType = ({
   logger,
@@ -38,11 +40,13 @@ export const signalRulesAlertType = ({
     },
     async executor({ previousStartedAt, alertId, services, params }) {
       const {
+        anomalyThreshold,
         from,
         ruleId,
         index,
         filters,
         language,
+        machineLearningJobId,
         outputIndex,
         savedId,
         query,
@@ -63,6 +67,7 @@ export const signalRulesAlertType = ({
       });
 
       const {
+        actions,
         name,
         tags,
         createdAt,
@@ -70,6 +75,7 @@ export const signalRulesAlertType = ({
         updatedBy,
         enabled,
         schedule: { interval },
+        throttle,
       } = savedObject.attributes;
 
       const updatedAt = savedObject.updated_at ?? '';
@@ -86,33 +92,72 @@ export const signalRulesAlertType = ({
         ruleStatusSavedObjects,
         name,
       });
-      // set searchAfter page size to be the lesser of default page size or maxSignals.
-      const searchAfterSize =
-        DEFAULT_SEARCH_AFTER_PAGE_SIZE <= params.maxSignals
-          ? DEFAULT_SEARCH_AFTER_PAGE_SIZE
-          : params.maxSignals;
+
+      const searchAfterSize = Math.min(params.maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
+      let creationSucceeded = false;
+
       try {
-        const inputIndex = await getInputIndex(services, version, index);
-        const esFilter = await getFilter({
-          type,
-          filters,
-          language,
-          query,
-          savedId,
-          services,
-          index: inputIndex,
-        });
+        if (type === 'machine_learning') {
+          if (machineLearningJobId == null || anomalyThreshold == null) {
+            throw new Error(
+              `Attempted to execute machine learning rule, but it is missing job id and/or anomaly threshold for rule id: "${ruleId}", name: "${name}", signals index: "${outputIndex}", job id: "${machineLearningJobId}", anomaly threshold: "${anomalyThreshold}"`
+            );
+          }
 
-        const noReIndex = buildEventsSearchQuery({
-          index: inputIndex,
-          from,
-          to,
-          filter: esFilter,
-          size: searchAfterSize,
-          searchAfterSortId: undefined,
-        });
+          const anomalyResults = await findMlSignals(
+            machineLearningJobId,
+            anomalyThreshold,
+            from,
+            to,
+            services.callCluster
+          );
 
-        try {
+          const anomalyCount = anomalyResults.hits.hits.length;
+          if (anomalyCount) {
+            logger.info(
+              `Found ${anomalyCount} signals from ML anomalies for signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+            );
+          }
+
+          creationSucceeded = await bulkCreateMlSignals({
+            actions,
+            throttle,
+            someResult: anomalyResults,
+            ruleParams: params,
+            services,
+            logger,
+            id: alertId,
+            signalsIndex: outputIndex,
+            name,
+            createdBy,
+            createdAt,
+            updatedBy,
+            updatedAt,
+            interval,
+            enabled,
+            tags,
+          });
+        } else {
+          const inputIndex = await getInputIndex(services, version, index);
+          const esFilter = await getFilter({
+            type,
+            filters,
+            language,
+            query,
+            savedId,
+            services,
+            index: inputIndex,
+          });
+
+          const noReIndex = buildEventsSearchQuery({
+            index: inputIndex,
+            from,
+            to,
+            filter: esFilter,
+            size: searchAfterSize,
+            searchAfterSortId: undefined,
+          });
+
           logger.debug(
             `Starting signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
@@ -130,14 +175,16 @@ export const signalRulesAlertType = ({
             );
           }
 
-          const bulkIndexResult = await searchAfterAndBulkCreate({
+          creationSucceeded = await searchAfterAndBulkCreate({
             someResult: noReIndexResult,
             ruleParams: params,
             services,
             logger,
             id: alertId,
+            inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
             filter: esFilter,
+            actions,
             name,
             createdBy,
             createdAt,
@@ -147,47 +194,37 @@ export const signalRulesAlertType = ({
             enabled,
             pageSize: searchAfterSize,
             tags,
+            throttle,
           });
+        }
 
-          if (bulkIndexResult) {
-            logger.debug(
-              `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-            );
-            await writeCurrentStatusSucceeded({
-              services,
-              currentStatusSavedObject,
-            });
-          } else {
-            await writeSignalRuleExceptionToSavedObject({
-              name,
-              alertId,
-              currentStatusSavedObject,
-              logger,
-              message: `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
-              services,
-              ruleStatusSavedObjects,
-              ruleId: ruleId ?? '(unknown rule id)',
-            });
-          }
-        } catch (err) {
+        if (creationSucceeded) {
+          logger.debug(
+            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", output_index: "${outputIndex}"`
+          );
+          await writeCurrentStatusSucceeded({
+            services,
+            currentStatusSavedObject,
+          });
+        } else {
           await writeSignalRuleExceptionToSavedObject({
             name,
             alertId,
             currentStatusSavedObject,
             logger,
-            message: err?.message ?? '(no error message given)',
+            message: `Bulk Indexing signals failed. Check logs for further details Rule name: "${name}" id: "${alertId}" rule_id: "${ruleId}" output_index: "${outputIndex}"`,
             services,
             ruleStatusSavedObjects,
             ruleId: ruleId ?? '(unknown rule id)',
           });
         }
-      } catch (exception) {
+      } catch (error) {
         await writeSignalRuleExceptionToSavedObject({
           name,
           alertId,
           currentStatusSavedObject,
           logger,
-          message: exception?.message ?? '(no error message given)',
+          message: error?.message ?? '(no error message given)',
           services,
           ruleStatusSavedObjects,
           ruleId: ruleId ?? '(unknown rule id)',

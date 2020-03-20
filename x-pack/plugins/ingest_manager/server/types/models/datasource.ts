@@ -25,13 +25,30 @@ const DatasourceBaseSchema = {
       type: schema.string(),
       enabled: schema.boolean(),
       processors: schema.maybe(schema.arrayOf(schema.string())),
+      config: schema.maybe(
+        schema.recordOf(
+          schema.string(),
+          schema.object({
+            type: schema.maybe(schema.string()),
+            value: schema.maybe(schema.any()),
+          })
+        )
+      ),
       streams: schema.arrayOf(
         schema.object({
           id: schema.string(),
           enabled: schema.boolean(),
           dataset: schema.string(),
           processors: schema.maybe(schema.arrayOf(schema.string())),
-          config: schema.recordOf(schema.string(), schema.any()),
+          config: schema.maybe(
+            schema.recordOf(
+              schema.string(),
+              schema.object({
+                type: schema.maybe(schema.string()),
+                value: schema.maybe(schema.any()),
+              })
+            )
+          ),
         })
       ),
     })

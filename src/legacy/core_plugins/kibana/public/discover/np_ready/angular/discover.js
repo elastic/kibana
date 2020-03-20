@@ -44,7 +44,6 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  intervalOptions,
   unhashUrl,
   subscribeWithScope,
   tabifyAggResponse,
@@ -64,7 +63,7 @@ const {
   share,
   timefilter,
   toastNotifications,
-  uiSettings,
+  uiSettings: config,
   visualizations,
 } = getServices();
 
@@ -76,6 +75,7 @@ import {
   connectToQueryState,
   syncQueryStateWithUrl,
   getDefaultQuery,
+  search,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../../../../plugins/kibana_legacy/public';
@@ -115,9 +115,9 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function($route, kbnUrl, Promise, $rootScope) {
+      savedObjects: function($route, Promise) {
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
+        return ensureDefaultIndexPattern(core, data, history).then(() => {
           const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
@@ -131,7 +131,7 @@ app.config($routeProvider => {
                *
                *  @type {State}
                */
-              const id = getIndexPatternId(index, indexPatternList, uiSettings.get('defaultIndex'));
+              const id = getIndexPatternId(index, indexPatternList, config.get('defaultIndex'));
               return Promise.props({
                 list: indexPatternList,
                 loaded: indexPatterns.get(id),
@@ -184,7 +184,6 @@ function discoverController(
   $timeout,
   $window,
   Promise,
-  config,
   kbnUrl,
   localStorage,
   uiCapabilities
@@ -286,7 +285,7 @@ function discoverController(
       mode: 'absolute',
     });
   };
-  $scope.intervalOptions = intervalOptions;
+  $scope.intervalOptions = search.aggs.intervalOptions;
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
