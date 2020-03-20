@@ -23,7 +23,7 @@ export type UMElasticsearchQueryFn<P, R = any> = (
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
   client: SavedObjectsClientContract,
-  params: P
+  params?: P
 ) => Promise<T> | T;
 
 export interface UptimeCoreSetup {

@@ -37,5 +37,5 @@ export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
     if (setBreadcrumbs) {
       setBreadcrumbs([makeBaseBreadcrumb(params)].concat(extraCrumbs));
     }
-  });
+  }, [extraCrumbs, params, setBreadcrumbs]);
 };

@@ -36,8 +36,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
         { APICaller, savedObjectsClient }
       ): Promise<MonitorSummaryResult> {
         const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-          savedObjectsClient,
-          undefined
+          savedObjectsClient
         );
 
         const decodedPagination = pagination

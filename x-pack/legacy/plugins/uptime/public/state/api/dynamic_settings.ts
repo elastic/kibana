@@ -32,5 +32,5 @@ export const setDynamicSettings = async ({
   basePath,
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
-  return await apiService.post(apiPath, JSON.stringify(settings), DynamicSettingsSaveType);
+  return await apiService.post(apiPath, settings, DynamicSettingsSaveType);
 };

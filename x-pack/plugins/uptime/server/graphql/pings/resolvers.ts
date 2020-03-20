@@ -39,8 +39,7 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
       { APICaller, savedObjectsClient }
     ): Promise<PingResults> {
       const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-        savedObjectsClient,
-        undefined
+        savedObjectsClient
       );
 
       return await libs.requests.getPings({
