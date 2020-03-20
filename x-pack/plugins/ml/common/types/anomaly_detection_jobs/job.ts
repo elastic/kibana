@@ -81,9 +81,9 @@ export interface ModelPlotConfig {
 
 // TODO, finish this when it's needed
 export interface CustomRule {
-  actions: any;
-  scope: object;
-  conditions: object;
+  actions: string[];
+  scope?: object;
+  conditions: any[];
 }
 
 export { JobStat, JobExistResult } from '../../../server/models/data_recognizer/data_recognizer';

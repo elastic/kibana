@@ -109,7 +109,8 @@ export const DurationChartComponent = ({
             <Chart>
               <Settings
                 xDomain={{ min, max }}
-                showLegend={true}
+                showLegend
+                showLegendExtra
                 legendPosition={Position.Bottom}
                 onBrushEnd={onBrushEnd}
                 onLegendItemClick={legendToggleVisibility}

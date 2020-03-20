@@ -6,11 +6,11 @@
 
 import { listActionTypesRoute } from './list_action_types';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { licenseStateMock } from '../lib/license_state.mock';
+import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -20,7 +20,7 @@ beforeEach(() => {
 
 describe('listActionTypesRoute', () => {
   it('lists action types with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     listActionTypesRoute(router, licenseState);
@@ -66,7 +66,7 @@ describe('listActionTypesRoute', () => {
   });
 
   it('ensures the license allows listing action types', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     listActionTypesRoute(router, licenseState);
@@ -104,7 +104,7 @@ describe('listActionTypesRoute', () => {
   });
 
   it('ensures the license check prevents listing action types', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router: RouterMock = mockRouter.create();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
