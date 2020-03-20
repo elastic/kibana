@@ -19,6 +19,7 @@ import { BulkError } from '../utils';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 export const ruleOutput: RulesSchema = {
+  actions: [],
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',
   created_by: 'elastic',

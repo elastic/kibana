@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
 import {
+  actions,
   enabled,
   description,
   false_positives,
@@ -31,6 +32,7 @@ import {
   to,
   type,
   threat,
+  throttle,
   references,
   id,
   note,
@@ -52,6 +54,7 @@ import { hasListsFeature } from '../../feature_flags';
  *   - id is on here because you can pass in an id to update using it instead of rule_id.
  */
 export const updateRulesSchema = Joi.object({
+  actions: actions.default([]),
   anomaly_threshold: anomaly_threshold.when('type', {
     is: 'machine_learning',
     then: Joi.required(),
@@ -98,6 +101,7 @@ export const updateRulesSchema = Joi.object({
   to: to.default('now'),
   type: type.required(),
   threat: threat.default([]),
+  throttle: throttle.default(null),
   references: references.default([]),
   note: note.allow(''),
   version,
