@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash';
 import {
   filterByAgent,
   ConfigSettingDefinition,
@@ -73,7 +74,18 @@ describe('filterByAgent', () => {
         'stack_trace_limit',
         'trace_methods_duration_threshold',
         'transaction_sample_rate',
-        'transaction_max_spans'
+        'transaction_max_spans',
+        'circuit_breaker_enabled',
+        'stress_monitor_gc_stress_threshold',
+        'stress_monitor_gc_relief_threshold',
+        'stress_monitor_cpu_duration_threshold',
+        'stress_monitor_system_cpu_stress_threshold',
+        'stress_monitor_system_cpu_relief_threshold',
+        'profiling_inferred_spans_enabled',
+        'profiling_inferred_spans_sampling_interval',
+        'profiling_inferred_spans_min_duration',
+        'profiling_inferred_spans_included_classes',
+        'profiling_inferred_spans_excluded_classes'
       ]);
     });
 
@@ -148,6 +160,26 @@ describe('filterByAgent', () => {
         'transaction_max_spans'
       ]);
     });
+  });
+});
+
+describe('configSettingDefinitions', () => {
+  it('should have correct default values', () => {
+    expect(
+      configSettingDefinitions.map(def => {
+        return {
+          ...omit(def, [
+            'defaultValue',
+            'validation',
+            'label',
+            'description',
+            'includeAgents',
+            'excludeAgents'
+          ]),
+          validationName: def.validation.name
+        };
+      })
+    ).toMatchSnapshot();
   });
 });
 

@@ -6,6 +6,7 @@
 
 import * as t from 'io-ts';
 import { isRight } from 'fp-ts/lib/Either';
+import { i18n } from '@kbn/i18n';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   rawConfigSettingDefinitions,
@@ -14,21 +15,56 @@ import {
 import { booleanRt } from '../boolean_rt';
 import { integerRt } from '../integer_rt';
 import { isRumAgentName } from '../../../agent_name';
+import { numberFloatRt } from '../number_float';
+import { bytesRt, BYTE_UNITS } from '../bytes_rt';
+import { durationRt, DURATION_UNITS } from '../duration_rt';
 
 export type ConfigSettingDefinition = RawConfigSettingDefinition & {
   validation: NonNullable<RawConfigSettingDefinition['validation']>;
 };
 
-function getDefaultValidation(
+function getDefaultsByType(
   configSettingDefinition: RawConfigSettingDefinition
 ) {
   switch (configSettingDefinition.type) {
     case 'boolean':
-      return booleanRt;
+      return { validation: booleanRt };
     case 'text':
-      return t.string;
+      return { validation: t.string };
     case 'integer':
-      return integerRt;
+      return {
+        validation: integerRt,
+        validationError: i18n.translate(
+          'xpack.apm.agentConfig.integer.errorText',
+          { defaultMessage: 'Must be an integer' }
+        )
+      };
+    case 'float':
+      return {
+        validation: numberFloatRt,
+        validationError: i18n.translate(
+          'xpack.apm.agentConfig.float.errorText',
+          { defaultMessage: 'Must be a number between 0.000 and 1' }
+        )
+      };
+    case 'bytes':
+      return {
+        validation: bytesRt,
+        units: BYTE_UNITS,
+        validationError: i18n.translate(
+          'xpack.apm.agentConfig.bytes.errorText',
+          { defaultMessage: 'Please specify an integer and a unit' }
+        )
+      };
+    case 'duration':
+      return {
+        validation: durationRt,
+        units: DURATION_UNITS,
+        validationError: i18n.translate(
+          'xpack.apm.agentConfig.bytes.errorText',
+          { defaultMessage: 'Please specify an integer and a unit' }
+        )
+      };
   }
 }
 
@@ -65,14 +101,16 @@ export function isValid(setting: ConfigSettingDefinition, value: unknown) {
   return isRight(setting.validation.decode(value));
 }
 
-// add default validations
 export const configSettingDefinitions = rawConfigSettingDefinitions.map(def => {
-  const validation = def.validation ?? getDefaultValidation(def);
-  if (!validation) {
+  const defWithDefaults = {
+    ...getDefaultsByType(def),
+    ...def
+  };
+
+  // ensure every option has validation
+  if (!defWithDefaults.validation) {
     throw new Error(`Missing validation for ${def.key}`);
   }
-  return {
-    ...def,
-    validation
-  };
+
+  return defWithDefaults as ConfigSettingDefinition;
 });

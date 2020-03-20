@@ -43,6 +43,7 @@ function FormRow({
   );
 
   switch (setting.type) {
+    case 'float':
     case 'text': {
       return (
         <EuiFieldText
@@ -87,7 +88,8 @@ function FormRow({
       );
     }
 
-    case 'amountAndUnit': {
+    case 'bytes':
+    case 'duration': {
       const { amount, unit } = amountAndUnitToObject(value ?? '');
 
       return (
@@ -110,7 +112,7 @@ function FormRow({
                 defaultMessage: 'Select unit'
               })}
               value={unit}
-              options={setting.units.map(text => ({ text }))}
+              options={setting.units?.map(text => ({ text }))}
               onChange={e =>
                 onChange(
                   setting.key,
