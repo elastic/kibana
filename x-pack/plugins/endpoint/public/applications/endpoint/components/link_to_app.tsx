@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, SyntheticEvent, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { EuiLinkProps } from '@elastic/eui/src/components/link/link';
+import { EuiLinkProps } from '@elastic/eui';
 import { useNavigateToAppEventHandler } from '../hooks/use_navigate_to_app_event_handler';
 
 /**
@@ -22,18 +22,11 @@ export const LinkToApp = memo<
     appState?: any;
   }
 >(({ appId, appPath: path, appState: state, onClick, children, ...otherProps }) => {
-  const navigateToApp = useNavigateToAppEventHandler(appId, { path, state });
-  const handleClickEvent = useMemo(() => {
-    return (ev: SyntheticEvent) => {
-      if (onClick) {
-        // @ts-ignore
-        onClick(ev);
-      }
-      navigateToApp(ev);
-    };
-  }, [navigateToApp, onClick]);
+  const handleOnClick = useNavigateToAppEventHandler(appId, { path, state, onClick });
   return (
-    <EuiLink {...otherProps} onClick={handleClickEvent}>
+    // @ts-ignore
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink {...otherProps} href={'#'} onClick={handleOnClick}>
       {children}
     </EuiLink>
   );

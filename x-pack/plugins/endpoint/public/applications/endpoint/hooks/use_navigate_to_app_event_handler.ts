@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SyntheticEvent, useMemo } from 'react';
+import { useCallback } from 'react';
 import { ApplicationStart } from 'kibana/public';
+import { EuiLinkProps } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 type NavigateToAppHandlerProps = Parameters<ApplicationStart['navigateToApp']>;
+type EventHandlerCallback = EuiLinkProps['onClick'];
 
 /**
  * Provides an event handlers that can be used with (for example) `onClick` to prevent the
@@ -28,17 +30,35 @@ export const useNavigateToAppEventHandler = (
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
   appId: NavigateToAppHandlerProps[0],
 
-  /** Options to pass along to the app route */
-  options?: NavigateToAppHandlerProps[1]
-): ((ev: SyntheticEvent) => void) => {
+  /** Options, some of which are passed along to the app route */
+  options?: NavigateToAppHandlerProps[1] & {
+    onClick?: EventHandlerCallback;
+  }
+): EventHandlerCallback => {
   const { services } = useKibana();
-  const { path, state } = options || {};
-  return useMemo(() => {
-    return (ev: SyntheticEvent) => {
-      if (!ev.isDefaultPrevented()) {
+  const { path, state, onClick } = options || {};
+  return useCallback(
+    ev => {
+      try {
+        if (onClick) {
+          onClick(ev);
+        }
+      } catch (error) {
         ev.preventDefault();
+        throw error;
       }
+
+      if (ev.defaultPrevented) {
+        return;
+      }
+
+      if (ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey) {
+        return;
+      }
+
+      ev.preventDefault();
       services.application.navigateToApp(appId, { path, state });
-    };
-  }, [appId, path, services.application, state]);
+    },
+    [appId, onClick, path, services.application, state]
+  );
 };
