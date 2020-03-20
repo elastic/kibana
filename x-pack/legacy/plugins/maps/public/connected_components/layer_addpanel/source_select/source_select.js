@@ -5,30 +5,33 @@
  */
 
 import React, { Fragment } from 'react';
-import { ALL_SOURCES } from '../../../layers/sources/all_sources';
+import { getSources } from '../../../layers/sources/source_registry';
 import { EuiTitle, EuiSpacer, EuiCard, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 
 export function SourceSelect({ updateSourceSelection }) {
-  const sourceCards = ALL_SOURCES.map(Source => {
-    const icon = Source.icon ? <EuiIcon type={Source.icon} size="l" /> : null;
-
-    const sourceTitle = Source.title;
+  const sourceCards = getSources().map(sourceRegistryEntry => {
+    const icon = sourceRegistryEntry.icon ? (
+      <EuiIcon type={sourceRegistryEntry.icon} size="l" />
+    ) : null;
 
     return (
-      <Fragment key={Source.type}>
+      <Fragment key={sourceRegistryEntry.id}>
         <EuiSpacer size="s" />
         <EuiCard
           className="mapLayerAddpanel__card"
-          title={sourceTitle}
+          title={sourceRegistryEntry.title}
           icon={icon}
           onClick={() =>
-            updateSourceSelection({ type: Source.type, isIndexingSource: Source.isIndexingSource })
+            updateSourceSelection({
+              sourceId: sourceRegistryEntry.id,
+              isIndexingSource: !!sourceRegistryEntry.isIndexingSource,
+            })
           }
-          description={Source.description}
+          description={sourceRegistryEntry.description}
           layout="horizontal"
-          data-test-subj={_.camelCase(Source.title)}
+          data-test-subj={_.camelCase(sourceRegistryEntry.title)}
         />
       </Fragment>
     );

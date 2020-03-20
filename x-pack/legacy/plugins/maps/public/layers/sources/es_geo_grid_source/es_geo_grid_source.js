@@ -32,17 +32,20 @@ import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
 import { DataRequestAbortError } from '../../util/data_request';
+import { registerSource } from '../source_registry';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
+const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
+  defaultMessage: 'Clusters',
+});
+
+const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle', {
+  defaultMessage: 'Heat map',
+});
+
 export class ESGeoGridSource extends AbstractESAggSource {
   static type = ES_GEO_GRID;
-  static title = i18n.translate('xpack.maps.source.esGridTitle', {
-    defaultMessage: 'Grid aggregation',
-  });
-  static description = i18n.translate('xpack.maps.source.esGridDescription', {
-    defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
-  });
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
     return {
@@ -53,21 +56,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
       requestType: requestType,
       resolution: resolution ? resolution : GRID_RESOLUTION.COARSE,
     };
-  }
-
-  static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
-      if (!sourceConfig) {
-        onPreviewSource(null);
-        return;
-      }
-
-      const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
-      const source = new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-
-    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   }
 
   renderSourceSettingsEditor({ onChange }) {
@@ -94,7 +82,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return [
       {
         label: getDataSourceLabel(),
-        value: ESGeoGridSource.title,
+        value: this._descriptor.requestType === RENDER_AS.HEATMAP ? heatmapTitle : clustersTitle,
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.indexPatternLabel', {
@@ -107,12 +95,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
           defaultMessage: 'Geospatial field',
         }),
         value: this._descriptor.geoField,
-      },
-      {
-        label: i18n.translate('xpack.maps.source.esGrid.showasFieldLabel', {
-          defaultMessage: 'Show as',
-        }),
-        value: this._descriptor.requestType,
       },
     ];
   }
@@ -429,3 +411,69 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return [VECTOR_SHAPE_TYPES.POINT];
   }
 }
+
+registerSource({
+  id: `${ES_GEO_GRID}_clusters`,
+  order: 11,
+  description: i18n.translate('xpack.maps.source.esGridClustersDescription', {
+    defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
+  }),
+  factory: (sourceDescriptor, inspectorAdapters) => {
+    return new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
+  },
+  icon: 'logoElasticsearch',
+  renderCreateEditor: ({ onPreviewSource, inspectorAdapters }) => {
+    const onSourceConfigChange = sourceConfig => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
+      const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
+      const source = new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
+    };
+
+    return (
+      <CreateSourceEditor
+        requestType={RENDER_AS.POINT}
+        onSourceConfigChange={onSourceConfigChange}
+      />
+    );
+  },
+  title: clustersTitle,
+  type: ES_GEO_GRID,
+});
+
+registerSource({
+  id: `${ES_GEO_GRID}_heatmap`,
+  order: 12,
+  description: i18n.translate('xpack.maps.source.esGridHeatmapDescription', {
+    defaultMessage: 'Geospatial data grouped in grids to show density',
+  }),
+  factory: (sourceDescriptor, inspectorAdapters) => {
+    return new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
+  },
+  icon: 'logoElasticsearch',
+  renderCreateEditor: ({ onPreviewSource, inspectorAdapters }) => {
+    const onSourceConfigChange = sourceConfig => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
+      const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
+      const source = new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
+    };
+
+    return (
+      <CreateSourceEditor
+        requestType={RENDER_AS.HEATMAP}
+        onSourceConfigChange={onSourceConfigChange}
+      />
+    );
+  },
+  title: heatmapTitle,
+  type: ES_GEO_GRID,
+});

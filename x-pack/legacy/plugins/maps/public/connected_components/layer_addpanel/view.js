@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 export class AddLayerPanel extends Component {
   state = {
-    sourceType: null,
+    sourceId: null,
     layer: null,
     importView: false,
     layerImportAddReady: false,
@@ -35,9 +35,9 @@ export class AddLayerPanel extends Component {
   }
 
   _getPanelDescription() {
-    const { sourceType, importView, layerImportAddReady } = this.state;
+    const { sourceId, importView, layerImportAddReady } = this.state;
     let panelDescription;
-    if (!sourceType) {
+    if (!sourceId) {
       panelDescription = i18n.translate('xpack.maps.addLayerPanel.selectSource', {
         defaultMessage: 'Select source',
       });
@@ -85,13 +85,13 @@ export class AddLayerPanel extends Component {
 
     this.setState({
       layer: null,
-      ...(!keepSourceType ? { sourceType: null, importView: false } : {}),
+      ...(!keepSourceType ? { sourceId: null, importView: false } : {}),
     });
     this.props.removeTransientLayer();
   };
 
-  _onSourceSelectionChange = ({ type, isIndexingSource }) => {
-    this.setState({ sourceType: type, importView: isIndexingSource });
+  _onSourceSelectionChange = ({ sourceId, isIndexingSource }) => {
+    this.setState({ sourceId, importView: isIndexingSource });
   };
 
   _layerAddHandler = () => {
@@ -118,8 +118,8 @@ export class AddLayerPanel extends Component {
   };
 
   _renderAddLayerPanel() {
-    const { sourceType, importView } = this.state;
-    if (!sourceType) {
+    const { sourceId, importView } = this.state;
+    if (!sourceId) {
       return <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />;
     }
     if (importView) {
@@ -134,7 +134,7 @@ export class AddLayerPanel extends Component {
     return (
       <SourceEditor
         clearSource={this._clearLayerData}
-        sourceType={sourceType}
+        sourceId={sourceId}
         previewLayer={this._viewLayer}
       />
     );
@@ -148,7 +148,7 @@ export class AddLayerPanel extends Component {
 
     return (
       <FlyoutFooter
-        showNextButton={!!this.state.sourceType}
+        showNextButton={!!this.state.sourceId}
         disableNextButton={!buttonEnabled}
         onClick={this._layerAddHandler}
         nextButtonText={buttonDescription}
