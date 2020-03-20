@@ -5,16 +5,11 @@
  */
 
 import { Query, Ast } from '@elastic/eui';
-import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
-export enum DATA_FRAME_TASK_STATE {
-  ANALYZING = 'analyzing',
-  FAILED = 'failed',
-  REINDEXING = 'reindexing',
-  STARTED = 'started',
-  STARTING = 'starting',
-  STOPPED = 'stopped',
-}
+import { DATA_FRAME_TASK_STATE } from './data_frame_task_state';
+export { DATA_FRAME_TASK_STATE };
+
+import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',
