@@ -99,6 +99,7 @@ export const TimeSeries = ({
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
         showLegend={legend}
+        showLegendExtra={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrush}
         animateData={false}

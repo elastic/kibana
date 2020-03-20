@@ -21,7 +21,7 @@ import { ChartBase } from '../../../types';
 import { getMetricsProjection } from '../../../../../../common/projections/metrics';
 import { mergeProjection } from '../../../../../../common/projections/util/merge_projection';
 import {
-  SERVICE_AGENT_NAME,
+  AGENT_NAME,
   LABEL_NAME,
   METRIC_JAVA_GC_COUNT,
   METRIC_JAVA_GC_TIME
@@ -64,7 +64,7 @@ export async function fetchAndTransformGcMetrics({
           filter: [
             ...projection.body.query.bool.filter,
             { exists: { field: fieldName } },
-            { term: { [SERVICE_AGENT_NAME]: 'java' } }
+            { term: { [AGENT_NAME]: 'java' } }
           ]
         }
       },
