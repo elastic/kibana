@@ -102,7 +102,6 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
-      comment_ids: [],
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
         full_name: 'elastic',
@@ -110,8 +109,9 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
         username: 'elastic',
       },
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
-      title: 'Another bad one',
+      pushed: null,
       status: 'closed',
+      title: 'Another bad one',
       tags: ['LOLBins'],
       updated_at: '2019-11-25T22:32:17.947Z',
       updated_by: {

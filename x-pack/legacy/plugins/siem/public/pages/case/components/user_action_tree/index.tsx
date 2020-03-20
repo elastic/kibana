@@ -206,7 +206,6 @@ export const UserActionTree = React.memo(
           isLoading={isLoadingIds.includes(NewId)}
           fullName={currentUser != null ? currentUser.fullName : ''}
           markdown={MarkdownNewComment}
-          onEdit={handleManageMarkdownEditId.bind(null, NewId)}
           userName={currentUser != null ? currentUser.username : ''}
         />
       </>

@@ -125,7 +125,7 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
               originalCases: myCases.saved_objects,
               updatedCases: updatedCases.saved_objects,
               actionDate: updatedDt,
-              actionBy: { full_name, username },
+              actionBy: { email, full_name, username },
             }),
           });
 

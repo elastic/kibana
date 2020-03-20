@@ -6,8 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled, { css } from 'styled-components';
-import { Redirect } from 'react-router-dom';
+import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { Case } from '../../../../containers/case/types';
@@ -25,9 +24,6 @@ import { WhitePageWrapper } from '../wrappers';
 import { useBasePath } from '../../../../lib/kibana';
 import { CaseStatus } from '../case_status';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
-import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
-import { SiemPageName } from '../../../home/types';
-import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 
 interface Props {
@@ -106,10 +102,6 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     [fetchCaseUserActions, updateCaseProperty, caseData.status]
   );
 
-  const toggleStatusCase = useCallback(
-    e => onUpdateField('status', e.target.checked ? 'open' : 'closed'),
-    [onUpdateField]
-  );
   const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
   const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
   const toggleStatusCase = useCallback(status => onUpdateField('status', status), [onUpdateField]);

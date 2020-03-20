@@ -23,6 +23,8 @@ export const caseProps: CaseProps = {
           username: 'smilovic',
           email: 'notmyrealemailfool@elastic.co',
         },
+        pushedAt: null,
+        pushedBy: null,
         updatedAt: '2020-02-20T23:06:33.798Z',
         updatedBy: {
           username: 'elastic',
@@ -33,6 +35,7 @@ export const caseProps: CaseProps = {
     createdAt: '2020-02-13T19:44:23.627Z',
     createdBy: { fullName: null, email: 'testemail@elastic.co', username: 'elastic' },
     description: 'Security banana Issue',
+    pushed: null,
     status: 'open',
     tags: ['defacement'],
     title: 'Another horrible breach!!',

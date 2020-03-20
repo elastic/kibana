@@ -22,6 +22,7 @@ export const transformNewUserAction = ({
   actionField,
   action,
   actionAt,
+  email,
   full_name,
   newValue = null,
   oldValue = null,
@@ -30,6 +31,7 @@ export const transformNewUserAction = ({
   actionField: UserActionField;
   action: UserAction;
   actionAt: string;
+  email?: string;
   full_name?: string;
   newValue?: string | null;
   oldValue?: string | null;
@@ -38,7 +40,7 @@ export const transformNewUserAction = ({
   action_field: actionField,
   action,
   action_at: actionAt,
-  action_by: { full_name, username },
+  action_by: { email, full_name, username },
   new_value: newValue,
   old_value: oldValue,
 });

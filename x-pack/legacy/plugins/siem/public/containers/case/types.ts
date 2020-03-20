@@ -46,7 +46,7 @@ export interface Case {
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
-  pushed: CasePush;
+  pushed: CasePush | null;
   status: string;
   tags: string[];
   title: string;

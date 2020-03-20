@@ -25,6 +25,9 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
       },
       action_by: {
         properties: {
+          email: {
+            type: 'keyword',
+          },
           username: {
             type: 'keyword',
           },

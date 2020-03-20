@@ -57,6 +57,7 @@ const initialData: Case = {
     username: '',
   },
   description: '',
+  pushed: null,
   status: '',
   tags: [],
   title: '',
