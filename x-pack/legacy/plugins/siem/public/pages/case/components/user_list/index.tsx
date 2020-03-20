@@ -58,7 +58,9 @@ const renderUsers = (
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           data-test-subj="user-list-email-button"
-          onClick={handleSendEmail.bind(null, email)} // TO DO
+          // onClick={handleSendEmail.bind(null, email)} // TO DO
+          href={`mailto:${email}`}
+          target="_blank"
           iconType="email"
           aria-label="email"
         />

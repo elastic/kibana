@@ -7,8 +7,8 @@
 import { EuiButtonIcon, EuiPopover, EuiSelectableOption } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-import { connect, ConnectedProps } from 'react-redux';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
@@ -27,21 +27,23 @@ interface RouterState {
   };
 }
 
-type Props = InsertTimelinePopoverProps & PropsFromRedux;
+type Props = InsertTimelinePopoverProps;
 
 export const InsertTimelinePopoverComponent: React.FC<Props> = ({
   isDisabled,
   hideUntitled = false,
   onTimelineChange,
-  showTimeline,
 }) => {
+  const dispatch = useDispatch();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { state } = useLocation();
   const [routerState, setRouterState] = useState<RouterState | null>(state ?? null);
 
   useEffect(() => {
     if (routerState && routerState.insertTimeline) {
-      showTimeline({ id: routerState.insertTimeline.timelineId, show: false });
+      dispatch(
+        timelineActions.showTimeline({ id: routerState.insertTimeline.timelineId, show: false })
+      );
       onTimelineChange(
         routerState.insertTimeline.timelineTitle,
         routerState.insertTimeline.timelineId
@@ -107,12 +109,4 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
   );
 };
 
-const mapDispatchToProps = {
-  showTimeline: timelineActions.showTimeline,
-};
-
-const connector = connect(null, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const InsertTimelinePopover = connector(memo(InsertTimelinePopoverComponent));
+export const InsertTimelinePopover = memo(InsertTimelinePopoverComponent);

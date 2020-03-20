@@ -10,8 +10,11 @@ import { mount } from 'enzyme';
 import routeData from 'react-router';
 /* eslint-enable @kbn/eslint/module_migration */
 import { InsertTimelinePopoverComponent } from './';
-import { TestProviders } from '../../../mock';
-import { ActionCreator } from 'typescript-fsa';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => ({
+  useDispatch: () => mockDispatch,
+}));
 const mockLocation = {
   pathname: '/apath',
   hash: '',
@@ -27,12 +30,11 @@ const mockLocationWithState = {
     },
   },
 };
+
 const onTimelineChange = jest.fn();
-const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
 const defaultProps = {
   isDisabled: false,
   onTimelineChange,
-  showTimeline,
 };
 
 describe('Insert timeline popover ', () => {
@@ -42,22 +44,17 @@ describe('Insert timeline popover ', () => {
 
   it('should insert a timeline when passed in the router state', () => {
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocationWithState);
-    mount(
-      <TestProviders>
-        <InsertTimelinePopoverComponent {...defaultProps} />
-      </TestProviders>
-    );
-    expect(showTimeline).toBeCalledWith({ id: 'timeline-id', show: false });
+    mount(<InsertTimelinePopoverComponent {...defaultProps} />);
+    expect(mockDispatch).toBeCalledWith({
+      payload: { id: 'timeline-id', show: false },
+      type: 'x-pack/siem/local/timeline/SHOW_TIMELINE',
+    });
     expect(onTimelineChange).toBeCalledWith('Timeline title', 'timeline-id');
   });
   it('should do nothing when router state', () => {
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
-    mount(
-      <TestProviders>
-        <InsertTimelinePopoverComponent {...defaultProps} />
-      </TestProviders>
-    );
-    expect(showTimeline).toHaveBeenCalledTimes(0);
+    mount(<InsertTimelinePopoverComponent {...defaultProps} />);
+    expect(mockDispatch).toHaveBeenCalledTimes(0);
     expect(onTimelineChange).toHaveBeenCalledTimes(0);
   });
 });
