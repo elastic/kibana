@@ -19,15 +19,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
-import {
-  ContainerOutput,
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IContainer,
-  Embeddable,
-} from '../embeddable_plugin';
+import { EmbeddableInput, EmbeddableOutput, IContainer, Embeddable } from '../embeddable_plugin';
 
 export const EMPTY_PANEL_EMBEDDABLE = 'EMPTY_PANEL_EMBEDDABLE';
 

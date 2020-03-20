@@ -16,10 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
-import { EuiModalBody } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { OverlayStart } from 'kibana/public';
 import { IContainer, EmbeddableFactory } from '../embeddable_plugin';
 import {
   EmptyPanelEmbeddable,
@@ -28,25 +26,12 @@ import {
   EmptyPanelEmbeddableOutput,
 } from './empty_panel_embeddable';
 
-function TaskInput({ onSave }: { onSave: (task: string) => void }) {
-  const [task, setTask] = useState('');
-  return <div>I am embeddable</div>;
-}
-
-interface StartServices {
-  openModal: OverlayStart['openModal'];
-}
-
 export class EmptyPanelEmbeddableFactory extends EmbeddableFactory<
   EmptyPanelEmbeddableInput,
   EmptyPanelEmbeddableOutput,
   EmptyPanelEmbeddable
 > {
   public readonly type = EMPTY_PANEL_EMBEDDABLE;
-
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super();
-  }
 
   public async isEditable() {
     return true;
@@ -62,10 +47,9 @@ export class EmptyPanelEmbeddableFactory extends EmbeddableFactory<
    * used to collect specific embeddable input that the container will not provide, like
    * in this case, the task string.
    */
-  public async getExplicitInput() {
-    const { openModal } = await this.getStartServices();
+  public getExplicitInput() {
     return new Promise<{ task: string }>(resolve => {
-      const onSave = (task: string) => resolve({ task });
+      resolve();
     });
   }
 
