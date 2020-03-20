@@ -20,7 +20,7 @@ import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
-import { monospaceTextStyle, hoveredContentStyle } from './text_styles';
+import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
 import { LogEntry, LogColumn } from '../../../../common/http_api';
 
 interface LogEntryRowProps {
@@ -105,6 +105,7 @@ export const LogEntryRow = memo(
         }
         onMouseEnter={setItemIsHovered}
         onMouseLeave={setItemIsNotHovered}
+        isHighlighted={isHighlighted}
         scale={scale}
       >
         {columnConfigurations.map(columnConfiguration => {
@@ -119,7 +120,7 @@ export const LogEntryRow = memo(
                 {...columnWidth}
               >
                 {isTimestampColumn(column) ? (
-                  <LogEntryTimestampColumn isHighlighted={isHighlighted} time={column.timestamp} />
+                  <LogEntryTimestampColumn time={column.timestamp} />
                 ) : null}
               </LogEntryColumn>
             );
@@ -137,7 +138,6 @@ export const LogEntryRow = memo(
                   <LogEntryMessageColumn
                     columnValue={column}
                     highlights={highlightsByColumnId[column.columnId] || []}
-                    isHighlighted={isHighlighted}
                     isActiveHighlight={isActiveHighlight}
                     wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
@@ -159,7 +159,6 @@ export const LogEntryRow = memo(
                     columnValue={column}
                     highlights={highlightsByColumnId[column.columnId] || []}
                     isActiveHighlight={isActiveHighlight}
-                    isHighlighted={isHighlighted}
                     wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
                 ) : null}
@@ -171,11 +170,7 @@ export const LogEntryRow = memo(
           key="logColumn iconLogColumn iconLogColumn:details"
           {...columnWidths[iconColumnId]}
         >
-          <LogEntryDetailsIconColumn
-            isHighlighted={isHighlighted}
-            isHovered={isHovered}
-            openFlyout={openFlyout}
-          />
+          <LogEntryDetailsIconColumn isHovered={isHovered} openFlyout={openFlyout} />
         </LogEntryColumn>
       </LogEntryRowWrapper>
     );
@@ -184,6 +179,7 @@ export const LogEntryRow = memo(
 
 interface LogEntryRowWrapperProps {
   scale: TextScale;
+  isHighlighted: boolean;
 }
 
 export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
@@ -198,6 +194,7 @@ export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   overflow: hidden;
 
   ${props => monospaceTextStyle(props.scale)};
+  ${props => (props.isHighlighted ? highlightedContentStyle : '')}
 
   &:hover {
     ${hoveredContentStyle}

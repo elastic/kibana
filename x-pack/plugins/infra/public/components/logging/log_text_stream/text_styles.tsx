@@ -32,6 +32,10 @@ export const hoveredContentStyle = css`
   background-color: ${props => props.theme.eui.euiFocusBackgroundColor};
 `;
 
+export const highlightedContentStyle = css`
+  background-color: ${props => props.theme.eui.euiFocusBackgroundColor};
+`;
+
 export const longWrappedContentStyle = css`
   overflow: visible;
   white-space: pre-wrap;

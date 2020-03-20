@@ -9,17 +9,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { LogEntryColumnContent } from './log_entry_column';
-import { hoveredContentStyle } from './text_styles';
 import { euiStyled } from '../../../../../observability/public';
 
 interface LogEntryDetailsIconColumnProps {
-  isHighlighted: boolean;
   isHovered: boolean;
   openFlyout: () => void;
 }
 
 export const LogEntryDetailsIconColumn: React.FC<LogEntryDetailsIconColumnProps> = ({
-  isHighlighted,
   isHovered,
   openFlyout,
 }) => {
@@ -28,7 +25,7 @@ export const LogEntryDetailsIconColumn: React.FC<LogEntryDetailsIconColumnProps>
   });
 
   return (
-    <IconColumnContent isHighlighted={isHighlighted}>
+    <IconColumnContent>
       {isHovered ? (
         <AbsoluteIconButtonWrapper>
           <EuiButtonIcon onClick={openFlyout} iconType="expand" title={label} aria-label={label} />
@@ -38,15 +35,9 @@ export const LogEntryDetailsIconColumn: React.FC<LogEntryDetailsIconColumnProps>
   );
 };
 
-interface IconColumnContentProps {
-  isHighlighted: boolean;
-}
-
-const IconColumnContent = euiStyled(LogEntryColumnContent)<IconColumnContentProps>`
+const IconColumnContent = euiStyled(LogEntryColumnContent)`
   overflow: hidden;
   user-select: none;
-
-  ${props => (props.isHighlighted ? hoveredContentStyle : '')};
 `;
 
 // this prevents the button from influencing the line height

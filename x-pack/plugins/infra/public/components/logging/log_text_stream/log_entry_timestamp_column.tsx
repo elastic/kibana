@@ -9,33 +9,23 @@ import React, { memo } from 'react';
 import { euiStyled } from '../../../../../observability/public';
 import { TimeFormat, useFormattedTime } from '../../formatted_time';
 import { LogEntryColumnContent } from './log_entry_column';
-import { hoveredContentStyle } from './text_styles';
 
 interface LogEntryTimestampColumnProps {
   format?: TimeFormat;
-  isHighlighted: boolean;
   time: number;
 }
 
 export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
-  ({ format = 'time', isHighlighted, time }) => {
+  ({ format = 'time', time }) => {
     const formattedTime = useFormattedTime(time, { format });
 
-    return (
-      <TimestampColumnContent isHighlighted={isHighlighted}>{formattedTime}</TimestampColumnContent>
-    );
+    return <TimestampColumnContent>{formattedTime}</TimestampColumnContent>;
   }
 );
 
-interface TimestampColumnContentProps {
-  isHighlighted: boolean;
-}
-
-const TimestampColumnContent = euiStyled(LogEntryColumnContent)<TimestampColumnContentProps>`
+const TimestampColumnContent = euiStyled(LogEntryColumnContent)`
   color: ${props => props.theme.eui.euiColorDarkShade};
   overflow: hidden;
   text-overflow: clip;
   white-space: pre;
-
-  ${props => (props.isHighlighted ? hoveredContentStyle : '')};
 `;

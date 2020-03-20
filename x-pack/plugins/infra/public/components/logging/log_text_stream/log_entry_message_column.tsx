@@ -18,7 +18,6 @@ import {
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
 import {
-  hoveredContentStyle,
   longWrappedContentStyle,
   preWrappedContentStyle,
   unwrappedContentStyle,
@@ -30,12 +29,11 @@ interface LogEntryMessageColumnProps {
   columnValue: LogColumn;
   highlights: LogColumn[];
   isActiveHighlight: boolean;
-  isHighlighted: boolean;
   wrapMode: WrapMode;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ columnValue, highlights, isActiveHighlight, isHighlighted, wrapMode }) => {
+  ({ columnValue, highlights, isActiveHighlight, wrapMode }) => {
     const message = useMemo(
       () =>
         isMessageColumn(columnValue)
@@ -44,23 +42,16 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
       [columnValue, highlights, isActiveHighlight]
     );
 
-    return (
-      <MessageColumnContent isHighlighted={isHighlighted} wrapMode={wrapMode}>
-        {message}
-      </MessageColumnContent>
-    );
+    return <MessageColumnContent wrapMode={wrapMode}>{message}</MessageColumnContent>;
   }
 );
 
 interface MessageColumnContentProps {
-  isHighlighted: boolean;
   wrapMode: WrapMode;
 }
 
 const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
   text-overflow: ellipsis;
-
-  ${props => (props.isHighlighted ? hoveredContentStyle : '')};
   ${props =>
     props.wrapMode === 'long'
       ? longWrappedContentStyle
