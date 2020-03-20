@@ -12,52 +12,41 @@ import { LogEntryColumnContent } from './log_entry_column';
 import { hoveredContentStyle } from './text_styles';
 import { euiStyled } from '../../../../../observability/public';
 
-interface LogEntryIconColumnProps {
+interface LogEntryDetailsIconColumnProps {
   isHighlighted: boolean;
   isHovered: boolean;
+  openFlyout: () => void;
 }
 
-export const LogEntryIconColumn: React.FunctionComponent<LogEntryIconColumnProps> = ({
-  children,
+export const LogEntryDetailsIconColumn: React.FC<LogEntryDetailsIconColumnProps> = ({
   isHighlighted,
   isHovered,
+  openFlyout,
 }) => {
-  return (
-    <IconColumnContent isHighlighted={isHighlighted} isHovered={isHovered}>
-      {children}
-    </IconColumnContent>
-  );
-};
-
-export const LogEntryDetailsIconColumn: React.FunctionComponent<LogEntryIconColumnProps & {
-  openFlyout: () => void;
-}> = ({ isHighlighted, isHovered, openFlyout }) => {
   const label = i18n.translate('xpack.infra.logEntryItemView.viewDetailsToolTip', {
     defaultMessage: 'View Details',
   });
 
   return (
-    <LogEntryIconColumn isHighlighted={isHighlighted} isHovered={isHovered}>
+    <IconColumnContent isHighlighted={isHighlighted}>
       {isHovered ? (
         <AbsoluteIconButtonWrapper>
           <EuiButtonIcon onClick={openFlyout} iconType="expand" title={label} aria-label={label} />
         </AbsoluteIconButtonWrapper>
       ) : null}
-    </LogEntryIconColumn>
+    </IconColumnContent>
   );
 };
 
 interface IconColumnContentProps {
   isHighlighted: boolean;
-  isHovered: boolean;
 }
 
 const IconColumnContent = euiStyled(LogEntryColumnContent)<IconColumnContentProps>`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
   overflow: hidden;
   user-select: none;
 
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
+  ${props => (props.isHighlighted ? hoveredContentStyle : '')};
 `;
 
 // this prevents the button from influencing the line height

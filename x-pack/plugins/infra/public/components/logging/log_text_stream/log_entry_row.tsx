@@ -20,7 +20,7 @@ import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
-import { monospaceTextStyle } from './text_styles';
+import { monospaceTextStyle, hoveredContentStyle } from './text_styles';
 import { LogEntry, LogColumn } from '../../../../common/http_api';
 
 interface LogEntryRowProps {
@@ -119,11 +119,7 @@ export const LogEntryRow = memo(
                 {...columnWidth}
               >
                 {isTimestampColumn(column) ? (
-                  <LogEntryTimestampColumn
-                    isHighlighted={isHighlighted}
-                    isHovered={isHovered}
-                    time={column.timestamp}
-                  />
+                  <LogEntryTimestampColumn isHighlighted={isHighlighted} time={column.timestamp} />
                 ) : null}
               </LogEntryColumn>
             );
@@ -143,7 +139,6 @@ export const LogEntryRow = memo(
                     highlights={highlightsByColumnId[column.columnId] || []}
                     isHighlighted={isHighlighted}
                     isActiveHighlight={isActiveHighlight}
-                    isHovered={isHovered}
                     wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
                 ) : null}
@@ -165,7 +160,6 @@ export const LogEntryRow = memo(
                     highlights={highlightsByColumnId[column.columnId] || []}
                     isActiveHighlight={isActiveHighlight}
                     isHighlighted={isHighlighted}
-                    isHovered={isHovered}
                     wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
                 ) : null}
@@ -204,4 +198,8 @@ export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   overflow: hidden;
 
   ${props => monospaceTextStyle(props.scale)};
+
+  &:hover {
+    ${hoveredContentStyle}
+  }
 `;

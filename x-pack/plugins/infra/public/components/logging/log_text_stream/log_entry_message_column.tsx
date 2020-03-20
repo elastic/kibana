@@ -31,12 +31,11 @@ interface LogEntryMessageColumnProps {
   highlights: LogColumn[];
   isActiveHighlight: boolean;
   isHighlighted: boolean;
-  isHovered: boolean;
   wrapMode: WrapMode;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ columnValue, highlights, isActiveHighlight, isHighlighted, isHovered, wrapMode }) => {
+  ({ columnValue, highlights, isActiveHighlight, isHighlighted, wrapMode }) => {
     const message = useMemo(
       () =>
         isMessageColumn(columnValue)
@@ -46,7 +45,7 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
     );
 
     return (
-      <MessageColumnContent isHighlighted={isHighlighted} isHovered={isHovered} wrapMode={wrapMode}>
+      <MessageColumnContent isHighlighted={isHighlighted} wrapMode={wrapMode}>
         {message}
       </MessageColumnContent>
     );
@@ -54,7 +53,6 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
 );
 
 interface MessageColumnContentProps {
-  isHovered: boolean;
   isHighlighted: boolean;
   wrapMode: WrapMode;
 }
@@ -62,7 +60,7 @@ interface MessageColumnContentProps {
 const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
   text-overflow: ellipsis;
 
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
+  ${props => (props.isHighlighted ? hoveredContentStyle : '')};
   ${props =>
     props.wrapMode === 'long'
       ? longWrappedContentStyle
