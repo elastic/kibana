@@ -10,8 +10,7 @@ import { parseCrossClusterPrefix, prefixIndexPattern } from '../ccs_utils';
 
 describe('ccs_utils', () => {
   describe('prefixIndexPattern', () => {
-    const indexPattern =
-      '.monitoring-xyz-1-*,.monitoring-xyz-2-*,monitoring-xyz-1-*,monitoring-xyz-2-*';
+    const indexPattern = '.monitoring-xyz-1-*,.monitoring-xyz-2-*';
 
     it('returns the index pattern if ccs is not enabled', () => {
       const get = sinon.stub();

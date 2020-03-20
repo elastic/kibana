@@ -30,7 +30,7 @@ export async function verifyMonitoringAuth(req) {
 
 /**
  * Reach out to the Monitoring cluster and ensure that it believes the current user has the privileges necessary
- * to make API calls against .monitoring-*,monitoring-* indices.
+ * to make API calls against .monitoring-* indices.
  *
  * @param req {Object} the server route handler request object
  * @return {Promise} That either resolves with no response (void) or an exception.
