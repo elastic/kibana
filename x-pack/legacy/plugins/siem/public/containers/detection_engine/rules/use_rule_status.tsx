@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { RuleStatusRowItemType } from '../../../pages/detection_engine/rules/all/columns';
@@ -38,7 +38,6 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
     const fetchData = async (idToFetch: string) => {
       try {
         setLoading(true);
-
         const ruleStatusResponse = await getRuleStatusById({
           id: idToFetch,
           signal: abortCtrl.signal,
@@ -88,7 +87,6 @@ export const useRulesStatuses = (rules: Rule[]): ReturnRulesStatuses => {
     const fetchData = async (ids: string[]) => {
       try {
         setLoading(true);
-
         const ruleStatusesResponse = await getRulesStatusByIds({
           ids,
           signal: abortCtrl.signal,
