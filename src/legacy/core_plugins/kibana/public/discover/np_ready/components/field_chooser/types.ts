@@ -23,6 +23,7 @@ export interface IndexPatternRef {
 }
 
 export interface Field {
+  count: number;
   details: FieldDetails;
   indexPattern: {
     metaFields: string[];
@@ -39,6 +40,7 @@ export interface Field {
    * determines if a field is selected and displayed in the doc table
    */
   display: boolean;
+  displayOrder: number;
 }
 
 export interface FieldDetails {

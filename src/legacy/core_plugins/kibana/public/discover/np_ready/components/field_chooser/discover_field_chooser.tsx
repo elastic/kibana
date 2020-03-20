@@ -26,36 +26,35 @@ import { DiscoverFieldSearch } from './discover_field_search';
 import { IIndexPattern, IndexPatternAttributes } from '../../../../../../../../plugins/data/common';
 import { Field, FieldDetails, FieldFilter } from './types';
 import { SavedObject } from '../../../../../../../../core/types';
+import { groupFields } from './lib/group_fields';
 
 export interface Props {
+  columns: string[];
   fields: Field[];
-  fieldTypes: string[];
+  fieldCounts: Record<string, number>;
   filter: FieldFilter;
   getDetails: (field: Field) => FieldDetails;
-  groupedFields: {
-    selected: Field[];
-    popular: Field[];
-    unpopular: Field[];
-  };
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
   onAddField: (fieldName: string) => void;
   onAddFilter: (field: Field | string, value: string, type: '+' | '-') => void;
   onRemoveField: (fieldName: string) => void;
+  popularLimit: number;
   selectedIndexPattern: IIndexPattern;
   setFilterValue: (field: string, value: string | boolean | undefined) => void;
   setIndexPattern: (id: string) => void;
 }
 
 export function DiscoverFieldChooser({
+  columns,
   fields,
-  fieldTypes,
+  fieldCounts,
   filter,
   getDetails,
-  groupedFields,
   indexPatternList,
   onAddField,
   onAddFilter,
   onRemoveField,
+  popularLimit,
   selectedIndexPattern,
   setFilterValue,
   setIndexPattern,
@@ -63,8 +62,15 @@ export function DiscoverFieldChooser({
   const [openFieldMap, setOpenFieldMap] = useState(new Map());
   const [showFields, setShowFields] = useState(false);
 
-  if (!selectedIndexPattern || !filter) {
+  if (!selectedIndexPattern || !filter || !Array.isArray(fields)) {
     return null;
+  }
+  const groupedFields = groupFields(fields, columns, popularLimit, fieldCounts);
+  const fieldTypes = ['any'];
+  for (const field of fields) {
+    if (fieldTypes.indexOf(field.type) === -1) {
+      fieldTypes.push(field.type);
+    }
   }
 
   const onShowDetails = (show: boolean, field: Field) => {
