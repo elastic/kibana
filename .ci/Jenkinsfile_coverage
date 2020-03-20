@@ -8,6 +8,28 @@ kibanaPipeline(timeoutMinutes: 180) {
     withEnv([
       'CODE_COVERAGE=1', // Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
+
+      def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
+
+      withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+        withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+          withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+            kibanaPipeline.bash(
+              """
+              source src/dev/ci_setup/setup_env.sh
+
+              if [ -z ${HOST_FROM_VAULT} ]; then
+                echo "### HOST_FROM_VAULT is undefined"
+                exit 1
+              fi
+
+              """, "### Fail fast without vault"
+            )
+          }
+        }
+      }
+
+
       parallel([
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh')
         ,
@@ -34,13 +56,11 @@ kibanaPipeline(timeoutMinutes: 180) {
       workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
         kibanaPipeline.downloadCoverageArtifacts()
 
-        def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
         withEnv([
-          "TIME_STAMP=${timestamp}",
+          "TIME_STAMP=${timestamp()}",
           "QA_TEAM_ROCKS=true"
         ]) {
 
-          def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
           withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
             withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
               withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
@@ -91,6 +111,10 @@ kibanaPipeline(timeoutMinutes: 180) {
     }
   }
   kibanaPipeline.sendMail()
+}
+
+def timestamp() {
+  return new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
 }
 
 def ossProks() {
