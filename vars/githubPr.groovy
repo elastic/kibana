@@ -173,10 +173,15 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
       * [Interpreting CI Failures](https://www.elastic.co/guide/en/kibana/current/interpreting-ci-failures.html)
     """
 
-    def steps = getFailedSteps()
-    if (steps?.size() > 0) {
-      def list = steps.collect { "* [${it.displayName}](${it.logs})" }.join("\n")
-      messages << "### Failed CI Steps\n${list}"
+    try {
+      def steps = getFailedSteps()
+      if (steps?.size() > 0) {
+        def list = steps.collect { "* [${it.displayName}](${it.logs})" }.join("\n")
+        messages << "### Failed CI Steps\n${list}"
+      }
+    } catch (ex) {
+      buildUtils.printStacktrace(ex)
+      print "Error retrieving failed pipeline steps for PR comment, will skip this section"
     }
   }
 
