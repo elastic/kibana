@@ -1,3 +1,19 @@
+/*
+  whenChanged('some/path') { yourCode() } can be used to execute pipeline code in PRs only when changes are detected on paths that you specify.
+  The specified code blocks will also always be executed during the non-PR jobs for tracked branches.
+
+  You have the option of passing in path prefixes, or regexes. Single or multiple.
+  Path specifications are NOT globby, they are only prefixes.
+  Specifying multiple will treat them as ORs.
+
+  Example Usages:
+    whenChanged('a/path/prefix/') { someCode() }
+    whenChanged(startsWith: 'a/path/prefix/') { someCode() } // Same as above
+    whenChanged(['prefix1/', 'prefix2/']) { someCode() }
+    whenChanged(regex: /\.test\.js$/) { someCode() }
+    whenChanged(regex: [/abc/, /xyz/]) { someCode() }
+*/
+
 def call(String startsWithString, Closure closure) {
   return whenChanged([ startsWith: startsWithString ], closure)
 }
