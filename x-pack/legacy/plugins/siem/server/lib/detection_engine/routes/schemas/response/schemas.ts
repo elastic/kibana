@@ -25,6 +25,25 @@ export const file_name = t.string;
  */
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
 
+/**
+ * Params is an "object", since it is a type of AlertActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/alert.ts
+ */
+export const action_group = t.string;
+export const action_id = t.string;
+export const action_action_type_id = t.string;
+export const action_params = t.object;
+export const action = t.exact(
+  t.type({
+    group: action_group,
+    id: action_id,
+    action_type_id: action_action_type_id,
+    params: action_params,
+  })
+);
+
+export const actions = t.array(action);
+
 // TODO: Create a regular expression type or custom date math part type here
 export const from = t.string;
 
@@ -45,6 +64,7 @@ export const output_index = t.string;
 export const saved_id = t.string;
 export const timeline_id = t.string;
 export const timeline_title = t.string;
+export const throttle = t.string;
 export const anomaly_threshold = PositiveInteger;
 export const machine_learning_job_id = t.string;
 
