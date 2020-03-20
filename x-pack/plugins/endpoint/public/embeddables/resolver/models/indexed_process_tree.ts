@@ -42,7 +42,7 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
     const parentAdjacencyMap =
       (uniqueParentPid && idToAdjacent.get(uniqueParentPid)) ||
       emptyAdjacencyMap(uniqueParentPid || 'root');
-    const adjacencyMapToUpdate: AdjacentProcessMap =
+    const currentProcessAdjacencyMap: AdjacentProcessMap =
       idToAdjacent.get(uniqueProcessPid) || emptyAdjacencyMap(uniqueProcessPid);
 
     if (processChildren) {
@@ -57,11 +57,11 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
 
       previousAdjacencyMap.nextSibling = uniqueProcessPid;
       idToAdjacent.set(previousProcessId, previousAdjacencyMap);
-      adjacencyMapToUpdate.previousSibling = previousProcessId;
+      currentProcessAdjacencyMap.previousSibling = previousProcessId;
       if (uniqueParentPid) {
-        adjacencyMapToUpdate.parent = uniqueParentPid;
+        currentProcessAdjacencyMap.parent = uniqueParentPid;
       }
-      idToAdjacent.set(uniqueProcessPid, adjacencyMapToUpdate);
+      idToAdjacent.set(uniqueProcessPid, currentProcessAdjacencyMap);
     } else {
       idToChildren.set(uniqueParentPid, [process]);
 
@@ -70,8 +70,8 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
         parentAdjacencyMap.firstChild = uniqueProcessPid;
         idToAdjacent.set(uniqueParentPid, parentAdjacencyMap);
       }
-      adjacencyMapToUpdate.parent = uniqueParentPid || null;
-      idToAdjacent.set(uniqueProcessPid, adjacencyMapToUpdate);
+      currentProcessAdjacencyMap.parent = uniqueParentPid || null;
+      idToAdjacent.set(uniqueProcessPid, currentProcessAdjacencyMap);
     }
   }
 
