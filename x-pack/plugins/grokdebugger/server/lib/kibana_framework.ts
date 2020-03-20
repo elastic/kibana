@@ -58,8 +58,8 @@ export class KibanaFramework {
         return await handler(requestContext, request, response);
       } else {
         return response.forbidden({
-          body: i18n.translate('xpack.grokDebugger.inactiveLicenseError', {
-            defaultMessage: 'You cannot use the Grok Debugger without an active license.',
+          body: i18n.translate('xpack.grokDebugger.serverInactiveLicenseError', {
+            defaultMessage: 'The Grok Debugger tool requires an active license.',
           }),
         });
       }

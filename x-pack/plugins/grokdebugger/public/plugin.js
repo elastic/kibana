@@ -5,40 +5,45 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { first } from 'rxjs/operators';
 import { registerFeature } from './register_feature';
+
+const inactiveLicenseMessage = i18n.translate('xpack.grokDebugger.clientInactiveLicenseError', {
+  defaultMessage: 'The Grok Debugger tool requires an active license.',
+});
 
 export class Plugin {
   setup(coreSetup, plugins) {
     registerFeature(plugins.home);
 
-    plugins.devTools.register({
-      order: 6,
-      title: i18n.translate('xpack.grokDebugger.displayName', {
-        defaultMessage: 'Grok Debugger',
-      }),
-      id: 'grokdebugger',
-      enableRouting: false,
-      disabled: false, // TODO: Address this via licensing plugin //!xpackInfo.get('features.grokdebugger.enableLink', false),
-      tooltipContent: 'Tooltip', // TODO: Address via licensing plugin xpackInfo.get('features.grokdebugger.message'),
-      async mount(context, { element }) {
-        // TODO: Address all of this via licensing plugin
-        // const licenseCheck = {
-        //   showPage: xpackInfo.get('features.grokdebugger.enableLink'),
-        //   message: xpackInfo.get('features.grokdebugger.message'),
-        // };
-        // if (!licenseCheck.showPage) {
-        //   npStart.core.notifications.toasts.addDanger(licenseCheck.message);
-        //   window.location.hash = '/dev_tools';
-        //   return () => {};
-        // }
-        const [coreStart] = await coreSetup.getStartServices();
-        const { renderApp } = await import('./render_app');
-        return renderApp(element, coreStart);
-      },
+    this.licensing = plugins.licensing;
+
+    this.licensing.license$.pipe(first()).subscribe(license => {
+      plugins.devTools.register({
+        order: 6,
+        title: i18n.translate('xpack.grokDebugger.displayName', {
+          defaultMessage: 'Grok Debugger',
+        }),
+        id: 'grokdebugger',
+        enableRouting: false,
+        disabled: !license.isActive,
+        tooltipContent: !license.isActive ? inactiveLicenseMessage : null,
+        async mount(context, { element }) {
+          const [coreStart] = await coreSetup.getStartServices();
+          const { renderApp } = await import('./render_app');
+          return renderApp(element, coreStart);
+        },
+      });
     });
   }
 
-  start() {}
+  start(coreStart) {
+    this.licensing.license$.subscribe(license => {
+      coreStart.chrome.navLinks.update('grokdebugger', {
+        hidden: !license.isActive,
+      });
+    });
+  }
 
   stop() {}
 }
