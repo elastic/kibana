@@ -85,6 +85,12 @@ export class ReportingAPIClient {
     window.open(location);
   }
 
+  public async deleteReport(jobId: string) {
+    return await this.http.delete(`${API_LIST_URL}/delete/${jobId}`, {
+      asSystemRequest: true,
+    });
+  }
+
   public list = (page = 0, jobIds: string[] = []): Promise<JobQueueEntry[]> => {
     const query = { page } as any;
     if (jobIds.length > 0) {

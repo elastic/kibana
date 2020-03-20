@@ -29,35 +29,57 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { sourceId } = useContext(Source.Context);
   const {
+    startTimestamp,
+    endTimestamp,
+    timestampsLastUpdate,
     targetPosition,
     pagesBeforeStart,
     pagesAfterEnd,
-    isAutoReloading,
+    isStreaming,
     jumpToTargetPosition,
+    isInitialized,
   } = useContext(LogPositionState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
 
+  // Don't render anything if the date range is incorrect.
+  if (!startTimestamp || !endTimestamp) {
+    return null;
+  }
+
   const entriesProps = {
+    startTimestamp,
+    endTimestamp,
+    timestampsLastUpdate,
     timeKey: targetPosition,
     pagesBeforeStart,
     pagesAfterEnd,
     filterQuery,
     sourceId,
-    isAutoReloading,
+    isStreaming,
     jumpToTargetPosition,
   };
+
+  // Don't initialize the entries until the position has been fully intialized.
+  // See `<WithLogPositionUrlState />`
+  if (!isInitialized) {
+    return null;
+  }
+
   return <LogEntriesState.Provider {...entriesProps}>{children}</LogEntriesState.Provider>;
 };
 
 const LogHighlightsStateProvider: React.FC = ({ children }) => {
   const { sourceId, version } = useContext(Source.Context);
-  const [{ entriesStart, entriesEnd }] = useContext(LogEntriesState.Context);
+  const [{ topCursor, bottomCursor, centerCursor, entries }] = useContext(LogEntriesState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
+
   const highlightsProps = {
     sourceId,
     sourceVersion: version,
-    entriesStart,
-    entriesEnd,
+    entriesStart: topCursor,
+    entriesEnd: bottomCursor,
+    centerCursor,
+    size: entries.length,
     filterQuery,
   };
   return <LogHighlightsState.Provider {...highlightsProps}>{children}</LogHighlightsState.Provider>;

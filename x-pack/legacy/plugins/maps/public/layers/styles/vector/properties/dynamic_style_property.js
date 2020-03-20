@@ -62,7 +62,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return rangeFieldMetaFromLocalFeatures;
     }
 
-    const styleMetaDataRequest = this._layer.findDataRequestById(dataRequestId);
+    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return rangeFieldMetaFromLocalFeatures;
     }
@@ -87,7 +87,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return categoryFieldMetaFromLocalFeatures;
     }
 
-    const styleMetaDataRequest = this._layer.findDataRequestById(dataRequestId);
+    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return categoryFieldMetaFromLocalFeatures;
     }
