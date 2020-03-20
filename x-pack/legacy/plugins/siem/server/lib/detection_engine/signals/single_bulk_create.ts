@@ -55,6 +55,11 @@ export const filterDuplicateRules = (
   });
 };
 
+export interface SingleBulkCreateResponse {
+  success: boolean;
+  bulkCreateDuration?: string;
+}
+
 // Bulk Index documents.
 export const singleBulkCreate = async ({
   someResult,
@@ -73,7 +78,7 @@ export const singleBulkCreate = async ({
   enabled,
   tags,
   throttle,
-}: SingleBulkCreateParams): Promise<{ success: boolean; bulkCreateDuration?: string }> => {
+}: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
   someResult.hits.hits = filterDuplicateRules(id, someResult);
   if (someResult.hits.hits.length === 0) {
     return { success: true };

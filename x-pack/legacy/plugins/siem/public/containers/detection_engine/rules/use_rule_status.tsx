@@ -10,7 +10,7 @@ import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { RuleStatusRowItemType } from '../../../pages/detection_engine/rules/all/columns';
 import { getRuleStatusById, getRulesStatusByIds } from './api';
 import * as i18n from './translations';
-import { RuleStatus, Rule } from './types';
+import { RuleStatus, Rules } from './types';
 
 type Func = (ruleId: string) => void;
 export type ReturnRuleStatus = [boolean, RuleStatus | null, Func | null];
@@ -75,7 +75,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
  * @param ids desired Rule ID's (not rule_id)
  *
  */
-export const useRulesStatuses = (rules: Rule[]): ReturnRulesStatuses => {
+export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
   const [rulesStatuses, setRuleStatuses] = useState<RuleStatusRowItemType[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();

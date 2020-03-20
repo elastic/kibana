@@ -34,7 +34,7 @@ interface SearchAfterAndBulkCreateParams {
   throttle: string | null;
 }
 
-interface SearchAfterAndBulkCreateReturnType {
+export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
   searchAfterTimes: string[];
   bulkCreateTimes: string[];

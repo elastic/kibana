@@ -12,6 +12,7 @@ import {
   ReturnRulesStatuses,
 } from './use_rule_status';
 import * as api from './api';
+import { RuleType } from '../rules/types';
 
 jest.mock('./api');
 
@@ -45,7 +46,7 @@ const testRule = {
   tags: ['APM'],
   threat: [],
   to: 'now',
-  type: 'query',
+  type: 'query' as RuleType,
   updated_at: 'mm/dd/yyyyTHH:MM:sssz',
   updated_by: 'mockUser',
 };
