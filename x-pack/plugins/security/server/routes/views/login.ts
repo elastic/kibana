@@ -37,9 +37,6 @@ export function defineLoginRoutes({
     async (context, request, response) => {
       // Default to true if license isn't available or it can't be resolved for some reason.
       const shouldShowLogin = license.isEnabled() ? license.getFeatures().showLogin : true;
-
-      // Authentication flow isn't triggered automatically for this route, so we should explicitly
-      // check whether user has an active session already.
       const isUserAlreadyLoggedIn = request.auth.isAuthenticated;
       if (isUserAlreadyLoggedIn || !shouldShowLogin) {
         logger.debug('User is already authenticated, redirecting...');
