@@ -53,7 +53,7 @@ export const EventRateChart: FC<Props> = ({
             xAccessor={'time'}
             yAccessors={['value']}
             data={eventRateChartData}
-            customSeriesColors={[barColor]}
+            color={barColor}
           />
         </Chart>
       </LoadingWrapper>
