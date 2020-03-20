@@ -127,19 +127,6 @@ export const ActionForm = ({
       });
     }
   }
-
-  const actionsErrors = actions.reduce(
-    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction, i: number) => {
-      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
-      if (!actionType) {
-        return { ...acc };
-      }
-      const actionValidationErrors = actionType.validateParams(alertAction.params);
-      return { ...acc, [i]: actionValidationErrors };
-    },
-    {}
-  ) as Record<string, { errors: IErrorObject }>;
-
   const getSelectedOptions = (actionItemId: string) => {
     const val = connectors.find(connector => connector.id === actionItemId);
     if (!val) {
@@ -157,6 +144,9 @@ export const ActionForm = ({
   const getActionTypeForm = (
     actionItem: AlertAction,
     actionConnector: ActionConnector,
+    actionParamsErrors: {
+      errors: IErrorObject;
+    },
     index: number
   ) => {
     const optionsList = connectors
@@ -173,8 +163,6 @@ export const ActionForm = ({
     const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
     if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
     const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
-    const actionParamsErrors: { errors: IErrorObject } =
-      Object.keys(actionsErrors).length > 0 ? actionsErrors[index] : { errors: {} };
 
     return (
       <EuiAccordion
@@ -434,7 +422,12 @@ export const ActionForm = ({
         if (!actionConnector) {
           return getAddConnectorsForm(actionItem, index);
         }
-        return getActionTypeForm(actionItem, actionConnector, index);
+
+        const actionErrors: { errors: IErrorObject } = actionTypeRegistry
+          .get(actionItem.actionTypeId)
+          ?.validateParams(actionItem.params);
+
+        return getActionTypeForm(actionItem, actionConnector, actionErrors, index);
       })}
       <EuiSpacer size="m" />
       {isAddActionPanelOpen === false ? (
