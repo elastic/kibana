@@ -22,7 +22,9 @@ export const initialState = {
   "number-parameter": 1.5,
   "boolean-parameter": true
 }`,
-  index: '',
-  document: '',
+  index: 'default-index',
+  document: `{
+  "my-field": "field-value"
+}`,
   query: '',
 };
