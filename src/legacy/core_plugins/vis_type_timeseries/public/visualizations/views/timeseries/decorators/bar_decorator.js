@@ -21,7 +21,7 @@ import React from 'react';
 import { ScaleType, BarSeries } from '@elastic/charts';
 import { getBarStyles } from '../utils/series_styles';
 import { ChartsEntities } from '../model/charts';
-import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
+import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES, Y0_ACCESSOR_INDEXES } from '../../../constants';
 
 export function BarSeriesDecorator({
   seriesId,
@@ -54,6 +54,7 @@ export function BarSeriesDecorator({
     hideInLegend,
     xAccessor: X_ACCESSOR_INDEX,
     yAccessors: Y_ACCESSOR_INDEXES,
+    y0Accessors: bars.mode === 'band' ? Y0_ACCESSOR_INDEXES : undefined,
     stackAccessors,
     stackAsPercentage,
     xScaleType,

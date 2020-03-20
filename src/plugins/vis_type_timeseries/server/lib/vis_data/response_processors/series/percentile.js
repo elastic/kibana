@@ -52,7 +52,17 @@ export function percentile(resp, panel, series, meta) {
             color: split.color,
             label,
             data,
-            lines: { show: true, fill: percentile.shade, lineWidth: 0, mode: 'band' },
+            lines: {
+              show: series.chart_type === 'line',
+              fill: Number(percentile.shade),
+              lineWidth: 0,
+              mode: 'band',
+            },
+            bars: {
+              show: series.chart_type === 'bar',
+              fill: Number(percentile.shade),
+              mode: 'band',
+            },
             points: { show: false },
           });
         } else {
