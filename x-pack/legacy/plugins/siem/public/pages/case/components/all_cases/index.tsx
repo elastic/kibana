@@ -43,6 +43,7 @@ import { OpenClosedStats } from '../open_closed_stats';
 
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
+import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
 
 const CONFIGURE_CASES_URL = getConfigureCasesUrl();
 const CREATE_CASE_URL = getCreateCaseUrl();
@@ -106,13 +107,20 @@ export const AllCases = React.memo(() => {
     isDisplayConfirmDeleteModal,
   } = useDeleteCases();
 
+  const { dispatchResetIsUpdated, isUpdated, updateBulkStatus } = useUpdateCases();
+
   useEffect(() => {
     if (isDeleted) {
       refetchCases(filterOptions, queryParams);
       fetchCasesStatus();
       dispatchResetIsDeleted();
     }
-  }, [isDeleted, filterOptions, queryParams]);
+    if (isUpdated) {
+      refetchCases(filterOptions, queryParams);
+      fetchCasesStatus();
+      dispatchResetIsUpdated();
+    }
+  }, [isDeleted, isUpdated, filterOptions, queryParams]);
 
   const [deleteThisCase, setDeleteThisCase] = useState({
     title: '',
@@ -135,36 +143,38 @@ export const AllCases = React.memo(() => {
     [deleteBulk, deleteThisCase, isDisplayConfirmDeleteModal]
   );
 
-  const toggleDeleteModal = useCallback(
-    (deleteCase: Case) => {
-      handleToggleModal();
-      setDeleteThisCase(deleteCase);
-    },
-    [isDisplayConfirmDeleteModal]
-  );
+  const toggleDeleteModal = useCallback((deleteCase: Case) => {
+    handleToggleModal();
+    setDeleteThisCase(deleteCase);
+  }, []);
 
-  const toggleBulkDeleteModal = useCallback(
-    (deleteCases: string[]) => {
-      handleToggleModal();
-      setDeleteBulk(deleteCases);
+  const toggleBulkDeleteModal = useCallback((deleteCases: string[]) => {
+    handleToggleModal();
+    setDeleteBulk(deleteCases);
+  }, []);
+
+  const handleUpdateCaseStatus = useCallback(
+    (status: string) => {
+      updateBulkStatus(selectedCases, status);
     },
-    [isDisplayConfirmDeleteModal]
+    [selectedCases]
   );
 
   const selectedCaseIds = useMemo(
-    (): string[] =>
-      selectedCases.reduce((arr: string[], caseObj: Case) => [...arr, caseObj.id], []),
+    (): string[] => selectedCases.map((caseObj: Case) => caseObj.id),
     [selectedCases]
   );
 
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void) => (
       <EuiContextMenuPanel
+        data-test-subj="cases-bulk-actions"
         items={getBulkItems({
+          caseStatus: filterOptions.status,
           closePopover,
           deleteCasesAction: toggleBulkDeleteModal,
           selectedCaseIds,
-          caseStatus: filterOptions.status,
+          updateCaseStatus: handleUpdateCaseStatus,
         })}
       />
     ),
@@ -322,7 +332,7 @@ export const AllCases = React.memo(() => {
             </UtilityBar>
             <EuiBasicTable
               columns={memoizedGetCasesColumns}
-              data-test-subj="all-cases-table"
+              data-test-subj="cases-table"
               isSelectable
               itemId="id"
               items={data.cases}
