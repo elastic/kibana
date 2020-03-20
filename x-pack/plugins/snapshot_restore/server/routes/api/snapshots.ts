@@ -70,12 +70,9 @@ export function registerSnapshotsRoutes({
         try {
           // If any of these repositories 504 they will cost the request significant time.
           const {
-            responses: fetchedResponses,
+            snapshots: fetchedSnapshots,
           }: {
-            responses: Array<{
-              repository: 'string';
-              snapshots: SnapshotDetailsEs[];
-            }>;
+            snapshots: SnapshotDetailsEs[];
           } = await callAsCurrentUser('snapshot.get', {
             repository,
             snapshot: '_all',
@@ -83,10 +80,9 @@ export function registerSnapshotsRoutes({
           });
 
           // Decorate each snapshot with the repository with which it's associated.
-          fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
-            fetchedSnapshots.forEach(snapshot => {
-              snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
-            });
+
+          fetchedSnapshots.forEach((snapshot: SnapshotDetailsEs) => {
+            snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
           });
 
           repositories.push(repository);
@@ -128,22 +124,16 @@ export function registerSnapshotsRoutes({
 
       try {
         const {
-          responses: snapshotsResponse,
+          snapshots: fetchedSnapshots,
         }: {
-          responses: Array<{
-            repository: string;
-            snapshots: SnapshotDetailsEs[];
-            error?: any;
-          }>;
+          snapshots: SnapshotDetailsEs[];
         } = await callAsCurrentUser('snapshot.get', {
           repository,
           snapshot: '_all',
           ignore_unavailable: true,
         });
 
-        const snapshotsList =
-          snapshotsResponse && snapshotsResponse[0] && snapshotsResponse[0].snapshots;
-        const selectedSnapshot = snapshotsList.find(
+        const selectedSnapshot = fetchedSnapshots.find(
           ({ snapshot: snapshotName }) => snapshot === snapshotName
         ) as SnapshotDetailsEs;
 
@@ -152,7 +142,7 @@ export function registerSnapshotsRoutes({
           return res.notFound({ body: 'Snapshot not found' });
         }
 
-        const successfulSnapshots = snapshotsList
+        const successfulSnapshots = fetchedSnapshots
           .filter(({ state }) => state === 'SUCCESS')
           .sort((a, b) => {
             return +new Date(b.end_time) - +new Date(a.end_time);

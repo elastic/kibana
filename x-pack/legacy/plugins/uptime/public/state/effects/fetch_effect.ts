@@ -26,10 +26,6 @@ export function fetchEffectFactory<T, R, S, F>(
 ) {
   return function*(action: Action<T>) {
     try {
-      if (!action.payload) {
-        yield put(fail(new Error('Cannot fetch snapshot for undefined parameters.')));
-        return;
-      }
       const {
         payload: { ...params },
       } = action;

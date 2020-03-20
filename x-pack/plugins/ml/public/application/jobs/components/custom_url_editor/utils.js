@@ -7,10 +7,9 @@
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
 import rison from 'rison-node';
-// import url from 'url';
+import url from 'url';
 
-// import { npStart } from 'ui/new_platform';
-// import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../src/plugins/dashboard_embeddable_container/public';
+import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../src/plugins/dashboard/public';
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
@@ -19,7 +18,7 @@ import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
-// import { getSavedObjectsClient } from '../../../util/dependency_cache';
+import { getSavedObjectsClient, getGetUrlGenerator } from '../../../util/dependency_cache';
 
 export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   // Returns the settings object in the format used by the custom URL editor
@@ -120,7 +119,7 @@ export function buildCustomUrlFromSettings(settings) {
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
-    // return buildDashboardUrlFromSettings(settings);
+    return buildDashboardUrlFromSettings(settings);
   } else if (settings.type === URL_TYPE.KIBANA_DISCOVER) {
     return Promise.resolve(buildDiscoverUrlFromSettings(settings));
   } else {
@@ -133,72 +132,70 @@ export function buildCustomUrlFromSettings(settings) {
   }
 }
 
-// function buildDashboardUrlFromSettings(settings) {
-//   // Get the complete list of attributes for the selected dashboard (query, filters).
-//   return new Promise((resolve, reject) => {
-//     const { dashboardId, queryFieldNames } = settings.kibanaSettings;
+function buildDashboardUrlFromSettings(settings) {
+  // Get the complete list of attributes for the selected dashboard (query, filters).
+  return new Promise((resolve, reject) => {
+    const { dashboardId, queryFieldNames } = settings.kibanaSettings;
 
-//     const savedObjectsClient = getSavedObjectsClient();
-//     savedObjectsClient
-//       .get('dashboard', dashboardId)
-//       .then(response => {
-//         // Use the filters from the saved dashboard if there are any.
-//         // let filters = [];
+    const savedObjectsClient = getSavedObjectsClient();
+    savedObjectsClient
+      .get('dashboard', dashboardId)
+      .then(response => {
+        // Use the filters from the saved dashboard if there are any.
+        let filters = [];
 
-//         // Use the query from the dashboard only if no job entities are selected.
-//         let query = undefined;
+        // Use the query from the dashboard only if no job entities are selected.
+        let query = undefined;
 
-//         const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
-//         if (searchSourceJSON !== undefined) {
-//           const searchSourceData = JSON.parse(searchSourceJSON);
-//           if (searchSourceData.filter !== undefined) {
-//             filters = searchSourceData.filter;
-//           }
-//           query = searchSourceData.query;
-//         }
+        const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
+        if (searchSourceJSON !== undefined) {
+          const searchSourceData = JSON.parse(searchSourceJSON);
+          if (searchSourceData.filter !== undefined) {
+            filters = searchSourceData.filter;
+          }
+          query = searchSourceData.query;
+        }
 
-//         const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
-//         if (queryFromEntityFieldNames !== undefined) {
-//           query = queryFromEntityFieldNames;
-//         }
+        const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
+        if (queryFromEntityFieldNames !== undefined) {
+          query = queryFromEntityFieldNames;
+        }
 
-//         const generator = npStart.plugins.share.urlGenerators.getUrlGenerator(
-//           DASHBOARD_APP_URL_GENERATOR
-//         );
+        const getUrlGenerator = getGetUrlGenerator();
+        const generator = getUrlGenerator(DASHBOARD_APP_URL_GENERATOR);
+        return generator
+          .createUrl({
+            dashboardId,
+            timeRange: {
+              from: '$earliest$',
+              to: '$latest$',
+              mode: 'absolute',
+            },
+            filters,
+            query,
+            // Don't hash the URL since this string will be 1. shown to the user and 2. used as a
+            // template to inject the time parameters.
+            useHash: false,
+          })
+          .then(urlValue => {
+            const urlToAdd = {
+              url_name: settings.label,
+              url_value: decodeURIComponent(`kibana${url.parse(urlValue).hash}`),
+              time_range: TIME_RANGE_TYPE.AUTO,
+            };
 
-//         return generator
-//           .createUrl({
-//             dashboardId,
-//             timeRange: {
-//               from: '$earliest$',
-//               to: '$latest$',
-//               mode: 'absolute',
-//             },
-//             filters,
-//             query,
-//             // Don't hash the URL since this string will be 1. shown to the user and 2. used as a
-//             // template to inject the time parameters.
-//             useHash: false,
-//           })
-//           .then(urlValue => {
-//             const urlToAdd = {
-//               url_name: settings.label,
-//               url_value: decodeURIComponent(`kibana${url.parse(urlValue).hash}`),
-//               time_range: TIME_RANGE_TYPE.AUTO,
-//             };
+            if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
+              urlToAdd.time_range = settings.timeRange.interval;
+            }
 
-//             if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
-//               urlToAdd.time_range = settings.timeRange.interval;
-//             }
-
-//             resolve(urlToAdd);
-//           });
-//       })
-//       .catch(resp => {
-//         reject(resp);
-//       });
-//   });
-// }
+            resolve(urlToAdd);
+          });
+      })
+      .catch(resp => {
+        reject(resp);
+      });
+  });
+}
 
 function buildDiscoverUrlFromSettings(settings) {
   const { discoverIndexPatternId, queryFieldNames } = settings.kibanaSettings;

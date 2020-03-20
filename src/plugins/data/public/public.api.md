@@ -362,8 +362,8 @@ export const esFilters: {
     getPhraseFilterField: (filter: import("../common").PhraseFilter) => string;
     getPhraseFilterValue: (filter: import("../common").PhraseFilter) => string | number | boolean;
     getDisplayValueFromFilter: typeof getDisplayValueFromFilter;
-    compareFilters: (first: import("../common").Filter | import("../common").Filter[], second: import("../common").Filter | import("../common").Filter[], comparatorOptions?: import("./query/filter_manager/lib/compare_filters").FilterCompareOptions) => boolean;
-    COMPARE_ALL_OPTIONS: import("./query/filter_manager/lib/compare_filters").FilterCompareOptions;
+    compareFilters: (first: import("../common").Filter | import("../common").Filter[], second: import("../common").Filter | import("../common").Filter[], comparatorOptions?: import("../common").FilterCompareOptions) => boolean;
+    COMPARE_ALL_OPTIONS: import("../common").FilterCompareOptions;
     generateFilters: typeof generateFilters;
     onlyDisabledFiltersChanged: (newFilters?: import("../common").Filter[] | undefined, oldFilters?: import("../common").Filter[] | undefined) => boolean;
     changeTimeFilter: typeof changeTimeFilter;
@@ -729,6 +729,8 @@ export interface IIndexPattern {
     // (undocumented)
     id?: string;
     // (undocumented)
+    intervalName?: string | null;
+    // (undocumented)
     timeFieldName?: string;
     // (undocumented)
     title: string;
@@ -810,6 +812,8 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getFieldByName(name: string): IndexPatternField | void;
     // (undocumented)
+    getIndex(): string;
+    // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     // (undocumented)
     getScriptedFields(): IndexPatternField[];
@@ -824,15 +828,21 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     init(forceFieldRefresh?: boolean): Promise<this>;
     // (undocumented)
+    intervalName: string | undefined | null;
+    // (undocumented)
     isTimeBased(): boolean;
     // (undocumented)
     isTimeBasedWildcard(): boolean;
     // (undocumented)
     isTimeNanosBased(): boolean;
     // (undocumented)
+    isUnsupportedTimePattern(): boolean;
+    // (undocumented)
     isWildcard(): boolean;
     // (undocumented)
     metaFields: string[];
+    // (undocumented)
+    migrate(newTitle: string): Promise<this>;
     // (undocumented)
     popularizeField(fieldName: string, unit?: number): Promise<void>;
     // (undocumented)
@@ -1843,8 +1853,8 @@ export type TSearchStrategyProvider<T extends TStrategyTypes> = (context: ISearc
 // src/plugins/data/public/index.ts:405:1 - (ae-forgotten-export) The symbol "parseInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:406:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:409:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/query/state_sync/connect_to_query_state.ts:34:33 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/query/state_sync/connect_to_query_state.ts:38:1 - (ae-forgotten-export) The symbol "QueryStateChange" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/query/state_sync/connect_to_query_state.ts:33:33 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/query/state_sync/connect_to_query_state.ts:37:1 - (ae-forgotten-export) The symbol "QueryStateChange" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/types.ts:52:5 - (ae-forgotten-export) The symbol "createFiltersFromEvent" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/types.ts:60:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
 

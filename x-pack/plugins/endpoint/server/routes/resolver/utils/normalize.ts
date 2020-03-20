@@ -7,7 +7,7 @@
 import { ResolverEvent, LegacyEndpointEvent } from '../../../../common/types';
 
 function isLegacyData(data: ResolverEvent): data is LegacyEndpointEvent {
-  return data.agent.type === 'endgame';
+  return data.agent?.type === 'endgame';
 }
 
 export function extractEventID(event: ResolverEvent) {
