@@ -9,6 +9,7 @@ import { alertsClientMock } from '../../../../../../../plugins/alerting/server/m
 import { actionsClientMock } from '../../../../../../../plugins/actions/server/mocks';
 import { getMlResult } from '../routes/__mocks__/request_responses';
 import { updateRules } from './update_rules';
+import { UpdateRuleParams } from './types';
 
 describe('updateRules', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -24,23 +25,21 @@ describe('updateRules', () => {
   it('calls the alertsClient with ML params', async () => {
     alertsClient.get.mockResolvedValue(getMlResult());
 
-    const params = {
-      ...getMlResult().params,
-      anomalyThreshold: 55,
-      machineLearningJobId: 'new_job_id',
-    };
-
-    await updateRules({
+    const params: UpdateRuleParams = {
       alertsClient,
       actionsClient,
       savedObjectsClient,
       id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      ...params,
+      ...getMlResult().params,
+      anomalyThreshold: 55,
+      machineLearningJobId: 'new_job_id',
       enabled: true,
       interval: '',
       name: '',
       tags: [],
-    });
+    };
+
+    await updateRules(params);
 
     expect(alertsClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
