@@ -72,6 +72,10 @@ export const Create = React.memo(() => {
     }
   }, [form]);
 
+  const handleSetIsCancel = useCallback(() => {
+    setIsCancel(true);
+  }, [isCancel]);
+
   if (caseData != null && caseData.id) {
     return <Redirect to={`/${SiemPageName.case}/${caseData.id}`} />;
   }
@@ -137,7 +141,12 @@ export const Create = React.memo(() => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={() => setIsCancel(true)} iconType="cross">
+            <EuiButtonEmpty
+              data-test-subj="create-case-cancel"
+              size="s"
+              onClick={handleSetIsCancel}
+              iconType="cross"
+            >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
