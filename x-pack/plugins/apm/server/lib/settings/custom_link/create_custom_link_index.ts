@@ -33,6 +33,7 @@ const mappings: Mappings = {
     label: {
       type: 'text',
       fields: {
+        // Adding keyword type to be able to sort by label alphabetically
         keyword: {
           type: 'keyword'
         }

@@ -20,7 +20,7 @@ import { FilterOptions } from '../../../../../../../../../../plugins/apm/common/
 import {
   DEFAULT_OPTION,
   FilterKeyValue,
-  filterSelectOptions,
+  FILTER_SELECT_OPTIONS,
   getSelectOptions
 } from './helper';
 
@@ -140,7 +140,7 @@ export const FiltersSection = ({
       <AddFilterButton
         onClick={handleAddFilter}
         // Disable button when user has already added all items available
-        isDisabled={filters.length === filterSelectOptions.length - 1}
+        isDisabled={filters.length === FILTER_SELECT_OPTIONS.length - 1}
       />
     </>
   );

@@ -87,7 +87,7 @@ export const DEFAULT_OPTION: FilterSelectOption = {
   )
 };
 
-export const filterSelectOptions: FilterSelectOption[] = [
+export const FILTER_SELECT_OPTIONS: FilterSelectOption[] = [
   DEFAULT_OPTION,
   ...FILTER_OPTIONS.map(filter => ({
     value: filter as keyof FilterOptions,
@@ -105,7 +105,7 @@ export const getSelectOptions = (
   filters: FilterKeyValue[],
   selectedKey: FilterKey
 ) => {
-  return filterSelectOptions.filter(
+  return FILTER_SELECT_OPTIONS.filter(
     ({ value }) =>
       !filters.some(
         ([filterKey]) => filterKey === value && filterKey !== selectedKey
