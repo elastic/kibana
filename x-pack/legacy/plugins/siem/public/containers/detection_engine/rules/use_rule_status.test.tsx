@@ -51,117 +51,113 @@ const testRule = {
 };
 
 describe('useRuleStatus', () => {
-  // beforeEach(() => {
-  //   jest.resetAllMocks();
-  //   jest.restoreAllMocks();
-  //   jest.clearAllMocks();
-  // });
-  // afterEach(async () => {
-  //   cleanup();
-  // });
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
+  afterEach(async () => {
+    cleanup();
+  });
 
-  // test('init', async () => {
-  //   await act(async () => {
-  //     const { result, waitForNextUpdate } = renderHook<string, ReturnRulesStatuses>(() =>
-  //       useRulesStatuses([testRule])
-  //     );
-  //     await waitForNextUpdate();
-  //     expect(result.current).toEqual([true, null, null]);
-  //   });
-  // });
-
-  // GOOD TEST
-  test('init status', async () => {
+  test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnRulesStatuses>(() =>
-        useRulesStatuses([testRule])
+      const { result, waitForNextUpdate } = renderHook<string, ReturnRuleStatus>(() =>
+        useRuleStatus('myOwnRuleID')
       );
       await waitForNextUpdate();
-      // expect(result.current).toEqual({ loading: true, rulesStatuses: null });
       expect(result.current).toEqual([true, null, null]);
     });
   });
 
-  // test('fetch rule status', async () => {
-  //   await act(async () => {
-  //     const { result, waitForNextUpdate } = renderHook<string, ReturnRuleStatus>(() =>
-  //       useRuleStatus('myOwnRuleID')
-  //     );
-  //     await waitForNextUpdate();
-  //     await waitForNextUpdate();
-  //     expect(result.current).toEqual([
-  //       false,
-  //       {
-  //         current_status: {
-  //           alert_id: 'alertId',
-  //           last_failure_at: null,
-  //           last_failure_message: null,
-  //           last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
-  //           last_success_message: 'it is a success',
-  //           status: 'succeeded',
-  //           status_date: 'mm/dd/yyyyTHH:MM:sssz',
-  //         },
-  //         failures: [],
-  //       },
-  //       result.current[2],
-  //     ]);
-  //   });
-  // });
+  test('fetch rule status', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, ReturnRuleStatus>(() =>
+        useRuleStatus('myOwnRuleID')
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(result.current).toEqual([
+        false,
+        {
+          current_status: {
+            alert_id: 'alertId',
+            last_failure_at: null,
+            last_failure_message: null,
+            last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
+            last_success_message: 'it is a success',
+            status: 'succeeded',
+            status_date: 'mm/dd/yyyyTHH:MM:sssz',
+            gap: null,
+            bulk_create_time_durations: ['2235.01'],
+            search_after_time_durations: ['616.97'],
+            last_look_back_date: '2020-03-19T00:32:07.996Z',
+          },
+          failures: [],
+        },
+        result.current[2],
+      ]);
+    });
+  });
 
-  // test('re-fetch rule status', async () => {
-  //   const spyOngetRuleStatusById = jest.spyOn(api, 'getRuleStatusById');
-  //   await act(async () => {
-  //     const { result, waitForNextUpdate } = renderHook<string, ReturnRuleStatus>(() =>
-  //       useRuleStatus('myOwnRuleID')
-  //     );
-  //     await waitForNextUpdate();
-  //     await waitForNextUpdate();
-  //     if (result.current[2]) {
-  //       result.current[2]('myOwnRuleID');
-  //     }
-  //     await waitForNextUpdate();
-  //     expect(spyOngetRuleStatusById).toHaveBeenCalledTimes(2);
-  //   });
-  // });
+  test('re-fetch rule status', async () => {
+    const spyOngetRuleStatusById = jest.spyOn(api, 'getRuleStatusById');
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, ReturnRuleStatus>(() =>
+        useRuleStatus('myOwnRuleID')
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      if (result.current[2]) {
+        result.current[2]('myOwnRuleID');
+      }
+      await waitForNextUpdate();
+      expect(spyOngetRuleStatusById).toHaveBeenCalledTimes(2);
+    });
+  });
 
-  // test('fetch rule status', async () => {
-  //   act(async () => {
-  //     const { result, waitForNextUpdate } = renderHook<string, ReturnRulesStatuses>(() =>
-  //       useRulesStatuses([testRule])
-  //     );
-  //     await waitForNextUpdate();
-  //     await waitForNextUpdate();
-  //     expect(result.current).toEqual({
-  //       loading: false,
-  //       '12345678987654321': {
-  //         current_status: {
-  //           alert_id: 'alertId',
-  //           last_failure_at: null,
-  //           last_failure_message: null,
-  //           last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
-  //           last_success_message: 'it is a success',
-  //           status: 'succeeded',
-  //           status_date: 'mm/dd/yyyyTHH:MM:sssz',
-  //         },
-  //         failures: [],
-  //       },
-  //     });
-  //   });
-  // });
+  test('init rules statuses', async () => {
+    const payload = [testRule];
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, ReturnRulesStatuses>(() =>
+        useRulesStatuses(payload)
+      );
+      await waitForNextUpdate();
+      expect(result.current).toEqual({ loading: true, rulesStatuses: null });
+    });
+  });
 
-  // test('re-fetch rule status', async () => {
-  //   const spyOngetRuleStatusById = jest.spyOn(api, 'getRulesStatusByIds');
-  //   await act(async () => {
-  //     const { result, waitForNextUpdate } = renderHook<string, ReturnRulesStatuses>(() =>
-  //     useRulesStatuses([testRule]);
-  //     );
-  //     // await waitForNextUpdate();
-  //     // await waitForNextUpdate();
-  //     if (result.current[2]) {
-  //       result.current[2]('myOwnRuleID');
-  //     }
-  //     await waitForNextUpdate();
-  //     expect(spyOngetRuleStatusById).toHaveBeenCalledTimes(2);
-  //   });
-  // });
+  test('fetch rules statuses', async () => {
+    const payload = [testRule];
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, ReturnRulesStatuses>(() =>
+        useRulesStatuses(payload)
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(result.current).toEqual({
+        loading: false,
+        rulesStatuses: [
+          {
+            current_status: {
+              alert_id: 'alertId',
+              bulk_create_time_durations: ['2235.01'],
+              gap: null,
+              last_failure_at: null,
+              last_failure_message: null,
+              last_look_back_date: '2020-03-19T00:32:07.996Z',
+              last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
+              last_success_message: 'it is a success',
+              search_after_time_durations: ['616.97'],
+              status: 'succeeded',
+              status_date: 'mm/dd/yyyyTHH:MM:sssz',
+            },
+            failures: [],
+            id: '12345678987654321',
+            name: 'Test rule',
+          },
+        ],
+      });
+    });
+  });
 });
