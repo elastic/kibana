@@ -4,9 +4,9 @@
 <titleabbrev>Upgrade readiness status</titleabbrev>
 ++++
 
-Check the status of your cluster.
-
 experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+Check the status of your cluster.
 
 [[upgrade-assistant-api-status-request]]
 ==== Request
