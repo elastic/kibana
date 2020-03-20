@@ -21,11 +21,11 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SwitchParamEditor } from './switch';
 
-import { isStringType } from '../../legacy_imports';
+import { search } from '../../../../../../plugins/data/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {
-  const fieldTypeIsNotString = !isStringType(props.agg);
+  const fieldTypeIsNotString = !search.aggs.isStringType(props.agg);
 
   useEffect(() => {
     if (fieldTypeIsNotString) {

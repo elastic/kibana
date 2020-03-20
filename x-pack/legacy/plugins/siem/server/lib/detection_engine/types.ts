@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertAction } from '../../../../../../plugins/alerting/common';
 import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
@@ -23,6 +24,10 @@ export interface ThreatParams {
   technique: IMitreAttack[];
 }
 
+export type RuleAlertAction = Omit<AlertAction, 'actionTypeId'> & {
+  action_type_id: string;
+};
+
 // Notice below we are using lists: ListsDefaultArraySchema[]; which is coming directly from the response output section.
 // TODO: Eventually this whole RuleAlertParams will be replaced with io-ts. For now we can slowly strangle it out and reduce duplicate types
 // We don't have the input types defined through io-ts just yet but as we being introducing types from there we will more and more remove
@@ -30,6 +35,7 @@ export interface ThreatParams {
 export type RuleType = 'query' | 'saved_query' | 'machine_learning';
 
 export interface RuleAlertParams {
+  actions: RuleAlertAction[];
   anomalyThreshold: number | undefined;
   description: string;
   note: string | undefined | null;
@@ -59,11 +65,14 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: RuleType;
   version: number;
-  throttle?: string;
+  throttle: string | null;
   lists: ListsDefaultArraySchema | null | undefined;
 }
 
-export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
+export type RuleTypeParams = Omit<
+  RuleAlertParams,
+  'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
+>;
 
 export type RuleAlertParamsRest = Omit<
   RuleAlertParams,
