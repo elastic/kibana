@@ -10,7 +10,7 @@ experimental[] Create a new {kib} role, or update the attributes of an existing 
 [[role-management-api-put-request]]
 ==== Request
 
-`PUT <kibana host>:port/api/security/role/my_kibana_role`
+`PUT <kibana host>:<port>/api/security/role/my_kibana_role`
 
 [[role-management-api-put-prereqs]]
 ==== Prerequisite
@@ -56,7 +56,7 @@ To use the create or update role API, you must have the `manage_security` cluste
 
 Grant access to various features in all spaces:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
 {
@@ -125,7 +125,7 @@ $ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
 
 Grant dashboard-only access to only the Marketing space:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
 {
@@ -153,7 +153,7 @@ $ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
 
 Grant full access to all features in the Default space:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
 {
@@ -180,7 +180,7 @@ $ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
 
 Grant different access to different spaces:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
 {
@@ -216,7 +216,7 @@ $ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
 
 Grant access to {kib} and {es}:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X PUT "localhost:5601/api/security/role/my_kibana_role"
 {

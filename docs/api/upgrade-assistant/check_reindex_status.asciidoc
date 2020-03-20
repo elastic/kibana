@@ -9,7 +9,7 @@ experimental[] Check the status of the reindex operation.
 [[check-reindex-status-request]]
 ==== Request
 
-`GET <kibana host>:port/api/upgrade_assistant/reindex/myIndex`
+`GET <kibana host>:<port>/api/upgrade_assistant/reindex/myIndex`
 
 [[check-reindex-status-response-codes]]
 ==== Response codes
@@ -22,7 +22,7 @@ experimental[] Check the status of the reindex operation.
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "reindexOp": {

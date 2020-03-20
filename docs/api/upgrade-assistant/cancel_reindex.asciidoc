@@ -9,7 +9,7 @@ experimental[] Cancel reindexes that are waiting for the {es} reindex task to co
 [[cancel-reindex-request]]
 ==== Request
 
-`POST <kibana host>:port/api/upgrade_assistant/reindex/myIndex/cancel`
+`POST <kibana host>:<port>/api/upgrade_assistant/reindex/myIndex/cancel`
 
 [[cancel-reindex-response-codes]]
 ==== Response codes
@@ -22,7 +22,7 @@ experimental[] Cancel reindexes that are waiting for the {es} reindex task to co
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "acknowledged": true

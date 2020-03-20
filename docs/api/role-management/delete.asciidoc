@@ -14,7 +14,7 @@ To use the delete role API, you must have the `manage_security` cluster privileg
 [[role-management-api-delete-request-body]]
 ==== Request
 
-`DELETE <kibana host>:port/api/security/role/my_admin_role`
+`DELETE <kibana host>:<port>/api/security/role/my_admin_role`
 
 [[role-management-api-delete-response-codes]]
 ==== Response codes

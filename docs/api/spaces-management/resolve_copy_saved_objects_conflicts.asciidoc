@@ -10,9 +10,9 @@ experimental[] Overwrite saved objects that are returned as errors from the <<sp
 [[spaces-api-resolve-copy-saved-objects-conflicts-request]]
 ==== {api-request-title}
 
-`POST <kibana host>:port/api/spaces/_resolve_copy_saved_objects_errors`
+`POST <kibana host>:<port>/api/spaces/_resolve_copy_saved_objects_errors`
 
-`POST <kibana host>:port/s/<space_id>/api/spaces/_resolve_copy_saved_objects_errors`
+`POST <kibana host>:<port>/s/<space_id>/api/spaces/_resolve_copy_saved_objects_errors`
 
 [[spaces-api-resolve-copy-saved-objects-conflicts-prereqs]]
 ==== {api-prereq-title}
@@ -76,7 +76,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
 
 Overwrite an index pattern in the `marketing` space, and a visualization in the `sales` space:
 
-[source,js]
+[source,sh]
 ----
 $ curl -X POST "localhost:5601/api/spaces/_resolve_copy_saved_objects_errors"
 {
@@ -103,7 +103,7 @@ $ curl -X POST "localhost:5601/api/spaces/_resolve_copy_saved_objects_errors"
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 ----
 {
   "marketing": {

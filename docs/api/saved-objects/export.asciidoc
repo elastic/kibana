@@ -9,9 +9,9 @@ experimental[] Retrieve sets of saved objects that you want to import into {kib}
 [[saved-objects-api-export-request]]
 ==== Request
 
-`POST <kibana host>:port/api/saved_objects/_export`
+`POST <kibana host>:<port>/api/saved_objects/_export`
 
-`POST <kibana host>:port/s/<space_id>/api/saved_objects/_export`
+`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_export`
 
 [[saved-objects-api-export-path-params]]
 ==== Path parameters
@@ -66,7 +66,7 @@ When `excludeExportDetails=false` (the default) we append an export result detai
 
 Export all index pattern saved objects:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_export"
 {
@@ -77,7 +77,7 @@ $ curl -X POST "localhost:5601/api/saved_objects/_export"
 
 Export all index pattern saved objects and exclude the export summary from the stream:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_export"
 {
@@ -89,7 +89,7 @@ $ curl -X POST "localhost:5601/api/saved_objects/_export"
 
 Export a specific saved object:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_export"
 {
@@ -105,7 +105,7 @@ $ curl -X POST "localhost:5601/api/saved_objects/_export"
 
 Export a specific saved object and it's related objects :
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_export"
 {

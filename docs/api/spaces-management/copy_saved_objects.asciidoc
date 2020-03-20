@@ -16,9 +16,9 @@ You can request to overwrite any objects that already exist in the target space 
 [[spaces-api-copy-saved-objects-request]]
 ==== {api-request-title}
 
-`POST <kibana host>:port/api/spaces/_copy_saved_objects`
+`POST <kibana host>:<port>/api/spaces/_copy_saved_objects`
 
-`POST <kibana host>:port/s/<space_id>/api/spaces/_copy_saved_objects`
+`POST <kibana host>:<port>/s/<space_id>/api/spaces/_copy_saved_objects`
 
 [[spaces-api-copy-saved-objects-path-params]]
 ==== {api-path-parms-title}
@@ -71,7 +71,7 @@ You can request to overwrite any objects that already exist in the target space 
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` and `sales` spaces:
 
-[source,js]
+[source,sh]
 ----
 $ curl -X POST "localhost:5601/api/spaces/_copy_saved_objects"
 {
@@ -87,7 +87,7 @@ $ curl -X POST "localhost:5601/api/spaces/_copy_saved_objects"
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 ----
 {
   "marketing": {
@@ -112,7 +112,7 @@ The `marketing` space succeeds, but the `sales` space fails due to a conflict in
 
 Copy a visualization with the `my-viz` ID from the `marketing` space to the `default` space:
 
-[source,js]
+[source,sh]
 ----
 $ curl -X POST "localhost:5601/s/marketing/api/spaces/_copy_saved_objects"
 {
@@ -127,7 +127,7 @@ $ curl -X POST "localhost:5601/s/marketing/api/spaces/_copy_saved_objects"
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 ----
 {
   "default": {

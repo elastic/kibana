@@ -9,7 +9,7 @@ experimental[] Start a new reindex or resume a paused reindex.
 [[start-resume-reindex-request]]
 ==== Request
 
-`POST <kibana host>:port/api/upgrade_assistant/reindex/myIndex`
+`POST <kibana host>:<port>/api/upgrade_assistant/reindex/myIndex`
 
 [[start-resume-reindex-codes]]
 ==== Response code
@@ -22,7 +22,7 @@ experimental[] Start a new reindex or resume a paused reindex.
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "indexName": ".ml-state",

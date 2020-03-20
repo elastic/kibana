@@ -9,7 +9,7 @@ experimental[] Import dashboards and corresponding saved objects.
 [[dashboard-api-import-request]]
 ==== Request
 
-`POST <kibana host>:port/api/kibana/dashboards/import`
+`POST <kibana host>:<port>/api/kibana/dashboards/import`
 
 [[dashboard-api-import-params]]
 ==== Query parameters
@@ -40,7 +40,7 @@ Use the complete response body from the <<dashboard-api-export, Export dashboard
 [[dashboard-api-import-example]]
 ==== Example
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/kibana/dashboards/import?exclude=index-pattern"
 {

@@ -9,7 +9,7 @@ experimental[] Update an existing {kib} space.
 [[spaces-api-put-api-request]]
 ==== Request
 
-`PUT <kibana host>:port/api/spaces/space/<space_id>`
+`PUT <kibana host>:<port>/api/spaces/space/<space_id>`
 
 [[spaces-api-put-request-body]]
 ==== Request body
@@ -45,7 +45,7 @@ experimental[] Update an existing {kib} space.
 [[sample-api-example]]
 ==== Example
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X PUT "localhost:5601/api/spaces/space/marketing"
 {

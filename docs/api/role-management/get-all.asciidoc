@@ -14,7 +14,7 @@ To use the get role API, you must have the `manage_security` cluster privilege.
 [[role-management-api-retrieve-all-request-body]]
 ==== Request
 
-`GET <kibana host>:port/api/security/role`
+`GET <kibana host>:<port>/api/security/role`
 
 [[role-management-api-retrieve-all-response-codes]]
 ==== Response code
@@ -27,7 +27,7 @@ To use the get role API, you must have the `manage_security` cluster privilege.
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 [
   {

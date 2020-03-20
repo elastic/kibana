@@ -9,7 +9,7 @@ experimental[] Create a {kib} space.
 [[spaces-api-post-request]]
 ==== Request
 
-`POST <kibana host>:port/api/spaces/space`
+`POST <kibana host>:<port>/api/spaces/space`
 
 [[spaces-api-post-request-body]]
 ==== Request body
@@ -45,7 +45,7 @@ experimental[] Create a {kib} space.
 [[spaces-api-post-example]]
 ==== Example
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/spaces/space"
 {

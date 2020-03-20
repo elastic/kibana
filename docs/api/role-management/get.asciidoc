@@ -14,7 +14,7 @@ To use the get specific role API, you must have the `manage_security` cluster pr
 [[role-management-specific-api-retrieve-all-request-body]]
 ===== Request
 
-`GET <kibana host>:port/api/security/role/my_restricted_kibana_role`
+`GET <kibana host>:<port>/api/security/role/my_restricted_kibana_role`
 
 [[role-management-specific-api-retrieve-all-response-codes]]
 ==== Response code
@@ -27,7 +27,7 @@ To use the get specific role API, you must have the `manage_security` cluster pr
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "name": "my_restricted_kibana_role",

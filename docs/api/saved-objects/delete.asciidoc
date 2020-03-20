@@ -11,9 +11,9 @@ WARNING: Once you delete a saved object, _it cannot be recovered_.
 [[saved-objects-api-delete-request]]
 ==== Request
 
-`DELETE <kibana host>:port/api/saved_objects/<type>/<id>`
+`DELETE <kibana host>:<port>/api/saved_objects/<type>/<id>`
 
-`DELETE <kibana host>:port/s/<space_id>/api/saved_objects/<type>/<id>`
+`DELETE <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 
 [[saved-objects-api-delete-path-params]]
 ==== Path parameters
@@ -37,7 +37,7 @@ WARNING: Once you delete a saved object, _it cannot be recovered_.
 
 Delete an index pattern object with the `my-pattern` ID:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X DELETE "localhost:5601/api/saved_objects/index-pattern/my-pattern"
 --------------------------------------------------

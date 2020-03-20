@@ -9,7 +9,7 @@ experimental[] Retrieve all {kib} spaces.
 [[spaces-api-get-all-request]]
 ==== Request
 
-`GET <kibana host>:port/api/spaces/space`
+`GET <kibana host>:<port>/api/spaces/space`
 
 [[spaces-api-get-all-response-codes]]
 ==== Response code
@@ -22,7 +22,7 @@ experimental[] Retrieve all {kib} spaces.
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 [
   {

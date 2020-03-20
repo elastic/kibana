@@ -9,7 +9,7 @@ experimental[] Retrieve a specified {kib} space.
 [[spaces-api-get-request]]
 ==== Request
 
-`GET <kibana host>:port/api/spaces/space/marketing`
+`GET <kibana host>:<port>/api/spaces/space/marketing`
 
 [[spaces-api-get-response-codes]]
 ==== Response code
@@ -22,7 +22,7 @@ experimental[] Retrieve a specified {kib} space.
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "marketing",

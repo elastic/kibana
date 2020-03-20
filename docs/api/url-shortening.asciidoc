@@ -12,7 +12,7 @@ Short URLs are designed to make sharing {kib} URLs easier.
 [[url-shortening-api-request]]
 ==== Request
 
-`POST <kibana host>:port/api/shorten_url`
+`POST <kibana host>:<port>/api/shorten_url`
 
 [[url-shortening-api-request-body]]
 ==== Request body
@@ -34,7 +34,7 @@ urlId:: A top-level property that contains the shortened URL token for the provi
 [[url-shortening-api-example]]
 ==== Example
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/shorten_url"
 {
@@ -45,7 +45,7 @@ $ curl -X POST "localhost:5601/api/shorten_url"
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "urlId": "f73b295ff92718b26bc94edac766d8e3"
