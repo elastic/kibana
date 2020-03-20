@@ -31,13 +31,13 @@ export interface Props {
   fields: Field[];
   fieldTypes: string[];
   filter: FieldFilter;
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
   getDetails: (field: Field) => FieldDetails;
   groupedFields: {
     selected: Field[];
     popular: Field[];
     unpopular: Field[];
   };
+  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
   onAddField: (fieldName: string) => void;
   onAddFilter: (field: Field | string, value: string, type: '+' | '-') => void;
   onRemoveField: (fieldName: string) => void;

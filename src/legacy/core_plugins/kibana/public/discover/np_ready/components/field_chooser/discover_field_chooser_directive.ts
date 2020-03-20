@@ -30,14 +30,8 @@ export function createDiscoverFieldChooserDirective(reactDirective: any) {
     ['onAddField', { watchDepth: 'reference' }],
     ['onAddFilter', { watchDepth: 'reference' }],
     ['onRemoveField', { watchDepth: 'reference' }],
-    ['onShowFields', { watchDepth: 'reference' }],
-    ['openFields', { watchDepth: 'reference' }],
-    ['popularFields', { watchDepth: 'reference' }],
     ['selectedIndexPattern', { watchDepth: 'reference' }],
     ['setFilterValue', { watchDepth: 'reference' }],
     ['setIndexPattern', { watchDepth: 'reference' }],
-    ['showDetails', { watchDepth: 'reference' }],
-    ['showFields', { watchDepth: 'reference' }],
-    ['unpopularFields', { watchDepth: 'reference' }],
   ]);
 }
