@@ -7,12 +7,6 @@
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
 
-let loggedDeprecationWarning = false;
-
-export function resetDeprecationWarning() {
-  loggedDeprecationWarning = false;
-}
-
 /*
  * Check if Cluster Alert email notifications is enabled in config
  * If so, use uiSettings API to fetch the X-Pack default admin email
