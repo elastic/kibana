@@ -15,7 +15,7 @@ import { VectorStyle } from '../../styles/vector/vector_style';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 import {
-  SOURCE_DATA_ID_ORIGIN,
+  FIELD_ORIGIN,
   ES_PEW_PEW,
   COUNT_PROP_NAME,
   VECTOR_STYLES,
@@ -134,7 +134,7 @@ export class ESPewPewSource extends AbstractESAggSource {
           ...defaultDynamicProperties[VECTOR_STYLES.LINE_COLOR].options,
           field: {
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
           color: COLOR_GRADIENTS[0].value,
         },
@@ -145,7 +145,7 @@ export class ESPewPewSource extends AbstractESAggSource {
           ...defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH].options,
           field: {
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
         },
       },

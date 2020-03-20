@@ -18,13 +18,13 @@ import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
-  SOURCE_DATA_ID_ORIGIN,
   ES_GEO_GRID,
   COUNT_PROP_NAME,
   COLOR_MAP_TYPE,
   RENDER_AS,
   GRID_RESOLUTION,
   VECTOR_STYLES,
+  FIELD_ORIGIN,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -354,7 +354,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
           ...defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options,
           field: {
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
           color: COLOR_GRADIENTS[0].value,
           type: COLOR_MAP_TYPE.ORDINAL,
@@ -378,7 +378,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
           ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
           field: {
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
         },
       },
@@ -388,7 +388,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
           ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
           field: {
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
         },
       },
