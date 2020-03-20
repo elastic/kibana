@@ -63,9 +63,47 @@ export const getBaseResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesS
   language: 'kuery',
   rule_id: 'query-rule-id',
   interval: '5m',
+  lists: [
+    {
+      field: 'source.ip',
+      boolean_operator: 'and',
+      values: [
+        {
+          name: '127.0.0.1',
+          type: 'value',
+        },
+      ],
+    },
+    {
+      field: 'host.name',
+      boolean_operator: 'and not',
+      values: [
+        {
+          name: 'rock01',
+          type: 'value',
+        },
+        {
+          name: 'mothra',
+          type: 'value',
+        },
+      ],
+    },
+  ],
 });
 
 export const getRulesBulkPayload = (): RulesBulkSchema => [getBaseResponsePayload()];
+
+export const getMlRuleResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
+  const basePayload = getBaseResponsePayload(anchorDate);
+  const { filters, index, query, language, ...rest } = basePayload;
+
+  return {
+    ...rest,
+    type: 'machine_learning',
+    anomaly_threshold: 59,
+    machine_learning_job_id: 'some_machine_learning_job_id',
+  };
+};
 
 export const getErrorPayload = (
   id: string = '819eded6-e9c8-445b-a647-519aea39e063'

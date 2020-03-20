@@ -92,6 +92,7 @@ describe('ServiceNow lib', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
 
@@ -116,6 +117,7 @@ describe('ServiceNow lib', () => {
       incidentId: '123',
       number: 'INC01',
       pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     });
   });
 
@@ -132,7 +134,10 @@ describe('ServiceNow lib', () => {
       commentId: '456',
       version: 'WzU3LDFd',
       comment: 'A comment',
-      incidentCommentId: undefined,
+      createdAt: '2020-03-13T08:34:53.450Z',
+      createdBy: { fullName: 'Elastic User', username: 'elastic' },
+      updatedAt: null,
+      updatedBy: null,
     };
 
     const res = await serviceNow.createComment('123', comment, 'comments');
@@ -173,13 +178,19 @@ describe('ServiceNow lib', () => {
         commentId: '123',
         version: 'WzU3LDFd',
         comment: 'A comment',
-        incidentCommentId: undefined,
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
+        updatedAt: null,
+        updatedBy: null,
       },
       {
         commentId: '456',
         version: 'WzU3LDFd',
         comment: 'A second comment',
-        incidentCommentId: undefined,
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
+        updatedAt: null,
+        updatedBy: null,
       },
     ];
     const res = await serviceNow.batchCreateComments('000', comments, 'comments');
@@ -210,7 +221,9 @@ describe('ServiceNow lib', () => {
     try {
       await serviceNow.getUserID();
     } catch (error) {
-      expect(error.message).toEqual('[ServiceNow]: Instance is not alive.');
+      expect(error.message).toEqual(
+        '[Action][ServiceNow]: Unable to get user id. Error: [ServiceNow]: Instance is not alive.'
+      );
     }
   });
 
@@ -226,7 +239,96 @@ describe('ServiceNow lib', () => {
     try {
       await serviceNow.getUserID();
     } catch (error) {
-      expect(error.message).toEqual('[ServiceNow]: Instance is not alive.');
+      expect(error.message).toEqual(
+        '[Action][ServiceNow]: Unable to get user id. Error: [ServiceNow]: Instance is not alive.'
+      );
+    }
+  });
+
+  test('check error when getting user', async () => {
+    expect.assertions(1);
+
+    axiosMock.mockImplementationOnce(() => {
+      throw new Error('Bad request.');
+    });
+    try {
+      await serviceNow.getUserID();
+    } catch (error) {
+      expect(error.message).toEqual(
+        '[Action][ServiceNow]: Unable to get user id. Error: Bad request.'
+      );
+    }
+  });
+
+  test('check error when getting incident', async () => {
+    expect.assertions(1);
+
+    axiosMock.mockImplementationOnce(() => {
+      throw new Error('Bad request.');
+    });
+    try {
+      await serviceNow.getIncident('123');
+    } catch (error) {
+      expect(error.message).toEqual(
+        '[Action][ServiceNow]: Unable to get incident with id 123. Error: Bad request.'
+      );
+    }
+  });
+
+  test('check error when creating incident', async () => {
+    expect.assertions(1);
+
+    axiosMock.mockImplementationOnce(() => {
+      throw new Error('Bad request.');
+    });
+    try {
+      await serviceNow.createIncident({ short_description: 'title' });
+    } catch (error) {
+      expect(error.message).toEqual(
+        '[Action][ServiceNow]: Unable to create incident. Error: Bad request.'
+      );
+    }
+  });
+
+  test('check error when updating incident', async () => {
+    expect.assertions(1);
+
+    axiosMock.mockImplementationOnce(() => {
+      throw new Error('Bad request.');
+    });
+    try {
+      await serviceNow.updateIncident('123', { short_description: 'title' });
+    } catch (error) {
+      expect(error.message).toEqual(
+        '[Action][ServiceNow]: Unable to update incident with id 123. Error: Bad request.'
+      );
+    }
+  });
+
+  test('check error when creating comment', async () => {
+    expect.assertions(1);
+
+    axiosMock.mockImplementationOnce(() => {
+      throw new Error('Bad request.');
+    });
+    try {
+      await serviceNow.createComment(
+        '123',
+        {
+          commentId: '456',
+          version: 'WzU3LDFd',
+          comment: 'A second comment',
+          createdAt: '2020-03-13T08:34:53.450Z',
+          createdBy: { fullName: 'Elastic User', username: 'elastic' },
+          updatedAt: null,
+          updatedBy: null,
+        },
+        'comment'
+      );
+    } catch (error) {
+      expect(error.message).toEqual(
+        '[Action][ServiceNow]: Unable to create comment at incident with id 123. Error: Bad request.'
+      );
     }
   });
 });

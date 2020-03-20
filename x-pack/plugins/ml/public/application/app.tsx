@@ -9,6 +9,8 @@ import ReactDOM from 'react-dom';
 
 import { AppMountParameters, CoreStart } from 'kibana/public';
 
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
@@ -23,6 +25,8 @@ interface AppProps {
   deps: MlDependencies;
   appMountParams: AppMountParameters;
 }
+
+const localStorage = new Storage(window.localStorage);
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   setDependencyCache({
@@ -41,6 +45,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
+    urlGenerators: deps.share.urlGenerators,
   });
 
   const mlLicense = setLicenseCache(deps.licensing);
@@ -61,6 +66,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     appName: 'ML',
     data: deps.data,
     security: deps.security,
+    storage: localStorage,
     ...coreStart,
   };
 
