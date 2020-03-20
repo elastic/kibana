@@ -39,7 +39,12 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 import { LoadingPanel } from '../loading_panel';
-import { getColumnData, ACTUAL_CLASS_ID } from './column_data';
+import {
+  getColumnData,
+  ACTUAL_CLASS_ID,
+  MAX_COLUMNS,
+  getTrailingControlColumns,
+} from './column_data';
 
 const defaultPanelWidth = 500;
 
@@ -57,6 +62,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
   const [columns, setColumns] = useState<any>([]);
   const [columnsData, setColumnsData] = useState<any>([]);
+  const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
   const [popoverContents, setPopoverContents] = useState<any>([]);
   const [docsCount, setDocsCount] = useState<null | number>(null);
   const [error, setError] = useState<null | string>(null);
@@ -169,7 +175,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
           const gridItem = columnData[rowIndex];
 
           if (gridItem !== undefined && colId !== ACTUAL_CLASS_ID) {
-            // const count = colId === gridItem.actual_class ? gridItem.count : gridItem.error_count;
             // @ts-ignore
             const count = gridItem[colId];
             return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
@@ -234,6 +239,15 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+
+  const showTrailingColumns = columnsData.length > MAX_COLUMNS;
+  const extraColumns = columnsData.length - MAX_COLUMNS;
+  const shownColumns =
+    showTrailingColumns === true && showFullColumns === false
+      ? columns.slice(0, MAX_COLUMNS + 1)
+      : columns;
+  const rowCount =
+    showTrailingColumns === true && showFullColumns === false ? MAX_COLUMNS : columnsData.length;
 
   return (
     <EuiPanel
@@ -326,7 +340,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             )}
             {/* BEGIN TABLE ELEMENTS */}
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" style={{ paddingLeft: '10%', paddingRight: '10%' }}>
+              <EuiFlexGroup gutterSize="s" style={{ paddingLeft: '5%', paddingRight: '5%' }}>
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
                     className="mlDataFrameAnalyticsClassification__actualLabel"
@@ -360,14 +374,26 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                           <EuiDataGrid
                             data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
                             aria-label="Classification confusion matrix"
-                            columns={columns}
+                            columns={shownColumns}
                             columnVisibility={{ visibleColumns, setVisibleColumns }}
-                            rowCount={columnsData.length}
+                            rowCount={rowCount}
                             renderCellValue={renderCellValue}
                             inMemory={{ level: 'sorting' }}
-                            toolbarVisibility={false}
+                            // @ts-ignore
+                            toolbarVisibility={{
+                              showColumnSelector: { allowReorder: false, allowHide: true },
+                              showStyleSelector: true,
+                              showFullScreenSelector: false,
+                              showSortSelector: false,
+                            }}
                             popoverContents={popoverContents}
                             gridStyle={{ rowHover: 'none' }}
+                            // @ts-ignore
+                            trailingControlColumns={
+                              showTrailingColumns === true && showFullColumns === false
+                                ? getTrailingControlColumns(extraColumns, setShowFullColumns)
+                                : undefined
+                            }
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>

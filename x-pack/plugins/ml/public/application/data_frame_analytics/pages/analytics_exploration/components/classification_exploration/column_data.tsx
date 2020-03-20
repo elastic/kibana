@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
 import { ConfusionMatrix } from '../../../../common/analytics';
 
 interface ColumnData {
@@ -16,6 +17,7 @@ interface ColumnData {
 }
 
 export const ACTUAL_CLASS_ID = 'actual_class';
+export const MAX_COLUMNS = 6;
 
 export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
   const colData: Partial<ColumnData[]> = [];
@@ -45,4 +47,39 @@ export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
   });
 
   return { columns, columnData: colData };
+}
+
+export function getTrailingControlColumns(numColumns: number, setShowFullColumns: any) {
+  return [
+    {
+      id: 'actions',
+      width: '60',
+      headerCellRender: () => `${numColumns} more`,
+      rowCellRender: function RowCellRender() {
+        const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+        return (
+          <EuiPopover
+            isOpen={isPopoverOpen}
+            anchorPosition="upCenter"
+            button={
+              <EuiButtonIcon
+                aria-label="show actions"
+                iconType="boxesHorizontal"
+                color="text"
+                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+              />
+            }
+            closePopover={() => setIsPopoverOpen(false)}
+            ownFocus={true}
+          >
+            <EuiButtonEmpty onClick={() => setShowFullColumns(true)}>
+              <EuiText size="s" grow={false} textAlign="center">
+                Show all columns
+              </EuiText>
+            </EuiButtonEmpty>
+          </EuiPopover>
+        );
+      },
+    },
+  ];
 }
