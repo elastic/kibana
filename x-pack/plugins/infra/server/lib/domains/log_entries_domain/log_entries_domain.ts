@@ -131,14 +131,14 @@ export class InfraLogEntriesDomain {
 
     const entries = documents.map(doc => {
       return {
-        id: doc.gid,
-        cursor: doc.key,
+        id: doc.id,
+        cursor: doc.cursor,
         columns: configuration.logColumns.map(
           (column): LogColumn => {
             if ('timestampColumn' in column) {
               return {
                 columnId: column.timestampColumn.id,
-                timestamp: doc.key.time,
+                timestamp: doc.cursor.time,
               };
             } else if ('messageColumn' in column) {
               return {
@@ -290,10 +290,10 @@ export interface LogEntriesAdapter {
 export type LogEntryQuery = JsonObject;
 
 export interface LogEntryDocument {
+  id: string;
   fields: Fields;
-  gid: string;
   highlights: Highlights;
-  key: TimeKey;
+  cursor: TimeKey;
 }
 
 export interface LogSummaryBucket {
