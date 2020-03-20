@@ -124,20 +124,31 @@ export function Cytoscape({
   // is required and can trigger rendering when changed.
   const divStyle = { ...style, height };
 
-  const dataHandler = useCallback<cytoscape.EventHandler>(
-    event => {
+  const resetConnectedEdgeStyle = useCallback(
+    (node?: cytoscape.NodeSingular) => {
       if (cy) {
         cy.edges().removeClass('highlight');
 
-        if (serviceName) {
-          const focusedNode = cy.getElementById(serviceName);
-          focusedNode.connectedEdges().addClass('highlight');
+        if (node) {
+          node.connectedEdges().addClass('highlight');
         }
+      }
+    },
+    [cy]
+  );
 
-        // Add the "primary" class to the node if its id matches the serviceName.
-        if (cy.nodes().length > 0 && serviceName) {
-          cy.nodes().removeClass('primary');
-          cy.getElementById(serviceName).addClass('primary');
+  const dataHandler = useCallback<cytoscape.EventHandler>(
+    event => {
+      if (cy) {
+        if (serviceName) {
+          resetConnectedEdgeStyle(cy.getElementById(serviceName));
+          // Add the "primary" class to the node if its id matches the serviceName.
+          if (cy.nodes().length > 0) {
+            cy.nodes().removeClass('primary');
+            cy.getElementById(serviceName).addClass('primary');
+          }
+        } else {
+          resetConnectedEdgeStyle();
         }
         if (event.cy.elements().length > 0) {
           const selectedRoots = selectRoots(event.cy);
@@ -156,7 +167,7 @@ export function Cytoscape({
         }
       }
     },
-    [cy, serviceName, height, width]
+    [cy, resetConnectedEdgeStyle, serviceName, height, width]
   );
 
   // Trigger a custom "data" event when data changes
@@ -177,12 +188,20 @@ export function Cytoscape({
       event.target.removeClass('hover');
       event.target.connectedEdges().removeClass('nodeHover');
     };
+    const selectHandler: cytoscape.EventHandler = event => {
+      resetConnectedEdgeStyle(event.target);
+    };
+    const unselectHandler: cytoscape.EventHandler = event => {
+      resetConnectedEdgeStyle();
+    };
 
     if (cy) {
       cy.on('data', dataHandler);
       cy.ready(dataHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
       cy.on('mouseout', 'edge, node', mouseoutHandler);
+      cy.on('select', 'node', selectHandler);
+      cy.on('unselect', 'node', unselectHandler);
     }
 
     return () => {
@@ -196,7 +215,7 @@ export function Cytoscape({
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
       }
     };
-  }, [cy, dataHandler, serviceName]);
+  }, [cy, dataHandler, resetConnectedEdgeStyle, serviceName]);
 
   return (
     <CytoscapeContext.Provider value={cy}>
