@@ -7,7 +7,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { hasNewMLJobSelector, isMLJobCreatingSelector } from '../../../state/selectors';
+import {
+  canCreateMLJobSelector,
+  hasNewMLJobSelector,
+  isMLJobCreatingSelector,
+} from '../../../state/selectors';
 import { createMLJobAction, getExistingMLJobAction } from '../../../state/actions';
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
@@ -68,6 +72,8 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
 
   const createMLJob = () => dispatch(createMLJobAction.get({ monitorId: monitorId as string }));
 
+  const canCreateMLJob = useSelector(canCreateMLJobSelector);
+
   const [isCreatingJob, setIsCreatingJob] = useState(false);
 
   useEffect(() => {
@@ -120,6 +126,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
   return (
     <>
       <MLFlyoutView
+        canCreateMLJob={canCreateMLJob}
         isCreatingJob={isMLJobCreating}
         onClickCreate={createAnomalyJob}
         onClose={onClose}

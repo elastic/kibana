@@ -27,9 +27,10 @@ interface Props {
   isCreatingJob: boolean;
   onClickCreate: () => void;
   onClose: () => void;
+  canCreateMLJob: boolean;
 }
 
-export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose }: Props) {
+export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateMLJob }: Props) {
   const { basePath, license } = useContext(UptimeSettingsContext);
 
   const isLoadingMLJob = false;
@@ -71,7 +72,7 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose }: Props) {
               onClick={() => onClickCreate()}
               fill
               isLoading={isCreatingJob}
-              disabled={isCreatingJob || isLoadingMLJob || !hasPlatinumLicense}
+              disabled={isCreatingJob || isLoadingMLJob || !hasPlatinumLicense || !canCreateMLJob}
             >
               {labels.CREATE_NEW_JOB}
             </EuiButton>

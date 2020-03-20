@@ -25,17 +25,25 @@ export function fetchEffectFactory<T, R, S, F>(
   fail: (error: IHttpFetchError) => Action<F>
 ) {
   return function*(action: Action<T>) {
-    const {
-      payload: { ...params },
-    } = action;
-    const response = yield call(fetch, params);
-    if (response instanceof Error) {
-      // eslint-disable-next-line no-console
-      console.error(response);
+    try {
+      const {
+        payload: { ...params },
+      } = action;
+      const response = yield call(fetch, params);
+      if (response instanceof Error) {
+        // eslint-disable-next-line no-console
+        console.error(response);
 
-      yield put(fail(response as IHttpFetchError));
-    } else {
-      yield put(success(response));
+        yield put(fail(response as IHttpFetchError));
+      } else {
+        yield put(success(response));
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      yield put(fail(error as IHttpFetchError));
     }
   };
 }
+
+// export function fetchEffectFactory<T, R>(fetch: (request: T) => Promise<R>): ;

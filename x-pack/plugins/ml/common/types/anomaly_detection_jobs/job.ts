@@ -85,3 +85,5 @@ export interface CustomRule {
   scope: object;
   conditions: object;
 }
+
+export { JobStat, JobExistResult } from '../../../server/models/data_recognizer/data_recognizer';

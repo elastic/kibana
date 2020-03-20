@@ -6,16 +6,28 @@
 
 import { createAction } from 'redux-actions';
 import { createAsyncAction } from './utils';
+import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
+import { AnomaliesTableRecord } from '../../../../../../plugins/ml/common/types/anomalies';
+import { JobExistResult } from '../../../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { CreateMLJobSuccess, DeleteJobResults, MonitorIdParam } from './types';
 
 export const resetMLState = createAction('RESET_ML_STATE');
 
-export const getExistingMLJobAction = createAsyncAction<{ monitorId: string }, any>(
+export const getExistingMLJobAction = createAsyncAction<MonitorIdParam, JobExistResult>(
   'GET_EXISTING_ML_JOB'
 );
 
-export const createMLJobAction = createAsyncAction<any, any>('CREATE_ML_JOB');
+export const createMLJobAction = createAsyncAction<MonitorIdParam, CreateMLJobSuccess | null>(
+  'CREATE_ML_JOB'
+);
 
-export const deleteMLJobAction = createAsyncAction<any, any>('DELETE_ML_JOB');
+export const getMLCapabilitiesAction = createAsyncAction<any, PrivilegesResponse>(
+  'GET_ML_CAPABILITIES'
+);
+
+export const deleteMLJobAction = createAsyncAction<MonitorIdParam, DeleteJobResults>(
+  'DELETE_ML_JOB'
+);
 
 export interface AnomalyRecordsParams {
   dateStart: number;
@@ -24,6 +36,11 @@ export interface AnomalyRecordsParams {
   anomalyThreshold?: number;
 }
 
-export const getAnomalyRecordsAction = createAsyncAction<AnomalyRecordsParams, any>(
+export interface AnomalyRecords {
+  anomalies: AnomaliesTableRecord[];
+  interval: string;
+}
+
+export const getAnomalyRecordsAction = createAsyncAction<AnomalyRecordsParams, AnomalyRecords>(
   'GET_ANOMALY_RECORDS'
 );

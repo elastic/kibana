@@ -5,9 +5,12 @@
  */
 
 import { createAction } from 'redux-actions';
-import { AsyncAction } from './types';
+import { AsyncAction, AsyncAction1 } from './types';
 import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 
+export function createAsyncAction<Payload, SuccessPayload>(
+  actionStr: string
+): AsyncAction1<Payload, SuccessPayload>;
 export function createAsyncAction<Payload, SuccessPayload>(
   actionStr: string
 ): AsyncAction<Payload, SuccessPayload> {

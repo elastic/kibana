@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createSelector } from 'reselect';
 import { AppState } from '../../state';
 
 // UI Selectors
@@ -37,6 +38,24 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
     esKuery: ui.esKuery,
   };
 };
+
+const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
+
+export const hasMLFeatureAvailable = createSelector(
+  mlCapabilitiesSelector,
+  mlCapabilities =>
+    mlCapabilities?.isPlatinumOrTrialLicense && mlCapabilities?.mlFeatureEnabledInSpace
+);
+
+export const canCreateMLJobSelector = createSelector(
+  mlCapabilitiesSelector,
+  mlCapabilities => mlCapabilities?.capabilities.canCreateJob
+);
+
+export const canDeleteMLJobSelector = createSelector(
+  mlCapabilitiesSelector,
+  mlCapabilities => mlCapabilities?.capabilities.canDeleteJob
+);
 
 export const hasMLJobSelector = ({ ml }: AppState) => ml.mlJob;
 

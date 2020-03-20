@@ -5,21 +5,27 @@
  */
 
 import moment from 'moment';
-import { API_URLS, INDEX_NAMES, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
-import { AnomalyRecordsParams } from '../actions';
 import { apiService } from './utils';
+import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
+import { API_URLS, INDEX_NAMES, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
+import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
+import { CreateMLJobSuccess, DeleteJobResults, MonitorIdParam } from '../actions/types';
+import { JobExistResult } from '../../../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { DataRecognizerConfigResponse } from '../../../../../../plugins/ml/common/types/modules';
 
 export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`;
 
-export const getMLCapabilities = async () => {
+export const getMLCapabilities = async (): Promise<PrivilegesResponse> => {
   return await apiService.get(API_URLS.ML_CAPABILITIES);
 };
 
-export const getExistingJobs = async () => {
+export const getExistingJobs = async (): Promise<JobExistResult> => {
   return await apiService.get(API_URLS.ML_MODULE_JOBS + ML_MODULE_ID);
 };
 
-export const createMLJob = async ({ monitorId }: { monitorId: string }) => {
+export const createMLJob = async ({
+  monitorId,
+}: MonitorIdParam): Promise<CreateMLJobSuccess | null> => {
   const url = API_URLS.ML_SETUP_MODULE + ML_MODULE_ID;
 
   const data = {
@@ -43,17 +49,18 @@ export const createMLJob = async ({ monitorId }: { monitorId: string }) => {
     },
   };
 
-  const response = await apiService.post(url, data);
-  if (response?.jobs?.[0]?.id === getMLJobId(monitorId) && response?.jobs?.[0]?.success === true) {
+  const response: DataRecognizerConfigResponse = await apiService.post(url, data);
+  if (response?.jobs?.[0]?.id === getMLJobId(monitorId) && response?.jobs?.[0]?.success) {
     return {
       count: 1,
+      jobId: response?.jobs?.[0]?.id,
     };
   } else {
     return null;
   }
 };
 
-export const deleteMLJob = async ({ monitorId }: { monitorId: string }) => {
+export const deleteMLJob = async ({ monitorId }: MonitorIdParam): Promise<DeleteJobResults> => {
   const data = { jobIds: [getMLJobId(monitorId)] };
 
   return await apiService.post(API_URLS.ML_DELETE_JOB, data);
@@ -64,25 +71,18 @@ export const fetchAnomalyRecords = async ({
   dateEnd,
   listOfMonitorIds,
   anomalyThreshold,
-}: AnomalyRecordsParams) => {
-  try {
-    const data = {
-      jobIds: listOfMonitorIds.map((monitorId: string) => getMLJobId(monitorId)),
-      criteriaFields: [],
-      influencers: [],
-      aggregationInterval: 'auto',
-      threshold: anomalyThreshold ?? 25,
-      earliestMs: dateStart,
-      latestMs: dateEnd,
-      dateFormatTz: 'Europe/Berlin',
-      maxRecords: 500,
-      maxExamples: 10,
-    };
-    return apiService.post(API_URLS.ML_ANOMALIES_RESULT, data);
-  } catch (error) {
-    if (error?.response?.status === 404) {
-      return null;
-    }
-    throw error;
-  }
+}: AnomalyRecordsParams): Promise<AnomalyRecords> => {
+  const data = {
+    jobIds: listOfMonitorIds.map((monitorId: string) => getMLJobId(monitorId)),
+    criteriaFields: [],
+    influencers: [],
+    aggregationInterval: 'auto',
+    threshold: anomalyThreshold ?? 25,
+    earliestMs: dateStart,
+    latestMs: dateEnd,
+    dateFormatTz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    maxRecords: 500,
+    maxExamples: 10,
+  };
+  return apiService.post(API_URLS.ML_ANOMALIES_RESULT, data);
 };

@@ -73,14 +73,14 @@ export interface RecognizeResult {
   logo: { icon: string } | null;
 }
 
-interface JobStat {
+export interface JobStat {
   id: string;
   earliestTimestampMs: number;
   latestTimestampMs: number;
   latestResultsTimestampMs: number;
 }
 
-interface JobExistResult {
+export interface JobExistResult {
   jobsExist: boolean;
   jobs: JobStat[];
 }

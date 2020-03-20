@@ -11,16 +11,22 @@ import {
   getAnomalyRecordsAction,
   deleteMLJobAction,
   resetMLState,
+  AnomalyRecords,
+  getMLCapabilitiesAction,
 } from '../actions';
 import { getAsyncInitialState, handleAsyncAction } from './utils';
 import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 import { AsyncInitialState } from './types';
+import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
+import { CreateMLJobSuccess, DeleteJobResults } from '../actions/types';
+import { JobExistResult } from '../../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 export interface MLJobState {
-  mlJob: AsyncInitialState<any>;
-  createJob: AsyncInitialState<any>;
-  deleteJob: AsyncInitialState<any>;
-  anomalies: AsyncInitialState<any>;
+  mlJob: AsyncInitialState<JobExistResult>;
+  createJob: AsyncInitialState<CreateMLJobSuccess>;
+  deleteJob: AsyncInitialState<DeleteJobResults>;
+  anomalies: AsyncInitialState<AnomalyRecords>;
+  mlCapabilities: AsyncInitialState<PrivilegesResponse>;
 }
 
 const initialState: MLJobState = {
@@ -28,6 +34,7 @@ const initialState: MLJobState = {
   createJob: getAsyncInitialState(),
   deleteJob: getAsyncInitialState(),
   anomalies: getAsyncInitialState(),
+  mlCapabilities: getAsyncInitialState(),
 };
 
 type Payload = IHttpFetchError;
@@ -35,6 +42,7 @@ type Payload = IHttpFetchError;
 export const mlJobsReducer = handleActions<MLJobState>(
   {
     ...handleAsyncAction<MLJobState, Payload>('mlJob', getExistingMLJobAction),
+    ...handleAsyncAction<MLJobState, Payload>('mlCapabilities', getMLCapabilitiesAction),
     ...handleAsyncAction<MLJobState, Payload>('createJob', createMLJobAction),
     ...handleAsyncAction<MLJobState, Payload>('deleteJob', deleteMLJobAction),
     ...handleAsyncAction<MLJobState, Payload>('anomalies', getAnomalyRecordsAction),

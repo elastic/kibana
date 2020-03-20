@@ -6,13 +6,8 @@
 
 import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 
-export interface IReducerState {
-  errors: IHttpFetchError[];
-  loading: boolean;
-}
-
-export interface AsyncInitialState<StateType> {
-  data: StateType;
+export interface AsyncInitialState<ReduceStateType> {
+  data: ReduceStateType | null;
   loading: boolean;
   error?: IHttpFetchError | null;
 }

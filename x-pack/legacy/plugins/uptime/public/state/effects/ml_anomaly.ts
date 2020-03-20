@@ -6,13 +6,20 @@
 
 import { takeLatest } from 'redux-saga/effects';
 import {
+  getMLCapabilitiesAction,
   getExistingMLJobAction,
   createMLJobAction,
   getAnomalyRecordsAction,
   deleteMLJobAction,
 } from '../actions';
 import { fetchEffectFactory } from './fetch_effect';
-import { getExistingJobs, createMLJob, fetchAnomalyRecords, deleteMLJob } from '../api/ml_anomaly';
+import {
+  getExistingJobs,
+  createMLJob,
+  fetchAnomalyRecords,
+  deleteMLJob,
+  getMLCapabilities,
+} from '../api/ml_anomaly';
 
 export function* fetchMLJobEffect() {
   yield takeLatest(
@@ -34,5 +41,13 @@ export function* fetchMLJobEffect() {
   yield takeLatest(
     deleteMLJobAction.get,
     fetchEffectFactory(deleteMLJob, deleteMLJobAction.success, deleteMLJobAction.fail)
+  );
+  yield takeLatest(
+    getMLCapabilitiesAction.get,
+    fetchEffectFactory(
+      getMLCapabilities,
+      getMLCapabilitiesAction.success,
+      getMLCapabilitiesAction.fail
+    )
   );
 }

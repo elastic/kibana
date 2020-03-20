@@ -11,6 +11,8 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { MachineLearningFlyout } from './ml_flyout_container';
 import {
+  canDeleteMLJobSelector,
+  hasMLFeatureAvailable,
   hasMLJobSelector,
   isMLJobDeletedSelector,
   isMLJobDeletingSelector,
@@ -21,6 +23,7 @@ import { UptimeRefreshContext } from '../../../contexts';
 import { getMLJobId } from '../../../state/api/ml_anomaly';
 import * as labels from './translations';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { JobStat } from '../../../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 export const MLIntegrationComponent = () => {
   const [isMlFlyoutOpen, setIsMlFlyoutOpen] = useState(false);
@@ -37,16 +40,22 @@ export const MLIntegrationComponent = () => {
 
   const { data } = useSelector(hasMLJobSelector);
 
-  const hasMLJob =
-    !!data?.jobsExist && data.jobs.find((job: any) => job.id === getMLJobId(monitorId as string));
+  const isMLAvailable = useSelector(hasMLFeatureAvailable);
+  const canDeleteMLJob = useSelector(canDeleteMLJobSelector);
 
-  const deleteMLJob = () => dispatch(deleteMLJobAction.get({ monitorId }));
+  const hasMLJob =
+    !!data?.jobsExist &&
+    data.jobs.find((job: JobStat) => job.id === getMLJobId(monitorId as string));
+
+  const deleteMLJob = () => dispatch(deleteMLJobAction.get({ monitorId: monitorId as string }));
   const isMLJobDeleting = useSelector(isMLJobDeletingSelector);
   const { data: jobDeletionSuccess } = useSelector(isMLJobDeletedSelector);
 
   useEffect(() => {
-    dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
-  }, [dispatch, monitorId]);
+    if (isMLAvailable) {
+      dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
+    }
+  }, [dispatch, isMLAvailable, monitorId, lastRefresh]);
 
   useEffect(() => {
     if (isConfirmDeleteJobOpen && jobDeletionSuccess?.[getMLJobId(monitorId as string)]?.deleted) {
@@ -73,10 +82,6 @@ export const MLIntegrationComponent = () => {
     dispatch,
   ]);
 
-  useEffect(() => {
-    dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
-  }, [dispatch, lastRefresh, monitorId]);
-
   const onButtonClick = () => {
     setIsMlFlyoutOpen(true);
   };
@@ -95,6 +100,7 @@ export const MLIntegrationComponent = () => {
         iconType="machineLearningApp"
         iconSide="left"
         onClick={hasMLJob ? confirmDeleteMLJob : onButtonClick}
+        disabled={hasMLJob && !canDeleteMLJob}
       >
         {hasMLJob ? 'Disable Anomaly Detection' : 'Enable Anomaly Detection'}
       </EuiButtonEmpty>

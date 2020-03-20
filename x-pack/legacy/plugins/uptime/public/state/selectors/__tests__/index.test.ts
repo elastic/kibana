@@ -67,6 +67,7 @@ describe('state selectors', () => {
       },
       createJob: { data: null, loading: false },
       deleteJob: { data: null, loading: false },
+      mlCapabilities: { data: null, loading: false },
       anomalies: {
         data: null,
         loading: false,

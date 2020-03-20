@@ -36,3 +36,5 @@ export interface AnomalyRecordDoc {
   // TODO provide the causes resource interface.
   causes?: any[];
 }
+
+export { AnomaliesTableRecord } from '../../server/models/results_service/build_anomaly_table_items';
