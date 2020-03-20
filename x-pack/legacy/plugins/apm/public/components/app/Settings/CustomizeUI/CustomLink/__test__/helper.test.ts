@@ -157,7 +157,7 @@ describe('Custom link helper', () => {
       });
     });
 
-    it('returnes error when transaction is not defined', () => {
+    it('returns error when transaction is not defined', () => {
       const expectedResult = {
         error:
           "We couldn't find a matching transaction document based on the defined filters.",
