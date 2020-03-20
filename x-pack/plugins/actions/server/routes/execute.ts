@@ -15,6 +15,7 @@ import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from
 
 import { ActionExecutorContract } from '../lib';
 import { ActionTypeExecutorResult } from '../types';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -31,7 +32,7 @@ export const executeActionRoute = (
 ) => {
   router.post(
     {
-      path: '/api/action/{id}/_execute',
+      path: `${BASE_ACTION_API_PATH}/{id}/_execute`,
       validate: {
         body: bodySchema,
         params: paramSchema,
