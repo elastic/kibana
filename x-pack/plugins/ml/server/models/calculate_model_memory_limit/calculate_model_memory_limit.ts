@@ -5,6 +5,7 @@
  */
 
 import numeral from '@elastic/numeral';
+import { pick } from 'lodash';
 import { APICaller } from 'kibana/server';
 import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
@@ -34,92 +35,182 @@ export interface ModelMemoryEstimate {
 /**
  * Retrieves overall and max bucket cardinalities.
  */
-async function getCardinalities(
-  callAsCurrentUser: APICaller,
-  analysisConfig: AnalysisConfig,
-  indexPattern: string,
-  query: any,
-  timeFieldName: string,
-  earliestMs: number,
-  latestMs: number
-): Promise<{
-  overallCardinality: { [key: string]: number };
-  maxBucketCardinality: { [key: string]: number };
-}> {
-  /**
-   * Fields not involved in cardinality check
-   */
-  const excludedKeywords = new Set<string>(
+const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
+  const cardinalityCache = new Map<
+    string,
+    {
+      overallCardinality: { [field: string]: number };
+      maxBucketCardinality: { [field: string]: number };
+    }
+  >();
+
+  const updateCache = (
+    indexPattern: string,
+    timeField: string,
+    earliestMs: number,
+    latestMs: number,
+    update: {
+      overallCardinality?: { [field: string]: number };
+      maxBucketCardinality?: { [field: string]: number };
+    }
+  ): void => {
+    const cacheKey = indexPattern + timeField + earliestMs + latestMs;
+    const cachedValues = cardinalityCache.get(cacheKey);
+    if (cachedValues === undefined) {
+      cardinalityCache.set(cacheKey, {
+        overallCardinality: update.overallCardinality ?? {},
+        maxBucketCardinality: update.maxBucketCardinality ?? {},
+      });
+      return;
+    }
+
+    Object.assign(cachedValues.overallCardinality, update.overallCardinality);
+    Object.assign(cachedValues.maxBucketCardinality, update.maxBucketCardinality);
+  };
+
+  const getCacheValue = (
+    indexPattern: string,
+    timeField: string,
+    earliestMs: number,
+    latestMs: number,
+    overallCardinalityFields: string[],
+    maxBucketCardinalityFields: string[]
+  ): {
+    overallCardinality: { [field: string]: number };
+    maxBucketCardinality: { [field: string]: number };
+  } | null => {
+    const cacheKey = indexPattern + timeField + earliestMs + latestMs;
+    const cached = cardinalityCache.get(cacheKey);
+    if (!cached) {
+      return null;
+    }
+
+    const overallCardinality = pick(cached.overallCardinality, overallCardinalityFields);
+    const maxBucketCardinality = pick(cached.maxBucketCardinality, maxBucketCardinalityFields);
+
+    return {
+      overallCardinality,
+      maxBucketCardinality,
+    };
+  };
+
+  return async (
+    analysisConfig: AnalysisConfig,
+    indexPattern: string,
+    query: any,
+    timeFieldName: string,
+    earliestMs: number,
+    latestMs: number
+  ): Promise<{
+    overallCardinality: { [key: string]: number };
+    maxBucketCardinality: { [key: string]: number };
+  }> => {
     /**
-     * The keyword which is used to mean the output of categorization,
-     * so it will have cardinality zero in the actual input data.
+     * Fields not involved in cardinality check
      */
-    'mlcategory'
-  );
-
-  const fieldsService = fieldsServiceProvider(callAsCurrentUser);
-
-  const { detectors, influencers, bucket_span: bucketSpan } = analysisConfig;
-
-  let overallCardinality = {};
-  let maxBucketCardinality = {};
-  const overallCardinalityFields: Set<string> = detectors.reduce(
-    (
-      acc,
-      {
-        by_field_name: byFieldName,
-        partition_field_name: partitionFieldName,
-        over_field_name: overFieldName,
-      }
-    ) => {
-      [byFieldName, partitionFieldName, overFieldName]
-        .filter(field => field !== undefined && field !== '' && !excludedKeywords.has(field))
-        .forEach(key => {
-          acc.add(key as string);
-        });
-      return acc;
-    },
-    new Set<string>()
-  );
-
-  const maxBucketFieldCardinalities: string[] = influencers.filter(
-    influencerField =>
-      typeof influencerField === 'string' &&
-      !excludedKeywords.has(influencerField) &&
-      !!influencerField &&
-      !overallCardinalityFields.has(influencerField)
-  ) as string[];
-
-  if (overallCardinalityFields.size > 0) {
-    overallCardinality = await fieldsService.getCardinalityOfFields(
-      indexPattern,
-      [...overallCardinalityFields],
-      query,
-      timeFieldName,
-      earliestMs,
-      latestMs
+    const excludedKeywords = new Set<string>(
+      /**
+       * The keyword which is used to mean the output of categorization,
+       * so it will have cardinality zero in the actual input data.
+       */
+      'mlcategory'
     );
-  }
 
-  if (maxBucketFieldCardinalities.length > 0) {
-    maxBucketCardinality = await fieldsService.getMaxBucketCardinalities(
+    const fieldsService = fieldsServiceProvider(callAsCurrentUser);
+
+    const { detectors, influencers, bucket_span: bucketSpan } = analysisConfig;
+
+    let overallCardinality = {};
+    let maxBucketCardinality = {};
+
+    // Get fields required for the model memory estimation
+    const overallCardinalityFields: Set<string> = detectors.reduce(
+      (
+        acc,
+        {
+          by_field_name: byFieldName,
+          partition_field_name: partitionFieldName,
+          over_field_name: overFieldName,
+        }
+      ) => {
+        [byFieldName, partitionFieldName, overFieldName]
+          .filter(field => field !== undefined && field !== '' && !excludedKeywords.has(field))
+          .forEach(key => {
+            acc.add(key as string);
+          });
+        return acc;
+      },
+      new Set<string>()
+    );
+
+    const maxBucketFieldCardinalities: string[] = influencers.filter(
+      influencerField =>
+        !!influencerField &&
+        !excludedKeywords.has(influencerField) &&
+        !overallCardinalityFields.has(influencerField)
+    ) as string[];
+
+    // Check if some of the values are already cached
+    const cachedValues = getCacheValue(
       indexPattern,
-      maxBucketFieldCardinalities,
-      query,
       timeFieldName,
       earliestMs,
       latestMs,
-      bucketSpan
+      [...overallCardinalityFields],
+      maxBucketFieldCardinalities
     );
-  }
+    overallCardinality = cachedValues?.overallCardinality ?? {};
+    maxBucketCardinality = cachedValues?.maxBucketCardinality ?? {};
 
-  return {
-    overallCardinality,
-    maxBucketCardinality,
+    const overallCardinalityFieldsToFetch = [...overallCardinalityFields].filter(
+      v => !overallCardinality.hasOwnProperty(v)
+    );
+    if (overallCardinalityFieldsToFetch.length > 0) {
+      const overallCardinalitResp = await fieldsService.getCardinalityOfFields(
+        indexPattern,
+        overallCardinalityFieldsToFetch,
+        query,
+        timeFieldName,
+        earliestMs,
+        latestMs
+      );
+      overallCardinality = { ...overallCardinality, ...overallCardinalitResp };
+      // update cache
+      updateCache(indexPattern, timeFieldName, earliestMs, latestMs, {
+        overallCardinality: overallCardinalitResp,
+      });
+    }
+
+    const maxBucketCardinalityFeildToFetch = maxBucketFieldCardinalities.filter(
+      v => !maxBucketCardinality.hasOwnProperty(v)
+    );
+    if (maxBucketCardinalityFeildToFetch.length > 0) {
+      const maxBucketCardinalityResp = await fieldsService.getMaxBucketCardinalities(
+        indexPattern,
+        maxBucketCardinalityFeildToFetch,
+        query,
+        timeFieldName,
+        earliestMs,
+        latestMs,
+        bucketSpan
+      );
+      maxBucketCardinality = { ...maxBucketCardinality, ...maxBucketCardinalityResp };
+      // update cache
+      updateCache(indexPattern, timeFieldName, earliestMs, latestMs, {
+        maxBucketCardinality: maxBucketCardinalityResp,
+      });
+    }
+
+    return {
+      overallCardinality,
+      maxBucketCardinality,
+    };
   };
-}
+};
 
 export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) {
+  const getCardinalities = cardinalityCheckProvider(callAsCurrentUser);
+
   /**
    * Retrieves an estimated size of the model memory limit used in the job config
    * based on the cardinality of the fields being used to split the data
@@ -145,7 +236,6 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
     }
 
     const { overallCardinality, maxBucketCardinality } = await getCardinalities(
-      callAsCurrentUser,
       analysisConfig,
       indexPattern,
       query,
