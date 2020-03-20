@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SyntheticEvent, useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiBasicTable, EuiText, EuiTableFieldDataColumnType, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,6 +24,7 @@ import { PolicyListAction } from '../../store/policy_list';
 import { PolicyData } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { PageView } from '../../components/page_view';
+import { LinkToApp } from '../../components/link_to_app';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -134,18 +135,13 @@ export const PolicyList = React.memo(() => {
         }),
         render(version: string) {
           return (
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiLink
+            <LinkToApp
+              appId="ingestManager"
+              appPath={`#/configs/${version}`}
               href={`${services.application.getUrlForApp('ingestManager')}#/configs/${version}`}
-              onClick={(ev: SyntheticEvent) => {
-                ev.preventDefault();
-                services.application.navigateToApp('ingestManager', {
-                  path: `#/configs/${version}`,
-                });
-              }}
             >
               {version}
-            </EuiLink>
+            </LinkToApp>
           );
         },
       },

@@ -25,14 +25,19 @@ type NavigateToAppHandlerProps = Parameters<ApplicationStart['navigateToApp']>;
  * return <EuiLink onClick={handleOnClick}>See configs</EuiLink>
  */
 export const useNavigateToAppEventHandler = (
+  /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
   appId: NavigateToAppHandlerProps[0],
+
+  /** Options to pass along to the app route */
   options?: NavigateToAppHandlerProps[1]
 ): ((ev: SyntheticEvent) => void) => {
   const { services } = useKibana();
   const { path, state } = options || {};
   return useMemo(() => {
     return (ev: SyntheticEvent) => {
-      ev.preventDefault();
+      if (!ev.isDefaultPrevented()) {
+        ev.preventDefault();
+      }
       services.application.navigateToApp(appId, { path, state });
     };
   }, [appId, path, services.application, state]);
