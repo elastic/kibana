@@ -72,20 +72,6 @@ export interface Drilldown<
   getDisplayName: () => string;
 
   /**
-   * Whether this drilldown should be considered for execution given `config`
-   * and `context`. When multiple drilldowns are attached to the same trigger
-   * user is presented with a context menu to pick one drilldown for execute. If
-   * this method returns `true` this trigger will appear in the context menu
-   * list, if `false`, it will not be presented to the user. If `doExecute` is
-   * not implemented, this drilldown will always be show to the user.
-   *
-   * @param config Config object that user configured this drilldown with.
-   * @param context Object that represents context in which the underlying
-   *  `UIAction` of this drilldown is being executed in.
-   */
-  doExecute?(config: Config, context: ExecutionContext): Promise<boolean>;
-
-  /**
    * Implements the "navigation" action of the drilldown. This happens when
    * user clicks something in the UI that executes a trigger to which this
    * drilldown was attached.
