@@ -2,7 +2,7 @@
   "type": "index",
   "value": {
     "aliases": {
-      "heartbeat-8.0.0": {
+      "heartbeat-8.0.0-full": {
         "is_write_index": true
       }
     },
