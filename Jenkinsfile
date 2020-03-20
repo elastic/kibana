@@ -6,14 +6,6 @@ kibanaLibrary.load()
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
   githubPr.withDefaultPrComments {
     catchError {
-      whenChanged('vars/') {
-        print "Testing 1"
-      }
-
-      whenChanged(regex: /^vars\//) {
-        print "Testing 2"
-      }
-
       retryable.enable()
       parallel([
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
