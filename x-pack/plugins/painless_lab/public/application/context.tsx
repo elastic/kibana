@@ -10,7 +10,8 @@ import { HttpSetup } from 'src/core/public';
 import { Links } from '../links';
 
 import { initialState, Store } from './store';
-import { PAINLESS_LAB_KEY } from './constants';
+
+const PAINLESS_LAB_KEY = 'painlessLabState';
 
 interface ContextValue {
   state: Store;

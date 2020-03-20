@@ -17,7 +17,11 @@ export interface Store {
 export const initialState = {
   context: painlessContextOptions[0].value,
   code: exampleScript,
-  parameters: '',
+  parameters: `{
+  "string-parameter": "yay",
+  "number-parameter": 1.5,
+  "boolean-parameter": true
+}`,
   index: '',
   document: '',
   query: '',

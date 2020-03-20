@@ -35,7 +35,7 @@ export const ParametersTab: FunctionComponent = () => {
             <span>
               <FormattedMessage
                 id="xpack.painlessLab.parametersFieldLabel"
-                defaultMessage="Parameters"
+                defaultMessage="Parameters (JSON)"
               />{' '}
               <EuiIcon type="questionInCircle" color="subdued" />
             </span>
@@ -51,9 +51,6 @@ export const ParametersTab: FunctionComponent = () => {
             </EuiLink>
           </EuiText>
         }
-        helpText={i18n.translate('xpack.painlessLab.helpIconAriaLabel', {
-          defaultMessage: 'Use JSON format',
-        })}
       >
         <EuiPanel paddingSize="s">
           <CodeEditor
