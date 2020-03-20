@@ -17,33 +17,34 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
   const idToValue = new Map<string, ResolverEvent>();
   const idToAdjacent = new Map<string, AdjacentProcessMap>();
 
+  function emptyAdjacencyMap(id: string): AdjacentProcessMap {
+    return {
+      self: id,
+      parent: null,
+      firstChild: null,
+      previousSibling: null,
+      nextSibling: null,
+      get level(): number {
+        if (!this.parent) {
+          return 1;
+        }
+        const mapAbove = idToAdjacent.get(this.parent!);
+        return mapAbove ? mapAbove.level + 1 : 1;
+      },
+    };
+  }
+
   for (const process of processes) {
     const uniqueProcessPid = uniquePidForProcess(process);
     idToValue.set(uniqueProcessPid, process);
 
-    const uniqueParentPid = uniqueParentPidForProcess(process);
-    const currentProcessSiblings = idToChildren.get(uniqueParentPid);
-    function emptyAdjacencyMap(id: string): AdjacentProcessMap {
-      return {
-        self: id,
-        parent: null,
-        firstChild: null,
-        previousSibling: null,
-        nextSibling: null,
-        get level(): number {
-          if (!this.parent) {
-            return 1;
-          }
-          const mapAbove = idToAdjacent.get(this.parent!);
-          return mapAbove ? mapAbove.level + 1 : 1;
-        },
-      };
-    }
-
     const currentProcessAdjacencyMap: AdjacentProcessMap =
       idToAdjacent.get(uniqueProcessPid) || emptyAdjacencyMap(uniqueProcessPid);
-
     idToAdjacent.set(uniqueProcessPid, currentProcessAdjacencyMap);
+
+    const uniqueParentPid = uniqueParentPidForProcess(process);
+    const currentProcessSiblings = idToChildren.get(uniqueParentPid);
+
     if (currentProcessSiblings) {
       const previousProcessId = uniquePidForProcess(
         currentProcessSiblings[currentProcessSiblings.length - 1]
