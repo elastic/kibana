@@ -1,0 +1,44 @@
+[
+  {
+    "description": "System package",
+    "download": "/epr/system/system-0.9.0.tar.gz",
+    "icons": [
+      {
+        "src": "/package/system-0.9.0/img/compute.svg",
+        "size": "16x16",
+        "type": "image/svg+xml"
+      }
+    ],
+    "name": "system",
+    "path": "/package/system-0.9.0",
+    "title": "System",
+    "type": "integration",
+    "version": "0.9.0"
+  },
+  {
+    "description": "This is the Elastic Endpoint package.",
+    "download": "/epr/endpoint/endpoint-1.0.0.tar.gz",
+    "icons": [
+      {
+        "src": "/package/endpoint-1.0.0/img/logo-endpoint-64-color.svg",
+        "size": "16x16",
+        "type": "image/svg+xml"
+      }
+    ],
+    "name": "endpoint",
+    "path": "/package/endpoint-1.0.0",
+    "title": "Elastic Endpoint",
+    "type": "solution",
+    "version": "1.0.0"
+  },
+  {
+    "description": "The base package contains assets which are needed for the basic setup of the stack.\nIt contains the default ILM policies.\n",
+    "download": "/epr/base/base-1.0.0.tar.gz",
+    "internal": true,
+    "name": "base",
+    "path": "/package/base-1.0.0",
+    "title": "Base package",
+    "type": "integration",
+    "version": "1.0.0"
+  }
+]

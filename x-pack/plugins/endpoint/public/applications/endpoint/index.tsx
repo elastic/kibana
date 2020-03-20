@@ -32,6 +32,7 @@ export function renderApp(
   depsStart: EndpointPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) {
+  // TODO handle a 500 from the ingest manager
   coreStart.http.post(setupRouteService.getSetupPath());
   coreStart.http.get('/api/endpoint/hello-world');
   const store = appStoreFactory({ coreStart, depsStart });

@@ -30,6 +30,8 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
         '--xpack.ingestManager.enabled=true',
         '--xpack.ingestManager.fleet.enabled=true',
         '--xpack.endpoint.alertResultListDefaultDateRange.from=2018-01-10T00:00:00.000Z',
+        '--xpack.ingestManager.epm.enabled=true',
+        '--xpack.ingestManager.epm.registryUrl=http://localhost:6666',
       ],
     },
     esTestCluster: {

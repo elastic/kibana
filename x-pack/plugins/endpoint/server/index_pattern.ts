@@ -5,12 +5,8 @@
  */
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { IndexPatternService } from '../../ingest_manager/server';
-import { EndpointAppConstants } from '../common/types';
 
-const fallbackIndexPatterns: Record<string, string> = {
-  events: 'events-endpoint-*',
-  metadata: 'metadata-endpoint-*',
-};
+const endpointPackageName = 'endpoint';
 
 export interface IndexPatternRetriever {
   get(): Promise<string>;
@@ -28,22 +24,17 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
   async get() {
     const pattern = await this.service.get(
       this.client,
-      EndpointAppConstants.ENDPOINT_PACKAGE_NAME,
+      endpointPackageName,
       this.datasetPath,
       this.version
     );
 
     if (!pattern) {
+      const version = this.version || 'none';
       this.log.warn(
-        `Failed to retrieve index pattern from ingest manager dataset: ${this.datasetPath} version: ${this.version} finding default`
+        `Failed to retrieve index pattern from ingest manager dataset: ${this.datasetPath} version: ${version}`
       );
-
-      const defaultPattern = fallbackIndexPatterns[this.datasetPath];
-      if (!defaultPattern) {
-        this.log.warn(`Failed to retrieve default index pattern ${this.datasetPath}`);
-        throw new Error('Invalid dataset used, unable to find default index pattern');
-      }
-      return defaultPattern;
+      throw new Error('Unable to retrieve the index pattern from the ingest manager');
     }
 
     return pattern;
