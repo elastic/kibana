@@ -53,12 +53,19 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
 export const SIGNALS_ID = `${APP_ID}.signals`;
 
 /**
+ * Id for the notifications alerting type
+ */
+export const NOTIFICATIONS_ID = `${APP_ID}.notifications`;
+
+/**
  * Special internal structure for tags for signals. This is used
  * to filter out tags that have internal structures within them.
  */
 export const INTERNAL_IDENTIFIER = '__internal';
 export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id`;
 export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable`;
+export const INTERNAL_NOTIFICATION_ID_KEY = `${INTERNAL_IDENTIFIER}_notification_id`;
+export const INTERNAL_NOTIFICATION_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_notification_rule_id`;
 
 /**
  * Detection engine routes

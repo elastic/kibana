@@ -27,6 +27,8 @@ import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
+import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
+import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
@@ -151,12 +153,21 @@ export class Plugin {
     });
 
     if (plugins.alerting != null) {
-      const type = signalRulesAlertType({
+      const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
       });
-      if (isAlertExecutor(type)) {
-        plugins.alerting.registerType(type);
+      const ruleNotificationType = rulesNotificationAlertType({
+        logger: this.logger,
+        version: this.context.env.packageInfo.version,
+      });
+
+      if (isAlertExecutor(signalRuleType)) {
+        plugins.alerting.registerType(signalRuleType);
+      }
+
+      if (isNotificationAlertExecutor(ruleNotificationType)) {
+        plugins.alerting.registerType(ruleNotificationType);
       }
     }
 

@@ -8,6 +8,7 @@ import { Logger } from 'src/core/server';
 import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
+import { buildSignalsSearchQuery } from '../notifications/build_signals_query';
 import { getInputIndex } from './get_input_output_index';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
@@ -46,6 +47,7 @@ export const signalRulesAlertType = ({
         index,
         filters,
         language,
+        meta,
         machineLearningJobId,
         outputIndex,
         savedId,
@@ -76,6 +78,7 @@ export const signalRulesAlertType = ({
         enabled,
         schedule: { interval },
         throttle,
+        params: ruleParams,
       } = savedObject.attributes;
 
       const updatedAt = savedObject.updated_at ?? '';
@@ -199,6 +202,35 @@ export const signalRulesAlertType = ({
         }
 
         if (creationSucceeded) {
+          if (meta?.throttle === 'rule' && actions.length) {
+            const actionsInterval = throttle ?? savedObject.attributes.schedule.interval;
+
+            const singalsQuery = buildSignalsSearchQuery({
+              ruleIds: [ruleId!],
+              index: [outputIndex],
+              from: `now-${actionsInterval}`,
+              to: 'now',
+            });
+
+            const newSignalsResult = await services.callCluster('search', singalsQuery);
+            const newSignalsCount = newSignalsResult.hits.total.value;
+            logger.warn(`newSignalsCount ${newSignalsCount}`);
+            logger.warn(
+              `savedObject.attributes ${JSON.stringify(savedObject.attributes, null, 2)}`
+            );
+
+            // if (newSignalsCount) {
+            const alertInstance = services.alertInstanceFactory(alertId);
+            alertInstance
+              .replaceState({
+                signalsCount: newSignalsCount,
+              })
+              .scheduleActions('default', {
+                rule: ruleParams,
+              });
+            // }
+          }
+
           logger.debug(
             `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", output_index: "${outputIndex}"`
           );

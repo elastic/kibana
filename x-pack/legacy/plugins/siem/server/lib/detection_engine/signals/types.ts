@@ -11,6 +11,7 @@ import {
   State,
   AlertExecutorOptions,
 } from '../../../../../../../plugins/alerting/server';
+import { AlertAction } from '../../../../../../../plugins/alerting/common';
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;

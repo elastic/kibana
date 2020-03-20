@@ -11,7 +11,7 @@ import { addTags } from './add_tags';
 import { hasListsFeature } from '../feature_flags';
 import { transformRuleToAlertAction } from './transform_actions';
 
-export const createRules = ({
+export const createRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
   actions,

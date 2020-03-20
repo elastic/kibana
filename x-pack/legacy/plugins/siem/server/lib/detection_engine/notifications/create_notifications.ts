@@ -1,0 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { Alert } from '../../../../../../../plugins/alerting/common';
+import { APP_ID, NOTIFICATIONS_ID } from '../../../../common/constants';
+import { CreateNotificationParams } from './types';
+import { addTags } from './add_tags';
+
+export const createNotifications = async ({
+  alertsClient,
+  actions,
+  enabled,
+  ruleId,
+  ruleAlertId,
+  interval,
+  name,
+  tags,
+}: CreateNotificationParams): Promise<Alert> =>
+  alertsClient.create({
+    data: {
+      name,
+      tags: addTags(tags, ruleId),
+      alertTypeId: NOTIFICATIONS_ID,
+      consumer: APP_ID,
+      params: {
+        ruleId,
+        ruleAlertId,
+      },
+      schedule: { interval },
+      enabled,
+      actions,
+      throttle: null,
+    },
+  });

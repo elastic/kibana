@@ -16,6 +16,7 @@ import {
   DeleteRulesRequestParams,
 } from '../../rules/types';
 import { deleteRules } from '../../rules/delete_rules';
+import { deleteNotifications } from '../../notifications/delete_notifications';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 type Config = RouteConfig<unknown, unknown, DeleteRulesRequestParams, 'delete' | 'post'>;
@@ -57,6 +58,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
             ruleId,
           });
           if (rule != null) {
+            await deleteNotifications({ alertsClient, ruleId: rule.params.ruleId });
             const ruleStatuses = await savedObjectsClient.find<
               IRuleSavedAttributesSavedObjectAttributes
             >({
