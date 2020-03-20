@@ -64,7 +64,7 @@ export const Main = () => {
 
           <Editor
             code={state.code}
-            onChange={nextCode => updateState(() => ({ code: nextCode }))}
+            onChange={nextCode => updateState({ code: nextCode })}
           />
         </EuiFlexItem>
 
@@ -78,8 +78,8 @@ export const Main = () => {
         isLoading={inProgress}
         toggleRequestFlyout={toggleRequestFlyout}
         isRequestFlyoutOpen={isRequestFlyoutOpen}
-        reset={() => updateState(() => ({ code: exampleScript }))}
         isNavDrawerLocked={isNavDrawerLocked}
+        reset={() => updateState({ code: exampleScript })}
       />
 
       {isRequestFlyoutOpen && (

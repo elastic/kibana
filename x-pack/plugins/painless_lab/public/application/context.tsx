@@ -15,7 +15,7 @@ const PAINLESS_LAB_KEY = 'painlessLabState';
 
 interface ContextValue {
   state: Store;
-  updateState: (nextState: (s: Store) => Partial<Store>) => void;
+  updateState: (changes: Partial<Store>) => void;
   services: {
     http: HttpSetup;
   };
@@ -41,11 +41,10 @@ export const AppContextProvider = ({
     ...JSON.parse(localStorage.getItem(PAINLESS_LAB_KEY) || '{}'),
   }));
 
-  const updateState = (getNextState: (s: Store) => Partial<Store>): void => {
-    const update = getNextState(state);
+  const updateState = (changes: Partial<Store>): void => {
     const nextState = {
       ...state,
-      ...update,
+      ...changes,
     };
     localStorage.setItem(PAINLESS_LAB_KEY, JSON.stringify(nextState));
     setState(() => nextState);

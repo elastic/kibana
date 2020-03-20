@@ -57,7 +57,7 @@ export const ParametersTab: FunctionComponent = () => {
             languageId="json"
             height={600}
             value={state.parameters}
-            onChange={nextParams => updateState(() => ({ parameters: nextParams }))}
+            onChange={nextParams => updateState({ parameters: nextParams })}
             options={{
               fontSize: 12,
               minimap: {
