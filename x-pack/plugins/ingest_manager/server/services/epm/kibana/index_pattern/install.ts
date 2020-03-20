@@ -78,8 +78,12 @@ export async function installIndexPatterns(
     savedObjectsClient,
     InstallationStatus.installed
   );
-  // add this package
-  if (pkgkey) installedPackages.push(pkgkey);
+  // add this package to the array if it doesn't already exist
+  // this should not happen because a user can't "reinstall" a package
+  // if it does because the install endpoint is called directly, the install continues
+  if (pkgkey && !installedPackages.includes(pkgkey)) {
+    installedPackages.push(pkgkey);
+  }
 
   // get each package's registry info
   const installedPackagesFetchInfoPromise = installedPackages.map(pkg => Registry.fetchInfo(pkg));
