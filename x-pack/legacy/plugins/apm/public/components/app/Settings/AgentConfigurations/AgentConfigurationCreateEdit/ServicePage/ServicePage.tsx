@@ -118,7 +118,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         )}
         fieldLabel={i18n.translate(
           'xpack.apm.agentConfig.servicePage.service.fieldLabel',
-          { defaultMessage: 'Service Name' }
+          { defaultMessage: 'Service name' }
         )}
         isLoading={serviceNamesStatus === FETCH_STATUS.LOADING}
         options={serviceNameOptions}
