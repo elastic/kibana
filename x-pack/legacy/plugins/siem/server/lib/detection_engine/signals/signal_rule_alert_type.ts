@@ -190,7 +190,7 @@ export const signalRulesAlertType = ({
           const start = performance.now();
           const noReIndexResult = await services.callCluster('search', noReIndex);
           const end = performance.now();
-          creationSucceeded.searchAfterTimes.push(Number(end - start).toFixed(2));
+
           if (noReIndexResult.hits.total.value !== 0) {
             logger.info(
               `Found ${
@@ -222,6 +222,7 @@ export const signalRulesAlertType = ({
             tags,
             throttle,
           });
+          creationSucceeded.searchAfterTimes.push(Number(end - start).toFixed(2));
         }
 
         if (creationSucceeded.success) {

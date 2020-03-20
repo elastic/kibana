@@ -218,6 +218,28 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
       width: '24%',
     },
     {
+      field: 'current_status.bulk_create_time_durations',
+      name: 'indexing time (ms)',
+      render: (value: RuleStatus['current_status']['bulk_create_time_durations']) => (
+        <EuiText data-test-subj="bulk_create_time_durations" size="s">
+          {value?.join(',')}
+        </EuiText>
+      ),
+      truncateText: true,
+      width: '14%',
+    },
+    {
+      field: 'current_status.search_after_time_durations',
+      name: 'query time (ms)',
+      render: (value: RuleStatus['current_status']['search_after_time_durations']) => (
+        <EuiText data-test-subj="search_after_time_durations" size="s">
+          {value?.join(',')}
+        </EuiText>
+      ),
+      truncateText: true,
+      width: '14%',
+    },
+    {
       field: 'current_status.gap',
       name: 'gap',
       render: (value: RuleStatus['current_status']['gap']) => (
