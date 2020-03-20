@@ -379,9 +379,8 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                             rowCount={rowCount}
                             renderCellValue={renderCellValue}
                             inMemory={{ level: 'sorting' }}
-                            // @ts-ignore
                             toolbarVisibility={{
-                              showColumnSelector: { allowReorder: false, allowHide: true },
+                              showColumnSelector: true,
                               showStyleSelector: true,
                               showFullScreenSelector: false,
                               showSortSelector: false,

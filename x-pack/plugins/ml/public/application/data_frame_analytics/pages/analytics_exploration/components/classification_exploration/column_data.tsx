@@ -11,9 +11,7 @@ import { ConfusionMatrix } from '../../../../common/analytics';
 interface ColumnData {
   actual_class: string;
   actual_class_doc_count: number;
-  predicted_class?: string;
-  count?: number;
-  error_count?: number;
+  [key: string]: any;
 }
 
 export const ACTUAL_CLASS_ID = 'actual_class';
@@ -53,7 +51,7 @@ export function getTrailingControlColumns(numColumns: number, setShowFullColumns
   return [
     {
       id: 'actions',
-      width: '60',
+      width: 60,
       headerCellRender: () => `${numColumns} more`,
       rowCellRender: function RowCellRender() {
         const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
