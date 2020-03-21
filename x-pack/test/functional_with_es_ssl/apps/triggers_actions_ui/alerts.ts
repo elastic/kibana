@@ -464,10 +464,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.common.closeToast();
 
-      await createAlert();
       await pageObjects.common.navigateToApp('triggersActions');
-      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults.length).to.eql(1);
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterDelete.length).to.eql(0);
     });
   });
 };
