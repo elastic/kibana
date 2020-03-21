@@ -31,7 +31,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .send({
           name: 'An index action',
           actionTypeId: '.index',
-          config: {},
+          config: {
+            index: ES_TEST_INDEX_NAME,
+          },
           secrets: {},
         })
         .expect(200);
@@ -41,7 +43,8 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index action',
         actionTypeId: '.index',
         config: {
-          index: null,
+          index: ES_TEST_INDEX_NAME,
+          refresh: false,
         },
       });
       createdActionID = createdAction.id;
@@ -55,10 +58,10 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: fetchedAction.id,
         name: 'An index action',
         actionTypeId: '.index',
-        config: { index: null },
+        config: { index: ES_TEST_INDEX_NAME, refresh: false },
       });
 
-      // create action with index config
+      // create action with all config props
       const { body: createdActionWithIndex } = await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
@@ -67,6 +70,8 @@ export default function indexTest({ getService }: FtrProviderContext) {
           actionTypeId: '.index',
           config: {
             index: ES_TEST_INDEX_NAME,
+            refresh: true,
+            executionTimeField: 'test',
           },
         })
         .expect(200);
@@ -77,6 +82,8 @@ export default function indexTest({ getService }: FtrProviderContext) {
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
+          refresh: true,
+          executionTimeField: 'test',
         },
       });
       createdActionIDWithIndex = createdActionWithIndex.id;
@@ -92,6 +99,8 @@ export default function indexTest({ getService }: FtrProviderContext) {
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
+          refresh: true,
+          executionTimeField: 'test',
         },
       });
     });
@@ -111,20 +120,31 @@ export default function indexTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: [index]: types that failed validation:\n- [index.0]: expected value of type [string] but got [number]\n- [index.1]: expected value to equal [null]',
+              'error validating action type config: [index]: expected value of type [string] but got [number]',
           });
         });
     });
 
     it('should execute successly when expected for a single body', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An index action',
+          actionTypeId: '.index',
+          config: {
+            index: ES_TEST_INDEX_NAME,
+            refresh: true,
+          },
+          secrets: {},
+        })
+        .expect(200);
       const { body: result } = await supertest
-        .post(`/api/action/${createdActionID}/_execute`)
+        .post(`/api/action/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            index: ES_TEST_INDEX_NAME,
             documents: [{ testing: [1, 2, 3] }],
-            refresh: true,
           },
         })
         .expect(200);
@@ -136,14 +156,25 @@ export default function indexTest({ getService }: FtrProviderContext) {
     });
 
     it('should execute successly when expected for with multiple bodies', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An index action',
+          actionTypeId: '.index',
+          config: {
+            index: ES_TEST_INDEX_NAME,
+            refresh: true,
+          },
+          secrets: {},
+        })
+        .expect(200);
       const { body: result } = await supertest
-        .post(`/api/action/${createdActionID}/_execute`)
+        .post(`/api/action/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            index: ES_TEST_INDEX_NAME,
             documents: [{ testing: [1, 2, 3] }, { Testing: [4, 5, 6] }],
-            refresh: true,
           },
         })
         .expect(200);
@@ -169,12 +200,25 @@ export default function indexTest({ getService }: FtrProviderContext) {
     });
 
     it('should execute successly with refresh false', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An index action',
+          actionTypeId: '.index',
+          config: {
+            index: ES_TEST_INDEX_NAME,
+            refresh: false,
+            executionTimeField: 'test',
+          },
+          secrets: {},
+        })
+        .expect(200);
       const { body: result } = await supertest
-        .post(`/api/action/${createdActionID}/_execute`)
+        .post(`/api/action/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            index: ES_TEST_INDEX_NAME,
             documents: [{ refresh: 'not set' }],
           },
         })
@@ -185,14 +229,25 @@ export default function indexTest({ getService }: FtrProviderContext) {
       items = await getTestIndexItems(es);
       expect(items.length).to.be.lessThan(2);
 
+      const { body: createdActionWithRefresh } = await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An index action',
+          actionTypeId: '.index',
+          config: {
+            index: ES_TEST_INDEX_NAME,
+            refresh: true,
+          },
+          secrets: {},
+        })
+        .expect(200);
       const { body: result2 } = await supertest
-        .post(`/api/action/${createdActionID}/_execute`)
+        .post(`/api/action/${createdActionWithRefresh.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            index: ES_TEST_INDEX_NAME,
             documents: [{ refresh: 'true' }],
-            refresh: true,
           },
         })
         .expect(200);
@@ -200,42 +255,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       items = await getTestIndexItems(es);
       expect(items.length).to.eql(2);
-    });
-
-    it('should execute unsuccessfully when expected', async () => {
-      let response;
-      let result;
-
-      response = await supertest
-        .post(`/api/action/${createdActionID}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            indeX: ES_TEST_INDEX_NAME,
-            documents: [{ testing: [1, 2, 3] }],
-          },
-        })
-        .expect(200);
-      result = response.body;
-      expect(result.status).to.equal('error');
-      expect(result.message).to.eql(
-        'error validating action params: [indeX]: definition for this key is missing'
-      );
-
-      response = await supertest
-        .post(`/api/action/${createdActionID}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            documents: [{ testing: [1, 2, 3] }],
-          },
-        })
-        .expect(200);
-      result = response.body;
-      expect(result.status).to.equal('error');
-      expect(result.message).to.eql(
-        'index param needs to be set because not set in config for action'
-      );
     });
   });
 }

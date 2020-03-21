@@ -12,7 +12,7 @@ import {
   toMountPoint,
 } from '../../../../../../../../src/plugins/kibana_react/public';
 import { EmbeddableContext, ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
-import { DrilldownsStartContract } from '../../../../../../drilldowns/public';
+import { DrilldownsStart } from '../../../../../../drilldowns/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
 
@@ -20,7 +20,7 @@ export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
 export interface FlyoutEditDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
-  drilldowns: () => Promise<DrilldownsStartContract>;
+  drilldowns: () => Promise<DrilldownsStart>;
 }
 
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {

@@ -6,9 +6,27 @@
 
 import { AdvancedUiActionsActionFactoryDefinition as ActionFactoryDefinition } from '../../advanced_ui_actions/public';
 
-export interface Drilldown<
+/**
+ * This is a convenience interface to register a drilldown. Drilldown has
+ * ability to collect configuration from user. Once drilldown is executed it
+ * receives the collected information together with the context of the
+ * user's interaction.
+ *
+ * `Config` is a serializable object containing the configuration that the
+ * drilldown is able to collect using UI.
+ *
+ * `PlaceContext` is an object that the app that opens drilldown management
+ * flyout provides to the React component, specifying the contextual information
+ * about that app. For example, on Dashboard app this context contains
+ * information about the current embeddable and dashboard.
+ *
+ * `ExecutionContext` is an object created in response to user's interaction
+ * and provided to the `execute` function of the drilldown. This object contains
+ * information about the action user performed.
+ */
+export interface DrilldownDefinition<
   Config extends object = object,
-  CreationContext extends object = object,
+  PlaceContext extends object = object,
   ExecutionContext extends object = object
 > {
   /**
@@ -17,17 +35,11 @@ export interface Drilldown<
   id: string;
 
   /**
-   * List of places where this drilldown should be available, e.g "dashboard", "graph".
-   * If omitted, the drilldown will be shown in all places.
-   */
-  places?: string[];
-
-  /**
    * Function that returns default config for this drilldown.
    */
   createConfig: ActionFactoryDefinition<
     Config,
-    DrilldownFactoryContext<CreationContext>,
+    DrilldownFactoryContext<PlaceContext>,
     ExecutionContext
   >['createConfig'];
 
@@ -52,7 +64,7 @@ export interface Drilldown<
    */
   CollectConfig: ActionFactoryDefinition<
     Config,
-    DrilldownFactoryContext<CreationContext>,
+    DrilldownFactoryContext<PlaceContext>,
     ExecutionContext
   >['CollectConfig'];
 
@@ -62,7 +74,7 @@ export interface Drilldown<
    */
   isConfigValid: ActionFactoryDefinition<
     Config,
-    DrilldownFactoryContext<CreationContext>,
+    DrilldownFactoryContext<PlaceContext>,
     ExecutionContext
   >['isConfigValid'];
 
@@ -76,20 +88,6 @@ export interface Drilldown<
    * displayed to the user.
    */
   getDisplayName: () => string;
-
-  /**
-   * Whether this drilldown should be considered for execution given `config`
-   * and `context`. When multiple drilldowns are attached to the same trigger
-   * user is presented with a context menu to pick one drilldown for execute. If
-   * this method returns `true` this trigger will appear in the context menu
-   * list, if `false`, it will not be presented to the user. If `doExecute` is
-   * not implemented, this drilldown will always be show to the user.
-   *
-   * @param config Config object that user configured this drilldown with.
-   * @param context Object that represents context in which the underlying
-   *  `UIAction` of this drilldown is being executed in.
-   */
-  doExecute?(config: Config, context: ExecutionContext): Promise<boolean>;
 
   /**
    * Implements the "navigation" action of the drilldown. This happens when
@@ -107,11 +105,6 @@ export interface Drilldown<
  * Context object used when creating a drilldown.
  */
 export interface DrilldownFactoryContext<T> {
-  /**
-   * Place where factory is being rendered.
-   */
-  place?: string;
-
   /**
    * Context provided to the drilldown factory by the place where the UI is
    * rendered. For example, for the "dashboard" place, this context contains

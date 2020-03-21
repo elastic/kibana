@@ -27,6 +27,7 @@ import {
   UiActionsDynamicActionManager,
   UiActionsStart,
 } from '../../../../../plugins/ui_actions/public';
+import { EmbeddableContext } from '../triggers';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -64,14 +65,15 @@ export abstract class Embeddable<
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
 
-  private storage = new EmbeddableActionStorage(this);
+  private storage = new EmbeddableActionStorage((this as unknown) as Embeddable);
 
   private cachedDynamicActions?: UiActionsDynamicActionManager;
   public get dynamicActions(): UiActionsDynamicActionManager | undefined {
     if (!this.params.uiActions) return undefined;
     if (!this.cachedDynamicActions) {
       this.cachedDynamicActions = new UiActionsDynamicActionManager({
-        isCompatible: async ({ embeddable }: any) => embeddable.runtimeId === this.runtimeId,
+        isCompatible: async (context: unknown) =>
+          (context as EmbeddableContext).embeddable.runtimeId === this.runtimeId,
         storage: this.storage,
         uiActions: this.params.uiActions,
       });

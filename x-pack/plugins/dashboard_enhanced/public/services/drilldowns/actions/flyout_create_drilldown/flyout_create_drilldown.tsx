@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import { DrilldownsStartContract } from '../../../../../../drilldowns/public';
+import { DrilldownsStart } from '../../../../../../drilldowns/public';
 import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
 export interface OpenFlyoutAddDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
-  drilldowns: () => Promise<DrilldownsStartContract>;
+  drilldowns: () => Promise<DrilldownsStart>;
 }
 
 export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {

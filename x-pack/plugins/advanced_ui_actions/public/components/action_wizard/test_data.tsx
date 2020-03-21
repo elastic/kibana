@@ -20,15 +20,15 @@ export const dashboards = [
 
 interface DashboardDrilldownConfig {
   dashboardId?: string;
-  useCurrentDashboardFilters: boolean;
-  useCurrentDashboardDataRange: boolean;
+  useCurrentFilters: boolean;
+  useCurrentDateRange: boolean;
 }
 
 function DashboardDrilldownCollectConfig(props: CollectConfigProps<DashboardDrilldownConfig>) {
   const config = props.config ?? {
     dashboardId: undefined,
-    useCurrentDashboardDataRange: true,
-    useCurrentDashboardFilters: true,
+    useCurrentFilters: true,
+    useCurrentDateRange: true,
   };
   return (
     <>
@@ -47,11 +47,11 @@ function DashboardDrilldownCollectConfig(props: CollectConfigProps<DashboardDril
         <EuiSwitch
           name="useCurrentFilters"
           label="Use current dashboard's filters"
-          checked={config.useCurrentDashboardFilters}
+          checked={config.useCurrentFilters}
           onChange={() =>
             props.onConfig({
               ...config,
-              useCurrentDashboardFilters: !config.useCurrentDashboardFilters,
+              useCurrentFilters: !config.useCurrentFilters,
             })
           }
         />
@@ -60,11 +60,11 @@ function DashboardDrilldownCollectConfig(props: CollectConfigProps<DashboardDril
         <EuiSwitch
           name="useCurrentDateRange"
           label="Use current dashboard's date range"
-          checked={config.useCurrentDashboardDataRange}
+          checked={config.useCurrentDateRange}
           onChange={() =>
             props.onConfig({
               ...config,
-              useCurrentDashboardDataRange: !config.useCurrentDashboardDataRange,
+              useCurrentDateRange: !config.useCurrentDateRange,
             })
           }
         />
@@ -84,8 +84,8 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
   createConfig: () => {
     return {
       dashboardId: undefined,
-      useCurrentDashboardDataRange: true,
-      useCurrentDashboardFilters: true,
+      useCurrentFilters: true,
+      useCurrentDateRange: true,
     };
   },
   isConfigValid: (config: DashboardDrilldownConfig): config is DashboardDrilldownConfig => {
@@ -146,7 +146,7 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
       openInNewTab: false,
     };
   },
-  isConfigValid: (config: any): config is UrlDrilldownConfig => {
+  isConfigValid: (config: UrlDrilldownConfig): config is UrlDrilldownConfig => {
     if (!config.url) return false;
     return true;
   },

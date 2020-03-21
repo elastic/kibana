@@ -15,7 +15,7 @@ function createJobStats(jobsSummaryList) {
   const jobStats = {
     activeNodes: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.activeMLNodesLabel', {
-        defaultMessage: 'Active ML Nodes',
+        defaultMessage: 'Active ML nodes',
       }),
       value: 0,
       show: true,

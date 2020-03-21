@@ -6,7 +6,7 @@
 
 import { CoreSetup } from 'src/core/public';
 import { AdvancedUiActionsSetup } from '../../../advanced_ui_actions/public';
-import { Drilldown, DrilldownFactoryContext } from '../types';
+import { DrilldownDefinition, DrilldownFactoryContext } from '../types';
 import { UiActionsActionFactoryDefinition as ActionFactoryDefinition } from '../../../../../src/plugins/ui_actions/public';
 
 export interface DrilldownServiceSetupDeps {
@@ -22,7 +22,7 @@ export interface DrilldownServiceSetupContract {
     CreationContext extends object = object,
     ExecutionContext extends object = object
   >(
-    drilldown: Drilldown<Config, CreationContext, ExecutionContext>
+    drilldown: DrilldownDefinition<Config, CreationContext, ExecutionContext>
   ) => void;
 }
 
@@ -37,14 +37,13 @@ export class DrilldownService {
       ExecutionContext extends object = object
     >({
       id: factoryId,
-      places,
       CollectConfig,
       createConfig,
       isConfigValid,
       getDisplayName,
       euiIcon,
       execute,
-    }: Drilldown<Config, CreationContext, ExecutionContext>) => {
+    }: DrilldownDefinition<Config, CreationContext, ExecutionContext>) => {
       const actionFactory: ActionFactoryDefinition<
         Config,
         DrilldownFactoryContext<CreationContext>,
@@ -56,11 +55,12 @@ export class DrilldownService {
         isConfigValid,
         getDisplayName,
         getIconType: () => euiIcon,
-        isCompatible: async ({ place }: any) => (!places ? true : places.indexOf(place) > -1),
+        isCompatible: async () => true,
         create: serializedAction => ({
           id: '',
           type: factoryId,
           getIconType: () => euiIcon,
+          getDisplayName: () => serializedAction.name,
           execute: async context => await execute(serializedAction.config, context),
         }),
       } as ActionFactoryDefinition<

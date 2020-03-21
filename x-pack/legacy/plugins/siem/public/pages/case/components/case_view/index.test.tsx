@@ -5,30 +5,68 @@
  */
 
 import React from 'react';
+import { Router } from 'react-router-dom';
 import { mount } from 'enzyme';
 import { CaseComponent } from './';
-import * as apiHook from '../../../../containers/case/use_update_case';
-import { caseProps, data } from './__mock__';
+import { caseProps, caseClosedProps, data, dataClosed } from './__mock__';
 import { TestProviders } from '../../../../mock';
+import { useUpdateCase } from '../../../../containers/case/use_update_case';
+jest.mock('../../../../containers/case/use_update_case');
+const useUpdateCaseMock = useUpdateCase as jest.Mock;
+type Action = 'PUSH' | 'POP' | 'REPLACE';
+const pop: Action = 'POP';
+const location = {
+  pathname: '/network',
+  search: '',
+  state: '',
+  hash: '',
+};
+const mockHistory = {
+  length: 2,
+  location,
+  action: pop,
+  push: jest.fn(),
+  replace: jest.fn(),
+  go: jest.fn(),
+  goBack: jest.fn(),
+  goForward: jest.fn(),
+  block: jest.fn(),
+  createHref: jest.fn(),
+  listen: jest.fn(),
+};
 
 describe('CaseView ', () => {
   const updateCaseProperty = jest.fn();
+  /* eslint-disable no-console */
+  // Silence until enzyme fixed to use ReactTestUtils.act()
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+  afterAll(() => {
+    console.error = originalError;
+  });
+  /* eslint-enable no-console */
+
+  const defaultUpdateCaseState = {
+    caseData: data,
+    isLoading: false,
+    isError: false,
+    updateKey: null,
+    updateCaseProperty,
+  };
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue({
-      caseData: data,
-      isLoading: false,
-      isError: false,
-      updateKey: null,
-      updateCaseProperty,
-    });
+    useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
   });
 
   it('should render CaseComponent', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseComponent {...caseProps} />
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
       </TestProviders>
     );
     expect(
@@ -55,6 +93,7 @@ describe('CaseView ', () => {
         .first()
         .text()
     ).toEqual(data.createdBy.username);
+    expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-createdAt"]`)
@@ -69,16 +108,45 @@ describe('CaseView ', () => {
     ).toEqual(data.description);
   });
 
+  it('should show closed indicators in header when case is closed', () => {
+    useUpdateCaseMock.mockImplementation(() => ({
+      ...defaultUpdateCaseState,
+      caseData: dataClosed,
+    }));
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseClosedProps} />
+        </Router>
+      </TestProviders>
+    );
+    expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-view-closedAt"]`)
+        .first()
+        .prop('value')
+    ).toEqual(dataClosed.closedAt);
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-view-status"]`)
+        .first()
+        .text()
+    ).toEqual(dataClosed.status);
+  });
+
   it('should dispatch update state when button is toggled', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseComponent {...caseProps} />
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
       </TestProviders>
     );
 
     wrapper
       .find('input[data-test-subj="toggle-case-status"]')
-      .simulate('change', { target: { value: false } });
+      .simulate('change', { target: { checked: true } });
 
     expect(updateCaseProperty).toBeCalledWith({
       updateKey: 'status',
@@ -89,7 +157,9 @@ describe('CaseView ', () => {
   it('should render comments', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseComponent {...caseProps} />
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
       </TestProviders>
     );
     expect(

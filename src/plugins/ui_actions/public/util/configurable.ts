@@ -31,7 +31,7 @@ export interface Configurable<Config extends object = object, Context = object> 
   /**
    * Is this config valid. Used to validate user's input before saving.
    */
-  readonly isConfigValid: (config: Config) => config is Config;
+  readonly isConfigValid: (config: Config) => boolean;
 
   /**
    * `UiComponent` to be rendered when collecting configuration for this item.

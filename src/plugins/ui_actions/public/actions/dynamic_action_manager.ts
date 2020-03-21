@@ -78,7 +78,6 @@ export class DynamicActionManager {
   protected reviveAction(event: SerializedEvent) {
     const { eventId, triggers, action } = event;
     const { uiActions, isCompatible } = this.params;
-    const { name } = action;
 
     const actionId = this.generateActionId(eventId);
     const factory = uiActions.getActionFactory(event.action.factoryId);
@@ -86,7 +85,6 @@ export class DynamicActionManager {
       ...factory.create(action as SerializedAction<object>),
       id: actionId,
       isCompatible,
-      getDisplayName: () => name,
     };
 
     uiActions.registerAction(actionDefinition);
@@ -142,7 +140,7 @@ export class DynamicActionManager {
    * 1. Loads all events from  @type {DynamicActionStorage} storage.
    * 2. Creates actions for each event in `ui_actions` registry.
    * 3. Adds events to UI state.
-   * 4. Does nothing if dynamic action manager was stopped of if event fetching
+   * 4. Does nothing if dynamic action manager was stopped or if event fetching
    *    is already taking place.
    */
   public async start() {
@@ -282,23 +280,5 @@ export class DynamicActionManager {
    */
   public async deleteEvents(eventIds: string[]) {
     await Promise.all(eventIds.map(this.deleteEvent.bind(this)));
-  }
-
-  /**
-   * @deprecated
-   *
-   * Use `.state.get().events` instead.
-   */
-  public async list(): Promise<readonly SerializedEvent[]> {
-    return this.state.get().events;
-  }
-
-  /**
-   * @deprecated
-   *
-   * Use `.state.get().events.length` instead.
-   */
-  public async count(): Promise<number> {
-    return this.state.get().events.length;
   }
 }

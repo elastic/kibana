@@ -16,6 +16,7 @@ import {
   OPEN_FLYOUT_ADD_DRILLDOWN,
   OPEN_FLYOUT_EDIT_DRILLDOWN,
 } from './actions';
+
 import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldown';
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
@@ -25,8 +26,24 @@ declare module '../../../../../../src/plugins/ui_actions/public' {
   }
 }
 
+interface BootstrapParams {
+  enableDrilldowns: boolean;
+}
+
 export class DashboardDrilldownsService {
-  async bootstrap(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
+  // async bootstrap(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
+  bootstrap(
+    // core: CoreSetup<{ drilldowns: DrilldownsStart }>,
+    core: CoreSetup<StartDependencies>,
+    plugins: SetupDependencies,
+    { enableDrilldowns }: BootstrapParams
+  ) {
+    if (enableDrilldowns) {
+      this.setupDrilldowns(core, plugins);
+    }
+  }
+
+  setupDrilldowns(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
     const overlays = async () => (await core.getStartServices())[0].overlays;
     const drilldowns = async () => (await core.getStartServices())[1].drilldowns;
     const getSavedObjectsClient = async () =>

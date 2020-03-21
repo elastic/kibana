@@ -13,13 +13,13 @@ import {
 } from '../../../../../../../src/plugins/embeddable/public';
 import { UiActionsCollectConfigProps } from '../../../../../../../src/plugins/ui_actions/public';
 
-export type FactoryContext = EmbeddableContext;
+export type PlaceContext = EmbeddableContext;
 export type ActionContext<T extends IEmbeddable = IEmbeddable> = EmbeddableVisTriggerContext<T>;
 
 export interface Config {
   dashboardId?: string;
-  useCurrentDashboardFilters: boolean;
-  useCurrentDashboardDataRange: boolean;
+  useCurrentFilters: boolean;
+  useCurrentDateRange: boolean;
 }
 
 export interface CollectConfigProps extends UiActionsCollectConfigProps<Config> {

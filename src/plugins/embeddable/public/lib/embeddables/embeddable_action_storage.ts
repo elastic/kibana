@@ -24,7 +24,7 @@ import {
 import { Embeddable } from '..';
 
 export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
-  constructor(private readonly embbeddable: Embeddable<any, any>) {
+  constructor(private readonly embbeddable: Embeddable) {
     super();
   }
 

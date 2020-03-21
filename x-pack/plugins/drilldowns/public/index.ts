@@ -7,9 +7,9 @@
 import { DrilldownsPlugin } from './plugin';
 
 export {
-  SetupContract as DrilldownsSetupContract,
+  SetupContract as DrilldownsSetup,
   SetupDependencies as DrilldownsSetupDependencies,
-  StartContract as DrilldownsStartContract,
+  StartContract as DrilldownsStart,
   StartDependencies as DrilldownsStartDependencies,
 } from './plugin';
 
@@ -17,4 +17,4 @@ export function plugin() {
   return new DrilldownsPlugin();
 }
 
-export { Drilldown as DrilldownsDrilldown } from './types';
+export { DrilldownDefinition } from './types';

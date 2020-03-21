@@ -24,16 +24,22 @@ import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { Action } from '../actions';
 
+export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
+  defaultMessage: 'Options',
+});
+
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
  */
 export async function buildContextMenuForActions<Context extends object>({
   actions,
   actionContext,
+  title = defaultTitle,
   closeMenu,
 }: {
   actions: Array<Action<Context>>;
   actionContext: Context;
+  title?: string;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelDescriptor> {
   const menuItems = await buildEuiContextMenuPanelItems<Context>({
@@ -44,9 +50,7 @@ export async function buildContextMenuForActions<Context extends object>({
 
   return {
     id: 'mainMenu',
-    title: i18n.translate('uiActions.actionPanel.title', {
-      defaultMessage: 'Options',
-    }),
+    title,
     items: menuItems,
   };
 }

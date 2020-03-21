@@ -21,8 +21,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
-import { Schemas } from 'ui/agg_types';
 
+import { Schemas } from '../../vis_default_editor/public';
 import { Status } from '../../visualizations/public';
 import { createTileMapVisualization } from './tile_map_visualization';
 import { TileMapOptions } from './components/tile_map_options';

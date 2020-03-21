@@ -101,8 +101,8 @@ export class CollectConfigContainer extends React.Component<
       <DashboardDrilldownConfig
         activeDashboardId={config.dashboardId}
         dashboards={mergeDashboards(dashboards, selectedDashboard)}
-        currentFilters={config.useCurrentDashboardFilters}
-        keepRange={config.useCurrentDashboardDataRange}
+        currentFilters={config.useCurrentFilters}
+        keepRange={config.useCurrentDateRange}
         isLoading={isLoading}
         onDashboardSelect={dashboardId => {
           onConfig({ ...config, dashboardId });
@@ -111,13 +111,13 @@ export class CollectConfigContainer extends React.Component<
         onCurrentFiltersToggle={() =>
           onConfig({
             ...config,
-            useCurrentDashboardFilters: !config.useCurrentDashboardFilters,
+            useCurrentFilters: !config.useCurrentFilters,
           })
         }
         onKeepRangeToggle={() =>
           onConfig({
             ...config,
-            useCurrentDashboardDataRange: !config.useCurrentDashboardDataRange,
+            useCurrentDateRange: !config.useCurrentDateRange,
           })
         }
       />

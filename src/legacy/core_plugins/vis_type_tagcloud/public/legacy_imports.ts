@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { Schemas } from 'ui/agg_types';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';

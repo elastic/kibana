@@ -28,10 +28,10 @@ export interface ActionFactoryDefinition<
   Config extends object = object,
   FactoryContext extends object = object,
   ActionContext extends object = object
-> extends Partial<Presentable<FactoryContext>>, Configurable<Config> {
+> extends Partial<Presentable<FactoryContext>>, Configurable<Config, FactoryContext> {
   /**
    * Unique ID of the action factory. This ID is used to identify this action
-   * factory in the registry as well as to construct actions of this ID and
+   * factory in the registry as well as to construct actions of this type and
    * identify this action factory when presenting it to the user in UI.
    */
   id: string;

@@ -10,10 +10,11 @@ import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_reac
 import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
 import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
 import { VisualizeEmbeddableContract } from '../../../../../../../src/legacy/core_plugins/visualizations/public';
-import { FactoryContext, ActionContext, Config, CollectConfigProps } from './types';
+import { PlaceContext, ActionContext, Config, CollectConfigProps } from './types';
+
 import { CollectConfigContainer } from './collect_config';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
-import { DrilldownsDrilldown as Drilldown } from '../../../../../drilldowns/public';
+import { DrilldownDefinition as Drilldown } from '../../../../../drilldowns/public';
 import { txtGoToDashboard } from './i18n';
 import {
   esFilters,
@@ -28,10 +29,8 @@ export interface Params {
 }
 
 export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, FactoryContext, ActionContext<VisualizeEmbeddableContract>> {
+  implements Drilldown<Config, PlaceContext, ActionContext<VisualizeEmbeddableContract>> {
   constructor(protected readonly params: Params) {}
-
-  // TODO: public readonly places = ['dashboard'];
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
 
@@ -49,8 +48,8 @@ export class DashboardToDashboardDrilldown
 
   public readonly createConfig = () => ({
     dashboardId: '',
-    useCurrentDashboardDataRange: true,
-    useCurrentDashboardFilters: true,
+    useCurrentFilters: true,
+    useCurrentDateRange: true,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
@@ -89,8 +88,8 @@ export class DashboardToDashboardDrilldown
       dashboardId: config.dashboardId,
       query,
       // todo - how to get destination dashboard timerange?
-      timeRange: config.useCurrentDashboardDataRange ? timeRange : undefined,
-      filters: config.useCurrentDashboardFilters
+      timeRange: config.useCurrentDateRange ? timeRange : undefined,
+      filters: config.useCurrentFilters
         ? filters
         : filters?.filter(f => esFilters.isFilterPinned(f)),
     });

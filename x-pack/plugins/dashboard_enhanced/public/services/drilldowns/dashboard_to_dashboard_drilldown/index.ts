@@ -10,7 +10,7 @@ export {
   Params as DashboardToDashboardDrilldownParams,
 } from './drilldown';
 export {
-  FactoryContext as DashboardToDashboardFactoryContext,
+  PlaceContext as DashboardToDashboardPlaceContext,
   ActionContext as DashboardToDashboardActionContext,
   Config as DashboardToDashboardConfig,
 } from './types';

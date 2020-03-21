@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { searchAggsSetupMock } from './aggs/mocks';
+import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
+import { AggTypeFieldFilters } from './aggs/param_types/filter';
+import { ISearchStart } from './types';
 
 export * from './search_source/mocks';
 
@@ -25,4 +27,25 @@ export const searchSetupMock = {
   aggs: searchAggsSetupMock(),
   registerSearchStrategyContext: jest.fn(),
   registerSearchStrategyProvider: jest.fn(),
+};
+
+export const searchStartMock: jest.Mocked<ISearchStart> = {
+  aggs: searchAggsStartMock(),
+  search: jest.fn(),
+  cancel: jest.fn(),
+  getPendingCount$: jest.fn(),
+  runBeyondTimeout: jest.fn(),
+  __LEGACY: {
+    AggConfig: jest.fn() as any,
+    AggType: jest.fn(),
+    aggTypeFieldFilters: new AggTypeFieldFilters(),
+    FieldParamType: jest.fn(),
+    MetricAggType: jest.fn(),
+    parentPipelineAggHelper: jest.fn() as any,
+    siblingPipelineAggHelper: jest.fn() as any,
+    esClient: {
+      search: jest.fn(),
+      msearch: jest.fn(),
+    },
+  },
 };

@@ -13,7 +13,7 @@ export class TaskManagerUtils {
     this.retry = retry;
   }
 
-  async waitForIdle(taskRunAtFilter: Date) {
+  async waitForEmpty(taskRunAtFilter: Date) {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
         index: '.kibana_task_manager',
@@ -40,6 +40,44 @@ export class TaskManagerUtils {
       });
       if (searchResult.hits.total.value) {
         throw new Error(`Expected 0 tasks but received ${searchResult.hits.total.value}`);
+      }
+    });
+  }
+
+  async waitForAllTasksIdle(taskRunAtFilter: Date) {
+    return await this.retry.try(async () => {
+      const searchResult = await this.es.search({
+        index: '.kibana_task_manager',
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  terms: {
+                    'task.scope': ['actions', 'alerting'],
+                  },
+                },
+                {
+                  range: {
+                    'task.scheduledAt': {
+                      gte: taskRunAtFilter,
+                    },
+                  },
+                },
+              ],
+              must_not: [
+                {
+                  term: {
+                    'task.status': 'idle',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+      if (searchResult.hits.total.value) {
+        throw new Error(`Expected 0 non-idle tasks but received ${searchResult.hits.total.value}`);
       }
     });
   }
