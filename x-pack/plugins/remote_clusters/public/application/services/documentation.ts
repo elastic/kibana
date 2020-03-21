@@ -10,6 +10,7 @@ export let skippingDisconnectedClustersUrl: string;
 export let remoteClustersUrl: string;
 export let transportPortUrl: string;
 export let proxyModeUrl: string;
+export let proxySettingsUrl: string;
 
 export function init(docLinks: DocLinksStart): void {
   const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
@@ -19,4 +20,5 @@ export function init(docLinks: DocLinksStart): void {
   remoteClustersUrl = `${esDocBasePath}/modules-remote-clusters.html`;
   transportPortUrl = `${esDocBasePath}/modules-transport.html`;
   proxyModeUrl = `${esDocBasePath}/modules-remote-clusters.html#proxy-mode`;
+  proxySettingsUrl = `${esDocBasePath}/modules-remote-clusters.html#remote-cluster-proxy-settings`;
 }

@@ -50,13 +50,18 @@ interface RouterProps {
 }
 
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
-  ({ basename, store, coreStart: { http, notifications, uiSettings }, depsStart: { data } }) => {
+  ({
+    basename,
+    store,
+    coreStart: { http, notifications, uiSettings, application },
+    depsStart: { data },
+  }) => {
     const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
     return (
       <Provider store={store}>
         <I18nProvider>
-          <KibanaContextProvider services={{ http, notifications, data }}>
+          <KibanaContextProvider services={{ http, notifications, application, data }}>
             <EuiThemeProvider darkMode={isDarkMode}>
               <BrowserRouter basename={basename}>
                 <RouteCapture>

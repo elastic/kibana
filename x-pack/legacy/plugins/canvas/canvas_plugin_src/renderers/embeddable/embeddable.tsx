@@ -18,11 +18,12 @@ import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_a
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
 import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
-
-const { embeddable: strings } = RendererStrings;
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { EmbeddableInput } from '../../expression_types';
 import { RendererHandlers } from '../../../types';
+import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
+
+const { embeddable: strings } = RendererStrings;
 
 const embeddablesRegistry: {
   [key: string]: IEmbeddable;
@@ -31,7 +32,7 @@ const embeddablesRegistry: {
 const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
   return (
     <div
-      className="embeddable"
+      className={CANVAS_EMBEDDABLE_CLASSNAME}
       style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
     >
       <I18nContext>

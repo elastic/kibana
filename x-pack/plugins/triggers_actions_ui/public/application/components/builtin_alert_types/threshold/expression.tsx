@@ -399,8 +399,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         <EuiFlexItem grow={false}>
           <ForLastExpression
             popupPosition={'upLeft'}
-            timeWindowSize={timeWindowSize || 1}
-            timeWindowUnit={timeWindowUnit || ''}
+            timeWindowSize={timeWindowSize}
+            timeWindowUnit={timeWindowUnit}
             errors={errors}
             onChangeWindowSize={(selectedWindowSize: any) =>
               setAlertParams('timeWindowSize', selectedWindowSize)
