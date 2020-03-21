@@ -9,6 +9,10 @@ kibanaPipeline(timeoutMinutes: 180) {
     withEnv([
       'CODE_COVERAGE=1', // Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
+
+      workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
+        maybeFailFast()
+      }
 //      parallel([
 //        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
 //        'x-pack-intake-agent': {
@@ -33,7 +37,7 @@ kibanaPipeline(timeoutMinutes: 180) {
 
       workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
 
-        maybeFailFast()
+
 
         def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
         withEnv([
