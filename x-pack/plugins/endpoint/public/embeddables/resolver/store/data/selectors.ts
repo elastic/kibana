@@ -393,15 +393,25 @@ function processPositions(
   return positions;
 }
 
+export const indexedProcessTree = createSelector(graphableProcesses, function indexedTree(
+  /* eslint-disable no-shadow */
+  graphableProcesses
+  /* eslint-enable no-shadow */
+) {
+  return indexedProcessTreeFactory(graphableProcesses);
+});
+
 export const processAdjacencies = createSelector(
+  indexedProcessTree,
   graphableProcesses,
   function selectProcessAdjacencies(
     /* eslint-disable no-shadow */
+    indexedProcessTree,
     graphableProcesses
     /* eslint-enable no-shadow */
   ) {
     const processToAdjacencyMap = new Map<ResolverEvent, AdjacentProcessMap>();
-    const { idToAdjacent } = indexedProcessTreeFactory(graphableProcesses);
+    const { idToAdjacent } = indexedProcessTree;
 
     for (const graphableProcess of graphableProcesses) {
       const processPid = uniquePidForProcess(graphableProcess);
@@ -413,16 +423,12 @@ export const processAdjacencies = createSelector(
 );
 
 export const processNodePositionsAndEdgeLineSegments = createSelector(
-  graphableProcesses,
+  indexedProcessTree,
   function processNodePositionsAndEdgeLineSegments(
     /* eslint-disable no-shadow */
-    graphableProcesses
+    indexedProcessTree
     /* eslint-enable no-shadow */
   ) {
-    /**
-     * Index the tree, creating maps from id -> node and id -> children
-     */
-    const indexedProcessTree = indexedProcessTreeFactory(graphableProcesses);
     /**
      * Walk the tree in reverse level order, calculating the 'width' of subtrees.
      */
