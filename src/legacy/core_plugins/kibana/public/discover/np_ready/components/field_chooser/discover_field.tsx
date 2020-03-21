@@ -21,26 +21,31 @@ import { EuiButton, EuiToolTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon } from '../../../../../../../../plugins/kibana_react/public';
-import { Field, FieldDetails } from './types';
+import { FieldDetails } from './types';
+import { IndexPatternField, IndexPattern } from '../../../../../../../../plugins/data/public';
 
 export interface Props {
-  field: Field;
+  field: IndexPatternField;
+  indexPattern: IndexPattern;
   onAddField: (fieldName: string) => void;
-  onAddFilter: (field: Field | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   onRemoveField: (fieldName: string) => void;
-  onShowDetails: (show: boolean, field: Field) => void;
+  onShowDetails: (show: boolean, field: IndexPatternField) => void;
   showDetails: boolean;
-  getDetails: (field: Field) => FieldDetails;
+  getDetails: (field: IndexPatternField) => FieldDetails;
+  selected?: boolean;
 }
 
 export function DiscoverField({
   field,
+  indexPattern,
   onAddField,
   onRemoveField,
   onAddFilter,
   onShowDetails,
   showDetails,
   getDetails,
+  selected,
 }: Props) {
   const addLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
     defaultMessage: 'Add',
@@ -49,8 +54,8 @@ export function DiscoverField({
     defaultMessage: 'Remove',
   });
 
-  const toggleDisplay = (f: Field) => {
-    if (f.display) {
+  const toggleDisplay = (f: IndexPatternField) => {
+    if (selected) {
       onRemoveField(f.name);
     } else {
       onAddField(f.name);
@@ -84,7 +89,7 @@ export function DiscoverField({
           </EuiToolTip>
         </span>
         <span>
-          {field.name !== '_source' && !field.display && (
+          {field.name !== '_source' && !selected && (
             <EuiButton
               fill
               size="s"
@@ -99,7 +104,7 @@ export function DiscoverField({
               {addLabel}
             </EuiButton>
           )}
-          {field.name !== '_source' && field.display && (
+          {field.name !== '_source' && selected && (
             <EuiButton
               color="danger"
               className="dscSidebarItem__action"
@@ -116,7 +121,12 @@ export function DiscoverField({
         </span>
       </div>
       {showDetails && details && (
-        <DiscoverFieldDetails field={field} details={details} onAddFilter={onAddFilter} />
+        <DiscoverFieldDetails
+          indexPattern={indexPattern}
+          field={field}
+          details={details}
+          onAddFilter={onAddFilter}
+        />
       )}
     </div>
   );

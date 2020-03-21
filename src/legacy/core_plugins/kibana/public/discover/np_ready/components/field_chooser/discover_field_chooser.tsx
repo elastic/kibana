@@ -16,56 +16,74 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiTitle } from '@elastic/eui';
+import { sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
-import { IIndexPattern, IndexPatternAttributes } from '../../../../../../../../plugins/data/common';
-import { Field, FieldDetails, FieldFilter } from './types';
+import { IndexPatternAttributes } from '../../../../../../../../plugins/data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import { groupFields } from './lib/group_fields';
+import {
+  IndexPatternFieldList,
+  IndexPatternField,
+  IndexPattern,
+} from '../../../../../../../../plugins/data/public';
+import { AppState } from '../../angular/discover_state';
+import { getDetails } from './lib/get_details';
+import { getFieldFilter } from './lib/get_field_filter';
+import { getServices } from '../../../kibana_services';
+import { getIndexPatternFieldList } from './lib/get_fields';
 
 export interface Props {
   columns: string[];
-  fields: Field[];
   fieldCounts: Record<string, number>;
-  filter: FieldFilter;
-  getDetails: (field: Field) => FieldDetails;
+  hits: Array<Record<string, unknown>>;
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
   onAddField: (fieldName: string) => void;
-  onAddFilter: (field: Field | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   onRemoveField: (fieldName: string) => void;
-  popularLimit: number;
-  selectedIndexPattern: IIndexPattern;
-  setFilterValue: (field: string, value: string | boolean | undefined) => void;
+  selectedIndexPattern: IndexPattern;
   setIndexPattern: (id: string) => void;
+  state: AppState;
 }
 
 export function DiscoverFieldChooser({
   columns,
-  fields,
   fieldCounts,
-  filter,
-  getDetails,
+  hits,
   indexPatternList,
   onAddField,
   onAddFilter,
   onRemoveField,
-  popularLimit,
   selectedIndexPattern,
-  setFilterValue,
   setIndexPattern,
+  state,
 }: Props) {
+  const filter = getFieldFilter();
   const [openFieldMap, setOpenFieldMap] = useState(new Map());
   const [showFields, setShowFields] = useState(false);
+  const [fields, setFields] = useState<IndexPatternFieldList | null>(null);
+  const [fieldFilterValues, setFieldFilterValues] = useState(filter.getValues());
+  useEffect(() => {
+    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
+    setFields(newFields);
+  }, [selectedIndexPattern, fieldCounts, hits]);
 
-  if (!selectedIndexPattern || !filter || !Array.isArray(fields)) {
+  const popularLimit = getServices().uiSettings.get('fields:popularLimit');
+  const onChangeFieldSearch = (field: string, value: string | boolean | undefined) => {
+    filter.setValue(field, value);
+    setFieldFilterValues({ ...filter.getValues() });
+  };
+
+  if (!selectedIndexPattern || !fields) {
     return null;
   }
   const groupedFields = groupFields(fields, columns, popularLimit, fieldCounts);
+
   const fieldTypes = ['any'];
   for (const field of fields) {
     if (fieldTypes.indexOf(field.type) === -1) {
@@ -73,7 +91,7 @@ export function DiscoverFieldChooser({
     }
   }
 
-  const onShowDetails = (show: boolean, field: Field) => {
+  const onShowDetails = (show: boolean, field: IndexPatternField) => {
     if (!show) {
       setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
     } else {
@@ -82,54 +100,64 @@ export function DiscoverFieldChooser({
     }
   };
 
-  const isFieldFiltered = (field: Field) => {
-    const { vals } = filter;
+  const isFieldDisplayed = (field: IndexPatternField) => {
+    return columns.includes(field.name);
+  };
+
+  const isFieldFiltered = (field: IndexPatternField) => {
+    const vals = fieldFilterValues;
     const matchFilter = vals.type === 'any' || field.type === vals.type;
-    const isAggregatable = vals.aggregatable == null || field.aggregatable === vals.aggregatable;
-    const isSearchable = vals.searchable == null || field.searchable === vals.searchable;
+    const isAggregatable = vals.aggregatable === null || field.aggregatable === vals.aggregatable;
+    const isSearchable = vals.searchable === null || field.searchable === vals.searchable;
     const scriptedOrMissing =
-      !vals.missing || field.type === '_source' || field.scripted || field.rowCount > 0;
+      !vals.missing || field.type === '_source' || field.scripted || fieldCounts[field.name] > 0;
     const matchName = !vals.name || field.name.indexOf(vals.name) !== -1;
 
     return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
   };
-
-  const isFieldFilteredAndDisplayed = (field: Field) => {
-    return field.display && isFieldFiltered(field);
+  /**
+   * filter for fields that match the filter and are displayed/selected
+   */
+  const isFieldFilteredAndDisplayed = (field: IndexPatternField) => {
+    return isFieldDisplayed(field) && isFieldFiltered(field);
   };
   /**
    * filter for fields that are not displayed / selected for the data table
    */
-  const isFieldFilteredAndNotDisplayed = (field: Field) => {
-    return !field.display && isFieldFiltered(field) && field.type !== '_source';
+  const isFieldFilteredAndNotDisplayed = (field: IndexPatternField) => {
+    return !isFieldDisplayed(field) && isFieldFiltered(field) && field.type !== '_source';
   };
 
-  const indexAndFieldsAriaLabel = i18n.translate(
-    'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
-    {
-      defaultMessage: 'Index and fields',
-    }
-  );
+  const getDetailsByField = (ipField: IndexPatternField) =>
+    getDetails(ipField, selectedIndexPattern, state, columns, hits);
+
   const popularFields = groupedFields?.popular?.filter(isFieldFilteredAndNotDisplayed) || [];
   return (
-    <section className="sidebar-list" aria-label={indexAndFieldsAriaLabel}>
+    <section
+      className="sidebar-list"
+      aria-label={i18n.translate(
+        'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
+        {
+          defaultMessage: 'Index and fields',
+        }
+      )}
+    >
       <DiscoverIndexPattern
         selectedIndexPattern={selectedIndexPattern}
         setIndexPattern={setIndexPattern}
-        indexPatternList={indexPatternList}
+        indexPatternList={sortBy(indexPatternList, o => o.attributes.title)}
       />
-
       <div className="sidebar-item">
         <form>
           <DiscoverFieldSearch
-            onChange={setFilterValue}
-            value={filter.vals.name}
+            onChange={onChangeFieldSearch}
+            value={fieldFilterValues.name}
             types={fieldTypes}
           />
         </form>
       </div>
       <div className="sidebar-list">
-        {fields && fields.length && (
+        {fields.length > 0 && (
           <>
             <div className="dscSidebar__listHeader sidebar-list-header">
               <EuiTitle size="xxxs" id="selected_fields">
@@ -142,21 +170,25 @@ export function DiscoverFieldChooser({
               </EuiTitle>
             </div>
             <ul className="list-unstyled dscFieldList--selected" aria-labelledby="selected_fields">
-              {fields.filter(isFieldFilteredAndDisplayed).map((field: Field, idx: number) => {
-                return (
-                  <li key={`field${idx}`}>
-                    <DiscoverField
-                      field={field}
-                      onAddField={onAddField}
-                      onRemoveField={onRemoveField}
-                      onAddFilter={onAddFilter}
-                      onShowDetails={onShowDetails}
-                      getDetails={getDetails}
-                      showDetails={openFieldMap.get(field.name) || false}
-                    />
-                  </li>
-                );
-              })}
+              {fields
+                .filter(isFieldFilteredAndDisplayed)
+                .map((field: IndexPatternField, idx: number) => {
+                  return (
+                    <li key={`field${idx}`}>
+                      <DiscoverField
+                        field={field}
+                        indexPattern={selectedIndexPattern}
+                        onAddField={onAddField}
+                        onRemoveField={onRemoveField}
+                        onAddFilter={onAddFilter}
+                        onShowDetails={onShowDetails}
+                        getDetails={getDetailsByField}
+                        showDetails={openFieldMap.get(field.name) || false}
+                        selected={true}
+                      />
+                    </li>
+                  );
+                })}
             </ul>
             <div className="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium">
               <EuiTitle size="xxxs" id="available_fields" className="euiFlexItem">
@@ -207,16 +239,17 @@ export function DiscoverFieldChooser({
                 />
               </h6>
             </li>
-            {popularFields.map((field: Field, idx: number) => {
+            {popularFields.map((field: IndexPatternField, idx: number) => {
               return (
                 <li key={`field${idx}`}>
                   <DiscoverField
                     field={field}
+                    indexPattern={selectedIndexPattern}
                     onAddField={onAddField}
                     onRemoveField={onRemoveField}
                     onAddFilter={onAddFilter}
                     onShowDetails={onShowDetails}
-                    getDetails={getDetails}
+                    getDetails={getDetailsByField}
                     showDetails={openFieldMap.get(field.name) || false}
                   />
                 </li>
@@ -234,16 +267,17 @@ export function DiscoverFieldChooser({
           {groupedFields &&
             groupedFields.unpopular
               .filter(isFieldFilteredAndNotDisplayed)
-              .map((field: Field, idx: number) => {
+              .map((field: IndexPatternField, idx: number) => {
                 return (
                   <li key={`field${idx}`}>
                     <DiscoverField
                       field={field}
+                      indexPattern={selectedIndexPattern}
                       onAddField={onAddField}
                       onRemoveField={onRemoveField}
                       onAddFilter={onAddFilter}
                       onShowDetails={onShowDetails}
-                      getDetails={getDetails}
+                      getDetails={getDetailsByField}
                       showDetails={openFieldMap.get(field.name) || false}
                     />
                   </li>

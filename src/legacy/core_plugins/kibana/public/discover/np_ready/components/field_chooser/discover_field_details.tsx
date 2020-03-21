@@ -21,15 +21,17 @@ import { EuiLink, EuiSpacer, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
-import { Bucket, Field, FieldDetails } from './types';
+import { Bucket, FieldDetails } from './types';
+import { IndexPatternField, IndexPattern } from '../../../../../../../../plugins/data/public';
 
 interface Props {
-  field: Field;
+  field: IndexPatternField;
+  indexPattern: IndexPattern;
   details: FieldDetails;
-  onAddFilter: (field: Field | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
-export function DiscoverFieldDetails({ field, details, onAddFilter }: Props) {
+export function DiscoverFieldDetails({ field, indexPattern, details, onAddFilter }: Props) {
   const warnings = getWarnings(field);
   if (!details) {
     return null;
@@ -43,12 +45,12 @@ export function DiscoverFieldDetails({ field, details, onAddFilter }: Props) {
             id="kbn.discover.fieldChooser.detailViews.topValuesInRecordsDescription"
             defaultMessage="Top 5 values in"
           />{' '}
-          {!field.indexPattern.metaFields.includes(field.name) && !field.scripted && (
+          {!indexPattern.metaFields.includes(field.name) && !field.scripted && (
             <EuiLink className="kuiLink" onClick={() => onAddFilter('_exists_', field.name, '+')}>
               {details.exists}
             </EuiLink>
           )}{' '}
-          {!field.indexPattern.metaFields.includes(field.name) && field.scripted && (
+          {!indexPattern.metaFields.includes(field.name) && field.scripted && (
             <span>{details.exists}</span>
           )}
           / {details.total}{' '}

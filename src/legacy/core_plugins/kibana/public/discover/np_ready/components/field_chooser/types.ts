@@ -22,27 +22,6 @@ export interface IndexPatternRef {
   title: string;
 }
 
-export interface Field {
-  count: number;
-  details: FieldDetails;
-  indexPattern: {
-    metaFields: string[];
-  };
-  scripted: boolean;
-  name: string;
-  filterable: boolean;
-  visualizable: boolean;
-  aggregatable: boolean;
-  searchable: boolean;
-  rowCount: number;
-  type: string;
-  /**
-   * determines if a field is selected and displayed in the doc table
-   */
-  display: boolean;
-  displayOrder: number;
-}
-
 export interface FieldDetails {
   error: string;
   exists: number;
@@ -56,27 +35,4 @@ export interface Bucket {
   value: string;
   percent: number;
   count: number;
-}
-
-export interface FieldFilterBoolOpt {
-  label: string;
-  value?: string;
-}
-
-export interface FieldFilterVals extends Field {
-  missing: boolean;
-  type: string;
-  name: string;
-}
-
-export interface FieldFilter {
-  props: string[];
-  defaults: {
-    missing: boolean;
-    type: string;
-    name: string;
-  };
-  boolOpts: FieldFilterBoolOpt[];
-  reset: () => void;
-  vals: FieldFilterVals;
 }

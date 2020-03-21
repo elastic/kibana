@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { chain, indexOf, sortBy } from 'lodash';
-import { Field } from '../types';
+import { chain, sortBy } from 'lodash';
+import { IndexPatternFieldList } from '../../../../../../../../../plugins/data/public';
 
 /**
  * group the fields into popular and up-popular lists
  * TODO: No reason to use lodash here, legacy, to be refactored
  */
 export function groupFields(
-  fields: Field[],
+  fields: IndexPatternFieldList,
   columns: string[],
   popularLimit: number,
   fieldCounts: Record<string, number>
@@ -37,17 +37,12 @@ export function groupFields(
     };
   }
   return chain(fields)
-    .each(function(field: Field) {
-      field.displayOrder = indexOf(columns, field.name) + 1;
-      field.display = !!field.displayOrder;
-      field.rowCount = fieldCounts[field.name];
-    })
     .sortBy(function(field) {
       return (field.count || 0) * -1;
     })
     .groupBy(function(field) {
-      if (field.display) return 'selected';
-      return field.count > 0 ? 'popular' : 'unpopular';
+      if (columns.includes(field.name)) return 'selected';
+      return field.count ? 'popular' : 'unpopular';
     })
     .tap(function(groups) {
       groups.selected = sortBy(groups.selected || [], 'displayOrder');

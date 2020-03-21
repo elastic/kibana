@@ -41,8 +41,6 @@ import { createTableRowDirective } from './np_ready/angular/doc_table/components
 import { createPagerFactory } from './np_ready/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './np_ready/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './np_ready/angular/doc_viewer';
-// @ts-ignore
-import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
 import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
 import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
@@ -154,7 +152,6 @@ export function initializeInnerAngularModule(
     .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discFieldChooser', createFieldChooserDirective)
     .directive('discoverFieldChooser', createDiscoverFieldChooserDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
 }

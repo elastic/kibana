@@ -21,12 +21,11 @@ import rison from 'rison-node';
 import {
   IFieldType,
   IIndexPattern,
+  IndexPatternField,
   KBN_FIELD_TYPES,
 } from '../../../../../../../../../plugins/data/public';
 import { AppState } from '../../../angular/discover_state';
 import { getServices } from '../../../../kibana_services';
-
-import { Field } from '../types';
 
 function getMapsAppBaseUrl() {
   const mapsAppVisAlias = getServices()
@@ -109,7 +108,7 @@ export function getMapsAppUrl(
 }
 
 export function getVisualizeUrl(
-  field: Field,
+  field: IndexPatternField,
   indexPattern: IIndexPattern,
   state: AppState,
   columns: string[],

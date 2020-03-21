@@ -28,6 +28,20 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { DiscoverFieldChooser } from './discover_field_chooser';
 import { coreMock } from '../../../../../../../../core/public/mocks';
+import { IndexPatternAttributes } from '../../../../../../../../plugins/data/common';
+import { SavedObject } from '../../../../../../../../core/types';
+
+jest.mock('../../../kibana_services', () => ({
+  getServices: () => ({
+    uiSettings: {
+      get: (key: string) => {
+        if (key === 'fields:popularLimit') {
+          return 5;
+        }
+      },
+    },
+  }),
+}));
 
 function getCompProps() {
   const indexPattern = new StubIndexPattern(
@@ -38,45 +52,34 @@ function getCompProps() {
     coreMock.createStart()
   );
 
-  const hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit);
+  const hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit) as Array<
+    Record<string, unknown>
+  >;
 
   const indexPatternList = [
-    { id: '0', attributes: { title: 'b' } },
-    { id: '1', attributes: { title: 'a' } },
-    { id: '2', attributes: { title: 'c' } },
+    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
+    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
+    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
   ];
 
-  const fieldCounts = {};
+  const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
     for (const key of Object.keys(indexPattern.flattenHit(hit))) {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
-
   return {
-    addField: jest.fn(),
-    addFilter: jest.fn(),
+    columns: ['extension'],
     fieldCounts,
-    fields: [],
-    fieldTypes: [],
-    filter: {
-      vals: {
-        name: '',
-      },
-    } as FieldFilter,
-    groupedFields: { selected: [], popular: [], unpopular: [] },
     hits,
     indexPatternList,
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    removeField: jest.fn(),
     selectedIndexPattern: indexPattern,
-    setFilterValue: jest.fn(),
     setIndexPattern: jest.fn(),
-    toggle: jest.fn(),
-    getDetails: jest.fn(),
+    state: {},
   };
 }
 
@@ -84,9 +87,6 @@ describe('discover field chooser', function() {
   describe('Field listing', function() {
     it('should have Selected Fields, Fields and Popular Fields sections', function() {
       const comp = mountWithIntl(<DiscoverFieldChooser {...getCompProps()} />);
-
-      // const headers = comp.find('.sidebar-list-header');
-      // expect(headers.length).toBe(3);
       expect(comp.html()).toMatchSnapshot();
     });
   });

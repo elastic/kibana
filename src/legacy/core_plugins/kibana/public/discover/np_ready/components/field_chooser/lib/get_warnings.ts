@@ -17,9 +17,9 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { Field } from '../types';
+import { IndexPatternField } from '../../../../../../../../../plugins/data/public';
 
-export function getWarnings(field: Field) {
+export function getWarnings(field: IndexPatternField) {
   let warnings = [];
 
   if (field.scripted) {

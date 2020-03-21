@@ -21,12 +21,13 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { getBucketAriaLabel } from './lib/get_bucket_aria_label';
-import { Bucket, Field } from './types';
+import { Bucket } from './types';
+import { IndexPatternField } from '../../../../../../../../plugins/data/public';
 
 interface Props {
   bucket: Bucket;
-  field: Field;
-  onAddFilter: (field: Field | string, value: string, type: '+' | '-') => void;
+  field: IndexPatternField;
+  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
 export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
