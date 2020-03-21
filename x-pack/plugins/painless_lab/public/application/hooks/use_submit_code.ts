@@ -9,7 +9,7 @@ import { HttpSetup } from 'kibana/public';
 import { debounce } from 'lodash';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { Response, PayloadFormat, Store } from '../types';
+import { Response, PayloadFormat, Payload } from '../types';
 import { formatRequestPayload } from '../lib/format';
 
 const DEBOUNCE_MS = 800;
@@ -21,7 +21,7 @@ export const useSubmitCode = (http: HttpSetup) => {
 
   const submit = useCallback(
     debounce(
-      async (config: Store) => {
+      async (config: Payload) => {
         setInProgress(true);
 
         // Prevent an older request that resolves after a more recent request from clobbering it.

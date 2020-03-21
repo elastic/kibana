@@ -24,8 +24,12 @@ import { painlessContextOptions } from '../../constants';
 import { useAppContext } from '../../context';
 
 export const ContextTab: FunctionComponent = () => {
-  const { state, updateState, links } = useAppContext();
-  const { context, document, index, query } = state;
+  const {
+    store: { payload, validation },
+    updatePayload,
+    links,
+  } = useAppContext();
+  const { context, document, index, query } = payload;
 
   return (
     <>
@@ -60,7 +64,7 @@ export const ContextTab: FunctionComponent = () => {
         <EuiSuperSelect
           options={painlessContextOptions}
           valueOfSelected={context}
-          onChange={nextContext => updateState({ context: nextContext })}
+          onChange={nextContext => updatePayload({ context: nextContext })}
           itemLayoutAlign="top"
           hasDividers
           fullWidth
@@ -72,25 +76,38 @@ export const ContextTab: FunctionComponent = () => {
           label={
             <EuiToolTip
               content={i18n.translate('xpack.painlessLab.indexFieldTooltipText', {
-                defaultMessage:
-                  "Index mappings must be compatible with the sample document's fields",
+                defaultMessage: `Index mappings must be compatible with the sample document's fields`,
               })}
             >
               <span>
-                <FormattedMessage id="xpack.painlessLab.indexFieldLabel" defaultMessage="Index" />{' '}
+                <FormattedMessage
+                  id="xpack.painlessLab.indexFieldLabel"
+                  defaultMessage="Index name"
+                />{' '}
                 <EuiIcon type="questionInCircle" color="subdued" />
               </span>
             </EuiToolTip>
           }
           fullWidth
+          isInvalid={!validation.fields.index}
+          error={
+            validation.fields.index
+              ? []
+              : [
+                  i18n.translate('xpack.painlessLab.indexFieldMissingErrorMessage', {
+                    defaultMessage: 'Enter an index name',
+                  }),
+                ]
+          }
         >
           <EuiFieldText
             fullWidth
             value={index || ''}
             onChange={e => {
               const nextIndex = e.target.value;
-              updateState({ index: nextIndex });
+              updatePayload({ index: nextIndex });
             }}
+            isInvalid={!validation.fields.index}
           />
         </EuiFormRow>
       )}
@@ -126,7 +143,7 @@ export const ContextTab: FunctionComponent = () => {
               languageId="json"
               height={150}
               value={query}
-              onChange={nextQuery => updateState({ query: nextQuery })}
+              onChange={nextQuery => updatePayload({ query: nextQuery })}
               options={{
                 fontSize: 12,
                 minimap: {
@@ -152,7 +169,7 @@ export const ContextTab: FunctionComponent = () => {
               <span>
                 <FormattedMessage
                   id="xpack.painlessLab.documentFieldLabel"
-                  defaultMessage="Sample document"
+                  defaultMessage="Sample document (JSON)"
                 />{' '}
                 <EuiIcon type="questionInCircle" color="subdued" />
               </span>
@@ -165,7 +182,7 @@ export const ContextTab: FunctionComponent = () => {
               languageId="json"
               height={400}
               value={document}
-              onChange={nextDocument => updateState({ document: nextDocument })}
+              onChange={nextDocument => updatePayload({ document: nextDocument })}
               options={{
                 fontSize: 12,
                 minimap: {

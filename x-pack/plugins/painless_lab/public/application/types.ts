@@ -5,6 +5,11 @@
  */
 
 export interface Store {
+  payload: Payload;
+  validation: Validation;
+}
+
+export interface Payload {
   context: string;
   code: string;
   parameters: string;
@@ -13,7 +18,14 @@ export interface Store {
   query: string;
 }
 
-// This should be an enumerated list
+export interface Validation {
+  isValid: boolean;
+  fields: {
+    index: boolean;
+  };
+}
+
+// TODO: This should be an enumerated list
 export type Context = string;
 
 export enum PayloadFormat {

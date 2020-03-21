@@ -9,7 +9,7 @@ import { HttpSetup } from 'src/core/public';
 
 import { Links } from '../links';
 import { exampleScript, painlessContextOptions } from './constants';
-import { Store } from './types';
+import { Store, Payload, Validation } from './types';
 
 interface AppContextProviderArgs {
   children: ReactNode;
@@ -19,9 +19,16 @@ interface AppContextProviderArgs {
   };
 }
 
-const PAINLESS_LAB_KEY = 'painlessLabState';
+interface ContextValue {
+  store: Store;
+  updatePayload: (changes: Partial<Payload>) => void;
+  services: {
+    http: HttpSetup;
+  };
+  links: Links;
+}
 
-const initialState = {
+const initialPayload = {
   context: painlessContextOptions[0].value,
   code: exampleScript,
   parameters: `{
@@ -36,37 +43,54 @@ const initialState = {
   query: '',
 };
 
-interface ContextValue {
-  state: Store;
-  updateState: (changes: Partial<Store>) => void;
-  services: {
-    http: HttpSetup;
-  };
-  links: Links;
-}
-
 const AppContext = createContext<ContextValue>(undefined as any);
+
+const validatePayload = (payload: Payload): Validation => {
+  const { index } = payload;
+
+  // For now just validate that the user has entered an index.
+  const indexExists = Boolean(index || index.trim());
+
+  return {
+    isValid: indexExists,
+    fields: {
+      index: indexExists,
+    },
+  };
+};
 
 export const AppContextProvider = ({
   children,
   value: { http, links, chrome },
 }: AppContextProviderArgs) => {
-  const [state, setState] = useState<Store>(() => ({
-    ...initialState,
-    ...JSON.parse(localStorage.getItem(PAINLESS_LAB_KEY) || '{}'),
-  }));
+  const PAINLESS_LAB_KEY = 'painlessLabState';
 
-  const updateState = (changes: Partial<Store>): void => {
-    const nextState = {
-      ...state,
+  const defaultPayload = {
+    ...initialPayload,
+    ...JSON.parse(localStorage.getItem(PAINLESS_LAB_KEY) || '{}'),
+  };
+
+  const [store, setStore] = useState<Store>({
+    payload: defaultPayload,
+    validation: validatePayload(defaultPayload),
+  });
+
+  const updatePayload = (changes: Partial<Payload>): void => {
+    const nextPayload = {
+      ...store.payload,
       ...changes,
     };
-    localStorage.setItem(PAINLESS_LAB_KEY, JSON.stringify(nextState));
-    setState(() => nextState);
+    // Persist state locally so we can load it up when the user reopens the app.
+    localStorage.setItem(PAINLESS_LAB_KEY, JSON.stringify(nextPayload));
+
+    setStore({
+      payload: nextPayload,
+      validation: validatePayload(nextPayload),
+    });
   };
 
   return (
-    <AppContext.Provider value={{ updateState, state, services: { http, chrome }, links }}>
+    <AppContext.Provider value={{ updatePayload, store, services: { http, chrome }, links }}>
       {children}
     </AppContext.Provider>
   );

@@ -21,7 +21,11 @@ import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public
 import { useAppContext } from '../../context';
 
 export const ParametersTab: FunctionComponent = () => {
-  const { state, updateState, links } = useAppContext();
+  const {
+    store: { payload },
+    updatePayload,
+    links,
+  } = useAppContext();
   return (
     <>
       <EuiSpacer size="m" />
@@ -56,8 +60,8 @@ export const ParametersTab: FunctionComponent = () => {
           <CodeEditor
             languageId="json"
             height={600}
-            value={state.parameters}
-            onChange={nextParams => updateState({ parameters: nextParams })}
+            value={payload.parameters}
+            onChange={nextParams => updatePayload({ parameters: nextParams })}
             options={{
               fontSize: 12,
               minimap: {
