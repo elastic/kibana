@@ -51,7 +51,12 @@ export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => 
             // We are removing the first item because it will always the creation of the case
             // and we do not want it to simplify our life
             setCaseUserActionsState({
-              caseUserActions: !isEmpty(response) ? response.slice(1) : [],
+              caseUserActions: !isEmpty(response)
+                ? [
+                    ...response.slice(1),
+                    { ...response[response.length - 1], actionId: 33, action: 'push-to-service' },
+                  ]
+                : [],
               isLoading: false,
               isError: false,
             });

@@ -138,7 +138,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
   const toggleStatusCase = useCallback(status => onUpdateField('status', status), [onUpdateField]);
 
   const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
-
+  const hasDataToPush = useMemo(() => {
+    const indexPushToService = caseUserActions.findIndex(cua => cua.action === 'push-to-service');
+    if (indexPushToService === -1 || indexPushToService < caseUserActions.length - 1) {
+      return true;
+    }
+    return false;
+  }, [caseUserActions]);
   const caseStatusData = useMemo(
     () =>
       caseData.status === 'open'
@@ -237,7 +243,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                         onChange={onChangeStatus}
                       />
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{pushButton}</EuiFlexItem>
+                    {hasDataToPush && <EuiFlexItem grow={false}>{pushButton}</EuiFlexItem>}
                   </EuiFlexGroup>
                 </>
               )}

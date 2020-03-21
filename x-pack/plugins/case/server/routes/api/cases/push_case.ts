@@ -121,7 +121,7 @@ export function initPushCaseUserActionApi({
               actionAt: pushedDate,
               actionBy: pushedBy,
               caseId,
-              fields: [],
+              fields: ['pushed'],
               newValue: JSON.stringify(pushed),
             }),
           ],

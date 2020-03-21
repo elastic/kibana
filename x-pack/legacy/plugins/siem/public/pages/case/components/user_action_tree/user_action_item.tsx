@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
@@ -28,7 +34,7 @@ interface UserActionItemProps {
   idToOutline?: string | null;
 }
 
-const UserActionItemContainer = styled(EuiFlexGroup)`
+export const UserActionItemContainer = styled(EuiFlexGroup)`
   ${({ theme }) => css`
     & {
       background-image: linear-gradient(
@@ -80,6 +86,18 @@ const MyEuiPanel = styled(EuiPanel)<{ showoutline: string }>`
     `
       : ''}
 `;
+const PushedContainer = styled(EuiFlexItem)`
+  margin-top: 8px;
+  margin-bottom: 24px;
+  hr {
+    margin: 5px;
+    height: 2px;
+  }
+`;
+
+const PushedInfoContainer = styled.div`
+  margin-left: 48px;
+`;
 
 export const UserActionItem = ({
   createdAt,
@@ -97,13 +115,41 @@ export const UserActionItem = ({
   userName,
   updatedAt,
 }: UserActionItemProps) => (
-  <UserActionItemContainer gutterSize={'none'}>
-    <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
-      {fullName.length > 0 || userName.length > 0 ? (
-        <UserActionAvatar name={fullName ?? userName} />
-      ) : (
-        <EuiLoadingSpinner className="userAction_loadingAvatar" />
-      )}
+  <UserActionItemContainer gutterSize={'none'} direction="column">
+    <EuiFlexItem>
+      <EuiFlexGroup gutterSize={'none'}>
+        <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
+          {fullName.length > 0 || userName.length > 0 ? (
+            <UserActionAvatar name={fullName ?? userName} />
+          ) : (
+            <EuiLoadingSpinner className="userAction_loadingAvatar" />
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj={`user-action-${id}`}>
+          {isEditable && markdown}
+          {!isEditable && (
+            <MyEuiPanel
+              className="userAction__panel"
+              paddingSize="none"
+              showoutline={id === idToOutline ? 'true' : 'false'}
+            >
+              <UserActionTitle
+                createdAt={createdAt}
+                id={id}
+                isLoading={isLoading}
+                labelAction={labelAction}
+                labelTitle={labelTitle ?? <></>}
+                linkId={linkId}
+                userName={userName}
+                updatedAt={updatedAt}
+                onEdit={onEdit}
+                outlineComment={outlineComment}
+              />
+              {markdown}
+            </MyEuiPanel>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem data-test-subj={`user-action-${id}`}>
       {isEditable && markdown}

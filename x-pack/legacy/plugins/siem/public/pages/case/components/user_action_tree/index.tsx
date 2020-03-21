@@ -15,7 +15,7 @@ import { useUpdateComment } from '../../../../containers/case/use_update_comment
 import { useCurrentUser } from '../../../../lib/kibana';
 import { AddComment } from '../add_comment';
 import { getLabelTitle } from './helpers';
-import { UserActionItem } from './user_action_item';
+import { UserActionItem, UserActionItemContainer } from './user_action_item';
 import { UserActionMarkdown } from './user_action_markdown';
 
 export interface UserActionTreeProps {
