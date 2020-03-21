@@ -58,7 +58,7 @@ kibanaPipeline(timeoutMinutes: 180) {
             "### Print Canonical TIME_STAMP"
           )
         }
-        TODO-TRE UNCOMMENT
+
         sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
         kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
         sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
