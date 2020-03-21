@@ -47,38 +47,21 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
     }
 
     if (action.type === 'userClosedAlert') {
-      // TODO: this also needs to close the flyout, not sure what the best way to do that would be
       const id = action.payload;
       const body = JSON.stringify({
         state: {
           active: false,
         },
       });
-      await coreStart.http
-        .patch(`/api/endpoint/alerts/${id}`, {
+
+      try {
+        await coreStart.http.patch(`/api/endpoint/alerts/${id}`, {
           body,
-        })
-        .then(() => {
-          coreStart.notifications.toasts.addSuccess({
-            title: i18n.translate(
-              'xpack.endpoint.application.endpoint.alerts.toasts.closeSuccess',
-              {
-                defaultMessage: `Alert Successfully Closed`,
-              }
-            ),
-          });
-        })
-        .catch(() => {
-          coreStart.notifications.toasts.addDanger({
-            title: i18n.translate(
-              'xpack.endpoint.application.endpoint.alerts.toasts.closeFailure',
-              {
-                defaultMessage: `Failed to close alert`,
-              }
-            ),
-          });
         });
-      // Close the flyout here
+        api.dispatch({ type: 'serverSuccessfullyClosedAlert' });
+      } catch {
+        api.dispatch({ type: 'serverFailedToCloseAlert' });
+      }
     }
   };
 };

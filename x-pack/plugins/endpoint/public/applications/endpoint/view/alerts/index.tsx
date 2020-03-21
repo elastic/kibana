@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useState, useMemo, useCallback } from 'react';
+import { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import React from 'react';
 import {
   EuiDataGrid,
@@ -33,9 +33,11 @@ import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailsOverview } from './details';
 import { FormattedDate } from './formatted_date';
 import { AlertIndexSearchBar } from './index_search_bar';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
+  const { notifications } = useKibana();
 
   const columns = useMemo((): EuiDataGridColumn[] => {
     return [
@@ -95,6 +97,8 @@ export const AlertIndex = memo(() => {
   const hasSelectedAlert = useAlertListSelector(selectors.hasSelectedAlert);
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
   const selectedAlertData = useAlertListSelector(selectors.selectedAlertDetailsData);
+  const closeSuccess = useAlertListSelector(selectors.closeSuccess);
+  const closeError = useAlertListSelector(selectors.closeError);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => {
@@ -207,6 +211,45 @@ export const AlertIndex = memo(() => {
     }),
     [setVisibleColumns, visibleColumns]
   );
+
+  useEffect(() => {
+    if (closeSuccess !== undefined) {
+      notifications.toasts.success({
+        title: (
+          <FormattedMessage
+            id="xpack.endpoint.host.details.errorTitle"
+            defaultMessage="Successfully Closed Alert"
+          />
+        ),
+        body: (
+          <FormattedMessage id="xpack.endpoint.host.details.errorBody" defaultMessage="noice." />
+        ),
+        toastLifeTimeMs: 10000,
+      });
+      const { selected_alert, ...paramsWithoutSelectedAlert } = queryParams;
+      history.push(urlFromQueryParams(paramsWithoutSelectedAlert));
+    }
+  }, [closeSuccess, history, notifications.toasts, queryParams]);
+
+  useEffect(() => {
+    if (closeError !== undefined) {
+      notifications.toasts.danger({
+        title: (
+          <FormattedMessage
+            id="xpack.endpoint.host.details.errorTitle"
+            defaultMessage="Failed to close alert"
+          />
+        ),
+        body: (
+          <FormattedMessage
+            id="xpack.endpoint.host.details.errorBody"
+            defaultMessage="oh geez sorry."
+          />
+        ),
+        toastLifeTimeMs: 10000,
+      });
+    }
+  }, [closeError, notifications.toasts]);
 
   return (
     <>

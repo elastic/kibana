@@ -19,7 +19,10 @@ const initialState = (): AlertListState => {
     searchBar: {
       patterns: [],
     },
-    error: undefined,
+    closedAlert: {
+      success: undefined,
+      error: undefined,
+    },
   };
 };
 
@@ -47,6 +50,10 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
     return {
       ...state,
       location: action.payload,
+      closedAlert: {
+        success: undefined,
+        error: undefined,
+      },
     };
   } else if (action.type === 'serverReturnedAlertDetailsData') {
     return {
@@ -59,6 +66,20 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
       searchBar: {
         ...state.searchBar,
         patterns: action.payload,
+      },
+    };
+  } else if (action.type === 'serverSuccessfullyClosedAlert') {
+    return {
+      ...state,
+      closedAlert: {
+        success: true,
+      },
+    };
+  } else if (action.type === 'serverFailedToCloseAlert') {
+    return {
+      ...state,
+      closedAlert: {
+        error: true,
       },
     };
   }

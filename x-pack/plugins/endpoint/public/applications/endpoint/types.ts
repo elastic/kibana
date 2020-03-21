@@ -202,7 +202,10 @@ export interface AlertListState {
   /** Search bar state including indexPatterns */
   readonly searchBar: AlertsSearchBarState;
 
-  readonly error?: ServerApiError;
+  readonly closedAlert: {
+    success?: boolean;
+    error?: boolean;
+  };
 }
 
 /**

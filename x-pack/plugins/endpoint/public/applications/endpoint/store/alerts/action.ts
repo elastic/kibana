@@ -28,8 +28,18 @@ interface UserClosedAlert {
   readonly payload: string;
 }
 
+interface ServerSuccessfullyClosedAlert {
+  readonly type: 'serverSuccessfullyClosedAlert';
+}
+
+interface ServerFailedToCloseAlert {
+  readonly type: 'serverFailedToCloseAlert';
+}
+
 export type AlertAction =
   | ServerReturnedAlertsData
   | ServerReturnedAlertDetailsData
   | ServerReturnedSearchBarIndexPatterns
-  | UserClosedAlert;
+  | UserClosedAlert
+  | ServerSuccessfullyClosedAlert
+  | ServerFailedToCloseAlert;
