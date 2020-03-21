@@ -21,7 +21,6 @@ import {
   IMitreEnterpriseAttack,
   ScheduleStepRule,
   ActionsStepRule,
-  ActionsStepRule,
 } from './types';
 
 export interface GetStepsData {
