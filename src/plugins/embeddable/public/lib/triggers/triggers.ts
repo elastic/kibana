@@ -30,6 +30,7 @@ export interface EmbeddableVisTriggerContext<T extends IEmbeddable = IEmbeddable
   data: {
     e: MouseEvent;
     data: unknown;
+    range: unknown;
   };
 }
 

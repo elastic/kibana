@@ -59,6 +59,7 @@ import {
   changeTimeFilter,
   mapAndFlattenFilters,
   extractTimeFilter,
+  convertRangeFilterToTimeRangeString,
 } from './query';
 
 // Filter helpers namespace:
@@ -96,6 +97,7 @@ export const esFilters = {
   onlyDisabledFiltersChanged,
 
   changeTimeFilter,
+  convertRangeFilterToTimeRangeString,
   mapAndFlattenFilters,
   extractTimeFilter,
 };
@@ -449,8 +451,6 @@ export {
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
 } from '../common';
-
-export { valueClickActionGetFilters, selectRangeActionGetFilters } from './actions';
 
 /*
  * Plugin setup

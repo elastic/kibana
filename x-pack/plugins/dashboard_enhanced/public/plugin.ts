@@ -8,6 +8,7 @@ import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { SharePluginStart, SharePluginSetup } from '../../../../src/plugins/share/public';
 import { DashboardDrilldownsService } from './services';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { DrilldownsSetup, DrilldownsStart } from '../../drilldowns/public';
 
 export interface SetupDependencies {
@@ -20,6 +21,7 @@ export interface StartDependencies {
   uiActions: UiActionsStart;
   drilldowns: DrilldownsStart;
   share: SharePluginStart;
+  data: DataPublicPluginStart;
 }
 
 // eslint-disable-next-line
