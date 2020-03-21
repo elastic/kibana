@@ -71,12 +71,6 @@ kibanaPipeline(timeoutMinutes: 180) {
               }
             }
           }
-          kibanaPipeline.bash(
-            """
-            echo "### Canonical TIME_STAMP for the build and ingestion: ${TIME_STAMP}"
-            """,
-            "### Print Canonical TIME_STAMP"
-          )
           kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
         }
 
