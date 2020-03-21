@@ -217,12 +217,15 @@ export const AlertIndex = memo(() => {
       notifications.toasts.success({
         title: (
           <FormattedMessage
-            id="xpack.endpoint.host.details.errorTitle"
+            id="xpack.endpoint.alerts.closedAlert.successTitle"
             defaultMessage="Successfully Closed Alert"
           />
         ),
         body: (
-          <FormattedMessage id="xpack.endpoint.host.details.errorBody" defaultMessage="noice." />
+          <FormattedMessage
+            id="xpack.endpoint.alerts.closedAlert.successBody"
+            defaultMessage="noice."
+          />
         ),
         toastLifeTimeMs: 10000,
       });
@@ -236,13 +239,13 @@ export const AlertIndex = memo(() => {
       notifications.toasts.danger({
         title: (
           <FormattedMessage
-            id="xpack.endpoint.host.details.errorTitle"
+            id="xpack.endpoint.alerts.closedAlert.errorTitle"
             defaultMessage="Failed to close alert"
           />
         ),
         body: (
           <FormattedMessage
-            id="xpack.endpoint.host.details.errorBody"
+            id="xpack.endpoint.alerts.closedAlert.errorBody"
             defaultMessage="oh geez sorry."
           />
         ),

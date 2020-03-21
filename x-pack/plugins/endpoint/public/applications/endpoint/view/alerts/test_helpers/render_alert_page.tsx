@@ -15,8 +15,6 @@ import { KibanaContextProvider } from '../../../../../../../../../src/plugins/ki
 import { RouteCapture } from '../../route_capture';
 import { depsStartMock } from '../../../mocks';
 
-// TODO: Fix this file
-
 /**
  * Create a 'history' instance that is only in-memory and causes no side effects to the testing environment.
  */
@@ -29,33 +27,35 @@ const store = appStoreFactory();
 const depsStart = depsStartMock();
 depsStart.data.ui.SearchBar.mockImplementation(() => <div />);
 
-export const alertPageTestRender = {
-  store,
-  history,
-  depsStart,
+export const alertPageTestRender = () => {
+  return {
+    store,
+    history,
+    depsStart,
 
-  /**
-   * Render the test component, use this after setting up anything in `beforeEach`.
-   */
-  render: () => {
     /**
-     * Provide the store via `Provider`, and i18n APIs via `I18nProvider`.
-     * Use react-router via `Router`, passing our in-memory `history` instance.
-     * Use `RouteCapture` to emit url-change actions when the URL is changed.
-     * Finally, render the `AlertIndex` component which we are testing.
+     * Render the test component, use this after setting up anything in `beforeEach`.
      */
-    return reactTestingLibrary.render(
-      <Provider store={store}>
-        <KibanaContextProvider services={{ data: depsStart.data }}>
-          <I18nProvider>
-            <Router history={history}>
-              <RouteCapture>
-                <AlertIndex />
-              </RouteCapture>
-            </Router>
-          </I18nProvider>
-        </KibanaContextProvider>
-      </Provider>
-    );
-  },
+    render: () => {
+      /**
+       * Provide the store via `Provider`, and i18n APIs via `I18nProvider`.
+       * Use react-router via `Router`, passing our in-memory `history` instance.
+       * Use `RouteCapture` to emit url-change actions when the URL is changed.
+       * Finally, render the `AlertIndex` component which we are testing.
+       */
+      return reactTestingLibrary.render(
+        <Provider store={store}>
+          <KibanaContextProvider services={{ data: depsStart.data }}>
+            <I18nProvider>
+              <Router history={history}>
+                <RouteCapture>
+                  <AlertIndex />
+                </RouteCapture>
+              </Router>
+            </I18nProvider>
+          </KibanaContextProvider>
+        </Provider>
+      );
+    },
+  };
 };

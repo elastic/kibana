@@ -19,7 +19,7 @@ describe('when the alert details flyout is open', () => {
 
   beforeEach(async () => {
     // Creates the render elements for the tests to use
-    ({ render, history, store } = alertPageTestRender);
+    ({ render, history, store } = alertPageTestRender());
   });
   describe('when the alerts details flyout is open', () => {
     beforeEach(() => {

@@ -22,7 +22,7 @@ describe('when on the alerting page', () => {
 
   beforeEach(async () => {
     // Creates the render elements for the tests to use
-    ({ render, history, store, depsStart } = alertPageTestRender);
+    ({ render, history, store, depsStart } = alertPageTestRender());
   });
   it('should show a data grid', async () => {
     await render().findByTestId('alertListGrid');
