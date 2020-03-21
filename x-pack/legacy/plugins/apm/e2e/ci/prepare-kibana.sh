@@ -18,4 +18,4 @@ echo "3/3 Start Kibana ..."
 popd
 ## Might help to avoid FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
 export NODE_OPTIONS="--max-old-space-size=4096"
-nohup node scripts/kibana --config x-pack/legacy/plugins/apm/e2e/ci/kibana.e2e.yml --no-base-path --optimize.watch=false> kibana.log 2>&1 &
+nohup node scripts/kibana --config "${E2E_DIR}/ci/kibana.e2e.yml" --no-base-path --optimize.watch=false> kibana.log 2>&1 &
