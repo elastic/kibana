@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertAction } from '../../../../../../plugins/alerting/common';
 import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
 import { ListsDefaultArraySchema } from './routes/schemas/types/lists_default_array';
+import { RuleAlertAction } from '../../../common/detection_engine/types';
 
 export type PartialFilter = Partial<Filter>;
 
@@ -23,10 +23,6 @@ export interface ThreatParams {
   tactic: IMitreAttack;
   technique: IMitreAttack[];
 }
-
-export type RuleAlertAction = Omit<AlertAction, 'actionTypeId'> & {
-  action_type_id: string;
-};
 
 // Notice below we are using lists: ListsDefaultArraySchema[]; which is coming directly from the response output section.
 // TODO: Eventually this whole RuleAlertParams will be replaced with io-ts. For now we can slowly strangle it out and reduce duplicate types

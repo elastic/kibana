@@ -125,7 +125,6 @@ export const updateRulesRoute = (router: IRouter) => {
             actions,
             enabled,
             ruleAlertId: rule.id,
-            ruleId: rule.params?.ruleId,
             interval: throttle,
             name,
           });

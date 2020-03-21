@@ -153,12 +153,14 @@ export class Plugin {
     });
 
     if (plugins.alerting != null) {
+      const { host, port, protocol } = core.http.getServerInfo();
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
+        kibanaUrl: `${protocol}//${host}:${port}`,
       });
 
       if (isAlertExecutor(signalRuleType)) {

@@ -13,7 +13,7 @@ import {
 } from '../../../../../../../plugins/alerting/server';
 import { Alert } from '../../../../../../../plugins/alerting/common';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
-import { RuleAlertAction } from '../types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
 export interface RuleNotificationAlertType extends Alert {
   params: {

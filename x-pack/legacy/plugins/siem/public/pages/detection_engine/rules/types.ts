@@ -5,6 +5,7 @@
  */
 
 import { AlertAction } from '../../../../../../../plugins/alerting/common';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { RuleType } from '../../../containers/detection_engine/rules/types';
 import { FieldValueQueryBar } from './components/query_bar';
@@ -122,7 +123,7 @@ export interface ScheduleStepRuleJson {
 }
 
 export interface ActionsStepRuleJson {
-  actions: AlertAction[];
+  actions: RuleAlertAction[];
   enabled: boolean;
   throttle?: string | null;
   meta?: unknown;

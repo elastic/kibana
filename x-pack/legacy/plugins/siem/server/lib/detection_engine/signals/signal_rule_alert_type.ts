@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment = require('moment');
 import { Logger } from 'src/core/server';
 import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 
@@ -12,7 +13,7 @@ import { buildSignalsSearchQuery } from '../notifications/build_signals_query';
 import { getInputIndex } from './get_input_output_index';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
-import { SignalRuleAlertTypeDefinition, AlertAttributes } from './types';
+import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
 import { getGapBetweenRuns } from './utils';
 import { writeSignalRuleExceptionToSavedObject } from './write_signal_rule_exception_to_saved_object';
 import { signalParamsSchema } from './signal_params_schema';
@@ -23,13 +24,16 @@ import { getCurrentStatusSavedObject } from './get_current_status_saved_object';
 import { writeCurrentStatusSucceeded } from './write_current_status_succeeded';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
+import { getNotificationResultsLink } from '../notifications/utils';
 
 export const signalRulesAlertType = ({
   logger,
   version,
+  kibanaUrl,
 }: {
   logger: Logger;
   version: string;
+  kibanaUrl: string;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -55,7 +59,10 @@ export const signalRulesAlertType = ({
         to,
         type,
       } = params;
-      const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
+      const savedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
+        'alert',
+        alertId
+      );
 
       const ruleStatusSavedObjects = await getRuleStatusSavedObjects({
         alertId,
@@ -206,7 +213,7 @@ export const signalRulesAlertType = ({
             const actionsInterval = throttle ?? savedObject.attributes.schedule.interval;
 
             const singalsQuery = buildSignalsSearchQuery({
-              ruleId: ruleParams.ruleId,
+              ruleId: ruleParams.ruleId!,
               index: [outputIndex],
               from: `now-${actionsInterval}`,
               to: 'now',
@@ -214,21 +221,26 @@ export const signalRulesAlertType = ({
 
             const newSignalsResult = await services.callCluster('search', singalsQuery);
             const newSignalsCount = newSignalsResult.hits.total.value;
-            logger.warn(`newSignalsCount ${newSignalsCount}`);
-            logger.warn(
-              `savedObject.attributes ${JSON.stringify(savedObject.attributes, null, 2)}`
-            );
 
-            // if (newSignalsCount) {
-            const alertInstance = services.alertInstanceFactory(alertId);
-            alertInstance
-              .replaceState({
-                signalsCount: newSignalsCount,
-              })
-              .scheduleActions('default', {
-                rule: ruleParams,
+            if (newSignalsCount) {
+              const fromInMs = moment(`now-${actionsInterval}`).format('x');
+              const toInMs = moment().format('x');
+              const resultsLink = getNotificationResultsLink({
+                baseUrl: kibanaUrl,
+                id: alertId,
+                from: fromInMs,
+                to: toInMs,
               });
-            // }
+              const alertInstance = services.alertInstanceFactory(alertId);
+              alertInstance
+                .replaceState({
+                  signalsCount: newSignalsCount,
+                })
+                .scheduleActions('default', {
+                  resultsLink,
+                  rule: ruleParams,
+                });
+            }
           }
 
           logger.debug(

@@ -8,6 +8,7 @@ import { Alert } from '../../../../../../../plugins/alerting/common';
 import { APP_ID, NOTIFICATIONS_ID } from '../../../../common/constants';
 import { CreateNotificationParams } from './types';
 import { addTags } from './add_tags';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
 export const createNotifications = async ({
   alertsClient,
@@ -29,7 +30,7 @@ export const createNotifications = async ({
       },
       schedule: { interval },
       enabled,
-      actions,
+      actions: actions?.map(transformRuleToAlertAction),
       throttle: null,
     },
   });

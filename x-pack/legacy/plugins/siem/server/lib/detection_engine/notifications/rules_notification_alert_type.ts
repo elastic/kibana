@@ -13,23 +13,14 @@ import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { NotificationAlertTypeDefinition } from './types';
 import { buildSignalsSearchQuery } from './build_signals_query';
 import { getNotificationResultsLink } from './utils';
+import { RuleAlertAttributes } from '../signals/types';
 
-interface AlertAttributes {
-  enabled: boolean;
-  name: string;
-  tags: string[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  schedule: {
-    interval: string;
-  };
-  throttle: string | null;
-}
 export const rulesNotificationAlertType = ({
   logger,
+  kibanaUrl,
 }: {
   logger: Logger;
+  kibanaUrl: string;
 }): NotificationAlertTypeDefinition => ({
   id: NOTIFICATIONS_ID,
   name: 'SIEM Notifications',
@@ -51,17 +42,23 @@ export const rulesNotificationAlertType = ({
     }),
   },
   async executor({ previousStartedAt, alertId, services, params }) {
-    const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
+    const ruleAlertSavedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
       'alert',
       params.ruleAlertId
     );
+
+    if (!ruleAlertSavedObject) {
+      logger.error(`Saved object for alert ${params.ruleAlertId} was not found`);
+      return;
+    }
+
     const { params: ruleParams } = ruleAlertSavedObject.attributes;
     const fromInMs = previousStartedAt ? moment(previousStartedAt).format('x') : 'now-1h';
     const toInMs = moment().format('x');
 
     const query = buildSignalsSearchQuery({
-      index: ruleParams.outputIndex,
-      ruleId: ruleParams.ruleId,
+      index: [ruleParams.outputIndex],
+      ruleId: ruleParams.ruleId!,
       to: toInMs,
       from: fromInMs,
     });
@@ -74,6 +71,7 @@ export const rulesNotificationAlertType = ({
 
     if (signalsCount) {
       const resultsLink = getNotificationResultsLink({
+        baseUrl: kibanaUrl,
         id: ruleAlertSavedObject.id,
         from: fromInMs,
         to: toInMs,

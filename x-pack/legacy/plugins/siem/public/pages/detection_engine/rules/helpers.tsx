@@ -9,6 +9,8 @@ import { get } from 'lodash/fp';
 import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule, RuleType } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
@@ -18,6 +20,7 @@ import {
   DefineStepRule,
   IMitreEnterpriseAttack,
   ScheduleStepRule,
+  ActionsStepRule,
   ActionsStepRule,
 } from './types';
 
@@ -51,11 +54,13 @@ export const getStepsData = ({
   };
 };
 
-export const getActionsStepsData = (rule: Rule): ActionsStepRule => {
+export const getActionsStepsData = (
+  rule: Omit<Rule, 'actions'> & { actions: RuleAlertAction[] }
+): ActionsStepRule => {
   const { throttle = null, enabled, actions = [] } = rule;
 
   return {
-    actions,
+    actions: actions?.map(transformRuleToAlertAction),
     isNew: false,
     throttle,
     enabled,

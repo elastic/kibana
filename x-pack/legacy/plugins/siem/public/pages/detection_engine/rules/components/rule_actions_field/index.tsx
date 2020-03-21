@@ -9,17 +9,48 @@ import memoizeOne from 'memoize-one';
 import deepMerge from 'deepmerge';
 
 import { SelectField } from '../../../../../shared_imports';
-import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
+import {
+  ActionForm,
+  ActionType,
+} from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertAction } from '../../../../../../../../../plugins/alerting/common';
 import { useKibana } from '../../../../../lib/kibana';
 
 type ThrottleSelectField = typeof SelectField;
 
 const SUPPORTED_ACTION_TYPES = [
-  { id: '.email', name: 'Email', enabled: true },
-  { id: '.pagerduty', name: 'PagerDuty', enabled: true },
-  { id: '.slack', name: 'Slack', enabled: true },
-  { id: '.webhook', name: 'Webhook', enabled: true },
+  {
+    id: '.email',
+    name: 'Email',
+    minimumLicenseRequired: 'gold' as ActionType['minimumLicenseRequired'],
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.pagerduty',
+    name: 'PagerDuty',
+    minimumLicenseRequired: 'gold' as ActionType['minimumLicenseRequired'],
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.slack',
+    name: 'Slack',
+    minimumLicenseRequired: 'gold' as ActionType['minimumLicenseRequired'],
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.webhook',
+    name: 'Webhook',
+    minimumLicenseRequired: 'gold' as ActionType['minimumLicenseRequired'],
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
 ];
 
 const DEFAULT_ACTION_GROUP_ID = 'default';

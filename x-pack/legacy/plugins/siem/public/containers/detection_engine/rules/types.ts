@@ -21,7 +21,7 @@ export const action = t.exact(
   t.type({
     group: t.string,
     id: t.string,
-    actionTypeId: t.string,
+    action_type_id: t.string,
     params: t.object,
   })
 );

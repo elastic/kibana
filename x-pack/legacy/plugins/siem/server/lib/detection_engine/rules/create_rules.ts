@@ -6,10 +6,10 @@
 
 import { Alert } from '../../../../../../../plugins/alerting/common';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { hasListsFeature } from '../feature_flags';
-import { transformRuleToAlertAction } from './transform_actions';
 
 export const createRules = async ({
   alertsClient,

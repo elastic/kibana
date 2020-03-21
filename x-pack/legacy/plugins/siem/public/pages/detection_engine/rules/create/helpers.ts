@@ -8,6 +8,7 @@ import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
+import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 
 import {
   AboutStepRule,
@@ -152,7 +153,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
   const { actions = [], enabled, throttle = null } = actionsStepData;
 
   return {
-    actions,
+    actions: actions.map(transformAlertToRuleAction),
     enabled,
     throttle: getAlertThrottle(throttle),
     meta: {

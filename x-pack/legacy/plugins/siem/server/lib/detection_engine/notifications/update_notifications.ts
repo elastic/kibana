@@ -9,6 +9,7 @@ import { readNotifications } from './read_notifications';
 import { UpdateNotificationParams } from './types';
 import { addTags } from './add_tags';
 import { createNotifications } from './create_notifications';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
 export const updateNotifications = async ({
   alertsClient,
@@ -31,7 +32,7 @@ export const updateNotifications = async ({
         schedule: {
           interval,
         },
-        actions,
+        actions: actions?.map(transformRuleToAlertAction),
         params: {
           ruleAlertId,
         },

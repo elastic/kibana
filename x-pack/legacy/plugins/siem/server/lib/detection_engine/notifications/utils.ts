@@ -5,12 +5,14 @@
  */
 
 export const getNotificationResultsLink = ({
+  baseUrl,
   id,
   from,
   to,
 }: {
+  baseUrl: string;
   id: string;
   from: string;
   to: string;
 }) =>
-  `http://localhost:5601/app/siem#/detections/rules/id/${id}?timerange=(global:(linkTo:!(timeline),timerange:(from:${from},kind:absolute,to:${to})),timeline:(linkTo:!(global),timerange:(from:${from},kind:absolute,to:${to})))`;
+  `${baseUrl}/app/siem#/detections/rules/id/${id}?timerange=(global:(linkTo:!(timeline),timerange:(from:${from},kind:absolute,to:${to})),timeline:(linkTo:!(global),timerange:(from:${from},kind:absolute,to:${to})))`;
