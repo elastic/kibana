@@ -13,10 +13,8 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
   const retry = getService('retry');
 
   return new (class UptimePage {
-    public settings: typeof uptimeService.settings;
-
-    constructor() {
-      this.settings = uptimeService.settings;
+    public get settings() {
+      return uptimeService.settings;
     }
 
     public async goToRoot() {
