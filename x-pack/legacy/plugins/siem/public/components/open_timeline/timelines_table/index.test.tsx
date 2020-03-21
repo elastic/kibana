@@ -151,7 +151,7 @@ describe('TimelinesTable', () => {
     expect(
       wrapper
         .find('thead tr th')
-        .at(5)
+        .at(4)
         .find('[data-test-subj="notes-count-header-icon"]')
         .first()
         .exists()
