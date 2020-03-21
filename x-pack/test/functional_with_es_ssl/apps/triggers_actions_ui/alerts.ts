@@ -332,6 +332,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should delete single alert', async () => {
+      await createAlert();
       const createdAlert = await createAlert();
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -345,7 +346,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql('Deleted 1 alert');
-      expect(await pageObjects.triggersActionsUI.isAnEmptyAlertsListDisplayed()).to.be(true);
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterDelete.length).to.eql(0);
     });
 
     it('should mute all selection', async () => {
@@ -460,7 +464,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.common.closeToast();
 
-      expect(await pageObjects.triggersActionsUI.isAnEmptyAlertsListDisplayed()).to.be(true);
+      await createAlert();
+      await pageObjects.common.navigateToApp('triggersActions');
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults.length).to.eql(1);
     });
   });
 };
