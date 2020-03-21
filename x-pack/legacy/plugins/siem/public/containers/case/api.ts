@@ -17,6 +17,7 @@ import {
   CasePushRequest,
   PushCaseParams,
   PushCaseResponse,
+  ActionTypeExecutorResult,
 } from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
 import {
@@ -206,7 +207,7 @@ export const pushToService = async (
   casePushParams: PushCaseParams,
   signal: AbortSignal
 ): Promise<PushCaseResponse> => {
-  const response = await KibanaServices.get().http.fetch<PushCaseResponse>(
+  const response = await KibanaServices.get().http.fetch<ActionTypeExecutorResult>(
     `/api/action/${connectorId}/_execute`,
     {
       method: 'POST',
@@ -214,7 +215,7 @@ export const pushToService = async (
       signal,
     }
   );
-  return decodePushCaseResponse(response);
+  return decodePushCaseResponse(response.data);
 };
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {

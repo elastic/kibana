@@ -11,6 +11,8 @@ import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
 
+export { ActionTypeExecutorResult } from '../../../../actions/server/types';
+
 const StatusRt = rt.union([rt.literal('open'), rt.literal('closed')]);
 
 const CaseBasicRt = rt.type({

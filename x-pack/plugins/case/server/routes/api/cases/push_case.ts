@@ -29,7 +29,7 @@ export function initPushCaseUserActionApi({
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: escapeHatch,
+        body: escapeHatch,
       },
     },
     async (context, request, response) => {
@@ -37,7 +37,7 @@ export function initPushCaseUserActionApi({
         const client = context.core.savedObjects.client;
         const caseId = request.params.case_id;
         const query = pipe(
-          CasePushRequestRt.decode(request.query),
+          CasePushRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
         const pushedBy = await caseService.getUser({ request, response });
