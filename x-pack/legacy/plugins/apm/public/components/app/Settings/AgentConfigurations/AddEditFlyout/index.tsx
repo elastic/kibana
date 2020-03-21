@@ -22,11 +22,10 @@ import {
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
-import { useCallApmApi } from '../../../../../hooks/useCallApmApi';
 import { transactionSampleRateRt } from '../../../../../../../../../plugins/apm/common/runtime_types/transaction_sample_rate_rt';
 import { Config } from '../index';
 import { SettingsSection } from './SettingsSection';
-import { ServiceForm } from '../../../../shared/ServiceForm';
+import { ServiceSection } from './ServiceSection';
 import { DeleteButton } from './DeleteButton';
 import { transactionMaxSpansRt } from '../../../../../../../../../plugins/apm/common/runtime_types/transaction_max_spans_rt';
 import { useFetcher } from '../../../../../hooks/useFetcher';
@@ -57,8 +56,6 @@ export function AddEditFlyout({
 }: Props) {
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
-
-  const callApmApiFromHook = useCallApmApi();
 
   // get a telemetry UI event tracker
   const trackApmEvent = useUiTracker({ app: 'apm' });
@@ -129,14 +126,13 @@ export function AddEditFlyout({
     setIsSaving(true);
 
     await saveConfig({
-      callApmApi: callApmApiFromHook,
       serviceName,
       environment,
       sampleRate,
       captureBody,
       transactionMaxSpans,
-      configurationId: selectedConfig ? selectedConfig.id : undefined,
       agentName,
+      isExistingConfig: Boolean(selectedConfig),
       toasts,
       trackApmEvent
     });
@@ -181,7 +177,7 @@ export function AddEditFlyout({
                 }
               }}
             >
-              <ServiceForm
+              <ServiceSection
                 isReadOnly={Boolean(selectedConfig)}
                 //
                 // environment

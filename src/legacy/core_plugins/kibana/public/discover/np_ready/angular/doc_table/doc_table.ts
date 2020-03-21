@@ -17,28 +17,17 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { IUiSettingsClient } from 'kibana/public';
 import html from './doc_table.html';
-import './infinite_scroll';
-import './components/table_header';
-import './components/table_row';
 import { dispatchRenderComplete } from '../../../../../../../../plugins/kibana_utils/public';
-import './components/pager';
-import './lib/pager';
 // @ts-ignore
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
+import { getServices } from '../../../kibana_services';
 
 interface LazyScope extends ng.IScope {
   [key: string]: any;
 }
 
-export function createDocTableDirective(
-  config: IUiSettingsClient,
-  getAppState: any,
-  pagerFactory: any,
-  $filter: any
-) {
+export function createDocTableDirective(pagerFactory: any, $filter: any) {
   return {
     restrict: 'E',
     template: html,
@@ -51,7 +40,6 @@ export function createDocTableDirective(
       isLoading: '=?',
       infiniteScroll: '=?',
       filter: '=?',
-      filters: '=?',
       minimumVisibleRows: '=?',
       onAddColumn: '=?',
       onChangeSortOrder: '=?',
@@ -76,29 +64,12 @@ export function createDocTableDirective(
       };
 
       $scope.limitedResultsWarning = getLimitedSearchResultsMessage(
-        config.get('discover:sampleSize')
+        getServices().uiSettings.get('discover:sampleSize')
       );
 
       $scope.addRows = function() {
         $scope.limit += 50;
       };
-
-      // This exists to fix the problem of an empty initial column list not playing nice with watchCollection.
-      $scope.$watch('columns', function(columns: string[]) {
-        if (columns.length !== 0) return;
-
-        const $state = getAppState();
-        $scope.columns.push('_source');
-        if ($state) $state.replace();
-      });
-
-      $scope.$watchCollection('columns', function(columns: string[], oldColumns: string[]) {
-        if (oldColumns.length === 1 && oldColumns[0] === '_source' && $scope.columns.length > 1) {
-          _.pull($scope.columns, '_source');
-        }
-
-        if ($scope.columns.length === 0) $scope.columns.push('_source');
-      });
 
       $scope.$watch('hits', (hits: any) => {
         if (!hits) return;

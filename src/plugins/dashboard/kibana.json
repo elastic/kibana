@@ -1,0 +1,15 @@
+{
+  "id": "dashboard",
+  "version": "kibana",
+  "requiredPlugins": [
+    "data",
+    "embeddable",
+    "inspector",
+    "uiActions"
+  ],
+  "optionalPlugins": [
+    "share"
+  ],
+  "server": false,
+  "ui": true
+}

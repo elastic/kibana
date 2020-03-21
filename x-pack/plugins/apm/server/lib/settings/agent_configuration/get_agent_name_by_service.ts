@@ -9,7 +9,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
-import { SERVICE_AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
 
 export async function getAgentNameByService({
   serviceName,
@@ -41,15 +41,13 @@ export async function getAgentNameByService({
       },
       aggs: {
         agent_names: {
-          terms: { field: SERVICE_AGENT_NAME, size: 1 }
+          terms: { field: AGENT_NAME, size: 1 }
         }
       }
     }
   };
 
   const { aggregations } = await client.search(params);
-  const agentName = aggregations?.agent_names.buckets[0].key as
-    | string
-    | undefined;
-  return { agentName };
+  const agentName = aggregations?.agent_names.buckets[0]?.key;
+  return agentName as string | undefined;
 }

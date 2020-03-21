@@ -22,7 +22,7 @@ import { UnwrapPromise } from '@kbn/utility-types';
 import { registerImportRoute } from '../import';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { SavedObjectConfig } from '../../saved_objects_config';
-import { setupServer } from './test_utils';
+import { setupServer, createExportableType } from './test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -32,7 +32,7 @@ const config = {
   maxImportExportSize: 10000,
 } as SavedObjectConfig;
 
-describe('POST /api/saved_objects/_import', () => {
+describe('POST /internal/saved_objects/_import', () => {
   let server: setupServerReturn['server'];
   let httpSetup: setupServerReturn['httpSetup'];
   let handlerContext: setupServerReturn['handlerContext'];
@@ -47,12 +47,15 @@ describe('POST /api/saved_objects/_import', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
-    savedObjectsClient = handlerContext.savedObjects.client;
+    handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
+      allowedTypes.map(createExportableType)
+    );
 
+    savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.find.mockResolvedValue(emptyResponse);
 
-    const router = httpSetup.createRouter('/api/saved_objects/');
-    registerImportRoute(router, config, allowedTypes);
+    const router = httpSetup.createRouter('/internal/saved_objects/');
+    registerImportRoute(router, config);
 
     await server.start();
   });
@@ -63,7 +66,7 @@ describe('POST /api/saved_objects/_import', () => {
 
   it('formats successful response', async () => {
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_import')
+      .post('/internal/saved_objects/_import')
       .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
       .send(
         [
@@ -99,7 +102,7 @@ describe('POST /api/saved_objects/_import', () => {
     });
 
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_import')
+      .post('/internal/saved_objects/_import')
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -148,7 +151,7 @@ describe('POST /api/saved_objects/_import', () => {
     });
 
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_import')
+      .post('/internal/saved_objects/_import')
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -199,7 +202,7 @@ describe('POST /api/saved_objects/_import', () => {
     });
 
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_import')
+      .post('/internal/saved_objects/_import')
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -249,7 +252,7 @@ describe('POST /api/saved_objects/_import', () => {
     });
 
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_import')
+      .post('/internal/saved_objects/_import')
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [

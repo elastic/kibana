@@ -21,12 +21,15 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
-import { tabifyAggResponse, npStart } from '../../legacy_imports';
+import { npStart } from '../../legacy_imports';
+import { search } from '../../../../../../plugins/data/public';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tableVisResponseHandler } from '../../table_vis_response_handler';
 import { start as visualizationsStart } from '../../../../visualizations/public/np_ready/public/legacy';
+
+const { tabifyAggResponse } = search;
 
 describe('Table Vis - AggTableGroup Directive', function() {
   let $rootScope;
@@ -35,10 +38,10 @@ describe('Table Vis - AggTableGroup Directive', function() {
   const tabifiedData = {};
 
   const init = () => {
-    const vis1 = new visualizationsStart.Vis(indexPattern, 'table');
+    const vis1 = visualizationsStart.createVis(indexPattern, 'table');
     tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, metricOnly);
 
-    const vis2 = new visualizationsStart.Vis(indexPattern, {
+    const vis2 = visualizationsStart.createVis(indexPattern, {
       type: 'pie',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },

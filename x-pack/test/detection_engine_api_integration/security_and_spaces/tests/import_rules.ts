@@ -74,6 +74,17 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should report that it failed to import a thousand and one (10001) simple rules', async () => {
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(new Array(10001).fill('rule-1')), 'rules.ndjson')
+          .query()
+          .expect(500);
+
+        expect(body).to.eql({ message: "Can't import more than 10000 rules", status_code: 500 });
+      });
+
       it('should be able to read an imported rule back out correctly', async () => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)

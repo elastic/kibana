@@ -9,5 +9,5 @@ import { join } from 'path';
 // eslint-disable-next-line
 require('@kbn/storybook').runStorybookCli({
   name: 'drilldowns',
-  storyGlobs: [join(__dirname, '..', 'public', 'components', '**', '*.examples.tsx')],
+  storyGlobs: [join(__dirname, '..', 'public', 'components', '**', '*.story.tsx')],
 });

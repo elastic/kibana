@@ -9,9 +9,6 @@ import PropTypes from 'prop-types';
 import {
   EuiForm,
   EuiFormRow,
-  EuiSuperSelect,
-  EuiTextColor,
-  EuiText,
   EuiFieldText,
   EuiButton,
   EuiSelect,
@@ -22,20 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../common/constants';
 import { getEsSpatialRelationLabel } from '../../common/i18n_getters';
-
-const GEO_FIELD_VALUE_DELIMITER = '/'; // `/` is not allowed in index pattern name so should not have collisions
-
-function createIndexGeoFieldName({ indexPatternTitle, geoFieldName }) {
-  return `${indexPatternTitle}${GEO_FIELD_VALUE_DELIMITER}${geoFieldName}`;
-}
-
-function splitIndexGeoFieldName(value) {
-  const split = value.split(GEO_FIELD_VALUE_DELIMITER);
-  return {
-    indexPatternTitle: split[0],
-    geoFieldName: split[1],
-  };
-}
+import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
 
 export class GeometryFilterForm extends Component {
   static propTypes = {
@@ -52,27 +36,13 @@ export class GeometryFilterForm extends Component {
   };
 
   state = {
-    geoFieldTag: this.props.geoFields.length
-      ? createIndexGeoFieldName(this.props.geoFields[0])
-      : '',
+    selectedField: this.props.geoFields.length ? this.props.geoFields[0] : undefined,
     geometryLabel: this.props.intitialGeometryLabel,
     relation: ES_SPATIAL_RELATIONS.INTERSECTS,
   };
 
-  _getSelectedGeoField = () => {
-    if (!this.state.geoFieldTag) {
-      return null;
-    }
-
-    const { indexPatternTitle, geoFieldName } = splitIndexGeoFieldName(this.state.geoFieldTag);
-
-    return this.props.geoFields.find(option => {
-      return option.indexPatternTitle === indexPatternTitle && option.geoFieldName === geoFieldName;
-    });
-  };
-
-  _onGeoFieldChange = selectedValue => {
-    this.setState({ geoFieldTag: selectedValue });
+  _onGeoFieldChange = selectedField => {
+    this.setState({ selectedField });
   };
 
   _onGeometryLabelChange = e => {
@@ -88,25 +58,21 @@ export class GeometryFilterForm extends Component {
   };
 
   _onSubmit = () => {
-    const geoField = this._getSelectedGeoField();
     this.props.onSubmit({
       geometryLabel: this.state.geometryLabel,
-      indexPatternId: geoField.indexPatternId,
-      geoFieldName: geoField.geoFieldName,
-      geoFieldType: geoField.geoFieldType,
+      indexPatternId: this.state.selectedField.indexPatternId,
+      geoFieldName: this.state.selectedField.geoFieldName,
+      geoFieldType: this.state.selectedField.geoFieldType,
       relation: this.state.relation,
     });
   };
 
   _renderRelationInput() {
-    if (!this.state.geoFieldTag) {
-      return null;
-    }
-
-    const { geoFieldType } = this._getSelectedGeoField();
-
     // relationship only used when filtering geo_shape fields
-    if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
+    if (
+      !this.state.selectedField ||
+      this.state.selectedField.geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT
+    ) {
       return null;
     }
 
@@ -141,20 +107,6 @@ export class GeometryFilterForm extends Component {
   }
 
   render() {
-    const options = this.props.geoFields.map(({ indexPatternTitle, geoFieldName }) => {
-      return {
-        inputDisplay: (
-          <EuiText size="s" component="span">
-            <EuiTextColor color="subdued">
-              <small>{indexPatternTitle}</small>
-            </EuiTextColor>
-            <br />
-            {geoFieldName}
-          </EuiText>
-        ),
-        value: createIndexGeoFieldName({ indexPatternTitle, geoFieldName }),
-      };
-    });
     let error;
     if (this.props.errorMsg) {
       error = <EuiFormErrorText>{this.props.errorMsg}</EuiFormErrorText>;
@@ -174,24 +126,11 @@ export class GeometryFilterForm extends Component {
           />
         </EuiFormRow>
 
-        <EuiFormRow
-          className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-          label={i18n.translate('xpack.maps.geometryFilterForm.geoFieldLabel', {
-            defaultMessage: 'Filtered field',
-          })}
-          display="rowCompressed"
-        >
-          <EuiSuperSelect
-            className="mapGeometryFilter__geoFieldSuperSelect"
-            options={options}
-            valueOfSelected={this.state.geoFieldTag}
-            onChange={this._onGeoFieldChange}
-            hasDividers={true}
-            fullWidth={true}
-            compressed={true}
-            itemClassName="mapGeometryFilter__geoFieldItem"
-          />
-        </EuiFormRow>
+        <MultiIndexGeoFieldSelect
+          selectedField={this.state.selectedField}
+          fields={this.props.geoFields}
+          onChange={this._onGeoFieldChange}
+        />
 
         {this._renderRelationInput()}
 
@@ -204,7 +143,7 @@ export class GeometryFilterForm extends Component {
             size="s"
             fill
             onClick={this._onSubmit}
-            isDisabled={!this.state.geometryLabel || !this.state.geoFieldTag}
+            isDisabled={!this.state.geometryLabel || !this.state.selectedField}
             isLoading={this.props.isLoading}
           >
             {this.props.buttonLabel}

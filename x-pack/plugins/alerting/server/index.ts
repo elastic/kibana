@@ -12,6 +12,7 @@ export type AlertsClient = PublicMethodsOf<AlertsClientClass>;
 
 export {
   AlertType,
+  ActionGroup,
   AlertingPlugin,
   AlertExecutorOptions,
   AlertActionParams,

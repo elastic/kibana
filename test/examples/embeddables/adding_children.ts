@@ -31,7 +31,7 @@ export default function({ getService }: PluginFunctionalProviderContext) {
 
     it('Can create a new child', async () => {
       await testSubjects.click('embeddablePanelToggleMenuIcon');
-      await testSubjects.click('embeddablePanelAction-ADD_PANEL_ACTION_ID');
+      await testSubjects.click('embeddablePanelAction-ACTION_ADD_PANEL');
       await testSubjects.click('createNew');
       await testSubjects.click('createNew-TODO_EMBEDDABLE');
       await testSubjects.setValue('taskInputField', 'new task');

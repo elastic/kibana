@@ -18,15 +18,6 @@
  */
 
 /**
- * Static legacy code which hasn't been moved to this plugin yet, but
- * should be eventually.
- *
- * @public
- */
-// @ts-ignore Used only by tsvb, vega, input control vis
-export { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
-
-/**
  * Static np-ready code, re-exported here so consumers can import from
  * `src/legacy/core_plugins/visualizations/public`
  *

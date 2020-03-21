@@ -9,11 +9,13 @@ import { ConcreteTaskInstance, TaskStatus } from '../../../../plugins/task_manag
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { actionsMock } from '../../../actions/server/mocks';
 
 const alertType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],
+  defaultActionGroupId: 'default',
   executor: jest.fn(),
 };
 let fakeTimer: sinon.SinonFakeTimers;
@@ -55,7 +57,7 @@ describe('Task Runner Factory', () => {
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     getServices: jest.fn().mockReturnValue(services),
-    executeAction: jest.fn(),
+    actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsPlugin,
     logger: loggingServiceMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),

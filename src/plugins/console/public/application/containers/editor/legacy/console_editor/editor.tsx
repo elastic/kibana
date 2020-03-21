@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import { useUIAceKeyboardMode } from '../../../../../../../es_ui_shared/public';
 // @ts-ignore
 import mappings from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
@@ -34,7 +35,6 @@ import {
 import * as senseEditor from '../../../../models/sense_editor';
 import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
 
@@ -65,7 +65,7 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue }: EditorProps) {
   const {
-    services: { history, notifications },
+    services: { history, notifications, settings: settingsService },
     docLinkVersion,
     elasticsearchUrl,
   } = useServicesContext();
@@ -172,7 +172,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    mappings.retrieveAutoCompleteInfo();
+    mappings.retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
@@ -182,7 +182,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
       mappings.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor]);
+  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;

@@ -20,6 +20,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
+import { IAggConfig, IAggType } from 'src/plugins/data/public';
 import { MetricsAxisOptions } from './index';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
@@ -27,10 +28,8 @@ import { Positions } from '../../../utils/collections';
 import { ValueAxesPanel } from './value_axes_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { ChartTypes } from '../../../utils/collections';
-import { IAggConfig, IAggType } from '../../../legacy_imports';
 import { defaultValueAxisId, valueAxis, seriesParam, categoryAxis } from './mocks';
 
-jest.mock('ui/new_platform');
 jest.mock('./series_panel', () => ({
   SeriesPanel: () => 'SeriesPanel',
 }));
@@ -193,9 +192,10 @@ describe('MetricsAxisOptions component', () => {
       const updatedSeriesParams = [{ ...chart, data: { ...chart.data, label: agg.makeLabel() } }];
       const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
 
-      expect(setValue).toHaveBeenCalledTimes(3);
-      expect(setValue).toHaveBeenNthCalledWith(2, SERIES_PARAMS, updatedSeriesParams);
-      expect(setValue).toHaveBeenNthCalledWith(3, VALUE_AXES, updatedValues);
+      expect(setValue).toHaveBeenCalledTimes(5);
+      expect(setValue).toHaveBeenNthCalledWith(3, SERIES_PARAMS, updatedSeriesParams);
+      expect(setValue).toHaveBeenNthCalledWith(5, SERIES_PARAMS, updatedSeriesParams);
+      expect(setValue).toHaveBeenNthCalledWith(4, VALUE_AXES, updatedValues);
     });
 
     it('should not set the custom title to match the value axis label when more than one agg exists for that axis', () => {

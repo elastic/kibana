@@ -87,6 +87,7 @@ describe('create()', () => {
       id: '123',
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       async executor() {},
     });
   });
@@ -522,7 +523,13 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValue({
       id: '123',
       name: 'Test',
-      actionGroups: [],
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -1885,6 +1892,7 @@ describe('update()', () => {
       id: '123',
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       async executor() {},
     });
   });
@@ -1976,6 +1984,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2093,6 +2102,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "throttle": null,
         "updatedBy": "elastic",
       }
     `);
@@ -2178,6 +2188,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: '5m',
         actions: [
           {
             group: 'default',
@@ -2246,6 +2257,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "throttle": "5m",
         "updatedBy": "elastic",
       }
     `);
@@ -2324,6 +2336,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: '5m',
         actions: [
           {
             group: 'default',
@@ -2393,6 +2406,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "throttle": "5m",
         "updatedBy": "elastic",
       }
     `);
@@ -2415,6 +2429,7 @@ describe('update()', () => {
       id: '123',
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -2432,6 +2447,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2500,6 +2516,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2604,6 +2621,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: '5m',
         actions: [
           {
             group: 'default',
@@ -2647,6 +2665,7 @@ describe('update()', () => {
         id: '123',
         name: 'Test',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
         async executor() {},
       });
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -2732,6 +2751,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2762,6 +2782,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2798,6 +2819,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2833,6 +2855,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',

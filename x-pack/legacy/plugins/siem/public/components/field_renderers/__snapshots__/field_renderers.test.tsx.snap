@@ -122,25 +122,17 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
 <DragDropContext
   onDragEnd={[MockFunction]}
 >
-  <VirusTotalLink
-    link="10.10.10.10"
-  >
-    virustotal.com
-  </VirusTotalLink>
-  , 
-  <ReputationLink
+  <Memo(ReputationLinkComponent)
+    direction="column"
     domain="10.10.10.10"
-  >
-    talosIntelligence.com
-  </ReputationLink>
+  />
 </DragDropContext>
 `;
 
 exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`] = `
-<EuiLink
-  href="https://www.iana.org/whois?q=10.10.10.10"
-  target="_blank"
+<ExternalLink
+  url="https://www.iana.org/whois?q=10.10.10.10"
 >
   iana.org
-</EuiLink>
+</ExternalLink>
 `;

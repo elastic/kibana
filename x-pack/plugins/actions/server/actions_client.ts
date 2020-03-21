@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets } from './lib';
@@ -93,11 +92,7 @@ export class ActionsClient {
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
 
-    try {
-      this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    } catch (err) {
-      throw Boom.badRequest(err.message);
-    }
+    this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     const result = await this.savedObjectsClient.create('action', {
       actionTypeId,
@@ -118,12 +113,14 @@ export class ActionsClient {
    * Update action
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
-    const existingObject = await this.savedObjectsClient.get('action', id);
+    const existingObject = await this.savedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = existingObject.attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+
+    this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     const result = await this.savedObjectsClient.update('action', id, {
       actionTypeId,
@@ -144,13 +141,13 @@ export class ActionsClient {
    * Get an action
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
-    const result = await this.savedObjectsClient.get('action', id);
+    const result = await this.savedObjectsClient.get<RawAction>('action', id);
 
     return {
       id,
-      actionTypeId: result.attributes.actionTypeId as string,
-      name: result.attributes.name as string,
-      config: result.attributes.config as Record<string, any>,
+      actionTypeId: result.attributes.actionTypeId,
+      name: result.attributes.name,
+      config: result.attributes.config,
     };
   }
 

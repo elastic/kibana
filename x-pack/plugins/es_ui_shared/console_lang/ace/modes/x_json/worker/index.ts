@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import src from '!!raw-loader!./worker.js';
 
 export const workerModule = {

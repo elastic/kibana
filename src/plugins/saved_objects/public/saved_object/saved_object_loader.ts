@@ -124,7 +124,7 @@ export class SavedObjectLoader {
    */
   findAll(search: string = '', size: number = 100, fields?: string[]) {
     return this.savedObjectsClient
-      .find({
+      .find<Record<string, unknown>>({
         type: this.lowercaseType,
         search: search ? `${search}*` : undefined,
         perPage: size,

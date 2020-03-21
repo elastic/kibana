@@ -6,15 +6,21 @@
 
 import { getEsNames } from './names';
 
+jest.mock('../lib/../../../../package.json', () => ({
+  version: '1.2.3',
+}));
+
 describe('getEsNames()', () => {
   test('works as expected', () => {
     const base = 'XYZ';
+    const version = '1.2.3';
     const esNames = getEsNames(base);
     expect(esNames.base).toEqual(base);
-    expect(esNames.alias).toEqual(`${base}-event-log`);
+    expect(esNames.alias).toEqual(`${base}-event-log-${version}`);
     expect(esNames.ilmPolicy).toEqual(`${base}-event-log-policy`);
     expect(esNames.indexPattern).toEqual(`${base}-event-log-*`);
-    expect(esNames.initialIndex).toEqual(`${base}-event-log-000001`);
-    expect(esNames.indexTemplate).toEqual(`${base}-event-log-template`);
+    expect(esNames.indexPatternWithVersion).toEqual(`${base}-event-log-${version}-*`);
+    expect(esNames.initialIndex).toEqual(`${base}-event-log-${version}-000001`);
+    expect(esNames.indexTemplate).toEqual(`${base}-event-log-${version}-template`);
   });
 });

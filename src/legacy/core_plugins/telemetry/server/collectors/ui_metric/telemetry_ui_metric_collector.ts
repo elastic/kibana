@@ -17,24 +17,33 @@
  * under the License.
  */
 
+import { ISavedObjectsRepository, SavedObjectAttributes } from 'kibana/server';
 import { UI_METRIC_USAGE_TYPE } from '../../../common/constants';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
+import { findAll } from '../find_all';
 
-export function registerUiMetricUsageCollector(usageCollection: UsageCollectionSetup, server: any) {
+interface UIMetricsSavedObjects extends SavedObjectAttributes {
+  count: number;
+}
+
+export function registerUiMetricUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  getSavedObjectsClient: () => ISavedObjectsRepository | undefined
+) {
   const collector = usageCollection.makeUsageCollector({
     type: UI_METRIC_USAGE_TYPE,
     fetch: async () => {
-      const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
-      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-      const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-      const savedObjectsClient = new SavedObjectsClient(internalRepository);
+      const savedObjectsClient = getSavedObjectsClient();
+      if (typeof savedObjectsClient === 'undefined') {
+        return;
+      }
 
-      const { saved_objects: rawUiMetrics } = await savedObjectsClient.find({
+      const rawUiMetrics = await findAll<UIMetricsSavedObjects>(savedObjectsClient, {
         type: 'ui-metric',
         fields: ['count'],
       });
 
-      const uiMetricsByAppName = rawUiMetrics.reduce((accum: any, rawUiMetric: any) => {
+      const uiMetricsByAppName = rawUiMetrics.reduce((accum, rawUiMetric) => {
         const {
           id,
           attributes: { count },
@@ -42,18 +51,16 @@ export function registerUiMetricUsageCollector(usageCollection: UsageCollectionS
 
         const [appName, metricType] = id.split(':');
 
-        if (!accum[appName]) {
-          accum[appName] = [];
-        }
-
         const pair = { key: metricType, value: count };
-        accum[appName].push(pair);
-        return accum;
-      }, {});
+        return {
+          ...accum,
+          [appName]: [...(accum[appName] || []), pair],
+        };
+      }, {} as Record<string, Array<{ key: string; value: number }>>);
 
       return uiMetricsByAppName;
     },
-    isReady: () => true,
+    isReady: () => typeof getSavedObjectsClient() !== 'undefined',
   });
 
   usageCollection.registerCollector(collector);

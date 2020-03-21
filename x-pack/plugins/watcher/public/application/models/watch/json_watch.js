@@ -31,7 +31,7 @@ export class JsonWatch extends BaseWatch {
 
   validate() {
     const validationResult = {};
-    const idRegex = /^[A-Za-z0-9\-\_]+$/;
+    const idRegex = /^[A-Za-z0-9\-\_.]+$/;
     const errors = {
       id: [],
       json: [],
@@ -47,7 +47,7 @@ export class JsonWatch extends BaseWatch {
     } else if (!idRegex.test(this.id)) {
       errors.id.push(
         i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidIdText', {
-          defaultMessage: 'ID can only contain letters, underscores, dashes, and numbers.',
+          defaultMessage: 'ID can only contain letters, underscores, dashes, periods and numbers.',
         })
       );
     }

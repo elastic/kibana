@@ -8,7 +8,7 @@ import { noop } from 'lodash/fp';
 import {
   EuiButton,
   EuiComboBox,
-  EuiComboBoxOptionProps,
+  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -64,7 +64,7 @@ const sanatizeValue = (value: string | number): string =>
 export const getInitialOperatorLabel = (
   isExcluded: boolean,
   operator: QueryOperator
-): EuiComboBoxOptionProps[] => {
+): EuiComboBoxOptionOption[] => {
   if (operator === ':') {
     return isExcluded ? [{ label: i18n.IS_NOT }] : [{ label: i18n.IS }];
   } else {
@@ -84,8 +84,8 @@ export const StatefulEditDataProvider = React.memo<Props>(
     timelineId,
     value,
   }) => {
-    const [updatedField, setUpdatedField] = useState<EuiComboBoxOptionProps[]>([{ label: field }]);
-    const [updatedOperator, setUpdatedOperator] = useState<EuiComboBoxOptionProps[]>(
+    const [updatedField, setUpdatedField] = useState<EuiComboBoxOptionOption[]>([{ label: field }]);
+    const [updatedOperator, setUpdatedOperator] = useState<EuiComboBoxOptionOption[]>(
       getInitialOperatorLabel(isExcluded, operator)
     );
     const [updatedValue, setUpdatedValue] = useState<string | number>(value);
@@ -105,13 +105,13 @@ export const StatefulEditDataProvider = React.memo<Props>(
       }
     };
 
-    const onFieldSelected = useCallback((selectedField: EuiComboBoxOptionProps[]) => {
+    const onFieldSelected = useCallback((selectedField: EuiComboBoxOptionOption[]) => {
       setUpdatedField(selectedField);
 
       focusInput();
     }, []);
 
-    const onOperatorSelected = useCallback((operatorSelected: EuiComboBoxOptionProps[]) => {
+    const onOperatorSelected = useCallback((operatorSelected: EuiComboBoxOptionOption[]) => {
       setUpdatedOperator(operatorSelected);
 
       focusInput();

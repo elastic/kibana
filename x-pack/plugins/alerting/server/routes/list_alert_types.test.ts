@@ -40,7 +40,13 @@ describe('listAlertTypesRoute', () => {
       {
         id: '1',
         name: 'name',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
       },
     ];
 
@@ -50,7 +56,13 @@ describe('listAlertTypesRoute', () => {
       Object {
         "body": Array [
           Object {
-            "actionGroups": Array [],
+            "actionGroups": Array [
+              Object {
+                "id": "default",
+                "name": "Default",
+              },
+            ],
+            "defaultActionGroupId": "default",
             "id": "1",
             "name": "name",
           },
@@ -58,7 +70,7 @@ describe('listAlertTypesRoute', () => {
       }
     `);
 
-    expect(context.alerting.listTypes).toHaveBeenCalledTimes(1);
+    expect(context.alerting!.listTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: listTypes,
@@ -128,7 +140,13 @@ describe('listAlertTypesRoute', () => {
       {
         id: '1',
         name: 'name',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
       },
     ];
 

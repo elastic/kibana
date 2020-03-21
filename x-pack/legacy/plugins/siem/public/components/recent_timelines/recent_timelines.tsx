@@ -21,10 +21,6 @@ import { WithHoverActions } from '../with_hover_actions';
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';
 
-export interface MeApiResponse {
-  username: string;
-}
-
 export const RecentTimelines = React.memo<{
   noTimelinesMessage: string;
   onOpenTimeline: OnOpenTimeline;

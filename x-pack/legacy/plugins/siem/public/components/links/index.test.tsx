@@ -4,23 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
+import { useUiSetting$ } from '../../lib/kibana';
 
 import {
   GoogleLink,
   HostDetailsLink,
   IPDetailsLink,
   ReputationLink,
-  VirusTotalLink,
   WhoIsLink,
   CertificateFingerprintLink,
   Ja3FingerprintLink,
   PortOrServiceNameLink,
+  DEFAULT_NUMBER_OF_LINK,
+  ExternalLink,
 } from '.';
+
+jest.mock('../../lib/kibana', () => {
+  return {
+    useUiSetting$: jest.fn(),
+  };
+});
 
 describe('Custom Links', () => {
   const hostName = 'Host Name';
@@ -101,53 +109,332 @@ describe('Custom Links', () => {
     });
   });
 
-  describe('ReputationLink', () => {
-    test('it renders link text', () => {
-      const wrapper = mountWithIntl(
-        <ReputationLink domain={'192.0.2.0'}>{'Example Link'}</ReputationLink>
-      );
-      expect(wrapper.text()).toEqual('Example Link');
+  describe('External Link', () => {
+    const mockLink = 'https://www.virustotal.com/gui/search/';
+    const mockLinkName = 'Link';
+    let wrapper: ShallowWrapper;
+
+    describe('render', () => {
+      beforeAll(() => {
+        wrapper = shallow(
+          <ExternalLink url={mockLink} idx={0} allItemsLimit={5} overflowIndexStart={5}>
+            {mockLinkName}
+          </ExternalLink>
+        );
+      });
+
+      test('it renders tooltip', () => {
+        expect(wrapper.find('[data-test-subj="externalLinkTooltip"]').exists()).toBeTruthy();
+      });
+
+      test('it renders ExternalLinkIcon', () => {
+        expect(wrapper.find('[data-test-subj="externalLinkIcon"]').exists()).toBeTruthy();
+      });
+
+      test('it renders correct url', () => {
+        expect(wrapper.find('[data-test-subj="externalLink"]').prop('href')).toEqual(mockLink);
+      });
+
+      test('it renders comma if id is given', () => {
+        expect(wrapper.find('[data-test-subj="externalLinkComma"]').exists()).toBeTruthy();
+      });
     });
 
-    test('it renders correct href', () => {
-      const wrapper = mountWithIntl(
-        <ReputationLink domain={'192.0.2.0'}>{'Example Link'} </ReputationLink>
-      );
-      expect(wrapper.find('a').prop('href')).toEqual(
-        'https://www.talosintelligence.com/reputation_center/lookup?search=192.0.2.0'
-      );
+    describe('not render', () => {
+      test('it should not render if childen prop is not given', () => {
+        wrapper = shallow(
+          <ExternalLink url={mockLink} idx={4} allItemsLimit={5} overflowIndexStart={5} />
+        );
+        expect(wrapper.find('[data-test-subj="externalLinkTooltip"]').exists()).toBeFalsy();
+      });
+
+      test('it should not render if url prop is not given', () => {
+        wrapper = shallow(
+          <ExternalLink url={''} idx={4} allItemsLimit={5} overflowIndexStart={5} />
+        );
+        expect(wrapper.find('[data-test-subj="externalLinkTooltip"]').exists()).toBeFalsy();
+      });
+
+      test('it should not render if url prop is invalid', () => {
+        wrapper = shallow(
+          <ExternalLink url={'xxx'} idx={4} allItemsLimit={5} overflowIndexStart={5} />
+        );
+        expect(wrapper.find('[data-test-subj="externalLinkTooltip"]').exists()).toBeFalsy();
+      });
+
+      test('it should not render comma if id is not given', () => {
+        wrapper = shallow(
+          <ExternalLink url={mockLink} allItemsLimit={5} overflowIndexStart={5}>
+            {mockLinkName}
+          </ExternalLink>
+        );
+        expect(wrapper.find('[data-test-subj="externalLinkComma"]').exists()).toBeFalsy();
+      });
+
+      test('it should not render comma for the last item', () => {
+        wrapper = shallow(
+          <ExternalLink url={mockLink} idx={4} allItemsLimit={5} overflowIndexStart={5}>
+            {mockLinkName}
+          </ExternalLink>
+        );
+        expect(wrapper.find('[data-test-subj="externalLinkComma"]').exists()).toBeFalsy();
+      });
     });
 
-    test("it encodes <script>alert('XSS')</script>", () => {
-      const wrapper = mountWithIntl(
-        <ReputationLink domain={"<script>alert('XSS')</script>"}>{'Example Link'}</ReputationLink>
-      );
-      expect(wrapper.find('a').prop('href')).toEqual(
-        "https://www.talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
-      );
-    });
+    describe.each<[number, number, number, boolean]>([
+      [0, 2, 5, true],
+      [1, 2, 5, false],
+      [2, 2, 5, false],
+      [3, 2, 5, false],
+      [4, 2, 5, false],
+      [5, 2, 5, false],
+    ])(
+      'renders Comma when overflowIndex is smaller than allItems limit',
+      (idx, overflowIndexStart, allItemsLimit, showComma) => {
+        beforeAll(() => {
+          wrapper = shallow(
+            <ExternalLink
+              url={mockLink}
+              idx={idx}
+              allItemsLimit={allItemsLimit}
+              overflowIndexStart={overflowIndexStart}
+            >
+              {mockLinkName}
+            </ExternalLink>
+          );
+        });
+
+        test(`should render Comma if current id (${idx}) is smaller than the index of last visible item`, () => {
+          expect(wrapper.find('[data-test-subj="externalLinkComma"]').exists()).toEqual(showComma);
+        });
+      }
+    );
+
+    describe.each<[number, number, number, boolean]>([
+      [0, 5, 4, true],
+      [1, 5, 4, true],
+      [2, 5, 4, true],
+      [3, 5, 4, false],
+      [4, 5, 4, false],
+      [5, 5, 4, false],
+    ])(
+      'When overflowIndex is grater than allItems limit',
+      (idx, overflowIndexStart, allItemsLimit, showComma) => {
+        beforeAll(() => {
+          wrapper = shallow(
+            <ExternalLink
+              url={mockLink}
+              idx={idx}
+              allItemsLimit={allItemsLimit}
+              overflowIndexStart={overflowIndexStart}
+            >
+              {mockLinkName}
+            </ExternalLink>
+          );
+        });
+
+        test(`Current item (${idx}) should render Comma execpt the last item`, () => {
+          expect(wrapper.find('[data-test-subj="externalLinkComma"]').exists()).toEqual(showComma);
+        });
+      }
+    );
+
+    describe.each<[number, number, number, boolean]>([
+      [0, 5, 5, true],
+      [1, 5, 5, true],
+      [2, 5, 5, true],
+      [3, 5, 5, true],
+      [4, 5, 5, false],
+      [5, 5, 5, false],
+    ])(
+      'when overflowIndex equals to allItems limit',
+      (idx, overflowIndexStart, allItemsLimit, showComma) => {
+        beforeAll(() => {
+          wrapper = shallow(
+            <ExternalLink
+              url={mockLink}
+              idx={idx}
+              allItemsLimit={allItemsLimit}
+              overflowIndexStart={overflowIndexStart}
+            >
+              {mockLinkName}
+            </ExternalLink>
+          );
+        });
+
+        test(`Current item (${idx}) should render Comma correctly`, () => {
+          expect(wrapper.find('[data-test-subj="externalLinkComma"]').exists()).toEqual(showComma);
+        });
+      }
+    );
   });
 
-  describe('VirusTotalLink', () => {
-    test('it renders sha passed in as value', () => {
-      const wrapper = mountWithIntl(<VirusTotalLink link={'abc'}>{'Example Link'}</VirusTotalLink>);
-      expect(wrapper.text()).toEqual('Example Link');
+  describe('ReputationLink', () => {
+    const mockCustomizedReputationLinks = [
+      { name: 'Link 1', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
+      {
+        name: 'Link 2',
+        url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
+      },
+      { name: 'Link 3', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
+      {
+        name: 'Link 4',
+        url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
+      },
+      { name: 'Link 5', url_template: 'https://www.virustotal.com/gui/search/{{ip}}' },
+      {
+        name: 'Link 6',
+        url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}',
+      },
+    ];
+    const mockDefaultReputationLinks = mockCustomizedReputationLinks.slice(0, 2);
+
+    describe('links property', () => {
+      beforeEach(() => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockDefaultReputationLinks]);
+      });
+
+      test('it renders default link text', () => {
+        const wrapper = shallow(<ReputationLink domain={'192.0.2.0'} />);
+        wrapper.find('[data-test-subj="externalLink"]').forEach((node, idx) => {
+          expect(node.at(idx).text()).toEqual(mockDefaultReputationLinks[idx].name);
+        });
+      });
+
+      test('it renders customized link text', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+        const wrapper = shallow(<ReputationLink domain={'192.0.2.0'} />);
+        wrapper.find('[data-test-subj="externalLink"]').forEach((node, idx) => {
+          expect(node.at(idx).text()).toEqual(mockCustomizedReputationLinks[idx].name);
+        });
+      });
+
+      test('it renders correct href', () => {
+        const wrapper = shallow(<ReputationLink domain={'192.0.2.0'} />);
+        wrapper.find('[data-test-subj="externalLink"]').forEach((node, idx) => {
+          expect(node.prop('href')).toEqual(
+            mockDefaultReputationLinks[idx].url_template.replace('{{ip}}', '192.0.2.0')
+          );
+        });
+      });
     });
 
-    test('it renders sha passed in as link', () => {
-      const wrapper = mountWithIntl(
-        <VirusTotalLink link={'abc'}>{'Example Link'} </VirusTotalLink>
-      );
-      expect(wrapper.find('a').prop('href')).toEqual('https://www.virustotal.com/#/search/abc');
+    describe('number of links', () => {
+      beforeAll(() => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+      });
+
+      afterEach(() => {
+        (useUiSetting$ as jest.Mock).mockClear();
+      });
+
+      test('it renders correct number of links by default', () => {
+        const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+        expect(wrapper.find('[data-test-subj="externalLinkComponent"]')).toHaveLength(
+          DEFAULT_NUMBER_OF_LINK
+        );
+      });
+
+      test('it renders correct number of tooltips by default', () => {
+        const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+        expect(wrapper.find('[data-test-subj="externalLinkTooltip"]')).toHaveLength(
+          DEFAULT_NUMBER_OF_LINK
+        );
+      });
+
+      test('it renders correct number of visible link', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('[data-test-subj="externalLinkComponent"]')).toHaveLength(1);
+      });
+
+      test('it renders correct number of tooltips for visible links', () => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('[data-test-subj="externalLinkTooltip"]')).toHaveLength(1);
+      });
     });
 
-    test("it encodes <script>alert('XSS')</script>", () => {
-      const wrapper = mountWithIntl(
-        <VirusTotalLink link={"<script>alert('XSS')</script>"}>{'Example Link'}</VirusTotalLink>
-      );
-      expect(wrapper.find('a').prop('href')).toEqual(
-        "https://www.virustotal.com/#/search/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
-      );
+    describe('invalid customized links', () => {
+      const mockInvalidLinksEmptyObj = [{}];
+      const mockInvalidLinksNoName = [
+        { url_template: 'https://talosintelligence.com/reputation_center/lookup?search={{ip}}' },
+      ];
+      const mockInvalidLinksNoUrl = [{ name: 'Link 1' }];
+      const mockInvalidUrl = [{ name: 'Link 1', url_template: "<script>alert('XSS')</script>" }];
+      afterEach(() => {
+        (useUiSetting$ as jest.Mock).mockReset();
+      });
+
+      test('it filters empty object', () => {
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksEmptyObj]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('[data-test-subj="externalLink"]')).toHaveLength(0);
+      });
+
+      test('it filters object without name property', () => {
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksNoName]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('[data-test-subj="externalLink"]')).toHaveLength(0);
+      });
+
+      test('it filters object without url_template property', () => {
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidLinksNoUrl]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('[data-test-subj="externalLink"]')).toHaveLength(0);
+      });
+
+      test('it filters object with invalid url', () => {
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockInvalidUrl]);
+
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('[data-test-subj="externalLink"]')).toHaveLength(0);
+      });
+    });
+
+    describe('external icon', () => {
+      beforeAll(() => {
+        (useUiSetting$ as jest.Mock).mockReset();
+        (useUiSetting$ as jest.Mock).mockReturnValue([mockCustomizedReputationLinks]);
+      });
+
+      afterEach(() => {
+        (useUiSetting$ as jest.Mock).mockClear();
+      });
+
+      test('it renders correct number of external icons by default', () => {
+        const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
+        expect(wrapper.find('[data-test-subj="externalLinkIcon"]')).toHaveLength(5);
+      });
+
+      test('it renders correct number of external icons', () => {
+        const wrapper = mountWithIntl(
+          <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
+        );
+        expect(wrapper.find('[data-test-subj="externalLinkIcon"]')).toHaveLength(1);
+      });
     });
   });
 
