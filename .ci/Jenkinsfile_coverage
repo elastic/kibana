@@ -77,6 +77,7 @@ kibanaPipeline(timeoutMinutes: 180) {
             """,
             "### Print Canonical TIME_STAMP"
           )
+          kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
         }
 
         sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
