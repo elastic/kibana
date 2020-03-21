@@ -6,6 +6,7 @@
 
 import { CoreStart } from 'src/core/public';
 import { SharePluginStart } from 'src/plugins/share/public';
+import { DrilldownFactoryContext } from '../../../../../drilldowns/public';
 import {
   EmbeddableVisTriggerContext,
   EmbeddableContext,
@@ -28,10 +29,7 @@ export interface CollectConfigProps extends UiActionsCollectConfigProps<Config> 
     getNavigateToApp: () => Promise<CoreStart['application']['navigateToApp']>;
     getGetUrlGenerator: () => Promise<SharePluginStart['urlGenerators']['getUrlGenerator']>;
   };
-  context: {
-    place: string;
-    placeContext: {
-      embeddable: IEmbeddable;
-    };
-  };
+  context: DrilldownFactoryContext<{
+    embeddable: IEmbeddable;
+  }>;
 }
