@@ -10,10 +10,6 @@ import {
   defaultDynamicSettings,
   DynamicSettings,
 } from '../../../../legacy/plugins/uptime/common/runtime_types/dynamic_settings';
-import {
-  settingsObjectId,
-  settingsObjectType,
-} from '../../../../plugins/uptime/server/lib/saved_objects';
 import { makeChecks } from '../../../api_integration/apis/uptime/graphql/helpers/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
