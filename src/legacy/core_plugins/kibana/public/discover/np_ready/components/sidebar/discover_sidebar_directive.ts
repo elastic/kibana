@@ -17,10 +17,10 @@
  * under the License.
  */
 import { wrapInI18nContext } from '../../../kibana_services';
-import { DiscoverFieldChooser } from './discover_field_chooser';
+import { DiscoverSidebar } from './discover_sidebar';
 
-export function createDiscoverFieldChooserDirective(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DiscoverFieldChooser), [
+export function createDiscoverSidebarDirective(reactDirective: any) {
+  return reactDirective(wrapInI18nContext(DiscoverSidebar), [
     ['columns', { watchDepth: 'reference' }],
     ['fieldCounts', { watchDepth: 'reference' }],
     ['hits', { watchDepth: 'reference' }],

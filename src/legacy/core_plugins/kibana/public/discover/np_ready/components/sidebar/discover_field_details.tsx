@@ -89,7 +89,9 @@ export function DiscoverFieldDetails({ field, indexPattern, details, onAddFilter
               defaultMessage="Visualize"
             />
           </EuiLink>
-          {warnings.length > 0 && <EuiIconTip content={warnings.join(' ')} />}
+          {warnings.length > 0 && (
+            <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
+          )}
         </>
       )}
     </div>

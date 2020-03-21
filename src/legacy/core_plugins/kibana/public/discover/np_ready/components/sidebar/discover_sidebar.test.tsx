@@ -19,6 +19,8 @@
 
 import _ from 'lodash';
 // @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
+// @ts-ignore
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 // @ts-ignore
 import realHits from 'fixtures/real_hits.js';
@@ -26,7 +28,7 @@ import realHits from 'fixtures/real_hits.js';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { DiscoverFieldChooser } from './discover_field_chooser';
+import { DiscoverSidebar } from './discover_sidebar';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../../../../plugins/data/common';
 import { SavedObject } from '../../../../../../../../core/types';
@@ -86,7 +88,13 @@ function getCompProps() {
 describe('discover field chooser', function() {
   describe('Field listing', function() {
     it('should have Selected Fields, Fields and Popular Fields sections', function() {
-      const comp = mountWithIntl(<DiscoverFieldChooser {...getCompProps()} />);
+      const comp = mountWithIntl(<DiscoverSidebar {...getCompProps()} />);
+      const popular = findTestSubject(comp, 'fieldList-popular');
+      const selected = findTestSubject(comp, 'fieldList-selected');
+      const unpopular = findTestSubject(comp, 'fieldList-unpopular');
+      expect(popular.children().length).toBe(2);
+      expect(unpopular.children().length).toBe(7);
+      expect(selected.children().length).toBe(1);
       expect(comp.html()).toMatchSnapshot();
     });
   });

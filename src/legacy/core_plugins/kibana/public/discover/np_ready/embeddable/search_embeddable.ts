@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import angular from 'angular';
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
@@ -23,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import {
   UiActionsStart,
   APPLY_FILTER_TRIGGER,
-} from '../../../../../../..//plugins/ui_actions/public';
+} from '../../../../../../../plugins/ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   esFilters,
@@ -41,7 +42,6 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
 import {
-  angular,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,

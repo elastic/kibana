@@ -51,7 +51,7 @@ export interface Props {
   state: AppState;
 }
 
-export function DiscoverFieldChooser({
+export function DiscoverSidebar({
   columns,
   fieldCounts,
   hits,
@@ -169,7 +169,11 @@ export function DiscoverFieldChooser({
                 </h3>
               </EuiTitle>
             </div>
-            <ul className="list-unstyled dscFieldList--selected" aria-labelledby="selected_fields">
+            <ul
+              className="list-unstyled dscFieldList--selected"
+              aria-labelledby="selected_fields"
+              data-test-subj={`fieldList-selected`}
+            >
               {fields
                 .filter(isFieldFilteredAndDisplayed)
                 .map((field: IndexPatternField, idx: number) => {
@@ -230,6 +234,7 @@ export function DiscoverFieldChooser({
               !showFields ? 'hidden-sm hidden-xs' : ''
             }`}
             aria-labelledby="available_fields"
+            data-test-subj={`fieldList-popular`}
           >
             <li className="sidebar-item sidebar-list-header">
               <h6>
@@ -263,6 +268,7 @@ export function DiscoverFieldChooser({
             !showFields ? 'hidden-sm hidden-xs' : ''
           }`}
           aria-labelledby="available_fields"
+          data-test-subj={`fieldList-unpopular`}
         >
           {groupedFields &&
             groupedFields.unpopular

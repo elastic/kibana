@@ -1,5 +1,3 @@
-// ONLY USED IN DISCOVER
-
 .sidebar-container {
   padding-left: 0 !important;
   padding-right: 0 !important;
@@ -12,20 +10,6 @@
   }
 
   .sidebar-list {
-    .sidebar-controls {
-      border-radius: $euiBorderRadius;
-      margin-right: -13px;
-      margin-top: $euiSizeXS / 2;
-
-      .navbar-btn-link {
-        padding-left: $euiSizeS;
-        padding-right: $euiSizeS;
-      }
-
-      .sidebar-controls-error {
-        cursor: default;
-      }
-    }
 
     ul {
       list-style: none;

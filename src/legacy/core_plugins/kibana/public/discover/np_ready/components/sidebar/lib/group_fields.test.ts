@@ -60,7 +60,7 @@ describe('group_fields', function() {
       customer_birth_date: 1,
     };
 
-    const actual = groupFields(fields, ['currency'], 5, fieldCounts);
+    const actual = groupFields(fields as any, ['currency'], 5, fieldCounts);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "popular": Array [

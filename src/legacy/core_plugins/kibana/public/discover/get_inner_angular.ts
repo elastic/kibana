@@ -61,7 +61,7 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../../plugins/kibana_legacy/public';
-import { createDiscoverFieldChooserDirective } from './np_ready/components/field_chooser/discover_field_chooser_directive';
+import { createDiscoverSidebarDirective } from './np_ready/components/sidebar';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -152,7 +152,7 @@ export function initializeInnerAngularModule(
     .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverFieldChooser', createDiscoverFieldChooserDirective)
+    .directive('discoverSidebar', createDiscoverSidebarDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
 }
 

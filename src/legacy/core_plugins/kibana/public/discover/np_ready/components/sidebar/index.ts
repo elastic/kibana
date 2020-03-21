@@ -16,34 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useRef, useEffect } from 'react';
-import { EuiToolTip } from '@elastic/eui';
 
-interface Props {
-  children: React.ReactNode;
-  value: string;
-}
-
-export function TextTruncate(props: Props) {
-  const [expandable, setExpandable] = useState(false);
-  const wrapper = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    if (wrapper && wrapper.current && wrapper.current.offsetWidth < wrapper.current.scrollWidth) {
-      setExpandable(true);
-    }
-  }, [wrapper]);
-
-  if (expandable) {
-    return (
-      <EuiToolTip position="right" title={props.value} anchorClassName="eui-textTruncate">
-        <>{props.children}</>
-      </EuiToolTip>
-    );
-  }
-
-  return (
-    <span ref={wrapper} className="eui-textTruncate">
-      {props.children}
-    </span>
-  );
-}
+export { DiscoverSidebar } from './discover_sidebar';
+export { createDiscoverSidebarDirective } from './discover_sidebar_directive';
