@@ -5,19 +5,19 @@
  */
 
 import React, { Fragment } from 'react';
-import { getSourceById } from '../../../layers/sources/source_registry';
+import { getLayerWizard } from '../../../layers/layer_wizard_registry';
 import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SourceEditor = ({
   clearSource,
-  sourceId,
+  layerWizardId,
   isIndexingTriggered,
   inspectorAdapters,
   previewLayer,
 }) => {
-  const source = getSourceById(sourceId);
-  if (!source) {
+  const layerWizard = getLayerWizard(layerWizardId);
+  if (!layerWizard) {
     return null;
   }
 
@@ -35,7 +35,7 @@ export const SourceEditor = ({
         </Fragment>
       )}
       <EuiPanel>
-        {source.renderCreateEditor({ onPreviewSource: previewLayer, inspectorAdapters })}
+        {layerWizard.renderWizard({ onPreviewSource: previewLayer, inspectorAdapters })}
       </EuiPanel>
     </Fragment>
   );

@@ -20,7 +20,7 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/reducers/util';
 import { InnerJoin } from '../layers/joins/inner_join';
-import { getSourceByType } from '../layers/sources/source_registry';
+import { createSourceInstance } from '../layers/sources/source_registry';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -46,14 +46,6 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
-}
-
-function createSourceInstance(sourceDescriptor, inspectorAdapters) {
-  const source = getSourceByType(sourceDescriptor.type);
-  if (!source) {
-    throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
-  }
-  return source.factory(sourceDescriptor, inspectorAdapters);
 }
 
 export const getOpenTooltips = ({ map }) => {

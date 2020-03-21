@@ -33,6 +33,7 @@ import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_sty
 import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
+import { registerLayerWizard } from '../../layer_wizard_registry';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -413,16 +414,20 @@ export class ESGeoGridSource extends AbstractESAggSource {
 }
 
 registerSource({
+  factory: (sourceDescriptor, inspectorAdapters) => {
+    return new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
+  },
+  type: ES_GEO_GRID,
+});
+
+registerLayerWizard({
   id: `${ES_GEO_GRID}_clusters`,
   order: 11,
   description: i18n.translate('xpack.maps.source.esGridClustersDescription', {
     defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
   }),
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
-  },
   icon: 'logoElasticsearch',
-  renderCreateEditor: ({ onPreviewSource, inspectorAdapters }) => {
+  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
     const onSourceConfigChange = sourceConfig => {
       if (!sourceConfig) {
         onPreviewSource(null);
@@ -442,20 +447,16 @@ registerSource({
     );
   },
   title: clustersTitle,
-  type: ES_GEO_GRID,
 });
 
-registerSource({
+registerLayerWizard({
   id: `${ES_GEO_GRID}_heatmap`,
   order: 12,
   description: i18n.translate('xpack.maps.source.esGridHeatmapDescription', {
     defaultMessage: 'Geospatial data grouped in grids to show density',
   }),
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
-  },
   icon: 'logoElasticsearch',
-  renderCreateEditor: ({ onPreviewSource, inspectorAdapters }) => {
+  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
     const onSourceConfigChange = sourceConfig => {
       if (!sourceConfig) {
         onPreviewSource(null);
@@ -475,5 +476,4 @@ registerSource({
     );
   },
   title: heatmapTitle,
-  type: ES_GEO_GRID,
 });

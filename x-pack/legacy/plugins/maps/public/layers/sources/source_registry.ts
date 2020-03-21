@@ -8,20 +8,7 @@
 import { AbstractSourceDescriptor, ISource } from './source';
 
 type SourceRegistryEntry = {
-  description: string;
   factory: (sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object) => ISource;
-  icon: string;
-  id: string;
-  isIndexingSource?: boolean;
-  order: number; // number to control display order in UI. Lower numbers display first
-  renderCreateEditor({
-    onPreviewSource,
-    inspectorAdapters,
-  }: {
-    onPreviewSource: () => void;
-    inspectorAdapters: unknown;
-  }): unknown;
-  title: string;
   type: string;
 };
 
@@ -31,16 +18,17 @@ export function registerSource(entry: SourceRegistryEntry) {
   registry.push(entry);
 }
 
-export function getSources(): SourceRegistryEntry[] {
-  return registry.sort(function(a: SourceRegistryEntry, b: SourceRegistryEntry) {
-    return a.order - b.order;
-  });
+function getSourceByType(sourceType: string): SourceRegistryEntry | undefined {
+  return registry.find((source: SourceRegistryEntry) => source.type === sourceType);
 }
 
-export function getSourceById(sourceId: string): SourceRegistryEntry | undefined {
-  return registry.find((source: SourceRegistryEntry) => source.id === sourceId);
-}
-
-export function getSourceByType(type: string): SourceRegistryEntry | undefined {
-  return registry.find((source: SourceRegistryEntry) => source.type === type);
+export function createSourceInstance(
+  sourceDescriptor: AbstractSourceDescriptor,
+  inspectorAdapters: object
+) {
+  const source = getSourceByType(sourceDescriptor.type);
+  if (!source) {
+    throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
+  }
+  return source.factory(sourceDescriptor, inspectorAdapters);
 }

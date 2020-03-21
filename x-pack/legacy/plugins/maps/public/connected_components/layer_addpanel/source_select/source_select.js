@@ -5,33 +5,33 @@
  */
 
 import React, { Fragment } from 'react';
-import { getSources } from '../../../layers/sources/source_registry';
+import { getLayerWizards } from '../../../layers/layer_wizard_registry';
 import { EuiTitle, EuiSpacer, EuiCard, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 
 export function SourceSelect({ updateSourceSelection }) {
-  const sourceCards = getSources().map(sourceRegistryEntry => {
-    const icon = sourceRegistryEntry.icon ? (
-      <EuiIcon type={sourceRegistryEntry.icon} size="l" />
-    ) : null;
+  const sourceCards = getLayerWizards().map(layerWizard => {
+    const icon = layerWizard.icon ? <EuiIcon type={layerWizard.icon} size="l" /> : null;
+
+    const onClick = () => {
+      updateSourceSelection({
+        layerWizardId: layerWizard.id,
+        isIndexingSource: !!layerWizard.isIndexingSource,
+      });
+    };
 
     return (
-      <Fragment key={sourceRegistryEntry.id}>
+      <Fragment key={layerWizard.id}>
         <EuiSpacer size="s" />
         <EuiCard
           className="mapLayerAddpanel__card"
-          title={sourceRegistryEntry.title}
+          title={layerWizard.title}
           icon={icon}
-          onClick={() =>
-            updateSourceSelection({
-              sourceId: sourceRegistryEntry.id,
-              isIndexingSource: !!sourceRegistryEntry.isIndexingSource,
-            })
-          }
-          description={sourceRegistryEntry.description}
+          onClick={onClick}
+          description={layerWizard.description}
           layout="horizontal"
-          data-test-subj={_.camelCase(sourceRegistryEntry.title)}
+          data-test-subj={_.camelCase(layerWizard.title)}
         />
       </Fragment>
     );

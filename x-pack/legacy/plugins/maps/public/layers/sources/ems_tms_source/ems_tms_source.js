@@ -17,6 +17,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { EMS_TMS } from '../../../../common/constants';
 import { getInjectedVarFunc, getUiSettings } from '../../../kibana_services';
 import { registerSource } from '../source_registry';
+import { registerLayerWizard } from '../../layer_wizard_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
   defaultMessage: 'EMS Basemaps',
@@ -147,16 +148,20 @@ export class EMSTMSSource extends AbstractTMSSource {
 }
 
 registerSource({
+  factory: (sourceDescriptor, inspectorAdapters) => {
+    return new EMSTMSSource(sourceDescriptor, inspectorAdapters);
+  },
+  type: EMS_TMS,
+});
+
+registerLayerWizard({
   id: EMS_TMS,
   order: 20,
   description: i18n.translate('xpack.maps.source.emsTileDescription', {
     defaultMessage: 'Tile map service from Elastic Maps Service',
   }),
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new EMSTMSSource(sourceDescriptor, inspectorAdapters);
-  },
   icon: 'emsApp',
-  renderCreateEditor: ({ onPreviewSource, inspectorAdapters }) => {
+  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
     const onSourceConfigChange = sourceConfig => {
       const descriptor = EMSTMSSource.createDescriptor(sourceConfig);
       const source = new EMSTMSSource(descriptor, inspectorAdapters);
@@ -166,5 +171,4 @@ registerSource({
     return <TileServiceSelect onTileSelect={onSourceConfigChange} />;
   },
   title: sourceTitle,
-  type: EMS_TMS,
 });
