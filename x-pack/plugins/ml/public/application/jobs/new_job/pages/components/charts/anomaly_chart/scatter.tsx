@@ -39,7 +39,7 @@ export const Scatter: FC<Props> = ({ chartData }) => {
       yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}
       lineSeriesStyle={scatterSeriesStyle}
-      customSeriesColors={[LINE_COLOR]}
+      color={LINE_COLOR}
     />
   );
 };
