@@ -139,6 +139,8 @@ def maybeFailFast() {
               if [ -z ${HOST_FROM_VAULT} ]; then
                 echo "### HOST_FROM_VAULT is undefined"
                 exit 1
+              else
+                echo "### 1 or more vault variables are DEFINED"
               fi
 
               """, "### Fail fast without vault"
