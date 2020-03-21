@@ -66,6 +66,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   );
   const setMl = useCallback(() => setType('machine_learning'), [setType]);
   const setQuery = useCallback(() => setType('query'), [setType]);
+  const mlCardDisabled = isReadOnly || !hasValidLicense;
 
   return (
     <EuiFormRow
@@ -92,8 +93,9 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             title={i18n.ML_TYPE_TITLE}
             description={<MlCardDescription hasValidLicense={hasValidLicense} />}
             icon={<EuiIcon size="l" type="machineLearningApp" />}
+            isDisabled={mlCardDisabled}
             selectable={{
-              isDisabled: isReadOnly || !hasValidLicense,
+              isDisabled: mlCardDisabled,
               onClick: setMl,
               isSelected: isMlRule(ruleType),
             }}
