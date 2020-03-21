@@ -110,21 +110,12 @@ export const ProcessEventDot = styled(
       );
 
       const markerBaseSize = 15;
-      const markerSize = (magFactor: number) => {
-        return markerBaseSize;
-      };
+      const markerSize = markerBaseSize;
+      const markerPositionOffset = -markerBaseSize / 2;
 
-      const markerPositionOffset = (magFactor: number) => {
-        return -markerBaseSize / 2;
-      };
+      const labelYOffset = markerPositionOffset + 0.25 * markerSize - 0.5;
 
-      const labelYOffset = (magFactor: number) => {
-        return markerPositionOffset(magFactorX) + 0.25 * markerSize(magFactorX) - 0.5;
-      };
-
-      const labelYHeight = (magFactor: number) => {
-        return markerSize(magFactorX) / 1.7647;
-      };
+      const labelYHeight = markerSize / 1.7647;
 
       const levelAttribute = adjacentNodeMap?.level
         ? {
@@ -195,10 +186,10 @@ export const ProcessEventDot = styled(
               <use
                 role="presentation"
                 xlinkHref={cubeSymbol}
-                x={markerPositionOffset(magFactorX)}
-                y={markerPositionOffset(magFactorX)}
-                width={markerSize(magFactorX)}
-                height={markerSize(magFactorX)}
+                x={markerPositionOffset}
+                y={markerPositionOffset}
+                width={markerSize}
+                height={markerSize}
                 opacity="1"
                 className="cube"
               >
@@ -217,16 +208,16 @@ export const ProcessEventDot = styled(
               <use
                 role="presentation"
                 xlinkHref={`#${SymbolIds.processNode}`}
-                x={markerPositionOffset(magFactorX) + markerSize(magFactorX) - 0.5}
-                y={labelYOffset(magFactorX)}
-                width={(markerSize(magFactorX) / 1.7647) * 5}
-                height={markerSize(magFactorX) / 1.7647}
+                x={markerPositionOffset + markerSize - 0.5}
+                y={labelYOffset}
+                width={(markerSize / 1.7647) * 5}
+                height={markerSize / 1.7647}
                 opacity="1"
                 fill={labelFill}
               />
               <text
-                x={markerPositionOffset(magFactorX) + 0.7 * markerSize(magFactorX) + 50 / 2}
-                y={labelYOffset(magFactorX) + labelYHeight(magFactorX) / 2}
+                x={markerPositionOffset + 0.7 * markerSize + 50 / 2}
+                y={labelYOffset + labelYHeight / 2}
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fontSize="3.75"
@@ -240,8 +231,8 @@ export const ProcessEventDot = styled(
                 {eventModel.eventName(event)}
               </text>
               <text
-                x={markerPositionOffset(magFactorX) + markerSize(magFactorX)}
-                y={labelYOffset(magFactorX) - 1}
+                x={markerPositionOffset + markerSize}
+                y={labelYOffset - 1}
                 textAnchor="start"
                 dominantBaseline="middle"
                 fontSize="2.67"
