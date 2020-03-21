@@ -156,7 +156,7 @@ registerSource({
 
 registerLayerWizard({
   id: EMS_TMS,
-  order: 20,
+  order: 21,
   description: i18n.translate('xpack.maps.source.emsTileDescription', {
     defaultMessage: 'Tile map service from Elastic Maps Service',
   }),

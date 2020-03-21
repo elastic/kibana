@@ -6,6 +6,19 @@
 
 import './kibana_services';
 
+import './layers/layer_wizard_registry';
+import './layers/sources/source_registry';
+import './layers/sources/ems_file_source';
+import './layers/sources/ems_tms_source';
+import './layers/sources/client_file_source';
+import './layers/sources/xyz_tms_source';
+import './layers/sources/wms_source';
+import './layers/sources/kibana_tilemap_source';
+import './layers/sources/kibana_regionmap_source';
+import './layers/sources/es_geo_grid_source';
+import './layers/sources/es_search_source';
+import './layers/sources/es_pew_pew_source/es_pew_pew_source';
+
 // import the uiExports that we want to "use"
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
