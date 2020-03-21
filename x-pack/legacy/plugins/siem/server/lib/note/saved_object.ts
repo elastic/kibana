@@ -84,7 +84,6 @@ export class Note {
     return notesByTimelineId.notes;
   }
 
-
   public async getAllNotes(
     request: FrameworkRequest,
     pageInfo: PageInfoNote | null,
@@ -111,7 +110,7 @@ export class Note {
   ): Promise<ResponseNote> {
     try {
       const savedObjectsClient = request.context.core.savedObjects.client;
-      console.log('persist timeline -1-', noteId, version, note);
+      console.log('persist note -1-', noteId, version, note);
 
       if (noteId == null) {
         const timelineVersionSavedObject =
@@ -143,6 +142,10 @@ export class Note {
       }
 
       // Update new note
+
+      const existingNote = await this.getSavedNote(request, noteId);
+      console.log('existing note', existingNote.version);
+      console.log('given version', version);
       return {
         code: 200,
         message: 'success',
@@ -152,7 +155,7 @@ export class Note {
             noteId,
             pickSavedNote(noteId, note, request.user),
             {
-              version: version || undefined,
+              version: existingNote.version || undefined,
             }
           )
         ),

@@ -89,9 +89,10 @@ export class PinnedEvent {
 
   public async persistPinnedEventOnTimeline(
     request: FrameworkRequest,
-    pinnedEventId: string | null,
+    pinnedEventId: string | null, // pinned event saved object id
     eventId: string,
-    timelineId: string | null
+    timelineId: string | null,
+    pinnedEventIds: string[]
   ): Promise<PinnedEventResponse | null> {
     const savedObjectsClient = request.context.core.savedObjects.client;
 
@@ -116,6 +117,14 @@ export class PinnedEvent {
           const isPinnedAlreadyExisting = allPinnedEventId.filter(
             pinnedEvent => pinnedEvent.eventId === eventId
           );
+          console.log(
+            'persist pinned event',
+            allPinnedEventId,
+            eventId,
+            timelineId,
+            isPinnedAlreadyExisting[0]
+          );
+
           if (isPinnedAlreadyExisting.length === 0) {
             const savedPinnedEvent: SavedPinnedEvent = {
               eventId,

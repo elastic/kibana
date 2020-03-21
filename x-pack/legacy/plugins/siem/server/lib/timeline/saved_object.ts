@@ -143,15 +143,17 @@ export class Timeline {
     try {
       if (timelineId == null) {
         // Create new timeline
+        const newTimeline = convertSavedObjectToSavedTimeline(
+          await savedObjectsClient.create(
+            timelineSavedObjectType,
+            pickSavedTimeline(timelineId, timeline, request.user)
+          )
+        );
+        console.log('-------persist timeline -1.5-', newTimeline);
         return {
           code: 200,
           message: 'success',
-          timeline: convertSavedObjectToSavedTimeline(
-            await savedObjectsClient.create(
-              timelineSavedObjectType,
-              pickSavedTimeline(timelineId, timeline, request.user)
-            )
-          ),
+          timeline: newTimeline,
         };
       }
       // Update Timeline

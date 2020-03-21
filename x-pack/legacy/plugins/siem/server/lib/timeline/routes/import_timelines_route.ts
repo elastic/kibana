@@ -5,7 +5,7 @@
  */
 
 import { extname } from 'path';
-import { chunk, omit, set } from 'lodash/fp';
+import { chunk, omit, set, difference } from 'lodash/fp';
 import {
   buildRouteValidation,
   buildSiemResponse,
@@ -167,6 +167,13 @@ export const importTimelinesRoute = (
                       parsedTimeline
                     );
                     try {
+                      const user = await securityPluginSetup.authc.getCurrentUser(request);
+                      let frameworkRequest = set(
+                        'context.core.savedObjects.client',
+                        savedObjectsClient,
+                        request
+                      );
+                      frameworkRequest = set('user', user, frameworkRequest);
                       const timeline = await readTimeline({
                         request,
                         savedObjectsClient,
@@ -175,28 +182,6 @@ export const importTimelinesRoute = (
 
                       console.log('------1------');
                       console.log(timeline);
-                      const user = await securityPluginSetup.authc.getCurrentUser(request);
-                      let frameworkRequest = set(
-                        'context.core.savedObjects.client',
-                        savedObjectsClient,
-                        request
-                      );
-                      frameworkRequest = set('user', user, frameworkRequest);
-
-                      // await Promise.resolve(
-                      //   timelineLib.deleteTimeline(frameworkRequest, [
-                      //     '01511bd0-6b06-11ea-a858-2b9ba1fc6268',
-                      //     '8592e7e0-6b04-11ea-a858-2b9ba1fc6268',
-                      //     'ee36cf90-6af6-11ea-b10c-e7ee394b3a26',
-                      //     '12980cd0-6b03-11ea-a858-2b9ba1fc6268',
-                      //     '9b8d9cf0-6b01-11ea-8aa7-d90be9c72808',
-                      //     'cda9e650-6aff-11ea-bcc8-a3142ebe5ca3',
-                      //     '6068d830-6aff-11ea-aca5-0f9787b572cd',
-                      //     '6ec6a110-6afe-11ea-a865-d73aa976a344',
-                      //     '2d29fa10-6afc-11ea-a865-d73aa976a344',
-                      //     'c1571430-6af6-11ea-8f66-29b4fbaf7c9b',
-                      //   ])
-                      // );
 
                       if (timeline == null) {
                         // create timeline
@@ -206,7 +191,7 @@ export const importTimelinesRoute = (
                           frameworkRequest,
                           null,
                           null,
-                          timeline ?? parsedTimelineObject
+                          parsedTimelineObject
                         );
                         console.log('------2------', pinnedEventIds);
                         if (pinnedEventIds.length !== 0) {
@@ -237,41 +222,101 @@ export const importTimelinesRoute = (
                         resolve({ timeline_id: newSavedObjectId, status_code: 200 });
                       } else if (timeline != null && frameworkRequest.query.overwrite) {
                         // update timeline
-
+                        const allPinnedEvent = await pinnedEventLib.getAllPinnedEventsByTimelineId(
+                          frameworkRequest,
+                          timeline.savedObjectId
+                        );
+                        const allPinnedEventSavedObjectId = allPinnedEvent.map(
+                          e => e.pinnedEventId
+                        );
                         await timelineLib.persistTimeline(
                           frameworkRequest,
-                          savedObjectId,
+                          timeline.savedObjectId,
                           timeline.version,
                           parsedTimelineObject
                         );
-                        console.log('------4------WzY0OCwxXQ==WzY1OCwxXQ==');
-                        await Promise.all(
-                          pinnedEventIds.map(eventId => {
-                            return pinnedEventLib.persistPinnedEventOnTimeline(
-                              frameworkRequest,
-                              null,
-                              eventId,
-                              savedObjectId
-                            );
-                          })
-                        );
+                        console.log('------4------', pinnedEventIds, allPinnedEventSavedObjectId);
+                        // await Promise.all(
+                        //   pinnedEventIds.map(eventId => {
+                        //     const isExistingEvent = timeline.pinnedEventIds.find(
+                        //       e => e !== eventId
+                        //     );
+                        //     if (isExistingEvent) {
+                        //       return pinnedEventLib.persistPinnedEventOnTimeline(
+                        //         frameworkRequest,
+                        //         null,
+                        //         eventId,
+                        //         timeline.savedObjectId,
+                        //         pinnedEventIds
+                        //       );
+                        //     } else {
+                        //       // return pinnedEventLib.deletePinnedEventOnTimeline(frameworkRequest, [
+                        //       //   eventId,
+                        //       // ]);
+                        //       return pinnedEventLib.persistPinnedEventOnTimeline(
+                        //         frameworkRequest,
+                        //         null,
+                        //         eventId,
+                        //         timeline.savedObjectId,
+                        //         pinnedEventIds
+                        //       );
+                        //     }
+                        //   })
+                        // );
+
+                        if (pinnedEventIds.length > allPinnedEventSavedObjectId.length) {
+                          const addedEvents = difference(
+                            pinnedEventIds,
+                            allPinnedEventSavedObjectId
+                          );
+                          console.log('-----addedEvents', addedEvents);
+                          await Promise.all(
+                            addedEvents.map(eventId => {
+                              return pinnedEventLib.persistPinnedEventOnTimeline(
+                                frameworkRequest,
+                                null,
+                                eventId,
+                                timeline.savedObjectId,
+                                pinnedEventIds
+                              );
+                            })
+                          );
+                        } else if (pinnedEventIds.length < allPinnedEventSavedObjectId.length) {
+                          const deletedEvents = difference(
+                            allPinnedEventSavedObjectId,
+                            pinnedEventIds
+                          );
+                          console.log('-----deletedEvents', deletedEvents);
+
+                          await Promise.all(
+                            deletedEvents.map(eventId => {
+                              return pinnedEventLib.deletePinnedEventOnTimeline(frameworkRequest, [
+                                eventId,
+                              ]);
+                            })
+                          );
+                        }
+
                         console.log('------5------');
                         await Promise.all(
                           [...eventNotes, ...globalNotes].map(note => {
                             const newNote = {
                               note: note.note,
-                              timelineId: savedObjectId,
+                              timelineId: timeline.savedObjectId,
                             };
-                            return noteLib.persistNote(frameworkRequest, null, null, newNote);
+                            return noteLib.persistNote(
+                              frameworkRequest,
+                              timeline.noteIds.find(nId => nId === note.noteId) ?? null,
+                              timeline.version,
+                              newNote
+                            );
                           })
                         );
                         console.log('------6------');
 
-                        resolve({ timeline_id: savedObjectId, status_code: 200 });
+                        resolve({ timeline_id: timeline.savedObjectId, status_code: 200 });
                       } else if (timeline != null) {
-                        console.log(
-                          '------7------d9458320-6b18-11ea-a400-635cd9b283df WzU4MiwxXQ=='
-                        );
+                        console.log('------7------');
                         resolve(
                           createBulkErrorObject({
                             savedObjectId,
