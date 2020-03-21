@@ -23,7 +23,6 @@ import { createPromiseFromStreams } from '../../../../../../../../src/legacy/uti
 import { getTupleDuplicateErrorsAndUniqueRules } from '../../detection_engine/routes/rules/utils';
 import { validate } from '../../detection_engine/routes/rules/validate';
 import {
-  readTimeline,
   createTimelines,
   patchTimelines,
   persistPinnedEventOnTimeline,
@@ -41,7 +40,7 @@ import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from
 import { Timeline } from '../saved_object';
 import { PinnedEvent } from '../../pinned_event/saved_object';
 import { Note } from '../../note/saved_object';
-
+import { ExportedTimelines } from '../types';
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
@@ -50,7 +49,7 @@ interface ImportTimelinesSchema {
   success_count: number;
   errors: BulkError[];
 }
-interface ImportTimelineResponse {}
+type ImportTimelineResponse = ExportedTimelines;
 interface ImportTimelinesRequestParams {
   query: { overwrite: boolean };
   body: { file: HapiReadableStream };
@@ -105,27 +104,21 @@ export const importTimelinesRoute = (
           body: `Invalid file extension ${fileExtension}`,
         });
       }
-      console.log('xxxxxxxxxxxx1xxxxxxxxx');
       const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
       try {
         const readStream = createTimelinesStreamFromNdJson(objectLimit);
-        console.log('xxxxxxxxxxxx2xxxxxxxxx');
 
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
           request.body.file,
           ...readStream,
         ]);
-        console.log('-------a------');
-        console.log(parsedObjects);
         const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueTimeline(
           parsedObjects,
           request.query.overwrite
         );
-        console.log('-------b------');
 
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importTimelineResponse: ImportTimelineResponse[] = [];
-        console.log('-------c------');
 
         while (chunkParseObjects.length) {
           const batchParseObjects = chunkParseObjects.shift() ?? [];
@@ -174,11 +167,10 @@ export const importTimelinesRoute = (
                         request
                       );
                       frameworkRequest = set('user', user, frameworkRequest);
-                      const timeline = await readTimeline({
-                        request,
-                        savedObjectsClient,
-                        timelineId: savedObjectId,
-                      });
+                      let timeline = null;
+                      try {
+                        timeline = await timelineLib.getTimeline(frameworkRequest, savedObjectId);
+                      } catch (e) {}
 
                       console.log('------1------');
                       console.log(timeline);
@@ -211,6 +203,7 @@ export const importTimelinesRoute = (
                           await Promise.all(
                             [...eventNotes, ...globalNotes].map(note => {
                               const newNote = {
+                                eventId: note.eventId,
                                 note: note.note,
                                 timelineId: newSavedObjectId,
                               };
@@ -235,72 +228,24 @@ export const importTimelinesRoute = (
                           timeline.version,
                           parsedTimelineObject
                         );
-                        console.log('------4------', pinnedEventIds, allPinnedEventSavedObjectId);
-                        // await Promise.all(
-                        //   pinnedEventIds.map(eventId => {
-                        //     const isExistingEvent = timeline.pinnedEventIds.find(
-                        //       e => e !== eventId
-                        //     );
-                        //     if (isExistingEvent) {
-                        //       return pinnedEventLib.persistPinnedEventOnTimeline(
-                        //         frameworkRequest,
-                        //         null,
-                        //         eventId,
-                        //         timeline.savedObjectId,
-                        //         pinnedEventIds
-                        //       );
-                        //     } else {
-                        //       // return pinnedEventLib.deletePinnedEventOnTimeline(frameworkRequest, [
-                        //       //   eventId,
-                        //       // ]);
-                        //       return pinnedEventLib.persistPinnedEventOnTimeline(
-                        //         frameworkRequest,
-                        //         null,
-                        //         eventId,
-                        //         timeline.savedObjectId,
-                        //         pinnedEventIds
-                        //       );
-                        //     }
-                        //   })
-                        // );
 
-                        if (pinnedEventIds.length > allPinnedEventSavedObjectId.length) {
-                          const addedEvents = difference(
-                            pinnedEventIds,
-                            allPinnedEventSavedObjectId
-                          );
-                          console.log('-----addedEvents', addedEvents);
-                          await Promise.all(
-                            addedEvents.map(eventId => {
-                              return pinnedEventLib.persistPinnedEventOnTimeline(
-                                frameworkRequest,
-                                null,
-                                eventId,
-                                timeline.savedObjectId,
-                                pinnedEventIds
-                              );
-                            })
-                          );
-                        } else if (pinnedEventIds.length < allPinnedEventSavedObjectId.length) {
-                          const deletedEvents = difference(
-                            allPinnedEventSavedObjectId,
-                            pinnedEventIds
-                          );
-                          console.log('-----deletedEvents', deletedEvents);
-
-                          await Promise.all(
-                            deletedEvents.map(eventId => {
-                              return pinnedEventLib.deletePinnedEventOnTimeline(frameworkRequest, [
-                                eventId,
-                              ]);
-                            })
-                          );
-                        }
+                        await Promise.all(
+                          pinnedEventIds.map(eventId => {
+                            return pinnedEventLib.persistPinnedEventOnTimeline(
+                              frameworkRequest,
+                              null,
+                              eventId,
+                              timeline.savedObjectId,
+                              pinnedEventIds
+                            );
+                          })
+                        );
 
                         console.log('------5------');
                         await Promise.all(
                           [...eventNotes, ...globalNotes].map(note => {
                             const newNote = {
+                              eventId: note.eventId,
                               note: note.note,
                               timelineId: timeline.savedObjectId,
                             };

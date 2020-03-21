@@ -110,7 +110,6 @@ export class Note {
   ): Promise<ResponseNote> {
     try {
       const savedObjectsClient = request.context.core.savedObjects.client;
-      console.log('persist note -1-', noteId, version, note);
 
       if (noteId == null) {
         const timelineVersionSavedObject =
@@ -144,8 +143,6 @@ export class Note {
       // Update new note
 
       const existingNote = await this.getSavedNote(request, noteId);
-      console.log('existing note', existingNote.version);
-      console.log('given version', version);
       return {
         code: 200,
         message: 'success',
@@ -223,7 +220,7 @@ export const convertSavedObjectToSavedNote = (
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
 
-export const pickSavedNote = (
+const pickSavedNote = (
   noteId: string | null,
   savedNote: SavedNote,
   userInfo: AuthenticatedUser | null

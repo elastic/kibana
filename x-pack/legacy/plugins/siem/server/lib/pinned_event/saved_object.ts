@@ -117,13 +117,6 @@ export class PinnedEvent {
           const isPinnedAlreadyExisting = allPinnedEventId.filter(
             pinnedEvent => pinnedEvent.eventId === eventId
           );
-          console.log(
-            'persist pinned event',
-            allPinnedEventId,
-            eventId,
-            timelineId,
-            isPinnedAlreadyExisting[0]
-          );
 
           if (isPinnedAlreadyExisting.length === 0) {
             const savedPinnedEvent: SavedPinnedEvent = {
