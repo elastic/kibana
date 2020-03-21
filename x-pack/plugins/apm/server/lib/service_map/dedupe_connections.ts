@@ -5,15 +5,24 @@
  */
 import { isEqual, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
-import { ConnectionNode, Connection } from '../../../common/service_map';
+import {
+  DESTINATION_ADDRESS,
+  SERVICE_NAME
+} from '../../../common/elasticsearch_fieldnames';
+import {
+  Connection,
+  ConnectionNode,
+  ExternalConnectionNode,
+  ServiceConnectionNode
+} from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 
 function getConnectionNodeId(node: ConnectionNode): string {
-  if ('destination.address' in node) {
+  if (DESTINATION_ADDRESS in node) {
     // use a prefix to distinguish exernal destination ids from services
-    return `>${node['destination.address']}`;
+    return `>${(node as ExternalConnectionNode)[DESTINATION_ADDRESS]}`;
   }
-  return node['service.name'];
+  return (node as ServiceConnectionNode)[SERVICE_NAME];
 }
 
 function getConnectionId(connection: Connection) {
@@ -29,14 +38,14 @@ export function dedupeConnections(response: ServiceMapResponse) {
 
   const serviceNodes = services.map(service => ({
     ...service,
-    id: service['service.name']
+    id: service[SERVICE_NAME]
   }));
 
   // maps destination.address to service.name if possible
   function getConnectionNode(node: ConnectionNode) {
     let mappedNode: ConnectionNode | undefined;
 
-    if ('destination.address' in node) {
+    if (DESTINATION_ADDRESS in node) {
       mappedNode = discoveredServices.find(map => isEqual(map.from, node))?.to;
     }
 
@@ -53,19 +62,21 @@ export function dedupeConnections(response: ServiceMapResponse) {
   // build connections with mapped nodes
   const mappedConnections = connections
     .map(connection => {
-      const source = getConnectionNode(connection.source);
-      const destination = getConnectionNode(connection.destination);
+      const sourceData = getConnectionNode(connection.source);
+      const targetData = getConnectionNode(connection.destination);
 
       return {
-        source,
-        destination,
-        id: getConnectionId({ source, destination })
+        source: sourceData.id,
+        target: targetData.id,
+        id: getConnectionId({ source: sourceData, destination: targetData }),
+        sourceData,
+        targetData
       };
     })
-    .filter(connection => connection.source.id !== connection.destination.id);
+    .filter(connection => connection.source !== connection.target);
 
   const nodes = mappedConnections
-    .flatMap(connection => [connection.source, connection.destination])
+    .flatMap(connection => [connection.sourceData, connection.targetData])
     .concat(serviceNodes);
 
   const dedupedNodes: typeof nodes = [];
@@ -100,9 +111,7 @@ export function dedupeConnections(response: ServiceMapResponse) {
     >
   >((prev, connection) => {
     const reversedConnection = prev.find(
-      c =>
-        c.destination.id === connection.source.id &&
-        c.source.id === connection.destination.id
+      c => c.target === connection.source && c.source === connection.target
     );
 
     if (reversedConnection) {
@@ -116,8 +125,10 @@ export function dedupeConnections(response: ServiceMapResponse) {
     return prev.concat(connection);
   }, []);
 
-  return {
-    nodes: dedupedNodes,
-    connections: dedupedConnections
-  };
+  // Put everything together in elements, with everything in the "data" property
+  const elements = [...dedupedConnections, ...dedupedNodes].map(element => ({
+    data: element
+  }));
+
+  return { elements };
 }
