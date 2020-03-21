@@ -5,13 +5,14 @@
  */
 
 import React, { Fragment } from 'react';
-import { GeojsonFileSource } from '../../../layers/sources/client_file_source';
+import { getLayerWizard } from '../../../layers/layer_wizard_registry';
 import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { GEOJSON_FILE } from '../../../../common/constants';
 
 export const ImportEditor = ({ clearSource, isIndexingTriggered, ...props }) => {
   const editorProperties = getEditorProperties({ isIndexingTriggered, ...props });
-  const editor = GeojsonFileSource.renderEditor(editorProperties);
+  const layerWizard = getLayerWizard(GEOJSON_FILE);
   return (
     <Fragment>
       {isIndexingTriggered ? null : (
@@ -25,7 +26,9 @@ export const ImportEditor = ({ clearSource, isIndexingTriggered, ...props }) => 
           <EuiSpacer size="s" />
         </Fragment>
       )}
-      <EuiPanel style={{ position: 'relative' }}>{editor}</EuiPanel>
+      <EuiPanel style={{ position: 'relative' }}>
+        {layerWizard.renderWizard(editorProperties)}
+      </EuiPanel>
     </Fragment>
   );
 };
