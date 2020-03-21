@@ -21,7 +21,7 @@ import { RuleType } from '../../../../../containers/detection_engine/rules/types
 import * as i18n from './translations';
 import { isMlRule } from '../../helpers';
 
-const MlCardDescription = ({ hasValidLicense = false }: { hasValidLicense: boolean }) => (
+const MlCardDescription = ({ hasValidLicense = false }: { hasValidLicense?: boolean }) => (
   <EuiText size="s">
     {hasValidLicense ? (
       i18n.ML_TYPE_DESCRIPTION
@@ -45,10 +45,10 @@ const MlCardDescription = ({ hasValidLicense = false }: { hasValidLicense: boole
 );
 
 interface SelectRuleTypeProps {
-  describedByIds: string[];
+  describedByIds?: string[];
   field: FieldHook;
-  hasValidLicense: boolean;
-  isReadOnly: boolean;
+  hasValidLicense?: boolean;
+  isReadOnly?: boolean;
 }
 
 export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
