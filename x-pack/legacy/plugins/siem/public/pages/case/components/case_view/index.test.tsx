@@ -14,8 +14,10 @@ import { CaseComponent } from './';
 import { caseProps, caseClosedProps, data, dataClosed } from './__mock__';
 import { TestProviders } from '../../../../mock';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
+import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 jest.mock('../../../../containers/case/use_update_case');
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
+const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 const location = {
@@ -47,6 +49,7 @@ const mockLocation = {
 
 describe('CaseView ', () => {
   const updateCaseProperty = jest.fn();
+  const fetchCaseUserActions = jest.fn();
   /* eslint-disable no-console */
   // Silence until enzyme fixed to use ReactTestUtils.act()
   const originalError = console.error;
@@ -66,10 +69,18 @@ describe('CaseView ', () => {
     updateCaseProperty,
   };
 
+  const defaultUseGetCaseUserActions = {
+    caseUserActions: [],
+    isLoading: false,
+    isError: false,
+    fetchCaseUserActions,
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
+    useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
   });
 
   it('should render CaseComponent', () => {

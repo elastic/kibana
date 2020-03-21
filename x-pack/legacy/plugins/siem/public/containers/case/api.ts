@@ -14,9 +14,13 @@ import {
   CommentResponse,
   User,
   CaseUserActionsResponse,
+  CasePushRequest,
+  PushCaseParams,
+  PushCaseResponse,
 } from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
 import {
+  ActionLicense,
   AllCases,
   BulkUpdateStatus,
   Case,
@@ -37,6 +41,7 @@ import {
   decodeCasesStatusResponse,
   decodeCommentResponse,
   decodeCaseUserActionsResponse,
+  decodePushCaseResponse,
 } from './utils';
 
 export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
@@ -178,4 +183,44 @@ export const deleteCases = async (caseIds: string[]): Promise<boolean> => {
     query: { ids: JSON.stringify(caseIds) },
   });
   return response === 'true' ? true : false;
+};
+
+export const pushCase = async (
+  caseId: string,
+  push: CasePushRequest,
+  signal: AbortSignal
+): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(
+    `${CASES_URL}/${caseId}/_push`,
+    {
+      method: 'POST',
+      body: JSON.stringify(push),
+      signal,
+    }
+  );
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+};
+
+export const pushToService = async (
+  connectorId: string,
+  casePushParams: PushCaseParams,
+  signal: AbortSignal
+): Promise<PushCaseResponse> => {
+  const response = await KibanaServices.get().http.fetch<PushCaseResponse>(
+    `/api/action/${connectorId}/_execute`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ params: casePushParams }),
+      signal,
+    }
+  );
+  return decodePushCaseResponse(response);
+};
+
+export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {
+  const response = await KibanaServices.get().http.fetch<ActionLicense[]>(`/api/action/types`, {
+    method: 'GET',
+    signal,
+  });
+  return response;
 };

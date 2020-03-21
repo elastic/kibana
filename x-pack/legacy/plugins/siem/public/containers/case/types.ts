@@ -107,3 +107,10 @@ export interface BulkUpdateStatus {
   id: string;
   version: string;
 }
+export interface ActionLicense {
+  id: string;
+  name: string;
+  enabled: boolean;
+  enabledInConfig: boolean;
+  enabledInLicense: boolean;
+}

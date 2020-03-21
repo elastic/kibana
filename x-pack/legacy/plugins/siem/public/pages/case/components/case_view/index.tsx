@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButtonToggle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingContent,
+  EuiLoadingSpinner,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -25,6 +32,7 @@ import { useBasePath } from '../../../../lib/kibana';
 import { CaseStatus } from '../case_status';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
+import { usePushToService } from './push_to_service';
 
 interface Props {
   caseId: string;
@@ -36,6 +44,13 @@ const MyWrapper = styled(WrapperPage)`
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
+`;
+
+const MyEuiHorizontalRule = styled(EuiHorizontalRule)`
+  margin-left: 48px;
+  &.euiHorizontalRule--full {
+    width: calc(100% - 48px);
+  }
 `;
 
 export interface CaseProps {
@@ -52,7 +67,10 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     isLoading: isLoadingUserActions,
     fetchCaseUserActions,
   } = useGetCaseUserActions(caseId);
-  const { caseData, isLoading, updateKey, updateCaseProperty } = useUpdateCase(caseId, initialData);
+  const { caseData, isLoading, updateKey, updateCase, updateCaseProperty } = useUpdateCase(
+    caseId,
+    initialData
+  );
 
   // Update Fields
   const onUpdateField = useCallback(
@@ -102,6 +120,19 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     [fetchCaseUserActions, updateCaseProperty, caseData.status]
   );
 
+  const handleUpdateCase = useCallback(
+    (newCase: Case) => {
+      updateCase(newCase);
+      fetchCaseUserActions(newCase.id);
+    },
+    [updateCase, fetchCaseUserActions]
+  );
+  const { pushButton, pushCallouts } = usePushToService({
+    caseData,
+    isNew: caseUserActions.filter(cua => cua.action === 'push-to-service').length === 0,
+    updateCase: handleUpdateCase,
+  });
+
   const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
   const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
   const toggleStatusCase = useCallback(status => onUpdateField('status', status), [onUpdateField]);
@@ -123,7 +154,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           }
         : {
             'data-test-subj': 'case-view-closedAt',
-            value: caseData.closedAt,
+            value: caseData.closedAt ?? '',
             title: i18n.CASE_CLOSED,
             buttonLabel: i18n.REOPEN_CASE,
             status: caseData.status,
@@ -140,6 +171,10 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     }),
     [caseData.title]
   );
+
+  const onChangeStatus = useCallback(e => toggleStatusCase(e.target.checked ? 'closed' : 'open'), [
+    toggleStatusCase,
+  ]);
 
   useEffect(() => {
     if (initLoadingData && !isLoadingUserActions) {
@@ -169,25 +204,42 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             caseId={caseData.id}
             caseTitle={caseData.title}
             isLoading={isLoading && updateKey === 'status'}
-            toggleStatusCase={toggleStatusCase}
+            toggleStatusCase={onChangeStatus}
             {...caseStatusData}
           />
         </HeaderPage>
       </MyWrapper>
       <WhitePageWrapper>
         <MyWrapper>
+          {pushCallouts != null && pushCallouts}
           <EuiFlexGroup>
             <EuiFlexItem grow={6}>
               {initLoadingData && <EuiLoadingContent lines={8} />}
               {!initLoadingData && (
-                <UserActionTree
-                  caseUserActions={caseUserActions}
-                  data={caseData}
-                  fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
-                  isLoadingDescription={isLoading && updateKey === 'description'}
-                  isLoadingUserActions={isLoadingUserActions}
-                  onUpdateField={onUpdateField}
-                />
+                <>
+                  <UserActionTree
+                    caseUserActions={caseUserActions}
+                    data={caseData}
+                    fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
+                    isLoadingDescription={isLoading && updateKey === 'description'}
+                    isLoadingUserActions={isLoadingUserActions}
+                    onUpdateField={onUpdateField}
+                  />
+                  <MyEuiHorizontalRule margin="s" />
+                  <EuiFlexGroup alignItems="baseline" gutterSize="s" justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonToggle
+                        data-test-subj={caseStatusData['data-test-subj']}
+                        iconType={caseStatusData.icon}
+                        isSelected={caseStatusData.isSelected}
+                        isLoading={isLoading && updateKey === 'status'}
+                        label={caseStatusData.buttonLabel}
+                        onChange={onChangeStatus}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{pushButton}</EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={2}>

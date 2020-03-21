@@ -16,10 +16,15 @@ import { CasePushRequestRt, CaseResponseRt, throwErrors } from '../../../../comm
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 
-export function initPushedCaseUserActionApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPushCaseUserActionApi({
+  caseConfigureService,
+  caseService,
+  router,
+  userActionService,
+}: RouteDeps) {
   router.post(
     {
-      path: '/api/cases/{case_id}/_pushed',
+      path: '/api/cases/{case_id}/_push',
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -38,20 +43,28 @@ export function initPushedCaseUserActionApi({ caseService, router, userActionSer
         const pushedBy = await caseService.getUser({ request, response });
         const pushedDate = new Date().toISOString();
 
-        const myCase = await caseService.getCase({
-          client: context.core.savedObjects.client,
-          caseId: request.params.case_id,
-        });
+        const [myCase, myCaseConfigure, totalCommentsFindByCases] = await Promise.all([
+          caseService.getCase({
+            client: context.core.savedObjects.client,
+            caseId: request.params.case_id,
+          }),
+          caseConfigureService.find({ client }),
+          caseService.getAllCaseComments({
+            client,
+            caseId,
+            options: {
+              fields: [],
+              page: 1,
+              perPage: 1,
+            },
+          }),
+        ]);
 
-        const totalCommentsFindByCases = await caseService.getAllCaseComments({
-          client,
-          caseId,
-          options: {
-            fields: [],
-            page: 1,
-            perPage: 1,
-          },
-        });
+        if (myCase.attributes.status === 'closed') {
+          throw Boom.conflict(
+            `This case ${myCase.attributes.title} is closed. You can not pushed if the case is closed.`
+          );
+        }
 
         const comments = await caseService.getAllCaseComments({
           client,
@@ -74,6 +87,11 @@ export function initPushedCaseUserActionApi({ caseService, router, userActionSer
             client,
             caseId,
             updatedAttributes: {
+              ...(myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
+                ? {
+                    status: 'closed',
+                  }
+                : {}),
               pushed,
               updated_at: pushedDate,
               updated_by: pushedBy,

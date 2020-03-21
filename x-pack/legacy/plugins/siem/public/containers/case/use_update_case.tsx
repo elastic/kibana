@@ -65,6 +65,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 
 interface UseUpdateCase extends NewCaseState {
   updateCaseProperty: (updates: UpdateByKey) => void;
+  updateCase: (newCase: Case) => void;
 }
 export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
@@ -74,6 +75,10 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
     updateKey: null,
   });
   const [, dispatchToaster] = useStateToaster();
+
+  const updateCase = useCallback((newCase: Case) => {
+    dispatch({ type: 'FETCH_SUCCESS', payload: newCase });
+  }, []);
 
   const dispatchUpdateCaseProperty = useCallback(
     async ({ fetchCaseUserActions, updateKey, updateValue }: UpdateByKey) => {
@@ -108,5 +113,5 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
     [state]
   );
 
-  return { ...state, updateCaseProperty: dispatchUpdateCaseProperty };
+  return { ...state, updateCase, updateCaseProperty: dispatchUpdateCaseProperty };
 };
