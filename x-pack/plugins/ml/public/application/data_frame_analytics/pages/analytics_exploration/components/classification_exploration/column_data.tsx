@@ -16,6 +16,7 @@ interface ColumnData {
 }
 
 export const ACTUAL_CLASS_ID = 'actual_class';
+export const OTHER_CLASS_ID = 'other';
 export const MAX_COLUMNS = 6;
 
 export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
@@ -27,11 +28,21 @@ export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
     },
   ];
 
+  let showOther = false;
+
   confusionMatrixData.forEach(classData => {
+    const otherCount = classData.other_predicted_class_doc_count;
+
+    if (otherCount > 0) {
+      showOther = true;
+    }
+
     const col: any = {
       actual_class: classData.actual_class,
       actual_class_doc_count: classData.actual_class_doc_count,
+      other: otherCount,
     };
+
     const predictedClasses = classData.predicted_classes || [];
 
     columns.push({ id: classData.actual_class });
@@ -44,6 +55,10 @@ export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
 
     colData.push(col);
   });
+
+  if (showOther) {
+    columns.push({ id: OTHER_CLASS_ID });
+  }
 
   return { columns, columnData: colData };
 }
