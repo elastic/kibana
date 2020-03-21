@@ -328,8 +328,7 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    // Flaky
-    it.skip('should send the correct payload', async () => {
+    it('should send the correct payload', async () => {
       const { actions } = testBed;
 
       await act(async () => {
