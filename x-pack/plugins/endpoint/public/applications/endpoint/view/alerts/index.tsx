@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useState, useMemo, useCallback } from 'react';
+import { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import React from 'react';
 import {
   EuiDataGrid,
@@ -33,9 +33,11 @@ import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailsOverview } from './details';
 import { FormattedDate } from './formatted_date';
 import { AlertIndexSearchBar } from './index_search_bar';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
+  const { notifications } = useKibana();
 
   const columns = useMemo((): EuiDataGridColumn[] => {
     return [
@@ -94,6 +96,7 @@ export const AlertIndex = memo(() => {
   const alertListData = useAlertListSelector(selectors.alertListData);
   const hasSelectedAlert = useAlertListSelector(selectors.hasSelectedAlert);
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
+  const error = useAlertListSelector(selectors.error);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => {
@@ -206,6 +209,26 @@ export const AlertIndex = memo(() => {
     }),
     [setVisibleColumns, visibleColumns]
   );
+
+  useEffect(() => {
+    if (error !== undefined) {
+      notifications.toasts.danger({
+        title: (
+          <FormattedMessage
+            id="xpack.endpoint.host.details.errorTitle"
+            defaultMessage="Failed to close alert"
+          />
+        ),
+        body: (
+          <FormattedMessage
+            id="xpack.endpoint.host.details.errorBody"
+            defaultMessage="oh geez sorry."
+          />
+        ),
+        toastLifeTimeMs: 10000,
+      });
+    }
+  }, [error, notifications.toasts]);
 
   const selectedAlertData = useAlertListSelector(selectors.selectedAlertDetailsData);
 

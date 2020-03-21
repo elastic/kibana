@@ -23,6 +23,8 @@ export const alertListData = (state: AlertListState) => state.alerts;
 
 export const selectedAlertDetailsData = (state: AlertListState) => state.alertDetails;
 
+export const error = (state: AlertListState) => state.error;
+
 /**
  * Returns the alert list pagination data from state
  */

@@ -47,6 +47,7 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
     }
 
     if (action.type === 'userClosedAlert') {
+      // TODO: this also needs to close the flyout, not sure what the best way to do that would be
       const id = action.payload;
       const body = {
         state: {
@@ -59,11 +60,16 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
       //     body: JSON.stringify(body),
       //   }
       // );
-      try {
-        api.dispatch({ type: 'serverSuccessfullyClosedAlert' });
-      } catch (error) {
-        api.dispatch({ type: 'serverFailedToCloseAlert', payload: error });
-      }
+
+      // try {
+      //   api.dispatch({ type: 'serverSuccessfullyClosedAlert' });
+      // } catch (error) {
+      //   api.dispatch({ type: 'serverFailedToCloseAlert', payload: error });
+      // }
+      api.dispatch({
+        type: 'serverFailedToCloseAlert',
+        payload: { message: 'adf', error: '500', statusCode: 500 },
+      });
     }
   };
 };
