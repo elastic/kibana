@@ -112,6 +112,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async clickNewSearchButton() {
       await testSubjects.click('discoverNewButton');
+      await header.waitUntilLoadingHasFinished();
     }
 
     public async clickSaveSearchButton() {

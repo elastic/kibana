@@ -63,7 +63,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it.skip('Click on new to clear the search', async () => {
+    it('Click on new to clear the search', async () => {
       await PageObjects.discover.clickNewSearchButton();
       await a11y.testAppSnapshot();
     });
