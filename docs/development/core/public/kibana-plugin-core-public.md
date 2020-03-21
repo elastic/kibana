@@ -57,7 +57,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
 |  [EnvironmentMode](./kibana-plugin-core-public.environmentmode.md) |  |
-|  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs. |
+|  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpFetchOptions](./kibana-plugin-core-public.httpfetchoptions.md) | All options that may be used with a [HttpHandler](./kibana-plugin-core-public.httphandler.md)<!-- -->. |
@@ -115,6 +115,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsUpdateOptions](./kibana-plugin-core-public.savedobjectsupdateoptions.md) |  |
 |  [StringValidationRegex](./kibana-plugin-core-public.stringvalidationregex.md) | StringValidation with regex object |
 |  [StringValidationRegexString](./kibana-plugin-core-public.stringvalidationregexstring.md) | StringValidation as regex string |
+|  [ToastOptions](./kibana-plugin-core-public.toastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs. |
 |  [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsState](./kibana-plugin-core-public.uisettingsstate.md) |  |
 |  [UserProvidedValues](./kibana-plugin-core-public.userprovidedvalues.md) | Describes the values explicitly set by user. |

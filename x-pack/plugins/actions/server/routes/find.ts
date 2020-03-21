@@ -13,8 +13,7 @@ import {
   KibanaResponseFactory,
 } from 'kibana/server';
 import { FindOptions } from '../../../alerting/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess } from '../lib';
 
 // config definition
 const querySchema = schema.object({
@@ -41,7 +40,7 @@ const querySchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
 
-export const findActionRoute = (router: IRouter, licenseState: LicenseState) => {
+export const findActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
       path: `/api/action/_find`,
