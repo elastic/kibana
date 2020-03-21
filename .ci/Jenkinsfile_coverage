@@ -11,7 +11,7 @@ kibanaPipeline(timeoutMinutes: 180) {
     ]) {
       failFast true
       parallel([
-        'trez-vault-check': workers.intake('trez-vault-check'), maybeFailFast)
+        'trez-vault-check': workers.intake('trez-vault-check', maybeFailFast),
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
         'x-pack-intake-agent': {
           withEnv([
