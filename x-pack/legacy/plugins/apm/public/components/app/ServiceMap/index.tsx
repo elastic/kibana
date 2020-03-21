@@ -7,7 +7,6 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/service_map';
-import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
 import { useUrlParams } from '../../../hooks/useUrlParams';
