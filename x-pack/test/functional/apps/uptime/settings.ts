@@ -17,18 +17,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('uptime settings page', () => {
+    const settingsPage = () => pageObjects.uptime.settings;
     beforeEach('navigate to clean app root', async () => {
       // make 10 checks
       await makeChecks(es, 'myMonitor', 1, 1, 1);
       await pageObjects.uptime.goToRoot();
     });
 
-    const settingsPage = pageObjects.uptime.settings;
-
     it('loads the default settings', async () => {
       await pageObjects.uptime.settings.go();
 
-      const fields = await settingsPage.loadFields();
+      const fields = await settingsPage().loadFields();
       expect(fields).to.eql(defaultDynamicSettings);
     });
 
@@ -36,15 +35,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.uptime.settings.go();
 
       // Disabled because it's the original value
-      expect(await settingsPage.applyButtonIsDisabled()).to.eql(true);
+      expect(await settingsPage().applyButtonIsDisabled()).to.eql(true);
 
       // Enabled because it's a new, different, value
-      await settingsPage.changeHeartbeatIndicesInput('somethingNew');
-      expect(await settingsPage.applyButtonIsDisabled()).to.eql(false);
+      await settingsPage().changeHeartbeatIndicesInput('somethingNew');
+      expect(await settingsPage().applyButtonIsDisabled()).to.eql(false);
 
       // Disabled because it's blank
-      await settingsPage.changeHeartbeatIndicesInput('');
-      expect(await settingsPage.applyButtonIsDisabled()).to.eql(true);
+      await settingsPage().changeHeartbeatIndicesInput('');
+      expect(await settingsPage().applyButtonIsDisabled()).to.eql(true);
     });
 
     it('changing index pattern setting is reflected elsewhere in UI', async () => {
@@ -55,8 +54,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.uptime.settings.go();
 
       const newFieldValues: DynamicSettings = { heartbeatIndices: 'new*' };
-      await settingsPage.changeHeartbeatIndicesInput(newFieldValues.heartbeatIndices);
-      await settingsPage.apply();
+      await settingsPage().changeHeartbeatIndicesInput(newFieldValues.heartbeatIndices);
+      await settingsPage().apply();
 
       await pageObjects.uptime.goToRoot();
 
@@ -65,7 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Verify that the settings page shows the value we previously saved
       await pageObjects.uptime.settings.go();
-      const fields = await settingsPage.loadFields();
+      const fields = await settingsPage().loadFields();
       expect(fields).to.eql(newFieldValues);
     });
   });
