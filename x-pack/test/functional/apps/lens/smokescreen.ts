@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects, ...rest }: FtrProviderContext) {
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -88,6 +88,17 @@ export default function({ getService, getPageObjects, ...rest }: FtrProviderCont
         operation: 'avg',
         field: 'bytes',
       });
+
+      await PageObjects.lens.configureDimension({
+        dimension:
+          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        operation: 'terms',
+        field: '@message.raw',
+      });
+
+      await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsDatatable');
+      await PageObjects.lens.removeDimension('lnsDatatable_column');
+      await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_bar_stacked');
 
       await PageObjects.lens.configureDimension({
         dimension:
