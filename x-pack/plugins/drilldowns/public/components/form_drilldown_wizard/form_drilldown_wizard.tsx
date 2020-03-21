@@ -47,7 +47,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         value={name}
         disabled={onNameChange === noopFn}
         onChange={event => onNameChange(event.target.value)}
-        data-test-subj="dynamicActionNameInput"
+        data-test-subj="drilldownNameInput"
       />
     </EuiFormRow>
   );

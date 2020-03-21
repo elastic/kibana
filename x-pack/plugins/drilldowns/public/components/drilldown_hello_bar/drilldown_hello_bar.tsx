@@ -23,7 +23,7 @@ export interface DrilldownHelloBarProps {
   onHideClick?: () => void;
 }
 
-export const WELCOME_MESSAGE_TEST_SUBJ = 'drilldowns-welcome-message-test-subj';
+export const WELCOME_MESSAGE_TEST_SUBJ = 'drilldownsWelcomeMessage';
 
 export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
   docsLink,

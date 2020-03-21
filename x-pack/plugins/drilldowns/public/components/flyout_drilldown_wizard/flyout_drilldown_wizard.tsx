@@ -79,6 +79,7 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
       }}
       fill
       isDisabled={!isActionValid(wizardConfig)}
+      data-test-subj={'drilldownWizardSubmit'}
     >
       {mode === 'edit' ? txtEditDrilldownButtonLabel : txtCreateDrilldownButtonLabel}
     </EuiButton>

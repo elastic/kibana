@@ -24,9 +24,7 @@ describe('<FormDrilldownWizard>', () => {
 
       render(<FormDrilldownWizard actionFactoryContext={{}} />, div);
 
-      const input = div.querySelector(
-        '[data-test-subj="dynamicActionNameInput"]'
-      ) as HTMLInputElement;
+      const input = div.querySelector('[data-test-subj="drilldownNameInput"]') as HTMLInputElement;
 
       expect(input?.value).toBe('');
     });
@@ -36,9 +34,7 @@ describe('<FormDrilldownWizard>', () => {
 
       render(<FormDrilldownWizard name={'foo'} actionFactoryContext={{}} />, div);
 
-      const input = div.querySelector(
-        '[data-test-subj="dynamicActionNameInput"]'
-      ) as HTMLInputElement;
+      const input = div.querySelector('[data-test-subj="drilldownNameInput"]') as HTMLInputElement;
 
       expect(input?.value).toBe('foo');
 

@@ -51,6 +51,7 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
           isLoading={isLoading}
           singleSelection={{ asPlainText: true }}
           fullWidth
+          data-test-subj={'dashboardDrilldownSelectDashboard'}
         />
       </EuiFormRow>
       {!!onCurrentFiltersToggle && (

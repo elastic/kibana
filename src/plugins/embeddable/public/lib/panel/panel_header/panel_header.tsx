@@ -151,7 +151,10 @@ export function PanelHeader({
         {renderBadges(badges, embeddable)}
       </h2>
       {!isViewMode && !!drilldownCount && (
-        <EuiNotificationBadge style={{ marginTop: '4px', marginRight: '4px' }}>
+        <EuiNotificationBadge
+          style={{ marginTop: '4px', marginRight: '4px' }}
+          data-test-subj={'embeddablePanelDrilldownCount'}
+        >
           {drilldownCount}
         </EuiNotificationBadge>
       )}

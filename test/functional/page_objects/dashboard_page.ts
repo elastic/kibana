@@ -510,6 +510,20 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
       return checkList.filter(viz => viz.isPresent === false).map(viz => viz.name);
     }
+
+    public async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
+      log.debug('getPanelDrilldownCount');
+      const panel = (await this.getDashboardPanels())[panelIndex];
+      try {
+        const count = await panel.findByCssSelector(
+          '[data-test-subj="embeddablePanelDrilldownCount"]'
+        );
+        return Number.parseInt(await count.getVisibleText(), 10);
+      } catch (e) {
+        // if not found then this is 0 (we don't show badge with 0)
+        return 0;
+      }
+    }
   }
 
   return new DashboardPage();

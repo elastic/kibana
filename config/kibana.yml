@@ -112,4 +112,4 @@
 #i18n.locale: "en"
 
 # Enables "Drilldowns" functionality on dashboard. Set to false by default.
-# xpack.dashboardEnhanced.drilldowns.enabled: false
+xpack.dashboardEnhanced.drilldowns.enabled: true

@@ -236,8 +236,8 @@ export class DashboardStateManager {
 
       if (
         !_.isEqual(
-          convertedPanelStateMap[panelState.explicitInput.id],
-          savedDashboardPanelMap[panelState.explicitInput.id]
+          _.omit(convertedPanelStateMap[panelState.explicitInput.id], 'version'),
+          _.omit(savedDashboardPanelMap[panelState.explicitInput.id], 'version')
         )
       ) {
         // A panel was changed
