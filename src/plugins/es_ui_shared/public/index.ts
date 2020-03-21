@@ -18,3 +18,5 @@
  */
 
 export * from './components/json_editor';
+
+export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
