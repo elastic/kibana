@@ -84,6 +84,7 @@ export class Note {
     return notesByTimelineId.notes;
   }
 
+
   public async getAllNotes(
     request: FrameworkRequest,
     pageInfo: PageInfoNote | null,
@@ -110,6 +111,7 @@ export class Note {
   ): Promise<ResponseNote> {
     try {
       const savedObjectsClient = request.context.core.savedObjects.client;
+      console.log('persist timeline -1-', noteId, version, note);
 
       if (noteId == null) {
         const timelineVersionSavedObject =

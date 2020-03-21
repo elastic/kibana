@@ -87,7 +87,8 @@ export class Plugin {
     initRoutes(
       router,
       __legacy.config,
-      plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false
+      plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false,
+      plugins.security
     );
 
     plugins.features.registerFeature({

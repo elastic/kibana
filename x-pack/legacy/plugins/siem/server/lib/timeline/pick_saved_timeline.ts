@@ -16,11 +16,13 @@ export const pickSavedTimeline = (
 ): any => {
   const dateNow = new Date().valueOf();
   if (timelineId == null) {
+    console.log('------pick save timeline -- create');
     savedTimeline.created = dateNow;
     savedTimeline.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
     savedTimeline.updated = dateNow;
     savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   } else if (timelineId != null) {
+    console.log('------pick save timeline -- update');
     savedTimeline.updated = dateNow;
     savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }

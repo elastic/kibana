@@ -35,7 +35,8 @@ import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_ro
 export const initRoutes = (
   router: IRouter,
   config: LegacyServices['config'],
-  usingEphemeralEncryptionKey: boolean
+  usingEphemeralEncryptionKey: boolean,
+  security: SecurityPluginSetup
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
@@ -56,7 +57,7 @@ export const initRoutes = (
   importRulesRoute(router, config);
   exportRulesRoute(router, config);
 
-  importTimelinesRoute(router, config);
+  importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config);
 
   findRulesStatusesRoute(router);

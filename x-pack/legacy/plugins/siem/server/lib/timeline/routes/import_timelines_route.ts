@@ -5,7 +5,7 @@
  */
 
 import { extname } from 'path';
-import { chunk, omit } from 'lodash/fp';
+import { chunk, omit, set } from 'lodash/fp';
 import {
   buildRouteValidation,
   buildSiemResponse,
@@ -38,6 +38,10 @@ import {
 } from './schemas/import_timelines_schema';
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
 import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
+import { Timeline } from '../saved_object';
+import { PinnedEvent } from '../../pinned_event/saved_object';
+import { Note } from '../../note/saved_object';
+
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
@@ -52,7 +56,15 @@ interface ImportTimelinesRequestParams {
   body: { file: HapiReadableStream };
 }
 
-export const importTimelinesRoute = (router: IRouter, config: LegacyServices['config']) => {
+const timelineLib = new Timeline();
+const noteLib = new Note();
+const pinnedEventLib = new PinnedEvent();
+
+export const importTimelinesRoute = (
+  router: IRouter,
+  config: LegacyServices['config'],
+  securityPluginSetup: SecurityPluginSetup
+) => {
   router.post(
     {
       path: `${IMPORT_TIMELINES_URL}`,
@@ -136,13 +148,22 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                     console.log('-----0------');
                     const {
                       savedObjectId,
-                      version,
                       pinnedEventIds,
                       globalNotes,
                       eventNotes,
                     } = parsedTimeline;
                     const parsedTimelineObject = omit(
-                      ['globalNotes', 'eventNotes', 'pinnedEventIds', 'version', 'savedObjectId'],
+                      [
+                        'globalNotes',
+                        'eventNotes',
+                        'pinnedEventIds',
+                        'version',
+                        'savedObjectId',
+                        'created',
+                        'createdBy',
+                        'updated',
+                        'updatedBy',
+                      ],
                       parsedTimeline
                     );
                     try {
@@ -154,23 +175,45 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
 
                       console.log('------1------');
                       console.log(timeline);
+                      const user = await securityPluginSetup.authc.getCurrentUser(request);
+                      let frameworkRequest = set(
+                        'context.core.savedObjects.client',
+                        savedObjectsClient,
+                        request
+                      );
+                      frameworkRequest = set('user', user, frameworkRequest);
+
+                      // await Promise.resolve(
+                      //   timelineLib.deleteTimeline(frameworkRequest, [
+                      //     '01511bd0-6b06-11ea-a858-2b9ba1fc6268',
+                      //     '8592e7e0-6b04-11ea-a858-2b9ba1fc6268',
+                      //     'ee36cf90-6af6-11ea-b10c-e7ee394b3a26',
+                      //     '12980cd0-6b03-11ea-a858-2b9ba1fc6268',
+                      //     '9b8d9cf0-6b01-11ea-8aa7-d90be9c72808',
+                      //     'cda9e650-6aff-11ea-bcc8-a3142ebe5ca3',
+                      //     '6068d830-6aff-11ea-aca5-0f9787b572cd',
+                      //     '6ec6a110-6afe-11ea-a865-d73aa976a344',
+                      //     '2d29fa10-6afc-11ea-a865-d73aa976a344',
+                      //     'c1571430-6af6-11ea-8f66-29b4fbaf7c9b',
+                      //   ])
+                      // );
+
                       if (timeline == null) {
+                        // create timeline
                         const {
                           timeline: { savedObjectId: newSavedObjectId },
-                        } = await createTimelines({
-                          request,
-                          savedObjectsClient,
-                          timelineId: null,
-                          version: null,
-                          timeline: timeline ?? parsedTimelineObject,
-                        });
+                        } = await timelineLib.persistTimeline(
+                          frameworkRequest,
+                          null,
+                          null,
+                          timeline ?? parsedTimelineObject
+                        );
                         console.log('------2------', pinnedEventIds);
                         if (pinnedEventIds.length !== 0) {
                           await Promise.all(
                             pinnedEventIds.map(eventId => {
-                              return persistPinnedEventOnTimeline(
-                                savedObjectsClient,
-                                request,
+                              return pinnedEventLib.persistPinnedEventOnTimeline(
+                                frameworkRequest,
                                 null,
                                 eventId,
                                 newSavedObjectId
@@ -182,28 +225,30 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                         if (eventNotes.length !== 0 || globalNotes.length !== 0) {
                           await Promise.all(
                             [...eventNotes, ...globalNotes].map(note => {
-                              return persistNote(savedObjectsClient, request, null, null, note);
+                              const newNote = {
+                                note: note.note,
+                                timelineId: newSavedObjectId,
+                              };
+                              return noteLib.persistNote(frameworkRequest, null, null, newNote);
                             })
                           );
                         }
 
                         resolve({ timeline_id: newSavedObjectId, status_code: 200 });
-                      } else if (timeline != null && request.query.overwrite) {
-                        console.log('------3.5------');
+                      } else if (timeline != null && frameworkRequest.query.overwrite) {
+                        // update timeline
 
-                        await patchTimelines({
-                          request,
-                          savedObjectsClient,
-                          timelineId: savedObjectId,
-                          version,
-                          timeline: parsedTimelineObject,
-                        });
-                        console.log('------4------');
+                        await timelineLib.persistTimeline(
+                          frameworkRequest,
+                          savedObjectId,
+                          timeline.version,
+                          parsedTimelineObject
+                        );
+                        console.log('------4------WzY0OCwxXQ==WzY1OCwxXQ==');
                         await Promise.all(
                           pinnedEventIds.map(eventId => {
-                            return persistPinnedEventOnTimeline(
-                              savedObjectsClient,
-                              request,
+                            return pinnedEventLib.persistPinnedEventOnTimeline(
+                              frameworkRequest,
                               null,
                               eventId,
                               savedObjectId
@@ -213,20 +258,20 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                         console.log('------5------');
                         await Promise.all(
                           [...eventNotes, ...globalNotes].map(note => {
-                            return persistNote(
-                              savedObjectsClient,
-                              request,
-                              null,
-                              null,
-                              omit('timelineId', note)
-                            );
+                            const newNote = {
+                              note: note.note,
+                              timelineId: savedObjectId,
+                            };
+                            return noteLib.persistNote(frameworkRequest, null, null, newNote);
                           })
                         );
                         console.log('------6------');
 
                         resolve({ timeline_id: savedObjectId, status_code: 200 });
                       } else if (timeline != null) {
-                        console.log('------7------');
+                        console.log(
+                          '------7------d9458320-6b18-11ea-a400-635cd9b283df WzU4MiwxXQ=='
+                        );
                         resolve(
                           createBulkErrorObject({
                             savedObjectId,
