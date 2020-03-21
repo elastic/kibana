@@ -80,6 +80,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         machine_learning_job_id: ruleFields.machineLearningJobId,
       }
     : {
+        index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
