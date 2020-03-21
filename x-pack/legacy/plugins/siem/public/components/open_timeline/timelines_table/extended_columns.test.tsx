@@ -58,7 +58,7 @@ describe('#getExtendedColumns', () => {
       expect(
         wrapper
           .find('thead tr th')
-          .at(5)
+          .at(4)
           .text()
       ).toContain(i18n.MODIFIED_BY);
     });

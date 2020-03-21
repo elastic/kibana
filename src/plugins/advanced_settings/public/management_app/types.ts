@@ -54,9 +54,3 @@ export interface FieldState {
   isInvalid?: boolean;
   error?: string | null;
 }
-
-export interface IQuery {
-  ast: any; // incomplete
-  text: string;
-  syntax: any; // incomplete
-}
