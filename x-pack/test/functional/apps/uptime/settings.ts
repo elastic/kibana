@@ -14,7 +14,6 @@ import { makeChecks } from '../../../api_integration/apis/uptime/graphql/helpers
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
-  const server = getService('kibanaServer');
   const es = getService('es');
 
   describe('uptime settings page', () => {
