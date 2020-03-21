@@ -9,5 +9,7 @@
 ```typescript
 actions: {
         createFiltersFromEvent: typeof createFiltersFromEvent;
+        valueClickActionGetFilters: typeof valueClickActionGetFilters;
+        selectRangeActionGetFilters: typeof selectRangeActionGetFilters;
     };
 ```
