@@ -61,11 +61,6 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
         patterns: action.payload,
       },
     };
-  } else if (action.type === 'serverFailedToCloseAlert') {
-    return {
-      ...state,
-      error: action.payload,
-    };
   }
 
   return state;
