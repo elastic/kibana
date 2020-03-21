@@ -10,7 +10,7 @@ yarn kbn clean && yarn kbn bootstrap
 
 echo "2/3 Ingest test data ..."
 pushd ${CYPRESS_DIR}
-yarn install
+yarn install || true
 curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output ingest-data/events.json
 node ingest-data/replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json > ingest-data.log
 
