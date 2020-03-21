@@ -18,7 +18,7 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
       activeDescendentId: action.payload.nodeId,
     };
   } else {
-    return uiState as ResolverUIState;
+    return uiState;
   }
 };
 
