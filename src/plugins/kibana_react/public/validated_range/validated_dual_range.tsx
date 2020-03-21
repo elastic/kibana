@@ -47,7 +47,11 @@ interface State {
 }
 
 export class ValidatedDualRange extends Component<Props> {
-  static defaultProps: { fullWidth: boolean; allowEmptyRange: boolean; compressed: boolean };
+  static defaultProps: { fullWidth: boolean; allowEmptyRange: boolean; compressed: boolean } = {
+    allowEmptyRange: true,
+    fullWidth: false,
+    compressed: false,
+  };
 
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (nextProps.value !== prevState.prevValue) {
@@ -125,9 +129,3 @@ export class ValidatedDualRange extends Component<Props> {
     );
   }
 }
-
-ValidatedDualRange.defaultProps = {
-  allowEmptyRange: true,
-  fullWidth: false,
-  compressed: false,
-};

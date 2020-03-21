@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AggTypeFilters } from 'ui/agg_types';
-export { AggTypeFieldFilters } from 'ui/agg_types';
+export { PluginsStart } from 'ui/new_platform/new_platform';

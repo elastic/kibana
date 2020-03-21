@@ -25,13 +25,6 @@ import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 
-jest.mock('ui/agg_types', () => ({
-  aggTypes: {
-    metrics: [],
-    buckets: [],
-  },
-}));
-
 jest.mock('ui/state_management/state', () => ({
   State: {},
 }));

@@ -48,7 +48,7 @@ Array [
     responsive={true}
     search={
       Object {
-        "toolsRight": null,
+        "toolsRight": undefined,
       }
     }
     selection={
@@ -62,7 +62,6 @@ Array [
     <div>
       <EuiSearchBar
         onChange={[Function]}
-        toolsRight={null}
       >
         <EuiFlexGroup
           alignItems="center"
