@@ -13,7 +13,7 @@ pipeline {
     BASE_DIR = 'src/github.com/elastic/kibana'
     HOME = "${env.WORKSPACE}"
     APM_ITS = 'apm-integration-testing'
-    CYPRESS_DIR = 'x-pack/legacy/plugins/apm/e2e'
+    E2E_DIR = 'x-pack/legacy/plugins/apm/e2e'
     PIPELINE_LOG_LEVEL = 'DEBUG'
   }
   options {
@@ -85,7 +85,7 @@ pipeline {
       steps {
         notifyStatus('Preparing kibana', 'PENDING')
         dir("${BASE_DIR}"){
-          sh script: "${CYPRESS_DIR}/ci/prepare-kibana.sh"
+          sh script: "${E2E_DIR}/ci/prepare-kibana.sh"
         }
       }
       post {
@@ -105,14 +105,14 @@ pipeline {
       steps{
         notifyStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){
-          sh "${CYPRESS_DIR}/ci/run-test.sh"
+          sh "${E2E_DIR}/ci/run-test.sh"
         }
       }
       post {
         always {
           dir("${BASE_DIR}"){
-            archiveArtifacts(allowEmptyArchive: false, artifacts: "${CYPRESS_DIR}/**/screenshots/**,${CYPRESS_DIR}/**/videos/**,${CYPRESS_DIR}/**/test-results/*e2e-tests.xml")
-            junit(allowEmptyResults: true, testResults: "${CYPRESS_DIR}/**/test-results/*e2e-tests.xml")
+            archiveArtifacts(allowEmptyArchive: false, artifacts: "${E2E_DIR}/**/screenshots/**,${E2E_DIR}/**/videos/**,${E2E_DIR}/**/test-results/*e2e-tests.xml")
+            junit(allowEmptyResults: true, testResults: "${E2E_DIR}/**/test-results/*e2e-tests.xml")
           }
           dir("${APM_ITS}"){
             sh 'docker-compose logs > apm-its.log || true'
@@ -132,7 +132,7 @@ pipeline {
   post {
     always {
       dir("${BASE_DIR}"){
-        archiveArtifacts(allowEmptyArchive: true, artifacts: "${CYPRESS_DIR}/**/*.log,kibana.log")
+        archiveArtifacts(allowEmptyArchive: true, artifacts: "${E2E_DIR}/**/*.log,kibana.log")
       }
     }
   }
