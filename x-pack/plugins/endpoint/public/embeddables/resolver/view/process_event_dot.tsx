@@ -97,11 +97,11 @@ export const ProcessEventDot = styled(
         () => ({
           left: `${left}px`,
           top: `${top}px`,
-          // TODO, explain magic numbers
+          // Width of symbol viewport scaled to fit
           width: `${360 * magFactorX}px`,
-          // TODO, explain magic numbers
+          // Height according to symbol viewbox AR
           height: `${120 * magFactorX}px`,
-          // TODO, explain magic numbers
+          // Adjusted to position/scale with camera
           transform: `translateX(-${0.172413 * 360 * magFactorX + 10}px) translateY(-${0.73684 *
             120 *
             magFactorX}px)`,
