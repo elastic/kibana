@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { Fragment, useCallback, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -17,6 +17,8 @@ import {
   EuiFlyoutBody,
   EuiPortal,
   EuiBetaBadge,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertsContext } from '../../context/alerts_context';
@@ -38,6 +40,7 @@ export const AlertEdit = ({
 }: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
 
   const {
     reloadAlerts,
@@ -63,25 +66,18 @@ export const AlertEdit = ({
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  const actionsErrors = alert.actions.reduce(
-    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
-      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
-      if (!actionType) {
-        return { ...acc };
-      }
-      const actionValidationErrors = actionType.validateParams(alertAction.params);
-      return { ...acc, [alertAction.id]: actionValidationErrors };
-    },
-    {}
-  ) as Record<string, { errors: IErrorObject }>;
+  const actionsErrors: Array<{
+    errors: IErrorObject;
+  }> = alert.actions.map((alertAction: AlertAction) =>
+    actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+  );
 
-  const hasActionErrors = !!Object.entries(actionsErrors)
-    .map(([, actionErrors]) => actionErrors)
-    .find((actionErrors: { errors: IErrorObject }) => {
-      return !!Object.keys(actionErrors.errors).find(
-        errorKey => actionErrors.errors[errorKey].length >= 1
-      );
-    });
+  const hasActionErrors =
+    actionsErrors.find(
+      (errorObj: { errors: IErrorObject }) =>
+        errorObj &&
+        !!Object.keys(errorObj.errors).find(errorKey => errorObj.errors[errorKey].length >= 1)
+    ) !== undefined;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
@@ -141,7 +137,27 @@ export const AlertEdit = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <AlertForm alert={alert} dispatch={dispatch} errors={errors} canChangeTrigger={false} />
+          {hasActionsDisabled && (
+            <Fragment>
+              <EuiCallOut
+                size="s"
+                color="danger"
+                iconType="alert"
+                title={i18n.translate(
+                  'xpack.triggersActionsUI.sections.alertEdit.disabledActionsWarningTitle',
+                  { defaultMessage: 'This alert has actions that are disabled' }
+                )}
+              />
+              <EuiSpacer />
+            </Fragment>
+          )}
+          <AlertForm
+            alert={alert}
+            dispatch={dispatch}
+            errors={errors}
+            canChangeTrigger={false}
+            setHasActionsDisabled={setHasActionsDisabled}
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">

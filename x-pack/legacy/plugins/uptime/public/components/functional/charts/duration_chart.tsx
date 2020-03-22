@@ -65,7 +65,8 @@ export const DurationChartComponent = ({ locationDurationLines, loading }: Durat
             <Chart>
               <Settings
                 xDomain={{ min, max }}
-                showLegend={true}
+                showLegend
+                showLegendExtra
                 legendPosition={Position.Bottom}
                 onBrushEnd={onBrushEnd}
               />
