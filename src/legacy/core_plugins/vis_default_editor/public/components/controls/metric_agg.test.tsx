@@ -20,7 +20,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import { IAggConfig } from '../../legacy_imports';
+import { IAggConfig } from 'src/plugins/data/public';
 import { DEFAULT_OPTIONS, aggFilter, MetricAggParamEditor } from './metric_agg';
 
 jest.mock('./utils', () => ({

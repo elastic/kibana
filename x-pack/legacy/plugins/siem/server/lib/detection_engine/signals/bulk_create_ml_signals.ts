@@ -9,11 +9,12 @@ import { SearchResponse } from 'elasticsearch';
 
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RuleAlertAction } from '../types';
 import { singleBulkCreate } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 
 interface BulkCreateMlSignalsParams {
+  actions: RuleAlertAction[];
   someResult: AnomalyResults;
   ruleParams: RuleTypeParams;
   services: AlertServices;
@@ -28,6 +29,7 @@ interface BulkCreateMlSignalsParams {
   interval: string;
   enabled: boolean;
   tags: string[];
+  throttle: string | null;
 }
 
 interface EcsAnomaly extends Anomaly {

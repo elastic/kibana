@@ -125,7 +125,9 @@ export const OfExpression = ({
                   onChangeSelectedAggField(
                     selectedOptions.length === 1 ? selectedOptions[0].label : undefined
                   );
-                  setAggFieldPopoverOpen(false);
+                  if (selectedOptions.length > 0) {
+                    setAggFieldPopoverOpen(false);
+                  }
                 }}
               />
             </EuiFormRow>

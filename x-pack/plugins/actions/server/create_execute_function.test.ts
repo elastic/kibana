@@ -7,6 +7,7 @@
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { createExecuteFunction } from './create_execute_function';
 import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
+import { actionTypeRegistryMock } from './action_type_registry.mock';
 
 const mockTaskManager = taskManagerMock.start();
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -19,6 +20,7 @@ describe('execute()', () => {
     const executeFn = createExecuteFunction({
       getBasePath,
       taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
       getScopedSavedObjectsClient: jest.fn().mockReturnValueOnce(savedObjectsClient),
       isESOUsingEphemeralEncryptionKey: false,
     });
@@ -73,6 +75,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
       isESOUsingEphemeralEncryptionKey: false,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -121,6 +124,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
       isESOUsingEphemeralEncryptionKey: false,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -166,6 +170,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
       isESOUsingEphemeralEncryptionKey: true,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
     });
     await expect(
       executeFn({
@@ -177,5 +182,37 @@ describe('execute()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
     );
+  });
+
+  test('should ensure action type is enabled', async () => {
+    const mockedActionTypeRegistry = actionTypeRegistryMock.create();
+    const getScopedSavedObjectsClient = jest.fn().mockReturnValueOnce(savedObjectsClient);
+    const executeFn = createExecuteFunction({
+      getBasePath,
+      taskManager: mockTaskManager,
+      getScopedSavedObjectsClient,
+      isESOUsingEphemeralEncryptionKey: false,
+      actionTypeRegistry: mockedActionTypeRegistry,
+    });
+    mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+
+    await expect(
+      executeFn({
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        apiKey: null,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
 });

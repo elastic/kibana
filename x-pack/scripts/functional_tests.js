@@ -13,6 +13,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/functional/config_security_basic.js'),
   require.resolve('../test/api_integration/config_security_basic.js'),
   require.resolve('../test/api_integration/config.js'),
+  require.resolve('../test/alerting_api_integration/basic/config.ts'),
   require.resolve('../test/alerting_api_integration/spaces_only/config.ts'),
   require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/detection_engine_api_integration/security_and_spaces/config.ts'),
