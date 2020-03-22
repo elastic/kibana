@@ -7,12 +7,15 @@
 import Boom from 'boom';
 import { APICaller } from 'kibana/server';
 import { parseInterval } from '../../../common/util/parse_interval';
+import { initCardinalityFieldsCache } from './fields_aggs_cache';
 
 /**
  * Service for carrying out queries to obtain data
  * specific to fields in Elasticsearch indices.
  */
 export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
+  const fieldsAggsCache = initCardinalityFieldsCache();
+
   /**
    * Gets aggregatable fields.
    */
@@ -58,6 +61,23 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       return {};
     }
 
+    const cachedValues =
+      fieldsAggsCache.getValues(
+        index,
+        timeFieldName,
+        earliestMs,
+        latestMs,
+        'overallCardinality',
+        fieldNames
+      ) ?? {};
+
+    // No need to perform aggregation over the cached fields
+    const fieldsToAgg = aggregatableFields.filter(field => !cachedValues.hasOwnProperty(field));
+
+    if (fieldsToAgg.length === 0) {
+      return cachedValues;
+    }
+
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range and the datafeed config query.
     const mustCriteria = [
@@ -76,7 +96,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       mustCriteria.push(query);
     }
 
-    const aggs = aggregatableFields.reduce((obj, field) => {
+    const aggs = fieldsToAgg.reduce((obj, field) => {
       obj[field] = { cardinality: { field } };
       return obj;
     }, {} as { [field: string]: { cardinality: { field: string } } });
@@ -105,10 +125,19 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       return {};
     }
 
-    return aggregatableFields.reduce((obj, field) => {
+    const aggResult = fieldsToAgg.reduce((obj, field) => {
       obj[field] = (aggregations[field] || { value: 0 }).value;
       return obj;
     }, {} as { [field: string]: number });
+
+    fieldsAggsCache.updateValues(index, timeFieldName, earliestMs, latestMs, {
+      overallCardinality: aggResult,
+    });
+
+    return {
+      ...cachedValues,
+      ...aggResult,
+    };
   }
 
   /**
@@ -214,6 +243,23 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       return {};
     }
 
+    const cachedValues =
+      fieldsAggsCache.getValues(
+        index,
+        timeFieldName,
+        earliestMs,
+        latestMs,
+        'maxBucketCardinality',
+        fieldNames
+      ) ?? {};
+
+    // No need to perform aggregation over the cached fields
+    const fieldsToAgg = aggregatableFields.filter(field => !cachedValues.hasOwnProperty(field));
+
+    if (fieldsToAgg.length === 0) {
+      return cachedValues;
+    }
+
     const { start, end } = getSafeTimeRange(earliestMs, latestMs, interval);
 
     const mustCriteria = [
@@ -239,7 +285,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     const getSafeAggName = (field: string) => field.replace(/\W/g, '');
     const getMaxBucketAggKey = (field: string) => `max_bucket_${field}`;
 
-    const fieldsCardinalityAggs = aggregatableFields.reduce((obj, field) => {
+    const fieldsCardinalityAggs = fieldsToAgg.reduce((obj, field) => {
       obj[getSafeAggName(field)] = { cardinality: { field } };
       return obj;
     }, {} as { [field: string]: { cardinality: { field: string } } });
@@ -280,13 +326,18 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     )?.aggregations;
 
     if (!aggregations) {
-      return {};
+      return cachedValues;
     }
 
-    return aggregatableFields.reduce((obj, field) => {
+    const aggResult = fieldsToAgg.reduce((obj, field) => {
       obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
       return obj;
     }, {} as { [field: string]: number });
+
+    return {
+      ...cachedValues,
+      ...aggResult,
+    };
   }
 
   return {
