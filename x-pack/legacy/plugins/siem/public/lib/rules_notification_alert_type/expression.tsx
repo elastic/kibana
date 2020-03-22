@@ -27,7 +27,6 @@ interface RuleOption {
 }
 
 const RulesNotificationExpressionComponent: React.FC<Props> = props => {
-  console.error('props', props);
   const [selectedRules, setSelectedRules] = useState<RuleOption[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
 

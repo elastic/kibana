@@ -46,17 +46,6 @@ jest.mock('../../components/toasters/', () => ({
   errorToToaster: jest.fn(),
 }));
 
-/* eslint-disable no-console */
-// Silence until enzyme fixed to use ReactTestUtils.act()
-const originalError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-});
-/* eslint-enable no-console */
-
 describe('useQuery', () => {
   let result: {
     data: MatrixOverTimeHistogramData[] | null;
