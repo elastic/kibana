@@ -22,13 +22,7 @@ import { ImportRuleAlertRest } from '../../detection_engine/types';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
 import { getTupleDuplicateErrorsAndUniqueRules } from '../../detection_engine/routes/rules/utils';
 import { validate } from '../../detection_engine/routes/rules/validate';
-import {
-  createTimelines,
-  patchTimelines,
-  persistPinnedEventOnTimeline,
-  persistNote,
-  getTupleDuplicateErrorsAndUniqueTimeline,
-} from './utils';
+import { getTupleDuplicateErrorsAndUniqueTimeline } from './utils';
 import { LegacyServices } from '../../../types';
 import { IMPORT_TIMELINES_URL } from '../../../../common/constants';
 import {
@@ -86,23 +80,24 @@ export const importTimelinesRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const savedObjectsClient = context.core.savedObjects.client;
-
       if (!savedObjectsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
-
       const { filename } = request.body.file.hapi;
+
       const fileExtension = extname(filename).toLowerCase();
+
       if (fileExtension !== '.ndjson') {
         return siemResponse.error({
           statusCode: 400,
           body: `Invalid file extension ${fileExtension}`,
         });
       }
+
       const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
+
       try {
         const readStream = createTimelinesStreamFromNdJson(objectLimit);
-
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
           request.body.file,
           ...readStream,
@@ -111,7 +106,6 @@ export const importTimelinesRoute = (
           parsedObjects,
           request.query.overwrite
         );
-
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importTimelineResponse: ImportTimelineResponse[] = [];
 
@@ -167,7 +161,7 @@ export const importTimelinesRoute = (
                         timeline = await timelineLib.getTimeline(frameworkRequest, savedObjectId);
                       } catch (e) {}
 
-                      console.log('------1------');
+                      console.log('------1------', timeline);
                       console.log(timeline);
 
                       if (timeline == null) {
@@ -180,9 +174,10 @@ export const importTimelinesRoute = (
                           null,
                           parsedTimelineObject
                         );
-                        console.log('------2------', pinnedEventIds);
                         if (pinnedEventIds.length !== 0) {
-                          await Promise.all(
+                          console.log('------2------', pinnedEventIds);
+
+                          const createdPinnedEvents = await Promise.all(
                             pinnedEventIds.map(eventId => {
                               return pinnedEventLib.persistPinnedEventOnTimeline(
                                 frameworkRequest,
@@ -192,9 +187,28 @@ export const importTimelinesRoute = (
                               );
                             })
                           );
+
+                          const errorMsg = createdPinnedEvents
+                            .reduce((acc, e) => {
+                              console.log('-----2.5-----', e instanceof Error, e);
+                              return e != null && e instanceof Error
+                                ? [...acc, e.message]
+                                : [...acc];
+                            }, [])
+                            .join(',');
+                          if (errorMsg.length !== 0) {
+                            resolve(
+                              createBulkErrorObject({
+                                id: newSavedObjectId,
+                                statusCode: 500,
+                                message: errorMsg,
+                              })
+                            );
+                          }
                         }
-                        console.log('------3------');
                         if (eventNotes.length !== 0 || globalNotes.length !== 0) {
+                          console.log('------3------', eventNotes, globalNotes);
+
                           await Promise.all(
                             [...eventNotes, ...globalNotes].map(note => {
                               const newNote = {
@@ -206,7 +220,7 @@ export const importTimelinesRoute = (
                             })
                           );
                         }
-
+                        console.log('---test3--');
                         resolve({ timeline_id: newSavedObjectId, status_code: 200 });
                       } else if (timeline != null && frameworkRequest.query.overwrite) {
                         // update timeline
@@ -266,6 +280,8 @@ export const importTimelinesRoute = (
                         );
                       }
                     } catch (err) {
+                      console.log('------8------');
+
                       resolve(
                         createBulkErrorObject({
                           savedObjectId,
@@ -301,17 +317,24 @@ export const importTimelinesRoute = (
           success_count: successes.length,
           errors: errorsResp,
         };
+        console.log('---collected response--', importTimelines);
         const [validated, errors] = validate(importTimelines, importRulesSchema);
+        console.log('----collected error---', validated.errors, errors);
+
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {
+          console.log('----before response----', validated.errors);
           return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);
+
+        // console.log(error);
+
         return siemResponse.error({
           body: error.message,
-          statusCode: error.statusCode,
+          statusCode: error.status_code,
         });
       }
     }

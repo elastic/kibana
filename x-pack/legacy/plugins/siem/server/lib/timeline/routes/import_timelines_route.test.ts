@@ -27,6 +27,13 @@ import {
 import { getTupleDuplicateErrorsAndUniqueTimeline } from './utils';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
 import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
+import {
+  mockConfig,
+  mockUniqueParsedObjects,
+  mockParsedObjects,
+  mockDuplicateIdErrors,
+  mockGetCurrentUser,
+} from './__mocks__/import_timelines';
 
 describe('import timelines', () => {
   let config;
@@ -34,56 +41,6 @@ describe('import timelines', () => {
   let request: ReturnType<typeof requestMock.create>;
   let securitySetup: SecuritySetup;
   let { clients, context } = requestContextMock.createTools();
-  const mockDuplicateIdErrors = [];
-
-  const mockParsedObjects = [
-    {
-      savedObjectId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
-      version: 'WzEyMjUsMV0=',
-      columns: [],
-      dataProviders: [],
-      description: 'description',
-      eventType: 'all',
-      filters: [],
-      kqlMode: 'filter',
-      kqlQuery: { filterQuery: [Object] },
-      title: 'My duplicate timeline',
-      dateRange: { start: 1584523907294, end: 1584610307294 },
-      savedQueryId: null,
-      sort: { columnId: '@timestamp', sortDirection: 'desc' },
-      created: 1584828930463,
-      createdBy: 'angela',
-      updated: 1584868346013,
-      updatedBy: 'angela',
-      eventNotes: [],
-      globalNotes: [],
-      pinnedEventIds: ['k-gi8nABm-sIqJ_scOoS'],
-    },
-  ];
-  const mockUniqueParsedObjects = [
-    {
-      savedObjectId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
-      version: 'WzEyMjUsMV0=',
-      columns: [],
-      dataProviders: [],
-      description: 'description',
-      eventType: 'all',
-      filters: [],
-      kqlMode: 'filter',
-      kqlQuery: { filterQuery: [Object] },
-      title: 'My duplicate timeline',
-      dateRange: { start: 1584523907294, end: 1584610307294 },
-      savedQueryId: null,
-      sort: { columnId: '@timestamp', sortDirection: 'desc' },
-      created: 1584828930463,
-      createdBy: 'angela',
-      updated: 1584868346013,
-      updatedBy: 'angela',
-      eventNotes: [],
-      globalNotes: [],
-      pinnedEventIds: ['k-gi8nABm-sIqJ_scOoS'],
-    },
-  ];
 
   beforeEach(() => {
     jest.resetModules();
@@ -94,21 +51,12 @@ describe('import timelines', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     config = jest.fn().mockImplementation(() => {
-      return {
-        get: () => {
-          return 100000000;
-        },
-        has: jest.fn(),
-      };
+      return mockConfig;
     });
 
     securitySetup = {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue({
-          user: {
-            username: 'mockUser',
-          },
-        }),
+        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
     };
     jest.doMock('./utils', () => {
@@ -133,7 +81,7 @@ describe('import timelines', () => {
   });
 
   describe('status codes', () => {
-    test('returns 200 when import timeline successfully', async () => {
+    beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
           Timeline: jest.fn().mockImplementation(() => {
@@ -170,12 +118,15 @@ describe('import timelines', () => {
       const importTimelinesRoute = jest.requireActual('./import_timelines_route')
         .importTimelinesRoute;
       importTimelinesRoute(server.router, config, securitySetup);
-
+    });
+    test('returns 200 when import timeline successfully', async () => {
       const response = await server.inject(getImportTimelinesRequest(), context);
       expect(response.status).toEqual(200);
     });
+  });
 
-    test('collect error when pin event throws error', async () => {
+  describe('collect error and finish the process', () => {
+    beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
           Timeline: jest.fn().mockImplementation(() => {
@@ -213,7 +164,8 @@ describe('import timelines', () => {
         .importTimelinesRoute;
 
       importTimelinesRoute(server.router, config, securitySetup);
-
+    });
+    test('collect error when pin event throws error', async () => {
       const response = await server.inject(getImportTimelinesRequest(), context, securitySetup);
 
       expect(response.body).toEqual({
@@ -230,7 +182,7 @@ describe('import timelines', () => {
   });
 
   describe('request validation', () => {
-    test('disallows invalid query', async () => {
+    beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
           Timeline: jest.fn().mockImplementation(() => {
@@ -263,7 +215,8 @@ describe('import timelines', () => {
           }),
         };
       });
-
+    });
+    test('disallows invalid query', async () => {
       request = requestMock.create({
         method: 'post',
         path: TIMELINE_EXPORT_URL,

@@ -21,7 +21,7 @@ export const getImportTimelinesRequest = (hapiStream?: HapiReadableStream) =>
     method: 'post',
     path: TIMELINE_IMPORT_URL,
     body: {
-      ids: { file: hapiStream },
+      file: { hapi: { filename: 'filename.ndjson' } },
     },
   });
 
