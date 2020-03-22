@@ -17,6 +17,7 @@ import {
   StatusCheckAlertStateType,
   StatusCheckAlertState,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { savedObjectsAdapter } from '../saved_objects';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -202,13 +203,17 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
     }
 
     const params = decoded.right;
-
+    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+      options.services.savedObjectsClient,
+      undefined
+    );
     /* This is called `monitorsByLocation` but it's really
      * monitors by location by status. The query we run to generate this
      * filters on the status field, so effectively there should be one and only one
      * status represented in the result set. */
     const monitorsByLocation = await libs.requests.getMonitorStatus({
       callES: options.services.callCluster,
+      dynamicSettings,
       ...params,
     });
 
