@@ -40,7 +40,7 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
 
   const isMLAvailable = useSelector(hasMLFeatureAvailable);
 
-  const { data: mlJobs } = useSelector(hasMLJobSelector);
+  const { data: mlJobs, loading: jobsLoading } = useSelector(hasMLJobSelector);
 
   const hasMLJob =
     !!mlJobs?.jobsExist &&
@@ -79,7 +79,7 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
     <DurationChartComponent
       anomalies={anomalies}
       hasMLJob={hasMLJob}
-      loading={loading}
+      loading={loading || jobsLoading}
       locationDurationLines={durationLines?.locationDurationLines ?? []}
     />
   );

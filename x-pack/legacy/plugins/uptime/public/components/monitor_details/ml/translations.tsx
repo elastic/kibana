@@ -57,10 +57,35 @@ export const VIEW_JOB = i18n.translate(
   }
 );
 
+export const EXPLORE_IN_ML_APP = i18n.translate('xpack.uptime.ml.durationChart.exploreInMlApp', {
+  defaultMessage: 'Explore in ML App',
+});
+
 export const ENABLE_ANOMALY_DETECTION = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.enableAnomalyDetectionTitle',
   {
     defaultMessage: 'Enable anomaly detection',
+  }
+);
+
+export const ANOMALY_DETECTION = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.anomalyDetectionTitle',
+  {
+    defaultMessage: 'Anomaly detection',
+  }
+);
+
+export const DISABLE_ANOMALY_DETECTION = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.disableAnomalyDetectionTitle',
+  {
+    defaultMessage: 'Disable anomaly detection',
+  }
+);
+
+export const MANAGE_ANOMALY_DETECTION = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.manageAnomalyDetectionTitle',
+  {
+    defaultMessage: 'Manage anomaly detection',
   }
 );
 
@@ -97,7 +122,8 @@ export const CREAT_ML_JOB_DESC = i18n.translate(
   {
     defaultMessage: `Here you can create a machine learning job to calculate anomaly scores on
     response durations for Uptime Monitor. Once enabled, The monitor duration chart on details page
-    will show the expected bounds and annotate the graph with anomalies.`,
+    will show the expected bounds and annotate the graph with anomalies. You can also potentially
+     identify periods of increased latency across geographical regions.`,
   }
 );
 

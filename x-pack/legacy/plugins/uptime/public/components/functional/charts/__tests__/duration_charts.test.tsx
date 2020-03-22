@@ -66,7 +66,7 @@ describe('MonitorCharts component', () => {
       <DurationChartComponent
         loading={false}
         hasMLJob={false}
-        anomalies={[]}
+        anomalies={null}
         locationDurationLines={chartResponse.monitorChartsData.locationDurationLines}
       />
     );

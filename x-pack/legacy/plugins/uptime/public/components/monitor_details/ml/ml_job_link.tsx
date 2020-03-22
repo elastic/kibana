@@ -6,60 +6,60 @@
 
 import React from 'react';
 import url from 'url';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import rison, { RisonValue } from 'rison-node';
-import { ML_JOB_ID } from '../../../../common/constants';
+import { getMLJobId } from '../../../state/api/ml_anomaly';
 
 interface Props {
-  fill?: boolean;
   monitorId: string;
   basePath: string;
+  dateRange: {
+    to: string;
+    from: string;
+  };
 }
 
-export const MLJobLink: React.FC<Props> = ({ fill, basePath, monitorId, children }) => {
-  // const { dateRangeStart, dateRangeEnd } = useUrlParams()[0]();
-
+export const getMLJobLinkHref = ({ basePath, monitorId, dateRange }: Props) => {
   const query = {
-    ml: { jobIds: [ML_JOB_ID] },
+    ml: { jobIds: [getMLJobId(monitorId)] },
     refreshInterval: { pause: true, value: 0 },
-    // time: { from: dateRangeStart, to: dateRangeEnd },
+    time: dateRange,
   };
 
   const queryParams = {
     mlExplorerFilter: {
       filterActive: true,
       filteredFields: ['monitor.id', monitorId],
-      influencersFilterQuery: {
-        bool: {
-          minimum_should_match: 1,
-          should: [
-            {
-              match_phrase: {
-                'monitor.id': monitorId,
-              },
-            },
-          ],
-        },
-      },
-      queryString: `monitor.id:${monitorId}`,
+      // influencersFilterQuery: {
+      //   bool: {
+      //     minimum_should_match: 1,
+      //     should: [
+      //       {
+      //         match_phrase: {
+      //           'monitor.id': monitorId,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      // queryString: `monitor.id:${monitorId}`,
     },
     mlExplorerSwimlane: {
-      viewByFieldName: 'monitor.id',
+      viewByFieldName: 'observer.geo.name',
     },
   };
 
   const path = '/explorer';
 
-  const href = url.format({
+  return url.format({
     pathname: basePath + '/app/ml',
     hash:
       `${path}?_g=${rison.encode(query as RisonValue)}` +
       (monitorId ? `&_a=${rison.encode(queryParams as RisonValue)}` : ''),
   });
+};
 
-  return fill ? (
-    <EuiButton size="s" children={children} fill={fill} href={href} target="_blank" />
-  ) : (
-    <EuiButtonEmpty children={children} size="s" href={href} target="_blank" />
-  );
+export const MLJobLink: React.FC<Props> = ({ basePath, monitorId, dateRange, children }) => {
+  const href = getMLJobLinkHref({ basePath, monitorId, dateRange });
+  return <EuiButtonEmpty children={children} size="s" href={href} target="_blank" />;
 };

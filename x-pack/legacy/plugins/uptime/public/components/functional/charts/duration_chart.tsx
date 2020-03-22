@@ -36,7 +36,7 @@ interface DurationChartProps {
 
   hasMLJob: boolean;
 
-  anomalies: AnomalyRecords;
+  anomalies: AnomalyRecords | null;
 }
 
 /**

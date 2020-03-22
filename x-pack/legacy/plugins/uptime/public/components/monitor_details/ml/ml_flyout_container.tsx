@@ -23,9 +23,9 @@ import {
 import { MLFlyoutView } from './ml_flyout';
 import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
+import { useUrlParams } from '../../../hooks';
 
 interface Props {
-  isOpen: boolean;
   onClose: () => void;
 }
 
@@ -33,6 +33,7 @@ const showMLJobNotification = (
   notifications: KibanaReactNotifications,
   monitorId: string,
   basePath: string,
+  range: { to: string; from: string },
   success: boolean,
   message = ''
 ) => {
@@ -42,7 +43,7 @@ const showMLJobNotification = (
       body: (
         <p>
           {labels.JOB_CREATED_SUCCESS_MESSAGE}
-          <MLJobLink monitorId={monitorId} basePath={basePath}>
+          <MLJobLink monitorId={monitorId} basePath={basePath} dateRange={range}>
             {labels.VIEW_JOB}
           </MLJobLink>
         </p>
@@ -58,7 +59,7 @@ const showMLJobNotification = (
   }
 };
 
-export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
+export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
   const { notifications } = useKibana();
 
   const dispatch = useDispatch();
@@ -81,24 +82,31 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
 
   const [isCreatingJob, setIsCreatingJob] = useState(false);
 
+  const [getUrlParams] = useUrlParams();
+  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+
   useEffect(() => {
     if (isCreatingJob && !isMLJobCreating) {
       if (hasMLJob) {
-        showMLJobNotification(notifications, monitorId as string, basePath, true);
+        showMLJobNotification(
+          notifications,
+          monitorId as string,
+          basePath,
+          { to: dateRangeEnd, from: dateRangeStart },
+          true
+        );
         const loadMLJob = (jobId: string) =>
           dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
 
         loadMLJob(ML_JOB_ID);
 
-        // wait a couple seconds to make sure, job is deleted
-        setTimeout(() => {
-          refreshApp();
-        }, 2000);
+        refreshApp();
       } else {
         showMLJobNotification(
           notifications,
           monitorId as string,
           basePath,
+          { to: dateRangeEnd, from: dateRangeStart },
           false,
           error?.body?.message
         );
@@ -126,7 +134,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
     }
   }, [dispatch, hasExistingMLJob, monitorId]);
 
-  if (!isOpen || hasExistingMLJob) {
+  if (hasExistingMLJob) {
     return null;
   }
 
