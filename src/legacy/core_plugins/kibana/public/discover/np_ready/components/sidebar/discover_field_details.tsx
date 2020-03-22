@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiLink, EuiSpacer, EuiIconTip } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
@@ -45,29 +45,26 @@ export function DiscoverFieldDetails({
   return (
     <div className="dscFieldDetails">
       {!details.error && (
-        <p className="euiText euiText--extraSmall euiTextColor--subdued">
+        <EuiText size="xs">
           <FormattedMessage
             id="kbn.discover.fieldChooser.detailViews.topValuesInRecordsDescription"
             defaultMessage="Top 5 values in"
           />{' '}
-          {!indexPattern.metaFields.includes(field.name) && !field.scripted && (
-            <EuiLink className="kuiLink" onClick={() => onAddFilter('_exists_', field.name, '+')}>
+          {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
+            <EuiLink onClick={() => onAddFilter('_exists_', field.name, '+')}>
               {details.exists}
             </EuiLink>
-          )}{' '}
-          {!indexPattern.metaFields.includes(field.name) && field.scripted && (
+          ) : (
             <span>{details.exists}</span>
-          )}
+          )}{' '}
           / {details.total}{' '}
           <FormattedMessage
             id="kbn.discover.fieldChooser.detailViews.recordsText"
             defaultMessage="records"
           />
-        </p>
+        </EuiText>
       )}
-      {details.error && (
-        <div className="euiText euiText--extraSmall euiTextColor--subdued">{details.error}</div>
-      )}
+      {details.error && <EuiText size="xs">{details.error}</EuiText>}
       {!details.error && (
         <div style={{ marginTop: '4px' }}>
           {details.buckets.map((bucket: Bucket, idx: number) => (

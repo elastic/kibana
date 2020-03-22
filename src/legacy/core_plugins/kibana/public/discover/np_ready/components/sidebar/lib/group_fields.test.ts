@@ -67,14 +67,11 @@ describe('group_fields', function() {
           Object {
             "aggregatable": true,
             "count": 1,
-            "display": false,
-            "displayOrder": 0,
             "esTypes": Array [
               "text",
             ],
             "name": "category",
             "readFromDocValues": true,
-            "rowCount": 1,
             "scripted": false,
             "searchable": true,
             "type": "string",
@@ -84,14 +81,11 @@ describe('group_fields', function() {
           Object {
             "aggregatable": true,
             "count": 0,
-            "display": true,
-            "displayOrder": 1,
             "esTypes": Array [
               "keyword",
             ],
             "name": "currency",
             "readFromDocValues": true,
-            "rowCount": 1,
             "scripted": false,
             "searchable": true,
             "type": "string",
@@ -101,14 +95,11 @@ describe('group_fields', function() {
           Object {
             "aggregatable": true,
             "count": 0,
-            "display": false,
-            "displayOrder": 0,
             "esTypes": Array [
               "date",
             ],
             "name": "customer_birth_date",
             "readFromDocValues": true,
-            "rowCount": 1,
             "scripted": false,
             "searchable": true,
             "type": "date",

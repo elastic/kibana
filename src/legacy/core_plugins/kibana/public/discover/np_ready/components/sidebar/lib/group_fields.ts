@@ -16,43 +16,49 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { chain, sortBy } from 'lodash';
-import { IndexPatternFieldList } from '../../../../../../../../../plugins/data/public';
+import {
+  IndexPatternFieldList,
+  IndexPatternField,
+} from '../../../../../../../../../plugins/data/public';
+
+interface GroupedFields {
+  selected: IndexPatternField[];
+  popular: IndexPatternField[];
+  unpopular: IndexPatternField[];
+}
 
 /**
- * group the fields into popular and up-popular lists
- * TODO: No reason to use lodash here, legacy, to be refactored
+ * group the fields into selected, popular and unpopular
  */
 export function groupFields(
   fields: IndexPatternFieldList,
   columns: string[],
   popularLimit: number,
   fieldCounts: Record<string, number>
-) {
+): GroupedFields {
+  const result: GroupedFields = {
+    selected: [],
+    popular: [],
+    unpopular: [],
+  };
   if (!Array.isArray(fields) || !Array.isArray(columns) || typeof fieldCounts !== 'object') {
-    return {
-      selected: [],
-      popular: [],
-      unpopular: [],
-    };
+    return result;
   }
-  return chain(fields)
-    .sortBy(function(field) {
-      return (field.count || 0) * -1;
-    })
-    .groupBy(function(field) {
-      if (columns.includes(field.name)) return 'selected';
-      return field.count ? 'popular' : 'unpopular';
-    })
-    .tap(function(groups) {
-      groups.selected = sortBy(groups.selected || [], 'displayOrder');
-      groups.popular = groups.popular || [];
-      groups.unpopular = groups.unpopular || [];
 
-      // move excess popular fields to un-popular list
-      const extras = groups.popular.splice(popularLimit);
-      groups.unpopular = extras.concat(groups.unpopular);
-    })
-    .commit()
-    .value();
+  const popular = fields
+    .filter(field => !columns.includes(field.name) && field.count)
+    .sort((a: IndexPatternField, b: IndexPatternField) => (b.count || 0) - (a.count || 0))
+    .map(field => field.name)
+    .slice(0, popularLimit);
+
+  for (const field of fields) {
+    if (columns.includes(field.name)) {
+      result.selected.push(field);
+    } else if (popular.includes(field.name)) {
+      result.popular.push(field);
+    } else if (field.type !== '_source') {
+      result.unpopular.push(field);
+    }
+  }
+  return result;
 }
