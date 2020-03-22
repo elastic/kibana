@@ -19,12 +19,12 @@
 
 import { BehaviorSubject, throwError, timer, Subscription, defer, fromEvent } from 'rxjs';
 import { takeUntil, finalize, filter, mergeMapTo } from 'rxjs/operators';
-import { Toast, ToastsStart } from '../../../../core/public';
+import { ApplicationStart, Toast, ToastsStart } from 'kibana/public';
 import { getCombinedSignal } from '../../common/utils';
 import { IKibanaSearchRequest } from '../../common/search';
 import { ISearchGeneric, ISearchOptions } from './i_search';
 import { RequestTimeoutError } from './request_timeout_error';
-import { getLongQueryNotification } from '../ui/long_query_notification';
+import { getLongQueryNotification } from './long_query_notification';
 
 export class SearchInterceptor {
   /**
@@ -56,9 +56,14 @@ export class SearchInterceptor {
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
    * @param toasts The `core.notifications.toasts` service
+   * @param application  The `core.application` service
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
-  constructor(private readonly toasts: ToastsStart, private readonly requestTimeout?: number) {
+  constructor(
+    private readonly toasts: ToastsStart,
+    private readonly application: ApplicationStart,
+    private readonly requestTimeout?: number
+  ) {
     // When search requests go out, a notification is scheduled allowing users to continue the
     // request past the timeout. When all search requests complete, we remove the notification.
     this.getPendingCount$()
@@ -67,52 +72,11 @@ export class SearchInterceptor {
   }
 
   /**
-   * Abort our `AbortController`, which in turn aborts any intercepted searches.
-   */
-  public cancelPending = () => {
-    this.hideToast();
-    this.abortController.abort();
-    this.abortController = new AbortController();
-  };
-
-  /**
-   * Un-schedule timing out all of the searches intercepted.
-   */
-  public runBeyondTimeout = () => {
-    this.hideToast();
-    this.timeoutSubscriptions.forEach(subscription => subscription.unsubscribe());
-    this.timeoutSubscriptions.clear();
-  };
-
-  /**
    * Returns an `Observable` over the current number of pending searches. This could mean that one
    * of the search requests is still in flight, or that it has only received partial responses.
    */
   public getPendingCount$ = () => {
     return this.pendingCount$.asObservable();
-  };
-
-  private showToast = () => {
-    if (this.longRunningToast) return;
-    this.longRunningToast = this.toasts.addInfo(
-      {
-        title: 'Your query is taking awhile',
-        text: getLongQueryNotification({
-          cancel: this.cancelPending,
-          runBeyondTimeout: this.runBeyondTimeout,
-        }),
-      },
-      {
-        toastLifeTimeMs: 100000,
-      }
-    );
-  };
-
-  private hideToast = () => {
-    if (this.longRunningToast) {
-      this.toasts.remove(this.longRunningToast);
-      delete this.longRunningToast;
-    }
   };
 
   /**
@@ -164,5 +128,27 @@ export class SearchInterceptor {
         })
       );
     });
+  };
+
+  protected showToast = () => {
+    if (this.longRunningToast) return;
+    this.longRunningToast = this.toasts.addInfo(
+      {
+        title: 'Your query is taking awhile',
+        text: getLongQueryNotification({
+          application: this.application,
+        }),
+      },
+      {
+        toastLifeTimeMs: Infinity,
+      }
+    );
+  };
+
+  private hideToast = () => {
+    if (this.longRunningToast) {
+      this.toasts.remove(this.longRunningToast);
+      delete this.longRunningToast;
+    }
   };
 }

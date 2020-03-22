@@ -373,6 +373,7 @@ export {
   TabbedAggColumn,
   TabbedAggRow,
   TabbedTable,
+  SearchInterceptor,
 } from './search';
 
 // Search namespace
