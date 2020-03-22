@@ -25,14 +25,42 @@ import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../../../../plugins/data/public';
 
 export interface Props {
+  /**
+   * The displayed field
+   */
   field: IndexPatternField;
+  /**
+   * The currently selected index pattern
+   */
   indexPattern: IndexPattern;
+  /**
+   * Callback to add/select the field
+   */
   onAddField: (fieldName: string) => void;
+  /**
+   * Callback to add a filter to filter bar
+   */
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Callback to remove/deselect a the field
+   * @param fieldName
+   */
   onRemoveField: (fieldName: string) => void;
+  /**
+   * Callback to hide/show details, buckets of the field
+   */
   onShowDetails: (show: boolean, field: IndexPatternField) => void;
+  /**
+   * Determines, whether details of the field are displayed
+   */
   showDetails: boolean;
+  /**
+   * Retrieve details data for the field
+   */
   getDetails: (field: IndexPatternField) => FieldDetails;
+  /**
+   * Determines whether the field is selected
+   */
   selected?: boolean;
 }
 
@@ -72,6 +100,7 @@ export function DiscoverField({
         tabIndex={0}
         onClick={() => onShowDetails(!showDetails, field)}
         onKeyPress={() => onShowDetails(!showDetails, field)}
+        data-test-subj={`field-${field.name}-showDetails`}
       >
         <span className="dscSidebarField__fieldIcon">
           <FieldIcon type={field.type} label={field.name} />

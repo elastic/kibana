@@ -62,7 +62,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                 iconType="magnifyWithPlus"
                 onClick={() => onAddFilter(field, bucket.value, '+')}
                 aria-label={addLabel}
-                data-test-subj={`plus-${field.name}-${bucket.display}`}
+                data-test-subj={`plus-${field.name}-${bucket.value}`}
                 style={{
                   minHeight: 'auto',
                   minWidth: 'auto',

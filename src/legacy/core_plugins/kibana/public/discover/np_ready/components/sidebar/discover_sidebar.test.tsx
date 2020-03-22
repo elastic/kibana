@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { ReactWrapper } from 'enzyme';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
@@ -28,13 +29,23 @@ import realHits from 'fixtures/real_hits.js';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { DiscoverSidebar } from './discover_sidebar';
+import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../../../../plugins/data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
+    history: {
+      location: {
+        search: '',
+      },
+    },
+    capabilities: {
+      visualize: {
+        show: true,
+      },
+    },
     uiSettings: {
       get: (key: string) => {
         if (key === 'fields:popularLimit') {
@@ -85,17 +96,34 @@ function getCompProps() {
   };
 }
 
-describe('discover field chooser', function() {
-  describe('Field listing', function() {
-    it('should have Selected Fields, Fields and Popular Fields sections', function() {
-      const comp = mountWithIntl(<DiscoverSidebar {...getCompProps()} />);
-      const popular = findTestSubject(comp, 'fieldList-popular');
-      const selected = findTestSubject(comp, 'fieldList-selected');
-      const unpopular = findTestSubject(comp, 'fieldList-unpopular');
-      expect(popular.children().length).toBe(2);
-      expect(unpopular.children().length).toBe(7);
-      expect(selected.children().length).toBe(1);
-      expect(comp.html()).toMatchSnapshot();
-    });
+describe('discover sidebar', function() {
+  let props: DiscoverSidebarProps;
+  let comp: ReactWrapper<DiscoverSidebarProps>;
+
+  beforeAll(() => {
+    props = getCompProps();
+    comp = mountWithIntl(<DiscoverSidebar {...props} />);
+  });
+
+  it('should have Selected Fields and Available Fields with Popular Fields sections', function() {
+    const popular = findTestSubject(comp, 'fieldList-popular');
+    const selected = findTestSubject(comp, 'fieldList-selected');
+    const unpopular = findTestSubject(comp, 'fieldList-unpopular');
+    expect(popular.children().length).toBe(2);
+    expect(unpopular.children().length).toBe(7);
+    expect(selected.children().length).toBe(1);
+  });
+  it('should allow selecting fields', function() {
+    findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
+    expect(props.onAddField).toHaveBeenCalledWith('bytes');
+  });
+  it('should allow deselecting fields', function() {
+    findTestSubject(comp, 'fieldToggle-extension').simulate('click');
+    expect(props.onRemoveField).toHaveBeenCalledWith('extension');
+  });
+  it('should allow adding filters', function() {
+    findTestSubject(comp, 'field-extension-showDetails').simulate('click');
+    findTestSubject(comp, 'plus-extension-gif').simulate('click');
+    expect(props.onAddFilter).toHaveBeenCalled();
   });
 });

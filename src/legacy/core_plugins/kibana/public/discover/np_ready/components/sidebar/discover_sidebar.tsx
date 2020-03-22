@@ -38,16 +38,47 @@ import { getFieldFilter } from './lib/get_field_filter';
 import { getServices } from '../../../kibana_services';
 import { getIndexPatternFieldList } from './lib/get_fields';
 
-export interface Props {
+export interface DiscoverSidebarProps {
+  /**
+   * the selected columns displayed in the doc table in discover
+   */
   columns: string[];
+  /**
+   * a statistics of the distribution of fields in the given hits
+   */
   fieldCounts: Record<string, number>;
+  /**
+   * hits fetched from ES, displayed in the doc table
+   */
   hits: Array<Record<string, unknown>>;
+  /**
+   * List of available index patterns
+   */
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  /**
+   * Callback function when selecting a field
+   */
   onAddField: (fieldName: string) => void;
+  /**
+   * Callback function when adding a filter from sidebar
+   */
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Callback function when removing a field
+   * @param fieldName
+   */
   onRemoveField: (fieldName: string) => void;
+  /**
+   * Currently selected index pattern
+   */
   selectedIndexPattern: IndexPattern;
+  /**
+   * Callback function to select another index pattern
+   */
   setIndexPattern: (id: string) => void;
+  /**
+   * Current app state, used for generating a link to visualize
+   */
   state: AppState;
 }
 
@@ -62,7 +93,7 @@ export function DiscoverSidebar({
   selectedIndexPattern,
   setIndexPattern,
   state,
-}: Props) {
+}: DiscoverSidebarProps) {
   const filter = getFieldFilter();
   const [openFieldMap, setOpenFieldMap] = useState(new Map());
   const [showFields, setShowFields] = useState(false);
@@ -73,15 +104,16 @@ export function DiscoverSidebar({
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits]);
 
+  if (!selectedIndexPattern || !fields) {
+    return null;
+  }
+
   const popularLimit = getServices().uiSettings.get('fields:popularLimit');
   const onChangeFieldSearch = (field: string, value: string | boolean | undefined) => {
     filter.setValue(field, value);
     setFieldFilterValues({ ...filter.getValues() });
   };
 
-  if (!selectedIndexPattern || !fields) {
-    return null;
-  }
   const groupedFields = groupFields(fields, columns, popularLimit, fieldCounts);
 
   const fieldTypes = ['any'];

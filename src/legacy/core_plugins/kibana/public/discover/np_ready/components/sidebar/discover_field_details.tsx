@@ -24,14 +24,19 @@ import { getWarnings } from './lib/get_warnings';
 import { Bucket, FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../../../../plugins/data/public';
 
-interface Props {
+interface DiscoverFieldDetailsProps {
   field: IndexPatternField;
   indexPattern: IndexPattern;
   details: FieldDetails;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
-export function DiscoverFieldDetails({ field, indexPattern, details, onAddFilter }: Props) {
+export function DiscoverFieldDetails({
+  field,
+  indexPattern,
+  details,
+  onAddFilter,
+}: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
   if (!details) {
     return null;
