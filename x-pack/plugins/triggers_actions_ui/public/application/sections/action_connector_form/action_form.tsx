@@ -139,19 +139,6 @@ export const ActionForm = ({
       });
     }
   }
-
-  const actionsErrors = actions.reduce(
-    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
-      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
-      if (!actionType) {
-        return { ...acc };
-      }
-      const actionValidationErrors = actionType.validateParams(alertAction.params);
-      return { ...acc, [alertAction.id]: actionValidationErrors };
-    },
-    {}
-  ) as Record<string, { errors: IErrorObject }>;
-
   const getSelectedOptions = (actionItemId: string) => {
     const val = connectors.find(connector => connector.id === actionItemId);
     if (!val) {
@@ -169,17 +156,16 @@ export const ActionForm = ({
   const getActionTypeForm = (
     actionItem: AlertAction,
     actionConnector: ActionConnector,
+    actionParamsErrors: {
+      errors: IErrorObject;
+    },
     index: number
   ) => {
     const optionsList = connectors
       .filter(
         connectorItem =>
           connectorItem.actionTypeId === actionItem.actionTypeId &&
-          (connectorItem.id === actionItem.id ||
-            !actions.find(
-              (existingAction: AlertAction) =>
-                existingAction.id === connectorItem.id && existingAction.group === actionItem.group
-            ))
+          connectorItem.id === actionItem.id
       )
       .map(({ name, id }) => ({
         label: name,
@@ -189,8 +175,6 @@ export const ActionForm = ({
     const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
     if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
     const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
-    const actionParamsErrors: { errors: IErrorObject } =
-      Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : { errors: {} };
     const checkEnabledResult = checkActionTypeEnabled(
       actionTypesIndex && actionTypesIndex[actionConnector.actionTypeId]
     );
@@ -317,9 +301,7 @@ export const ActionForm = ({
               }
             )}
             onClick={() => {
-              const updatedActions = actions.filter(
-                (item: AlertAction) => item.id !== actionItem.id
-              );
+              const updatedActions = actions.filter((_item: AlertAction, i: number) => i !== index);
               setAlertProperty(updatedActions);
               setIsAddActionPanelOpen(
                 updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
@@ -381,9 +363,7 @@ export const ActionForm = ({
               }
             )}
             onClick={() => {
-              const updatedActions = actions.filter(
-                (item: AlertAction) => item.id !== actionItem.id
-              );
+              const updatedActions = actions.filter((_item: AlertAction, i: number) => i !== index);
               setAlertProperty(updatedActions);
               setIsAddActionPanelOpen(
                 updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
@@ -441,24 +421,16 @@ export const ActionForm = ({
     const actionTypeConnectors = connectors.filter(
       field => field.actionTypeId === actionTypeModel.id
     );
-    let freeConnectors;
     if (actionTypeConnectors.length > 0) {
-      // Should we allow adding multiple actions to the same connector under the alert?
-      freeConnectors = actionTypeConnectors.filter(
-        (actionConnector: ActionConnector) =>
-          !actions.find((actionItem: AlertAction) => actionItem.id === actionConnector.id)
-      );
-      if (freeConnectors.length > 0) {
-        actions.push({
-          id: '',
-          actionTypeId: actionTypeModel.id,
-          group: defaultActionGroupId,
-          params: {},
-        });
-        setActionIdByIndex(freeConnectors[0].id, actions.length - 1);
-      }
+      actions.push({
+        id: '',
+        actionTypeId: actionTypeModel.id,
+        group: defaultActionGroupId,
+        params: {},
+      });
+      setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
-    if (actionTypeConnectors.length === 0 || !freeConnectors || freeConnectors.length === 0) {
+    if (actionTypeConnectors.length === 0) {
       // if no connectors exists or all connectors is already assigned an action under current alert
       // set actionType as id to be able to create new connector within the alert form
       actions.push({
@@ -520,7 +492,12 @@ export const ActionForm = ({
         if (!actionConnector) {
           return getAddConnectorsForm(actionItem, index);
         }
-        return getActionTypeForm(actionItem, actionConnector, index);
+
+        const actionErrors: { errors: IErrorObject } = actionTypeRegistry
+          .get(actionItem.actionTypeId)
+          ?.validateParams(actionItem.params);
+
+        return getActionTypeForm(actionItem, actionConnector, actionErrors, index);
       })}
       <EuiSpacer size="m" />
       {isAddActionPanelOpen === false ? (
