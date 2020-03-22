@@ -21,7 +21,7 @@ import {
 } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 import { getMLJobId } from '../../../state/api/ml_anomaly';
-import { JobStat } from '../../../../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { JobStat } from '../../../../../../../plugins/ml/common/types/data_recognizer';
 
 interface Props {
   monitorId: string;

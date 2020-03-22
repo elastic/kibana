@@ -10,7 +10,6 @@ import numeral from '@elastic/numeral';
 import { CallAPIOptions, APICaller, SavedObjectsClientContract } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
-import { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import {
   KibanaObjects,
   ModuleDataFeed,
@@ -28,6 +27,17 @@ import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../commo
 import { mlLog } from '../../client/log';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
+import {
+  Config,
+  JobExistResult,
+  JobStat,
+  MlJobStats,
+  ObjectExistResponse,
+  ObjectExistResult,
+  RawModuleConfig,
+  RecognizeResult,
+  SaveResults,
+} from '../../../common/types/data_recognizer';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -38,70 +48,6 @@ export const SAVED_OBJECT_TYPES = {
   SEARCH: 'search',
   VISUALIZATION: 'visualization',
 };
-
-interface RawModuleConfig {
-  id: string;
-  title: string;
-  description: string;
-  type: string;
-  logoFile: string;
-  defaultIndexPattern: string;
-  query: any;
-  jobs: Array<{ file: string; id: string }>;
-  datafeeds: Array<{ file: string; job_id: string; id: string }>;
-  kibana: {
-    search: Array<{ file: string; id: string }>;
-    visualization: Array<{ file: string; id: string }>;
-    dashboard: Array<{ file: string; id: string }>;
-  };
-}
-
-interface MlJobStats {
-  jobs: CombinedJobWithStats[];
-}
-
-interface Config {
-  dirName: any;
-  json: RawModuleConfig;
-}
-
-export interface RecognizeResult {
-  id: string;
-  title: string;
-  query: any;
-  description: string;
-  logo: { icon: string } | null;
-}
-
-export interface JobStat {
-  id: string;
-  earliestTimestampMs: number;
-  latestTimestampMs: number;
-  latestResultsTimestampMs: number;
-}
-
-export interface JobExistResult {
-  jobsExist: boolean;
-  jobs: JobStat[];
-}
-
-interface ObjectExistResult {
-  id: string;
-  type: string;
-}
-
-interface ObjectExistResponse {
-  id: string;
-  type: string;
-  exists: boolean;
-  savedObject?: any;
-}
-
-interface SaveResults {
-  jobs: JobResponse[];
-  datafeeds: DatafeedResponse[];
-  savedObjects: KibanaObjectResponse[];
-}
 
 export class DataRecognizer {
   modulesDir = `${__dirname}/modules`;

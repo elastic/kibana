@@ -20,6 +20,7 @@ import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { MLIntegrationComponent } from '../../monitor_details/ml/ml_integeration';
+import { AnomalyRecords } from '../../../state/actions';
 
 interface DurationChartProps {
   /**
@@ -35,7 +36,7 @@ interface DurationChartProps {
 
   hasMLJob: boolean;
 
-  anomalies: any;
+  anomalies: AnomalyRecords;
 }
 
 /**

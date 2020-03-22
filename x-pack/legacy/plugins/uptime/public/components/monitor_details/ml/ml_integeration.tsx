@@ -23,7 +23,7 @@ import { UptimeRefreshContext } from '../../../contexts';
 import { getMLJobId } from '../../../state/api/ml_anomaly';
 import * as labels from './translations';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { JobStat } from '../../../../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { JobStat } from '../../../../../../../plugins/ml/common/types/data_recognizer';
 
 export const MLIntegrationComponent = () => {
   const [isMlFlyoutOpen, setIsMlFlyoutOpen] = useState(false);

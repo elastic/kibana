@@ -8,8 +8,8 @@ import { createAction } from 'redux-actions';
 import { createAsyncAction } from './utils';
 import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
 import { AnomaliesTableRecord } from '../../../../../../plugins/ml/common/types/anomalies';
-import { JobExistResult } from '../../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { CreateMLJobSuccess, DeleteJobResults, MonitorIdParam } from './types';
+import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
 
 export const resetMLState = createAction('RESET_ML_STATE');
 

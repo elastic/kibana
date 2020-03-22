@@ -96,7 +96,7 @@ export const CREAT_ML_JOB_DESC = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.createMLJobDescription',
   {
     defaultMessage: `Here you can create a machine learning job to calculate anomaly scores on
-    response durations for Uptime Monitor.Once enabled, The monitor duration chart on details page
+    response durations for Uptime Monitor. Once enabled, The monitor duration chart on details page
     will show the expected bounds and annotate the graph with anomalies.`,
   }
 );

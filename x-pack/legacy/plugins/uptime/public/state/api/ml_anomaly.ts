@@ -10,8 +10,8 @@ import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
 import { API_URLS, INDEX_NAMES, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
 import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
 import { CreateMLJobSuccess, DeleteJobResults, MonitorIdParam } from '../actions/types';
-import { JobExistResult } from '../../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { DataRecognizerConfigResponse } from '../../../../../../plugins/ml/common/types/modules';
+import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
 
 export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`;
 

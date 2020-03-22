@@ -37,4 +37,19 @@ export interface AnomalyRecordDoc {
   causes?: any[];
 }
 
-export { AnomaliesTableRecord } from '../../server/models/results_service/build_anomaly_table_items';
+export interface AnomaliesTableRecord {
+  time: number;
+  source: AnomalyRecordDoc;
+  rowId: string;
+  jobId: string;
+  detectorIndex: number;
+  severity: number;
+  entityName?: string;
+  entityValue?: any;
+  influencers?: Array<{ [key: string]: any }>;
+  actual?: number[];
+  actualSort?: any;
+  typical?: number[];
+  typicalSort?: any;
+  metricDescriptionSort?: number;
+}

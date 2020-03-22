@@ -6,6 +6,7 @@
 import React from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const Header = styled.div`
   font-weight: bold;
@@ -34,9 +35,19 @@ export const AnnotationTooltip = ({ details }: { details: string }) => {
   return (
     <>
       <TimeDiv>{moment(data.time).format('lll')}</TimeDiv>
-      <Header>Score: {data.score.toFixed(2)}</Header>
+      <Header>
+        <FormattedMessage
+          id="xpack.uptime.charts.mlAnnotation.header"
+          defaultMessage="Score: {score}"
+          values={{ score: data.score.toFixed(2) }}
+        />
+      </Header>
       <RecordSeverity color={data.color}>
-        Severity: {capitalizeFirstLetter(data.severity)}
+        <FormattedMessage
+          id="xpack.uptime.charts.mlAnnotation.severity"
+          defaultMessage="Severity: {severity}"
+          values={{ severity: capitalizeFirstLetter(data.severity) }}
+        />
       </RecordSeverity>
     </>
   );

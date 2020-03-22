@@ -19,7 +19,7 @@ import { IHttpFetchError } from '../../../../../../../target/types/core/public/h
 import { AsyncInitialState } from './types';
 import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
 import { CreateMLJobSuccess, DeleteJobResults } from '../actions/types';
-import { JobExistResult } from '../../../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
 
 export interface MLJobState {
   mlJob: AsyncInitialState<JobExistResult>;

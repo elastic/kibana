@@ -45,5 +45,3 @@ export function fetchEffectFactory<T, R, S, F>(
     }
   };
 }
-
-// export function fetchEffectFactory<T, R>(fetch: (request: T) => Promise<R>): ;
