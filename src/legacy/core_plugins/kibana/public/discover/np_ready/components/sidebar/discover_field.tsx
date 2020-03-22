@@ -26,7 +26,7 @@ import { IndexPatternField, IndexPattern } from '../../../../../../../../plugins
 import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
 
-export interface Props {
+export interface DiscoverFieldProps {
   /**
    * The displayed field
    */
@@ -81,7 +81,7 @@ export function DiscoverField({
   getDetails,
   selected,
   useShortDots,
-}: Props) {
+}: DiscoverFieldProps) {
   const addLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
     defaultMessage: 'Add',
   });
@@ -96,7 +96,6 @@ export function DiscoverField({
       onAddField(f.name);
     }
   };
-  const details = showDetails ? getDetails(field) : null;
 
   return (
     <div className={`${showDetails ? 'dscSidebarItemExpanded' : ''}`}>
@@ -156,11 +155,11 @@ export function DiscoverField({
           )}
         </span>
       </div>
-      {showDetails && details && (
+      {showDetails && (
         <DiscoverFieldDetails
           indexPattern={indexPattern}
           field={field}
-          details={details}
+          details={getDetails(field)}
           onAddFilter={onAddFilter}
         />
       )}

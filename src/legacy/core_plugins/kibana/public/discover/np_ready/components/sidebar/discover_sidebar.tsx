@@ -36,7 +36,7 @@ import { AppState } from '../../angular/discover_state';
 import { getDetails } from './lib/get_details';
 import { getFieldFilter } from './lib/get_field_filter';
 import { getServices } from '../../../kibana_services';
-import { getIndexPatternFieldList } from './lib/get_fields';
+import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 
 export interface DiscoverSidebarProps {
   /**

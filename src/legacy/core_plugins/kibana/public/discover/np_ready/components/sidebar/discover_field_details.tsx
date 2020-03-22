@@ -90,10 +90,10 @@ export function DiscoverFieldDetails({
               id="kbn.discover.fieldChooser.detailViews.visualizeLinkText"
               defaultMessage="Visualize"
             />
+            {warnings.length > 0 && (
+              <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
+            )}
           </EuiLink>
-          {warnings.length > 0 && (
-            <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
-          )}
         </>
       )}
     </div>
