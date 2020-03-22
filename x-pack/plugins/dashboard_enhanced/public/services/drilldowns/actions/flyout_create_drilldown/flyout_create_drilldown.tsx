@@ -61,7 +61,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
       toMountPoint(
         <drilldowns.FlyoutManageDrilldowns
           onClose={() => handle.close()}
-          context={context}
+          placeContext={context}
           viewMode={'create'}
           dynamicActionManager={dynamicActionManager}
         />

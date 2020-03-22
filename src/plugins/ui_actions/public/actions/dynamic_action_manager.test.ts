@@ -30,9 +30,10 @@ const actionFactoryDefinition1: ActionFactoryDefinition = {
   CollectConfig: {} as any,
   createConfig: () => ({}),
   isConfigValid: (() => true) as any,
-  create: () => ({
+  create: ({ name }) => ({
     id: '',
     execute: async () => {},
+    getDisplayName: () => name,
   }),
 };
 
@@ -41,9 +42,10 @@ const actionFactoryDefinition2: ActionFactoryDefinition = {
   CollectConfig: {} as any,
   createConfig: () => ({}),
   isConfigValid: (() => true) as any,
-  create: () => ({
+  create: ({ name }) => ({
     id: '',
     execute: async () => {},
+    getDisplayName: () => name,
   }),
 };
 

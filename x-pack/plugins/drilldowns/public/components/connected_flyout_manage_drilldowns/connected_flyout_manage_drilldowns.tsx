@@ -34,7 +34,7 @@ import {
 import { DrilldownFactoryContext } from '../../types';
 
 interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> {
-  context: Context;
+  placeContext: Context;
   dynamicActionManager: DynamicActionManager;
   viewMode?: 'create' | 'manage';
   onClose?: () => void;
@@ -76,10 +76,10 @@ export function createFlyoutManageDrilldowns({
 
     const factoryContext: DrilldownFactoryContext<unknown> = React.useMemo(
       () => ({
-        placeContext: props.context,
+        placeContext: props.placeContext,
         triggers: selectedTriggers,
       }),
-      [props.context, selectedTriggers]
+      [props.placeContext, selectedTriggers]
     );
 
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
