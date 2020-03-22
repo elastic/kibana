@@ -105,6 +105,7 @@ export const usePushToService = ({
     () => (
       <EuiButton
         fill
+        iconType="importAction"
         onClick={handlePushToService}
         disabled={isLoading || loadingLicense || loadingCaseConfigure || errorsMsg.length > 0}
         isLoading={isLoading}

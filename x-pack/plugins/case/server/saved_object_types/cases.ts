@@ -62,6 +62,9 @@ export const caseSavedObjectType: SavedObjectsType = {
               full_name: {
                 type: 'keyword',
               },
+              email: {
+                type: 'keyword',
+              },
             },
           },
           connector_id: {

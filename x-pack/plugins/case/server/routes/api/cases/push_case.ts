@@ -40,7 +40,7 @@ export function initPushCaseUserActionApi({
           CasePushRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const pushedBy = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request, response });
         const pushedDate = new Date().toISOString();
 
         const [myCase, myCaseConfigure, totalCommentsFindByCases] = await Promise.all([
@@ -78,7 +78,7 @@ export function initPushCaseUserActionApi({
 
         const pushed = {
           at: pushedDate,
-          by: pushedBy,
+          by: { username, full_name, email },
           ...query,
         };
 
@@ -94,7 +94,7 @@ export function initPushCaseUserActionApi({
                 : {}),
               pushed,
               updated_at: pushedDate,
-              updated_by: pushedBy,
+              updated_by: { username, full_name, email },
             },
             version: myCase.version,
           }),
@@ -104,28 +104,40 @@ export function initPushCaseUserActionApi({
               commentId: comment.id,
               updatedAttributes: {
                 pushed_at: pushedDate,
-                pushed_by: pushedBy,
+                pushed_by: { username, full_name, email },
                 updated_at: pushedDate,
-                updated_by: pushedBy,
+                updated_by: { username, full_name, email },
               },
               version: comment.version,
             })),
           }),
+          userActionService.postUserActions({
+            client,
+            actions: [
+              ...(myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
+                ? [
+                    buildCaseUserActionItem({
+                      action: 'update',
+                      actionAt: pushedDate,
+                      actionBy: { username, full_name, email },
+                      caseId,
+                      fields: [status],
+                      newValue: 'closes',
+                      oldValue: myCase.attributes.status,
+                    }),
+                  ]
+                : []),
+              buildCaseUserActionItem({
+                action: 'push-to-service',
+                actionAt: pushedDate,
+                actionBy: { username, full_name, email },
+                caseId,
+                fields: ['pushed'],
+                newValue: JSON.stringify(pushed),
+              }),
+            ],
+          }),
         ]);
-
-        await userActionService.postUserActions({
-          client,
-          actions: [
-            buildCaseUserActionItem({
-              action: 'push-to-service',
-              actionAt: pushedDate,
-              actionBy: pushedBy,
-              caseId,
-              fields: ['pushed'],
-              newValue: JSON.stringify(pushed),
-            }),
-          ],
-        });
 
         return response.ok({
           body: CaseResponseRt.encode(

@@ -30,10 +30,10 @@ const CaseContainerComponent: React.FC = () => (
     <Route strict exact path={configureCasesPagePath}>
       <ConfigureCasesPage />
     </Route>
-    <Route strict path={caseDetailsPagePath}>
+    <Route strict path={caseDetailsPagePathWithCommentId}>
       <CaseDetailsPage />
     </Route>
-    <Route strict path={caseDetailsPagePathWithCommentId}>
+    <Route strict path={caseDetailsPagePath}>
       <CaseDetailsPage />
     </Route>
   </Switch>

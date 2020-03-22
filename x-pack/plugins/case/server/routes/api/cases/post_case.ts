@@ -31,14 +31,16 @@ export function initPostCaseApi({ caseService, router, userActionService }: Rout
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const createdBy = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
         const newCase = await caseService.postNewCase({
           client,
           attributes: transformNewCase({
             createdDate,
             newCase: query,
-            ...createdBy,
+            username,
+            full_name,
+            email,
           }),
         });
 
@@ -48,7 +50,7 @@ export function initPostCaseApi({ caseService, router, userActionService }: Rout
             buildCaseUserActionItem({
               action: 'create',
               actionAt: createdDate,
-              actionBy: createdBy,
+              actionBy: { username, full_name, email },
               caseId: newCase.id,
               fields: ['description', 'status', 'tags', 'title'],
               newValue: JSON.stringify(query),

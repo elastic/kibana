@@ -74,8 +74,7 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
           return Object.keys(updateCaseAttributes).length > 0;
         });
         if (updateFilterCases.length > 0) {
-          const updatedBy = await caseService.getUser({ request, response });
-          const { email, full_name, username } = updatedBy;
+          const { username, full_name, email } = await caseService.getUser({ request, response });
           const updatedDt = new Date().toISOString();
           const updatedCases = await caseService.patchCases({
             client,

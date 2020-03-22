@@ -34,6 +34,20 @@ export const REMOVED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabe
   defaultMessage: 'removed',
 });
 
+export const PUSHED_NEW_INCIDENT = i18n.translate(
+  'xpack.siem.case.caseView.actionLabel.pushedNewIncident',
+  {
+    defaultMessage: 'pushed as new incident',
+  }
+);
+
+export const UPDATE_INCIDENT = i18n.translate(
+  'xpack.siem.case.caseView.actionLabel.updateIncident',
+  {
+    defaultMessage: 'updated incident',
+  }
+);
+
 export const ADDED_DESCRIPTION = i18n.translate(
   'xpack.siem.case.caseView.actionLabel.addDescription',
   {

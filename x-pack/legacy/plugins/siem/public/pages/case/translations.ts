@@ -34,8 +34,12 @@ export const CLOSED_ON = i18n.translate('xpack.siem.case.caseView.closedOn', {
   defaultMessage: 'Closed on',
 });
 
-export const REPORTER = i18n.translate('xpack.siem.case.caseView.createdBy', {
+export const REPORTER = i18n.translate('xpack.siem.case.caseView.reporterLabel', {
   defaultMessage: 'Reporter',
+});
+
+export const PARTICIPANTS = i18n.translate('xpack.siem.case.caseView.particpantsLabel', {
+  defaultMessage: 'Participants',
 });
 
 export const CREATE_BC_TITLE = i18n.translate('xpack.siem.case.caseView.breadcrumb', {

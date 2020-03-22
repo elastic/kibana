@@ -23,7 +23,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
-        const deletedBy = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();
 
         const comments = await caseService.getAllCaseComments({
@@ -45,7 +45,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
             buildCommentUserActionItem({
               action: 'delete',
               actionAt: deleteDate,
-              actionBy: deletedBy,
+              actionBy: { username, full_name, email },
               caseId: request.params.case_id,
               commentId: comment.id,
               fields: ['comment'],

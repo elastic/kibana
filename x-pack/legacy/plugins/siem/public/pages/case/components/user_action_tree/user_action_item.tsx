@@ -10,12 +10,14 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiHorizontalRule,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionTitle } from './user_action_title';
+import * as i18n from './translations';
 
 interface UserActionItemProps {
   createdAt: string;
@@ -31,6 +33,8 @@ interface UserActionItemProps {
   userName: string;
   updatedAt?: string | null;
   outlineComment?: (id: string) => void;
+  showBottomFooter?: boolean;
+  showTopFooter?: boolean;
   idToOutline?: string | null;
 }
 
@@ -86,13 +90,16 @@ const MyEuiPanel = styled(EuiPanel)<{ showoutline: string }>`
     `
       : ''}
 `;
+
 const PushedContainer = styled(EuiFlexItem)`
-  margin-top: 8px;
-  margin-bottom: 24px;
-  hr {
-    margin: 5px;
-    height: 2px;
-  }
+  ${({ theme }) => `
+    margin-top: ${theme.eui.euiSizeS};
+    margin-bottom: ${theme.eui.euiSizeXL};
+    hr {
+      margin: 5px;
+      height: ${theme.eui.euiBorderWidthThick};
+    }
+  `}
 `;
 
 const PushedInfoContainer = styled.div`
@@ -112,6 +119,8 @@ export const UserActionItem = ({
   markdown,
   onEdit,
   outlineComment,
+  showBottomFooter,
+  showTopFooter,
   userName,
   updatedAt,
 }: UserActionItemProps) => (
@@ -137,7 +146,7 @@ export const UserActionItem = ({
                 createdAt={createdAt}
                 id={id}
                 isLoading={isLoading}
-                labelAction={labelAction}
+                labelAction={labelEditAction}
                 labelTitle={labelTitle ?? <></>}
                 linkId={linkId}
                 userName={userName}
@@ -151,29 +160,22 @@ export const UserActionItem = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
-    <EuiFlexItem data-test-subj={`user-action-${id}`}>
-      {isEditable && markdown}
-      {!isEditable && (
-        <MyEuiPanel
-          className="userAction__panel"
-          paddingSize="none"
-          showoutline={id === idToOutline ? 'true' : 'false'}
-        >
-          <UserActionTitle
-            createdAt={createdAt}
-            id={id}
-            isLoading={isLoading}
-            labelEditAction={labelEditAction}
-            labelTitle={labelTitle ?? <></>}
-            linkId={linkId}
-            userName={userName}
-            updatedAt={updatedAt}
-            onEdit={onEdit}
-            outlineComment={outlineComment}
-          />
-          {markdown}
-        </MyEuiPanel>
-      )}
-    </EuiFlexItem>
+    {showTopFooter && (
+      <PushedContainer>
+        <PushedInfoContainer>
+          <EuiText size="xs" color="subdued">
+            {i18n.ALREADY_PUSHED_TO_SERVICE}
+          </EuiText>
+        </PushedInfoContainer>
+        <EuiHorizontalRule />
+        {showBottomFooter && (
+          <PushedInfoContainer>
+            <EuiText size="xs" color="subdued">
+              {i18n.REQUIRED_UPDATE_TO_SERVICE}
+            </EuiText>
+          </PushedInfoContainer>
+        )}
+      </PushedContainer>
+    )}
   </UserActionItemContainer>
 );

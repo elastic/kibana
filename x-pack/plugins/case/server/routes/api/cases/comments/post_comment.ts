@@ -40,7 +40,12 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const createdBy = await caseService.getUser({ request, response });
+        const myCase = await caseService.getCase({
+          client: context.core.savedObjects.client,
+          caseId: request.params.case_id,
+        });
+
+        const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
 
         const newComment = await caseService.postNewComment({
@@ -48,13 +53,15 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
           attributes: transformNewComment({
             createdDate,
             ...query,
-            ...createdBy,
+            username,
+            full_name,
+            email,
           }),
           references: [
             {
               type: CASE_SAVED_OBJECT,
               name: `associated-${CASE_SAVED_OBJECT}`,
-              id: request.params.case_id,
+              id: myCase.id,
             },
           ],
         });
@@ -65,8 +72,8 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
             buildCommentUserActionItem({
               action: 'create',
               actionAt: createdDate,
-              actionBy: createdBy,
-              caseId: request.params.case_id,
+              actionBy: { username, full_name, email },
+              caseId: myCase.id,
               commentId: newComment.id,
               fields: ['comment'],
               newValue: query.comment,

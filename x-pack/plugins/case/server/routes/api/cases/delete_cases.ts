@@ -54,7 +54,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
             )
           );
         }
-        const deletedBy = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();
 
         await userActionService.postUserActions({
@@ -63,7 +63,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
             buildCaseUserActionItem({
               action: 'create',
               actionAt: deleteDate,
-              actionBy: deletedBy,
+              actionBy: { username, full_name, email },
               caseId: id,
               fields: ['comment', 'description', 'status', 'tags', 'title'],
             })

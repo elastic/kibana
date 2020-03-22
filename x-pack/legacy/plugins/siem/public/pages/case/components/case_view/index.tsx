@@ -15,6 +15,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { uniqBy } from 'lodash/fp';
 import * as i18n from './translations';
 import { Case } from '../../../../containers/case/types';
 import { getCaseUrl } from '../../../../components/link_to';
@@ -64,8 +65,11 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
   const [initLoadingData, setInitLoadingData] = useState(true);
   const {
     caseUserActions,
-    isLoading: isLoadingUserActions,
     fetchCaseUserActions,
+    firstIndexPushToService,
+    hasDataToPush,
+    isLoading: isLoadingUserActions,
+    lastIndexPushToService,
   } = useGetCaseUserActions(caseId);
   const { caseData, isLoading, updateKey, updateCase, updateCaseProperty } = useUpdateCase(
     caseId,
@@ -119,7 +123,6 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     },
     [fetchCaseUserActions, updateCaseProperty, caseData.status]
   );
-
   const handleUpdateCase = useCallback(
     (newCase: Case) => {
       updateCase(newCase);
@@ -127,6 +130,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     },
     [updateCase, fetchCaseUserActions]
   );
+
   const { pushButton, pushCallouts } = usePushToService({
     caseData,
     isNew: caseUserActions.filter(cua => cua.action === 'push-to-service').length === 0,
@@ -135,16 +139,15 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
 
   const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
   const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
-  const toggleStatusCase = useCallback(status => onUpdateField('status', status), [onUpdateField]);
-
+  const toggleStatusCase = useCallback(
+    e => onUpdateField('status', e.target.checked ? 'closed' : 'open'),
+    [onUpdateField]
+  );
   const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
-  const hasDataToPush = useMemo(() => {
-    const indexPushToService = caseUserActions.findIndex(cua => cua.action === 'push-to-service');
-    if (indexPushToService === -1 || indexPushToService < caseUserActions.length - 1) {
-      return true;
-    }
-    return false;
-  }, [caseUserActions]);
+  const participants = useMemo(
+    () => uniqBy('actionBy.username', caseUserActions).map(cau => cau.actionBy),
+    [caseUserActions]
+  );
   const caseStatusData = useMemo(
     () =>
       caseData.status === 'open'
@@ -175,12 +178,8 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
       subject: i18n.EMAIL_SUBJECT(caseData.title),
       body: i18n.EMAIL_BODY(caseLink),
     }),
-    [caseData.title]
+    [caseLink, caseData.title]
   );
-
-  const onChangeStatus = useCallback(e => toggleStatusCase(e.target.checked ? 'closed' : 'open'), [
-    toggleStatusCase,
-  ]);
 
   useEffect(() => {
     if (initLoadingData && !isLoadingUserActions) {
@@ -210,7 +209,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             caseId={caseData.id}
             caseTitle={caseData.title}
             isLoading={isLoading && updateKey === 'status'}
-            toggleStatusCase={onChangeStatus}
+            toggleStatusCase={toggleStatusCase}
             {...caseStatusData}
           />
         </HeaderPage>
@@ -227,8 +226,10 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                     caseUserActions={caseUserActions}
                     data={caseData}
                     fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
+                    firstIndexPushToService={firstIndexPushToService}
                     isLoadingDescription={isLoading && updateKey === 'description'}
                     isLoadingUserActions={isLoadingUserActions}
+                    lastIndexPushToService={lastIndexPushToService}
                     onUpdateField={onUpdateField}
                   />
                   <MyEuiHorizontalRule margin="s" />
@@ -240,7 +241,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                         isSelected={caseStatusData.isSelected}
                         isLoading={isLoading && updateKey === 'status'}
                         label={caseStatusData.buttonLabel}
-                        onChange={onChangeStatus}
+                        onChange={toggleStatusCase}
                       />
                     </EuiFlexItem>
                     {hasDataToPush && <EuiFlexItem grow={false}>{pushButton}</EuiFlexItem>}
@@ -250,10 +251,16 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <UserList
-                data-test-subj="case-view-user-list"
+                data-test-subj="case-view-user-list-reporter"
                 email={emailContent}
                 headline={i18n.REPORTER}
                 users={[caseData.createdBy]}
+              />
+              <UserList
+                data-test-subj="case-view-user-list-particpants"
+                email={emailContent}
+                headline={i18n.PARTICIPANTS}
+                users={participants}
               />
               <TagList
                 data-test-subj="case-view-tag-list"

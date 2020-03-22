@@ -14,12 +14,18 @@ import { CaseUserActions } from './types';
 
 interface CaseUserActionsState {
   caseUserActions: CaseUserActions[];
+  firstIndexPushToService: number;
+  hasDataToPush: boolean;
   isLoading: boolean;
   isError: boolean;
+  lastIndexPushToService: number;
 }
 
 const initialData: CaseUserActionsState = {
   caseUserActions: [],
+  firstIndexPushToService: -1,
+  lastIndexPushToService: -1,
+  hasDataToPush: false,
   isLoading: true,
   isError: false,
 };
@@ -27,6 +33,25 @@ const initialData: CaseUserActionsState = {
 interface UseGetCaseUserActions extends CaseUserActionsState {
   fetchCaseUserActions: (caseId: string) => void;
 }
+
+const getPushedInfo = (
+  caseUserActions: CaseUserActions[]
+): { firstIndexPushToService: number; lastIndexPushToService: number; hasDataToPush: boolean } => {
+  const firstIndexPushToService = caseUserActions.findIndex(
+    cua => cua.action === 'push-to-service'
+  );
+  const lastIndexPushToService = caseUserActions
+    .map(cua => cua.action)
+    .lastIndexOf('push-to-service');
+
+  const hasDataToPush =
+    lastIndexPushToService === -1 || lastIndexPushToService < caseUserActions.length - 1;
+  return {
+    firstIndexPushToService,
+    lastIndexPushToService,
+    hasDataToPush,
+  };
+};
 
 export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => {
   const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
@@ -48,15 +73,12 @@ export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => 
           const response = await getCaseUserActions(thisCaseId, abortCtrl.signal);
           if (!didCancel) {
             // Attention Future developer
-            // We are removing the first item because it will always the creation of the case
+            // We are removing the first item because it will always be the creation of the case
             // and we do not want it to simplify our life
+            const caseUserActions = !isEmpty(response) ? response.slice(1) : [];
             setCaseUserActionsState({
-              caseUserActions: !isEmpty(response)
-                ? [
-                    ...response.slice(1),
-                    { ...response[response.length - 1], actionId: 33, action: 'push-to-service' },
-                  ]
-                : [],
+              caseUserActions,
+              ...getPushedInfo(caseUserActions),
               isLoading: false,
               isError: false,
             });
@@ -70,6 +92,9 @@ export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => 
             });
             setCaseUserActionsState({
               caseUserActions: [],
+              firstIndexPushToService: -1,
+              lastIndexPushToService: -1,
+              hasDataToPush: false,
               isLoading: false,
               isError: true,
             });

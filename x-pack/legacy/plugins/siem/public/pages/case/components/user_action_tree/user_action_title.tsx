@@ -65,7 +65,7 @@ export const UserActionTitle = ({
   }, [id, labelEditAction, onEdit]);
 
   const handleAnchorLink = useCallback(() => {
-    copy(`${window.location.origin}${window.location.pathname}#case/${caseId}/id${urlSearch}`, {
+    copy(`${window.location.origin}${window.location.pathname}#case/${caseId}/${id}${urlSearch}`, {
       debug: true,
     });
   }, [caseId, id, urlSearch]);
@@ -73,15 +73,6 @@ export const UserActionTitle = ({
   const handleMoveToLink = useCallback(() => {
     if (outlineComment != null && linkId != null) {
       outlineComment(linkId);
-    }
-    const moveToTarget = document.getElementById(`${linkId}-permLink`);
-    if (moveToTarget != null) {
-      const yOffset = -60;
-      const y = moveToTarget.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({
-        top: y,
-        behavior: 'smooth',
-      });
     }
   }, [linkId, outlineComment]);
 
@@ -128,11 +119,22 @@ export const UserActionTitle = ({
           <EuiFlexGroup alignItems="baseline" gutterSize="none">
             {!isEmpty(linkId) && (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon onClick={handleMoveToLink} iconType="arrowUp" />
+                <EuiButtonIcon
+                  aria-label=""
+                  aria-labelledby=""
+                  onClick={handleMoveToLink}
+                  iconType="arrowUp"
+                />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon onClick={handleAnchorLink} iconType="link" id={`${id}-permLink`} />
+              <EuiButtonIcon
+                aria-label=""
+                aria-labelledby=""
+                onClick={handleAnchorLink}
+                iconType="link"
+                id={`${id}-permLink`}
+              />
             </EuiFlexItem>
             {propertyActions.length > 0 && (
               <EuiFlexItem grow={false}>

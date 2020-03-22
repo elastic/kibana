@@ -57,9 +57,8 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
           );
         }
 
-        const updatedBy = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request, response });
         const updatedDate = new Date().toISOString();
-        const { email, full_name, username } = updatedBy;
         const updatedComment = await caseService.patchComment({
           client: context.core.savedObjects.client,
           commentId: query.id,
@@ -77,7 +76,7 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
             buildCommentUserActionItem({
               action: 'update',
               actionAt: updatedDate,
-              actionBy: updatedBy,
+              actionBy: { username, full_name, email },
               caseId: request.params.case_id,
               commentId: updatedComment.id,
               fields: ['comment'],

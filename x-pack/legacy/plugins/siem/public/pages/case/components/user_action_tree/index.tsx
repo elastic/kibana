@@ -5,7 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import * as i18n from '../case_view/translations';
@@ -15,15 +16,17 @@ import { useUpdateComment } from '../../../../containers/case/use_update_comment
 import { useCurrentUser } from '../../../../lib/kibana';
 import { AddComment } from '../add_comment';
 import { getLabelTitle } from './helpers';
-import { UserActionItem, UserActionItemContainer } from './user_action_item';
+import { UserActionItem } from './user_action_item';
 import { UserActionMarkdown } from './user_action_markdown';
 
 export interface UserActionTreeProps {
   data: Case;
   caseUserActions: CaseUserActions[];
+  fetchUserActions: () => void;
+  firstIndexPushToService: number;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
-  fetchUserActions: () => void;
+  lastIndexPushToService: number;
   onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
 }
 
@@ -39,11 +42,15 @@ export const UserActionTree = React.memo(
     data: caseData,
     caseUserActions,
     fetchUserActions,
+    firstIndexPushToService,
     isLoadingDescription,
     isLoadingUserActions,
+    lastIndexPushToService,
     onUpdateField,
   }: UserActionTreeProps) => {
+    const { commentId } = useParams();
     const handlerTimeoutId = useRef(0);
+    const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { comments, isLoadingIds, updateComment, addPostedComment } = useUpdateComment(
       caseData.comments
@@ -77,6 +84,15 @@ export const UserActionTree = React.memo(
 
     const handleOutlineComment = useCallback(
       (id: string) => {
+        const moveToTarget = document.getElementById(`${id}-permLink`);
+        if (moveToTarget != null) {
+          const yOffset = -60;
+          const y = moveToTarget.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({
+            top: y,
+            behavior: 'smooth',
+          });
+        }
         window.clearTimeout(handlerTimeoutId.current);
         setSelectedOutlineCommentId(id);
         handlerTimeoutId.current = window.setTimeout(() => {
@@ -123,6 +139,15 @@ export const UserActionTree = React.memo(
       [caseData.id, handleUpdate]
     );
 
+    useEffect(() => {
+      if (initLoading && !isLoadingUserActions && isLoadingIds.length === 0) {
+        setInitLoading(false);
+        if (commentId != null) {
+          handleOutlineComment(commentId);
+        }
+      }
+    }, [commentId, initLoading, isLoadingUserActions, isLoadingIds]);
+
     return (
       <>
         <UserActionItem
@@ -137,7 +162,8 @@ export const UserActionTree = React.memo(
           onEdit={handleManageMarkdownEditId.bind(null, DescriptionId)}
           userName={caseData.createdBy.username}
         />
-        {caseUserActions.map(action => {
+
+        {caseUserActions.map((action, index) => {
           if (action.commentId != null && action.action === 'create') {
             const comment = comments.find(c => c.id === action.commentId);
             if (comment != null) {
@@ -171,7 +197,12 @@ export const UserActionTree = React.memo(
           }
           if (action.actionField.length === 1) {
             const myField = action.actionField[0];
-            const labelTitle: string | JSX.Element = getLabelTitle(myField, action);
+            const labelTitle: string | JSX.Element = getLabelTitle({
+              action,
+              field: myField,
+              firstIndexPushToService,
+              index,
+            });
 
             return (
               <UserActionItem
@@ -186,6 +217,14 @@ export const UserActionTree = React.memo(
                 }
                 fullName={action.actionBy.fullName ?? action.actionBy.username}
                 outlineComment={handleOutlineComment}
+                showTopFooter={
+                  action.action === 'push-to-service' && index === lastIndexPushToService
+                }
+                showBottomFooter={
+                  action.action === 'push-to-service' &&
+                  index === lastIndexPushToService &&
+                  index < caseUserActions.length - 1
+                }
                 userName={action.actionBy.username}
               />
             );
