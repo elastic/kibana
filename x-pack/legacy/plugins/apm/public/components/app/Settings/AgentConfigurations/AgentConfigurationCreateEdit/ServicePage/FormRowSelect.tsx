@@ -5,11 +5,8 @@
  */
 
 import React from 'react';
-import {
-  EuiDescribedFormGroup,
-  EuiSelectOptionProps,
-  EuiFormRow
-} from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiSelectOption } from '@elastic/eui';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
 interface Props {
@@ -17,7 +14,7 @@ interface Props {
   description: string;
   fieldLabel: string;
   isLoading: boolean;
-  options?: EuiSelectOptionProps[];
+  options?: EuiSelectOption[];
   value?: string;
   disabled: boolean;
   onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
