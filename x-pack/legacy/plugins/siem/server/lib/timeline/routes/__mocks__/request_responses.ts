@@ -20,6 +20,17 @@ export const getImportTimelinesRequest = (hapiStream?: HapiReadableStream) =>
   requestMock.create({
     method: 'post',
     path: TIMELINE_IMPORT_URL,
+    query: { overwrite: false },
+    body: {
+      file: { hapi: { filename: 'filename.ndjson' } },
+    },
+  });
+
+export const getImportTimelinesRequestEnableOverwrite = (hapiStream?: HapiReadableStream) =>
+  requestMock.create({
+    method: 'post',
+    path: TIMELINE_IMPORT_URL,
+    query: { overwrite: true },
     body: {
       file: { hapi: { filename: 'filename.ndjson' } },
     },

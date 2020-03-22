@@ -10,6 +10,7 @@ import {
   mockTimelinesSavedObjects,
   mockPinnedEvents,
   getImportTimelinesRequest,
+  getImportTimelinesRequestEnableOverwrite,
 } from './__mocks__/request_responses';
 import {
   serverMock,
@@ -59,11 +60,10 @@ describe('import timelines', () => {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
     };
-    jest.doMock('./utils', () => {
+
+    jest.doMock('../create_timelines_stream_from_ndjson', () => {
       return {
-        getTupleDuplicateErrorsAndUniqueTimeline: jest
-          .fn()
-          .mockReturnValue([mockDuplicateIdErrors, mockUniqueParsedObjects]),
+        createTimelinesStreamFromNdJson: jest.fn().mockReturnValue(mockParsedObjects),
       };
     });
 
@@ -73,14 +73,16 @@ describe('import timelines', () => {
       };
     });
 
-    jest.doMock('../create_timelines_stream_from_ndjson', () => {
+    jest.doMock('./utils', () => {
       return {
-        createTimelinesStreamFromNdJson: jest.fn().mockReturnValue([]),
+        getTupleDuplicateErrorsAndUniqueTimeline: jest
+          .fn()
+          .mockReturnValue([mockDuplicateIdErrors, mockUniqueParsedObjects]),
       };
     });
   });
 
-  describe('status codes', () => {
+  describe('Import a new timeline', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
@@ -125,7 +127,110 @@ describe('import timelines', () => {
     });
   });
 
-  describe('collect error and finish the process', () => {
+  describe('Import a timeline already exist but overwrite is not allowed', () => {
+    beforeEach(() => {
+      jest.doMock('../saved_object', () => {
+        return {
+          Timeline: jest.fn().mockImplementation(() => {
+            return {
+              getTimeline: jest.fn().mockReturnValue(mockParsedObjects),
+              persistTimeline: jest.fn(),
+            };
+          }),
+        };
+      });
+
+      jest.doMock('../../pinned_event/saved_object', () => {
+        return {
+          PinnedEvent: jest.fn().mockImplementation(() => {
+            return {
+              persistPinnedEventOnTimeline: jest.fn(),
+            };
+          }),
+        };
+      });
+
+      jest.doMock('../../note/saved_object', () => {
+        return {
+          Note: jest.fn().mockImplementation(() => {
+            return {
+              persistNote: jest.fn(),
+            };
+          }),
+        };
+      });
+
+      const importTimelinesRoute = jest.requireActual('./import_timelines_route')
+        .importTimelinesRoute;
+      importTimelinesRoute(server.router, config, securitySetup);
+    });
+    test('returns error message', async () => {
+      const response = await server.inject(getImportTimelinesRequest(), context);
+      expect(response.body).toEqual({
+        success: false,
+        success_count: 0,
+        errors: [
+          {
+            id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+            error: {
+              status_code: 409,
+              message: `timeline_id: "79deb4c0-6bc1-11ea-a90b-f5341fb7a189" already exists`,
+            },
+          },
+        ],
+      });
+    });
+  });
+
+  describe('Import an existing timeline and allow overwrite', () => {
+    beforeEach(() => {
+      jest.doMock('../saved_object', () => {
+        return {
+          Timeline: jest.fn().mockImplementation(() => {
+            return {
+              getTimeline: jest.fn().mockReturnValue(mockParsedObjects),
+              persistTimeline: jest.fn(),
+            };
+          }),
+        };
+      });
+
+      jest.doMock('../../pinned_event/saved_object', () => {
+        return {
+          PinnedEvent: jest.fn().mockImplementation(() => {
+            return {
+              persistPinnedEventOnTimeline: jest.fn(),
+              getAllPinnedEventsByTimelineId: jest.fn().mockReturnValue(['k-gi8nABm-sIqJ_scOoS']),
+            };
+          }),
+        };
+      });
+
+      jest.doMock('../../note/saved_object', () => {
+        return {
+          Note: jest.fn().mockImplementation(() => {
+            return {
+              persistNote: jest.fn(),
+            };
+          }),
+        };
+      });
+
+      const importTimelinesRoute = jest.requireActual('./import_timelines_route')
+        .importTimelinesRoute;
+      importTimelinesRoute(server.router, config, securitySetup);
+    });
+    test('returns status 200 ', async () => {
+      const response = await server.inject(getImportTimelinesRequestEnableOverwrite(), context);
+      expect(response.body).toEqual({
+        success: true,
+        success_count: 1,
+        errors: [],
+      });
+    });
+  });
+
+  describe('Import a new timeline but failed when pinning events', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
@@ -165,7 +270,7 @@ describe('import timelines', () => {
 
       importTimelinesRoute(server.router, config, securitySetup);
     });
-    test('collect error when pin event throws error', async () => {
+    test('collect error and finish the process', async () => {
       const response = await server.inject(getImportTimelinesRequest(), context, securitySetup);
 
       expect(response.body).toEqual({

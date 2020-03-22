@@ -244,8 +244,7 @@ export const importTimelinesRoute = (
                               frameworkRequest,
                               null,
                               eventId,
-                              timeline.savedObjectId,
-                              pinnedEventIds
+                              timeline.savedObjectId
                             );
                           })
                         );
@@ -273,7 +272,7 @@ export const importTimelinesRoute = (
                         console.log('------7------');
                         resolve(
                           createBulkErrorObject({
-                            savedObjectId,
+                            id: savedObjectId,
                             statusCode: 409,
                             message: `timeline_id: "${savedObjectId}" already exists`,
                           })
