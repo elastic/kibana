@@ -5,7 +5,8 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { AbstractSourceDescriptor, ISource } from './source';
+import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
+import { ISource } from './source';
 
 type SourceRegistryEntry = {
   factory: (sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object) => ISource;

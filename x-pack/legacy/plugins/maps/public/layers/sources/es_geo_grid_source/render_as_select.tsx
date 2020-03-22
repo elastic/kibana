@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Component } from 'react';
-import { EuiFormRow, EuiComboBox } from '@elastic/eui';
+import React from 'react';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RENDER_AS } from '../../../../common/constants';
 
@@ -28,11 +28,11 @@ export function RenderAsSelect(props: {
   renderAs: RENDER_AS;
   onChange: (newValue: RENDER_AS) => void;
 }) {
-  function onChange(selectedOptions) {
+  function onChange(selectedOptions: Array<EuiComboBoxOptionOption<RENDER_AS>>) {
     if (!selectedOptions || !selectedOptions.length) {
       return;
     }
-    props.onChange(selectedOptions[0].value);
+    props.onChange(selectedOptions[0].value as RENDER_AS);
   }
 
   const selectedOptions = [];
