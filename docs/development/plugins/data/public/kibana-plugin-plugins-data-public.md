@@ -19,6 +19,7 @@
 |  [OptionedParamType](./kibana-plugin-plugins-data-public.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-public.plugin.md) |  |
 |  [SearchError](./kibana-plugin-plugins-data-public.searcherror.md) |  |
+|  [SearchInterceptor](./kibana-plugin-plugins-data-public.searchinterceptor.md) |  |
 |  [SearchSource](./kibana-plugin-plugins-data-public.searchsource.md) |  |
 |  [TimeHistory](./kibana-plugin-plugins-data-public.timehistory.md) |  |
 
