@@ -43,6 +43,7 @@ export default function(kibana: any) {
       const notEnabledActionType: ActionType = {
         id: 'test.not-enabled',
         name: 'Test: Not Enabled',
+        minimumLicenseRequired: 'gold',
         async executor() {
           return { status: 'ok', actionId: '' };
         },

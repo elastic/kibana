@@ -9,7 +9,7 @@ Adds a new toast pre-configured with the warning color and help icon.
 <b>Signature:</b>
 
 ```typescript
-addWarning(toastOrTitle: ToastInput): Toast;
+addWarning(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
 ```
 
 ## Parameters
@@ -17,6 +17,7 @@ addWarning(toastOrTitle: ToastInput): Toast;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  toastOrTitle | <code>ToastInput</code> | a [ToastInput](./kibana-plugin-core-public.toastinput.md) |
+|  options | <code>ToastOptions</code> | a [ToastOptions](./kibana-plugin-core-public.toastoptions.md) |
 
 <b>Returns:</b>
 

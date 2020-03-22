@@ -24,6 +24,8 @@ import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
 import { kibanaService } from './state/kibana_service';
+import { UptimeAlertsFlyoutWrapper } from './components/connected';
+import { UptimeAlertsContextProvider } from './components/functional/alerts';
 
 export interface UptimeAppColors {
   danger: string;
@@ -99,11 +101,14 @@ const Application = (props: UptimeAppProps) => {
                 <UptimeRefreshContextProvider>
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
-                      <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                        <main>
-                          <PageRouter autocomplete={plugins.data.autocomplete} />
-                        </main>
-                      </EuiPage>
+                      <UptimeAlertsContextProvider>
+                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                          <main>
+                            <UptimeAlertsFlyoutWrapper />
+                            <PageRouter autocomplete={plugins.data.autocomplete} />
+                          </main>
+                        </EuiPage>
+                      </UptimeAlertsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>
                 </UptimeRefreshContextProvider>
