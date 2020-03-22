@@ -224,13 +224,7 @@ export const importTimelinesRoute = (
                         resolve({ timeline_id: newSavedObjectId, status_code: 200 });
                       } else if (timeline != null && frameworkRequest.query.overwrite) {
                         // update timeline
-                        const allPinnedEvent = await pinnedEventLib.getAllPinnedEventsByTimelineId(
-                          frameworkRequest,
-                          timeline.savedObjectId
-                        );
-                        const allPinnedEventSavedObjectId = allPinnedEvent.map(
-                          e => e.pinnedEventId
-                        );
+
                         await timelineLib.persistTimeline(
                           frameworkRequest,
                           timeline.savedObjectId,
@@ -259,7 +253,7 @@ export const importTimelinesRoute = (
                             };
                             return noteLib.persistNote(
                               frameworkRequest,
-                              timeline.noteIds.find(nId => nId === note.noteId) ?? null,
+                              timeline.noteIds?.find(nId => nId === note.noteId) ?? null,
                               timeline.version,
                               newNote
                             );
@@ -283,7 +277,7 @@ export const importTimelinesRoute = (
 
                       resolve(
                         createBulkErrorObject({
-                          savedObjectId,
+                          id: savedObjectId,
                           statusCode: 400,
                           message: err.message,
                         })
