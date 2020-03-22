@@ -8,6 +8,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     margin="xs"
   />
   <EuiAccordion
+    arrowDisplay="left"
     buttonContent={
       <ForwardRef
         gutterSize="none"
@@ -240,6 +241,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     margin="xs"
   />
   <EuiAccordion
+    arrowDisplay="left"
     buttonContent={
       <ForwardRef
         gutterSize="none"
@@ -504,6 +506,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     margin="xs"
   />
   <EuiAccordion
+    arrowDisplay="left"
     buttonContent={
       <ForwardRef
         gutterSize="none"
@@ -576,6 +579,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     margin="xs"
   />
   <EuiAccordion
+    arrowDisplay="left"
     buttonContent={
       <ForwardRef
         gutterSize="none"
