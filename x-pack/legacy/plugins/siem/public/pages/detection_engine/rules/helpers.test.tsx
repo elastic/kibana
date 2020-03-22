@@ -286,7 +286,10 @@ describe('rule helpers', () => {
 
   describe('getActionsStepsData', () => {
     test('returns expected ActionsStepRule rule object', () => {
-      const mockedRule = mockRule('test-id');
+      const mockedRule = {
+        ...mockRule('test-id'),
+        actions: [],
+      };
       const result: ActionsStepRule = getActionsStepsData(mockedRule);
       const expected = {
         actions: [],

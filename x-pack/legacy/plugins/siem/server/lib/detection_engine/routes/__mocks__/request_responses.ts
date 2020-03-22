@@ -310,6 +310,27 @@ export const createMlRuleRequest = () => {
   });
 };
 
+export const createRuleWithActionsRequest = () => {
+  const payload = typicalPayload();
+
+  return requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: {
+      ...payload,
+      throttle: '5m',
+      actions: [
+        {
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+          params: { message: 'Rule generated {{state.signalsCount}} singals' },
+          action_type_id: '.slack',
+        },
+      ],
+    },
+  });
+};
+
 export const getSetSignalStatusByIdsRequest = () =>
   requestMock.create({
     method: 'post',

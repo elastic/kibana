@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { loggerMock } from 'src/core/server/logging/logger.mock';
 import { getNotificationResult, getResult } from '../routes/__mocks__/request_responses';
 import { isAlertTypes, isNotificationAlertExecutor } from './types';
 import { rulesNotificationAlertType } from './rules_notification_alert_type';
@@ -20,7 +21,7 @@ describe('types', () => {
   it('isNotificationAlertExecutor should return true it passed object is NotificationAlertTypeDefinition type', () => {
     expect(
       isNotificationAlertExecutor(
-        rulesNotificationAlertType({ logger: {} as Logger, kibanaUrl: '' })
+        rulesNotificationAlertType({ logger: loggerMock.create(), kibanaUrl: '' })
       )
     ).toEqual(true);
   });

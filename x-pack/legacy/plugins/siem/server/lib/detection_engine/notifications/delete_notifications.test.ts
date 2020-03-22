@@ -132,7 +132,7 @@ describe('deleteNotifications', () => {
 
     const result = await deleteNotifications({
       alertsClient,
-      id: null,
+      id: undefined,
       ruleAlertId,
     });
 

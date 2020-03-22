@@ -41,20 +41,29 @@ export const rulesNotificationAlertType = ({
       ruleAlertId: schema.string(),
     }),
   },
-  async executor({ previousStartedAt, alertId, services, params }) {
+  async executor({ startedAt, previousStartedAt, alertId, services, params }) {
     const ruleAlertSavedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
       'alert',
       params.ruleAlertId
     );
 
-    if (!ruleAlertSavedObject) {
+    if (!ruleAlertSavedObject.attributes.params) {
       logger.error(`Saved object for alert ${params.ruleAlertId} was not found`);
       return;
     }
 
-    const { params: ruleParams } = ruleAlertSavedObject.attributes;
-    const fromInMs = previousStartedAt ? moment(previousStartedAt).format('x') : 'now-1h';
-    const toInMs = moment().format('x');
+    logger.warn(
+      `ruleAlertSavedObject.attributes ${JSON.stringify(ruleAlertSavedObject.attributes, null, 2)}`
+    );
+
+    const { params: ruleAlertParams, name: ruleName } = ruleAlertSavedObject.attributes;
+    const ruleParams = { ...ruleAlertParams, name: ruleName };
+    const fromInMs = previousStartedAt
+      ? moment(previousStartedAt).format('x')
+      : moment()
+          .subtract(ruleParams.interval)
+          .format('x');
+    const toInMs = moment(startedAt).format('x');
 
     const query = buildSignalsSearchQuery({
       index: [ruleParams.outputIndex],

@@ -133,7 +133,7 @@ export const createRulesRoute = (router: IRouter): void => {
           lists,
         });
 
-        if (throttle && actions) {
+        if (throttle && actions.length) {
           await createNotifications({
             alertsClient,
             enabled,

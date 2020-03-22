@@ -42,6 +42,7 @@ export const getStepsData = ({
   const aboutRuleData: AboutStepRule = getAboutStepsData(rule, detailsView);
   const modifiedAboutRuleDetailsData: AboutStepRuleDetails = getModifiedAboutDetailsData(rule);
   const scheduleRuleData: ScheduleStepRule = getScheduleStepsData(rule);
+  // @ts-ignore
   const ruleActionsData: ActionsStepRule = getActionsStepsData(rule);
 
   return {

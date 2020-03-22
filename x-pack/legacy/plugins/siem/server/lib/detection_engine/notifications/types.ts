@@ -89,7 +89,9 @@ export const isAlertType = (
 };
 
 export type NotificationExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
-  params: NotificationAlertParams;
+  params: {
+    ruleAlertId: string;
+  };
 };
 
 // This returns true because by default a NotificationAlertTypeDefinition is an AlertType
