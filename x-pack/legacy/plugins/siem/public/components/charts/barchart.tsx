@@ -75,7 +75,7 @@ export const BarChartBaseComponent = ({
             splitSeriesAccessors={['g']}
             data={series.value!}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
-            customSeriesColors={series.color ? [series.color] : undefined}
+            color={series.color ? series.color : undefined}
           />
         ) : null;
       })}

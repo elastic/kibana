@@ -18,12 +18,12 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Schemas } from 'ui/agg_types';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from '../../visualizations/public';
 import { RegionMapOptions } from './components/region_map_options';
 import { truncatedColorSchemas } from '../../../../plugins/charts/public';
+import { Schemas } from '../../vis_default_editor/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
 import { ORIGIN } from '../../tile_map/common/origin';
