@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash/fp';
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { ESQuery } from '../../../../../common/typed_json';
@@ -23,6 +23,8 @@ import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats'
 import { manageQuery } from '../../../page/manage_query';
 import { inputsModel } from '../../../../store/inputs';
 import { InspectButtonContainer } from '../../../inspect';
+import { useGetUrlSearch } from '../../../navigation/use_get_url_search';
+import { navTabs } from '../../../../pages/home/home_navigations';
 
 export interface OwnProps {
   startDate: number;
@@ -51,7 +53,15 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   setQuery,
 }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-
+  const urlSearch = useGetUrlSearch(navTabs.hosts);
+  const hostPageButton = useMemo(
+    () => (
+      <EuiButton href={getHostsUrl(urlSearch)}>
+        <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View hosts" />
+      </EuiButton>
+    ),
+    [urlSearch]
+  );
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
@@ -95,12 +105,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
                       />
                     }
                   >
-                    <EuiButton href={getHostsUrl()}>
-                      <FormattedMessage
-                        id="xpack.siem.overview.hostsAction"
-                        defaultMessage="View hosts"
-                      />
-                    </EuiButton>
+                    {hostPageButton}
                   </HeaderSection>
 
                   <OverviewHostStatsManage

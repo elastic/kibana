@@ -14,15 +14,22 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiHorizontalRule,
+  EuiRadioGroup,
 } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
-import { indexPatternService } from '../../../kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
 import { ValidatedRange } from '../../../components/validated_range';
-import { DEFAULT_MAX_INNER_RESULT_WINDOW, SORT_ORDER } from '../../../../common/constants';
+import {
+  DEFAULT_MAX_INNER_RESULT_WINDOW,
+  DEFAULT_MAX_RESULT_WINDOW,
+  SORT_ORDER,
+  SCALING_TYPES,
+  LAYER_TYPE,
+} from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { loadIndexSettings } from './load_index_settings';
@@ -35,7 +42,7 @@ export class UpdateSourceEditor extends Component {
     tooltipFields: PropTypes.arrayOf(PropTypes.object).isRequired,
     sortField: PropTypes.string,
     sortOrder: PropTypes.string.isRequired,
-    useTopHits: PropTypes.bool.isRequired,
+    scalingType: PropTypes.string.isRequired,
     topHitsSplitField: PropTypes.string,
     topHitsSize: PropTypes.number.isRequired,
     source: PropTypes.object,
@@ -46,6 +53,8 @@ export class UpdateSourceEditor extends Component {
     termFields: null,
     sortFields: null,
     maxInnerResultWindow: DEFAULT_MAX_INNER_RESULT_WINDOW,
+    maxResultWindow: DEFAULT_MAX_RESULT_WINDOW,
+    supportsClustering: false,
   };
 
   componentDidMount() {
@@ -60,10 +69,10 @@ export class UpdateSourceEditor extends Component {
 
   async loadIndexSettings() {
     try {
-      const indexPattern = await indexPatternService.get(this.props.indexPatternId);
-      const { maxInnerResultWindow } = await loadIndexSettings(indexPattern.title);
+      const indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
+      const { maxInnerResultWindow, maxResultWindow } = await loadIndexSettings(indexPattern.title);
       if (this._isMounted) {
-        this.setState({ maxInnerResultWindow });
+        this.setState({ maxInnerResultWindow, maxResultWindow });
       }
     } catch (err) {
       return;
@@ -73,7 +82,7 @@ export class UpdateSourceEditor extends Component {
   async loadFields() {
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(this.props.indexPatternId);
+      indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({
@@ -84,6 +93,16 @@ export class UpdateSourceEditor extends Component {
             },
           }),
         });
+      }
+      return;
+    }
+
+    let geoField;
+    try {
+      geoField = await this.props.getGeoField();
+    } catch (err) {
+      if (this._isMounted) {
+        this.setState({ loadError: err.message });
       }
       return;
     }
@@ -102,6 +121,7 @@ export class UpdateSourceEditor extends Component {
     });
 
     this.setState({
+      supportsClustering: geoField.aggregatable,
       sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(
@@ -113,8 +133,14 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  onUseTopHitsChange = event => {
-    this.props.onChange({ propName: 'useTopHits', value: event.target.checked });
+  _onScalingTypeChange = optionId => {
+    const layerType =
+      optionId === SCALING_TYPES.CLUSTERS ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR;
+    this.props.onChange({ propName: 'scalingType', value: optionId, newLayerType: layerType });
+  };
+
+  _onFilterByMapBoundsChange = event => {
+    this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
   };
 
   onTopHitsSplitFieldChange = topHitsSplitField => {
@@ -133,29 +159,7 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'topHitsSize', value: size });
   };
 
-  renderTopHitsForm() {
-    const topHitsSwitch = (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.source.esSearch.topHitsLabel', {
-          defaultMessage: `Top hits`,
-        })}
-        display="columnCompressed"
-      >
-        <EuiSwitch
-          label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-            defaultMessage: `Show top hits per entity`,
-          })}
-          checked={this.props.useTopHits}
-          onChange={this.onUseTopHitsChange}
-          compressed
-        />
-      </EuiFormRow>
-    );
-
-    if (!this.props.useTopHits) {
-      return topHitsSwitch;
-    }
-
+  _renderTopHitsForm() {
     let sizeSlider;
     if (this.props.topHitsSplitField) {
       sizeSlider = (
@@ -183,7 +187,6 @@ export class UpdateSourceEditor extends Component {
 
     return (
       <Fragment>
-        {topHitsSwitch}
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldLabel', {
             defaultMessage: 'Entity',
@@ -287,9 +290,83 @@ export class UpdateSourceEditor extends Component {
             compressed
           />
         </EuiFormRow>
+      </EuiPanel>
+    );
+  }
 
-        <EuiHorizontalRule margin="xs" />
-        {this.renderTopHitsForm()}
+  _renderScalingPanel() {
+    const scalingOptions = [
+      {
+        id: SCALING_TYPES.LIMIT,
+        label: i18n.translate('xpack.maps.source.esSearch.limitScalingLabel', {
+          defaultMessage: 'Limit results to {maxResultWindow}.',
+          values: { maxResultWindow: this.state.maxResultWindow },
+        }),
+      },
+      {
+        id: SCALING_TYPES.TOP_HITS,
+        label: i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
+          defaultMessage: 'Show top hits per entity.',
+        }),
+      },
+    ];
+    if (this.state.supportsClustering) {
+      scalingOptions.push({
+        id: SCALING_TYPES.CLUSTERS,
+        label: i18n.translate('xpack.maps.source.esSearch.clusterScalingLabel', {
+          defaultMessage: 'Show clusters when results exceed {maxResultWindow}.',
+          values: { maxResultWindow: this.state.maxResultWindow },
+        }),
+      });
+    }
+
+    let filterByBoundsSwitch;
+    if (this.props.scalingType !== SCALING_TYPES.CLUSTERS) {
+      filterByBoundsSwitch = (
+        <EuiFormRow>
+          <EuiSwitch
+            label={i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
+              defaultMessage: 'Dynamically filter for data in the visible map area',
+            })}
+            checked={this.props.filterByMapBounds}
+            onChange={this._onFilterByMapBoundsChange}
+            compressed
+          />
+        </EuiFormRow>
+      );
+    }
+
+    let scalingForm = null;
+    if (this.props.scalingType === SCALING_TYPES.TOP_HITS) {
+      scalingForm = (
+        <Fragment>
+          <EuiHorizontalRule margin="xs" />
+          {this._renderTopHitsForm()}
+        </Fragment>
+      );
+    }
+
+    return (
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage id="xpack.maps.esSearch.scaleTitle" defaultMessage="Scaling" />
+          </h5>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+
+        <EuiFormRow>
+          <EuiRadioGroup
+            options={scalingOptions}
+            idSelected={this.props.scalingType}
+            onChange={this._onScalingTypeChange}
+          />
+        </EuiFormRow>
+
+        {filterByBoundsSwitch}
+
+        {scalingForm}
       </EuiPanel>
     );
   }
@@ -301,6 +378,9 @@ export class UpdateSourceEditor extends Component {
         <EuiSpacer size="s" />
 
         {this._renderSortPanel()}
+        <EuiSpacer size="s" />
+
+        {this._renderScalingPanel()}
         <EuiSpacer size="s" />
       </Fragment>
     );

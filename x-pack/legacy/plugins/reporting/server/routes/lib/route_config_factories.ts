@@ -106,7 +106,22 @@ export function getRouteConfigFactoryDownloadPre(
   const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
   return (): RouteConfigFactory => ({
     ...getManagementRouteConfig(),
-    tags: [API_TAG],
+    tags: [API_TAG, 'download'],
+    response: {
+      ranges: false,
+    },
+  });
+}
+
+export function getRouteConfigFactoryDeletePre(
+  server: ServerFacade,
+  plugins: ReportingSetupDeps,
+  logger: Logger
+): GetRouteConfigFactoryFn {
+  const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
+  return (): RouteConfigFactory => ({
+    ...getManagementRouteConfig(),
+    tags: [API_TAG, 'delete'],
     response: {
       ranges: false,
     },

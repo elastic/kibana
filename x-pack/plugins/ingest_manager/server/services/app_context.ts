@@ -5,7 +5,7 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SavedObjectsServiceStart } from 'kibana/server';
+import { SavedObjectsServiceStart } from 'src/core/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';

@@ -4,18 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 
-import {
-  EuiFieldSearch,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiForm,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSuperSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -23,18 +14,24 @@ import { i18n } from '@kbn/i18n';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
-import { SavedSearchQuery } from '../../../../contexts/ml';
 
-// @ts-ignore
-import { KqlFilterBar } from '../../../../components/kql_filter_bar/index';
+import {
+  esKuery,
+  esQuery,
+  Query,
+  QueryStringInput,
+} from '../../../../../../../../../src/plugins/data/public';
+
+import { getToastNotifications } from '../../../../util/dependency_cache';
 
 interface Props {
   indexPattern: IndexPattern;
-  searchString: string | SavedSearchQuery;
-  setSearchString(s: string): void;
-  searchQuery: string | SavedSearchQuery;
-  setSearchQuery(q: string | SavedSearchQuery): void;
+  searchString: Query['query'];
+  setSearchString(s: Query['query']): void;
+  searchQuery: Query['query'];
+  setSearchQuery(q: Query['query']): void;
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE;
+  setSearchQueryLanguage(q: any): void;
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
   totalCount: number;
@@ -66,44 +63,66 @@ export const SearchPanel: FC<Props> = ({
   searchQuery,
   setSearchQuery,
   searchQueryLanguage,
+  setSearchQueryLanguage,
   samplerShardSize,
   setSamplerShardSize,
   totalCount,
 }) => {
-  const searchHandler = (d: Record<string, any>) => {
-    setSearchQuery(d.filterQuery);
+  // The internal state of the input query bar updated on every key stroke.
+  const [searchInput, setSearchInput] = useState<Query>({
+    query: searchString || '',
+    language: searchQueryLanguage,
+  });
+
+  const searchHandler = (query: Query) => {
+    let filterQuery;
+    try {
+      if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+        filterQuery = esKuery.toElasticsearchQuery(
+          esKuery.fromKueryExpression(query.query),
+          indexPattern
+        );
+      } else if (query.language === SEARCH_QUERY_LANGUAGE.LUCENE) {
+        filterQuery = esQuery.luceneStringToDsl(query.query);
+      } else {
+        filterQuery = {};
+      }
+
+      setSearchQuery(filterQuery);
+      setSearchString(query.query);
+      setSearchQueryLanguage(query.language);
+    } catch (e) {
+      console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
+      const toastNotifications = getToastNotifications();
+      toastNotifications.addError(e, {
+        title: i18n.translate('xpack.ml.datavisualizer.invalidSyntaxErrorMessage', {
+          defaultMessage: 'Invalid syntax in search bar',
+        }),
+        toastMessage: e.message ? e.message : e,
+      });
+    }
   };
+  const searchChangeHandler = (query: Query) => setSearchInput(query);
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center" data-test-subj="mlDataVisualizerSearchPanel">
       <EuiFlexItem>
-        {searchQueryLanguage === SEARCH_QUERY_LANGUAGE.KUERY ? (
-          <KqlFilterBar
-            indexPattern={indexPattern}
-            onSubmit={searchHandler}
-            initialValue={searchString}
-            placeholder={i18n.translate(
-              'xpack.ml.datavisualizer.searchPanel.queryBarPlaceholderText',
-              {
-                defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
-              }
-            )}
-          />
-        ) : (
-          <EuiForm>
-            <EuiFormRow
-              helpText={i18n.translate('xpack.ml.datavisualizer.searchPanel.kqlEditOnlyLabel', {
-                defaultMessage: 'Currently only KQL saved searches can be edited',
-              })}
-            >
-              <EuiFieldSearch
-                value={`${searchString}`}
-                readOnly
-                data-test-subj="mlDataVisualizerLuceneSearchBarl"
-              />
-            </EuiFormRow>
-          </EuiForm>
-        )}
+        <QueryStringInput
+          bubbleSubmitEvent={true}
+          query={searchInput}
+          indexPatterns={[indexPattern]}
+          onChange={searchChangeHandler}
+          onSubmit={searchHandler}
+          placeholder={i18n.translate(
+            'xpack.ml.datavisualizer.searchPanel.queryBarPlaceholderText',
+            {
+              defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
+            }
+          )}
+          disableAutoFocus={true}
+          dataTestSubj="transformQueryInput"
+          languageSwitcherPopoverAnchorPosition="rightDown"
+        />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

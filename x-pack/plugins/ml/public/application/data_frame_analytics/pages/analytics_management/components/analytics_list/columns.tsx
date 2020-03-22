@@ -43,13 +43,13 @@ enum TASK_STATE_COLOR {
 
 export const getTaskStateBadge = (
   state: DataFrameAnalyticsStats['state'],
-  reason?: DataFrameAnalyticsStats['reason']
+  failureReason?: DataFrameAnalyticsStats['failure_reason']
 ) => {
   const color = TASK_STATE_COLOR[state];
 
-  if (isDataFrameAnalyticsFailed(state) && reason !== undefined) {
+  if (isDataFrameAnalyticsFailed(state) && failureReason !== undefined) {
     return (
-      <EuiToolTip content={reason}>
+      <EuiToolTip content={failureReason}>
         <EuiBadge className="mlTaskStateBadge" color={color}>
           {state}
         </EuiBadge>
@@ -229,7 +229,7 @@ export const getColumns = (
       sortable: (item: DataFrameAnalyticsListRow) => item.stats.state,
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
-        return getTaskStateBadge(item.stats.state, item.stats.reason);
+        return getTaskStateBadge(item.stats.state, item.stats.failure_reason);
       },
       width: '100px',
       'data-test-subj': 'mlAnalyticsTableColumnStatus',

@@ -562,7 +562,7 @@ test('Panel added to input state', async () => {
 test('Container changes made directly after adding a new embeddable are propagated', async done => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
-  const { doStart, uiActions } = testPlugin(coreSetup, coreStart);
+  const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
   const start = doStart();
 
   const container = new HelloWorldContainer(
@@ -586,7 +586,7 @@ test('Container changes made directly after adding a new embeddable are propagat
     loadTickCount: 3,
     execAction: uiActions.executeTriggerActions,
   });
-  start.registerEmbeddableFactory(factory.type, factory);
+  setup.registerEmbeddableFactory(factory.type, factory);
 
   const subscription = Rx.merge(container.getOutput$(), container.getInput$())
     .pipe(skip(2))
@@ -755,7 +755,7 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
 });
 
 test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', async done => {
-  const { doStart, coreStart, uiActions } = testPlugin(
+  const { doStart, setup, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
   );
@@ -764,7 +764,7 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
     loadTickCount: 3,
     execAction: uiActions.executeTriggerActions,
   });
-  start.registerEmbeddableFactory(factory.type, factory);
+  setup.registerEmbeddableFactory(factory.type, factory);
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -795,7 +795,7 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
 });
 
 test('adding a panel then subsequently removing it before its loaded removes the panel', async done => {
-  const { doStart, coreStart, uiActions } = testPlugin(
+  const { doStart, coreStart, uiActions, setup } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
   );
@@ -804,7 +804,7 @@ test('adding a panel then subsequently removing it before its loaded removes the
     loadTickCount: 1,
     execAction: uiActions.executeTriggerActions,
   });
-  start.registerEmbeddableFactory(factory.type, factory);
+  setup.registerEmbeddableFactory(factory.type, factory);
   const container = new HelloWorldContainer(
     {
       id: 'hello',
