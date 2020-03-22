@@ -23,6 +23,7 @@ import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
+import { kibanaService } from './state/kibana_service';
 import { UptimeAlertsFlyoutWrapper } from './components/connected';
 import { UptimeAlertsContextProvider } from './components/functional/alerts';
 
@@ -84,6 +85,8 @@ const Application = (props: UptimeAppProps) => {
         : undefined
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
+
+  kibanaService.core = core;
 
   // @ts-ignore
   store.dispatch(setBasePath(basePath));
