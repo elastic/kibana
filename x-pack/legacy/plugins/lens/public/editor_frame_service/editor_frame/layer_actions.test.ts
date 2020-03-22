@@ -28,19 +28,21 @@ function createTestArgs(initialLayerIds: string[]) {
     appendLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
   };
 
+  const datasourceStates = {
+    ds1: {
+      isLoading: false,
+      state: initialLayerIds.slice(0, 1),
+    },
+    ds2: {
+      isLoading: false,
+      state: initialLayerIds.slice(1),
+    },
+  };
+
   return {
     state: {
       activeDatasourceId: 'ds1',
-      datasourceStates: {
-        ds1: {
-          isLoading: false,
-          state: initialLayerIds.slice(0, 1),
-        },
-        ds2: {
-          isLoading: false,
-          state: initialLayerIds.slice(1),
-        },
-      },
+      datasourceStates,
       title: 'foo',
       visualization: {
         activeId: 'vis1',
@@ -53,6 +55,13 @@ function createTestArgs(initialLayerIds: string[]) {
       ds2: testDatasource('ds2'),
     },
     trackUiEvent,
+    stagedPreview: {
+      visualization: {
+        activeId: 'vis1',
+        state: initialLayerIds,
+      },
+      datasourceStates,
+    },
   };
 }
 
@@ -70,6 +79,7 @@ describe('removeLayer', () => {
     expect(newState.visualization.state).toEqual(['vis_clear_layer1']);
     expect(newState.datasourceStates.ds1.state).toEqual(['ds1_clear_layer1']);
     expect(newState.datasourceStates.ds2.state).toEqual([]);
+    expect(newState.stagedPreview).not.toBeDefined();
     expect(trackUiEvent).toHaveBeenCalledWith('layer_cleared');
   });
 
@@ -89,6 +99,7 @@ describe('removeLayer', () => {
     expect(newState.visualization.state).toEqual(['layer2']);
     expect(newState.datasourceStates.ds1.state).toEqual([]);
     expect(newState.datasourceStates.ds2.state).toEqual(['layer2']);
+    expect(newState.stagedPreview).not.toBeDefined();
     expect(trackUiEvent).toHaveBeenCalledWith('layer_removed');
   });
 });
@@ -110,6 +121,7 @@ describe('appendLayer', () => {
     expect(newState.visualization.state).toEqual(['layer1', 'layer2', 'foo']);
     expect(newState.datasourceStates.ds1.state).toEqual(['layer1', 'foo']);
     expect(newState.datasourceStates.ds2.state).toEqual(['layer2']);
+    expect(newState.stagedPreview).not.toBeDefined();
     expect(trackUiEvent).toHaveBeenCalledWith('layer_added');
   });
 });

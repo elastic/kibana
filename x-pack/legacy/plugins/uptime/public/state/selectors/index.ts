@@ -13,11 +13,11 @@ export const isIntegrationsPopupOpen = ({ ui: { integrationsPopoverOpen } }: App
   integrationsPopoverOpen;
 
 // Monitor Selectors
-export const getMonitorDetails = (state: AppState, summary: any) => {
+export const monitorDetailsSelector = (state: AppState, summary: any) => {
   return state.monitor.monitorDetailsList[summary.monitor_id];
 };
 
-export const selectMonitorLocations = (state: AppState, monitorId: string) => {
+export const monitorLocationsSelector = (state: AppState, monitorId: string) => {
   return state.monitor.monitorLocationsList?.get(monitorId);
 };
 
@@ -27,6 +27,10 @@ export const selectSelectedMonitor = (state: AppState) => {
 
 export const selectMonitorStatus = (state: AppState) => {
   return state.monitorStatus.status;
+};
+
+export const selectDynamicSettings = (state: AppState) => {
+  return state.dynamicSettings;
 };
 
 export const selectIndexPattern = ({ indexPattern }: AppState) => {
@@ -45,6 +49,15 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
 export const selectDurationLines = ({ monitorDuration }: AppState) => {
   return monitorDuration;
 };
+
+export const selectAlertFlyoutVisibility = ({ ui: { alertFlyoutVisible } }: AppState) =>
+  alertFlyoutVisible;
+
+export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: AppState) => ({
+  filters: ui.esKuery,
+  indexPattern: indexPattern.index_pattern,
+  locations: overviewFilters.filters.locations,
+});
 
 export const indexStatusSelector = ({ indexStatus }: AppState) => {
   return indexStatus;
