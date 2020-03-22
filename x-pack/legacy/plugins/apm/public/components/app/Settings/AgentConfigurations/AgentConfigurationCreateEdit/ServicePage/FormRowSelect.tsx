@@ -5,8 +5,11 @@
  */
 
 import React from 'react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
-import { EuiSelectOption } from '@elastic/eui';
+import {
+  EuiDescribedFormGroup,
+  EuiSelectOption,
+  EuiFormRow
+} from '@elastic/eui';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
 interface Props {
