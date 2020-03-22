@@ -51,10 +51,18 @@ export function groupFields(
     .map(field => field.name)
     .slice(0, popularLimit);
 
-  for (const field of fields) {
+  const compareFn = (a: IndexPatternField, b: IndexPatternField) => {
+    if (!a.displayName) {
+      return 0;
+    }
+    return a.displayName.localeCompare(b.displayName || '');
+  };
+  const fieldsSorted = fields.sort(compareFn);
+
+  for (const field of fieldsSorted) {
     if (columns.includes(field.name)) {
       result.selected.push(field);
-    } else if (popular.includes(field.name)) {
+    } else if (popular.includes(field.name) && field.type !== '_source') {
       result.popular.push(field);
     } else if (field.type !== '_source') {
       result.unpopular.push(field);

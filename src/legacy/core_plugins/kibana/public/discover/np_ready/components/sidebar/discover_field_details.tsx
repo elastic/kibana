@@ -80,7 +80,7 @@ export function DiscoverFieldDetails({
 
       {details.visualizeUrl && (
         <>
-          <EuiSpacer size={'xs'} />
+          <EuiSpacer size={'s'} />
           <EuiLink
             href={details.visualizeUrl}
             className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"

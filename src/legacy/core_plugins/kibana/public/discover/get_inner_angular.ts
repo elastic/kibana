@@ -31,7 +31,7 @@ import { KbnUrlProvider } from 'ui/url';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { createDocTableDirective } from './np_ready/angular/doc_table/doc_table';
+import { createDocTableDirective } from './np_ready/angular/doc_table';
 import { createTableHeaderDirective } from './np_ready/angular/doc_table/components/table_header';
 import {
   createToolBarPagerButtonsDirective,
@@ -43,7 +43,6 @@ import { createInfiniteScrollDirective } from './np_ready/angular/doc_table/infi
 import { createDocViewerDirective } from './np_ready/angular/doc_viewer';
 import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
-import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
 // @ts-ignore
 import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
 // @ts-ignore
@@ -149,7 +148,6 @@ export function initializeInnerAngularModule(
     .directive('icon', reactDirective => reactDirective(EuiIcon))
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
-    .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverSidebar', createDiscoverSidebarDirective)

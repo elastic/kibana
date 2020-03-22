@@ -109,6 +109,7 @@ export function DiscoverSidebar({
   }
 
   const popularLimit = getServices().uiSettings.get('fields:popularLimit');
+  const useShortDots = getServices().uiSettings.get('shortDots:enable');
   const onChangeFieldSearch = (field: string, value: string | boolean | undefined) => {
     filter.setValue(field, value);
     setFieldFilterValues({ ...filter.getValues() });
@@ -203,6 +204,7 @@ export function DiscoverSidebar({
                       getDetails={getDetailsByField}
                       showDetails={openFieldMap.get(field.name) || false}
                       selected={true}
+                      useShortDots={useShortDots}
                     />
                   </li>
                 );
@@ -270,6 +272,7 @@ export function DiscoverSidebar({
                     onShowDetails={onShowDetails}
                     getDetails={getDetailsByField}
                     showDetails={openFieldMap.get(field.name) || false}
+                    useShortDots={useShortDots}
                   />
                 </li>
               );
@@ -298,6 +301,7 @@ export function DiscoverSidebar({
                     onShowDetails={onShowDetails}
                     getDetails={getDetailsByField}
                     showDetails={openFieldMap.get(field.name) || false}
+                    useShortDots={useShortDots}
                   />
                 </li>
               );
