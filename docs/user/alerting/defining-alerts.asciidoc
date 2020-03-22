@@ -9,7 +9,7 @@
 
 When an alert is created in an app, the app will display a flyout panel with three main sections to configure:
 
-. General <<defining-alerts-general-details, alert details>>
+. <<defining-alerts-general-details, General alert details>>
 . <<defining-alerts-type-conditions, Alert type and conditions>>
 . <<defining-alerts-actions-details, Action type and action details>>
 
@@ -17,7 +17,7 @@ image::images/alert-flyout-sections.png[The three sections of an alert definitio
 
 [float]
 [[defining-alerts-general-details]]
-==== General alert details
+=== General alert details
 
 All alert share the following four properties in common:
 
@@ -31,7 +31,7 @@ Re-notify every::      This value limits how often actions are repeated when an 
 
 [float]
 [[defining-alerts-type-conditions]]
-==== Alert type and conditions
+=== Alert type and conditions
 
 Depending upon the {kib} app and context, you may be prompted to choose the type of alert you wish to create. Some apps will pre-select the type of alert for you. 
 
@@ -45,7 +45,7 @@ image::images/alert-flyout-alert-conditions.png[UI for defining alert conditions
 
 [float]
 [[defining-alerts-actions-details]]
-==== Action type and action details
+=== Action type and action details
 
 To add an action to an alert, you first select the type of action:
 

@@ -1,3 +1,6 @@
 [role="xpack"]
 [[alert-types]]
 == Alert types
+
+[float]
+=== Index threshold

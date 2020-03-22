@@ -1,3 +1,93 @@
 [role="xpack"]
 [[action-types]]
 == Action types and connectors
+
+{kib} provides the following types of actions:
+
+* <<email-action-type, Email>>
+* <<index-action-type, Index>>
+* <<pagerduty-action-type, PagerDuty>>
+* <<server-log-action-type, ServerLog>>
+* <<slack-action-type, Slack>>
+* <<webhook-action-type, Webhook>>
+
+This section describes how to configure connectors and actions for each type. 
+
+[NOTE]
+==============================================
+Some action types are paid commercial features, while others are free. 
+For a comparison of the Elastic license levels, 
+see https://www.elastic.co/subscriptions[the subscription page]. 
+==============================================
+
+[float]
+[[email-action-type]]
+=== Email
+
+[float]
+[[email-connector-configuration]]
+==== Connector configuration
+
+[float]
+[[email-action-configuration]]
+==== Action configuration
+
+[float]
+[[index-action-type]]
+=== Index
+
+[float]
+[[index-connector-configuration]]
+==== Connector configuration
+
+[float]
+[[index-action-configuration]]
+==== Action configuration
+
+[float]
+[[pagerduty-action-type]]
+=== PagerDuty
+
+[float]
+[[pagerduty-connector-configuration]]
+==== Connector configuration
+
+[float]
+[[pagerduty-action-configuration]]
+==== Action configuration
+
+[float]
+[[server-log-action-type]]
+=== Server log
+
+[float]
+[[server-log-connector-configuration]]
+==== Connector configuration
+
+[float]
+[[server-log-action-configuration]]
+==== Action configuration
+
+[float]
+[[slack-action-type]]
+=== Slack
+
+[float]
+[[slack-connector-configuration]]
+==== Connector configuration
+
+[float]
+[[slack-action-configuration]]
+==== Action configuration
+
+[float]
+[[webhook-action-type]]
+=== Webhook
+
+[float]
+[[webhook-connector-configuration]]
+==== Connector configuration
+
+[float]
+[[webhook-action-configuration]]
+==== Action configuration
