@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Subject } from 'rxjs';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -19,6 +21,7 @@ import {
   CustomSettings,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { Aggregation, Field } from '../../../../../../common/types/fields';
+import { ml } from '../../../../services/ml_api_service';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -26,6 +29,7 @@ import {
   JOB_TYPE,
   CREATED_BY_LABEL,
   SHARED_RESULTS_INDEX_NAME,
+  DEFAULT_MODEL_MEMORY_LIMIT,
 } from '../../../../../../common/constants/new_job';
 import { isSparseDataJob, collectAggs } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
@@ -57,6 +61,10 @@ export class JobCreator {
     stop: boolean;
   } = { stop: false };
 
+  private _modelMemoryCheck$ = new Subject();
+  private _lastEstimatedModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+  private _unsubscribeAll = new Subject();
+
   constructor(
     indexPattern: IndexPattern,
     savedSearch: SavedSearchSavedObject | null,
@@ -77,6 +85,74 @@ export class JobCreator {
     }
 
     this._datafeed_config.query = query;
+
+    this.listenForModelMemoryCheck();
+  }
+
+  private listenForModelMemoryCheck() {
+    this._modelMemoryCheck$
+      .pipe(takeUntil(this._unsubscribeAll), debounceTime(500))
+      .subscribe(() => {
+        this.calculateModelMemoryLimit();
+      });
+  }
+
+  protected updateModelMemoryEstimation() {
+    this._modelMemoryCheck$.next();
+  }
+
+  // called externally to set the model memory limit based current detector configuration
+  public async calculateModelMemoryLimit() {
+    if (this.jobConfig.analysis_config.detectors.length === 0) {
+      this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+    } else {
+      try {
+        const { modelMemoryLimit } = await ml.calculateModelMemoryLimit({
+          analysisConfig: this.jobConfig.analysis_config,
+          indexPattern: this._indexPatternTitle,
+          query: this._datafeed_config.query,
+          timeFieldName: this._job_config.data_description.time_field,
+          earliestMs: this._start,
+          latestMs: this._end,
+        });
+
+        if (this.modelMemoryLimit === null) {
+          this.modelMemoryLimit = modelMemoryLimit;
+        } else {
+          // To avoid overwriting a possible custom set model memory limit,
+          // it only gets set to the estimation if the current limit is either
+          // the default value or the value of the previous estimation.
+          // That's our best guess if the value hasn't been customized.
+          // It doesn't get it if the user intentionally for whatever reason (re)set
+          // the value to either the default or pervious estimate.
+          // Because the string based limit could contain e.g. MB/Mb/mb
+          // all strings get lower cased for comparison.
+          const currentModelMemoryLimit = this.modelMemoryLimit.toLowerCase();
+          const defaultModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT.toLowerCase();
+          if (
+            currentModelMemoryLimit === defaultModelMemoryLimit ||
+            currentModelMemoryLimit === this._lastEstimatedModelMemoryLimit
+          ) {
+            this.modelMemoryLimit = modelMemoryLimit;
+          }
+        }
+        this._lastEstimatedModelMemoryLimit = modelMemoryLimit.toLowerCase();
+      } catch (error) {
+        if (this.modelMemoryLimit === null) {
+          this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+        } else {
+          // To avoid overwriting a possible custom set model memory limit,
+          // the limit is reset to the default only if the current limit matches
+          // the previous estimated limit.
+          const currentModelMemoryLimit = this.modelMemoryLimit.toLowerCase();
+          if (currentModelMemoryLimit === this._lastEstimatedModelMemoryLimit) {
+            this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+          }
+          // eslint-disable-next-line no-console
+          console.error('Model memory limit could not be calculated', error);
+        }
+      }
+    }
   }
 
   public get type(): JOB_TYPE {
@@ -87,6 +163,7 @@ export class JobCreator {
     this._detectors.push(detector);
     this._aggs.push(agg);
     this._fields.push(field);
+    this.updateModelMemoryEstimation();
     this._updateSparseDataDetectors();
   }
 
@@ -95,6 +172,7 @@ export class JobCreator {
       this._detectors[index] = detector;
       this._aggs[index] = agg;
       this._fields[index] = field;
+      this.updateModelMemoryEstimation();
       this._updateSparseDataDetectors();
     }
   }
@@ -103,12 +181,14 @@ export class JobCreator {
     this._detectors.splice(index, 1);
     this._aggs.splice(index, 1);
     this._fields.splice(index, 1);
+    this.updateModelMemoryEstimation();
   }
 
   public removeAllDetectors() {
     this._detectors.length = 0;
     this._aggs.length = 0;
     this._fields.length = 0;
+    this.updateModelMemoryEstimation();
   }
 
   public get detectors(): Detector[] {
@@ -149,6 +229,7 @@ export class JobCreator {
   protected _setBucketSpanMs(bucketSpan: BucketSpan) {
     const bs = parseInterval(bucketSpan);
     this._bucketSpanMs = bs === null ? 0 : bs.asMilliseconds();
+    this.updateModelMemoryEstimation();
   }
 
   public get bucketSpanMs(): number {
@@ -158,6 +239,7 @@ export class JobCreator {
   public addInfluencer(influencer: string) {
     if (this._influencers.includes(influencer) === false) {
       this._influencers.push(influencer);
+      this.updateModelMemoryEstimation();
     }
   }
 
@@ -165,10 +247,12 @@ export class JobCreator {
     const idx = this._influencers.indexOf(influencer);
     if (idx !== -1) {
       this._influencers.splice(idx, 1);
+      this.updateModelMemoryEstimation();
     }
   }
 
   public removeAllInfluencers() {
+    this.updateModelMemoryEstimation();
     this._influencers.length = 0;
   }
 
@@ -596,6 +680,11 @@ export class JobCreator {
 
   public get formattedDatafeedJson() {
     return JSON.stringify(this._datafeed_config, null, 2);
+  }
+
+  public unsubscribeAll() {
+    this._unsubscribeAll.next();
+    this._unsubscribeAll.complete();
   }
 
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {
