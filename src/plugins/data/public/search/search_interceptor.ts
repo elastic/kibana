@@ -106,7 +106,7 @@ export class SearchInterceptor {
       );
 
       // Schedule the notification to allow users to cancel or wait beyond the timeout
-      const notificationSubscription = timer(5000).subscribe(this.showToast);
+      const notificationSubscription = timer(10000).subscribe(this.showToast);
 
       // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
       // 1. The user manually aborts (via `cancelPending`)
