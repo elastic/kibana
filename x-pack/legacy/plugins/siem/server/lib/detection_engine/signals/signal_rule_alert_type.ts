@@ -67,6 +67,7 @@ export const signalRulesAlertType = ({
       });
 
       const {
+        actions,
         name,
         tags,
         createdAt,
@@ -74,6 +75,7 @@ export const signalRulesAlertType = ({
         updatedBy,
         enabled,
         schedule: { interval },
+        throttle,
       } = savedObject.attributes;
 
       const updatedAt = savedObject.updated_at ?? '';
@@ -118,6 +120,8 @@ export const signalRulesAlertType = ({
           }
 
           creationSucceeded = await bulkCreateMlSignals({
+            actions,
+            throttle,
             someResult: anomalyResults,
             ruleParams: params,
             services,
@@ -180,6 +184,7 @@ export const signalRulesAlertType = ({
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
             filter: esFilter,
+            actions,
             name,
             createdBy,
             createdAt,
@@ -189,6 +194,7 @@ export const signalRulesAlertType = ({
             enabled,
             pageSize: searchAfterSize,
             tags,
+            throttle,
           });
         }
 

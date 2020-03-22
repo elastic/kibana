@@ -86,7 +86,7 @@ describe('alert_form', () => {
             uiSettings: deps!.uiSettings,
           }}
         >
-          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [] }} />
+          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
         </AlertsContextProvider>
       );
 
@@ -165,7 +165,7 @@ describe('alert_form', () => {
             uiSettings: deps!.uiSettings,
           }}
         >
-          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [] }} />
+          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
         </AlertsContextProvider>
       );
 
