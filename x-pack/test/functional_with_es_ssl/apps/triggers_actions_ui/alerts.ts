@@ -240,6 +240,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
+    it('should display an empty list when search removes all alerts', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(`An Alert That For Sure Doesn't Exist!`);
+
+      expect(await pageObjects.triggersActionsUI.isAlertsListDisplayed()).to.eql(true);
+    });
+
     it('should disable single alert', async () => {
       const createdAlert = await createAlert();
       await pageObjects.common.navigateToApp('triggersActions');
@@ -325,6 +332,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should delete single alert', async () => {
+      await createAlert();
       const createdAlert = await createAlert();
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -332,8 +340,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('deleteAlert');
-      const emptyPrompt = await testSubjects.find('createFirstAlertEmptyPrompt');
-      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
+      await testSubjects.existOrFail('deleteIdsConfirmation');
+      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql('Deleted 1 alert');
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterDelete.length).to.eql(0);
     });
 
     it('should mute all selection', async () => {
@@ -442,9 +458,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkAction');
 
       await testSubjects.click('deleteAll');
+      await testSubjects.existOrFail('deleteIdsConfirmation');
+      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      const emptyPrompt = await testSubjects.find('createFirstAlertEmptyPrompt');
-      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
+      await pageObjects.common.closeToast();
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterDelete.length).to.eql(0);
     });
   });
 };
