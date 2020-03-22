@@ -18,7 +18,7 @@
  */
 
 import { VisState, VisParams } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggType, IAggConfig, IAggGroupNames } from '../legacy_imports';
+import { IAggType, IAggConfig, IAggGroupNames } from 'src/plugins/data/public';
 import { Schema } from '../schemas';
 
 type AggId = IAggConfig['id'];
