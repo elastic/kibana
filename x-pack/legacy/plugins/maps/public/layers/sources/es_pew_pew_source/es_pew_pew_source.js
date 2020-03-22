@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { VectorLayer } from '../../vector_layer';
@@ -37,19 +38,14 @@ const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 export class ESPewPewSource extends AbstractESAggSource {
   static type = ES_PEW_PEW;
 
-  static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
-      if (!sourceConfig) {
-        onPreviewSource(null);
-        return;
-      }
-
-      const sourceDescriptor = ESPewPewSource.createDescriptor(sourceConfig);
-      const source = new ESPewPewSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
+  static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
+    return {
+      type: ESPewPewSource.type,
+      id: uuid(),
+      indexPatternId: indexPatternId,
+      sourceGeoField,
+      destGeoField,
     };
-
-    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   }
 
   renderSourceSettingsEditor({ onChange }) {
