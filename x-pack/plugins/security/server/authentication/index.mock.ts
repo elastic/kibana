@@ -15,6 +15,7 @@ export const authenticationMock = {
     getCurrentUser: jest.fn(),
     grantAPIKeyAsInternalUser: jest.fn(),
     invalidateAPIKey: jest.fn(),
+    invalidateAPIKeyAsInternalUser: jest.fn(),
     isAuthenticated: jest.fn(),
     getSessionInfo: jest.fn(),
   }),
