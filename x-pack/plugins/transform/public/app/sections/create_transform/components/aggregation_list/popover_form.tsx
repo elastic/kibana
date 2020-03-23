@@ -46,8 +46,27 @@ function getDefaultPercents(defaultData: PivotAggsConfig): number[] | undefined 
   if (isPivotAggsConfigPercentiles(defaultData)) {
     return defaultData.percents;
   }
+}
 
-  return undefined;
+function parsePercentsInput(inputValue: string | undefined) {
+  if (inputValue !== undefined) {
+    const strVals: string[] = inputValue.split(',');
+    const percents: number[] = [];
+    for (const str of strVals) {
+      if (str.trim().length > 0 && isNaN(str as any) === false) {
+        const val = Number(str);
+        if (val >= 0 && val <= 100) {
+          percents.push(val);
+        } else {
+          return [];
+        }
+      }
+    }
+
+    return percents;
+  }
+
+  return [];
 }
 
 function isPercentsInputValid(inputValue: string | undefined) {
@@ -85,12 +104,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   }
 
   function updatePercents(inputValue: string) {
-    const isInputValid = isPercentsInputValid(inputValue);
-    if (isInputValid === true) {
-      setPercents(inputValue.split(',').map(Number));
-    } else {
-      setPercents([]);
-    }
+    setPercents(parsePercentsInput(inputValue));
   }
 
   function getUpdatedItem(): PivotAggsConfig {
@@ -153,7 +167,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   }
 
   const validPercents =
-    agg === PIVOT_SUPPORTED_AGGS.PERCENTILES && isPercentsInputValid(percentsText);
+    agg === PIVOT_SUPPORTED_AGGS.PERCENTILES && parsePercentsInput(percentsText).length > 0;
 
   let formValid = validAggName;
   if (formValid && agg === PIVOT_SUPPORTED_AGGS.PERCENTILES) {
