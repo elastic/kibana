@@ -23,6 +23,7 @@ export {
   CreateAPIKeyResult,
   InvalidateAPIKeyParams,
   InvalidateAPIKeyResult,
+  GrantAPIKeyResult,
 } from './authentication';
 export { SecurityPluginSetup };
 export { AuthenticatedUser } from '../common/model';

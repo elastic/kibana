@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
@@ -71,10 +70,9 @@ export class AlertsClientFactory {
         if (!securityPluginSetup) {
           return { apiKeysEnabled: false };
         }
-        const createAPIKeyResult = await securityPluginSetup.authc.createAPIKey(request, {
-          name: `source: alerting, generated uuid: "${uuid.v4()}"`,
-          role_descriptors: {},
-        });
+        const createAPIKeyResult = await securityPluginSetup.authc.grantAPIKeyAsInternalUser(
+          request
+        );
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
         }
@@ -87,8 +85,7 @@ export class AlertsClientFactory {
         if (!securityPluginSetup) {
           return { apiKeysEnabled: false };
         }
-        const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKey(
-          request,
+        const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKeyAsInternalUser(
           params
         );
         // Null when Elasticsearch security is disabled
