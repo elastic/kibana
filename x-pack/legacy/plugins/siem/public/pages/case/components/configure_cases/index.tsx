@@ -84,8 +84,6 @@ const ConfigureCasesComponent: React.FC = () => {
 
   const [actionBarVisible, setActionBarVisible] = useState(false);
 
-  const handleShowAddFlyout = useCallback(() => setAddFlyoutVisibility(true), []);
-
   const [{ connectorId, closureType, mapping }, dispatch] = useReducer(
     configureCasesReducer(),
     initialState
@@ -147,6 +145,16 @@ const ConfigureCasesComponent: React.FC = () => {
     setClosureType(newClosureType);
   }, []);
 
+  const onClickAddConnector = useCallback(() => {
+    setActionBarVisible(false);
+    setAddFlyoutVisibility(true);
+  }, []);
+
+  const onClickUpdateConnector = useCallback(() => {
+    setActionBarVisible(false);
+    setEditFlyoutVisibility(true);
+  }, []);
+
   useEffect(() => {
     if (
       !isEmpty(connectors) &&
@@ -203,7 +211,7 @@ const ConfigureCasesComponent: React.FC = () => {
           disabled={persistLoading || isLoadingConnectors}
           isLoading={isLoadingConnectors}
           onChangeConnector={onChangeConnector}
-          handleShowAddFlyout={handleShowAddFlyout}
+          handleShowAddFlyout={onClickAddConnector}
           selectedConnector={connectorId}
         />
       </SectionWrapper>
@@ -220,7 +228,7 @@ const ConfigureCasesComponent: React.FC = () => {
           updateConnectorDisabled={updateConnectorDisabled}
           mapping={mapping}
           onChangeMapping={setMapping}
-          setEditFlyoutVisibility={setEditFlyoutVisibility}
+          setEditFlyoutVisibility={onClickUpdateConnector}
         />
       </SectionWrapper>
       {actionBarVisible && (
