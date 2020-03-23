@@ -24,10 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
 import { docTitle } from 'ui/doc_title';
 import { fatalError, toastNotifications } from 'ui/notify';
-import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
 import { npStart } from 'ui/new_platform';
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
+import { getTimezone } from '../../vis_type_timelion/public';
 
 import 'uiExports/savedObjectTypes';
 
@@ -38,7 +38,6 @@ import 'ui/directives/input_focus';
 import './directives/saved_object_finder';
 import 'ui/directives/listen';
 import './directives/saved_object_save_as_checkbox';
-import '../../data/public/legacy';
 import './services/saved_sheet_register';
 
 import rootTemplate from 'plugins/timelion/index.html';
@@ -116,8 +115,7 @@ app.controller('timelion', function(
   $timeout,
   AppState,
   config,
-  kbnUrl,
-  Private
+  kbnUrl
 ) {
   // Keeping this at app scope allows us to keep the current page when the user
   // switches to say, the timepicker.
@@ -128,7 +126,7 @@ app.controller('timelion', function(
   timefilter.enableTimeRangeSelector();
 
   const savedVisualizations = visualizations.savedVisualizationsLoader;
-  const timezone = Private(timezoneProvider)();
+  const timezone = getTimezone(config);
 
   const defaultExpression = '.es(*)';
   const savedSheet = $route.current.locals.savedSheet;
