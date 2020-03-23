@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { NotificationsStart } from 'kibana/public';
 import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { pairwise, takeUntil } from 'rxjs/operators';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -21,7 +22,6 @@ import {
   CustomSettings,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { Aggregation, Field } from '../../../../../../common/types/fields';
-import { ml } from '../../../../services/ml_api_service';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -29,18 +29,16 @@ import {
   JOB_TYPE,
   CREATED_BY_LABEL,
   SHARED_RESULTS_INDEX_NAME,
-  DEFAULT_MODEL_MEMORY_LIMIT,
 } from '../../../../../../common/constants/new_job';
 import { isSparseDataJob, collectAggs } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { estimatorProvider, ModelMemoryEstimator } from './util/model_memory_estimator';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
-  protected _indexPattern: IndexPattern;
-  protected _savedSearch: SavedSearchSavedObject | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _job_config: Job;
   protected _calendars: Calendar[];
@@ -61,18 +59,16 @@ export class JobCreator {
     stop: boolean;
   } = { stop: false };
 
-  private _modelMemoryCheck$ = new Subject();
-  private _lastEstimatedModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
   private _unsubscribeAll = new Subject();
+  private modelMemoryEstimator: ModelMemoryEstimator;
 
   constructor(
-    indexPattern: IndexPattern,
-    savedSearch: SavedSearchSavedObject | null,
-    query: object
+    protected _indexPattern: IndexPattern,
+    protected _savedSearch: SavedSearchSavedObject | null,
+    query: object,
+    protected notification: NotificationsStart
   ) {
-    this._indexPattern = indexPattern;
-    this._savedSearch = savedSearch;
-    this._indexPatternTitle = indexPattern.title;
+    this._indexPatternTitle = this._indexPattern.title;
 
     this._job_config = createEmptyJob();
     this._calendars = [];
@@ -80,79 +76,37 @@ export class JobCreator {
     this._detectors = this._job_config.analysis_config.detectors;
     this._influencers = this._job_config.analysis_config.influencers;
 
-    if (typeof indexPattern.timeFieldName === 'string') {
-      this._job_config.data_description.time_field = indexPattern.timeFieldName;
+    if (typeof this._indexPattern.timeFieldName === 'string') {
+      this._job_config.data_description.time_field = this._indexPattern.timeFieldName;
     }
 
     this._datafeed_config.query = query;
 
+    this.modelMemoryEstimator = estimatorProvider(notification);
     this.listenForModelMemoryCheck();
   }
 
   private listenForModelMemoryCheck() {
-    this._modelMemoryCheck$
-      .pipe(takeUntil(this._unsubscribeAll), debounceTime(500))
-      .subscribe(() => {
-        this.calculateModelMemoryLimit();
+    this.modelMemoryEstimator
+      .updates$()
+      .pipe(takeUntil(this._unsubscribeAll), pairwise())
+      .subscribe(([previousEstimation, currentEstimation]) => {
+        // to make sure we don't overwrite a manual input
+        if (this.modelMemoryLimit === previousEstimation) {
+          this.modelMemoryLimit = currentEstimation;
+        }
       });
   }
 
   protected updateModelMemoryEstimation() {
-    this._modelMemoryCheck$.next();
-  }
-
-  // called externally to set the model memory limit based current detector configuration
-  public async calculateModelMemoryLimit() {
-    if (this.jobConfig.analysis_config.detectors.length === 0) {
-      this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-    } else {
-      try {
-        const { modelMemoryLimit } = await ml.calculateModelMemoryLimit({
-          analysisConfig: this.jobConfig.analysis_config,
-          indexPattern: this._indexPatternTitle,
-          query: this._datafeed_config.query,
-          timeFieldName: this._job_config.data_description.time_field,
-          earliestMs: this._start,
-          latestMs: this._end,
-        });
-
-        if (this.modelMemoryLimit === null) {
-          this.modelMemoryLimit = modelMemoryLimit;
-        } else {
-          // To avoid overwriting a possible custom set model memory limit,
-          // it only gets set to the estimation if the current limit is either
-          // the default value or the value of the previous estimation.
-          // That's our best guess if the value hasn't been customized.
-          // It doesn't get it if the user intentionally for whatever reason (re)set
-          // the value to either the default or pervious estimate.
-          // Because the string based limit could contain e.g. MB/Mb/mb
-          // all strings get lower cased for comparison.
-          const currentModelMemoryLimit = this.modelMemoryLimit.toLowerCase();
-          const defaultModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT.toLowerCase();
-          if (
-            currentModelMemoryLimit === defaultModelMemoryLimit ||
-            currentModelMemoryLimit === this._lastEstimatedModelMemoryLimit
-          ) {
-            this.modelMemoryLimit = modelMemoryLimit;
-          }
-        }
-        this._lastEstimatedModelMemoryLimit = modelMemoryLimit.toLowerCase();
-      } catch (error) {
-        if (this.modelMemoryLimit === null) {
-          this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-        } else {
-          // To avoid overwriting a possible custom set model memory limit,
-          // the limit is reset to the default only if the current limit matches
-          // the previous estimated limit.
-          const currentModelMemoryLimit = this.modelMemoryLimit.toLowerCase();
-          if (currentModelMemoryLimit === this._lastEstimatedModelMemoryLimit) {
-            this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-          }
-          // eslint-disable-next-line no-console
-          console.error('Model memory limit could not be calculated', error);
-        }
-      }
-    }
+    this.modelMemoryEstimator.runEstimation({
+      analysisConfig: this.jobConfig.analysis_config,
+      indexPattern: this._indexPatternTitle,
+      query: this._datafeed_config.query,
+      timeFieldName: this._job_config.data_description.time_field,
+      earliestMs: this._start,
+      latestMs: this._end,
+    });
   }
 
   public get type(): JOB_TYPE {

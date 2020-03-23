@@ -59,7 +59,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const jobCreator = jobCreatorFactory(jobType)(
     mlContext.currentIndexPattern,
     mlContext.currentSavedSearch,
-    mlContext.combinedQuery
+    mlContext.combinedQuery,
+    notifications
   );
 
   const { from, to } = getTimeFilterRange();

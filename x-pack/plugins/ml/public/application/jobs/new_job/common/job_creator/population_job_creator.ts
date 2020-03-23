@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { NotificationsStart } from 'kibana/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import {
@@ -28,9 +29,10 @@ export class PopulationJobCreator extends JobCreator {
   constructor(
     indexPattern: IndexPattern,
     savedSearch: SavedSearchSavedObject | null,
-    query: object
+    query: object,
+    notification: NotificationsStart
   ) {
-    super(indexPattern, savedSearch, query);
+    super(indexPattern, savedSearch, query, notification);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
   }
 
