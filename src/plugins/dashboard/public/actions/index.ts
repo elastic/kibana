@@ -19,3 +19,4 @@
 
 export { ExpandPanelAction, ACTION_EXPAND_PANEL } from './expand_panel_action';
 export { ReplacePanelAction, ACTION_REPLACE_PANEL } from './replace_panel_action';
+export { DuplicatePanelAction, ACTION_DUPLICATE_PANEL } from './duplicate_panel_action';

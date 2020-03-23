@@ -24,7 +24,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core
 import { SharePluginSetup } from 'src/plugins/share/public';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, EmbeddableSetup, EmbeddableStart } from './embeddable_plugin';
-import { ExpandPanelAction, ReplacePanelAction } from '.';
+import { ExpandPanelAction, ReplacePanelAction, DuplicatePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
 import { getSavedObjectFinder } from '../../../plugins/saved_objects/public';
@@ -34,6 +34,10 @@ import {
 } from '../../../plugins/kibana_react/public';
 import { ExpandPanelActionContext, ACTION_EXPAND_PANEL } from './actions/expand_panel_action';
 import { ReplacePanelActionContext, ACTION_REPLACE_PANEL } from './actions/replace_panel_action';
+import {
+  DuplicatePanelActionContext,
+  ACTION_DUPLICATE_PANEL,
+} from './actions/duplicate_panel_action';
 import {
   DashboardAppLinkGeneratorState,
   DASHBOARD_APP_URL_GENERATOR,
@@ -65,6 +69,7 @@ declare module '../../../plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
+    [ACTION_DUPLICATE_PANEL]: DuplicatePanelActionContext;
   }
 }
 
@@ -135,6 +140,13 @@ export class DashboardEmbeddableContainerPublicPlugin
     );
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
+
+    const duplicatePanelAction = new DuplicatePanelAction(
+      core,
+      plugins.embeddable.getEmbeddableFactories
+    );
+    uiActions.registerAction(duplicatePanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, duplicatePanelAction);
   }
 
   public stop() {}
