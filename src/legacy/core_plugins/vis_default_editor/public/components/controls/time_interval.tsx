@@ -177,7 +177,7 @@ function TimeIntervalParamEditor({
       error={error}
       fullWidth={true}
       helpText={helpText}
-      isInvalid={showValidation ? !isValid : false}
+      isInvalid={showValidation && !isValid}
       label={i18n.translate('visDefaultEditor.controls.timeInterval.minimumIntervalLabel', {
         defaultMessage: 'Minimum interval',
       })}
@@ -186,7 +186,7 @@ function TimeIntervalParamEditor({
         compressed
         fullWidth={true}
         data-test-subj="visEditorInterval"
-        isInvalid={showValidation ? !isValid : false}
+        isInvalid={showValidation && !isValid}
         noSuggestions={!!timeBase}
         onChange={onChange}
         onCreateOption={onCustomInterval}
