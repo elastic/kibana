@@ -50,14 +50,17 @@ export const AppContextProvider = ({
 }: AppContextProviderArgs) => {
   const PAINLESS_LAB_KEY = 'painlessLabState';
 
-  const defaultPayload = {
-    ...initialPayload,
-    ...JSON.parse(localStorage.getItem(PAINLESS_LAB_KEY) || '{}'),
-  };
+  const [store, setStore] = useState<Store>(() => {
+    // Using a callback here ensures these values are only calculated on the first render.
+    const defaultPayload = {
+      ...initialPayload,
+      ...JSON.parse(localStorage.getItem(PAINLESS_LAB_KEY) || '{}'),
+    };
 
-  const [store, setStore] = useState<Store>({
-    payload: defaultPayload,
-    validation: validatePayload(defaultPayload),
+    return {
+      payload: defaultPayload,
+      validation: validatePayload(defaultPayload),
+    };
   });
 
   const updatePayload = (changes: Partial<Payload>): void => {
