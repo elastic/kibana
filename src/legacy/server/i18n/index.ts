@@ -24,10 +24,10 @@ import { Server } from 'hapi';
 import { fromRoot } from '../../../core/server/utils';
 import { getTranslationPaths } from './get_translations_path';
 import { I18N_RC } from './constants';
-import KbnServer from '../kbn_server';
+import KbnServer, { KibanaConfig } from '../kbn_server';
 import { registerLocalizationUsageCollector } from './localization';
 
-export async function i18nMixin(kbnServer: KbnServer, server: Server, config: KbnServer['config']) {
+export async function i18nMixin(kbnServer: KbnServer, server: Server, config: KibanaConfig) {
   const locale = config.get('i18n.locale') as string;
 
   const translationPaths = await Promise.all([
