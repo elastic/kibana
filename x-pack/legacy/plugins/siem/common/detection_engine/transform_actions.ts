@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertAction } from '../../../../../../../plugins/alerting/common';
-import { RuleAlertAction } from '../types';
+import { AlertAction } from '../../../../../plugins/alerting/common';
+import { RuleAlertAction } from './types';
 
 export const transformRuleToAlertAction = ({
   group,
