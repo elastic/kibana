@@ -8,7 +8,7 @@ experimental[] Retrieves all {kib} features. Features are used by spaces and sec
 [[features-api-get-request]]
 === Request
 
-`GET /api/features`
+`GET <kibana host>:<port>/api/features`
 
 [float]
 [[features-api-get-codes]]
@@ -23,7 +23,7 @@ experimental[] Retrieves all {kib} features. Features are used by spaces and sec
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
   {
     "id": "discover",

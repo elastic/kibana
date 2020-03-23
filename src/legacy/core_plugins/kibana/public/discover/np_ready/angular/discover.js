@@ -184,7 +184,6 @@ function discoverController(
   $timeout,
   $window,
   Promise,
-  kbnUrl,
   localStorage,
   uiCapabilities
 ) {
@@ -255,6 +254,15 @@ function discoverController(
     }
   });
 
+  // this listener is waiting for such a path http://localhost:5601/app/kibana#/discover
+  // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
+  // to reload the page in a right way
+  const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
+    if (!search && !hash && pathname === '/discover') {
+      $route.reload();
+    }
+  });
+
   $scope.setIndexPattern = async id => {
     await replaceUrlAppState({ index: id });
     $route.reload();
@@ -310,6 +318,7 @@ function discoverController(
     stopStateSync();
     stopSyncingGlobalStateWithUrl();
     stopSyncingQueryAppStateWithStateContainer();
+    unlistenHistoryBasePath();
   });
 
   const getTopNavLinks = () => {
@@ -323,7 +332,7 @@ function discoverController(
       }),
       run: function() {
         $scope.$evalAsync(() => {
-          kbnUrl.change('/discover');
+          history.push('/discover');
         });
       },
       testId: 'discoverNewButton',
@@ -391,9 +400,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: searchId => {
-            return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
-          },
+          makeUrl: searchId => `#/discover/${encodeURIComponent(searchId)}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -751,7 +758,7 @@ function discoverController(
           });
 
           if (savedSearch.id !== $route.current.params.id) {
-            kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+            history.push(`/discover/${encodeURIComponent(savedSearch.id)}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
@@ -921,11 +928,11 @@ function discoverController(
   };
 
   $scope.resetQuery = function() {
-    kbnUrl.change('/discover/{{id}}', { id: $route.current.params.id });
+    history.push(`/discover/${encodeURIComponent($route.current.params.id)}`);
   };
 
   $scope.newQuery = function() {
-    kbnUrl.change('/discover');
+    history.push('/discover');
   };
 
   $scope.updateDataSource = () => {

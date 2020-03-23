@@ -16,6 +16,6 @@ export const createLogMonitorPageRoute: UMRestApiRouteFactory = () => ({
     return response.ok();
   },
   options: {
-    tags: ['access:uptime'],
+    tags: ['access:uptime-read'],
   },
 });
