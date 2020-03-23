@@ -7,7 +7,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiFieldNumber } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiFieldNumber,
+  EuiCallOut,
+} from '@elastic/eui';
 
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../common/util/job_utils';
 import { getNewJobDefaults } from '../../../../../services/ml_server_info';
@@ -72,9 +79,21 @@ export class Datafeed extends Component {
 
   render() {
     const { query, queryDelay, frequency, scrollSize, defaults } = this.state;
+    const { datafeedRunning } = this.props;
     return (
       <React.Fragment>
         <EuiSpacer size="m" />
+        {datafeedRunning && (
+          <>
+            <EuiCallOut color="warning">
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.datafeed.readOnlyCalloutText"
+                defaultMessage="Datafeed settings cannot be edited while the datafeed is running. Please stop the job if you wish to edit these settings."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
         <EuiForm>
           <EuiFormRow
             label={
@@ -85,7 +104,12 @@ export class Datafeed extends Component {
             }
             style={{ maxWidth: 'inherit' }}
           >
-            <MLJobEditor value={query} onChange={this.onQueryChange} height="200px" />
+            <MLJobEditor
+              value={query}
+              onChange={this.onQueryChange}
+              height="200px"
+              readOnly={datafeedRunning}
+            />
           </EuiFormRow>
           <EuiFormRow
             label={
@@ -99,6 +123,7 @@ export class Datafeed extends Component {
               value={queryDelay}
               placeholder={defaults.queryDelay}
               onChange={this.onQueryDelayChange}
+              disabled={datafeedRunning}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -113,6 +138,7 @@ export class Datafeed extends Component {
               value={frequency}
               placeholder={defaults.frequency}
               onChange={this.onFrequencyChange}
+              disabled={datafeedRunning}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -127,6 +153,7 @@ export class Datafeed extends Component {
               value={scrollSize}
               placeholder={defaults.scrollSize}
               onChange={this.onScrollSizeChange}
+              disabled={datafeedRunning}
             />
           </EuiFormRow>
         </EuiForm>
@@ -135,6 +162,7 @@ export class Datafeed extends Component {
   }
 }
 Datafeed.propTypes = {
+  datafeedRunning: PropTypes.bool.isRequired,
   datafeedQuery: PropTypes.string.isRequired,
   datafeedQueryDelay: PropTypes.string.isRequired,
   datafeedFrequency: PropTypes.string.isRequired,
