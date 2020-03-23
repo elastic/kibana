@@ -121,8 +121,9 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       await nextTick();
     }
 
-    clickNextButton();
     await nextTick(50); // hooks updates cycles are tricky, adding some latency is needed
+    clickNextButton();
+    await nextTick(50);
     component.update();
   };
 
