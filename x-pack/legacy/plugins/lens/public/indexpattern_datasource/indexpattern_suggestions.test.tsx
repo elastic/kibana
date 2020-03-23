@@ -843,6 +843,49 @@ describe('IndexPattern Data Source suggestions', () => {
         );
       });
 
+      it('adds a metric column on a number field if no other metrics set', () => {
+        const initialState = stateWithNonEmptyTables();
+        const modifiedState: IndexPatternPrivateState = {
+          ...initialState,
+          layers: {
+            ...initialState.layers,
+            currentLayer: {
+              ...initialState.layers.currentLayer,
+              columns: {
+                cola: initialState.layers.currentLayer.columns.cola,
+              },
+              columnOrder: ['cola'],
+            },
+          },
+        };
+        const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', {
+          name: 'memory',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        });
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: modifiedState.layers.previousLayer,
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['cola', 'id1'],
+                  columns: {
+                    ...modifiedState.layers.currentLayer.columns,
+                    id1: expect.objectContaining({
+                      operationType: 'avg',
+                      sourceField: 'memory',
+                    }),
+                  },
+                }),
+              },
+            }),
+          })
+        );
+      });
+
       it('adds a metric column on a number field if 2 or more other metric', () => {
         const initialState = stateWithNonEmptyTables();
         const modifiedState: IndexPatternPrivateState = {

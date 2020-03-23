@@ -200,8 +200,8 @@ function addFieldAsMetricOperation(
 
   const [, metrics] = separateBucketColumns(layer);
 
-  // Add new metric if we already have multiple
-  if (metrics.length > 1) {
+  // Add metrics if there are 0 or > 1 metric
+  if (metrics.length !== 1) {
     return {
       indexPatternId: indexPattern.id,
       columns: {
