@@ -17,7 +17,7 @@ import {
 import { TextScale } from '../../../../common/log_text_scale';
 import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
 import { LogEntryFieldColumn } from './log_entry_field_column';
-import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
+import { LogEntryActionsColumn } from './log_entry_actions_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
@@ -170,7 +170,7 @@ export const LogEntryRow = memo(
           key="logColumn iconLogColumn iconLogColumn:details"
           {...columnWidths[iconColumnId]}
         >
-          <LogEntryDetailsIconColumn isHovered={isHovered} openFlyout={openFlyout} />
+          <LogEntryActionsColumn isHovered={isHovered} openFlyout={openFlyout} />
         </LogEntryColumn>
       </LogEntryRowWrapper>
     );

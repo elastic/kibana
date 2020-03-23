@@ -11,12 +11,12 @@ import React from 'react';
 import { LogEntryColumnContent } from './log_entry_column';
 import { euiStyled } from '../../../../../observability/public';
 
-interface LogEntryDetailsIconColumnProps {
+interface LogEntryActionsColumnProps {
   isHovered: boolean;
   openFlyout: () => void;
 }
 
-export const LogEntryDetailsIconColumn: React.FC<LogEntryDetailsIconColumnProps> = ({
+export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   isHovered,
   openFlyout,
 }) => {
@@ -25,23 +25,23 @@ export const LogEntryDetailsIconColumn: React.FC<LogEntryDetailsIconColumnProps>
   });
 
   return (
-    <IconColumnContent>
+    <ActionsColumnContent>
       {isHovered ? (
-        <AbsoluteIconButtonWrapper>
+        <AbsoluteWrapper>
           <EuiButtonIcon onClick={openFlyout} iconType="expand" title={label} aria-label={label} />
-        </AbsoluteIconButtonWrapper>
+        </AbsoluteWrapper>
       ) : null}
-    </IconColumnContent>
+    </ActionsColumnContent>
   );
 };
 
-const IconColumnContent = euiStyled(LogEntryColumnContent)`
+const ActionsColumnContent = euiStyled(LogEntryColumnContent)`
   overflow: hidden;
   user-select: none;
 `;
 
 // this prevents the button from influencing the line height
-const AbsoluteIconButtonWrapper = euiStyled.div`
+const AbsoluteWrapper = euiStyled.div`
   overflow: hidden;
   position: absolute;
 `;
