@@ -42,7 +42,7 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
           );
           const indexNames = status.indices
             .filter(({ index }) => typeof index !== 'undefined')
-            .map(({ index }) => index);
+            .map(({ index }) => index as string);
 
           await reindexService.cleanupReindexOperations(indexNames);
 
