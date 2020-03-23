@@ -218,31 +218,6 @@ describe('alert_details', () => {
   });
 
   describe('links', () => {
-    it('links to the Edit flyout', () => {
-      const alert = mockAlert();
-
-      const alertType = {
-        id: '.noop',
-        name: 'No Op',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
-        defaultActionGroupId: 'default',
-      };
-
-      expect(
-        shallow(
-          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(
-          <EuiButtonEmpty disabled={true} iconType="pencil">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-              defaultMessage="Edit"
-            />
-          </EuiButtonEmpty>
-        )
-      ).toBeTruthy();
-    });
-
     it('links to the app that created the alert', () => {
       const alert = mockAlert();
 
@@ -258,31 +233,6 @@ describe('alert_details', () => {
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
         ).containsMatchingElement(<ViewInApp alert={alert} />)
-      ).toBeTruthy();
-    });
-
-    it('links to the activity log', () => {
-      const alert = mockAlert();
-
-      const alertType = {
-        id: '.noop',
-        name: 'No Op',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
-        defaultActionGroupId: 'default',
-      };
-
-      expect(
-        shallow(
-          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(
-          <EuiButtonEmpty disabled={true} iconType="menuLeft">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertDetails.activityLogButtonLabel"
-              defaultMessage="Activity Log"
-            />
-          </EuiButtonEmpty>
-        )
       ).toBeTruthy();
     });
   });
