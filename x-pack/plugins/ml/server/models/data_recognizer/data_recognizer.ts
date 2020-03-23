@@ -19,11 +19,12 @@ import {
   Module,
   JobOverride,
   DatafeedOverride,
-  GeneralOverride,
+  GeneralJobsOverride,
   DatafeedResponse,
   JobResponse,
   KibanaObjectResponse,
   DataRecognizerConfigResponse,
+  GeneralDatafeedsOverride,
 } from '../../../common/types/modules';
 import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
@@ -111,6 +112,10 @@ export class DataRecognizer {
   indexPatternName: string = '';
   indexPatternId: string | undefined = undefined;
   savedObjectsClient: SavedObjectsClientContract;
+  /**
+   * List of job ids that require model memory estimation
+   */
+  jobsForModelMemoryEstimation: string[] = [];
 
   callAsCurrentUser: (
     endpoint: string,
@@ -978,29 +983,31 @@ export class DataRecognizer {
       return;
     }
 
-    if (estimateMML) {
+    if (estimateMML && this.jobsForModelMemoryEstimation.length > 0) {
       const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this.callAsCurrentUser);
       const query = moduleConfig.query ?? null;
 
+      const jobs = moduleConfig.jobs.filter(job =>
+        this.jobsForModelMemoryEstimation.includes(job.id)
+      );
+
       // Checks if all jobs in the module have the same time field configured
-      const isSameTimeFields = moduleConfig.jobs.every(
-        job =>
-          job.config.data_description.time_field ===
-          moduleConfig.jobs[0].config.data_description.time_field
+      const isSameTimeFields = jobs.every(
+        job => job.config.data_description.time_field === jobs[0].config.data_description.time_field
       );
 
       if (isSameTimeFields && (start === undefined || end === undefined)) {
         // In case of time range is not provided and the time field is the same
         // set the fallback range for all jobs
         const { start: fallbackStart, end: fallbackEnd } = await this.getFallbackTimeRange(
-          moduleConfig.jobs[0].config.data_description.time_field,
+          jobs[0].config.data_description.time_field,
           query
         );
         start = fallbackStart;
         end = fallbackEnd;
       }
 
-      for (const job of moduleConfig.jobs) {
+      for (const job of jobs) {
         let earliestMs = start;
         let latestMs = end;
         if (earliestMs === undefined || latestMs === undefined) {
@@ -1027,8 +1034,6 @@ export class DataRecognizer {
 
         job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
       }
-
-      return;
     }
 
     for (const job of moduleConfig.jobs) {
@@ -1084,7 +1089,7 @@ export class DataRecognizer {
 
     // separate all the overrides.
     // the overrides which don't contain a job id will be applied to all jobs in the module
-    const generalOverrides: GeneralOverride[] = [];
+    const generalOverrides: GeneralJobsOverride[] = [];
     const jobSpecificOverrides: JobOverride[] = [];
 
     overrides.forEach(override => {
@@ -1094,6 +1099,14 @@ export class DataRecognizer {
         jobSpecificOverrides.push(override);
       }
     });
+
+    if (generalOverrides.some(override => !!override.analysis_limits?.model_memory_limit)) {
+      this.jobsForModelMemoryEstimation = [];
+    } else {
+      this.jobsForModelMemoryEstimation = jobSpecificOverrides
+        .filter(override => !override.analysis_limits?.model_memory_limit)
+        .map(override => override.job_id);
+    }
 
     function processArrayValues(source: any, update: any) {
       if (typeof source !== 'object' || typeof update !== 'object') {
@@ -1160,7 +1173,7 @@ export class DataRecognizer {
 
       // separate all the overrides.
       // the overrides which don't contain a datafeed id or a job id will be applied to all jobs in the module
-      const generalOverrides: GeneralOverride[] = [];
+      const generalOverrides: GeneralDatafeedsOverride[] = [];
       const datafeedSpecificOverrides: DatafeedOverride[] = [];
       overrides.forEach(o => {
         if (o.datafeed_id === undefined && o.job_id === undefined) {
