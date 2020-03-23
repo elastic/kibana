@@ -35,7 +35,10 @@ export type EditorVisState = Pick<Vis, 'title' | 'description' | 'type' | 'param
 
 const createEditorStateReducer = ({
   aggs: { createAggConfigs },
-}: DataPublicPluginStart['search']) => (state: EditorVisState, action: EditorAction): VisState => {
+}: DataPublicPluginStart['search']) => (
+  state: EditorVisState,
+  action: EditorAction
+): EditorVisState => {
   switch (action.type) {
     case EditorStateActionTypes.ADD_NEW_AGG: {
       const { schema } = action.payload;
