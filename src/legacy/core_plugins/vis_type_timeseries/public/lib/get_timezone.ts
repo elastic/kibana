@@ -18,15 +18,14 @@
  */
 
 import moment from 'moment-timezone';
+import { IUiSettingsClient } from 'kibana/public';
 
-export function timezoneProvider(config) {
-  return function() {
-    if (config.isDefault('dateFormat:tz')) {
-      const detectedTimezone = moment.tz.guess();
-      if (detectedTimezone) return detectedTimezone;
-      else return moment().format('Z');
-    } else {
-      return config.get('dateFormat:tz', 'Browser');
-    }
-  };
+export function getTimezone(config: IUiSettingsClient) {
+  if (config.isDefault('dateFormat:tz')) {
+    const detectedTimezone = moment.tz.guess();
+    if (detectedTimezone) return detectedTimezone;
+    else return moment().format('Z');
+  } else {
+    return config.get('dateFormat:tz', 'Browser');
+  }
 }
