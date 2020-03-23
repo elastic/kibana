@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
 import {
+  actions,
   enabled,
   description,
   false_positives,
@@ -31,15 +32,18 @@ import {
   to,
   type,
   threat,
+  throttle,
   references,
   note,
   version,
+  lists,
   anomaly_threshold,
   machine_learning_job_id,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
+import { hasListsFeature } from '../../feature_flags';
 
 /**
  * Big differences between this schema and the createRulesSchema
@@ -51,6 +55,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  *  - index is a required field that must exist
  */
 export const addPrepackagedRulesSchema = Joi.object({
+  actions: actions.default([]),
   anomaly_threshold: anomaly_threshold.when('type', {
     is: 'machine_learning',
     then: Joi.required(),
@@ -99,7 +104,11 @@ export const addPrepackagedRulesSchema = Joi.object({
   to: to.default('now'),
   type: type.required(),
   threat: threat.default([]),
+  throttle: throttle.default(null),
   references: references.default([]),
   note: note.allow(''),
   version: version.required(),
+
+  // TODO: (LIST-FEATURE) Remove the hasListsFeatures once this is ready for release
+  lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 });

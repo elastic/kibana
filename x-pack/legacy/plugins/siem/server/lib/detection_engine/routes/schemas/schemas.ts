@@ -110,4 +110,28 @@ export const updated_by = Joi.string();
 export const version = Joi.number()
   .integer()
   .min(1);
+export const action_group = Joi.string();
+export const action_id = Joi.string();
+export const action_action_type_id = Joi.string();
+export const action_params = Joi.object();
+export const action = Joi.object({
+  group: action_group.required(),
+  id: action_id.required(),
+  action_type_id: action_action_type_id.required(),
+  params: action_params.required(),
+});
+export const actions = Joi.array().items(action);
+export const throttle = Joi.string().allow(null);
 export const note = Joi.string();
+
+// NOTE: Experimental list support not being shipped currently and behind a feature flag
+// TODO: (LIST-FEATURE) Remove this comment once we lists have passed testing and is ready for the release
+export const boolean_operator = Joi.string().valid('and', 'and not');
+export const list_type = Joi.string().valid('value'); // TODO: (LIST-FEATURE) Eventually this can be "list" when we support list types
+export const list_value = Joi.object({ name: Joi.string().required(), type: list_type.required() });
+export const list = Joi.object({
+  field: Joi.string().required(),
+  boolean_operator: boolean_operator.required(),
+  values: Joi.array().items(list_value),
+});
+export const lists = Joi.array().items(list);

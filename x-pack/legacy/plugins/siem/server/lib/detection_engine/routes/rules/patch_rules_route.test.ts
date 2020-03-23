@@ -16,10 +16,19 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { patchRulesRoute } from './patch_rules_route';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('patch_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -75,6 +84,30 @@ describe('patch_rules', () => {
         message: 'Test error',
         status_code: 500,
       });
+    });
+
+    test('allows ML Params to be patched', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          rule_id: 'my-rule-id',
+          anomaly_threshold: 4,
+          machine_learning_job_id: 'some_job_id',
+        },
+      });
+      await server.inject(request, context);
+
+      expect(clients.alertsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({
+              anomalyThreshold: 4,
+              machineLearningJobId: 'some_job_id',
+            }),
+          }),
+        })
+      );
     });
   });
 
