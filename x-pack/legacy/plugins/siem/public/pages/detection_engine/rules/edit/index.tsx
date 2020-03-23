@@ -319,6 +319,18 @@ const EditRulePageComponent: FC = () => {
     [selectedTab, stepsForm.current]
   );
 
+  useEffect(() => {
+    if (rule != null) {
+      const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
+        rule,
+      });
+      setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
+      setMyDefineRuleForm({ data: defineRuleData, isValid: true });
+      setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
+      setMyActionsRuleForm({ data: ruleActionsData, isValid: true });
+    }
+  }, [rule]);
+
   if (isSaved || (rule != null && rule.immutable)) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;

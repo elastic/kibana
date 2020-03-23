@@ -11,11 +11,6 @@ import {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '../../../../../src/core/public';
-import {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-} from '../../../../plugins/triggers_actions_ui/public';
-import { SecurityPluginSetup } from '../../../../plugins/security/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
@@ -28,9 +23,13 @@ import { KibanaServices } from './lib/kibana';
 
 import { serviceNowActionType } from './lib/connectors';
 
-export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../../plugins/triggers_actions_ui/public';
+import { SecurityPluginSetup } from '../../../../plugins/security/public';
 
-import { getRulesNotificationAlertType } from './lib/rules_notification_alert_type';
+export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
@@ -75,8 +74,6 @@ export class Plugin implements IPlugin<Setup, Start> {
         const { renderApp } = await import('./app');
 
         plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
-        plugins.triggers_actions_ui.alertTypeRegistry.register(getRulesNotificationAlertType());
-
         return renderApp(coreStart, { ...startPlugins, security } as StartPlugins, params);
       },
     });

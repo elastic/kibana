@@ -5,7 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { setFieldValue } from '../../helpers';
@@ -83,6 +83,20 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     setMyStepData,
   ]);
 
+  const throttleFieldComponentProps = useMemo(
+    () => ({
+      idAria: 'detectionEngineStepRuleActionsThrottle',
+      isDisabled: isLoading,
+      dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
+      hasNoInitialSelection: false,
+      handleChange: updateThrottle,
+      euiFieldProps: {
+        options: THROTTLE_OPTIONS,
+      },
+    }),
+    [isLoading, updateThrottle]
+  );
+
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription schema={schema} data={myStepData} />
@@ -94,16 +108,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           <UseField
             path="throttle"
             component={ThrottleSelectField}
-            componentProps={{
-              idAria: 'detectionEngineStepRuleActionsThrottle',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
-              hasNoInitialSelection: false,
-              handleChange: updateThrottle,
-              euiFieldProps: {
-                options: THROTTLE_OPTIONS,
-              },
-            }}
+            componentProps={throttleFieldComponentProps}
           />
           {myStepData.throttle !== stepActionsDefaultValue.throttle && (
             <>
