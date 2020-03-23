@@ -11,7 +11,8 @@
     "data",
     "dataEnhanced",
     "metrics",
-    "alerting"
+    "alerting",
+    "triggers_actions_ui"
   ],
   "server": true,
   "ui": true,
