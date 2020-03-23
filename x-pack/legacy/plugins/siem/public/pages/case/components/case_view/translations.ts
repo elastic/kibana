@@ -117,55 +117,41 @@ export const UPDATE_PUSH_SERVICENOW = i18n.translate(
 export const PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE = i18n.translate(
   'xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigTitle',
   {
-    defaultMessage: 'Configure case',
-  }
-);
-
-export const PUSH_DISABLE_BY_NO_CASE_CONFIG_DESCRIPTION = i18n.translate(
-  'xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDescription',
-  {
-    defaultMessage: 'You did not configure you case system',
+    defaultMessage: 'Configure external connector',
   }
 );
 
 export const PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE = i18n.translate(
   'xpack.siem.case.caseView.pushToServiceDisableBecauseCaseClosedTitle',
   {
-    defaultMessage: 'Case closed',
-  }
-);
-
-export const PUSH_DISABLE_BECAUSE_CASE_CLOSED_DESCRIPTION = i18n.translate(
-  'xpack.siem.case.caseView.pushToServiceDisableBecauseCaseClosedDescription',
-  {
-    defaultMessage: 'You cannot push a case who have been closed',
+    defaultMessage: 'Reopen the case',
   }
 );
 
 export const PUSH_DISABLE_BY_KIBANA_CONFIG_TITLE = i18n.translate(
   'xpack.siem.case.caseView.pushToServiceDisableByConfigTitle',
   {
-    defaultMessage: 'Connector kibana config',
-  }
-);
-
-export const PUSH_DISABLE_BY_KIBANA_CONFIG_DESCRIPTION = i18n.translate(
-  'xpack.siem.case.caseView.pushToServiceDisableByConfigDescription',
-  {
-    defaultMessage: 'ServiceNow connector have been disabled in kibana config',
+    defaultMessage: 'Enable ServiceNow in Kibana configuration file',
   }
 );
 
 export const PUSH_DISABLE_BY_LICENSE_TITLE = i18n.translate(
   'xpack.siem.case.caseView.pushToServiceDisableByLicenseTitle',
   {
-    defaultMessage: 'Elastic Stack subscriptions',
+    defaultMessage: 'Upgrade to Elastic Platinum',
   }
 );
 
-export const PUSH_DISABLE_BY_LICENSE_DESCRIPTION = i18n.translate(
-  'xpack.siem.case.caseView.pushToServiceDisableByLicenseDescription',
+export const LINK_CLOUD_DEPLOYMENT = i18n.translate(
+  'xpack.siem.case.caseView.cloudDeploymentLink',
   {
-    defaultMessage: 'ServiceNow is disabled because you do not have the right license',
+    defaultMessage: 'cloud deployment',
+  }
+);
+
+export const LINK_CONNECTOR_CONFIGURE = i18n.translate(
+  'xpack.siem.case.caseView.connectorConfigureLink',
+  {
+    defaultMessage: 'connector',
   }
 );

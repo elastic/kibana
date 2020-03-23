@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const ERROR_PUSH_SERVICE_CALLOUT_TITLE = i18n.translate(
   'xpack.siem.case.errorsPushServiceCallOutTitle',
   {
-    defaultMessage: 'You can not push to ServiceNow because of the errors below',
+    defaultMessage: 'To send cases to external systems, you need to:',
   }
 );
 
