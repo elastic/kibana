@@ -39,7 +39,7 @@ const configSchema = schema.object({
         })
       ),
     },
-    { allowUnknowns: true }
+    { unknowns: 'allow' }
   ),
 });
 

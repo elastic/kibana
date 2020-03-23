@@ -47,13 +47,13 @@ import {
   isQueryStringFilter,
   isRangeFilter,
   toggleFilterNegated,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
 } from '../common';
 
 import { FilterLabel } from './ui/filter_bar';
 
 import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
   generateFilters,
   onlyDisabledFiltersChanged,
   changeTimeFilter,
@@ -328,6 +328,7 @@ export {
   AggParamType,
   AggTypeFieldFilters, // TODO convert to interface
   AggTypeFilters, // TODO convert to interface
+  AggConfigOptions,
   BUCKET_TYPES,
   DateRangeKey, // only used in field formatter deserialization, which will live in data
   IAggConfig,

@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useLogSummary } from './log_summary';
 
 import { fetchLogSummary } from './api/fetch_log_summary';
+import { datemathToEpochMillis } from '../../../utils/datemath';
 
 // Typescript doesn't know that `fetchLogSummary` is a jest mock.
 // We use a second variable with a type cast to help the compiler further down the line.
@@ -21,20 +22,26 @@ describe('useLogSummary hook', () => {
   });
 
   it('provides an empty list of buckets by default', () => {
-    const { result } = renderHook(() => useLogSummary('SOURCE_ID', null, 1000, null));
+    const { result } = renderHook(() => useLogSummary('SOURCE_ID', null, null, null));
     expect(result.current.buckets).toEqual([]);
   });
 
   it('queries for new summary buckets when the source id changes', async () => {
-    const firstMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 1 }]);
-    const secondMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 2 }]);
+    const { startTimestamp, endTimestamp } = createMockDateRange();
+
+    const firstMockResponse = createMockResponse([
+      { start: startTimestamp, end: endTimestamp, entriesCount: 1 },
+    ]);
+    const secondMockResponse = createMockResponse([
+      { start: startTimestamp, end: endTimestamp, entriesCount: 2 },
+    ]);
 
     fetchLogSummaryMock
       .mockResolvedValueOnce(firstMockResponse)
       .mockResolvedValueOnce(secondMockResponse);
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      ({ sourceId }) => useLogSummary(sourceId, 100000, 1000, null),
+      ({ sourceId }) => useLogSummary(sourceId, startTimestamp, endTimestamp, null),
       {
         initialProps: { sourceId: 'INITIAL_SOURCE_ID' },
       }
@@ -63,15 +70,21 @@ describe('useLogSummary hook', () => {
   });
 
   it('queries for new summary buckets when the filter query changes', async () => {
-    const firstMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 1 }]);
-    const secondMockResponse = createMockResponse([{ start: 99000, end: 101000, entriesCount: 2 }]);
+    const { startTimestamp, endTimestamp } = createMockDateRange();
+
+    const firstMockResponse = createMockResponse([
+      { start: startTimestamp, end: endTimestamp, entriesCount: 1 },
+    ]);
+    const secondMockResponse = createMockResponse([
+      { start: startTimestamp, end: endTimestamp, entriesCount: 2 },
+    ]);
 
     fetchLogSummaryMock
       .mockResolvedValueOnce(firstMockResponse)
       .mockResolvedValueOnce(secondMockResponse);
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      ({ filterQuery }) => useLogSummary('SOURCE_ID', 100000, 1000, filterQuery),
+      ({ filterQuery }) => useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, filterQuery),
       {
         initialProps: { filterQuery: 'INITIAL_FILTER_QUERY' },
       }
@@ -99,15 +112,17 @@ describe('useLogSummary hook', () => {
     expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
   });
 
-  it('queries for new summary buckets when the midpoint time changes', async () => {
+  it('queries for new summary buckets when the start and end date changes', async () => {
     fetchLogSummaryMock
       .mockResolvedValueOnce(createMockResponse([]))
       .mockResolvedValueOnce(createMockResponse([]));
 
+    const firstRange = createMockDateRange();
     const { waitForNextUpdate, rerender } = renderHook(
-      ({ midpointTime }) => useLogSummary('SOURCE_ID', midpointTime, 1000, null),
+      ({ startTimestamp, endTimestamp }) =>
+        useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, null),
       {
-        initialProps: { midpointTime: 100000 },
+        initialProps: firstRange,
       }
     );
 
@@ -115,54 +130,21 @@ describe('useLogSummary hook', () => {
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        startDate: 98500,
-        endDate: 101500,
+        startTimestamp: firstRange.startTimestamp,
+        endTimestamp: firstRange.endTimestamp,
       })
     );
 
-    rerender({ midpointTime: 200000 });
+    const secondRange = createMockDateRange('now-20s', 'now');
+
+    rerender(secondRange);
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        startDate: 198500,
-        endDate: 201500,
-      })
-    );
-  });
-
-  it('queries for new summary buckets when the interval size changes', async () => {
-    fetchLogSummaryMock
-      .mockResolvedValueOnce(createMockResponse([]))
-      .mockResolvedValueOnce(createMockResponse([]));
-
-    const { waitForNextUpdate, rerender } = renderHook(
-      ({ intervalSize }) => useLogSummary('SOURCE_ID', 100000, intervalSize, null),
-      {
-        initialProps: { intervalSize: 1000 },
-      }
-    );
-
-    await waitForNextUpdate();
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        bucketSize: 10,
-        startDate: 98500,
-        endDate: 101500,
-      })
-    );
-
-    rerender({ intervalSize: 2000 });
-    await waitForNextUpdate();
-
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        bucketSize: 20,
-        startDate: 97000,
-        endDate: 103000,
+        startTimestamp: secondRange.startTimestamp,
+        endTimestamp: secondRange.endTimestamp,
       })
     );
   });
@@ -171,3 +153,12 @@ describe('useLogSummary hook', () => {
 const createMockResponse = (
   buckets: Array<{ start: number; end: number; entriesCount: number }>
 ) => ({ data: { buckets, start: Number.NEGATIVE_INFINITY, end: Number.POSITIVE_INFINITY } });
+
+const createMockDateRange = (startDate = 'now-10s', endDate = 'now') => {
+  return {
+    startDate,
+    endDate,
+    startTimestamp: datemathToEpochMillis(startDate)!,
+    endTimestamp: datemathToEpochMillis(endDate, 'up')!,
+  };
+};

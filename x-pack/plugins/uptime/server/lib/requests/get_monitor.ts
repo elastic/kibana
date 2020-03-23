@@ -8,7 +8,6 @@ import { isRight } from 'fp-ts/lib/Either';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { PingType, Ping } from '../../../../../legacy/plugins/uptime/common/types/ping/ping';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetMonitorParams {
   /** @member monitorId optional limit to monitorId */
@@ -18,10 +17,11 @@ export interface GetMonitorParams {
 // Get the monitor meta info regardless of timestamp
 export const getMonitor: UMElasticsearchQueryFn<GetMonitorParams, Ping> = async ({
   callES,
+  dynamicSettings,
   monitorId,
 }) => {
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       size: 1,
       _source: ['@timestamp', 'url', 'monitor', 'observer'],

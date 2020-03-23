@@ -7,7 +7,6 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ChromeBreadcrumb } from 'kibana/public';
 import { connect, MapDispatchToPropsFunction, MapStateToPropsParam } from 'react-redux';
 import { UptimeRefreshContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
@@ -16,10 +15,11 @@ import { MonitorStatusDetails } from '../components/connected';
 import { Ping } from '../../common/types/ping/ping';
 import { AppState } from '../state';
 import { selectSelectedMonitor } from '../state/selectors';
-import { getSelectedMonitor } from '../state/actions';
+import { getSelectedMonitorAction } from '../state/actions';
 import { PageHeader } from './page_header';
 import { MonitorCharts } from '../components/functional';
 import { PingList } from '../components/connected';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 
 interface StateProps {
   selectedMonitor: Ping | null;
@@ -59,10 +59,10 @@ export const MonitorPageComponent: React.FC<Props> = ({
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
 
   const nameOrId = selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id || '';
-  const breadcrumbs: ChromeBreadcrumb[] = [{ text: nameOrId }];
+  useBreadcrumbs([{ text: nameOrId }]);
   return (
     <>
-      <PageHeader headingText={nameOrId} breadcrumbs={breadcrumbs} datePicker={true} />
+      <PageHeader headingText={nameOrId} datePicker={true} />
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
@@ -94,7 +94,7 @@ const mapDispatchToProps: MapDispatchToPropsFunction<DispatchProps, {}> = (dispa
   return {
     dispatchGetMonitorStatus: (monitorId: string) => {
       dispatch(
-        getSelectedMonitor({
+        getSelectedMonitorAction({
           monitorId,
         })
       );

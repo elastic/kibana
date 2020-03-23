@@ -7,7 +7,6 @@
 import { APICaller as APICaller_2 } from 'kibana/server';
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
-import { CallCluster as CallCluster_2 } from 'src/legacy/core_plugins/elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
 import { CatCommonParams } from 'elasticsearch';
@@ -176,6 +175,8 @@ export enum ES_FIELD_TYPES {
     // (undocumented)
     HALF_FLOAT = "half_float",
     // (undocumented)
+    HISTOGRAM = "histogram",
+    // (undocumented)
     _ID = "_id",
     // (undocumented)
     _INDEX = "_index",
@@ -328,12 +329,6 @@ export function getDefaultSearchParams(config: SharedGlobalConfig): {
     ignoreUnavailable: boolean;
     restTotalHitsAsInt: boolean;
 };
-
-// Warning: (ae-forgotten-export) The symbol "TStrategyTypes" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "ICancel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type ICancel<T extends TStrategyTypes> = (id: string) => Promise<void>;
 
 // Warning: (ae-missing-release-tag) "IFieldFormatsRegistry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -507,10 +502,16 @@ export interface IResponseTypesMap {
     [ES_SEARCH_STRATEGY]: IEsSearchResponse;
 }
 
+// Warning: (ae-forgotten-export) The symbol "TStrategyTypes" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ISearch" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export type ISearch<T extends TStrategyTypes> = (request: IRequestTypesMap[T], options?: ISearchOptions) => Promise<IResponseTypesMap[T]>;
+
+// Warning: (ae-missing-release-tag) "ISearchCancel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type ISearchCancel<T extends TStrategyTypes> = (id: string) => Promise<void>;
 
 // Warning: (ae-missing-release-tag) "ISearchContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -546,6 +547,8 @@ export enum KBN_FIELD_TYPES {
     GEO_POINT = "geo_point",
     // (undocumented)
     GEO_SHAPE = "geo_shape",
+    // (undocumented)
+    HISTOGRAM = "histogram",
     // (undocumented)
     IP = "ip",
     // (undocumented)

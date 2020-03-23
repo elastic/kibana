@@ -6,6 +6,7 @@
 
 import { createGetOverviewFilters } from './overview_filters';
 import { createGetPingHistogramRoute, createGetPingsRoute } from './pings';
+import { createGetDynamicSettingsRoute, createPostDynamicSettingsRoute } from './dynamic_settings';
 import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemetry';
 import { createGetSnapshotCount } from './snapshot';
 import { UMRestApiRouteFactory } from './types';
@@ -26,6 +27,8 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetPingsRoute,
   createGetIndexPatternRoute,
   createGetIndexStatusRoute,
+  createGetDynamicSettingsRoute,
+  createPostDynamicSettingsRoute,
   createGetMonitorRoute,
   createGetMonitorDetailsRoute,
   createGetMonitorLocationsRoute,

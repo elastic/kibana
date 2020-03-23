@@ -4,53 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
-import { getApiPath } from '../../lib/helper';
 import { QueryParams } from '../actions/types';
-import { PingType, Ping } from '../../../common/types/ping/ping';
+import { Ping } from '../../../common/types/ping/ping';
+import { API_URLS } from '../../../common/constants/rest_api';
+import { apiService } from './utils';
 
 export interface APIParams {
-  basePath: string;
   monitorId: string;
 }
 
-export const fetchSelectedMonitor = async ({ basePath, monitorId }: APIParams): Promise<Ping> => {
-  const url = getApiPath(`/api/uptime/monitor/selected`, basePath);
-  const params = {
+export const fetchSelectedMonitor = async ({ monitorId }: APIParams): Promise<Ping> => {
+  const queryParams = {
     monitorId,
   };
-  const urlParams = new URLSearchParams(params).toString();
-  const response = await fetch(`${url}?${urlParams}`);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const responseData = await response.json();
-  return responseData;
+
+  return await apiService.get(API_URLS.MONITOR_SELECTED, queryParams);
 };
 
 export const fetchMonitorStatus = async ({
-  basePath,
   monitorId,
   dateStart,
   dateEnd,
-}: QueryParams & APIParams): Promise<Ping> => {
-  const url = getApiPath(`/api/uptime/monitor/status`, basePath);
-  const params = {
+}: QueryParams): Promise<Ping> => {
+  const queryParams = {
     monitorId,
     dateStart,
     dateEnd,
   };
-  const urlParams = new URLSearchParams(params).toString();
-  const response = await fetch(`${url}?${urlParams}`);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const responseData = await response.json();
-  const decoded = PingType.decode(responseData);
-  if (isRight(decoded)) {
-    return decoded.right;
-  }
-  ThrowReporter.report(decoded);
-  throw new Error('Error parsing API response');
+
+  return await apiService.get(API_URLS.MONITOR_STATUS, queryParams);
 };

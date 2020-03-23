@@ -49,11 +49,11 @@ export const ImportRuleModalComponent = ({
   const [overwrite, setOverwrite] = useState(false);
   const [, dispatchToaster] = useStateToaster();
 
-  const cleanupAndCloseModal = () => {
+  const cleanupAndCloseModal = useCallback(() => {
     setIsImporting(false);
     setSelectedFiles(null);
     closeModal();
-  };
+  }, [setIsImporting, setSelectedFiles, closeModal]);
 
   const importRulesCallback = useCallback(async () => {
     if (selectedFiles != null) {

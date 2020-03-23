@@ -86,22 +86,62 @@ exports[`should enable sort order select when sort field provided 1`] = `
         value="DESC"
       />
     </EuiFormRow>
-    <EuiHorizontalRule
-      margin="xs"
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Scaling"
+          id="xpack.maps.esSearch.scaleTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
     />
     <EuiFormRow
       describedByIds={Array []}
-      display="columnCompressed"
+      display="row"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
-      label="Top hits"
+      labelType="label"
+    >
+      <EuiRadioGroup
+        idSelected="LIMIT"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "LIMIT",
+              "label": "Limit results to 10000.",
+            },
+            Object {
+              "id": "TOP_HITS",
+              "label": "Show top hits per entity.",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
       labelType="label"
     >
       <EuiSwitch
-        checked={false}
+        checked={true}
         compressed={true}
-        label="Show top hits per entity"
+        label="Dynamically filter for data in the visible map area"
         onChange={[Function]}
       />
     </EuiFormRow>
@@ -112,7 +152,7 @@ exports[`should enable sort order select when sort field provided 1`] = `
 </Fragment>
 `;
 
-exports[`should render top hits form when useTopHits is true 1`] = `
+exports[`should render top hits form when scaling type is TOP_HITS 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle
@@ -197,25 +237,68 @@ exports[`should render top hits form when useTopHits is true 1`] = `
         value="DESC"
       />
     </EuiFormRow>
-    <EuiHorizontalRule
-      margin="xs"
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Scaling"
+          id="xpack.maps.esSearch.scaleTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
     />
     <EuiFormRow
       describedByIds={Array []}
-      display="columnCompressed"
+      display="row"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
-      label="Top hits"
+      labelType="label"
+    >
+      <EuiRadioGroup
+        idSelected="TOP_HITS"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "LIMIT",
+              "label": "Limit results to 10000.",
+            },
+            Object {
+              "id": "TOP_HITS",
+              "label": "Show top hits per entity.",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
       labelType="label"
     >
       <EuiSwitch
         checked={true}
         compressed={true}
-        label="Show top hits per entity"
+        label="Dynamically filter for data in the visible map area"
         onChange={[Function]}
       />
     </EuiFormRow>
+    <EuiHorizontalRule
+      margin="xs"
+    />
     <EuiFormRow
       describedByIds={Array []}
       display="columnCompressed"
@@ -347,22 +430,62 @@ exports[`should render update source editor 1`] = `
         value="DESC"
       />
     </EuiFormRow>
-    <EuiHorizontalRule
-      margin="xs"
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Scaling"
+          id="xpack.maps.esSearch.scaleTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
     />
     <EuiFormRow
       describedByIds={Array []}
-      display="columnCompressed"
+      display="row"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
-      label="Top hits"
+      labelType="label"
+    >
+      <EuiRadioGroup
+        idSelected="LIMIT"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "LIMIT",
+              "label": "Limit results to 10000.",
+            },
+            Object {
+              "id": "TOP_HITS",
+              "label": "Show top hits per entity.",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
       labelType="label"
     >
       <EuiSwitch
-        checked={false}
+        checked={true}
         compressed={true}
-        label="Show top hits per entity"
+        label="Dynamically filter for data in the visible map area"
         onChange={[Function]}
       />
     </EuiFormRow>

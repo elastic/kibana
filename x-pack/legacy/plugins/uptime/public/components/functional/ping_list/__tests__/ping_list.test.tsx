@@ -174,7 +174,7 @@ describe('PingList component', () => {
         locations={[]}
         monitorId="foo"
         onPageCountChange={jest.fn()}
-        onSelectedLocationChange={(loc: any[]) => {}}
+        onSelectedLocationChange={(_loc: any[]) => {}}
         onSelectedStatusChange={jest.fn()}
         pageSize={30}
         pings={response.pings}

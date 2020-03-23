@@ -76,7 +76,7 @@ export class KibanaFramework {
 
   public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema) {
     // These endpoints are validated by GraphQL at runtime and with GraphQL generated types
-    const body = schema.object({}, { allowUnknowns: true });
+    const body = schema.object({}, { unknowns: 'allow' });
     type Body = TypeOf<typeof body>;
 
     const routeOptions = {

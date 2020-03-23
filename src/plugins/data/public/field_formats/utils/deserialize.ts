@@ -70,7 +70,8 @@ export const deserializeFieldFormat: FormatFactory = function(
   const { id } = mapping;
   if (id === 'range') {
     const RangeFormat = FieldFormat.from((range: any) => {
-      const format = getFieldFormat(this, id, mapping.params);
+      const nestedFormatter = mapping.params as SerializedFieldFormat;
+      const format = getFieldFormat(this, nestedFormatter.id, nestedFormatter.params);
       const gte = '\u2265';
       const lt = '\u003c';
       return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessage', {
