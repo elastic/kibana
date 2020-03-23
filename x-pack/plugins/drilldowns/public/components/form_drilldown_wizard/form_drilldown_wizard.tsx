@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import './form_drilldown_wizard.scss';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
 import {
@@ -40,7 +39,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   actionFactoryContext,
 }) => {
   const nameFragment = (
-    <EuiFormRow label={txtNameOfDrilldown} className="drdFormDrilldownWizard__formRow">
+    <EuiFormRow label={txtNameOfDrilldown}>
       <EuiFieldText
         name="drilldown_name"
         placeholder={txtUntitledDrilldown}
@@ -56,7 +55,6 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
     <EuiFormRow
       label={actionFactories?.length > 1 ? txtDrilldownAction : undefined}
       fullWidth={true}
-      className="drdFormDrilldownWizard__formRow"
     >
       <ActionWizard
         actionFactories={actionFactories}
