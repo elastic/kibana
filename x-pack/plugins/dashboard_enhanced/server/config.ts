@@ -9,7 +9,7 @@ import { PluginConfigDescriptor } from '../../../../src/core/server';
 
 export const configSchema = schema.object({
   drilldowns: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
 });
 

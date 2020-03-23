@@ -45,8 +45,8 @@ export class DashboardToDashboardDrilldown
 
   public readonly createConfig = () => ({
     dashboardId: '',
-    useCurrentFilters: true,
-    useCurrentDateRange: true,
+    useCurrentFilters: false,
+    useCurrentDateRange: false,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
@@ -82,7 +82,6 @@ export class DashboardToDashboardDrilldown
     // for brush event this time range would be overwritten
     let timeRange = config.useCurrentDateRange ? currentTimeRange : undefined;
 
-    // @ts-ignore TODO
     if (context.data.range) {
       // look up by range
       const { restOfFilters, timeRangeFilter } =

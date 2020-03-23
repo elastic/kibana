@@ -84,11 +84,6 @@ const createFilter = async (table: EventData['table'], columnIndex: number, rowI
   if (!column.meta || !column.meta.indexPatternId) {
     return;
   }
-  console.log('aggConfig', column.meta.indexPatternId); // eslint-disable-line
-  console.log( // eslint-disable-line
-    'This fails, but not always',
-    await getIndexPatterns().get(column.meta.indexPatternId)
-  );
   const aggConfig = deserializeAggConfig({
     type: column.meta.type,
     aggConfigParams: column.meta.aggConfigParams ? column.meta.aggConfigParams : {},

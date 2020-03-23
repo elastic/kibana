@@ -31,9 +31,7 @@ interface BootstrapParams {
 }
 
 export class DashboardDrilldownsService {
-  // async bootstrap(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
   bootstrap(
-    // core: CoreSetup<{ drilldowns: DrilldownsStart }>,
     core: CoreSetup<StartDependencies>,
     plugins: SetupDependencies,
     { enableDrilldowns }: BootstrapParams

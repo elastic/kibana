@@ -34,11 +34,11 @@ export interface SelectRangeActionContext {
 }
 
 async function isCompatible(context: SelectRangeActionContext) {
-  // try {
-  return Boolean(await onBrushEvent(context.data));
-  // } catch {
-  //  return false;
-  // }
+  try {
+    return Boolean(await onBrushEvent(context.data));
+  } catch {
+    return false;
+  }
 }
 
 export const selectRangeActionGetFilters = async ({
