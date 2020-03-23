@@ -31,7 +31,13 @@ const mappings: Mappings = {
       type: 'date'
     },
     label: {
-      type: 'text'
+      type: 'text',
+      fields: {
+        // Adding keyword type to be able to sort by label alphabetically
+        keyword: {
+          type: 'keyword'
+        }
+      }
     },
     url: {
       type: 'keyword'

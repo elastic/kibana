@@ -14,6 +14,7 @@ import {
 } from 'kibana/server';
 import { ActionResult } from '../types';
 import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -25,7 +26,7 @@ export const bodySchema = schema.object({
 export const createActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.post(
     {
-      path: `/api/action`,
+      path: BASE_ACTION_API_PATH,
       validate: {
         body: bodySchema,
       },
