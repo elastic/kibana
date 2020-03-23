@@ -137,8 +137,6 @@ export class Timeline {
     version: string | null,
     timeline: SavedTimeline
   ): Promise<ResponseTimeline> {
-    console.log('persist timeline -1-', timelineId, version, timeline);
-
     const savedObjectsClient = request.context.core.savedObjects.client;
     try {
       if (timelineId == null) {
@@ -149,7 +147,6 @@ export class Timeline {
             pickSavedTimeline(timelineId, timeline, request.user)
           )
         );
-        console.log('-------persist timeline -1.5-', newTimeline);
         return {
           code: 200,
           message: 'success',
@@ -157,9 +154,7 @@ export class Timeline {
         };
       }
       // Update Timeline
-      console.log('persist timeline -2-', version, timeline?.version);
       const existingTimeline = await this.getSavedTimeline(request, timelineId);
-      console.log('persist timeline -3-', existingTimeline);
 
       await savedObjectsClient.update(
         timelineSavedObjectType,
@@ -170,29 +165,24 @@ export class Timeline {
         }
       );
 
-      console.log('existingTimeline');
       return {
         code: 200,
         message: 'success',
         timeline: { ...existingTimeline, ...timeline },
       };
     } catch (err) {
-      console.log('persist timeline -3.5-', err);
       if (timelineId != null && savedObjectsClient.errors.isConflictError(err)) {
-        console.log('persist timeline -4-');
         return {
           code: 409,
           message: err.message,
           timeline: await this.getSavedTimeline(request, timelineId),
         };
-        console.log('persist timeline -5-');
       } else if (getOr(null, 'output.statusCode', err) === 403) {
         const timelineToReturn: TimelineResult = {
           ...timeline,
           savedObjectId: '',
           version: '',
         };
-        console.log('persist timeline -6-');
         return {
           code: 403,
           message: err.message,

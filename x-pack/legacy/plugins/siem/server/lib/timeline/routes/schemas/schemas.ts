@@ -16,7 +16,6 @@ export const eventType = Joi.string();
 
 export const filters = Joi.array();
 
-const id = Joi.string();
 export const kqlMode = Joi.string();
 
 export const noteId = Joi.string().allow([null, '']);

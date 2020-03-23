@@ -5,10 +5,6 @@
  */
 
 import {
-  mockTimelines,
-  mockNotes,
-  mockTimelinesSavedObjects,
-  mockPinnedEvents,
   getImportTimelinesRequest,
   getImportTimelinesRequestEnableOverwrite,
 } from './__mocks__/request_responses';
@@ -18,16 +14,8 @@ import {
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
-import { convertSavedObjectToSavedNote } from '../../note/saved_object';
-import { convertSavedObjectToSavedPinnedEvent } from '../../pinned_event/saved_object';
-import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';
-import {
-  buildHapiStream,
-  ruleIdsToNdJsonString,
-} from '../../detection_engine/routes/__mocks__/utils';
-import { getTupleDuplicateErrorsAndUniqueTimeline } from './utils/import_timelines';
-import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
-import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
+import { SecurityPluginSetup } from '../../../../../../../plugins/security/server';
+
 import {
   mockConfig,
   mockUniqueParsedObjects,
@@ -38,15 +26,15 @@ import {
 } from './__mocks__/import_timelines';
 
 describe('import timelines', () => {
-  let config;
+  let config: jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
-  let securitySetup: SecuritySetup;
-  let { clients, context } = requestContextMock.createTools();
-  let mockGetTimeline;
-  let mockPersistTimeline;
-  let mockPersistPinnedEventOnTimeline;
-  let mockPersistNote;
+  let securitySetup: SecurityPluginSetup;
+  let { context } = requestContextMock.createTools();
+  let mockGetTimeline: jest.Mock;
+  let mockPersistTimeline: jest.Mock;
+  let mockPersistPinnedEventOnTimeline: jest.Mock;
+  let mockPersistNote: jest.Mock;
 
   beforeEach(() => {
     jest.resetModules();
@@ -55,16 +43,17 @@ describe('import timelines', () => {
     jest.clearAllMocks();
 
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
+    context = requestContextMock.createTools().context;
     config = jest.fn().mockImplementation(() => {
       return mockConfig;
     });
 
-    securitySetup = {
+    securitySetup = ({
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
-    };
+      authz: {},
+    } as unknown) as SecurityPluginSetup;
 
     mockGetTimeline = jest.fn();
     mockPersistTimeline = jest.fn();
@@ -136,25 +125,25 @@ describe('import timelines', () => {
 
     test('should see if the given timeline savedObjectId already exist', async () => {
       const mockRequest = getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      await server.inject(mockRequest, context);
       expect(mockGetTimeline).toHaveBeenCalled();
     });
 
     test('should Create a new timeline savedObject', async () => {
       const mockRequest = getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      await server.inject(mockRequest, context);
       expect(mockPersistTimeline).toHaveBeenCalled();
     });
 
     test('should Create new pinned events', async () => {
       const mockRequest = getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      await server.inject(mockRequest, context);
       expect(mockPersistPinnedEventOnTimeline).toHaveBeenCalled();
     });
 
     test('should Create notes', async () => {
       const mockRequest = getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      await server.inject(mockRequest, context);
       expect(mockPersistNote).toHaveBeenCalled();
     });
 
@@ -260,25 +249,25 @@ describe('import timelines', () => {
 
     test('should see if the given timeline savedObjectId already exist', async () => {
       const mockRequest = getImportTimelinesRequestEnableOverwrite();
-      const response = await server.inject(mockRequest, context);
+      await server.inject(mockRequest, context);
       expect(mockGetTimeline).toHaveBeenCalled();
     });
 
     test('should Update existing timeline savedObject', async () => {
       const mockRequest = getImportTimelinesRequestEnableOverwrite();
-      const response = await server.inject(mockRequest, context);
+      await server.inject(mockRequest, context);
       expect(mockPersistTimeline).toHaveBeenCalled();
     });
 
     test('should Create new pinned events', async () => {
       const mockRequest = getImportTimelinesRequestEnableOverwrite();
-      const response = await server.inject(mockRequest, context);
+      await server.inject(mockRequest, context);
       expect(mockPersistPinnedEventOnTimeline).toHaveBeenCalled();
     });
 
     test('should Create/Update notes', async () => {
       const mockRequest = getImportTimelinesRequestEnableOverwrite();
-      const response = await server.inject(mockRequest, context);
+      await server.inject(mockRequest, context);
       expect(mockPersistNote).toHaveBeenCalled();
     });
 
@@ -289,64 +278,6 @@ describe('import timelines', () => {
         success: true,
         success_count: 1,
         errors: [],
-      });
-    });
-  });
-
-  describe('Import a new timeline but failed when pinning events', () => {
-    beforeEach(() => {
-      jest.doMock('../saved_object', () => {
-        return {
-          Timeline: jest.fn().mockImplementation(() => {
-            return {
-              getTimeline: mockGetTimeline.mockReturnValue(null),
-              persistTimeline: mockPersistTimeline.mockReturnValue({
-                timeline: { savedObjectId: '79deb4c0-6bc1-11ea-9999-f5341fb7a189' },
-              }),
-            };
-          }),
-        };
-      });
-
-      jest.doMock('../../pinned_event/saved_object', () => {
-        return {
-          PinnedEvent: jest.fn().mockImplementation(() => {
-            return {
-              persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline.mockReturnValue(
-                new Error('Test error')
-              ),
-            };
-          }),
-        };
-      });
-
-      jest.doMock('../../note/saved_object', () => {
-        return {
-          Note: jest.fn().mockImplementation(() => {
-            return {
-              persistNote: mockPersistNote,
-            };
-          }),
-        };
-      });
-
-      const importTimelinesRoute = jest.requireActual('./import_timelines_route')
-        .importTimelinesRoute;
-
-      importTimelinesRoute(server.router, config, securitySetup);
-    });
-    test('collect error and finish the process', async () => {
-      const response = await server.inject(getImportTimelinesRequest(), context, securitySetup);
-
-      expect(response.body).toEqual({
-        success: false,
-        success_count: 0,
-        errors: [
-          {
-            id: '79deb4c0-6bc1-11ea-9999-f5341fb7a189',
-            error: { status_code: 500, message: 'Test error' },
-          },
-        ],
       });
     });
   });

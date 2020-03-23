@@ -4,40 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, set as _set } from 'lodash/fp';
-import uuid from 'uuid';
+import { set as _set } from 'lodash/fp';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
 } from '../../../../saved_objects';
-import { NoteSavedObject, SavedNote } from '../../../note/types';
-import { PinnedEventSavedObject, SavedPinnedEvent } from '../../../pinned_event/types';
+import { NoteSavedObject } from '../../../note/types';
+import { PinnedEventSavedObject } from '../../../pinned_event/types';
 import { convertSavedObjectToSavedTimeline } from '../../convert_saved_object_to_savedtimeline';
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import { timelineWithReduxProperties } from '../../saved_object';
-import {
-  convertSavedObjectToSavedPinnedEvent,
-  pickSavedPinnedEvent,
-} from '../../../pinned_event/saved_object';
+
+import { convertSavedObjectToSavedPinnedEvent } from '../../../pinned_event/saved_object';
 import { convertSavedObjectToSavedNote } from '../../../note/saved_object';
-import { ResponseTimeline, ResponseNote, NoteResult } from '../../../../graphql/types';
-import { pickSavedTimeline } from '../../pick_saved_timeline';
+
 import {
   SavedObjectsClient,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '../../../../../../../../../src/core/server';
-import { BulkError, createBulkErrorObject } from '../../../detection_engine/routes/utils';
 
 import {
   ExportedTimelines,
   ExportTimelineSavedObjectsClient,
   ExportTimelineRequest,
   ExportedNotes,
-  SavedTimeline,
   TimelineSavedObject,
-} from '../types';
+} from '../../types';
 
 import { transformDataToNdjson } from '../../../detection_engine/routes/rules/utils';
 export type TimelineSavedObjectsClient = Pick<
@@ -94,16 +86,6 @@ const getNotesByTimelineId = (
   };
 
   return savedObjectsClient.find(options);
-};
-
-const getAllSavedNotesByTimelineId = async (
-  savedObjectsClient: ExportTimelineSavedObjectsClient,
-  timelineId: string
-): Promise<NoteSavedObject[]> => {
-  const noteSavedObject = await Promise.resolve(
-    getNotesByTimelineId(savedObjectsClient, timelineId)
-  );
-  return getAllSavedNote(noteSavedObject);
 };
 
 const getGlobalEventNotesByTimelineId = (currentNotes: NoteSavedObject[]): ExportedNotes => {

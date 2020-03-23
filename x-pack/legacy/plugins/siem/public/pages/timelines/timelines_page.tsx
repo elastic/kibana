@@ -28,7 +28,7 @@ type OwnProps = TimelinesProps;
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
-  const [importCompleteToggle, setImportCompleteToggle] = useState(false);
+  const [importCompleteToggle, setImportCompleteToggle] = useState<boolean>(false);
   const onImportTimelineBtnClick = useCallback(() => {
     setImportCompleteToggle(true);
   }, [setImportCompleteToggle]);

@@ -51,7 +51,7 @@ interface ImportRuleModalProps {
 /**
  * Modal component for importing Rules from a json file
  */
-export const ImportRuleModalComponent = ({
+export const ImportDataModalComponent = ({
   checkBoxLabel,
   closeModal,
   description,
@@ -165,8 +165,8 @@ export const ImportRuleModalComponent = ({
   );
 };
 
-ImportRuleModalComponent.displayName = 'ImportRuleModalComponent';
+ImportDataModalComponent.displayName = 'ImportDataModalComponent';
 
-export const ImportDataModal = React.memo(ImportRuleModalComponent);
+export const ImportDataModal = React.memo(ImportDataModalComponent);
 
 ImportDataModal.displayName = 'ImportDataModal';

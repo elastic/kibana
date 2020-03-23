@@ -97,15 +97,23 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     );
 
     const onRefreshBtnClick = useCallback(() => {
-      if (typeof refetch === 'function') refetch();
+      if (refetch != null) {
+        refetch();
+      }
     }, [refetch]);
 
     const handleCloseModal = useCallback(() => {
-      setImportCompleteToggle(false);
+      if (setImportCompleteToggle != null) {
+        setImportCompleteToggle(false);
+      }
     }, [setImportCompleteToggle]);
     const handleComplete = useCallback(() => {
-      setImportCompleteToggle(!importCompleteToggle);
-      refetch();
+      if (setImportCompleteToggle != null) {
+        setImportCompleteToggle(false);
+      }
+      if (refetch != null) {
+        refetch();
+      }
     }, [setImportCompleteToggle]);
 
     return (
@@ -127,7 +135,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           importComplete={handleComplete}
           importData={importTimelines}
           successMessage={i18n.SUCCESSFULLY_IMPORTED_TIMELINES}
-          showModal={importCompleteToggle}
+          showModal={importCompleteToggle ?? false}
           submitBtnText={i18n.IMPORT_TIMELINE_BTN_TITLE}
           subtitle={i18n.INITIAL_PROMPT_TEXT}
           title={i18n.IMPORT_TIMELINE}

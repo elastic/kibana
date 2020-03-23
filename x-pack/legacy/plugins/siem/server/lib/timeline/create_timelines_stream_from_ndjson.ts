@@ -17,9 +17,10 @@ import {
 } from '../detection_engine/rules/create_rules_stream_from_ndjson';
 import { importTimelinesSchema } from './routes/schemas/import_timelines_schema';
 import { BadRequestError } from '../detection_engine/errors/bad_request_error';
+import { ImportTimelineResponse } from './routes/utils/import_timelines';
 
 export const validateTimelines = (): Transform => {
-  return createMapStream((obj: ImportRuleAlertRest) => {
+  return createMapStream((obj: ImportTimelineResponse) => {
     if (!(obj instanceof Error)) {
       const validated = importTimelinesSchema.validate(obj);
       if (validated.error != null) {

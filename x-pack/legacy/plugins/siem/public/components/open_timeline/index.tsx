@@ -52,7 +52,10 @@ interface OwnProps<TCache = object> {
 }
 
 export type OpenTimelineOwnProps = OwnProps &
-  Pick<OpenTimelineProps, 'defaultPageSize' | 'title'> &
+  Pick<
+    OpenTimelineProps,
+    'defaultPageSize' | 'title' | 'importCompleteToggle' | 'setImportCompleteToggle'
+  > &
   PropsFromRedux;
 
 /** Returns a collection of selected timeline ids */
@@ -282,7 +285,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               refetch={refetch}
               searchResults={timelines}
               setImportCompleteToggle={setImportCompleteToggle}
-              refetch={refetch}
               selectedItems={selectedItems}
               sortDirection={sortDirection}
               sortField={sortField}

@@ -45,6 +45,7 @@ export const importTimelinesSchema = Joi.object({
   eventNotes,
   eventType,
   filters,
+  favorite,
   globalNotes,
   kqlMode,
   kqlQuery,

@@ -5,32 +5,29 @@
  */
 
 import { extname } from 'path';
-import { chunk, omit, set, difference } from 'lodash/fp';
+import { chunk, omit, set } from 'lodash/fp';
 import {
   buildRouteValidation,
   buildSiemResponse,
   createBulkErrorObject,
-  isBulkError,
   BulkError,
-  isImportRegular,
   transformError,
 } from '../../detection_engine/routes/utils';
 
 import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
-import { ExportedTimelines } from '../types';
-import { getTupleDuplicateErrorsAndUniqueRules } from '../../detection_engine/routes/rules/utils';
 
 import {
   createTimelines,
-  savePinnedEvents,
-  getCollectErrorMessages,
   getTupleDuplicateErrorsAndUniqueTimeline,
-  saveTimelines,
-  saveNotes,
+  isBulkError,
+  isImportRegular,
+  ImportTimelineResponse,
+  ImportTimelinesRequestParams,
+  ImportTimelinesSchema,
+  PromiseFromStreams,
 } from './utils/import_timelines';
 
-import { HapiReadableStream } from '../../detection_engine/rules/types';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { IMPORT_TIMELINES_URL } from '../../../../common/constants';
 import {
@@ -39,29 +36,15 @@ import {
 } from './schemas/import_timelines_schema';
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
 import { LegacyServices } from '../../../types';
-import { ImportRuleAlertRest } from '../../detection_engine/types';
-import { Note } from '../../note/saved_object';
-import { PinnedEvent } from '../../pinned_event/saved_object';
+
 import { Timeline } from '../saved_object';
 import { validate } from '../../detection_engine/routes/rules/validate';
-
-type PromiseFromStreams = ImportRuleAlertRest | Error;
+import { FrameworkRequest } from '../../framework';
+import { SecurityPluginSetup } from '../../../../../../../plugins/security/server';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
-interface ImportTimelinesSchema {
-  success: boolean;
-  success_count: number;
-  errors: BulkError[];
-}
-type ImportTimelineResponse = ExportedTimelines;
-interface ImportTimelinesRequestParams {
-  query: { overwrite: boolean };
-  body: { file: HapiReadableStream };
-}
 
 const timelineLib = new Timeline();
-const noteLib = new Note();
-const pinnedEventLib = new PinnedEvent();
 
 export const importTimelinesRoute = (
   router: IRouter,
@@ -135,6 +118,7 @@ export const importTimelinesRoute = (
                           message: parsedTimeline.message,
                         })
                       );
+
                       return null;
                     }
                     const {
@@ -167,33 +151,36 @@ export const importTimelinesRoute = (
                       frameworkRequest = set('user', user, frameworkRequest);
                       let timeline = null;
                       try {
-                        timeline = await timelineLib.getTimeline(frameworkRequest, savedObjectId);
+                        timeline = await timelineLib.getTimeline(
+                          (frameworkRequest as unknown) as FrameworkRequest,
+                          savedObjectId
+                        );
                         // eslint-disable-next-line no-empty
                       } catch (e) {}
 
                       if (timeline == null) {
                         await createTimelines(
-                          frameworkRequest,
+                          (frameworkRequest as unknown) as FrameworkRequest,
+                          resolve,
+                          parsedTimelineObject,
                           null, // timelineSavedObjectId
                           null, // timelineVersion
-                          parsedTimelineObject,
                           pinnedEventIds,
                           [...globalNotes, ...eventNotes],
-                          [], // existing note ids
-                          resolve
+                          [] // existing note ids
                         );
                       } else if (timeline != null && frameworkRequest.query.overwrite) {
                         // update timeline
 
                         await createTimelines(
-                          frameworkRequest,
+                          (frameworkRequest as unknown) as FrameworkRequest,
+                          resolve,
+                          parsedTimelineObject,
                           timeline.savedObjectId,
                           timeline.version,
-                          parsedTimelineObject,
                           pinnedEventIds,
                           [...globalNotes, ...eventNotes],
-                          timeline.noteIds,
-                          resolve
+                          timeline.noteIds
                         );
                       } else if (timeline != null) {
                         resolve(
@@ -252,7 +239,7 @@ export const importTimelinesRoute = (
 
         return siemResponse.error({
           body: error.message,
-          statusCode: error.status_code,
+          statusCode: error.statusCode,
         });
       }
     }

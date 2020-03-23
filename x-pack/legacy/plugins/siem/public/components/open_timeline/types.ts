@@ -121,7 +121,7 @@ export interface OpenTimelineProps {
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
   /** Display import timelines modal*/
-  importCompleteToggle: boolean;
+  importCompleteToggle?: boolean;
   /** If this callback is specified, a "Favorite Selected" button will be displayed, and this callback will be invoked when the button is clicked */
   onAddTimelinesToFavorites?: OnAddTimelinesToFavorites;
   /** If this callback is specified, a "Delete Selected" button will be displayed, and this callback will be invoked when the button is clicked */
@@ -147,13 +147,13 @@ export interface OpenTimelineProps {
   /** The currently applied search criteria */
   query: string;
   /** Refetch table */
-  refetch: Refetch;
+  refetch?: Refetch;
   /** The results of executing a search */
   searchResults: OpenTimelineResult[];
   /** the currently-selected timelines in the table */
   selectedItems: OpenTimelineResult[];
   /** Toggle export timelines modal*/
-  setImportCompleteToggle: React.Dispatch<React.SetStateAction<boolean>>;
+  setImportCompleteToggle?: React.Dispatch<React.SetStateAction<boolean>>;
   /** the requested sort direction of the query results */
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */

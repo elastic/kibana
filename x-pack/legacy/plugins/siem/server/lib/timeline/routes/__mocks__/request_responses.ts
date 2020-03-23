@@ -16,23 +16,23 @@ export const getExportTimelinesRequest = () =>
     },
   });
 
-export const getImportTimelinesRequest = (hapiStream?: HapiReadableStream) =>
+export const getImportTimelinesRequest = (filename?: string) =>
   requestMock.create({
     method: 'post',
     path: TIMELINE_IMPORT_URL,
     query: { overwrite: false },
     body: {
-      file: { hapi: { filename: 'filename.ndjson' } },
+      file: { hapi: { filename: filename ?? 'filename.ndjson' } },
     },
   });
 
-export const getImportTimelinesRequestEnableOverwrite = (hapiStream?: HapiReadableStream) =>
+export const getImportTimelinesRequestEnableOverwrite = (filename?: string) =>
   requestMock.create({
     method: 'post',
     path: TIMELINE_IMPORT_URL,
     query: { overwrite: true },
     body: {
-      file: { hapi: { filename: 'filename.ndjson' } },
+      file: { hapi: { filename: filename ?? 'filename.ndjson' } },
     },
   });
 

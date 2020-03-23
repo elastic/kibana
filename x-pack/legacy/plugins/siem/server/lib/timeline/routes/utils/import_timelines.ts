@@ -5,15 +5,52 @@
  */
 
 import uuid from 'uuid';
-import { createBulkErrorObject } from '../../../detection_engine/routes/utils';
+import { has } from 'lodash/fp';
+import { createBulkErrorObject, BulkError } from '../../../detection_engine/routes/utils';
 import { PinnedEvent } from '../../../pinned_event/saved_object';
 import { Note } from '../../../note/saved_object';
 
 import { Timeline } from '../../saved_object';
+import { SavedTimeline } from '../../types';
+import { FrameworkRequest } from '../../../framework';
+import { SavedNote } from '../../../note/types';
+import { NoteResult } from '../../../../graphql/types';
+import { HapiReadableStream } from '../../../detection_engine/rules/types';
 
 const pinnedEventLib = new PinnedEvent();
 const timelineLib = new Timeline();
 const noteLib = new Note();
+
+export interface ImportTimelinesSchema {
+  success: boolean;
+  success_count: number;
+  errors: BulkError[];
+}
+
+export type ImportedTimeline = SavedTimeline & {
+  savedObjectId: string;
+  pinnedEventIds: string[];
+  globalNotes: NoteResult[];
+  eventNotes: NoteResult[];
+};
+
+interface ImportRegular {
+  timeline_id: string;
+  status_code: number;
+  message?: string;
+}
+
+export type ImportTimelineResponse = ImportRegular | BulkError;
+export type PromiseFromStreams = ImportedTimeline;
+export interface ImportTimelinesRequestParams {
+  query: { overwrite: boolean };
+  body: { file: HapiReadableStream };
+}
+
+type Resolve = (
+  value?: ImportRegular | BulkError | PromiseLike<ImportTimelineResponse> | undefined
+) => void;
+
 export const getTupleDuplicateErrorsAndUniqueTimeline = (
   timelines: PromiseFromStreams[],
   isOverwrite: boolean
@@ -29,7 +66,7 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
             acc.errors.set(
               uuid.v4(),
               createBulkErrorObject({
-                savedObjectId,
+                id: savedObjectId,
                 statusCode: 400,
                 message: `More than one timeline with savedObjectId: "${savedObjectId}" found`,
               })
@@ -52,139 +89,111 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
   return [Array.from(errors.values()), Array.from(timelinesAcc.values())];
 };
 
-export const getCollectErrorMessages = (savedObject: []) => {
-  return savedObject
-    .reduce((acc, e) => {
-      return e != null && e instanceof Error ? [...acc, e.message] : [...acc];
-    }, [])
-    .join(',');
-};
-
 export const saveTimelines = async (
-  frameworkRequest,
-  timelineSavedObjectId = null,
-  timelineVersion = null,
-  timeline,
-  resolve
+  frameworkRequest: FrameworkRequest,
+  resolve: Resolve,
+  timeline: SavedTimeline,
+  timelineSavedObjectId?: string | null,
+  timelineVersion?: string | null
 ) => {
   const newTimelineRes = await timelineLib.persistTimeline(
     frameworkRequest,
-    timelineSavedObjectId,
-    timelineVersion,
+    timelineSavedObjectId ?? null,
+    timelineVersion ?? null,
     timeline
   );
   const newSavedObjectId = newTimelineRes?.timeline?.savedObjectId ?? null;
-
-  if (timelineSavedObjectId != null && newSavedObjectId == null) {
-    resolve(
-      createBulkErrorObject({
-        id: newSavedObjectId,
-        statusCode: 500,
-        message: 'Create timeline savedObject failed',
-      })
-    );
-  }
 
   return newSavedObjectId;
 };
 
 export const savePinnedEvents = async (
-  frameworkRequest,
-  timelineSavedObjectId,
-  pinnedEventIds,
-  resolve
+  frameworkRequest: FrameworkRequest,
+  resolve: Resolve,
+  timelineSavedObjectId: string,
+  pinnedEventIds?: string[] | null
 ) => {
-  if (pinnedEventIds.length !== 0) {
-    const createdPinnedEvents = await Promise.all(
-      pinnedEventIds.map(eventId => {
+  if (pinnedEventIds?.length !== 0) {
+    await Promise.all(
+      pinnedEventIds?.map(eventId => {
         return pinnedEventLib.persistPinnedEventOnTimeline(
           frameworkRequest,
           null, // pinnedEventSavedObjectId
           eventId,
-          timelineSavedObjectId,
-          pinnedEventIds
+          timelineSavedObjectId
         );
-      })
+      }) ?? []
     );
-    const errorMsg = getCollectErrorMessages(createdPinnedEvents);
-    if (errorMsg.length !== 0) {
-      resolve(
-        createBulkErrorObject({
-          id: timelineSavedObjectId,
-          statusCode: 500,
-          message: errorMsg,
-        })
-      );
-    }
   }
 };
 
 export const saveNotes = async (
-  frameworkRequest,
-  timelineSavedObjectId,
-  timelineVersion = null,
-  existingNoteIds = [],
-  newNotes = [],
-  resolve
+  frameworkRequest: FrameworkRequest,
+  resolve: Resolve,
+  timelineSavedObjectId: string,
+  timelineVersion?: string | null,
+  existingNoteIds?: string[],
+  newNotes?: NoteResult[]
 ) => {
-  if (newNotes.length !== 0) {
-    const createdNotes = await Promise.all(
-      newNotes.map(note => {
-        const newNote = {
+  if (newNotes?.length !== 0) {
+    await Promise.all(
+      newNotes?.map(note => {
+        const newNote: SavedNote = {
           eventId: note.eventId,
           note: note.note,
           timelineId: timelineSavedObjectId,
         };
         return noteLib.persistNote(
           frameworkRequest,
-          existingNoteIds.noteIds?.find(nId => nId === note.noteId) ?? null,
-          timelineVersion,
+          existingNoteIds?.find(nId => nId === note.noteId) ?? null,
+          timelineVersion ?? null,
           newNote
         );
-      })
+      }) ?? []
     );
-
-    const errorMsg = getCollectErrorMessages(createdNotes);
-    if (errorMsg.length !== 0) {
-      resolve(
-        createBulkErrorObject({
-          id: timelineSavedObjectId,
-          statusCode: 500,
-          message: errorMsg,
-        })
-      );
-    }
   }
 };
 
 export const createTimelines = async (
-  frameworkRequest,
-  timelineSavedObjectId = null,
-  timelineVersion = null,
-  timeline,
-  pinnedEventIds = [],
-  notes = [],
-  existingNoteIds = [],
-  resolve
+  frameworkRequest: FrameworkRequest,
+  resolve: Resolve,
+  timeline: SavedTimeline,
+  timelineSavedObjectId?: string | null,
+  timelineVersion?: string | null,
+  pinnedEventIds?: string[] | null,
+  notes?: NoteResult[],
+  existingNoteIds?: string[]
 ) => {
   const newSavedObjectId = await saveTimelines(
     frameworkRequest,
-    timelineSavedObjectId, // timeline SavedObjectId
-    timelineVersion, // timeline version
+    resolve,
     timeline,
-    resolve
+    timelineSavedObjectId,
+    timelineVersion
   );
 
-  await savePinnedEvents(frameworkRequest, newSavedObjectId, pinnedEventIds, resolve);
+  await savePinnedEvents(frameworkRequest, resolve, newSavedObjectId, pinnedEventIds);
 
   await saveNotes(
     frameworkRequest,
+    resolve,
     newSavedObjectId,
-    timelineVersion, // timelineVersion
-    existingNoteIds, // existingNoteIds
-    notes,
-    resolve
+    timelineVersion,
+    existingNoteIds,
+    notes
   );
 
   resolve({ timeline_id: newSavedObjectId, status_code: 200 });
+};
+
+export const isImportRegular = (
+  importTimelineResponse: ImportTimelineResponse
+): importTimelineResponse is ImportRegular => {
+  return !has('error', importTimelineResponse) && has('status_code', importTimelineResponse);
+};
+
+export const isBulkError = (
+  importRuleResponse: ImportTimelineResponse
+): importRuleResponse is BulkError => {
+  return has('error', importRuleResponse);
 };

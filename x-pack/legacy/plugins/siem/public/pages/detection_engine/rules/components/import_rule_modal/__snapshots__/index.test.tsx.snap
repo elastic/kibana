@@ -8,13 +8,17 @@ exports[`ImportDataModal renders correctly against snapshot 1`] = `
       onClose={[MockFunction]}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle />
+        <EuiModalHeaderTitle>
+          title
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText
           size="s"
         >
-          <h4 />
+          <h4>
+            description
+          </h4>
         </EuiText>
         <EuiSpacer
           size="s"
@@ -24,7 +28,7 @@ exports[`ImportDataModal renders correctly against snapshot 1`] = `
           display="large"
           fullWidth={true}
           id="rule-file-picker"
-          initialPromptText="Select or drag and drop a file"
+          initialPromptText="subtitle"
           isLoading={false}
           onChange={[Function]}
         />
@@ -37,6 +41,7 @@ exports[`ImportDataModal renders correctly against snapshot 1`] = `
           disabled={false}
           id="rule-overwrite-saved-object"
           indeterminate={false}
+          label="checkBoxLabel"
           onChange={[Function]}
         />
       </EuiModalBody>
@@ -50,7 +55,9 @@ exports[`ImportDataModal renders correctly against snapshot 1`] = `
           disabled={true}
           fill={true}
           onClick={[Function]}
-        />
+        >
+          submitBtnText
+        </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   </EuiOverlayMask>

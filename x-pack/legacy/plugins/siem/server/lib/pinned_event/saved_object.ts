@@ -91,8 +91,7 @@ export class PinnedEvent {
     request: FrameworkRequest,
     pinnedEventId: string | null, // pinned event saved object id
     eventId: string,
-    timelineId: string | null,
-    pinnedEventIds: string[]
+    timelineId: string | null
   ): Promise<PinnedEventResponse | null> {
     const savedObjectsClient = request.context.core.savedObjects.client;
 
