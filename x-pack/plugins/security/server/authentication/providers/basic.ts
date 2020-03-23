@@ -8,7 +8,10 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
+import {
+  HTTPAuthorizationHeader,
+  BasicHTTPAuthorizationHeaderCredentials,
+} from '../http_authentication';
 import { BaseAuthenticationProvider } from './base';
 
 /**
@@ -64,7 +67,10 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to perform a login.');
 
     const authHeaders = {
-      authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+      authorization: new HTTPAuthorizationHeader(
+        'Basic',
+        new BasicHTTPAuthorizationHeaderCredentials(username, password).toString()
+      ).toString(),
     };
 
     try {
@@ -86,7 +92,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    if (getHTTPAuthenticationScheme(request) != null) {
+    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
