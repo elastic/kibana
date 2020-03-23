@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AgentConfigurationIntake } from '../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
+import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {

@@ -20,7 +20,7 @@ import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/
 import {
   omitAllOption,
   getOptionLabel
-} from '../../../../../../../../../../plugins/apm/common/agent_configuration/constants';
+} from '../../../../../../../../../../plugins/apm/common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/useFetcher';
 import { FormRowSelect } from './FormRowSelect';
 import { APMLink } from '../../../../../shared/Links/apm/APMLink';

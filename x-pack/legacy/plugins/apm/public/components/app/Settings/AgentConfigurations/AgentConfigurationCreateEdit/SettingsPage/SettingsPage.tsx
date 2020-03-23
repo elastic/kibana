@@ -21,6 +21,8 @@ import {
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
+import { FETCH_STATUS } from '../../../../../../hooks/useFetcher';
 import { AgentName } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/fields/agent';
 import { history } from '../../../../../../utils/history';
 import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/agent_configuration/configuration_types';
@@ -33,7 +35,7 @@ import { saveConfig } from './saveConfig';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useUiTracker } from '../../../../../../../../../../plugins/observability/public';
 import { SettingFormRow } from './SettingFormRow';
-import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration/constants';
+import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration/all_option';
 
 function removeEmpty<T>(obj: T): T {
   return Object.fromEntries(
@@ -42,7 +44,7 @@ function removeEmpty<T>(obj: T): T {
 }
 
 export function SettingsPage({
-  isLoading,
+  status,
   unsavedChanges,
   newConfig,
   setNewConfig,
@@ -50,7 +52,7 @@ export function SettingsPage({
   isEditMode,
   onClickEdit
 }: {
-  isLoading: boolean;
+  status?: FETCH_STATUS;
   unsavedChanges: Record<string, string>;
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -63,6 +65,7 @@ export function SettingsPage({
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   const isFormValid = useMemo(() => {
     return (
@@ -95,6 +98,26 @@ export function SettingsPage({
       search: history.location.search
     });
   };
+
+  if (status === FETCH_STATUS.FAILURE) {
+    return (
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.apm.agentConfig.settingsPage.notFound.title',
+          { defaultMessage: 'Sorry, there was an error' }
+        )}
+        color="danger"
+        iconType="alert"
+      >
+        <p>
+          {i18n.translate(
+            'xpack.apm.agentConfig.settingsPage.notFound.message',
+            { defaultMessage: 'The requested configuration does not exist' }
+          )}
+        </p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <>

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FetcherResult, FETCH_STATUS } from '../../../../../hooks/useFetcher';
+import { FetcherResult } from '../../../../../hooks/useFetcher';
 import { history } from '../../../../../utils/history';
 import {
   AgentConfigurationIntake,
@@ -90,6 +91,15 @@ export function AgentConfigurationCreateEdit({
     if (pageStep === 'choose-service-step' && isEditMode) {
       setPage('choose-settings-step');
     }
+
+    // the user skipped the first step (select service)
+    if (
+      pageStep === 'choose-settings-step' &&
+      !isEditMode &&
+      isEmpty(newConfig.service)
+    ) {
+      setPage('choose-service-step');
+    }
   }, [isEditMode, newConfig, pageStep]);
 
   const unsavedChanges = getUnsavedChanges({ newConfig, existingConfig });
@@ -128,7 +138,7 @@ export function AgentConfigurationCreateEdit({
 
       {pageStep === 'choose-settings-step' && (
         <SettingsPage
-          isLoading={existingConfigResult?.status === FETCH_STATUS.LOADING}
+          status={existingConfigResult?.status}
           unsavedChanges={unsavedChanges}
           onClickEdit={() => setPage('choose-service-step')}
           newConfig={newConfig}

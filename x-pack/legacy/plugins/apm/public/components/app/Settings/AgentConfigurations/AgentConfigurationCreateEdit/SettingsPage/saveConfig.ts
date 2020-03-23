@@ -10,7 +10,7 @@ import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/
 import {
   getOptionLabel,
   omitAllOption
-} from '../../../../../../../../../../plugins/apm/common/agent_configuration/constants';
+} from '../../../../../../../../../../plugins/apm/common/agent_configuration/all_option';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 
 export async function saveConfig({
