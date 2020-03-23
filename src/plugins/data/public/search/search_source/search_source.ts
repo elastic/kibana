@@ -78,7 +78,7 @@ import { SearchSourceOptions, SearchSourceFields } from './types';
 import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 
 import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
-import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
+import { getEsQueryConfig, buildEsQuery } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
