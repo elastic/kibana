@@ -92,6 +92,28 @@ describe('filter manager utilities', () => {
       expect(compareFilters(f1, f2)).toBeTruthy();
     });
 
+    test('should compare duplicates, assuming $state: { store: FilterStateStore.APP_STATE } is default', () => {
+      const f1 = {
+        $state: { store: FilterStateStore.APP_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+      };
+      const f2 = {
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+      };
+      const f3 = {
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+      };
+
+      // don't take state into account at all:
+      expect(compareFilters(f1, f2)).toBeTruthy();
+      expect(compareFilters(f2, f3)).toBeTruthy();
+
+      // compare with state:
+      expect(compareFilters(f1, f2, { state: true })).toBeTruthy();
+      expect(compareFilters(f2, f3, { state: true })).toBeFalsy();
+    });
+
     test('should compare filters array to non array', () => {
       const f1 = buildQueryFilter(
         { _type: { match: { query: 'apache', type: 'phrase' } } },
