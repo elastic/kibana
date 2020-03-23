@@ -278,10 +278,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  getFormattedValue(value) {
-    return this.isOrdinal() ? this.getNumericalMbFeatureStateValue(value) : this.formatField(value);
-  }
-
   getNumericalMbFeatureStateValue(value) {
     const valueAsFloat = parseFloat(value);
     return isNaN(valueAsFloat) ? null : valueAsFloat;

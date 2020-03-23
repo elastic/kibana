@@ -510,7 +510,12 @@ export class VectorStyle extends AbstractStyle {
           //in practice, a new system property will only be created for:
           // - label text: this requires the value to be formatted first.
           // - icon orientation: this is a lay-out property which do not support feature-state (but we're still coercing to a number)
-          feature.properties[computedName] = dynamicStyleProp.getFormattedValue(rawValue);
+
+          const formattedValue = dynamicStyleProp.isOrdinal()
+            ? dynamicStyleProp.getNumericalMbFeatureStateValue(rawValue)
+            : dynamicStyleProp.formatField(rawValue);
+
+          feature.properties[computedName] = formattedValue;
         }
       }
       tmpFeatureIdentifier.source = mbSourceId;
