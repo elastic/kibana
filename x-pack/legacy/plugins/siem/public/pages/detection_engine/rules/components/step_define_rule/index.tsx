@@ -13,13 +13,14 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { FC, memo, useCallback, useState, useEffect } from 'react';
+import React, { FC, memo, useCallback, useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
+import { MlCapabilitiesContext } from '../../../../../components/ml/permissions/ml_capabilities_provider';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { setFieldValue, isMlRule } from '../../helpers';
 import * as RuleI18n from '../../translations';
@@ -103,6 +104,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   setForm,
   setStepData,
 }) => {
+  const mlCapabilities = useContext(MlCapabilitiesContext);
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState(false);
   const [localIsMlRule, setIsMlRule] = useState(false);
@@ -182,6 +184,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             path="ruleType"
             component={SelectRuleType}
             componentProps={{
+              describedByIds: ['detectionEngineStepDefineRuleType'],
+              hasValidLicense: mlCapabilities.isPlatinumOrTrialLicense,
               isReadOnly: isUpdateView,
             }}
           />
@@ -220,7 +224,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 component={QueryBarDefineRule}
                 componentProps={{
                   browserFields,
-                  loading: indexPatternLoadingQueryBar,
                   idAria: 'detectionEngineStepDefineRuleQueryBar',
                   indexPattern: indexPatternQueryBar,
                   isDisabled: isLoading,
@@ -234,8 +237,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </EuiFormRow>
           <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'flex' : 'none' }}>
             <>
-              <UseField path="machineLearningJobId" component={MlJobSelect} />
-              <UseField path="anomalyThreshold" component={AnomalyThresholdSlider} />
+              <UseField
+                path="machineLearningJobId"
+                component={MlJobSelect}
+                componentProps={{
+                  describedByIds: ['detectionEngineStepDefineRulemachineLearningJobId'],
+                }}
+              />
+              <UseField
+                path="anomalyThreshold"
+                component={AnomalyThresholdSlider}
+                componentProps={{
+                  describedByIds: ['detectionEngineStepDefineRuleAnomalyThreshold'],
+                }}
+              />
             </>
           </EuiFormRow>
           <FormDataProvider pathsToWatch={['index', 'ruleType']}>

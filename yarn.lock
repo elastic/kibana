@@ -2022,10 +2022,10 @@
     through2 "^2.0.0"
     update-notifier "^0.5.0"
 
-"@elastic/maki@6.1.0":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/maki/-/maki-6.1.0.tgz#384bdd53b95e9f87bd6b27e3d9dfaad70e29715a"
-  integrity sha512-eCNuGV3bVfSpDn1af6qCJ1udwm9DqGFjNN5JXbNIonAQYrbPvrRXNe5CxDKlWXbgxKOaOIhWtJ3/62JN+YKlZA==
+"@elastic/maki@6.2.0":
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/maki/-/maki-6.2.0.tgz#d0a85aa248bdc14dca44e1f9430c0b670f65e489"
+  integrity sha512-QkmRNpEY4Dy6eqwDimR5X9leMgdPFjdANmpEIwEW1XVUG2U4YtB2BXhDxsnMmNTUrJUjtnjnwgwBUyg0pU0FTg==
 
 "@elastic/node-crypto@^0.1.2":
   version "0.1.2"
