@@ -89,6 +89,10 @@ export default async function({ readConfigFile }) {
         '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
         '--xpack.endpoint.enabled=true',
+        '--xpack.ingestManager.enabled=true',
+        '--xpack.ingestManager.fleet.enabled=true',
+        '--xpack.ingestManager.epm.enabled=true',
+        '--xpack.ingestManager.epm.registryUrl=http://localhost:6666',
       ],
     },
     uiSettings: {
@@ -201,6 +205,9 @@ export default async function({ readConfigFile }) {
       },
       endpoint: {
         pathname: '/app/endpoint',
+      },
+      ingestManager: {
+        pathname: '/app/ingest_manager',
       },
     },
 

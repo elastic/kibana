@@ -27,13 +27,13 @@ async function main() {
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
-      default: 'events-endpoint-1',
+      default: 'events-endpoint-default-1',
       type: 'string',
     },
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'endpoint-agent-1',
+      default: 'metrics-endpoint-default-1',
       type: 'string',
     },
     auth: {

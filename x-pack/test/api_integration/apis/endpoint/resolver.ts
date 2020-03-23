@@ -6,8 +6,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { FakePackageRegistry } from '../../../epm_api_integration/apis/fake_registry';
-import { setupRouteService } from '../../../../plugins/ingest_manager/common';
 const commonHeaders = {
   accept: 'application/json',
   'kbn-xsrf': 'some-xsrf-token',
@@ -17,19 +15,12 @@ const commonHeaders = {
 export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const registry = new FakePackageRegistry();
   describe('Resolver', () => {
     before(async () => {
-      registry.start();
-      await supertest
-        .post(setupRouteService.getSetupPath())
-        .set(commonHeaders)
-        .expect(200);
       await esArchiver.load('endpoint/resolver/api_feature');
     });
-    after(() => {
-      esArchiver.unload('endpoint/resolver/api_feature');
-      registry.stop();
+    after(async () => {
+      await esArchiver.unload('endpoint/resolver/api_feature');
     });
 
     describe('related events endpoint', () => {

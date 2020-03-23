@@ -17,7 +17,7 @@ export const kibanaRequestToMetadataListESQuery = async (
     body: {
       query: buildQueryBody(request),
       collapse: {
-        field: 'host.id.keyword',
+        field: 'host.id',
         inner_hits: {
           name: 'most_recent',
           size: 1,
@@ -27,7 +27,7 @@ export const kibanaRequestToMetadataListESQuery = async (
       aggs: {
         total: {
           cardinality: {
-            field: 'host.id.keyword',
+            field: 'host.id',
           },
         },
       },
@@ -83,7 +83,7 @@ export const kibanaRequestToMetadataGetESQuery = (
     body: {
       query: {
         match: {
-          'host.id.keyword': request.params.id,
+          'host.id': request.params.id,
         },
       },
       sort: [

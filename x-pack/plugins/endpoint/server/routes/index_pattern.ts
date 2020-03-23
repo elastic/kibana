@@ -25,12 +25,13 @@ function handleIndexPattern(
         context.core.savedObjects.client,
         req.params.datasetPath,
         log,
-        req.query?.version
+        req.query.version
       );
+
       return res.ok({ body: await indexPattern.get() });
-    } catch (e) {
-      log.warn(e);
-      return res.internalError({ body: e });
+    } catch (error) {
+      log.warn(error);
+      return res.internalError({ body: error });
     }
   };
 }

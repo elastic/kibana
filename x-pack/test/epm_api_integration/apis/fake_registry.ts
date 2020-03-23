@@ -36,15 +36,22 @@ interface Server {
   on(options: Options): void;
 }
 
+/**
+ * This class sets up a fake package registry. It only handles the requests needed for the ingest manager's /setup
+ * route so that the default packages can be installed.
+ */
 export class FakePackageRegistry {
   private readonly server: Server;
   private readonly responses: Record<string, Package>;
+  private readonly allSearchResp: string;
   constructor() {
     this.server = new ServerMock({ host: 'localhost', port: 6666 });
-    this.responses = FakePackageRegistry.loadResponses();
+    const { responses, allSearchResp } = FakePackageRegistry.loadResponses();
+    this.responses = responses;
+    this.allSearchResp = allSearchResp;
   }
 
-  private static loadResponses(): Record<string, Package> {
+  private static loadResponses(): { responses: Record<string, Package>; allSearchResp: string } {
     const responses: Record<string, Package> = {};
     const packages = ['base-1.0.0', 'system-0.9.0', 'endpoint-1.0.0'];
     for (const packageName of packages) {
@@ -63,23 +70,26 @@ export class FakePackageRegistry {
       const name = packageName.split('-')[0];
       responses[name] = { packageResp, searchResp, archive };
     }
-    const searchResp = readFileSync(
-      join(__dirname, 'fixtures/packages/package', 'search.json'),
+    const allSearchResp = readFileSync(
+      join(__dirname, 'fixtures/packages/package', 'all_search.json'),
       'utf8'
     );
-    responses.all = { searchResp };
-    return responses;
+    return { responses, allSearchResp };
   }
 
   start() {
     this.server.start(() => {});
+    /**
+     * Handle /search requests
+     * e.g. /search?package=endpoint-1.0.0
+     */
     this.server.on({
       method: 'GET',
       path: '/search',
       reply: {
         body: (req: Request) => {
           if (!req.query.package) {
-            return this.responses.all.searchResp;
+            return this.allSearchResp;
           }
           const resp = this.responses[req.query?.package].searchResp;
           return resp;
@@ -87,11 +97,14 @@ export class FakePackageRegistry {
       },
     });
 
+    /**
+     * Handle /package requests
+     * e.g. /package/system-0.9.0
+     */
     this.server.on({
       method: 'GET',
       path: '*',
       filter: (req: Request) => {
-        // /package/system-0.9.0
         return req.pathname.startsWith('/package');
       },
       reply: {
@@ -103,11 +116,15 @@ export class FakePackageRegistry {
       },
     });
 
+    /**
+     * Handle /epr requests for downloading a package
+     * e.g. /epr/endpoint/endpoint-1.0.0.tar.gz
+     */
     this.server.on({
       method: 'GET',
       path: '*',
       filter: (req: Request) => {
-        // /epr/endpoint/endpoint-0.0.1.tar.gz
+        //
         return req.pathname.startsWith('/epr');
       },
       reply: {

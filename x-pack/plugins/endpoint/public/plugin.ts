@@ -49,7 +49,9 @@ export class EndpointPlugin
       }),
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./applications/endpoint');
+
+        const { renderApp, setupDeps } = await import('./applications/endpoint');
+        await setupDeps(coreStart);
         return renderApp(coreStart, depsStart, params);
       },
     });

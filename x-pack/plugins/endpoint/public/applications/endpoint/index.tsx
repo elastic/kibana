@@ -24,6 +24,11 @@ import { HeaderNavigation } from './components/header_nav';
 import { setupRouteService } from '../../../../ingest_manager/common';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
 
+export async function setupDeps(coreStart: CoreStart) {
+  // TODO handle a 500 from the ingest manager
+  await coreStart.http.post(setupRouteService.getSetupPath());
+}
+
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
@@ -32,8 +37,6 @@ export function renderApp(
   depsStart: EndpointPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) {
-  // TODO handle a 500 from the ingest manager
-  coreStart.http.post(setupRouteService.getSetupPath());
   coreStart.http.get('/api/endpoint/hello-world');
   const store = appStoreFactory({ coreStart, depsStart });
   ReactDOM.render(

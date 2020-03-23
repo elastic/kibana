@@ -7,8 +7,6 @@
 import { schema } from '@kbn/config-schema';
 
 export const indexPatternGetParamsSchema = schema.object({ datasetPath: schema.string() });
-export const indexPatternGetQueryParamsSchema = schema.maybe(
-  schema.object({
-    version: schema.string(),
-  })
-);
+export const indexPatternGetQueryParamsSchema = schema.object({
+  version: schema.maybe(schema.string()),
+});
