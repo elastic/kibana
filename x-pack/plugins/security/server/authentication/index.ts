@@ -28,6 +28,10 @@ export {
   CreateAPIKeyParams,
   InvalidateAPIKeyParams,
 } from './api_keys';
+export {
+  BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
+} from './http_authentication';
 
 interface SetupAuthenticationParams {
   http: CoreSetup['http'];
@@ -181,8 +185,11 @@ export async function setupAuthentication({
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),
+    grantAPIKeyAsInternalUser: (request: KibanaRequest) => apiKeys.grantAsInternalUser(request),
     invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
       apiKeys.invalidate(request, params),
+    invalidateAPIKeyAsInternalUser: (params: InvalidateAPIKeyParams) =>
+      apiKeys.invalidateAsInternalUser(params),
     isAuthenticated: (request: KibanaRequest) => http.auth.isAuthenticated(request),
   };
 }
