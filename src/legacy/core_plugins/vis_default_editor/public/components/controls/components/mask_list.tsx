@@ -22,7 +22,7 @@ import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { InputList, InputListConfig, InputObject, InputModel, InputItem } from './input_list';
-import { CidrMask } from '../../../legacy_imports';
+import { search } from '../../../../../../../plugins/data/public';
 
 const EMPTY_STRING = '';
 
@@ -47,7 +47,7 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
     defaultValue: {
       mask: { model: '0.0.0.0/1', value: '0.0.0.0/1', isInvalid: false },
     },
-    validateClass: CidrMask,
+    validateClass: search.aggs.CidrMask,
     getModelValue: (item: MaskObject = {}) => ({
       mask: {
         model: item.mask || EMPTY_STRING,

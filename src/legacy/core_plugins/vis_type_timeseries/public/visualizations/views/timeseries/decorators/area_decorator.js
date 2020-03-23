@@ -43,7 +43,6 @@ export function AreaSeriesDecorator({
 }) {
   const id = seriesId;
   const groupId = seriesGroupId;
-  const customSeriesColors = [color];
   const areaSeriesStyle = getAreaStyles({ points, lines, color });
 
   const seriesSettings = {
@@ -51,7 +50,7 @@ export function AreaSeriesDecorator({
     name,
     groupId,
     data,
-    customSeriesColors,
+    color,
     hideInLegend,
     xAccessor: X_ACCESSOR_INDEX,
     yAccessors: Y_ACCESSOR_INDEXES,
