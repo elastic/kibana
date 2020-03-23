@@ -24,7 +24,16 @@ import { Bundle } from '../common';
 import { KibanaPlatformPlugin } from './kibana_platform_plugins';
 
 export function getBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
-  return plugins
+  const coreBundle = new Bundle({
+    type: 'standalone',
+    id: 'core',
+    entry: './public/entry_point',
+    sourceRoot: repoRoot,
+    contextDir: Path.resolve(repoRoot, 'src/core'),
+    outputDir: Path.resolve(repoRoot, 'src/core/public/target/public'),
+  });
+
+  const pluginBundles = plugins
     .filter(p => p.isUiPlugin)
     .map(
       p =>
@@ -37,4 +46,6 @@ export function getBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
           outputDir: Path.resolve(p.directory, 'target/public'),
         })
     );
+
+  return [coreBundle, ...pluginBundles];
 }
