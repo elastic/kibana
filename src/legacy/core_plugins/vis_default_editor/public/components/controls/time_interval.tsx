@@ -37,7 +37,14 @@ function getInvalidEsMessage(interval: string) {
   );
 }
 
+// we check if Elasticsearch interval is valid to show a user appropriate error message
+// e.g. there is the case when a user inputs '14d' but it's '2w' in expression equivalent and the request will fail
+// we don't check it for 0ms because the overall time range has not yet been set
 function isValidCalendarInterval(interval: string) {
+  if (interval === '0ms') {
+    return true;
+  }
+
   try {
     parseEsInterval(interval);
     return true;
@@ -50,24 +57,48 @@ function isValidCalendarInterval(interval: string) {
   }
 }
 
-function validate(value?: string, definedOption?: ComboBoxOption, timeBase?: string) {
+const errorMessage = i18n.translate(
+  'visDefaultEditor.controls.timeInterval.invalidFormatErrorMessage',
+  {
+    defaultMessage: 'Invalid interval format.',
+  }
+);
+
+function validateInterval(
+  agg: any,
+  value?: string,
+  definedOption?: ComboBoxOption,
+  timeBase?: string
+) {
   if (definedOption) {
-    return { isValidValue: true };
+    return { isValid: true };
   }
 
   if (!value) {
-    return { isValidValue: false };
+    return { isValid: false, error: errorMessage };
   }
 
   // we check if Elasticsearch interval is valid ES interval to show a user appropriate error message
   // we don't check if there is timeBase
-  const isValidIntervalValue = !!timeBase || value === '0ms' || isValidCalendarInterval(value);
+  const isValidCalendarValue = !!timeBase || isValidCalendarInterval(value);
 
-  if (!isValidIntervalValue) {
-    return { isValidValue: false, errorMessage: getInvalidEsMessage(value) };
+  if (!isValidCalendarValue) {
+    return { isValid: false, error: getInvalidEsMessage(value) };
   }
 
-  return { isValidValue: search.aggs.isValidInterval(value, timeBase) };
+  const isValid = search.aggs.isValidInterval(value, timeBase);
+
+  if (!isValid) {
+    return { isValid: false, error: errorMessage };
+  }
+
+  const interval = agg.buckets?.getInterval();
+
+  if (!isValidCalendarInterval(interval.expression)) {
+    return { isValid: false, error: getInvalidEsMessage(interval.expression) };
+  }
+
+  return { isValid, interval };
 }
 
 interface ComboBoxOption extends EuiComboBoxOptionOption {
@@ -99,43 +130,15 @@ function TimeIntervalParamEditor({
 
   let selectedOptions: ComboBoxOption[] = [];
   let definedOption: ComboBoxOption | undefined;
-  let error = '';
   if (value) {
     definedOption = find(options, { key: value });
     selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
   }
 
-  const { isValidValue, errorMessage } = validate(value, definedOption, timeBase);
-  let invalidEsMessage = errorMessage;
-  let isValid = isValidValue;
-
-  let interval: { scaled: boolean; scale: number; expression: string } = {} as any;
-  if (isValid) {
-    interval = (agg as any).buckets?.getInterval();
-
-    // we check if Elasticsearch interval is valid to show a user appropriate error message
-    // e.g. there is the case when a user inputs '14d' but it's '2w' in expression equivalent and the request will fail
-    // we don't check it for 0ms because the overall time range has not yet been set
-    if (
-      !invalidEsMessage &&
-      interval.expression !== '0ms' &&
-      !isValidCalendarInterval(interval.expression)
-    ) {
-      isValid = false;
-      invalidEsMessage = getInvalidEsMessage(interval.expression);
-    }
-  }
-
-  if (!isValid) {
-    error =
-      invalidEsMessage ||
-      i18n.translate('visDefaultEditor.controls.timeInterval.invalidFormatErrorMessage', {
-        defaultMessage: 'Invalid interval format.',
-      });
-  }
+  const { isValid, error, interval } = validateInterval(agg, value, definedOption, timeBase);
 
   const scaledHelpText =
-    isValid && interval && interval.scaled ? (
+    interval && interval.scaled ? (
       <strong className="eui-displayBlock">
         <FormattedMessage
           id="visDefaultEditor.controls.timeInterval.scaledHelpText"
