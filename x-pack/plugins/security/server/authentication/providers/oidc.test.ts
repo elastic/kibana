@@ -575,7 +575,7 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
       await expect(provider.logout(request, { accessToken, refreshToken })).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/logged_out')
+        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
       );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);

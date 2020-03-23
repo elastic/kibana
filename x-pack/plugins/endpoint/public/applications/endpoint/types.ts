@@ -5,47 +5,56 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
-import { CoreStart } from 'kibana/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
-  EndpointMetadata,
+  HostMetadata,
   AlertData,
   AlertResultList,
   Immutable,
   ImmutableArray,
 } from '../../../common/types';
+import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
+import { CoreStart } from '../../../../../../src/core/public';
+import { Datasource } from '../../../../ingest_manager/common/types/models';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
-  coreStart: CoreStart
+  coreStart: CoreStart,
+  depsStart: EndpointPluginStartDependencies
 ) => (
   api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
-export interface ManagementListState {
-  endpoints: EndpointMetadata[];
-  total: number;
+export interface HostListState {
+  hosts: HostMetadata[];
   pageSize: number;
   pageIndex: number;
+  total: number;
   loading: boolean;
+  detailsError?: ServerApiError;
+  details?: Immutable<HostMetadata>;
+  location?: Immutable<EndpointAppLocation>;
 }
 
-export interface ManagementListPagination {
+export interface HostListPagination {
   pageIndex: number;
   pageSize: number;
 }
-
-// REFACTOR to use Types from Ingest Manager - see: https://github.com/elastic/endpoint-app-team/issues/150
-export interface PolicyData {
-  name: string;
-  total: number;
-  pending: number;
-  failed: number;
-  created_by: string;
-  created: string;
-  updated_by: string;
-  updated: string;
+export interface HostIndexUIQueryParams {
+  selected_host?: string;
 }
+
+export interface ServerApiError {
+  statusCode: number;
+  error: string;
+  message: string;
+}
+
+/**
+ * An Endpoint Policy.
+ */
+export type PolicyData = Datasource;
 
 /**
  * Policy list store state
@@ -53,6 +62,8 @@ export interface PolicyData {
 export interface PolicyListState {
   /** Array of policy items  */
   policyItems: PolicyData[];
+  /** API error if loading data failed */
+  apiError?: ServerApiError;
   /** total number of policies */
   total: number;
   /** Number of policies per page */
@@ -63,10 +74,23 @@ export interface PolicyListState {
   isLoading: boolean;
 }
 
+/**
+ * Policy list store state
+ */
+export interface PolicyDetailsState {
+  /** A single policy item  */
+  policyItem: PolicyData | undefined;
+  /** data is being retrieved from server */
+  isLoading: boolean;
+  /** current location of the application */
+  location?: Immutable<EndpointAppLocation>;
+}
+
 export interface GlobalState {
-  readonly managementList: ManagementListState;
+  readonly hostList: HostListState;
   readonly alertList: AlertListState;
   readonly policyList: PolicyListState;
+  readonly policyDetails: PolicyDetailsState;
 }
 
 /**
@@ -89,23 +113,33 @@ export interface EndpointAppLocation {
   key?: string;
 }
 
+interface AlertsSearchBarState {
+  patterns: IIndexPattern[];
+}
+
 export type AlertListData = AlertResultList;
 
 export interface AlertListState {
   /** Array of alert items. */
-  alerts: ImmutableArray<AlertData>;
+  readonly alerts: ImmutableArray<AlertData>;
 
   /** The total number of alerts on the page. */
-  total: number;
+  readonly total: number;
 
   /** Number of alerts per page. */
-  pageSize: number;
+  readonly pageSize: number;
 
   /** Page number, starting at 0. */
-  pageIndex: number;
+  readonly pageIndex: number;
 
   /** Current location object from React Router history. */
   readonly location?: Immutable<EndpointAppLocation>;
+
+  /** Specific Alert data to be shown in the details view */
+  readonly alertDetails?: Immutable<AlertData>;
+
+  /** Search bar state including indexPatterns */
+  readonly searchBar: AlertsSearchBarState;
 }
 
 /**
@@ -124,18 +158,7 @@ export interface AlertingIndexUIQueryParams {
    * If any value is present, show the alert detail view for the selected alert. Should be an ID for an alert event.
    */
   selected_alert?: string;
-}
-
-/**
- * Query params to pass to the alert API when fetching new data.
- */
-export interface AlertsAPIQueryParams {
-  /**
-   * Number of results to return.
-   */
-  page_size?: string;
-  /**
-   * 0-based index of 'page' to return.
-   */
-  page_index?: string;
+  query?: string;
+  date_range?: string;
+  filters?: string;
 }

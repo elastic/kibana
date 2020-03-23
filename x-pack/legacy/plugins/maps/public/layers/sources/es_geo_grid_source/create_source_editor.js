@@ -9,8 +9,8 @@ import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { RENDER_AS } from './render_as';
-import { indexPatternService } from '../../../kibana_services';
+import { RENDER_AS } from '../../../../common/constants';
+import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
 
@@ -19,9 +19,6 @@ import {
   AGGREGATABLE_GEO_FIELD_TYPES,
   getAggregatableGeoFields,
 } from '../../../index_pattern_util';
-
-import { npStart } from 'ui/new_platform';
-const { IndexPatternSelect } = npStart.plugins.data.ui;
 
 const requestTypeOptions = [
   {
@@ -92,7 +89,7 @@ export class CreateSourceEditor extends Component {
 
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(indexPatternId);
+      indexPattern = await getIndexPatternService().get(indexPatternId);
     } catch (err) {
       // index pattern no longer exists
       return;
@@ -205,6 +202,8 @@ export class CreateSourceEditor extends Component {
   }
 
   _renderIndexPatternSelect() {
+    const IndexPatternSelect = getIndexPatternSelectComponent();
+
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.esGeoGrid.indexPatternLabel', {

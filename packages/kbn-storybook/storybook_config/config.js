@@ -55,7 +55,7 @@ addParameters({
       brandTitle: 'Kibana Storybook',
       brandUrl: 'https://github.com/elastic/kibana/tree/master/packages/kbn-storybook',
     }),
-    showPanel: true,
+    showPanel: false,
     isFullscreen: false,
     panelPosition: 'bottom',
     isToolshown: true,

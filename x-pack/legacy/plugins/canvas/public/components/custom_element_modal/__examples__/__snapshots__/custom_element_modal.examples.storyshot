@@ -54,16 +54,11 @@ Array [
         onClick={[Function]}
         type="button"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="cross"
+          size="m"
         />
       </button>
       <div
@@ -198,6 +193,7 @@ Array [
                       >
                         <input
                           accept="image/*"
+                          aria-describedby="generated-id-filePicker__prompt"
                           className="euiFilePicker__input"
                           id="generated-id"
                           onBlur={[Function]}
@@ -210,17 +206,13 @@ Array [
                         />
                         <div
                           className="euiFilePicker__prompt"
+                          id="generated-id-filePicker__prompt"
                         >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
+                          <div
+                            aria-hidden="true"
+                            className="euiFilePicker__icon"
+                            data-euiicon-type="importAction"
+                            size="l"
                           />
                           <div
                             className="euiFilePicker__promptText"
@@ -258,16 +250,10 @@ Array [
                   <div
                     className="euiCard__top"
                   >
-                    <svg
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
-                      focusable="false"
-                      height={16}
-                      role="img"
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width={16}
-                      xmlns="http://www.w3.org/2000/svg"
+                    <div
+                      className="euiCard__icon"
+                      data-euiicon-type="canvasApp"
+                      size="xxl"
                     />
                   </div>
                   <div
@@ -418,16 +404,11 @@ Array [
         onClick={[Function]}
         type="button"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="cross"
+          size="m"
         />
       </button>
       <div
@@ -562,6 +543,7 @@ Array [
                       >
                         <input
                           accept="image/*"
+                          aria-describedby="generated-id-filePicker__prompt"
                           className="euiFilePicker__input"
                           id="generated-id"
                           onBlur={[Function]}
@@ -574,17 +556,13 @@ Array [
                         />
                         <div
                           className="euiFilePicker__prompt"
+                          id="generated-id-filePicker__prompt"
                         >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
+                          <div
+                            aria-hidden="true"
+                            className="euiFilePicker__icon"
+                            data-euiicon-type="importAction"
+                            size="l"
                           />
                           <div
                             className="euiFilePicker__promptText"
@@ -777,16 +755,11 @@ Array [
         onClick={[Function]}
         type="button"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="cross"
+          size="m"
         />
       </button>
       <div
@@ -921,6 +894,7 @@ Array [
                       >
                         <input
                           accept="image/*"
+                          aria-describedby="generated-id-filePicker__prompt"
                           className="euiFilePicker__input"
                           id="generated-id"
                           onBlur={[Function]}
@@ -933,17 +907,13 @@ Array [
                         />
                         <div
                           className="euiFilePicker__prompt"
+                          id="generated-id-filePicker__prompt"
                         >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
+                          <div
+                            aria-hidden="true"
+                            className="euiFilePicker__icon"
+                            data-euiicon-type="importAction"
+                            size="l"
                           />
                           <div
                             className="euiFilePicker__promptText"
@@ -981,16 +951,10 @@ Array [
                   <div
                     className="euiCard__top"
                   >
-                    <svg
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
-                      focusable="false"
-                      height={16}
-                      role="img"
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width={16}
-                      xmlns="http://www.w3.org/2000/svg"
+                    <div
+                      className="euiCard__icon"
+                      data-euiicon-type="canvasApp"
+                      size="xxl"
                     />
                   </div>
                   <div
@@ -1140,16 +1104,11 @@ Array [
         onClick={[Function]}
         type="button"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="cross"
+          size="m"
         />
       </button>
       <div
@@ -1284,6 +1243,7 @@ Array [
                       >
                         <input
                           accept="image/*"
+                          aria-describedby="generated-id-filePicker__prompt"
                           className="euiFilePicker__input"
                           id="generated-id"
                           onBlur={[Function]}
@@ -1296,17 +1256,13 @@ Array [
                         />
                         <div
                           className="euiFilePicker__prompt"
+                          id="generated-id-filePicker__prompt"
                         >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
+                          <div
+                            aria-hidden="true"
+                            className="euiFilePicker__icon"
+                            data-euiicon-type="importAction"
+                            size="l"
                           />
                           <div
                             className="euiFilePicker__promptText"
@@ -1344,16 +1300,10 @@ Array [
                   <div
                     className="euiCard__top"
                   >
-                    <svg
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
-                      focusable="false"
-                      height={16}
-                      role="img"
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width={16}
-                      xmlns="http://www.w3.org/2000/svg"
+                    <div
+                      className="euiCard__icon"
+                      data-euiicon-type="canvasApp"
+                      size="xxl"
                     />
                   </div>
                   <div

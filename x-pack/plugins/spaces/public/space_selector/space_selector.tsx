@@ -95,7 +95,7 @@ export class SpaceSelector extends Component<Props, State> {
           <EuiPageHeader className="spcSpaceSelector__heading">
             <EuiSpacer size="xxl" />
             <span className="spcSpaceSelector__logo">
-              <EuiIcon size="xxl" type={`logoKibana`} />
+              <EuiIcon size="xxl" type={`logoElastic`} />
             </span>
 
             <EuiTitle size="l">

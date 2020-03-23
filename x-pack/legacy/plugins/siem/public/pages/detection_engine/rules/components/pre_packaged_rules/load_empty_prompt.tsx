@@ -43,6 +43,7 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
               isDisabled={userHasNoPermissions}
               isLoading={loading}
               onClick={handlePreBuiltCreation}
+              data-test-subj="load-prebuilt-rules"
             >
               {i18n.PRE_BUILT_ACTION}
             </EuiButton>

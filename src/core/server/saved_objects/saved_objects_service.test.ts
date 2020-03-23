@@ -23,7 +23,7 @@ import {
   clientProviderInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
-
+import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
@@ -34,7 +34,6 @@ import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { BehaviorSubject } from 'rxjs';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 
 describe('SavedObjectsService', () => {

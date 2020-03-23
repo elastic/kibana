@@ -33,7 +33,6 @@ export const lens: LegacyPluginInitializer = kibana => {
       embeddableFactories: [`plugins/${PLUGIN_ID}/legacy`],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
-      visTypes: ['plugins/lens/register_vis_type_alias'],
       savedObjectsManagement: {
         lens: {
           defaultSearchField: 'title',

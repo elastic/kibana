@@ -12,6 +12,7 @@ import {
   createMockSetupDependencies,
   createMockStartDependencies,
 } from './mocks';
+import { CoreSetup } from 'kibana/public';
 
 jest.mock('ui/new_platform');
 
@@ -41,9 +42,12 @@ describe('editor_frame service', () => {
   it('should create an editor frame instance which mounts and unmounts', async () => {
     await expect(
       (async () => {
-        pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
+        pluginInstance.setup(
+          coreMock.createSetup() as CoreSetup<MockedStartDependencies>,
+          pluginSetupDependencies
+        );
         const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
-        const instance = await publicAPI.createInstance({});
+        const instance = await publicAPI.createInstance();
         instance.mount(mountpoint, {
           onError: jest.fn(),
           onChange: jest.fn(),
@@ -57,9 +61,12 @@ describe('editor_frame service', () => {
   });
 
   it('should not have child nodes after unmount', async () => {
-    pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
+    pluginInstance.setup(
+      coreMock.createSetup() as CoreSetup<MockedStartDependencies>,
+      pluginSetupDependencies
+    );
     const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
-    const instance = await publicAPI.createInstance({});
+    const instance = await publicAPI.createInstance();
     instance.mount(mountpoint, {
       onError: jest.fn(),
       onChange: jest.fn(),

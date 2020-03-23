@@ -34,8 +34,6 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-  selectRangeTrigger,
-  valueClickTrigger,
   EmbeddableVisTriggerContext,
 } from '../../../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
@@ -48,6 +46,7 @@ import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VisSavedObject } from '../types';
+import { VIS_EVENT_TO_TRIGGER } from './events';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -85,6 +84,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private savedVisualization: VisSavedObject;
   private appState: { save(): void } | undefined;
   private uiState: PersistedState;
+  private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
   private query?: Query;
   private title?: string;
@@ -122,6 +122,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       },
       parent
     );
+    this.timefilter = timefilter;
     this.appState = appState;
     this.savedVisualization = savedVisualization;
     this.vis = this.savedVisualization.vis;
@@ -291,8 +292,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const triggerId: 'SELECT_RANGE_TRIGGER' | 'VALUE_CLICK_TRIGGER' =
-            event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
+          const triggerId =
+            event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
           const context: EmbeddableVisTriggerContext = {
             embeddable: this,
             timeFieldName: this.vis.indexPattern.timeFieldName,
@@ -364,6 +365,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     };
     this.expression = await buildPipeline(this.vis, {
       searchSource: this.savedVisualization.searchSource,
+      timefilter: this.timefilter,
       timeRange: this.timeRange,
       savedObjectId: this.savedVisualization.id,
     });
@@ -390,4 +392,31 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       ...this.uiState.toJSON(),
     });
   };
+
+  public supportedTriggers() {
+    // TODO: Report a correct list of triggers for each vis_type.
+    switch (this.vis.type.name) {
+      case 'area':
+      case 'heatmap':
+      case 'histogram':
+      case 'horizontal_bar':
+      case 'line':
+      case 'pie':
+      case 'table':
+      case 'tagcloud':
+        return [VIS_EVENT_TO_TRIGGER.filter];
+      case 'gauge':
+      case 'goal':
+      case 'input_control_vis':
+      case 'markdown':
+      case 'metric':
+      case 'metrics':
+      case 'region_map':
+      case 'tile_map':
+      case 'timelion':
+      case 'vega':
+      default:
+        return [];
+    }
+  }
 }

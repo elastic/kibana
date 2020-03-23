@@ -52,7 +52,7 @@ export class ArrayType<T> extends Type<T[]> {
       case 'array.sparse':
         return `sparse array are not allowed`;
       case 'array.parse':
-        return `could not parse array value from [${value}]`;
+        return `could not parse array value from json input`;
       case 'array.min':
         return `array size is [${value.length}], but cannot be smaller than [${limit}]`;
       case 'array.max':

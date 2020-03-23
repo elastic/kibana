@@ -39,7 +39,7 @@ export type IndexPatternSelectProps = Required<
 interface IndexPatternSelectState {
   isLoading: boolean;
   options: [];
-  selectedIndexPattern: string | undefined;
+  selectedIndexPattern: { value: string; label: string } | undefined;
   searchValue: string | undefined;
 }
 

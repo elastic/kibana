@@ -511,7 +511,7 @@ describe('PKIAuthenticationProvider', () => {
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
       await expect(provider.logout(request, state)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/logged_out')
+        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
       );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);

@@ -4,23 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-
+import { useSet } from 'react-use';
+import { euiStyled } from '../../../../../../../observability/public';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   formatAnomalyScore,
   getFriendlyNameForPartitionId,
 } from '../../../../../../common/log_analysis';
+import { RowExpansionButton } from '../../../../../components/basic_table';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
-import { euiStyled } from '../../../../../../../observability/public';
 
 interface TableItem {
-  id: string;
-  partition: string;
+  partitionName: string;
+  partitionId: string;
   topAnomalyScore: number;
 }
 
@@ -30,14 +31,6 @@ interface SortingOptions {
     direction: 'asc' | 'desc';
   };
 }
-
-const collapseAriaLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableCollapseLabel', {
-  defaultMessage: 'Collapse',
-});
-
-const expandAriaLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableExpandLabel', {
-  defaultMessage: 'Expand',
-});
 
 const partitionColumnName = i18n.translate(
   'xpack.infra.logs.analysis.anomaliesTablePartitionColumnName',
@@ -62,19 +55,40 @@ export const AnomaliesTable: React.FunctionComponent<{
   const tableItems: TableItem[] = useMemo(() => {
     return Object.entries(results.partitionBuckets).map(([key, value]) => {
       return {
-        // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap, so we have to use the friendly name here
-        id: getFriendlyNameForPartitionId(key),
         // The real ID
         partitionId: key,
-        partition: getFriendlyNameForPartitionId(key),
+        // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap, so we have to use the friendly name here
+        partitionName: getFriendlyNameForPartitionId(key),
         topAnomalyScore: formatAnomalyScore(value.topAnomalyScore),
       };
     });
   }, [results]);
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-    Record<string, React.ReactNode>
-  >({});
+  const [expandedDatasetIds, { add: expandDataset, remove: collapseDataset }] = useSet<string>(
+    new Set()
+  );
+
+  const expandedDatasetRowContents = useMemo(
+    () =>
+      [...expandedDatasetIds].reduce<Record<string, React.ReactNode>>(
+        (aggregatedDatasetRows, datasetId) => {
+          return {
+            ...aggregatedDatasetRows,
+            [getFriendlyNameForPartitionId(datasetId)]: (
+              <AnomaliesTableExpandedRow
+                partitionId={datasetId}
+                results={results}
+                setTimeRange={setTimeRange}
+                timeRange={timeRange}
+                jobId={jobId}
+              />
+            ),
+          };
+        },
+        {}
+      ),
+    [expandedDatasetIds, jobId, results, setTimeRange, timeRange]
+  );
 
   const [sorting, setSorting] = useState<SortingOptions>({
     sort: {
@@ -98,72 +112,51 @@ export const AnomaliesTable: React.FunctionComponent<{
 
   const sortedTableItems = useMemo(() => {
     let sortedItems: TableItem[] = [];
-    if (sorting.sort.field === 'partition') {
-      sortedItems = tableItems.sort((a, b) => (a.partition > b.partition ? 1 : -1));
+    if (sorting.sort.field === 'partitionName') {
+      sortedItems = tableItems.sort((a, b) => (a.partitionId > b.partitionId ? 1 : -1));
     } else if (sorting.sort.field === 'topAnomalyScore') {
       sortedItems = tableItems.sort((a, b) => a.topAnomalyScore - b.topAnomalyScore);
     }
     return sorting.sort.direction === 'asc' ? sortedItems : sortedItems.reverse();
   }, [tableItems, sorting]);
 
-  const toggleExpandedItems = useCallback(
-    item => {
-      if (itemIdToExpandedRowMap[item.id]) {
-        const { [item.id]: toggledItem, ...remainingExpandedRowMap } = itemIdToExpandedRowMap;
-        setItemIdToExpandedRowMap(remainingExpandedRowMap);
-      } else {
-        const newItemIdToExpandedRowMap = {
-          ...itemIdToExpandedRowMap,
-          [item.id]: (
-            <AnomaliesTableExpandedRow
-              partitionId={item.partitionId}
-              results={results}
-              topAnomalyScore={item.topAnomalyScore}
-              setTimeRange={setTimeRange}
-              timeRange={timeRange}
-              jobId={jobId}
-            />
-          ),
-        };
-        setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
-      }
-    },
-    [itemIdToExpandedRowMap, jobId, results, setTimeRange, timeRange]
+  const columns: Array<EuiBasicTableColumn<TableItem>> = useMemo(
+    () => [
+      {
+        field: 'partitionName',
+        name: partitionColumnName,
+        sortable: true,
+        truncateText: true,
+      },
+      {
+        field: 'topAnomalyScore',
+        name: maxAnomalyScoreColumnName,
+        sortable: true,
+        truncateText: true,
+        dataType: 'number' as const,
+      },
+      {
+        align: RIGHT_ALIGNMENT,
+        width: '40px',
+        isExpander: true,
+        render: (item: TableItem) => (
+          <RowExpansionButton
+            isExpanded={expandedDatasetIds.has(item.partitionId)}
+            item={item.partitionId}
+            onExpand={expandDataset}
+            onCollapse={collapseDataset}
+          />
+        ),
+      },
+    ],
+    [collapseDataset, expandDataset, expandedDatasetIds]
   );
-
-  const columns = [
-    {
-      field: 'partition',
-      name: partitionColumnName,
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'topAnomalyScore',
-      name: maxAnomalyScoreColumnName,
-      sortable: true,
-      truncateText: true,
-      dataType: 'number' as const,
-    },
-    {
-      align: RIGHT_ALIGNMENT,
-      width: '40px',
-      isExpander: true,
-      render: (item: TableItem) => (
-        <EuiButtonIcon
-          onClick={() => toggleExpandedItems(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? collapseAriaLabel : expandAriaLabel}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-        />
-      ),
-    },
-  ];
 
   return (
     <StyledEuiBasicTable
       items={sortedTableItems}
-      itemId="id"
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      itemId="partitionName"
+      itemIdToExpandedRowMap={expandedDatasetRowContents}
       isExpandable={true}
       hasActions={true}
       columns={columns}

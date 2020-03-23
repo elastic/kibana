@@ -49,6 +49,7 @@ function validateValue(value: number | '', numberRange: NumberListRange) {
 
   if (value === EMPTY_STRING) {
     result.isInvalid = true;
+    result.error = EMPTY_STRING;
   } else if (!numberRange.within(value)) {
     result.isInvalid = true;
     result.error = i18n.translate('visDefaultEditor.controls.numberList.invalidRangeErrorMessage', {
@@ -60,19 +61,46 @@ function validateValue(value: number | '', numberRange: NumberListRange) {
   return result;
 }
 
-function validateOrder(list: Array<number | undefined>) {
-  const result: { isValidOrder: boolean; modelIndex?: number } = {
-    isValidOrder: true,
+function validateValueAscending(
+  inputValue: number | '',
+  index: number,
+  list: Array<number | undefined>
+) {
+  const result: { isInvalidOrder: boolean; error?: string } = {
+    isInvalidOrder: false,
   };
 
-  list.forEach((inputValue, index, array) => {
-    const previousModel = array[index - 1];
-    if (previousModel !== undefined && inputValue !== undefined && inputValue <= previousModel) {
-      result.isValidOrder = false;
-      result.modelIndex = index;
-    }
-  });
+  const previousModel = list[index - 1];
+  if (previousModel !== undefined && inputValue !== undefined && inputValue <= previousModel) {
+    result.isInvalidOrder = true;
+    result.error = i18n.translate(
+      'visDefaultEditor.controls.numberList.invalidAscOrderErrorMessage',
+      {
+        defaultMessage: 'Value is not in ascending order.',
+      }
+    );
+  }
+  return result;
+}
 
+function validateValueUnique(
+  inputValue: number | '',
+  index: number,
+  list: Array<number | undefined>
+) {
+  const result: { isDuplicate: boolean; error?: string } = {
+    isDuplicate: false,
+  };
+
+  if (inputValue && list.indexOf(inputValue) !== index) {
+    result.isDuplicate = true;
+    result.error = i18n.translate(
+      'visDefaultEditor.controls.numberList.duplicateValueErrorMessage',
+      {
+        defaultMessage: 'Duplicate value.',
+      }
+    );
+  }
   return result;
 }
 
@@ -101,11 +129,12 @@ function getInitModelList(list: Array<number | undefined>): NumberRowModel[] {
     : [defaultModel];
 }
 
-function getUpdatedModels(
+function getValidatedModels(
   numberList: Array<number | undefined>,
   modelList: NumberRowModel[],
   numberRange: NumberListRange,
-  invalidOrderModelIndex?: number
+  validateAscendingOrder: boolean = false,
+  disallowDuplicates: boolean = false
 ): NumberRowModel[] {
   if (!numberList.length) {
     return [defaultModel];
@@ -113,12 +142,27 @@ function getUpdatedModels(
   return numberList.map((number, index) => {
     const model = modelList[index] || { id: generateId() };
     const newValue: NumberRowModel['value'] = number === undefined ? EMPTY_STRING : number;
-    const { isInvalid, error } = validateValue(newValue, numberRange);
+
+    const valueResult = numberRange ? validateValue(newValue, numberRange) : { isInvalid: false };
+
+    const ascendingResult = validateAscendingOrder
+      ? validateValueAscending(newValue, index, numberList)
+      : { isInvalidOrder: false };
+
+    const duplicationResult = disallowDuplicates
+      ? validateValueUnique(newValue, index, numberList)
+      : { isDuplicate: false };
+
+    const allErrors = [valueResult.error, ascendingResult.error, duplicationResult.error]
+      .filter(Boolean)
+      .join(' ');
+
     return {
       ...model,
       value: newValue,
-      isInvalid: invalidOrderModelIndex === index ? true : isInvalid,
-      error,
+      isInvalid:
+        valueResult.isInvalid || ascendingResult.isInvalidOrder || duplicationResult.isDuplicate,
+      error: allErrors === EMPTY_STRING ? undefined : allErrors,
     };
   });
 }
@@ -132,9 +176,8 @@ export {
   parse,
   getRange,
   validateValue,
-  validateOrder,
   getNextModel,
   getInitModelList,
-  getUpdatedModels,
+  getValidatedModels,
   hasInvalidValues,
 };

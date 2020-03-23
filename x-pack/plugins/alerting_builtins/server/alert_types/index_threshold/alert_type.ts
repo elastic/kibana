@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { BaseActionContext, addMessages } from './action_context';
+import { TimeSeriesQuery } from './lib/time_series_query';
 
 export const ID = '.index-threshold';
 
@@ -31,6 +32,41 @@ export function getAlertType(service: Service): AlertType {
     }
   );
 
+  const actionVariableContextGroupLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextGroupLabel',
+    {
+      defaultMessage: 'The group that exceeded the threshold.',
+    }
+  );
+
+  const actionVariableContextDateLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextDateLabel',
+    {
+      defaultMessage: 'The date the alert exceeded the threshold.',
+    }
+  );
+
+  const actionVariableContextValueLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextValueLabel',
+    {
+      defaultMessage: 'The value that exceeded the threshold.',
+    }
+  );
+
+  const actionVariableContextMessageLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextMessageLabel',
+    {
+      defaultMessage: 'A pre-constructed message for the alert.',
+    }
+  );
+
+  const actionVariableContextTitleLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextTitleLabel',
+    {
+      defaultMessage: 'A pre-constructed title for the alert.',
+    }
+  );
+
   return {
     id: ID,
     name: alertTypeName,
@@ -39,6 +75,15 @@ export function getAlertType(service: Service): AlertType {
     validate: {
       params: ParamsSchema,
     },
+    actionVariables: {
+      context: [
+        { name: 'message', description: actionVariableContextMessageLabel },
+        { name: 'title', description: actionVariableContextTitleLabel },
+        { name: 'group', description: actionVariableContextGroupLabel },
+        { name: 'date', description: actionVariableContextDateLabel },
+        { name: 'value', description: actionVariableContextValueLabel },
+      ],
+    },
     executor,
   };
 
@@ -46,26 +91,29 @@ export function getAlertType(service: Service): AlertType {
     const { alertId, name, services } = options;
     const params: Params = options.params as Params;
 
-    const compareFn = ComparatorFns.get(params.comparator);
+    const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
-      throw new Error(getInvalidComparatorMessage(params.comparator));
+      throw new Error(getInvalidComparatorMessage(params.thresholdComparator));
     }
 
     const callCluster = services.callCluster;
     const date = new Date().toISOString();
     // the undefined values below are for config-schema optional types
-    const queryParams = {
+    const queryParams: TimeSeriesQuery = {
       index: params.index,
       timeField: params.timeField,
       aggType: params.aggType,
       aggField: params.aggField,
-      groupField: params.groupField,
-      groupLimit: params.groupLimit,
+      groupBy: params.groupBy,
+      termField: params.termField,
+      termSize: params.termSize,
       dateStart: date,
       dateEnd: date,
-      window: params.window,
+      timeWindowSize: params.timeWindowSize,
+      timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
     };
+    // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
     const result = await service.indexThreshold.timeSeriesQuery({
       logger,
       callCluster,
@@ -74,6 +122,7 @@ export function getAlertType(service: Service): AlertType {
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
 
     const groupResults = result.results || [];
+    // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
     for (const groupResult of groupResults) {
       const instanceId = groupResult.group;
       const value = groupResult.metrics[0][1];
@@ -82,15 +131,11 @@ export function getAlertType(service: Service): AlertType {
       if (!met) continue;
 
       const baseContext: BaseActionContext = {
-        name,
-        spaceId: options.spaceId,
-        namespace: options.namespace,
-        tags: options.tags,
         date,
         group: instanceId,
         value,
       };
-      const actionContext = addMessages(baseContext, params);
+      const actionContext = addMessages(options, baseContext, params);
       const alertInstance = options.services.alertInstanceFactory(instanceId);
       alertInstance.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
@@ -100,7 +145,7 @@ export function getAlertType(service: Service): AlertType {
 
 export function getInvalidComparatorMessage(comparator: string) {
   return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidComparatorErrorMessage', {
-    defaultMessage: 'invalid comparator specified: {comparator}',
+    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
     values: {
       comparator,
     },
@@ -111,10 +156,10 @@ type ComparatorFn = (value: number, threshold: number[]) => boolean;
 
 function getComparatorFns(): Map<string, ComparatorFn> {
   const fns: Record<string, ComparatorFn> = {
-    lessThan: (value: number, threshold: number[]) => value < threshold[0],
-    lessThanOrEqual: (value: number, threshold: number[]) => value <= threshold[0],
-    greaterThanOrEqual: (value: number, threshold: number[]) => value >= threshold[0],
-    greaterThan: (value: number, threshold: number[]) => value > threshold[0],
+    '<': (value: number, threshold: number[]) => value < threshold[0],
+    '<=': (value: number, threshold: number[]) => value <= threshold[0],
+    '>=': (value: number, threshold: number[]) => value >= threshold[0],
+    '>': (value: number, threshold: number[]) => value > threshold[0],
     between: (value: number, threshold: number[]) => value >= threshold[0] && value <= threshold[1],
     notBetween: (value: number, threshold: number[]) =>
       value < threshold[0] || value > threshold[1],

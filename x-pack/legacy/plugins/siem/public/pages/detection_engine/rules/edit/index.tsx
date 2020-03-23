@@ -26,7 +26,7 @@ import { displaySuccessToast, useStateToaster } from '../../../../components/toa
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
-import { FormHook, FormData } from '../../../shared_imports';
+import { FormHook, FormData } from '../../../../shared_imports';
 import { StepPanel } from '../components/step_panel';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
@@ -195,8 +195,8 @@ const EditRulePageComponent: FC = () => {
 
     if (invalidForms.length === 0 && activeForm != null) {
       setTabHasError([]);
-      setRule(
-        formatRule(
+      setRule({
+        ...formatRule(
           (activeFormId === RuleStep.defineRule
             ? activeForm.data
             : myDefineRuleForm.data) as DefineStepRule,
@@ -205,10 +205,10 @@ const EditRulePageComponent: FC = () => {
             : myAboutRuleForm.data) as AboutStepRule,
           (activeFormId === RuleStep.scheduleRule
             ? activeForm.data
-            : myScheduleRuleForm.data) as ScheduleStepRule,
-          ruleId
-        )
-      );
+            : myScheduleRuleForm.data) as ScheduleStepRule
+        ),
+        ...(ruleId ? { id: ruleId } : {}),
+      });
     } else {
       setTabHasError(invalidForms);
     }

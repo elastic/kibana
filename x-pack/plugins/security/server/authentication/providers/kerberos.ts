@@ -91,7 +91,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.failed(err);
     }
 
-    return DeauthenticationResult.redirectTo(`${this.options.basePath.serverBasePath}/logged_out`);
+    return DeauthenticationResult.redirectTo(
+      `${this.options.basePath.serverBasePath}/security/logged_out`
+    );
   }
 
   /**

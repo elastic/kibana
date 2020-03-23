@@ -10,8 +10,7 @@ import { checkRecognizer, getJobsSummary, getModules } from '../api';
 import { SiemJob } from '../types';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
-import { useStateToaster } from '../../toasters';
-import { errorToToaster } from '../../ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../toasters';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 

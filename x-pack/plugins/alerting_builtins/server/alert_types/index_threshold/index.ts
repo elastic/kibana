@@ -7,7 +7,7 @@
 import { Service, AlertingSetup, IRouter } from '../../types';
 import { timeSeriesQuery } from './lib/time_series_query';
 import { getAlertType } from './alert_type';
-import { createTimeSeriesQueryRoute } from './routes';
+import { registerRoutes } from './routes';
 
 // future enhancement: make these configurable?
 export const MAX_INTERVALS = 1000;
@@ -32,6 +32,6 @@ export function register(params: RegisterParams) {
 
   alerting.registerType(getAlertType(service));
 
-  const alertTypeBaseRoute = `${baseRoute}/index_threshold`;
-  createTimeSeriesQueryRoute(service, router, alertTypeBaseRoute);
+  const baseBuiltInRoute = `${baseRoute}/index_threshold`;
+  registerRoutes({ service, router, baseRoute: baseBuiltInRoute });
 }

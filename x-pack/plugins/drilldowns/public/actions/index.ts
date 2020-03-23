@@ -5,3 +5,4 @@
  */
 
 export * from './flyout_create_drilldown';
+export * from './flyout_edit_drilldown';

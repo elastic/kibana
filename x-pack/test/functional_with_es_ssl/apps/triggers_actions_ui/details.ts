@@ -18,8 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const alerting = getService('alerting');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/57426
-  describe.skip('Alert Details', function() {
+  describe('Alert Details', function() {
     describe('Header', function() {
       const testRunUuid = uuid.v4();
       before(async () => {
@@ -149,6 +148,55 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('View In App', function() {
+      const testRunUuid = uuid.v4();
+
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+      });
+
+      it('renders the alert details view in app button', async () => {
+        const alert = await alerting.alerts.createNoOp(`test-alert-${testRunUuid}`);
+
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        expect(await pageObjects.alertDetailsUI.isViewInAppEnabled()).to.be(true);
+
+        await pageObjects.alertDetailsUI.clickViewInApp();
+
+        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);
+      });
+
+      it('renders a disabled alert details view in app button', async () => {
+        const alert = await alerting.alerts.createAlwaysFiringWithActions(
+          `test-alert-disabled-nav`,
+          []
+        );
+
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        expect(await pageObjects.alertDetailsUI.isViewInAppDisabled()).to.be(true);
+      });
+    });
+
     describe('Alert Instances', function() {
       const testRunUuid = uuid.v4();
       let alert: any;
@@ -206,8 +254,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the active alert instances', async () => {
-        const testBeganAt = moment().utc();
-
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
@@ -219,30 +265,42 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             meta: {
               lastScheduledActions: { date },
             },
-          }) => moment(date).utc()
+          }) => date
         );
+
+        log.debug(`API RESULT: ${JSON.stringify(dateOnAllInstances)}`);
 
         const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(instancesList.map(instance => omit(instance, 'duration'))).to.eql([
           {
             instance: 'us-central',
             status: 'Active',
-            start: dateOnAllInstances['us-central'].format('D MMM YYYY @ HH:mm:ss'),
+            start: moment(dateOnAllInstances['us-central'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-east',
             status: 'Active',
-            start: dateOnAllInstances['us-east'].format('D MMM YYYY @ HH:mm:ss'),
+            start: moment(dateOnAllInstances['us-east'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-west',
             status: 'Active',
-            start: dateOnAllInstances['us-west'].format('D MMM YYYY @ HH:mm:ss'),
+            start: moment(dateOnAllInstances['us-west'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
           },
         ]);
 
+        const durationEpoch = moment(
+          await pageObjects.alertDetailsUI.getAlertInstanceDurationEpoch()
+        ).utc();
+
         const durationFromInstanceTillPageLoad = mapValues(dateOnAllInstances, date =>
-          moment.duration(testBeganAt.diff(moment(date).utc()))
+          moment.duration(durationEpoch.diff(moment(date).utc()))
         );
         instancesList
           .map(alertInstance => ({
