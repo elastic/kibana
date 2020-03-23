@@ -3,23 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { EuiBetaBadge } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
-import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/service_map';
+import {
+  invalidLicenseMessage,
+  isValidPlatinumLicense
+} from '../../../../../../../plugins/apm/common/service_map';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
-import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { BetaBadge } from './BetaBadge';
+import { LicensePrompt } from '../../shared/LicensePrompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
+import { cytoscapeDivStyle } from './cytoscapeOptions';
 import { EmptyBanner } from './EmptyBanner';
-import { getCytoscapeElements } from './get_cytoscape_elements';
-import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
 
@@ -27,35 +27,8 @@ interface ServiceMapProps {
   serviceName?: string;
 }
 
-const cytoscapeDivStyle = {
-  background: `linear-gradient(
-  90deg,
-  ${theme.euiPageBackgroundColor}
-    calc(${theme.euiSizeL} - calc(${theme.euiSizeXS} / 2)),
-  transparent 1%
-)
-center,
-linear-gradient(
-  ${theme.euiPageBackgroundColor}
-    calc(${theme.euiSizeL} - calc(${theme.euiSizeXS} / 2)),
-  transparent 1%
-)
-center,
-${theme.euiColorLightShade}`,
-  backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
-  margin: `-${theme.gutterTypes.gutterLarge}`,
-  marginTop: 0
-};
-const BetaBadgeContainer = styled.div`
-  right: ${theme.gutterTypes.gutterMedium};
-  position: absolute;
-  top: ${theme.gutterTypes.gutterSmall};
-  z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
-`;
-
 export function ServiceMap({ serviceName }: ServiceMapProps) {
   const license = useLicense();
-  const { search } = useLocation();
   const { urlParams, uiFilters } = useUrlParams();
 
   const { data } = useFetcher(() => {
@@ -79,10 +52,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     }
   }, [serviceName, uiFilters, urlParams]);
 
-  const elements = useMemo(() => {
-    return data ? getCytoscapeElements(data as any, search) : [];
-  }, [data, search]);
-
   const { ref, height, width } = useRefDimensions();
 
   if (!license) {
@@ -95,32 +64,31 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       ref={ref}
     >
       <Cytoscape
-        elements={elements}
-        serviceName={serviceName}
+        elements={data?.elements ?? []}
         height={height}
-        width={width}
+        serviceName={serviceName}
         style={cytoscapeDivStyle}
+        width={width}
       >
         <Controls />
+        <BetaBadge />
         {serviceName && <EmptyBanner />}
         <Popover focusedServiceName={serviceName} />
-        <BetaBadgeContainer>
-          <EuiBetaBadge
-            label={i18n.translate('xpack.apm.serviceMap.betaBadge', {
-              defaultMessage: 'Beta'
-            })}
-            tooltipContent={i18n.translate(
-              'xpack.apm.serviceMap.betaTooltipMessage',
-              {
-                defaultMessage:
-                  'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.'
-              }
-            )}
-          />
-        </BetaBadgeContainer>
       </Cytoscape>
     </div>
   ) : (
-    <PlatinumLicensePrompt />
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceAround"
+      // Set the height to give it some top margin
+      style={{ height: '60vh' }}
+    >
+      <EuiFlexItem
+        grow={false}
+        style={{ width: 600, textAlign: 'center' as const }}
+      >
+        <LicensePrompt text={invalidLicenseMessage} showBetaBadge />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
