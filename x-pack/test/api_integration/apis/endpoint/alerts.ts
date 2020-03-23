@@ -29,13 +29,13 @@ export default function({ getService }: FtrProviderContext) {
 
   describe('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
-      before(() => {
-        esArchiver.load('endpoint/alerts/api_feature');
-        esArchiver.load('endpoint/metadata/api_feature');
+      before(async () => {
+        await esArchiver.load('endpoint/alerts/api_feature');
+        await esArchiver.load('endpoint/metadata/api_feature');
       });
-      after(() => {
-        esArchiver.unload('endpoint/alerts/api_feature');
-        esArchiver.unload('endpoint/metadata/api_feature');
+      after(async () => {
+        await esArchiver.unload('endpoint/alerts/api_feature');
+        await esArchiver.unload('endpoint/metadata/api_feature');
       });
 
       it('should not support POST requests', async () => {
