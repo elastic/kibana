@@ -6,7 +6,7 @@
 
 import { get, set, merge } from 'lodash';
 
-import { StatsGetter } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
+import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
 import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';
 import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
 import { getKibanaStats, KibanaStats } from './get_kibana_stats';
@@ -17,22 +17,27 @@ type PromiseReturnType<T extends (...args: any[]) => any> = ReturnType<T> extend
   ? R
   : T;
 
+export interface CustomContext {
+  maxBucketSize: number;
+}
+
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
  * Returns the array of clusters joined with the Kibana and Logstash instances.
  *
  */
-export const getAllStats: StatsGetter = async (
+export const getAllStats: StatsGetter<CustomContext> = async (
   clustersDetails,
-  { server, callCluster, start, end }
+  { callCluster, start, end },
+  { maxBucketSize }
 ) => {
   const clusterUuids = clustersDetails.map(clusterDetails => clusterDetails.clusterUuid);
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
-    getElasticsearchStats(server, callCluster, clusterUuids), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
-    getKibanaStats(server, callCluster, clusterUuids, start, end), // stack_stats.kibana
-    getHighLevelStats(server, callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID), // stack_stats.logstash
-    getBeatsStats(server, callCluster, clusterUuids, start, end), // stack_stats.beats
+    getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
+    getKibanaStats(callCluster, clusterUuids, start, end, maxBucketSize), // stack_stats.kibana
+    getHighLevelStats(callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID, maxBucketSize), // stack_stats.logstash
+    getBeatsStats(callCluster, clusterUuids, start, end), // stack_stats.beats
   ]);
 
   return handleAllStats(esClusters, { kibana, logstash, beats });
