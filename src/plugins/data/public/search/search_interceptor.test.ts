@@ -43,9 +43,13 @@ describe('SearchInterceptor', () => {
 
   describe('search', () => {
     test('should invoke `search` with the request', () => {
-      mockSearch.mockReturnValue(new Observable());
+      const mockResponse = new Subject();
+      mockSearch.mockReturnValue(mockResponse.asObservable());
       const mockRequest: IKibanaSearchRequest = {};
-      searchInterceptor.search(mockSearch, mockRequest);
+      const response = searchInterceptor.search(mockSearch, mockRequest);
+      mockResponse.complete();
+
+      response.subscribe({});
       expect(mockSearch.mock.calls[0][0]).toBe(mockRequest);
     });
 
