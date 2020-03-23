@@ -116,7 +116,7 @@ image::apm/images/create-github-issue.png[Example github issue]
 
 |====
 |Label |`Open an issue in apm-rum-js`
-|Link |`https://github.com/elastic/apm-agent-rum-js/issues/new?title=Investigate+APM+trace&body=Investigate+the+following+APM+trace%3A%0D%0A%0D%0A---%0D%0A%0D%0Aservice.name%3A+%7B%7Bservice.name%7D%7D%0D%0Atransaction.id%3A+%7B%7Btransaction.id%7D%7D%0D%0Acontainer.id%3A+%7B%7Bcontainer.id%7D%7D%0D%0Aurl.full%3A+%7B%7Burl.full%7D%7D`
+|Link |`https://github.com/elastic/apm-agent-rum-js/issues/new?title=Investigate+APM+trace&body=Investigate+the+following+APM+trace%3A%0D%0A%0D%0Aservice.name%3A+service.name%0D%0Atransaction.id%3A+transaction.id%0D%0Acontainer.id%3A+container.id%0D%0Aurl.full%3A+url.full`
 |Filters |`service.name:client`
 |====
 
@@ -143,8 +143,8 @@ Clicking this link results in the following task being created in Jira:
 image::apm/images/create-jira-issue.png[Example jira issue]
 
 |====
-|Label |`Open an task in Jira`
-|Link |`https://test-site-33.atlassian.net/secure/CreateIssueDetails!init.jspa?pid=10000&issuetype=10001&summary=Created+via+APM&description=Investigate+the+following+APM+trace%3A%0D%0A%0D%0A---%0D%0A%0D%0Aservice.name%3A+%7B%7Bservice.name%7D%7D%0D%0Atransaction.id%3A+%7B%7Btransaction.id%7D%7D%0D%0Acontainer.id%3A+%7B%7Bcontainer.id%7D%7D%0D%0Aurl.full%3A+%7B%7Burl.full%7D%7D`
+|Label |`Open a task in Jira`
+|Link |`https://test-site-33.atlassian.net/secure/CreateIssueDetails!init.jspa?pid=10000&issuetype=10001&summary=Created+via+APM&description=Investigate+the+following+APM+trace%3A%0D%0A%0D%0Aservice.name%3A+service.name%0D%0Atransaction.id%3A+transaction.id%0D%0Acontainer.id%3A+container.id%0D%0Aurl.full%3A+url.full`
 |====
 
 See the {jira-query-params}[Jira application administration knowledge base]
@@ -186,12 +186,12 @@ Open a specified slack channel.
 **Example**
 
 This link opens a company slack channel, #apm-support.
-It only appears when {{TODO: ENTER CRITERIA FOR WHEN THIS LINK WOULD APPEAR}}.
+It only appears when `transaction.name` is `GET user/login`.
 
 |====
-|Label |`Open #apm-support`
+|Label |`Open #apm-user-support`
 |Link |`https://microsoft.slack.com/archives/efk52kt23k`
-|Filters |`{{TODO: ENTER CRITERIA}}` : `{{TODO: ENTER CRITERIA}}`
+|Filters |`transaction.name:GET user/login`
 |====
 
 [float]
