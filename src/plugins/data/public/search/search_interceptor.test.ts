@@ -49,7 +49,7 @@ describe('SearchInterceptor', () => {
       const response = searchInterceptor.search(mockSearch, mockRequest);
       mockResponse.complete();
 
-      response.subscribe({});
+      response.subscribe();
       expect(mockSearch.mock.calls[0][0]).toBe(mockRequest);
     });
 

@@ -24,7 +24,7 @@ export function getPainlessError(error: Error) {
   const rootCause: Array<{ lang: string; script: string }> | undefined = get(
     error,
     'body.attributes.error.root_cause'
-  );
+  ) || [get(error, 'body.attributes.error')];
   const message: string = get(error, 'body.message');
 
   if (!rootCause) {
