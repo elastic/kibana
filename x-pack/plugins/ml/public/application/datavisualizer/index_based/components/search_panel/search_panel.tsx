@@ -56,20 +56,6 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map(v => {
   };
 });
 
-const kqlSyntaxErrorMessage = i18n.translate(
-  'xpack.ml.datavisualizer.invalidKqlSyntaxErrorMessage',
-  {
-    defaultMessage:
-      'Invalid syntax in search bar. The input must be valid Kibana Query Language (KQL)',
-  }
-);
-const luceneSyntaxErrorMessage = i18n.translate(
-  'xpack.ml.datavisualizer.invalidLuceneSyntaxErrorMessage',
-  {
-    defaultMessage: 'Invalid syntax in search bar. The input must be valid Lucene',
-  }
-);
-
 export const SearchPanel: FC<Props> = ({
   indexPattern,
   searchString,
@@ -106,13 +92,14 @@ export const SearchPanel: FC<Props> = ({
       setSearchString(query.query);
       setSearchQueryLanguage(query.language);
     } catch (e) {
-      console.log('Invalid syntax', e); // eslint-disable-line no-console
+      console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
       const toastNotifications = getToastNotifications();
-      const notification =
-        query.language === SEARCH_QUERY_LANGUAGE.KUERY
-          ? kqlSyntaxErrorMessage
-          : luceneSyntaxErrorMessage;
-      toastNotifications.addDanger(notification);
+      toastNotifications.addError(e, {
+        title: i18n.translate('xpack.ml.datavisualizer.invalidSyntaxErrorMessage', {
+          defaultMessage: 'Invalid syntax in search bar',
+        }),
+        toastMessage: e.message ? e.message : e,
+      });
     }
   };
   const searchChangeHandler = (query: Query) => setSearchInput(query);
