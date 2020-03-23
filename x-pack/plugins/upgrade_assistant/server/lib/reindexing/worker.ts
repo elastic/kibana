@@ -16,6 +16,8 @@ const POLL_INTERVAL = 30000;
 // If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
 const PAUSE_WINDOW = POLL_INTERVAL * 4;
 
+const WORKER_PADDING_MS = 500;
+
 /**
  * A singleton worker that will coordinate two polling loops:
  *   (1) A longer loop that polls for reindex operations that are in progress. If any are found, loop (2) is started.
@@ -111,6 +113,9 @@ export class ReindexWorker {
 
         // Push each operation through the state machine and refresh.
         await Promise.all(this.inProgressOps.map(this.processNextStep));
+        // TODO: This tight loop needs something to relax potentially high CPU demands so this padding is added.
+        // This scheduler should probably be revisited or removed in future.
+        await new Promise(res => setTimeout(res, WORKER_PADDING_MS));
         await this.refresh();
       }
     } finally {
@@ -173,20 +178,20 @@ export class ReindexWorker {
     }
   };
 
-  private processNextStep = async (reindexOp: ReindexSavedObject) => {
+  private processNextStep = async (reindexOp: ReindexSavedObject): void => {
     const credential = this.credentialStore.get(reindexOp);
 
     if (!credential) {
-      // Set to paused state if the job hasn't been updated in PAUSE_WINDOW.
       // This indicates that no Kibana nodes currently have credentials to update this job.
       const now = moment();
       const updatedAt = moment(reindexOp.updated_at);
       if (updatedAt < now.subtract(PAUSE_WINDOW)) {
-        return this.reindexService.pauseReindexOperation(reindexOp.attributes.indexName);
+        await this.reindexService.pauseReindexOperation(reindexOp.attributes.indexName);
+        return;
       } else {
         // If it has been updated recently, we assume another node has the necessary credentials,
         // and this becomes a noop.
-        return reindexOp;
+        return;
       }
     }
 
