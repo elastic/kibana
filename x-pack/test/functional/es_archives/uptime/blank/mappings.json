@@ -2,11 +2,11 @@
   "type": "index",
   "value": {
     "aliases": {
-      "heartbeat-8.0.0": {
+      "heartbeat-7.0.0": {
         "is_write_index": true
       }
     },
-    "index": "heartbeat-8-test",
+    "index": "heartbeat-7-generated-test",
     "mappings": {
       "_meta": {
         "beat": "heartbeat",

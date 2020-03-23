@@ -332,6 +332,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('deleteAlert');
+      await testSubjects.existOrFail('deleteIdsConfirmation');
+      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('deleteIdsConfirmation');
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql('Deleted 1 alert');
       const emptyPrompt = await find.byCssSelector(
         '[data-test-subj="createFirstAlertEmptyPrompt"]'
       );
@@ -444,6 +449,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkAction');
 
       await testSubjects.click('deleteAll');
+      await testSubjects.existOrFail('deleteIdsConfirmation');
+      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+      await pageObjects.common.closeToast();
 
       const emptyPrompt = await find.byCssSelector(
         '[data-test-subj="createFirstAlertEmptyPrompt"]'
