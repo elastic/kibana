@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
 
-  describe('location', () => {
+  describe.skip('location', () => {
     const start = new Date().toISOString();
     const end = new Date().toISOString();
 
