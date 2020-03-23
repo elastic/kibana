@@ -40,7 +40,8 @@ import changestartupPng from './changestartup.png';
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
-import { ExprVis } from '../../../../../plugins/visualizations/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
 import { npSetup } from '../../../../ui/public/new_platform';
 
 const THRESHOLD = 0.45;

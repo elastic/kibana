@@ -34,7 +34,8 @@ import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mock
 
 import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
-import { ExprVis } from '../../../../../plugins/visualizations/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
 import { npSetup } from '../../../../ui/public/new_platform';
 
 function mockRawData() {

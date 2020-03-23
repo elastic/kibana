@@ -29,11 +29,10 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { PersistedState } from '../../../../plugins/visualizations/public';
+import { VisParams, PersistedState } from '../../../../plugins/visualizations/public';
 
 import { getTypes } from '../services';
 import { VisType } from '../vis_types';
-import { VisParams } from '../types';
 
 export interface ExprVisState {
   title?: string;
