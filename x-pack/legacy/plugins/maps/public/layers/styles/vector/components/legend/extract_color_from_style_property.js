@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VectorStyle } from '../../vector_style';
 import { getColorRampCenterColor, getColorPalette } from '../../../color_utils';
-import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
+import { COLOR_MAP_TYPE, STYLE_TYPE } from '../../../../../../common/constants';
 
 export function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
   if (!colorStyleProperty) {
     return defaultColor;
   }
 
-  if (colorStyleProperty.type === VectorStyle.STYLE_TYPE.STATIC) {
+  if (colorStyleProperty.type === STYLE_TYPE.STATIC) {
     return colorStyleProperty.options.color;
   }
 

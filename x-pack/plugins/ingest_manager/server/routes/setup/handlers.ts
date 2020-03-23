@@ -3,12 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'src/core/server';
-import { outputService, agentConfigService } from '../../services';
-import { CreateFleetSetupRequestSchema, CreateFleetSetupResponse } from '../../types';
-import { setup } from '../../services/setup';
-import { generateEnrollmentAPIKey } from '../../services/api_keys';
+import { outputService } from '../../services';
+import { CreateFleetSetupResponse } from '../../types';
+import { setupIngestManager, setupFleet } from '../../services/setup';
 
 export const getFleetSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -32,21 +30,12 @@ export const getFleetSetupHandler: RequestHandler = async (context, request, res
   }
 };
 
-export const createFleetSetupHandler: RequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof CreateFleetSetupRequestSchema.body>
-> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+export const createFleetSetupHandler: RequestHandler = async (context, request, response) => {
   try {
-    await outputService.updateOutput(soClient, await outputService.getDefaultOutputId(soClient), {
-      admin_username: request.body.admin_username,
-      admin_password: request.body.admin_password,
-    });
-    await generateEnrollmentAPIKey(soClient, {
-      name: 'Default',
-      configId: await agentConfigService.getDefaultAgentConfigId(soClient),
-    });
+    const soClient = context.core.savedObjects.client;
+    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+    await setupIngestManager(soClient, callCluster);
+    await setupFleet(soClient, callCluster);
 
     return response.ok({
       body: { isInitialized: true },
@@ -63,7 +52,7 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
   try {
-    await setup(soClient, callCluster);
+    await setupIngestManager(soClient, callCluster);
     return response.ok({
       body: { isInitialized: true },
     });

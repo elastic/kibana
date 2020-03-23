@@ -137,6 +137,7 @@ export class AlertingPlugin {
       taskRunnerFactory: this.taskRunnerFactory,
     });
     this.alertTypeRegistry = alertTypeRegistry;
+
     this.serverBasePath = core.http.basePath.serverBasePath;
 
     const usageCollection = plugins.usageCollection;
@@ -205,7 +206,7 @@ export class AlertingPlugin {
       logger,
       getServices: this.getServicesFactory(core.savedObjects),
       spaceIdToNamespace: this.spaceIdToNamespace,
-      executeAction: plugins.actions.execute,
+      actionsPlugin: plugins.actions,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
     });

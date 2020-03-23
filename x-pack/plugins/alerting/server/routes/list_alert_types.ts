@@ -13,11 +13,12 @@ import {
 } from 'kibana/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { BASE_ALERT_API_PATH } from '../../common';
 
 export const listAlertTypesRoute = (router: IRouter, licenseState: LicenseState) => {
   router.get(
     {
-      path: `/api/alert/types`,
+      path: `${BASE_ALERT_API_PATH}/types`,
       validate: {},
       options: {
         tags: ['access:alerting-read'],
