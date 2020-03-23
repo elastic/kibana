@@ -69,7 +69,7 @@ export function getEditBreadcrumbs($route: any) {
   return [
     ...getLandingBreadcrumbs(),
     {
-      text: $route.current.locals.savedVis.title,
+      text: $route.current.locals.resolved.savedVis.title,
     },
   ];
 }
