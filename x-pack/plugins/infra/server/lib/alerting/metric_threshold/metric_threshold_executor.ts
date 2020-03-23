@@ -14,6 +14,8 @@ import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/ser
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { getDateHistogramOffset } from '../../snapshot/query_helpers';
 
+const TOTAL_BUCKETS = 5;
+
 interface Aggregation {
   aggregatedIntervals: {
     buckets: Array<{ aggregatedValue: { value: number }; doc_count: number }>;
@@ -68,7 +70,9 @@ export const getElasticsearchMetricQuery = (
   const interval = `${timeSize}${timeUnit}`;
   const to = Date.now();
   const intervalAsSeconds = getIntervalInSeconds(interval);
-  const from = to - intervalAsSeconds * 5000;
+  // We need enough data for 5 buckets worth of data. We also need
+  // to convert the intervalAsSeconds to milliseconds.
+  const from = to - intervalAsSeconds * 1000 * TOTAL_BUCKETS;
   const offset = getDateHistogramOffset(from, interval);
 
   const aggregations =
