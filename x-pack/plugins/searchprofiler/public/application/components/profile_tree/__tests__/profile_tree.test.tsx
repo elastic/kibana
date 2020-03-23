@@ -14,6 +14,7 @@ describe('ProfileTree', () => {
       onHighlight: () => {},
       target: 'searches',
       data: searchResponse,
+      onDataInitError: jest.fn(),
     };
     const init = registerTestBed(ProfileTree);
     await init(props);
