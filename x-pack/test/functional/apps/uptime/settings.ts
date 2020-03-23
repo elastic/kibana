@@ -46,7 +46,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await settingsPage().applyButtonIsDisabled()).to.eql(true);
     });
 
-    it('changing index pattern setting is reflected elsewhere in UI', async () => {
+    // Failing: https://github.com/elastic/kibana/issues/60863
+    it.skip('changing index pattern setting is reflected elsewhere in UI', async () => {
       const originalCount = await pageObjects.uptime.getSnapshotCount();
       // We should find 1 monitor up with the default index pattern
       expect(originalCount.up).to.eql(1);
