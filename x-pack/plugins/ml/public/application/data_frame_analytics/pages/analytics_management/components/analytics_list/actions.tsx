@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { DeepReadonly } from '../../../../../../../common/types/common';
 
 import {
   checkPermission,
@@ -19,6 +20,8 @@ import {
   isOutlierAnalysis,
   isClassificationAnalysis,
 } from '../../../../common/analytics';
+import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { CloneAction } from './action_clone';
 
 import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
@@ -57,7 +60,7 @@ export const AnalyticsViewAction = {
   },
 };
 
-export const getActions = () => {
+export const getActions = (createAnalyticsForm: CreateAnalyticsFormProps) => {
   const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
   return [
@@ -102,6 +105,11 @@ export const getActions = () => {
     {
       render: (item: DataFrameAnalyticsListRow) => {
         return <DeleteAction item={item} />;
+      },
+    },
+    {
+      render: (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
+        return <CloneAction item={item} createAnalyticsForm={createAnalyticsForm} />;
       },
     },
   ];

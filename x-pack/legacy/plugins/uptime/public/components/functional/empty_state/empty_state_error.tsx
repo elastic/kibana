@@ -7,15 +7,14 @@
 import { EuiEmptyPrompt, EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import { GraphQLError } from 'graphql';
 
 interface EmptyStateErrorProps {
-  errors: GraphQLError[];
+  errors: Error[];
 }
 
 export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
   const unauthorized = errors.find(
-    (error: GraphQLError) => error.message && error.message.includes('unauthorized')
+    (error: Error) => error.message && error.message.includes('unauthorized')
   );
 
   return (
@@ -46,7 +45,7 @@ export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
             body={
               <Fragment>
                 {!unauthorized &&
-                  errors.map((error: GraphQLError) => <p key={error.message}>{error.message}</p>)}
+                  errors.map((error: Error) => <p key={error.message}>{error.message}</p>)}
               </Fragment>
             }
           />

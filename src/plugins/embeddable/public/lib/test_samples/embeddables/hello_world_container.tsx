@@ -24,7 +24,7 @@ import { UiActionsService } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../types';
+import { EmbeddableStart } from '../../../plugin';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 
@@ -46,8 +46,8 @@ interface HelloWorldContainerInput extends ContainerInput {
 
 interface HelloWorldContainerOptions {
   getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;

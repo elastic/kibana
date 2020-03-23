@@ -6,11 +6,11 @@
 
 import { merge } from 'lodash';
 
-import { DataFrameAnalyticsConfig } from '../../../../common';
+import { ANALYSIS_CONFIG_TYPE, DataFrameAnalyticsConfig } from '../../../../common';
 
 import { ACTION } from './actions';
 import { reducer, validateAdvancedEditor, validateMinMML } from './reducer';
-import { getInitialState, JOB_TYPES } from './state';
+import { getInitialState } from './state';
 
 type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
 
@@ -52,7 +52,7 @@ describe('useCreateAnalyticsForm', () => {
         destinationIndex: 'the-destination-index',
         jobId: 'the-analytics-job-id',
         sourceIndex: 'the-source-index',
-        jobType: JOB_TYPES.OUTLIER_DETECTION,
+        jobType: ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION,
         modelMemoryLimit: '200mb',
       },
     });

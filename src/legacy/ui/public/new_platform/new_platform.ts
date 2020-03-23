@@ -20,7 +20,7 @@
 import { IScope } from 'angular';
 
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
+import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
 import {
   LegacyCoreSetup,
@@ -31,13 +31,15 @@ import {
 } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
 import {
-  setIndexPatterns,
-  setQueryService,
-  setUiSettings,
-  setInjectedMetadata,
   setFieldFormats,
-  setSearchService,
+  setIndexPatterns,
+  setInjectedMetadata,
+  setHttp,
+  setNotifications,
   setOverlays,
+  setQueryService,
+  setSearchService,
+  setUiSettings,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
@@ -68,7 +70,7 @@ export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
   charts: ChartsPluginSetup;
   data: ReturnType<DataPlugin['setup']>;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
@@ -88,7 +90,7 @@ export interface PluginsStart {
   bfetch: BfetchPublicStart;
   charts: ChartsPluginStart;
   data: ReturnType<DataPlugin['start']>;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
@@ -141,12 +143,14 @@ export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
 
   // Services that need to be set in the legacy platform since the legacy data plugin
   // which previously provided them has been removed.
-  setUiSettings(npStart.core.uiSettings);
-  setQueryService(npStart.plugins.data.query);
-  setIndexPatterns(npStart.plugins.data.indexPatterns);
-  setFieldFormats(npStart.plugins.data.fieldFormats);
-  setSearchService(npStart.plugins.data.search);
+  setHttp(npStart.core.http);
+  setNotifications(npStart.core.notifications);
   setOverlays(npStart.core.overlays);
+  setUiSettings(npStart.core.uiSettings);
+  setFieldFormats(npStart.plugins.data.fieldFormats);
+  setIndexPatterns(npStart.plugins.data.indexPatterns);
+  setQueryService(npStart.plugins.data.query);
+  setSearchService(npStart.plugins.data.search);
 }
 
 /** Flag used to ensure `legacyAppRegister` is only called once. */

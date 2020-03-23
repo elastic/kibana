@@ -19,7 +19,7 @@
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 import { UiActionsService } from './service';
-import { selectRangeTrigger } from './triggers';
+import { selectRangeTrigger, valueClickTrigger, applyFilterTrigger } from './triggers';
 
 export type UiActionsSetup = Pick<
   UiActionsService,
@@ -35,6 +35,8 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
 
   public setup(core: CoreSetup): UiActionsSetup {
     this.service.registerTrigger(selectRangeTrigger);
+    this.service.registerTrigger(valueClickTrigger);
+    this.service.registerTrigger(applyFilterTrigger);
     return this.service;
   }
 

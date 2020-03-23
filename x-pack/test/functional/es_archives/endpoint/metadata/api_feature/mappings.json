@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "endpoint-agent",
+    "index": "endpoint-agent-1",
     "mappings": {
       "properties": {
         "@timestamp": {
@@ -28,15 +28,6 @@
                 }
               },
               "type": "text"
-            },
-            "name": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
             }
           }
         },
@@ -52,6 +43,15 @@
                     }
                   },
                   "type": "text"
+                },
+                "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
                 }
               }
             }
@@ -60,21 +60,12 @@
         "event": {
           "properties": {
             "created": {
-              "type": "date"
+              "type": "long"
             }
           }
         },
         "host": {
           "properties": {
-            "architecture": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
             "hostname": {
               "fields": {
                 "keyword": {

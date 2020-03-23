@@ -14,7 +14,7 @@ validate: RouteValidatorFullConfig<P, Q, B> | false;
 
 ## Remarks
 
-You \*must\* specify a validation schema to be able to read: - url path segments - request query - request body To opt out of validating the request, specify `validate: false`<!-- -->. In this case request params, query, and body will be \*\*empty\*\* objects and have no access to raw values. In some cases you may want to use another validation library. To do this, you need to instruct the `@kbn/config-schema` library to output \*\*non-validated values\*\* with setting schema as `schema.object({}, { allowUnknowns: true })`<!-- -->;
+You \*must\* specify a validation schema to be able to read: - url path segments - request query - request body To opt out of validating the request, specify `validate: false`<!-- -->. In this case request params, query, and body will be \*\*empty\*\* objects and have no access to raw values. In some cases you may want to use another validation library. To do this, you need to instruct the `@kbn/config-schema` library to output \*\*non-validated values\*\* with setting schema as `schema.object({}, { unknowns: 'allow' })`<!-- -->;
 
 ## Example
 
@@ -49,7 +49,7 @@ router.get({
   path: 'path/{id}',
   validate: {
     // handler has access to raw non-validated params in runtime
-    params: schema.object({}, { allowUnknowns: true })
+    params: schema.object({}, { unknowns: 'allow' })
   },
 },
 (context, req, res,) {

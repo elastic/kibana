@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DeepReadonly } from '../../../../../../../common/types/common';
+import { DataFrameAnalyticsConfig } from '../../../../common';
 import { FormMessage, State, SourceIndexMap } from './state';
 
 export enum ACTION {
@@ -25,6 +27,7 @@ export enum ACTION {
   SET_JOB_IDS,
   SWITCH_TO_ADVANCED_EDITOR,
   SET_ESTIMATED_MODEL_MEMORY_LIMIT,
+  SET_JOB_CLONE,
 }
 
 export type Action =
@@ -61,13 +64,14 @@ export type Action =
   | { type: ACTION.SET_IS_MODAL_VISIBLE; isModalVisible: State['isModalVisible'] }
   | { type: ACTION.SET_JOB_CONFIG; payload: State['jobConfig'] }
   | { type: ACTION.SET_JOB_IDS; jobIds: State['jobIds'] }
-  | { type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT; value: State['estimatedModelMemoryLimit'] };
+  | { type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT; value: State['estimatedModelMemoryLimit'] }
+  | { type: ACTION.SET_JOB_CLONE; cloneJob: DeepReadonly<DataFrameAnalyticsConfig> };
 
 // Actions wrapping the dispatcher exposed by the custom hook
 export interface ActionDispatchers {
   closeModal: () => void;
   createAnalyticsJob: () => void;
-  openModal: () => void;
+  openModal: () => Promise<void>;
   resetAdvancedEditorMessages: () => void;
   setAdvancedEditorRawString: (payload: State['advancedEditorRawString']) => void;
   setFormState: (payload: Partial<State['form']>) => void;
@@ -76,4 +80,5 @@ export interface ActionDispatchers {
   startAnalyticsJob: () => void;
   switchToAdvancedEditor: () => void;
   setEstimatedModelMemoryLimit: (value: State['estimatedModelMemoryLimit']) => void;
+  setJobClone: (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => Promise<void>;
 }

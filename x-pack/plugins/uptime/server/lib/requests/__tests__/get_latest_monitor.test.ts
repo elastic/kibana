@@ -5,13 +5,14 @@
  */
 
 import { getLatestMonitor } from '../get_latest_monitor';
+import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 describe('getLatestMonitor', () => {
   let expectedGetLatestSearchParams: any;
   let mockEsSearchResult: any;
   beforeEach(() => {
     expectedGetLatestSearchParams = {
-      index: 'heartbeat-8*',
+      index: defaultDynamicSettings.heartbeatIndices,
       body: {
         query: {
           bool: {
@@ -81,6 +82,7 @@ describe('getLatestMonitor', () => {
     const mockEsClient = jest.fn(async (_request: any, _params: any) => mockEsSearchResult);
     const result = await getLatestMonitor({
       callES: mockEsClient,
+      dynamicSettings: defaultDynamicSettings,
       dateStart: 'now-1h',
       dateEnd: 'now',
       monitorId: 'testMonitor',

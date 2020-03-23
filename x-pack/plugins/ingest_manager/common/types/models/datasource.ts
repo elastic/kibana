@@ -10,18 +10,26 @@ export interface DatasourcePackage {
   version: string;
 }
 
+export interface DatasourceConfigRecordEntry {
+  type?: string;
+  value?: any;
+}
+
+export type DatasourceConfigRecord = Record<string, DatasourceConfigRecordEntry>;
+
 export interface DatasourceInputStream {
   id: string;
   enabled: boolean;
   dataset: string;
   processors?: string[];
-  config?: Record<string, any>;
+  config?: DatasourceConfigRecord;
 }
 
 export interface DatasourceInput {
   type: string;
   enabled: boolean;
   processors?: string[];
+  config?: DatasourceConfigRecord;
   streams: DatasourceInputStream[];
 }
 

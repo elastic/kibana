@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { call, put, select } from 'redux-saga/effects';
+import { call, put } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
-import { getBasePath } from '../selectors';
 
 /**
  * Factory function for a fetch effect. It expects three action creators,
@@ -26,17 +25,19 @@ export function fetchEffectFactory<T, R, S, F>(
 ) {
   return function*(action: Action<T>) {
     try {
-      if (!action.payload) {
-        yield put(fail(new Error('Cannot fetch snapshot for undefined parameters.')));
-        return;
+      const response = yield call(fetch, action.payload);
+
+      if (response instanceof Error) {
+        // eslint-disable-next-line no-console
+        console.error(response);
+
+        yield put(fail(response));
+      } else {
+        yield put(success(response));
       }
-      const {
-        payload: { ...params },
-      } = action;
-      const basePath = yield select(getBasePath);
-      const response = yield call(fetch, { ...params, basePath });
-      yield put(success(response));
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
       yield put(fail(error));
     }
   };

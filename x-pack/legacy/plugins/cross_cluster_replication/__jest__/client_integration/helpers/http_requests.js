@@ -19,7 +19,7 @@ const registerHttpRequestMockHelpers = server => {
 
     server.respondWith(
       'GET',
-      'api/cross_cluster_replication/follower_indices',
+      '/api/cross_cluster_replication/follower_indices',
       mockResponse(defaultResponse, response)
     );
   };
@@ -29,7 +29,7 @@ const registerHttpRequestMockHelpers = server => {
 
     server.respondWith(
       'GET',
-      'api/cross_cluster_replication/auto_follow_patterns',
+      '/api/cross_cluster_replication/auto_follow_patterns',
       mockResponse(defaultResponse, response)
     );
   };
@@ -39,7 +39,7 @@ const registerHttpRequestMockHelpers = server => {
 
     server.respondWith(
       'DELETE',
-      /api\/cross_cluster_replication\/auto_follow_patterns/,
+      /\/api\/cross_cluster_replication\/auto_follow_patterns/,
       mockResponse(defaultResponse, response)
     );
   };
@@ -61,7 +61,7 @@ const registerHttpRequestMockHelpers = server => {
 
     server.respondWith(
       'GET',
-      'api/cross_cluster_replication/stats/auto_follow',
+      '/api/cross_cluster_replication/stats/auto_follow',
       mockResponse(defaultResponse, response)
     );
   };
@@ -87,7 +87,7 @@ const registerHttpRequestMockHelpers = server => {
 
     server.respondWith(
       'GET',
-      /api\/cross_cluster_replication\/auto_follow_patterns\/.+/,
+      /\/api\/cross_cluster_replication\/auto_follow_patterns\/.+/,
       mockResponse(defaultResponse, response)
     );
   };
@@ -105,7 +105,7 @@ const registerHttpRequestMockHelpers = server => {
 
     server.respondWith(
       'GET',
-      /api\/cross_cluster_replication\/follower_indices\/.+/,
+      /\/api\/cross_cluster_replication\/follower_indices\/.+/,
       mockResponse(defaultResponse, response)
     );
   };

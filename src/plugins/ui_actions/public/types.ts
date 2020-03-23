@@ -19,8 +19,9 @@
 
 import { ActionByType } from './actions/action';
 import { TriggerInternal } from './triggers/trigger_internal';
-import { EmbeddableVisTriggerContext } from '../../embeddable/public';
-import { SELECT_RANGE_TRIGGER } from './triggers';
+import { EmbeddableVisTriggerContext, IEmbeddable } from '../../embeddable/public';
+import { Filter } from '../../data/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER } from './triggers';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, ActionByType<any>>;
@@ -36,6 +37,11 @@ export type TriggerContext = BaseContext;
 export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;
   [SELECT_RANGE_TRIGGER]: EmbeddableVisTriggerContext;
+  [VALUE_CLICK_TRIGGER]: EmbeddableVisTriggerContext;
+  [APPLY_FILTER_TRIGGER]: {
+    embeddable: IEmbeddable;
+    filters: Filter[];
+  };
 }
 
 const DEFAULT_ACTION = '';

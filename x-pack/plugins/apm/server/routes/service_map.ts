@@ -20,10 +20,12 @@ export const serviceMapRoute = createRoute(() => ({
   path: '/api/apm/service-map',
   params: {
     query: t.intersection([
-      t.partial({ environment: t.string, serviceName: t.string }),
+      t.partial({
+        environment: t.string,
+        serviceName: t.string
+      }),
       uiFiltersRt,
-      rangeRt,
-      t.partial({ after: t.string })
+      rangeRt
     ])
   },
   handler: async ({ context, request }) => {
@@ -36,9 +38,9 @@ export const serviceMapRoute = createRoute(() => ({
 
     const setup = await setupRequest(context, request);
     const {
-      query: { serviceName, environment, after }
+      query: { serviceName, environment }
     } = context.params;
-    return getServiceMap({ setup, serviceName, environment, after });
+    return getServiceMap({ setup, serviceName, environment });
   }
 }));
 

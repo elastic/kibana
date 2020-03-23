@@ -4,71 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { getApiPath } from '../../lib/helper';
 import { BaseParams } from './types';
-import {
-  MonitorDetailsType,
-  MonitorDetails,
-  MonitorLocations,
-  MonitorLocationsType,
-} from '../../../common/runtime_types';
+import { MonitorDetailsType, MonitorLocationsType } from '../../../common/runtime_types';
 import { QueryParams } from '../actions/types';
+import { apiService } from './utils';
+import { API_URLS } from '../../../common/constants/rest_api';
 
 interface ApiRequest {
   monitorId: string;
-  basePath: string;
 }
 
 export type MonitorQueryParams = BaseParams & ApiRequest;
 
 export const fetchMonitorDetails = async ({
   monitorId,
-  basePath,
   dateStart,
   dateEnd,
-}: MonitorQueryParams): Promise<MonitorDetails> => {
-  const url = getApiPath(`/api/uptime/monitor/details`, basePath);
+}: MonitorQueryParams) => {
   const params = {
     monitorId,
     dateStart,
     dateEnd,
   };
-  const urlParams = new URLSearchParams(params).toString();
-  const response = await fetch(`${url}?${urlParams}`);
-
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  return response.json().then(data => {
-    PathReporter.report(MonitorDetailsType.decode(data));
-    return data;
-  });
+  return await apiService.get(API_URLS.MONITOR_DETAILS, params, MonitorDetailsType);
 };
 
 type ApiParams = QueryParams & ApiRequest;
 
-export const fetchMonitorLocations = async ({
-  monitorId,
-  basePath,
-  dateStart,
-  dateEnd,
-}: ApiParams): Promise<MonitorLocations> => {
-  const url = getApiPath(`/api/uptime/monitor/locations`, basePath);
-
+export const fetchMonitorLocations = async ({ monitorId, dateStart, dateEnd }: ApiParams) => {
   const params = {
     dateStart,
     dateEnd,
     monitorId,
   };
-  const urlParams = new URLSearchParams(params).toString();
-  const response = await fetch(`${url}?${urlParams}`);
-
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  return response.json().then(data => {
-    PathReporter.report(MonitorLocationsType.decode(data));
-    return data;
-  });
+  return await apiService.get(API_URLS.MONITOR_LOCATIONS, params, MonitorLocationsType);
 };
