@@ -121,15 +121,18 @@ const style: cytoscape.Stylesheet[] = [
   {
     selector: 'edge.nodeHover',
     style: {
-      width: 4,
+      width: 2,
       // @ts-ignore
-      'z-index': zIndexEdgeHover
+      'z-index': zIndexEdgeHover,
+      'line-color': theme.euiColorDarkShade,
+      'source-arrow-color': theme.euiColorDarkShade,
+      'target-arrow-color': theme.euiColorDarkShade
     }
   },
   {
     selector: 'node.hover',
     style: {
-      'border-width': 4
+      'border-width': 2
     }
   },
   {
