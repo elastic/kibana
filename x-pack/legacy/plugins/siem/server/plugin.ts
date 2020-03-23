@@ -154,7 +154,7 @@ export class Plugin {
 
     if (plugins.alerting != null) {
       const { host, port, protocol } = core.http.getServerInfo();
-      const kibanaUrl = `${protocol}//${host}:${port}`;
+      const kibanaUrl = `${protocol}://${host}:${port}`;
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,

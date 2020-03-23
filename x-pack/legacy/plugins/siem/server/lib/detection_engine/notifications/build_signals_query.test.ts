@@ -8,10 +8,11 @@ import { buildSignalsSearchQuery } from './build_signals_query';
 
 describe('buildSignalsSearchQuery', () => {
   it('returns proper query object', () => {
-    const index = ['index'];
+    const index = 'index';
     const ruleId = 'ruleId-12';
     const from = '123123123';
     const to = '1123123123';
+
     expect(
       buildSignalsSearchQuery({
         index,
@@ -20,10 +21,7 @@ describe('buildSignalsSearchQuery', () => {
         ruleId,
       })
     ).toEqual({
-      allowNoIndices: true,
       index,
-      size: 10000,
-      ignoreUnavailable: true,
       body: {
         query: {
           bool: {
@@ -49,13 +47,6 @@ describe('buildSignalsSearchQuery', () => {
             ],
           },
         },
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-            },
-          },
-        ],
       },
     });
   });

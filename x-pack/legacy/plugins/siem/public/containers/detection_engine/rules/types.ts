@@ -69,9 +69,14 @@ export interface AddRulesProps {
   signal: AbortSignal;
 }
 
-const MetaRule = t.type({
-  from: t.string,
-});
+const MetaRule = t.intersection([
+  t.type({
+    from: t.string,
+  }),
+  t.partial({
+    throttle: t.string,
+  }),
+]);
 
 export const RuleSchema = t.intersection([
   t.type({

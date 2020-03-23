@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { Logger } from 'src/core/server';
 import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
-import { buildSignalsSearchQuery } from '../notifications/build_signals_query';
 import { getInputIndex } from './get_input_output_index';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
@@ -24,7 +22,8 @@ import { getCurrentStatusSavedObject } from './get_current_status_saved_object';
 import { writeCurrentStatusSucceeded } from './write_current_status_succeeded';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { getNotificationResultsLink } from '../notifications/utils';
+import { getSignalsCount } from '../notifications/get_signals_count';
+import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 
 export const signalRulesAlertType = ({
   logger,
@@ -210,36 +209,32 @@ export const signalRulesAlertType = ({
 
         if (creationSucceeded) {
           if (meta?.throttle === 'rule' && actions.length) {
-            const actionsInterval = throttle ?? savedObject.attributes.schedule.interval;
-
-            const singalsQuery = buildSignalsSearchQuery({
-              ruleId: ruleParams.ruleId!,
-              index: [outputIndex],
-              from: `now-${actionsInterval}`,
+            const notificationRuleParams = {
+              ...ruleParams,
+              name,
+            };
+            const { signalsCount, resultsLink } = await getSignalsCount({
+              from: `now-${interval}`,
               to: 'now',
+              index: ruleParams.outputIndex,
+              ruleId: ruleParams.ruleId!,
+              kibanaUrl,
+              ruleAlertId: savedObject.id,
+              callCluster: services.callCluster,
             });
 
-            const newSignalsResult = await services.callCluster('search', singalsQuery);
-            const newSignalsCount = newSignalsResult.hits.total.value;
+            logger.info(
+              `Found ${signalsCount} signals using signal rule name: "${notificationRuleParams.name}", id: "${notificationRuleParams.ruleId}", rule_id: "${notificationRuleParams.ruleId}" in "${notificationRuleParams.outputIndex}" index`
+            );
 
-            if (newSignalsCount) {
-              const fromInMs = moment(`now-${actionsInterval}`).format('x');
-              const toInMs = moment().format('x');
-              const resultsLink = getNotificationResultsLink({
-                baseUrl: kibanaUrl,
-                id: alertId,
-                from: fromInMs,
-                to: toInMs,
-              });
+            if (signalsCount) {
               const alertInstance = services.alertInstanceFactory(alertId);
-              alertInstance
-                .replaceState({
-                  signalsCount: newSignalsCount,
-                })
-                .scheduleActions('default', {
-                  resultsLink,
-                  rule: ruleParams,
-                });
+              scheduleNotificationActions({
+                alertInstance,
+                signalsCount,
+                resultsLink,
+                ruleParams: notificationRuleParams,
+              });
             }
           }
 

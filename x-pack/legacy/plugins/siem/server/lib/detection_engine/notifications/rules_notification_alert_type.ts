@@ -6,14 +6,13 @@
 
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
-import { buildSignalsSearchQuery } from './build_signals_query';
-import { getNotificationResultsLink } from './utils';
+import { getSignalsCount } from './get_signals_count';
 import { RuleAlertAttributes } from '../signals/types';
+import { scheduleNotificationActions } from './schedule_notification_actions';
 
 export const rulesNotificationAlertType = ({
   logger,
@@ -52,48 +51,26 @@ export const rulesNotificationAlertType = ({
       return;
     }
 
-    logger.warn(
-      `ruleAlertSavedObject.attributes ${JSON.stringify(ruleAlertSavedObject.attributes, null, 2)}`
-    );
-
     const { params: ruleAlertParams, name: ruleName } = ruleAlertSavedObject.attributes;
     const ruleParams = { ...ruleAlertParams, name: ruleName };
-    const fromInMs = previousStartedAt
-      ? moment(previousStartedAt).format('x')
-      : moment()
-          .subtract(ruleParams.interval)
-          .format('x');
-    const toInMs = moment(startedAt).format('x');
 
-    const query = buildSignalsSearchQuery({
-      index: [ruleParams.outputIndex],
+    const { signalsCount, resultsLink } = await getSignalsCount({
+      from: previousStartedAt ?? `now-${ruleParams.interval}`,
+      to: startedAt,
+      index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId!,
-      to: toInMs,
-      from: fromInMs,
+      kibanaUrl,
+      ruleAlertId: ruleAlertSavedObject.id,
+      callCluster: services.callCluster,
     });
 
-    const signalsQueryResult = await services.callCluster('search', query);
-    const signalsCount = signalsQueryResult.hits.total.value;
     logger.info(
       `Found ${signalsCount} signals using signal rule name: "${ruleParams.name}", id: "${params.ruleAlertId}", rule_id: "${ruleParams.ruleId}" in "${ruleParams.outputIndex}" index`
     );
 
     if (signalsCount) {
-      const resultsLink = getNotificationResultsLink({
-        baseUrl: kibanaUrl,
-        id: ruleAlertSavedObject.id,
-        from: fromInMs,
-        to: toInMs,
-      });
       const alertInstance = services.alertInstanceFactory(alertId);
-      alertInstance
-        .replaceState({
-          signalsCount,
-        })
-        .scheduleActions('default', {
-          resultsLink,
-          rule: ruleParams,
-        });
+      scheduleNotificationActions({ alertInstance, signalsCount, resultsLink, ruleParams });
     }
   },
 });

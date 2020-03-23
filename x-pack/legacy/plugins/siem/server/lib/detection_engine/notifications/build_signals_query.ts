@@ -6,23 +6,13 @@
 
 interface BuildSignalsSearchQuery {
   ruleId: string;
-  index: string[];
+  index: string;
   from: string;
   to: string;
-  size?: number;
 }
 
-export const buildSignalsSearchQuery = ({
-  ruleId,
+export const buildSignalsSearchQuery = ({ ruleId, index, from, to }: BuildSignalsSearchQuery) => ({
   index,
-  from,
-  to,
-  size = 10000,
-}: BuildSignalsSearchQuery) => ({
-  allowNoIndices: true,
-  index,
-  size,
-  ignoreUnavailable: true,
   body: {
     query: {
       bool: {
@@ -48,12 +38,5 @@ export const buildSignalsSearchQuery = ({
         ],
       },
     },
-    sort: [
-      {
-        '@timestamp': {
-          order: 'asc',
-        },
-      },
-    ],
   },
 });

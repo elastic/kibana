@@ -57,12 +57,12 @@ export const getStepsData = ({
 export const getActionsStepsData = (
   rule: Omit<Rule, 'actions'> & { actions: RuleAlertAction[] }
 ): ActionsStepRule => {
-  const { throttle = null, enabled, actions = [] } = rule;
+  const { enabled, actions = [], meta } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
     isNew: false,
-    throttle,
+    throttle: meta?.throttle,
     enabled,
   };
 };

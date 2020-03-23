@@ -67,11 +67,7 @@ describe('rules_notification_alert_type', () => {
         attributes: ruleAlert,
       });
       callClusterMock.mockResolvedValue({
-        hits: {
-          total: {
-            value: 0,
-          },
-        },
+        count: 0,
       });
 
       await alert.executor(payload);
@@ -79,7 +75,7 @@ describe('rules_notification_alert_type', () => {
       expect(buildSignalsSearchQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           from: '1576255233400',
-          index: ['.siem-signals'],
+          index: '.siem-signals',
           ruleId: 'rule-1',
           to: '1576341633400',
         })
@@ -95,11 +91,7 @@ describe('rules_notification_alert_type', () => {
         attributes: ruleAlert,
       });
       callClusterMock.mockResolvedValue({
-        hits: {
-          total: {
-            value: 0,
-          },
-        },
+        count: 0,
       });
 
       await alert.executor(payload);
@@ -116,11 +108,7 @@ describe('rules_notification_alert_type', () => {
         attributes: ruleAlert,
       });
       callClusterMock.mockResolvedValue({
-        hits: {
-          total: {
-            value: 10,
-          },
-        },
+        count: 10,
       });
 
       await alert.executor(payload);
