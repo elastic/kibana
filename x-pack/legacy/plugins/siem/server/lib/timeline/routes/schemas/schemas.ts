@@ -45,12 +45,14 @@ export const dateRange = Joi.object({
   start,
   end,
 });
-export const favorite = Joi.object({
-  keySearch: Joi.string(),
-  fullName: Joi.string(),
-  userName: Joi.string(),
-  favoriteDate: Joi.number(),
-});
+export const favorite = Joi.array().items(
+  Joi.object({
+    keySearch: Joi.string(),
+    fullName: Joi.string(),
+    userName: Joi.string(),
+    favoriteDate: Joi.number(),
+  }).allow(null)
+);
 const noteItem = Joi.object({
   noteId,
   version,
