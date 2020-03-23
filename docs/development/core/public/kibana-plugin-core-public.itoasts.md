@@ -9,5 +9,5 @@ Methods for adding and removing global toast messages. See [ToastsApi](./kibana-
 <b>Signature:</b>
 
 ```typescript
-export declare type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'>;
+export declare type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 ```
