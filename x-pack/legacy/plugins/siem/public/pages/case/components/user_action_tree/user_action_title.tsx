@@ -25,7 +25,7 @@ interface UserActionTitleProps {
   createdAt: string;
   id: string;
   isLoading: boolean;
-  labelAction: string;
+  labelEditAction: string;
   labelTitle: string;
   userName: string;
   onEdit: (id: string) => void;
@@ -35,7 +35,7 @@ export const UserActionTitle = ({
   createdAt,
   id,
   isLoading,
-  labelAction,
+  labelEditAction,
   labelTitle,
   userName,
   onEdit,
@@ -43,8 +43,8 @@ export const UserActionTitle = ({
   const propertyActions = useMemo(() => {
     return [
       {
-        iconType: 'documentEdit',
-        label: labelAction,
+        iconType: 'pencil',
+        label: labelEditAction,
         onClick: () => onEdit(id),
       },
     ];
