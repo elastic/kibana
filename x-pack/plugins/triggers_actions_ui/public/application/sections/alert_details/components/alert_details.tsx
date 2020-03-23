@@ -78,7 +78,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
                       {
                         defaultMessage:
-                          'This module is not GA. Please help us by reporting any bugs.',
+                          'Alerts and Actions is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
                       }
                     )}
                   />
@@ -194,7 +194,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <p>
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
-                        defaultMessage="Disabled Alerts do not have an active state, hence Alert Instances cannot be displayed."
+                        defaultMessage="This alert is disabled and cannot be displayed. Toggle Enable ↑ to activate it."
                       />
                     </p>
                   </EuiCallOut>

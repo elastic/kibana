@@ -30,8 +30,7 @@ export function checkActionTypeEnabled(
       message: i18n.translate(
         'xpack.triggersActionsUI.checkActionTypeEnabled.actionTypeDisabledByLicenseMessage',
         {
-          defaultMessage:
-            'This connector is disabled because it requires a {minimumLicenseRequired} license.',
+          defaultMessage: 'This connector requires a {minimumLicenseRequired} license.',
           values: {
             minimumLicenseRequired: actionType.minimumLicenseRequired,
           },
@@ -45,7 +44,9 @@ export function checkActionTypeEnabled(
             {
               defaultMessage: 'This feature requires a {minimumLicenseRequired} license.',
               values: {
-                minimumLicenseRequired: actionType.minimumLicenseRequired,
+                minimumLicenseRequired: `${actionType.minimumLicenseRequired
+                  .charAt(0)
+                  .toUpperCase()}${actionType.minimumLicenseRequired.slice(1)}`,
               },
             }
           )}

@@ -43,7 +43,7 @@ test('returns isEnabled:false when action type is disabled by license', async ()
   expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
     Object {
       "isEnabled": false,
-      "message": "This connector is disabled because it requires a basic license.",
+      "message": "This connector requires a Basic license.",
       "messageCard": <EuiCard
         className="actCheckActionTypeEnabled__disabledActionWarningCard"
         description="To re-enable this action, please upgrade your license."

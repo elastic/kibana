@@ -17,6 +17,7 @@ import {
   EuiTabs,
   EuiTitle,
   EuiBetaBadge,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -100,12 +101,21 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
                     'xpack.triggersActionsUI.home.betaBadgeTooltipContent',
                     {
                       defaultMessage:
-                        'This module is not GA. Please help us by reporting any bugs.',
+                        'Alerts and Actions is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
                     }
                   )}
                 />
               </h1>
             </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.home.sectionDescription"
+                  defaultMessage="Detect conditions using alerts, and take actions using connectors."
+                />
+              </p>
+            </EuiText>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
 

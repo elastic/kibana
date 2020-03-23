@@ -133,7 +133,7 @@ export const ConnectorAddModal = ({
                         'xpack.triggersActionsUI.sections.addModalConnectorForm.betaBadgeTooltipContent',
                         {
                           defaultMessage:
-                            'This module is not GA. Please help us by reporting any bugs.',
+                            'Alerts and Actions is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
                         }
                       )}
                     />

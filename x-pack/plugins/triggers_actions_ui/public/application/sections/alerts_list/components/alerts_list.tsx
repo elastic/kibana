@@ -120,7 +120,7 @@ export const AlertsList: React.FunctionComponent = () => {
     (async () => {
       try {
         const result = await loadActionTypes({ http });
-        setActionTypes(result);
+        setActionTypes(result.filter(actionType => actionTypeRegistry.has(actionType.id)));
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -285,7 +285,7 @@ export const AlertsList: React.FunctionComponent = () => {
       >
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
-          defaultMessage="Create"
+          defaultMessage="Create alert"
         />
       </EuiButton>
     );
@@ -307,7 +307,7 @@ export const AlertsList: React.FunctionComponent = () => {
         <p>
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.emptyDesc"
-            defaultMessage="Recieve an alert through email, slack or other connectors when a certain trigger is hit"
+            defaultMessage="Receive an alert through email, Slack, or another connector when a trigger is hit."
           />
         </p>
       }
