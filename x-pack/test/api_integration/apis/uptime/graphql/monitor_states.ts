@@ -22,6 +22,7 @@ export default function({ getService }: FtrProviderContext) {
       variables: {
         dateRangeStart,
         dateRangeEnd,
+        pageSize: 10,
         ...variables,
       },
     };
