@@ -191,7 +191,7 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
       <Settings
         showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
         legendPosition={legend.position}
-        showLegendDisplayValue={false}
+        showLegendExtra={false}
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
         xDomain={

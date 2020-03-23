@@ -1384,32 +1384,36 @@ class TimeseriesChartIntl extends Component {
     // Show the time and metric values in the tooltip.
     // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
     const formattedDate = formatHumanReadableDateTimeSeconds(marker.date);
-    const tooltipData = [{ name: formattedDate }];
+    const tooltipData = [{ label: formattedDate }];
 
     if (_.has(marker, 'anomalyScore')) {
       const score = parseInt(marker.anomalyScore);
       const displayScore = score > 0 ? score : '< 1';
       tooltipData.push({
-        name: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyScoreLabel', {
+        label: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyScoreLabel', {
           defaultMessage: 'anomaly score',
         }),
         value: displayScore,
         color: anomalyColorScale(score),
-        seriesKey,
-        yAccessor: 'anomaly_score',
+        seriesIdentifier: {
+          key: seriesKey,
+        },
+        valueAccessor: 'anomaly_score',
       });
 
       if (showMultiBucketAnomalyTooltip(marker) === true) {
         tooltipData.push({
-          name: i18n.translate(
+          label: i18n.translate(
             'xpack.ml.timeSeriesExplorer.timeSeriesChart.multiBucketImpactLabel',
             {
               defaultMessage: 'multi-bucket impact',
             }
           ),
           value: getMultiBucketImpactLabel(marker.multiBucketImpact),
-          seriesKey,
-          yAccessor: 'multi_bucket_impact',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'multi_bucket_impact',
         });
       }
 
@@ -1421,36 +1425,42 @@ class TimeseriesChartIntl extends Component {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
           tooltipData.push({
-            name: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.actualLabel', {
+            label: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.actualLabel', {
               defaultMessage: 'actual',
             }),
             value: formatValue(marker.actual, marker.function, fieldFormat),
-            seriesKey,
-            yAccessor: 'actual',
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'actual',
           });
           tooltipData.push({
-            name: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.typicalLabel', {
+            label: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.typicalLabel', {
               defaultMessage: 'typical',
             }),
             value: formatValue(marker.typical, marker.function, fieldFormat),
-            seriesKey,
-            yAccessor: 'typical',
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'typical',
           });
         } else {
           tooltipData.push({
-            name: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.valueLabel', {
+            label: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.valueLabel', {
               defaultMessage: 'value',
             }),
             value: formatValue(marker.value, marker.function, fieldFormat),
-            seriesKey,
-            yAccessor: 'value',
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'value',
           });
           if (_.has(marker, 'byFieldName') && _.has(marker, 'numberOfCauses')) {
             const numberOfCauses = marker.numberOfCauses;
             // If numberOfCauses === 1, won't go into this block as actual/typical copied to top level fields.
             const byFieldName = mlEscape(marker.byFieldName);
             tooltipData.push({
-              name: i18n.translate(
+              label: i18n.translate(
                 'xpack.ml.timeSeriesExplorer.timeSeriesChart.moreThanOneUnusualByFieldValuesLabel',
                 {
                   defaultMessage: '{numberOfCauses}{plusSign} unusual {byFieldName} values',
@@ -1462,96 +1472,112 @@ class TimeseriesChartIntl extends Component {
                   },
                 }
               ),
-              seriesKey,
-              yAccessor: 'numberOfCauses',
+              seriesIdentifier: {
+                key: seriesKey,
+              },
+              valueAccessor: 'numberOfCauses',
             });
           }
         }
       } else {
         tooltipData.push({
-          name: i18n.translate(
+          label: i18n.translate(
             'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.actualLabel',
             {
               defaultMessage: 'actual',
             }
           ),
           value: formatValue(marker.actual, marker.function, fieldFormat),
-          seriesKey,
-          yAccessor: 'actual',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'actual',
         });
         tooltipData.push({
-          name: i18n.translate(
+          label: i18n.translate(
             'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.upperBoundsLabel',
             {
               defaultMessage: 'upper bounds',
             }
           ),
           value: formatValue(marker.upper, marker.function, fieldFormat),
-          seriesKey,
-          yAccessor: 'upper_bounds',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'upper_bounds',
         });
         tooltipData.push({
-          name: i18n.translate(
+          label: i18n.translate(
             'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.lowerBoundsLabel',
             {
               defaultMessage: 'lower bounds',
             }
           ),
           value: formatValue(marker.lower, marker.function, fieldFormat),
-          seriesKey,
-          yAccessor: 'lower_bounds',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'lower_bounds',
         });
       }
     } else {
       // TODO - need better formatting for small decimals.
       if (_.get(marker, 'isForecast', false) === true) {
         tooltipData.push({
-          name: i18n.translate(
+          label: i18n.translate(
             'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.predictionLabel',
             {
               defaultMessage: 'prediction',
             }
           ),
           value: formatValue(marker.value, marker.function, fieldFormat),
-          seriesKey,
-          yAccessor: 'prediction',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'prediction',
         });
       } else {
         tooltipData.push({
-          name: i18n.translate(
+          label: i18n.translate(
             'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.valueLabel',
             {
               defaultMessage: 'value',
             }
           ),
           value: formatValue(marker.value, marker.function, fieldFormat),
-          seriesKey,
-          yAccessor: 'value',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'value',
         });
       }
 
       if (modelPlotEnabled === true) {
         tooltipData.push({
-          name: i18n.translate(
+          label: i18n.translate(
             'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScoreAndModelPlotEnabled.upperBoundsLabel',
             {
               defaultMessage: 'upper bounds',
             }
           ),
           value: formatValue(marker.upper, marker.function, fieldFormat),
-          seriesKey,
-          yAccessor: 'upper_bounds',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'upper_bounds',
         });
         tooltipData.push({
-          name: i18n.translate(
+          label: i18n.translate(
             'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScoreAndModelPlotEnabled.lowerBoundsLabel',
             {
               defaultMessage: 'lower bounds',
             }
           ),
           value: formatValue(marker.lower, marker.function, fieldFormat),
-          seriesKey,
-          yAccessor: 'lower_bounds',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'lower_bounds',
         });
       }
     }
@@ -1559,23 +1585,29 @@ class TimeseriesChartIntl extends Component {
     if (_.has(marker, 'scheduledEvents')) {
       marker.scheduledEvents.forEach((scheduledEvent, i) => {
         tooltipData.push({
-          name: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.scheduledEventsLabel', {
-            defaultMessage: 'scheduled event{counter}',
-            values: {
-              counter: marker.scheduledEvents.length > 1 ? ` #${i + 1}` : '',
-            },
-          }),
+          label: i18n.translate(
+            'xpack.ml.timeSeriesExplorer.timeSeriesChart.scheduledEventsLabel',
+            {
+              defaultMessage: 'scheduled event{counter}',
+              values: {
+                counter: marker.scheduledEvents.length > 1 ? ` #${i + 1}` : '',
+              },
+            }
+          ),
           value: scheduledEvent,
-          seriesKey,
-          yAccessor: `scheduled_events_${i + 1}`,
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: `scheduled_events_${i + 1}`,
         });
       });
     }
 
     if (_.has(marker, 'annotation')) {
       tooltipData.length = 0;
+      // header
       tooltipData.push({
-        name: marker.annotation,
+        label: marker.annotation,
       });
       let timespan = moment(marker.timestamp).format('MMMM Do YYYY, HH:mm');
 
@@ -1583,7 +1615,11 @@ class TimeseriesChartIntl extends Component {
         timespan += ` - ${moment(marker.end_timestamp).format('MMMM Do YYYY, HH:mm')}`;
       }
       tooltipData.push({
-        name: timespan,
+        label: timespan,
+        seriesIdentifier: {
+          key: seriesKey,
+        },
+        valueAccessor: 'timespan',
       });
     }
 

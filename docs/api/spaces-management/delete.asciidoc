@@ -4,22 +4,20 @@
 <titleabbrev>Delete space</titleabbrev>
 ++++
 
-Delete a {kib} space.
+experimental[] Delete a {kib} space.
 
-experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
-
-WARNING: When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone. 
+WARNING: When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.
 
 [[spaces-api-delete-request]]
 ==== Request
 
-`DELETE /api/spaces/space/marketing`
+`DELETE <kibana host>:<port>/api/spaces/space/marketing`
 
 [[spaces-api-delete-errors-codes]]
 ==== Response codes
 
-`204`:: 
+`204`::
     Indicates a successful call.
-    
+
 `404`::
     Indicates that the request failed.
