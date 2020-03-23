@@ -22,6 +22,7 @@ import {
 } from './services';
 import {
   agentConfigurationRoute,
+  getSingleAgentConfigurationRoute,
   agentConfigurationSearchRoute,
   deleteAgentConfigurationRoute,
   listAgentConfigurationEnvironmentsRoute,
@@ -63,7 +64,8 @@ import {
   createCustomLinkRoute,
   updateCustomLinkRoute,
   deleteCustomLinkRoute,
-  listCustomLinksRoute
+  listCustomLinksRoute,
+  customLinkTransactionRoute
 } from './settings/custom_link';
 
 const createApmApi = () => {
@@ -85,6 +87,7 @@ const createApmApi = () => {
     .add(serviceAnnotationsRoute)
 
     // Agent configuration
+    .add(getSingleAgentConfigurationRoute)
     .add(agentConfigurationAgentNameRoute)
     .add(agentConfigurationRoute)
     .add(agentConfigurationSearchRoute)
@@ -138,7 +141,8 @@ const createApmApi = () => {
     .add(createCustomLinkRoute)
     .add(updateCustomLinkRoute)
     .add(deleteCustomLinkRoute)
-    .add(listCustomLinksRoute);
+    .add(listCustomLinksRoute)
+    .add(customLinkTransactionRoute);
 
   return api;
 };
