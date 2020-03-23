@@ -25,6 +25,8 @@ import {
   KibanaObjectResponse,
   DataRecognizerConfigResponse,
   GeneralDatafeedsOverride,
+  JobSpecificOverride,
+  isGeneralJobOverride,
 } from '../../../common/types/modules';
 import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
@@ -1090,10 +1092,10 @@ export class DataRecognizer {
     // separate all the overrides.
     // the overrides which don't contain a job id will be applied to all jobs in the module
     const generalOverrides: GeneralJobsOverride[] = [];
-    const jobSpecificOverrides: JobOverride[] = [];
+    const jobSpecificOverrides: JobSpecificOverride[] = [];
 
     overrides.forEach(override => {
-      if (override.job_id === undefined) {
+      if (isGeneralJobOverride(override)) {
         generalOverrides.push(override);
       } else {
         jobSpecificOverrides.push(override);
