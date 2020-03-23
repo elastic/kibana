@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback } from 'react';
+import { MouseEventHandler, useCallback } from 'react';
 import { ApplicationStart } from 'kibana/public';
-import { EuiLinkProps } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 type NavigateToAppHandlerProps = Parameters<ApplicationStart['navigateToApp']>;
-type EventHandlerCallback = EuiLinkProps['onClick'];
+type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
 
 /**
  * Provides an event handlers that can be used with (for example) `onClick` to prevent the
@@ -49,6 +48,18 @@ export const useNavigateToAppEventHandler = (
       }
 
       if (ev.defaultPrevented) {
+        return;
+      }
+
+      if (ev.button !== 0) {
+        return;
+      }
+
+      if (
+        ev.currentTarget instanceof HTMLAnchorElement &&
+        ev.currentTarget.target !== '' &&
+        ev.currentTarget.target !== '_self'
+      ) {
         return;
       }
 

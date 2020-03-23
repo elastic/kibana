@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, MouseEventHandler } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { EuiLinkProps } from '@elastic/eui';
 import { useNavigateToAppEventHandler } from '../hooks/use_navigate_to_app_event_handler';
@@ -20,13 +20,13 @@ export const LinkToApp = memo<
     /** Any app specic path (route) */
     appPath?: string;
     appState?: any;
+    onClick?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
   }
 >(({ appId, appPath: path, appState: state, onClick, children, ...otherProps }) => {
   const handleOnClick = useNavigateToAppEventHandler(appId, { path, state, onClick });
   return (
-    // @ts-ignore
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink {...otherProps} href={'#'} onClick={handleOnClick}>
+    <EuiLink {...otherProps} onClick={handleOnClick}>
       {children}
     </EuiLink>
   );
