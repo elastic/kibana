@@ -11,7 +11,7 @@ export function LoadingStatePrompt() {
   return (
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="l" />
+        <EuiLoadingSpinner size="l" data-test-subj="loading-spinner" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
