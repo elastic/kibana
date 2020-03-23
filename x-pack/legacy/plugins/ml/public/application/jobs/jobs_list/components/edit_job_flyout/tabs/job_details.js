@@ -116,14 +116,6 @@ class JobDetailsUI extends Component {
                 defaultMessage="Job description"
               />
             }
-            helpText={
-              datafeedRunning ? (
-                <FormattedMessage
-                  id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitLabelHelp"
-                  defaultMessage="Model memory limit cannot be edited while the datafeed is running."
-                />
-              ) : null
-            }
           >
             <EuiFieldText value={description} onChange={this.onDescriptionChange} />
           </EuiFormRow>
@@ -157,6 +149,14 @@ class JobDetailsUI extends Component {
                 id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitLabel"
                 defaultMessage="Model memory limit"
               />
+            }
+            helpText={
+              datafeedRunning ? (
+                <FormattedMessage
+                  id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitLabelHelp"
+                  defaultMessage="Model memory limit cannot be edited while the datafeed is running."
+                />
+              ) : null
             }
             isInvalid={mmlValidationError !== ''}
             error={mmlValidationError}
