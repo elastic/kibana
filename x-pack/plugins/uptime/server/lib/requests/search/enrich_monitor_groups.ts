@@ -7,7 +7,7 @@
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
 import { getHistogramIntervalFormatted } from '../../helper';
-import { INDEX_NAMES, STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import {
   MonitorSummary,
   SummaryHistogram,
@@ -25,7 +25,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
   // redundant with the way the code works now. This could be simplified
   // to a much simpler query + some JS processing.
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: queryContext.heartbeatIndices,
     body: {
       query: {
         bool: {
@@ -292,7 +292,7 @@ const getHistogramForMonitors = async (
   monitorIds: string[]
 ): Promise<{ [key: string]: SummaryHistogram }> => {
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: queryContext.heartbeatIndices,
     body: {
       size: 0,
       query: {

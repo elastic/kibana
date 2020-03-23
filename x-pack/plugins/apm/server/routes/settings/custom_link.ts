@@ -4,33 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE
-} from '../../../common/elasticsearch_fieldnames';
+import { FilterOptionsRt } from '../../../common/custom_link_filter_options';
 import { createRoute } from '../create_route';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_or_update_custom_link';
 import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_link';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
+import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
 
-const FilterOptionsRt = t.partial({
-  [SERVICE_NAME]: t.string,
-  [SERVICE_ENVIRONMENT]: t.string,
-  [TRANSACTION_NAME]: t.string,
-  [TRANSACTION_TYPE]: t.string
-});
-
-export type FilterOptions = t.TypeOf<typeof FilterOptionsRt>;
-
-export const filterOptions: Array<keyof FilterOptions> = [
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_TYPE,
-  TRANSACTION_NAME
-];
+export const customLinkTransactionRoute = createRoute(core => ({
+  path: '/api/apm/settings/custom_links/transaction',
+  params: {
+    query: FilterOptionsRt
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { params } = context;
+    return await getTransaction({ setup, filters: params.query });
+  }
+}));
 
 export const listCustomLinksRoute = createRoute(core => ({
   path: '/api/apm/settings/custom_links',
