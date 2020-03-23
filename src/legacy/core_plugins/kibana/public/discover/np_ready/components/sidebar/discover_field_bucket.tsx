@@ -46,6 +46,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
       defaultMessage: 'Filter out this value',
     }
   );
+
   return (
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false}>
@@ -62,7 +63,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                 iconType="magnifyWithPlus"
                 onClick={() => onAddFilter(field, bucket.value, '+')}
                 aria-label={addLabel}
-                data-test-subj={`plus-${field.name}-${bucket.display}`}
+                data-test-subj={`plus-${field.name}-${bucket.value}`}
                 style={{
                   minHeight: 'auto',
                   minWidth: 'auto',
@@ -77,7 +78,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                 iconType="magnifyWithMinus"
                 onClick={() => onAddFilter(field, bucket.value, '-')}
                 aria-label={removeLabel}
-                data-test-subj={`minus-${field.name}-${bucket.display}`}
+                data-test-subj={`minus-${field.name}-${bucket.value}`}
                 style={{
                   minHeight: 'auto',
                   minWidth: 'auto',
