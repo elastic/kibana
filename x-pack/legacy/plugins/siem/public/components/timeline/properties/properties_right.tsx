@@ -14,7 +14,7 @@ import {
   EuiToolTip,
   EuiAvatar,
 } from '@elastic/eui';
-import { NewTimeline, Description, NotesButton } from './helpers';
+import { NewTimeline, Description, NotesButton, NewCase } from './helpers';
 import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal/open_timeline_modal_button';
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
@@ -79,6 +79,7 @@ interface Props {
   onCloseTimelineModal: () => void;
   onOpenTimelineModal: () => void;
   showTimelineModal: boolean;
+  title: string;
   updateNote: UpdateNote;
 }
 
@@ -104,6 +105,7 @@ const PropertiesRightComponent: React.FC<Props> = ({
   showTimelineModal,
   onCloseTimelineModal,
   onOpenTimelineModal,
+  title,
 }) => (
   <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
     <EuiFlexItem grow={false}>
@@ -133,6 +135,14 @@ const PropertiesRightComponent: React.FC<Props> = ({
 
             <EuiFlexItem grow={false}>
               <OpenTimelineModalButton onClick={onOpenTimelineModal} />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <NewCase
+                onClosePopover={onClosePopover}
+                timelineId={timelineId}
+                timelineTitle={title}
+              />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>

@@ -20,6 +20,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
+import { IAggConfig, IAggType } from 'src/plugins/data/public';
 import { MetricsAxisOptions } from './index';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
@@ -27,10 +28,8 @@ import { Positions } from '../../../utils/collections';
 import { ValueAxesPanel } from './value_axes_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { ChartTypes } from '../../../utils/collections';
-import { IAggConfig, IAggType } from '../../../legacy_imports';
 import { defaultValueAxisId, valueAxis, seriesParam, categoryAxis } from './mocks';
 
-jest.mock('ui/new_platform');
 jest.mock('./series_panel', () => ({
   SeriesPanel: () => 'SeriesPanel',
 }));
