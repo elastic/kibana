@@ -5,13 +5,8 @@
  */
 import { PluginInitializerContext } from 'src/core/public';
 
-import {
-  LicenseManagementUIPlugin,
-  LicenseManagementUIPluginSetup,
-  LicenseManagementUIPluginStart,
-} from './plugin';
+export { LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart } from './plugin';
+import { LicenseManagementUIPlugin } from './plugin';
 import './application/index.scss';
 
 export const plugin = (ctx: PluginInitializerContext) => new LicenseManagementUIPlugin(ctx);
-
-export { LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart };
