@@ -14,9 +14,9 @@ import {
   CommentResponse,
   User,
   CaseUserActionsResponse,
-  CasePushRequest,
-  PushCaseParams,
-  PushCaseResponse,
+  CaseExternalServiceRequest,
+  ServiceConnectorCaseParams,
+  ServiceConnectorCaseResponse,
   ActionTypeExecutorResult,
 } from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
@@ -42,7 +42,7 @@ import {
   decodeCasesStatusResponse,
   decodeCommentResponse,
   decodeCaseUserActionsResponse,
-  decodePushCaseResponse,
+  decodeServiceConnectorCaseResponse,
 } from './utils';
 
 export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
@@ -188,7 +188,7 @@ export const deleteCases = async (caseIds: string[]): Promise<boolean> => {
 
 export const pushCase = async (
   caseId: string,
-  push: CasePushRequest,
+  push: CaseExternalServiceRequest,
   signal: AbortSignal
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(
@@ -204,9 +204,9 @@ export const pushCase = async (
 
 export const pushToService = async (
   connectorId: string,
-  casePushParams: PushCaseParams,
+  casePushParams: ServiceConnectorCaseParams,
   signal: AbortSignal
-): Promise<PushCaseResponse> => {
+): Promise<ServiceConnectorCaseResponse> => {
   const response = await KibanaServices.get().http.fetch<ActionTypeExecutorResult>(
     `/api/action/${connectorId}/_execute`,
     {
@@ -215,7 +215,7 @@ export const pushToService = async (
       signal,
     }
   );
-  return decodePushCaseResponse(response.data);
+  return decodeServiceConnectorCaseResponse(response.data);
 };
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {

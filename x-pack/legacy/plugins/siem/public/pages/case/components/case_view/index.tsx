@@ -15,7 +15,6 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { uniqBy } from 'lodash/fp';
 import * as i18n from './translations';
 import { Case } from '../../../../containers/case/types';
 import { getCaseUrl } from '../../../../components/link_to';
@@ -70,6 +69,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     hasDataToPush,
     isLoading: isLoadingUserActions,
     lastIndexPushToService,
+    participants,
   } = useGetCaseUserActions(caseId);
   const { caseData, isLoading, updateKey, updateCase, updateCaseProperty } = useUpdateCase(
     caseId,
@@ -132,7 +132,8 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
   );
 
   const { pushButton, pushCallouts } = usePushToService({
-    caseData,
+    caseId: caseData.id,
+    caseStatus: caseData.status,
     isNew: caseUserActions.filter(cua => cua.action === 'push-to-service').length === 0,
     updateCase: handleUpdateCase,
   });
@@ -144,10 +145,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     [onUpdateField]
   );
   const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
-  const participants = useMemo(
-    () => uniqBy('actionBy.username', caseUserActions).map(cau => cau.actionBy),
-    [caseUserActions]
-  );
+
   const caseStatusData = useMemo(
     () =>
       caseData.status === 'open'
@@ -233,7 +231,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                     onUpdateField={onUpdateField}
                   />
                   <MyEuiHorizontalRule margin="s" />
-                  <EuiFlexGroup alignItems="baseline" gutterSize="s" justifyContent="flexEnd">
+                  <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
                       <EuiButtonToggle
                         data-test-subj={caseStatusData['data-test-subj']}
@@ -257,7 +255,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                 users={[caseData.createdBy]}
               />
               <UserList
-                data-test-subj="case-view-user-list-particpants"
+                data-test-subj="case-view-user-list-participants"
                 email={emailContent}
                 headline={i18n.PARTICIPANTS}
                 users={participants}

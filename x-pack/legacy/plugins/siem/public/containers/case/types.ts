@@ -29,9 +29,9 @@ export interface CaseUserActions {
   oldValue: string | null;
 }
 
-export interface CasePush {
-  at: string;
-  by: string;
+export interface CaseExternalService {
+  pushedAt: string;
+  pushedBy: string;
   connectorId: string;
   connectorName: string;
   externalId: string;
@@ -46,7 +46,7 @@ export interface Case {
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
-  pushed: CasePush | null;
+  externalService: CaseExternalService | null;
   status: string;
   tags: string[];
   title: string;

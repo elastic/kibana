@@ -25,12 +25,12 @@ export interface ReturnUseCaseConfigure {
 }
 
 interface UseCaseConfigure {
-  setConnectorId: (newConnectorId: string, newConnectorName?: string) => void;
+  setConnector: (newConnectorId: string, newConnectorName?: string) => void;
   setClosureType?: (newClosureType: ClosureType) => void;
 }
 
 export const useCaseConfigure = ({
-  setConnectorId,
+  setConnector,
   setClosureType,
 }: UseCaseConfigure): ReturnUseCaseConfigure => {
   const [, dispatchToaster] = useStateToaster();
@@ -49,7 +49,7 @@ export const useCaseConfigure = ({
         if (!didCancel) {
           setLoading(false);
           if (res != null) {
-            setConnectorId(res.connectorId, res.connectorName);
+            setConnector(res.connectorId, res.connectorName);
             if (setClosureType != null) {
               setClosureType(res.closureType);
             }
@@ -99,7 +99,7 @@ export const useCaseConfigure = ({
                 );
           if (!didCancel) {
             setPersistLoading(false);
-            setConnectorId(res.connectorId);
+            setConnector(res.connectorId);
             if (setClosureType) {
               setClosureType(res.closureType);
             }

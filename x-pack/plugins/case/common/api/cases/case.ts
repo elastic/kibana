@@ -22,7 +22,7 @@ const CaseBasicRt = rt.type({
   title: rt.string,
 });
 
-const CasePushBasicRt = rt.type({
+const CaseExternalServiceBasicRt = rt.type({
   connector_id: rt.string,
   connector_name: rt.string,
   external_id: rt.string,
@@ -30,12 +30,12 @@ const CasePushBasicRt = rt.type({
   external_url: rt.string,
 });
 
-const CasePushedBasicRt = rt.union([
+const CaseFullExternalServiceRt = rt.union([
   rt.intersection([
-    CasePushBasicRt,
+    CaseExternalServiceBasicRt,
     rt.type({
-      at: rt.string,
-      by: UserRT,
+      pushed_at: rt.string,
+      pushed_by: UserRT,
     }),
   ]),
   rt.null,
@@ -48,7 +48,7 @@ export const CaseAttributesRt = rt.intersection([
     closed_by: rt.union([UserRT, rt.null]),
     created_at: rt.string,
     created_by: UserRT,
-    pushed: CasePushedBasicRt,
+    external_service: CaseFullExternalServiceRt,
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRT, rt.null]),
   }),
@@ -56,7 +56,7 @@ export const CaseAttributesRt = rt.intersection([
 
 export const CaseRequestRt = CaseBasicRt;
 
-export const CasePushRequestRt = CasePushBasicRt;
+export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
 
 export const CasesFindRequestRt = rt.partial({
   tags: rt.union([rt.array(rt.string), rt.string]),
@@ -109,37 +109,37 @@ export const CasesResponseRt = rt.array(CaseResponseRt);
  * so we redefine then so we can use/validate types
  */
 
-const PushCaseUserParams = rt.type({
+const ServiceConnectorUserParams = rt.type({
   fullName: rt.union([rt.string, rt.null]),
   username: rt.string,
 });
 
-export const PushCommentParamsRt = rt.type({
+export const ServiceConnectorCommentParamsRt = rt.type({
   commentId: rt.string,
   comment: rt.string,
   createdAt: rt.string,
-  createdBy: PushCaseUserParams,
+  createdBy: ServiceConnectorUserParams,
   updatedAt: rt.union([rt.string, rt.null]),
-  updatedBy: rt.union([PushCaseUserParams, rt.null]),
+  updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
 });
 
-export const PushCaseParamsRt = rt.intersection([
+export const ServiceConnectorCaseParamsRt = rt.intersection([
   rt.type({
     caseId: rt.string,
     createdAt: rt.string,
-    createdBy: PushCaseUserParams,
+    createdBy: ServiceConnectorUserParams,
     incidentId: rt.union([rt.string, rt.null]),
     title: rt.string,
     updatedAt: rt.union([rt.string, rt.null]),
-    updatedBy: rt.union([PushCaseUserParams, rt.null]),
+    updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
   }),
   rt.partial({
     description: rt.string,
-    comments: rt.array(PushCommentParamsRt),
+    comments: rt.array(ServiceConnectorCommentParamsRt),
   }),
 ]);
 
-export const PushCaseResponseRt = rt.intersection([
+export const ServiceConnectorCaseResponseRt = rt.intersection([
   rt.type({
     number: rt.string,
     incidentId: rt.string,
@@ -163,8 +163,8 @@ export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
-export type CasePushRequest = rt.TypeOf<typeof CasePushRequestRt>;
-export type PushCaseParams = rt.TypeOf<typeof PushCaseParamsRt>;
-export type PushCaseResponse = rt.TypeOf<typeof PushCaseResponseRt>;
-export type CasePushedData = rt.TypeOf<typeof CasePushedBasicRt>;
-export type PushCommentParams = rt.TypeOf<typeof PushCommentParamsRt>;
+export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
+export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCaseParamsRt>;
+export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;
+export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
+export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;

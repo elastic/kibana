@@ -82,6 +82,7 @@ describe('CaseView ', () => {
     isLoading: false,
     isError: false,
     lastIndexPushToService: -1,
+    participants: [data.createdBy],
   };
 
   const defaultUsePushToServiceMock = {

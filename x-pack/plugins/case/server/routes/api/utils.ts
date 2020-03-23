@@ -42,7 +42,7 @@ export const transformNewCase = ({
   closed_by: null,
   created_at: createdDate,
   created_by: { email, full_name, username },
-  pushed: null,
+  external_service: null,
   updated_at: null,
   updated_by: null,
   ...newCase,

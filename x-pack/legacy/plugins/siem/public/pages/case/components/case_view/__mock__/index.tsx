@@ -35,7 +35,7 @@ export const caseProps: CaseProps = {
     createdAt: '2020-02-13T19:44:23.627Z',
     createdBy: { fullName: null, email: 'testemail@elastic.co', username: 'elastic' },
     description: 'Security banana Issue',
-    pushed: null,
+    externalService: null,
     status: 'open',
     tags: ['defacement'],
     title: 'Another horrible breach!!',

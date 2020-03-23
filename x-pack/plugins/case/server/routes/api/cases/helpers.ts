@@ -4,16 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference, get } from 'lodash';
+import { get } from 'lodash';
 
 import { CaseAttributes, CasePatchRequest } from '../../../../common/api';
 
-export const isTwoArraysDifference = (origVal: unknown, updatedVal: unknown) =>
-  origVal != null &&
-  updatedVal != null &&
-  Array.isArray(updatedVal) &&
-  Array.isArray(origVal) &&
-  difference(origVal, updatedVal).length !== 0;
+interface CompareArrays {
+  addedItems: string[];
+  deletedItems: string[];
+}
+export const compareArrays = ({
+  originalValue,
+  updatedValue,
+}: {
+  originalValue: string[];
+  updatedValue: string[];
+}): CompareArrays => {
+  const result: CompareArrays = {
+    addedItems: [],
+    deletedItems: [],
+  };
+  originalValue.forEach(origVal => {
+    if (!updatedValue.includes(origVal)) {
+      result.deletedItems = [...result.deletedItems, origVal];
+    }
+  });
+  updatedValue.forEach(updatedVal => {
+    if (!originalValue.includes(updatedVal)) {
+      result.addedItems = [...result.addedItems, updatedVal];
+    }
+  });
+
+  return result;
+};
+
+export const isTwoArraysDifference = (
+  originalValue: unknown,
+  updatedValue: unknown
+): CompareArrays | null => {
+  if (
+    originalValue != null &&
+    updatedValue != null &&
+    Array.isArray(updatedValue) &&
+    Array.isArray(originalValue)
+  ) {
+    const compObj = compareArrays({ originalValue, updatedValue });
+    if (compObj.addedItems.length > 0 || compObj.deletedItems.length > 0) {
+      return compObj;
+    }
+  }
+  return null;
+};
 
 export const getCaseToUpdate = (
   currentCase: CaseAttributes,

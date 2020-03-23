@@ -12,7 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { flattenCaseSavedObject, wrapError, escapeHatch } from '../utils';
 
-import { CasePushRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
+import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 
@@ -37,7 +37,7 @@ export function initPushCaseUserActionApi({
         const client = context.core.savedObjects.client;
         const caseId = request.params.case_id;
         const query = pipe(
-          CasePushRequestRt.decode(request.body),
+          CaseExternalServiceRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
         const { username, full_name, email } = await caseService.getUser({ request, response });
@@ -76,9 +76,9 @@ export function initPushCaseUserActionApi({
           },
         });
 
-        const pushed = {
-          at: pushedDate,
-          by: { username, full_name, email },
+        const externalService = {
+          pushed_at: pushedDate,
+          pushed_by: { username, full_name, email },
           ...query,
         };
 
@@ -90,9 +90,11 @@ export function initPushCaseUserActionApi({
               ...(myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
                 ? {
                     status: 'closed',
+                    closed_at: pushedDate,
+                    closed_by: { email, full_name, username },
                   }
                 : {}),
-              pushed,
+              external_service: externalService,
               updated_at: pushedDate,
               updated_by: { username, full_name, email },
             },
@@ -121,8 +123,8 @@ export function initPushCaseUserActionApi({
                       actionAt: pushedDate,
                       actionBy: { username, full_name, email },
                       caseId,
-                      fields: [status],
-                      newValue: 'closes',
+                      fields: ['status'],
+                      newValue: 'closed',
                       oldValue: myCase.attributes.status,
                     }),
                   ]
@@ -133,7 +135,7 @@ export function initPushCaseUserActionApi({
                 actionBy: { username, full_name, email },
                 caseId,
                 fields: ['pushed'],
-                newValue: JSON.stringify(pushed),
+                newValue: JSON.stringify(externalService),
               }),
             ],
           }),

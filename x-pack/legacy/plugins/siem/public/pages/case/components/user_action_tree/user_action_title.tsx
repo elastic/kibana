@@ -17,6 +17,7 @@ import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_s
 import { navTabs } from '../../../home/home_navigations';
 import * as i18n from '../case_view/translations';
 import { PropertyActions } from '../property_actions';
+import { SiemPageName } from '../../../home/types';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   .euiLoadingSpinner {
@@ -65,9 +66,12 @@ export const UserActionTitle = ({
   }, [id, labelEditAction, onEdit]);
 
   const handleAnchorLink = useCallback(() => {
-    copy(`${window.location.origin}${window.location.pathname}#case/${caseId}/${id}${urlSearch}`, {
-      debug: true,
-    });
+    copy(
+      `${window.location.origin}${window.location.pathname}#${SiemPageName.case}/${caseId}/${id}${urlSearch}`,
+      {
+        debug: true,
+      }
+    );
   }, [caseId, id, urlSearch]);
 
   const handleMoveToLink = useCallback(() => {

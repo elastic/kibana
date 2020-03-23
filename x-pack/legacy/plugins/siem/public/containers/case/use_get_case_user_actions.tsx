@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, uniqBy } from 'lodash/fp';
 import { useCallback, useEffect, useState } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getCaseUserActions } from './api';
 import * as i18n from './translations';
-import { CaseUserActions } from './types';
+import { CaseUserActions, ElasticUser } from './types';
 
 interface CaseUserActionsState {
   caseUserActions: CaseUserActions[];
   firstIndexPushToService: number;
   hasDataToPush: boolean;
+  participants: ElasticUser[];
   isLoading: boolean;
   isError: boolean;
   lastIndexPushToService: number;
@@ -28,6 +29,7 @@ const initialData: CaseUserActionsState = {
   hasDataToPush: false,
   isLoading: true,
   isError: false,
+  participants: [],
 };
 
 interface UseGetCaseUserActions extends CaseUserActionsState {
@@ -75,12 +77,16 @@ export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => 
             // Attention Future developer
             // We are removing the first item because it will always be the creation of the case
             // and we do not want it to simplify our life
+            const participants = !isEmpty(response)
+              ? uniqBy('actionBy.username', response).map(cau => cau.actionBy)
+              : [];
             const caseUserActions = !isEmpty(response) ? response.slice(1) : [];
             setCaseUserActionsState({
               caseUserActions,
               ...getPushedInfo(caseUserActions),
               isLoading: false,
               isError: false,
+              participants,
             });
           }
         } catch (error) {
@@ -97,6 +103,7 @@ export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => 
               hasDataToPush: false,
               isLoading: false,
               isError: true,
+              participants: [],
             });
           }
         }

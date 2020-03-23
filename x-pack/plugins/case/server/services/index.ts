@@ -18,13 +18,7 @@ import {
 } from 'kibana/server';
 
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
-import {
-  CaseAttributes,
-  CommentAttributes,
-  SavedObjectFindOptions,
-  User,
-  CasePushedData,
-} from '../../common/api';
+import { CaseAttributes, CommentAttributes, SavedObjectFindOptions, User } from '../../common/api';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../saved_object_types';
 import { readReporters } from './reporters/read_reporters';
 import { readTags } from './tags/read_tags';
@@ -71,7 +65,7 @@ interface PostCommentArgs extends ClientArgs {
 
 interface PatchCase {
   caseId: string;
-  updatedAttributes: Partial<CaseAttributes & PushedArgs & { pushed: CasePushedData }>;
+  updatedAttributes: Partial<CaseAttributes & PushedArgs>;
   version?: string;
 }
 type PatchCaseArgs = PatchCase & ClientArgs;

@@ -16,7 +16,8 @@ import * as i18n from './translations';
 import { ErrorsPushServiceCallOut } from '../errors_push_service_callout';
 
 interface UsePushToService {
-  caseData: Case;
+  caseId: string;
+  caseStatus: string;
   isNew: boolean;
   updateCase: (newCase: Case) => void;
 }
@@ -32,7 +33,8 @@ interface ReturnUsePushToService {
 }
 
 export const usePushToService = ({
-  caseData,
+  caseId,
+  caseStatus,
   updateCase,
   isNew,
 }: UsePushToService): ReturnUsePushToService => {
@@ -45,7 +47,7 @@ export const usePushToService = ({
   }, []);
 
   const { loading: loadingCaseConfigure } = useCaseConfigure({
-    setConnectorId: handleSetConnector,
+    setConnector: handleSetConnector,
   });
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
@@ -53,16 +55,16 @@ export const usePushToService = ({
   const handlePushToService = useCallback(() => {
     if (connector != null) {
       postPushToService({
-        caseToPush: caseData,
+        caseId,
         ...connector,
         updateCase,
       });
     }
-  }, [caseData, connector, postPushToService, updateCase]);
+  }, [caseId, connector, postPushToService, updateCase]);
 
   const errorsMsg = useMemo(() => {
     let errors: Array<{ title: string; description: string }> = [];
-    if (caseData.status === 'closed') {
+    if (caseStatus === 'closed') {
       errors = [
         ...errors,
         {
@@ -99,7 +101,7 @@ export const usePushToService = ({
       ];
     }
     return errors;
-  }, [actionLicense, caseData, connector, loadingCaseConfigure, loadingLicense]);
+  }, [actionLicense, caseStatus, connector, loadingCaseConfigure, loadingLicense]);
 
   const pushToServiceButton = useMemo(
     () => (

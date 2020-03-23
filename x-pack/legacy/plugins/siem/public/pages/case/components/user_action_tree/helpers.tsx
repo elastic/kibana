@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiLink } from '@elastic/eui';
 import React from 'react';
 
-import { CasePushedData } from '../../../../../../../../plugins/case/common/api';
+import { CaseFullExternalService } from '../../../../../../../../plugins/case/common/api';
 import { CaseUserActions } from '../../../../containers/case/types';
 import * as i18n from '../case_view/translations';
 
@@ -59,14 +59,14 @@ const getPushedServiceLabelTitle = (
   firstIndexPushToService: number,
   index: number
 ) => {
-  const pushedVal = JSON.parse(action.newValue ?? '') as CasePushedData;
+  const pushedVal = JSON.parse(action.newValue ?? '') as CaseFullExternalService;
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="xs">
       <EuiFlexItem>
         {firstIndexPushToService === index ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink href={pushedVal?.external_url}>
+        <EuiLink href={pushedVal?.external_url} target="_blank">
           {pushedVal?.connector_name} {pushedVal?.external_title}
         </EuiLink>
       </EuiFlexItem>

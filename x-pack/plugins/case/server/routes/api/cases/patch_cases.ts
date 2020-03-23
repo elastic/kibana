@@ -104,6 +104,7 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
               };
             }),
           });
+
           const returnUpdatedCase = myCases.saved_objects
             .filter(myCase =>
               updatedCases.saved_objects.some(updatedCase => updatedCase.id === myCase.id)

@@ -34,8 +34,8 @@ const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
 `;
 
-const DescriptionId = 'description';
-const NewId = 'newComment';
+const DESCRIPTION_ID = 'description';
+const NEW_ID = 'newComment';
 
 export const UserActionTree = React.memo(
   ({
@@ -114,12 +114,12 @@ export const UserActionTree = React.memo(
     const MarkdownDescription = useMemo(
       () => (
         <UserActionMarkdown
-          id={DescriptionId}
+          id={DESCRIPTION_ID}
           content={caseData.description}
-          isEditable={manageMarkdownEditIds.includes(DescriptionId)}
+          isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
           onSaveContent={(content: string) => {
-            handleManageMarkdownEditId(DescriptionId);
-            onUpdateField(DescriptionId, content);
+            handleManageMarkdownEditId(DESCRIPTION_ID);
+            onUpdateField(DESCRIPTION_ID, content);
           }}
           onChangeEditable={handleManageMarkdownEditId}
         />
@@ -132,7 +132,7 @@ export const UserActionTree = React.memo(
         <AddComment
           caseId={caseData.id}
           onCommentPosted={handleUpdate}
-          onCommentSaving={handleManageMarkdownEditId.bind(null, NewId)}
+          onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
         />
       ),
@@ -152,14 +152,14 @@ export const UserActionTree = React.memo(
       <>
         <UserActionItem
           createdAt={caseData.createdAt}
-          id={DescriptionId}
-          isEditable={manageMarkdownEditIds.includes(DescriptionId)}
+          id={DESCRIPTION_ID}
+          isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
           isLoading={isLoadingDescription}
           labelEditAction={i18n.EDIT_DESCRIPTION}
           labelTitle={i18n.ADDED_DESCRIPTION}
           fullName={caseData.createdBy.fullName ?? caseData.createdBy.username}
           markdown={MarkdownDescription}
-          onEdit={handleManageMarkdownEditId.bind(null, DescriptionId)}
+          onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
           userName={caseData.createdBy.username}
         />
 
@@ -231,7 +231,7 @@ export const UserActionTree = React.memo(
           }
           return null;
         })}
-        {(isLoadingUserActions || isLoadingIds.includes(NewId)) && (
+        {(isLoadingUserActions || isLoadingIds.includes(NEW_ID)) && (
           <MyEuiFlexGroup justifyContent="center" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner size="l" />
@@ -240,9 +240,9 @@ export const UserActionTree = React.memo(
         )}
         <UserActionItem
           createdAt={new Date().toISOString()}
-          id={NewId}
+          id={NEW_ID}
           isEditable={true}
-          isLoading={isLoadingIds.includes(NewId)}
+          isLoading={isLoadingIds.includes(NEW_ID)}
           fullName={currentUser != null ? currentUser.fullName : ''}
           markdown={MarkdownNewComment}
           userName={currentUser != null ? currentUser.username : ''}

@@ -113,7 +113,7 @@ const ConfigureCasesComponent: React.FC = () => {
   }, []);
 
   const { loading: loadingCaseConfigure, persistLoading, persistCaseConfigure } = useCaseConfigure({
-    setConnectorId,
+    setConnector: setConnectorId,
     setClosureType,
   });
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();

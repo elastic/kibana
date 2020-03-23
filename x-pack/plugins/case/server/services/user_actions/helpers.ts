@@ -117,34 +117,6 @@ export const buildCaseUserActionItem = ({
   ],
 });
 
-interface CompareArray {
-  addedItems: string[];
-  deletedItems: string[];
-}
-const compareArray = ({
-  originalValue,
-  updatedValue,
-}: {
-  originalValue: string[];
-  updatedValue: string[];
-}): CompareArray => {
-  const result: CompareArray = {
-    addedItems: [],
-    deletedItems: [],
-  };
-  originalValue.forEach(origVal => {
-    if (!updatedValue.includes(origVal)) {
-      result.deletedItems = [...result.deletedItems, origVal];
-    }
-  });
-  updatedValue.forEach(updatedVal => {
-    if (!originalValue.includes(updatedVal)) {
-      result.addedItems = [...result.addedItems, updatedVal];
-    }
-  });
-
-  return result;
-};
 const userActionFieldsAllowed: UserActionField = [
   'comment',
   'description',
@@ -173,37 +145,31 @@ export const buildCaseUserActions = ({
         if (userActionFieldsAllowed.includes(field)) {
           const origValue = get(originalItem, ['attributes', field]);
           const updatedValue = get(updatedItem, ['attributes', field]);
-          if (isTwoArraysDifference(origValue, updatedValue)) {
-            const arrayDiff = compareArray({
-              originalValue: origValue as string[],
-              updatedValue: updatedValue as string[],
-            });
-            if (arrayDiff.addedItems.length > 0) {
-              userActions = [
-                ...userActions,
-                buildCaseUserActionItem({
-                  action: 'add',
-                  actionAt: actionDate,
-                  actionBy,
-                  caseId: updatedItem.id,
-                  fields: [field],
-                  newValue: arrayDiff.addedItems.join(', '),
-                }),
-              ];
-            }
-            if (arrayDiff.deletedItems.length > 0) {
-              userActions = [
-                ...userActions,
-                buildCaseUserActionItem({
-                  action: 'delete',
-                  actionAt: actionDate,
-                  actionBy,
-                  caseId: updatedItem.id,
-                  fields: [field],
-                  newValue: arrayDiff.deletedItems.join(', '),
-                }),
-              ];
-            }
+          const compareValues = isTwoArraysDifference(origValue, updatedValue);
+          if (compareValues != null && compareValues.addedItems.length > 0) {
+            userActions = [
+              ...userActions,
+              buildCaseUserActionItem({
+                action: 'add',
+                actionAt: actionDate,
+                actionBy,
+                caseId: updatedItem.id,
+                fields: [field],
+                newValue: compareValues.addedItems.join(', '),
+              }),
+            ];
+          } else if (compareValues != null && compareValues.deletedItems.length > 0) {
+            userActions = [
+              ...userActions,
+              buildCaseUserActionItem({
+                action: 'delete',
+                actionAt: actionDate,
+                actionBy,
+                caseId: updatedItem.id,
+                fields: [field],
+                newValue: compareValues.deletedItems.join(', '),
+              }),
+            ];
           } else if (origValue !== updatedValue) {
             userActions = [
               ...userActions,

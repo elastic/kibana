@@ -49,12 +49,12 @@ export const caseSavedObjectType: SavedObjectsType = {
       description: {
         type: 'text',
       },
-      pushed: {
+      external_service: {
         properties: {
-          at: {
+          pushed_at: {
             type: 'date',
           },
-          by: {
+          pushed_by: {
             properties: {
               username: {
                 type: 'keyword',
