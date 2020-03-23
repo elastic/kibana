@@ -181,7 +181,6 @@ export class Plugin {
           index: get(legacyConfig, 'kibana.index'),
           host: serverInfo.host,
           transport_address: `${serverInfo.host}:${serverInfo.port}`,
-          port: serverInfo.port.toString(),
           version: this.initializerContext.env.packageInfo.version,
           snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
         },
