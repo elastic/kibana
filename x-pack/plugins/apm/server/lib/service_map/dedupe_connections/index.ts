@@ -6,23 +6,25 @@
 import { isEqual, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
 import {
-  DESTINATION_ADDRESS,
-  SERVICE_NAME
-} from '../../../common/elasticsearch_fieldnames';
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE
+} from '../../../../common/elasticsearch_fieldnames';
 import {
   Connection,
   ConnectionNode,
-  ExternalConnectionNode,
-  ServiceConnectionNode
-} from '../../../common/service_map';
-import { ConnectionsResponse, ServicesResponse } from './get_service_map';
+  ServiceConnectionNode,
+  ExternalConnectionNode
+} from '../../../../common/service_map';
+import { ConnectionsResponse, ServicesResponse } from '../get_service_map';
 
 function getConnectionNodeId(node: ConnectionNode): string {
-  if (DESTINATION_ADDRESS in node) {
+  if ('span.destination.service.resource' in node) {
     // use a prefix to distinguish exernal destination ids from services
-    return `>${(node as ExternalConnectionNode)[DESTINATION_ADDRESS]}`;
+    return `>${node[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
   }
-  return (node as ServiceConnectionNode)[SERVICE_NAME];
+  return node[SERVICE_NAME];
 }
 
 function getConnectionId(connection: Connection) {
@@ -31,32 +33,86 @@ function getConnectionId(connection: Connection) {
   )}`;
 }
 
-type ServiceMapResponse = ConnectionsResponse & { services: ServicesResponse };
+export type ServiceMapResponse = ConnectionsResponse & {
+  services: ServicesResponse;
+};
 
 export function dedupeConnections(response: ServiceMapResponse) {
   const { discoveredServices, services, connections } = response;
 
-  const serviceNodes = services.map(service => ({
-    ...service,
-    id: service[SERVICE_NAME]
-  }));
+  const allNodes = connections
+    .flatMap(connection => [connection.source, connection.destination])
+    .map(node => ({ ...node, id: getConnectionNodeId(node) }))
+    .concat(
+      services.map(service => ({
+        ...service,
+        id: service[SERVICE_NAME]
+      }))
+    );
+
+  const serviceNodes = allNodes.filter(node => SERVICE_NAME in node) as Array<
+    ServiceConnectionNode & {
+      id: string;
+    }
+  >;
+
+  const externalNodes = allNodes.filter(
+    node => SPAN_DESTINATION_SERVICE_RESOURCE in node
+  ) as Array<
+    ExternalConnectionNode & {
+      id: string;
+    }
+  >;
+
+  // 1. maps external nodes to internal services
+  // 2. collapses external nodes into one node based on span.destination.service.resource
+  // 3. picks the first available span.type/span.subtype in an alphabetically sorted list
+  const nodeMap = allNodes.reduce((map, node) => {
+    if (map[node.id]) {
+      return map;
+    }
+
+    const service =
+      discoveredServices.find(({ from }) => {
+        if ('span.destination.service.resource' in node) {
+          return (
+            node[SPAN_DESTINATION_SERVICE_RESOURCE] ===
+            from[SPAN_DESTINATION_SERVICE_RESOURCE]
+          );
+        }
+        return false;
+      })?.to ?? serviceNodes.find(serviceNode => serviceNode.id === node.id);
+
+    if (service) {
+      return {
+        ...map,
+        [node.id]: {
+          id: service[SERVICE_NAME],
+          ...service
+        }
+      };
+    }
+
+    const allMatchedExternalNodes = externalNodes.filter(n => n.id === node.id);
+
+    const firstMatchedNode = allMatchedExternalNodes[0];
+
+    return {
+      ...map,
+      [node.id]: {
+        ...firstMatchedNode,
+        label: firstMatchedNode[SPAN_DESTINATION_SERVICE_RESOURCE],
+        [SPAN_TYPE]: allMatchedExternalNodes.map(n => n[SPAN_TYPE]).sort()[0],
+        [SPAN_SUBTYPE]: allMatchedExternalNodes
+          .map(n => n[SPAN_SUBTYPE])
+          .sort()[0]
+      }
+    };
+  }, {} as Record<string, ConnectionNode & { id: string }>);
 
   // maps destination.address to service.name if possible
   function getConnectionNode(node: ConnectionNode) {
-    let mappedNode: ConnectionNode | undefined;
-
-    if (DESTINATION_ADDRESS in node) {
-      mappedNode = discoveredServices.find(map => isEqual(map.from, node))?.to;
-    }
-
-    if (!mappedNode) {
-      mappedNode = node;
-    }
-
-    return {
-      ...mappedNode,
-      id: getConnectionNodeId(mappedNode)
-    };
+    return nodeMap[getConnectionNodeId(node)];
   }
 
   // build connections with mapped nodes
