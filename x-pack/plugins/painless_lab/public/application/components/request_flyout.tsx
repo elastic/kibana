@@ -35,7 +35,7 @@ export const RequestFlyout: FunctionComponent<Props> = ({
   return (
     <EuiFlyout onClose={onClose} maxWidth={640}>
       <EuiFlyoutHeader>
-        <EuiFlexGroup gutterSize="xs">
+        <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
           <EuiFlexItem>
             {/* We need an extra div to get out of flex grow */}
             <div>
