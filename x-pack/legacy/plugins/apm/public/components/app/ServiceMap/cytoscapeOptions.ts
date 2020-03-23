@@ -115,11 +115,6 @@ const style: cytoscape.Stylesheet[] = [
     selector: 'edge[isInverseEdge]',
     style: { visibility: 'hidden' }
   },
-  // @ts-ignore
-  {
-    selector: '.invisible',
-    style: { visibility: 'hidden' }
-  },
   {
     selector: 'edge.nodeHover',
     style: {
