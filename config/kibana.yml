@@ -111,5 +111,5 @@
 # Supported languages are the following: English - en , by default , Chinese - zh-CN .
 #i18n.locale: "en"
 
-# Enables "Drilldowns" functionality on dashboard. Set to false by default.
-xpack.dashboardEnhanced.drilldowns.enabled: true
+# Enables "Drilldowns" functionality on dashboard. Set to true by default.
+# xpack.dashboardEnhanced.drilldowns.enabled: false
