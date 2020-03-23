@@ -29,8 +29,9 @@ import {
   KBN_FIELD_TYPES,
 } from '../../../../../../../../plugins/data/public';
 import { getMapsAppUrl, isFieldVisualizable, isMapsAppRegistered } from './lib/visualize_url_utils';
+import { getServices } from '../../../kibana_services';
 
-export function createFieldChooserDirective($location, config) {
+export function createFieldChooserDirective($location) {
   return {
     restrict: 'E',
     scope: {
@@ -49,6 +50,7 @@ export function createFieldChooserDirective($location, config) {
       $scope.showFilter = false;
       $scope.toggleShowFilter = () => ($scope.showFilter = !$scope.showFilter);
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
+      const config = getServices().uiSettings;
 
       const filter = ($scope.filter = {
         props: ['type', 'aggregatable', 'searchable', 'missing', 'name'],

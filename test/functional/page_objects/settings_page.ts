@@ -212,9 +212,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async getScriptedFieldsTabCount() {
-      const selector = '[data-test-subj="tab-count-scriptedFields"]';
       return await retry.try(async () => {
-        const theText = await (await find.byCssSelector(selector)).getVisibleText();
+        const theText = await testSubjects.getVisibleText('tab-count-scriptedFields');
         return theText.replace(/\((.*)\)/, '$1');
       });
     }
@@ -613,9 +612,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
-      log.debug(`Setting the path on the file input`);
-      const input = await find.byCssSelector('.euiFilePicker__input');
-      await input.type(path);
+      await PageObjects.common.setFileInputPath(path);
 
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);

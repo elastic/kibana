@@ -48,7 +48,7 @@ export class VectorTileLayer extends TileLayer {
       return;
     }
 
-    const nextMeta = { tileLayerId: this._source.getTileLayerId() };
+    const nextMeta = { tileLayerId: this.getSource().getTileLayerId() };
     const canSkipSync = this._canSkipSync({
       prevDataRequest: this.getSourceDataRequest(),
       nextMeta,
@@ -60,7 +60,7 @@ export class VectorTileLayer extends TileLayer {
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     try {
       startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
-      const styleAndSprites = await this._source.getVectorStyleSheetAndSpriteMeta(isRetina());
+      const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(isRetina());
       const spriteSheetImageData = await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png);
       const data = {
         ...styleAndSprites,
@@ -78,7 +78,7 @@ export class VectorTileLayer extends TileLayer {
 
   _generateMbSourceIdPrefix() {
     const DELIMITTER = '___';
-    return `${this.getId()}${DELIMITTER}${this._source.getTileLayerId()}${DELIMITTER}`;
+    return `${this.getId()}${DELIMITTER}${this.getSource().getTileLayerId()}${DELIMITTER}`;
   }
 
   _generateMbSourceId(name) {
@@ -141,7 +141,7 @@ export class VectorTileLayer extends TileLayer {
   }
 
   _makeNamespacedImageId(imageId) {
-    const prefix = this._source.getSpriteNamespacePrefix() + '/';
+    const prefix = this.getSource().getSpriteNamespacePrefix() + '/';
     return prefix + imageId;
   }
 

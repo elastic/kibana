@@ -18,8 +18,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.load('endpoint/alerts/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/alerts');
     });
-
-    it('loads in the browser', async () => {
+    it('loads the Alert List Page', async () => {
       await testSubjects.existOrFail('alertListPage');
     });
     it('contains the Alert List Page title', async () => {
@@ -56,6 +55,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('loads the Alert List Flyout correctly', async () => {
         await testSubjects.existOrFail('alertDetailFlyout');
+      });
+
+      it('loads the resolver component and renders at least a single node', async () => {
+        await testSubjects.click('overviewResolverTab');
+        await testSubjects.existOrFail('alertResolver');
+        await testSubjects.existOrFail('resolverNode');
       });
     });
 
