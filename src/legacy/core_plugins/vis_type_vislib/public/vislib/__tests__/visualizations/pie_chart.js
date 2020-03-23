@@ -133,21 +133,30 @@ describe('No global chart settings', function() {
     responseHandler = vislibSlicesResponseHandler;
 
     let id1 = 1;
-    stubVis1 = visualizationsStart.createVis(indexPattern, {
+    stubVis1 = visualizationsStart.createVis('pie', {
       type: 'pie',
-      aggs: rowAgg,
+      data: {
+        aggs: rowAgg,
+        searchSource: {
+          getField: name => {
+            if (name === 'index') {
+              return indexPattern;
+            }
+          },
+        },
+      },
     });
 
     stubVis1.isHierarchical = () => true;
 
     // We need to set the aggs to a known value.
-    _.each(stubVis1.aggs.aggs, function(agg) {
+    _.each(stubVis1.data.aggs.aggs, function(agg) {
       agg.id = 'agg_' + id1++;
     });
   });
 
   beforeEach(async () => {
-    const table1 = tabifyAggResponse(stubVis1.aggs, threeTermBuckets, {
+    const table1 = tabifyAggResponse(stubVis1.data.aggs, threeTermBuckets, {
       metricsAtAllLevels: true,
     });
     data1 = await responseHandler(table1, rowAggDimensions);
@@ -222,19 +231,28 @@ describe('Vislib PieChart Class Test Suite', function() {
         responseHandler = vislibSlicesResponseHandler;
 
         let id = 1;
-        stubVis = visualizationsStart.createVis(indexPattern, {
+        stubVis = visualizationsStart.createVis('pie', {
           type: 'pie',
-          aggs: dataAgg,
+          data: {
+            aggs: dataAgg,
+            searchSource: {
+              getField: name => {
+                if (name === 'index') {
+                  return indexPattern;
+                }
+              },
+            },
+          },
         });
 
         // We need to set the aggs to a known value.
-        _.each(stubVis.aggs.aggs, function(agg) {
+        _.each(stubVis.data.aggs.aggs, function(agg) {
           agg.id = 'agg_' + id++;
         });
       });
 
       beforeEach(async () => {
-        const table = tabifyAggResponse(stubVis.aggs, threeTermBuckets, {
+        const table = tabifyAggResponse(stubVis.data.aggs, threeTermBuckets, {
           metricsAtAllLevels: true,
         });
         data = await responseHandler(table, dataDimensions);
