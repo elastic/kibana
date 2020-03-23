@@ -35,27 +35,29 @@ const expectedOverviewDestinationResult = {
       __typename: 'TlsEdges',
       cursor: {
         __typename: 'CursorType',
-        value: '61749734b3246f1584029deb4f5276c64da00ada',
+        value: 'EB4E81DD7C55BA9715652ECF5647FB8877E55A8F',
       },
       node: {
         __typename: 'TlsNode',
-        _id: '61749734b3246f1584029deb4f5276c64da00ada',
-        alternativeNames: ['api.snapcraft.io'],
-        commonNames: ['api.snapcraft.io'],
-        issuerNames: ['DigiCert SHA2 Secure Server CA'],
-        ja3: ['839868ad711dc55bde0d37a87f14740d'],
-        notAfter: ['2019-05-22T12:00:00.000Z'],
+        _id: 'EB4E81DD7C55BA9715652ECF5647FB8877E55A8F',
+        subjects: [
+          'CN=*.cdn.mozilla.net,OU=Cloud Services,O=Mozilla Corporation,L=Mountain View,ST=California,C=US',
+        ],
+        issuers: ['CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US'],
+        ja3: [],
+        notAfter: ['2020-12-09T12:00:00.000Z'],
       },
     },
   ],
   pageInfo: {
     __typename: 'PageInfoPaginated',
     activePage: 0,
-    fakeTotalCount: 1,
+    fakeTotalCount: 3,
     showMorePagesIndicator: false,
   },
-  totalCount: 1,
+  totalCount: 3,
 };
+
 const expectedOverviewSourceResult = {
   __typename: 'TlsData',
   edges: [
@@ -220,8 +222,8 @@ export default function({ getService }: FtrProviderContext) {
           })
           .then(resp => {
             const tls = resp.data.source.Tls;
-            expect(tls.pageInfo).to.eql(expectedOverviewSourceResult.pageInfo);
-            expect(tls.edges[0]).to.eql(expectedOverviewSourceResult.edges[0]);
+            expect(tls.pageInfo).to.eql(expectedOverviewDestinationResult.pageInfo);
+            expect(tls.edges[0]).to.eql(expectedOverviewDestinationResult.edges[0]);
           });
       });
     });
