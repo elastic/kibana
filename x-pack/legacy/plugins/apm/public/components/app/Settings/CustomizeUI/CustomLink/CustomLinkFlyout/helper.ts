@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { isEmpty, pick } from 'lodash';
+import Mustache from 'mustache';
+import { isEmpty, pick, get } from 'lodash';
+import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   FilterOptions,
-  filterOptions
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../../../../plugins/apm/server/routes/settings/custom_link';
+  FILTER_OPTIONS
+} from '../../../../../../../../../../plugins/apm/common/custom_link_filter_options';
 import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 
-export type Filters = Array<[keyof FilterOptions | '', string]>;
+type FilterKey = keyof FilterOptions | '';
+type FilterValue = string;
+export type FilterKeyValue = [FilterKey, FilterValue];
 
 interface FilterSelectOption {
   value: 'DEFAULT' | keyof FilterOptions;
@@ -33,9 +36,13 @@ interface FilterSelectOption {
  * results: [['service.name', 'opbeans-java'],['transaction.type', 'request']]
  * @param customLink
  */
-export const convertFiltersToArray = (customLink?: CustomLink): Filters => {
+export const convertFiltersToArray = (
+  customLink?: CustomLink
+): FilterKeyValue[] => {
   if (customLink) {
-    const filters = Object.entries(pick(customLink, filterOptions)) as Filters;
+    const filters = Object.entries(
+      pick(customLink, FILTER_OPTIONS)
+    ) as FilterKeyValue[];
     if (!isEmpty(filters)) {
       return filters;
     }
@@ -54,9 +61,18 @@ export const convertFiltersToArray = (customLink?: CustomLink): Filters => {
  * }
  * @param filters
  */
-export const convertFiltersToObject = (filters: Filters) => {
+export const convertFiltersToObject = (filters: FilterKeyValue[]) => {
   const convertedFilters = Object.fromEntries(
-    filters.filter(([key, value]) => !isEmpty(key) && !isEmpty(value))
+    filters
+      .filter(([key, value]) => !isEmpty(key) && !isEmpty(value))
+      .map(([key, value]) => [
+        key,
+        // Splits the value by comma, removes whitespace from both ends and filters out empty values
+        value
+          .split(',')
+          .map(v => v.trim())
+          .filter(v => v)
+      ])
   );
   if (!isEmpty(convertedFilters)) {
     return convertedFilters;
@@ -71,9 +87,9 @@ export const DEFAULT_OPTION: FilterSelectOption = {
   )
 };
 
-export const filterSelectOptions: FilterSelectOption[] = [
+export const FILTER_SELECT_OPTIONS: FilterSelectOption[] = [
   DEFAULT_OPTION,
-  ...filterOptions.map(filter => ({
+  ...FILTER_OPTIONS.map(filter => ({
     value: filter as keyof FilterOptions,
     text: filter
   }))
@@ -83,14 +99,76 @@ export const filterSelectOptions: FilterSelectOption[] = [
  * Returns the options available, removing filters already added, but keeping the selected filter.
  *
  * @param filters
- * @param idx
+ * @param selectedKey
  */
-export const getSelectOptions = (filters: Filters, idx: number) => {
-  return filterSelectOptions.filter(option => {
-    const indexUsedFilter = filters.findIndex(
-      filter => filter[0] === option.value
+export const getSelectOptions = (
+  filters: FilterKeyValue[],
+  selectedKey: FilterKey
+) => {
+  return FILTER_SELECT_OPTIONS.filter(
+    ({ value }) =>
+      !filters.some(
+        ([filterKey]) => filterKey === value && filterKey !== selectedKey
+      )
+  );
+};
+
+const getInvalidTemplateVariables = (
+  template: string,
+  transaction: Transaction
+) => {
+  return (Mustache.parse(template) as Array<[string, string]>)
+    .filter(([type]) => type === 'name')
+    .map(([, value]) => value)
+    .filter(templateVar => get(transaction, templateVar) == null);
+};
+
+const validateUrl = (url: string, transaction?: Transaction) => {
+  if (!transaction || isEmpty(transaction)) {
+    return i18n.translate(
+      'xpack.apm.settings.customizeUI.customLink.preview.transaction.notFound',
+      {
+        defaultMessage:
+          "We couldn't find a matching transaction document based on the defined filters."
+      }
     );
-    // Filter out all items already added, besides the one selected in the current filter.
-    return indexUsedFilter === -1 || idx === indexUsedFilter;
-  });
+  }
+  try {
+    const invalidVariables = getInvalidTemplateVariables(url, transaction);
+    if (!isEmpty(invalidVariables)) {
+      return i18n.translate(
+        'xpack.apm.settings.customizeUI.customLink.preview.contextVariable.noMatch',
+        {
+          defaultMessage:
+            "We couldn't find a value match for {variables} in the example transaction document.",
+          values: {
+            variables: invalidVariables
+              .map(variable => `{{${variable}}}`)
+              .join(', ')
+          }
+        }
+      );
+    }
+  } catch (e) {
+    return i18n.translate(
+      'xpack.apm.settings.customizeUI.customLink.preview.contextVariable.invalid',
+      {
+        defaultMessage:
+          "We couldn't find an example transaction document due to invalid variable(s) defined."
+      }
+    );
+  }
+};
+
+export const replaceTemplateVariables = (
+  url: string,
+  transaction?: Transaction
+) => {
+  const error = validateUrl(url, transaction);
+  try {
+    return { formattedUrl: Mustache.render(url, transaction), error };
+  } catch (e) {
+    // errors will be caught on validateUrl function
+    return { formattedUrl: url, error };
+  }
 };
