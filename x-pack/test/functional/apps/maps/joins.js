@@ -58,11 +58,15 @@ export default function({ getPageObjects, getService }) {
       const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
       const split = layerTOCDetails.trim().split('\n');
 
-      const min = split[0];
-      expect(min).to.equal('3');
+      //bands 1-5
+      expect(split[0]).to.equal('3');
+      expect(split[1]).to.equal('4.8');
+      expect(split[2]).to.equal('6.6');
+      expect(split[3]).to.equal('8.4');
+      expect(split[4]).to.equal('10');
 
-      const max = split[2];
-      expect(max).to.equal('12');
+      //field display name
+      expect(split[5]).to.equal('max prop1');
     });
 
     it('should decorate feature properties with join property', async () => {
