@@ -7,19 +7,19 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, CoreStart } from 'kibana/public';
+import { HttpSetup, ChromeStart } from 'src/core/public';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 
 import { Links } from '../links';
-
 import { AppContextProvider } from './context';
 import { Main } from './components/main';
 
 interface AppDependencies {
-  http: CoreSetup['http'];
+  http: HttpSetup;
   I18nContext: CoreStart['i18n']['Context'];
   uiSettings: CoreSetup['uiSettings'];
   links: Links;
-  chrome: CoreSetup['chrome'];
+  chrome: ChromeStart;
 }
 
 export function renderApp(

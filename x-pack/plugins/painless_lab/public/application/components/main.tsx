@@ -8,19 +8,19 @@ import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatRequestPayload, formatJson } from '../lib/format';
-import { exampleScript } from '../common/constants';
-import { PayloadFormat } from '../common/types';
+import { exampleScript } from '../constants';
+import { PayloadFormat } from '../types';
 import { useSubmitCode } from '../hooks';
+import { useAppContext } from '../context';
 import { OutputPane } from './output_pane';
 import { MainControls } from './main_controls';
 import { Editor } from './editor';
 import { RequestFlyout } from './request_flyout';
-import { useAppContext } from '../context';
 
-export const Main = () => {
+export const Main: React.FunctionComponent = () => {
   const {
-    state,
-    updateState,
+    store: { payload, validation },
+    updatePayload,
     services: {
       http,
       chrome: { getIsNavDrawerLocked$ },
@@ -31,10 +31,12 @@ export const Main = () => {
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
   const { inProgress, response, submit } = useSubmitCode(http);
 
-  // Live-update the output and persist state as the user changes it.
+  // Live-update the output and persist payload state as the user changes it.
   useEffect(() => {
-    submit(state);
-  }, [state, submit]);
+    if (validation.isValid) {
+      submit(payload);
+    }
+  }, [payload, submit, validation.isValid]);
 
   const toggleRequestFlyout = () => {
     setRequestFlyoutOpen(!isRequestFlyoutOpen);
@@ -62,10 +64,7 @@ export const Main = () => {
             </h1>
           </EuiTitle>
 
-          <Editor
-            code={state.code}
-            onChange={nextCode => updateState(() => ({ code: nextCode }))}
-          />
+          <Editor code={payload.code} onChange={nextCode => updatePayload({ code: nextCode })} />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -78,15 +77,15 @@ export const Main = () => {
         isLoading={inProgress}
         toggleRequestFlyout={toggleRequestFlyout}
         isRequestFlyoutOpen={isRequestFlyoutOpen}
-        reset={() => updateState(() => ({ code: exampleScript }))}
         isNavDrawerLocked={isNavDrawerLocked}
+        reset={() => updatePayload({ code: exampleScript })}
       />
 
       {isRequestFlyoutOpen && (
         <RequestFlyout
           links={links}
           onClose={() => setRequestFlyoutOpen(false)}
-          requestBody={formatRequestPayload(state, PayloadFormat.PRETTY)}
+          requestBody={formatRequestPayload(payload, PayloadFormat.PRETTY)}
           response={response ? formatJson(response.result || response.error) : ''}
         />
       )}

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PAINLESS_LAB_KEY = 'painlessLabState';
+export { AppContextProvider, useAppContext } from './context';

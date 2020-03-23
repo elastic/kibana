@@ -4,7 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// This should be an enumerated list
+export interface Store {
+  payload: Payload;
+  validation: Validation;
+}
+
+export interface Payload {
+  context: string;
+  code: string;
+  parameters: string;
+  index: string;
+  document: string;
+  query: string;
+}
+
+export interface Validation {
+  isValid: boolean;
+  fields: {
+    index: boolean;
+  };
+}
+
+// TODO: This should be an enumerated list
 export type Context = string;
 
 export enum PayloadFormat {
