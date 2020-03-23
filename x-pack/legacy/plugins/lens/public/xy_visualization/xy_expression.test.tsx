@@ -14,6 +14,7 @@ import {
   ScaleType,
   GeometryValue,
   XYChartSeriesIdentifier,
+  SeriesNameFn,
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
@@ -445,6 +446,72 @@ describe('xy_expression', () => {
         />
       );
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
+    });
+
+    test('it names the series for multiple accessors', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
+        />
+      );
+      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+      expect(
+        nameFn(
+          {
+            seriesKeys: ['a', 'b', 'c', 'd'],
+            key: '',
+            specId: 'a',
+            yAccessor: '',
+            splitAccessors: new Map(),
+          },
+          false
+        )
+      ).toEqual('Label A - Label B - c - Label D');
+    });
+
+    test('it names the series for a single accessor', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                ...args.layers[0],
+                accessors: ['a'],
+              },
+            ],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
+        />
+      );
+      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+      expect(
+        nameFn(
+          {
+            seriesKeys: ['a', 'b', 'c', 'd'],
+            key: '',
+            specId: 'a',
+            yAccessor: '',
+            splitAccessors: new Map(),
+          },
+          false
+        )
+      ).toEqual('Label A');
     });
 
     test('it set the scale of the x axis according to the args prop', () => {

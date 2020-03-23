@@ -46,6 +46,7 @@ export interface XYChartSeriesIdentifier {
   splitAccessors: Map<string | number, string | number>; // does the map have a size vs making it optional
   seriesKeys: Array<string | number>;
 }
+
 export interface XYChartProps {
   data: LensMultiTable;
   args: XYArgs;
@@ -323,10 +324,11 @@ export function XYChart({
             return;
           }
 
-          const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
-          const idForLegend = accessors;
-          const table = data.tables[layerId];
+          const columnToLabelMap: Record<string, string> = columnToLabel
+            ? JSON.parse(columnToLabel)
+            : {};
 
+          const table = data.tables[layerId];
           const rows = table.rows.filter(
             row =>
               !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
@@ -335,7 +337,7 @@ export function XYChart({
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
-            id: idForLegend.join(','),
+            id: splitAccessor || accessors.join(','),
             xAccessor,
             yAccessors: accessors,
             data: rows,
@@ -343,13 +345,13 @@ export function XYChart({
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
-            name: (d: XYChartSeriesIdentifier): string => {
+            name(d) {
               if (accessors.length > 1) {
                 return d.seriesKeys
                   .map((key: string | number) => columnToLabelMap[key] || key)
                   .join(' - ');
               }
-              return columnToLabelMap[d.seriesKeys[0]] || null;
+              return columnToLabelMap[d.seriesKeys[0]] ?? d.seriesKeys[0];
             },
           };
 
