@@ -4,45 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from '../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
-import { setupEnvironment, pageHelpers } from './helpers';
+import {
+  MINUTE,
+  HOUR,
+  DAY,
+  WEEK,
+  MONTH,
+  YEAR,
+} from '../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
+import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { setHttp } from '../../public/crud_app/services';
+import { mockHttpRequest, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
 const { setup } = pageHelpers.jobCreate;
 
 describe('Create Rollup Job, step 1: Logistics', () => {
-  let server;
-  let httpRequestsMockHelpers;
   let find;
   let exists;
   let actions;
   let form;
   let getEuiStepsHorizontalActive;
+  let npStart;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
 
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
-    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+    mockHttpRequest(npStart.core.http);
 
-    ({
-      find,
-      exists,
-      actions,
-      form,
-      getEuiStepsHorizontalActive,
-    } = setup());
+    ({ find, exists, actions, form, getEuiStepsHorizontalActive } = setup());
+  });
+
+  afterEach(() => {
+    npStart.core.http.get.mockClear();
+    npStart.core.http.post.mockClear();
+    npStart.core.http.put.mockClear();
   });
 
   it('should have the horizontal step active on "Logistics"', () => {
@@ -94,21 +97,25 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       });
 
       it('should not allow an unknown index pattern', async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ doesMatchIndices: false });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { doesMatchIndices: false } });
         await form.setInputValue('rollupIndexPattern', 'unknown', true);
         actions.clickNextStep();
-        expect(form.getErrorsMessages()).toContain('Index pattern doesn\'t match any indices.');
+        expect(form.getErrorsMessages()).toContain("Index pattern doesn't match any indices.");
       });
 
       it('should not allow an index pattern without time fields', async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ dateFields: [] });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { dateFields: [] } });
         await form.setInputValue('rollupIndexPattern', 'abc', true);
         actions.clickNextStep();
-        expect(form.getErrorsMessages()).toContain('Index pattern must match indices that contain time fields.');
+        expect(form.getErrorsMessages()).toContain(
+          'Index pattern must match indices that contain time fields.'
+        );
       });
 
       it('should not allow an index pattern that matches a rollup index', async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ doesMatchRollupIndices: true });
+        mockHttpRequest(npStart.core.http, {
+          indxPatternVldtResp: { doesMatchRollupIndices: true },
+        });
         await form.setInputValue('rollupIndexPattern', 'abc', true);
         actions.clickNextStep();
         expect(form.getErrorsMessages()).toContain('Index pattern must not match rollup indices.');
@@ -138,17 +145,21 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       it('should not allow spaces', () => {
         form.setInputValue('rollupIndexName', 'with space');
         actions.clickNextStep();
-        expect(form.getErrorsMessages()).toContain('Remove the spaces from your rollup index name.');
+        expect(form.getErrorsMessages()).toContain(
+          'Remove the spaces from your rollup index name.'
+        );
       });
 
       it('should not allow invalid characters', () => {
-        const expectInvalidChar = (char) => {
+        const expectInvalidChar = char => {
           form.setInputValue('rollupIndexName', `rollup_index_${char}`);
           actions.clickNextStep();
-          expect(form.getErrorsMessages()).toContain(`Remove the characters ${char} from your rollup index name.`);
+          expect(form.getErrorsMessages()).toContain(
+            `Remove the characters ${char} from your rollup index name.`
+          );
         };
 
-        [...INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, ','].reduce((promise, char) => {
+        [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, ','].reduce((promise, char) => {
           return promise.then(() => expectInvalidChar(char));
         }, Promise.resolve());
       });
@@ -161,13 +172,12 @@ describe('Create Rollup Job, step 1: Logistics', () => {
     });
 
     describe('rollup cron', () => {
-      const changeFrequency = (value) => {
+      const changeFrequency = value => {
         find('cronFrequencySelect').simulate('change', { target: { value } });
       };
 
-      const generateStringSequenceOfNumbers = (total) => (
-        new Array(total).fill('').map((_, i) => i < 10 ? `0${i}` : i.toString())
-      );
+      const generateStringSequenceOfNumbers = total =>
+        new Array(total).fill('').map((_, i) => (i < 10 ? `0${i}` : i.toString()));
 
       describe('frequency', () => {
         it('should allow "minute", "hour", "day", "week", "month", "year"', () => {
@@ -374,7 +384,9 @@ describe('Create Rollup Job, step 1: Logistics', () => {
           form.setInputValue('rollupAdvancedCron', 'invalid');
           actions.clickNextStep();
 
-          expect(form.getErrorsMessages()).toContain('Expression has only 1 part. At least 5 parts are required.');
+          expect(form.getErrorsMessages()).toContain(
+            'Expression has only 1 part. At least 5 parts are required.'
+          );
         });
       });
     });

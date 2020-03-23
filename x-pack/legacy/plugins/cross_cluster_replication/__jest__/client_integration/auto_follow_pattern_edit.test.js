@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AutoFollowPatternForm } from '../../public/app/components/auto_follow_pattern_form';
+import '../../public/np_ready/app/services/breadcrumbs.mock';
+import { AutoFollowPatternForm } from '../../public/np_ready/app/components/auto_follow_pattern_form';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { AUTO_FOLLOW_PATTERN_EDIT } from './helpers/constants';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 const { setup } = pageHelpers.autoFollowPatternEdit;
 const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;
@@ -65,7 +65,9 @@ describe('Edit Auto-follow pattern', () => {
     test('should populate the form fields with the values from the auto-follow pattern loaded', () => {
       expect(find('nameInput').props().value).toBe(AUTO_FOLLOW_PATTERN_EDIT.name);
       expect(find('remoteClusterInput').props().value).toBe(AUTO_FOLLOW_PATTERN_EDIT.remoteCluster);
-      expect(find('indexPatternInput').text()).toBe(AUTO_FOLLOW_PATTERN_EDIT.leaderIndexPatterns.join(''));
+      expect(find('indexPatternInput').text()).toBe(
+        AUTO_FOLLOW_PATTERN_EDIT.leaderIndexPatterns.join('')
+      );
       expect(find('prefixInput').props().value).toBe('prefix_');
       expect(find('suffixInput').props().value).toBe('_suffix');
     });
@@ -79,7 +81,9 @@ describe('Edit Auto-follow pattern', () => {
     let form;
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadRemoteClustersResponse([{ name: 'cluster-2', seeds: ['localhost:123'], isConnected: false }]);
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse([
+        { name: 'cluster-2', seeds: ['localhost:123'], isConnected: false },
+      ]);
       httpRequestsMockHelpers.setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN_EDIT);
       ({ component, find, exists, actions, form } = setup());
 
@@ -91,8 +95,9 @@ describe('Edit Auto-follow pattern', () => {
       const error = find('notConnectedError');
 
       expect(error.length).toBe(1);
-      expect(error.find('.euiCallOutHeader__title').text())
-        .toBe(`Can't edit auto-follow pattern because remote cluster '${AUTO_FOLLOW_PATTERN_EDIT.remoteCluster}' is not connected`);
+      expect(error.find('.euiCallOutHeader__title').text()).toBe(
+        `Can't edit auto-follow pattern because remote cluster '${AUTO_FOLLOW_PATTERN_EDIT.remoteCluster}' is not connected`
+      );
       expect(exists('notConnectedError.editButton')).toBe(true);
     });
 

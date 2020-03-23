@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`HeaderPanel it renders 1`] = `
-<Component>
-  <HeaderPanel
-    title="Test title"
-  />
-</Component>
-`;

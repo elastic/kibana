@@ -17,12 +17,16 @@
  * under the License.
  */
 import { npStart } from 'ui/new_platform';
-import { IAction, createAction } from '../../../../../src/plugins/ui_actions/public';
+import { Action, createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 
-export const createSamplePanelLink = (): IAction =>
-  createAction({
-    type: 'samplePanelLink',
+// Casting to ActionType is a hack - in a real situation use
+// declare module and add this id to ActionContextMapping.
+export const SAMPLE_PANEL_LINK = 'samplePanelLink' as ActionType;
+
+export const createSamplePanelLink = (): Action =>
+  createAction<typeof SAMPLE_PANEL_LINK>({
+    type: SAMPLE_PANEL_LINK,
     getDisplayName: () => 'Sample panel Link',
     execute: async () => {},
     getHref: () => 'https://example.com/kibana/test',
@@ -30,4 +34,4 @@ export const createSamplePanelLink = (): IAction =>
 
 const action = createSamplePanelLink();
 npStart.plugins.uiActions.registerAction(action);
-npStart.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);
+npStart.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);

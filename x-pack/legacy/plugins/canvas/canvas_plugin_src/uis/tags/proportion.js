@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const proportion = () => ({ name: 'proportion', color: '#490092' });
+import { euiPaletteColorBlind } from '@elastic/eui';
+const euiVisPalette = euiPaletteColorBlind();
+
+export const proportion = () => ({ name: 'proportion', color: euiVisPalette[3] });

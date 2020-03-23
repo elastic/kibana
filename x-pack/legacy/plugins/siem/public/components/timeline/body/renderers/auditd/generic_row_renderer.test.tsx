@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { RowRenderer } from '../row_renderer';
 import {
   createGenericAuditRowRenderer,
@@ -20,6 +20,8 @@ import {
 } from './generic_row_renderer';
 
 describe('GenericRowRenderer', () => {
+  const mount = useMountAppended();
+
   describe('#createGenericAuditRowRenderer', () => {
     let nonAuditd: Ecs;
     let auditd: Ecs;
@@ -38,12 +40,11 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields,
         data: auditd,
-        children: <span>{'some children'}</span>,
         timelineId: 'test',
       });
 
       const wrapper = shallow(<span>{children}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a auditd datum', () => {
@@ -64,26 +65,10 @@ describe('GenericRowRenderer', () => {
       }
     });
 
-    test('should render children normally if it does not have a auditd object', () => {
-      const children = connectedToRenderer.renderRow({
-        browserFields: mockBrowserFields,
-        data: nonAuditd,
-        children: <span>{'some children'}</span>,
-        timelineId: 'test',
-      });
-      const wrapper = mount(
-        <TestProviders>
-          <span>{children}</span>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual('some children');
-    });
-
     test('should render a auditd row', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: auditd,
-        children: <span>{'some children '}</span>,
         timelineId: 'test',
       });
       const wrapper = mount(
@@ -92,7 +77,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Session246alice@zeek-londonsome textwgetwith resultsuccessDestination93.184.216.34:80'
+        'Session246alice@zeek-londonsome textwget(1490)wget www.example.comwith resultsuccessDestination93.184.216.34:80'
       );
     });
   });
@@ -117,12 +102,11 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields,
         data: auditdFile,
-        children: <span>{'some children'}</span>,
         timelineId: 'test',
       });
 
       const wrapper = shallow(<span>{children}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a auditd datum', () => {
@@ -143,26 +127,10 @@ describe('GenericRowRenderer', () => {
       }
     });
 
-    test('should render children normally if it does not have a auditd object', () => {
-      const children = fileToRenderer.renderRow({
-        browserFields: mockBrowserFields,
-        data: nonAuditd,
-        children: <span>{'some children'}</span>,
-        timelineId: 'test',
-      });
-      const wrapper = mount(
-        <TestProviders>
-          <span>{children}</span>
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual('some children');
-    });
-
     test('should render a auditd row', () => {
       const children = fileToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: auditdFile,
-        children: <span>{'some children '}</span>,
         timelineId: 'test',
       });
       const wrapper = mount(
@@ -171,7 +139,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusingsystemd-journalwith resultsuccess'
+        'Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusingsystemd-journal(27244)/lib/systemd/systemd-journaldwith resultsuccess'
       );
     });
   });

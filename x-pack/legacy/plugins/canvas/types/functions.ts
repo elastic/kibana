@@ -4,29 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
-
-/**
- * Utility type for converting a union of types into an intersection.
- *
- * This is a bit of "black magic" that will interpret a Union type as an Intersection
- * type.  This is necessary in this case of distiguishing one collection from
- * another in `FunctionError` and `FunctionStrings`.
- */
-// prettier-ignore
-export type UnionToIntersection<U> = 
-  (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
-
-/**
- * Utility type: gathers values of a collection as a type for use as a type.
- */
-export type ValuesOf<T extends any[]> = T[number];
-
-type valueof<T> = T[keyof T];
-type ValuesOfUnion<T> = T extends any ? valueof<T> : never;
+import { initFunctions } from '../public/functions';
 
 /**
  * A `ExpressionFunctionFactory` is a powerful type used for any function that produces
@@ -87,8 +69,8 @@ type ValuesOfUnion<T> = T extends any ? valueof<T> : never;
  * in Kibana and Canvas.
  */
 // prettier-ignore
-export type ExpressionFunctionFactory<Name extends string, Context, Arguments, Return> = 
-() => ExpressionFunction<Name, Context, Arguments, Return>;
+export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Output> = 
+  () => ExpressionFunctionDefinition<Name, Input, Arguments, Output>;
 
 /**
  * `FunctionFactory` exists as a name shim between the `ExpressionFunction` type and
@@ -98,33 +80,22 @@ export type ExpressionFunctionFactory<Name extends string, Context, Arguments, R
  */
 // prettier-ignore
 export type FunctionFactory<FnFactory> = 
-  FnFactory extends ExpressionFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
-    ExpressionFunction<Name, Context, Arguments, Return> :
+  FnFactory extends ExpressionFunctionFactory<infer Name, infer Input, infer Arguments, infer Output> ?
+  ExpressionFunctionDefinition<Name, Input, Arguments, Output> :
     never;
 
-// A type containing all of the raw Function definitions in Canvas.
-// prettier-ignore
-type Functions = 
-  typeof commonFunctions[number] &
-  typeof serverFunctions[number] &
-  typeof browserFunctions[number];
+type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
+type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
+type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
+type ClientFunctions = FunctionFactory<
+  ReturnType<typeof initFunctions> extends Array<infer U> ? U : never
+>;
 
 /**
- * A union type of all Canvas Functions.
+ * A collection of all Canvas Functions.
  */
-export type CanvasFunction = FunctionFactory<Functions>;
 
-/**
- * A union type of all Canvas Function names.
- */
-export type CanvasFunctionName = CanvasFunction['name'];
-
-/**
- * A union type of all Canvas Function argument objects.
- */
-export type CanvasArg = CanvasFunction['args'];
-
-export type CanvasArgValue = ValuesOfUnion<CanvasFunction['args']>;
+export type CanvasFunction = CommonFunction | BrowserFunction | ServerFunction | ClientFunctions;
 
 /**
  * Represents a function called by the `case` Function.
@@ -193,3 +164,16 @@ export interface AxisConfig {
  */
 export const isAxisConfig = (axisConfig: any): axisConfig is AxisConfig =>
   !!axisConfig && axisConfig.type === 'axisConfig';
+
+export interface MapCenter {
+  type: 'mapCenter';
+  lat: number;
+  lon: number;
+  zoom: number;
+}
+
+export interface TimeRange {
+  type: 'timerange';
+  from: string;
+  to: string;
+}

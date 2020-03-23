@@ -6,7 +6,7 @@
 
 import { cloneDeep, isArray } from 'lodash/fp';
 
-import { convertSchemaToAssociativeArray, getIndexSchemaDoc } from '.';
+import { convertSchemaToAssociativeArray, getIndexSchemaDoc, getIndexAlias } from '.';
 import { auditbeatSchema, filebeatSchema, packetbeatSchema } from './8.0.0';
 import { Schema } from './type';
 
@@ -655,6 +655,19 @@ describe('Schema Beat', () => {
         'thrift',
         'tls',
       ]);
+    });
+  });
+
+  describe('getIndexAlias', () => {
+    test('getIndexAlias handles values with leading wildcard', () => {
+      const leadingWildcardIndex = '*-auditbeat-*';
+      const result = getIndexAlias([leadingWildcardIndex], leadingWildcardIndex);
+      expect(result).toBe(leadingWildcardIndex);
+    });
+    test('getIndexAlias no match returns "unknown" string', () => {
+      const index = 'auditbeat-*';
+      const result = getIndexAlias([index], 'hello');
+      expect(result).toBe('unknown');
     });
   });
 });

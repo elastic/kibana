@@ -21,9 +21,9 @@ import expect from '@kbn/expect';
 import { metadata } from '../metadata';
 describe('ui/metadata', () => {
   it('is immutable', () => {
-    expect(() => metadata.foo = 'something').to.throw;
-    expect(() => metadata.version = 'something').to.throw;
-    expect(() => metadata.vars = {}).to.throw;
-    expect(() => metadata.vars.kbnIndex = 'something').to.throw;
+    expect(() => (metadata.foo = 'something')).to.throw;
+    expect(() => (metadata.version = 'something')).to.throw;
+    expect(() => (metadata.vars = {})).to.throw;
+    expect(() => (metadata.vars.kbnIndex = 'something')).to.throw;
   });
 });

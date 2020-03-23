@@ -16,17 +16,17 @@ export const getAutoFollowPatternMock = (
   pattern: {
     remote_cluster: remoteCluster,
     leader_index_patterns: leaderIndexPatterns,
-    follow_index_pattern: followIndexPattern
-  }
+    follow_index_pattern: followIndexPattern,
+  },
 });
 
 export const getAutoFollowPatternListMock = (total = 3) => {
   const list = {
-    patterns: []
+    patterns: [],
   };
 
   let i = total;
-  while(i--) {
+  while (i--) {
     list.patterns.push(getAutoFollowPatternMock());
   }
 
@@ -40,7 +40,7 @@ export const getAutoFollowPatternClientMock = ({
   name = getRandomString(),
   remoteCluster = getRandomString(),
   leaderIndexPatterns = [`${getRandomString()}-*`],
-  followIndexPattern = getRandomString()
+  followIndexPattern = getRandomString(),
 }) => ({
   name,
   remoteCluster,

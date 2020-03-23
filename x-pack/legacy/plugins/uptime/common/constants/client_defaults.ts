@@ -8,10 +8,15 @@ export const CLIENT_DEFAULTS = {
   ABSOLUTE_DATE_RANGE_START: 0,
   // 15 minutes
   ABSOLUTE_DATE_RANGE_END: 1000 * 60 * 15,
-  // 60 seconds
+  /**
+   * The application auto refreshes every 60s by default.
+   */
   AUTOREFRESH_INTERVAL: 60 * 1000,
-  // polling defaults to "on"
+  /**
+   * The application's autorefresh feature is enabled.
+   */
   AUTOREFRESH_IS_PAUSED: false,
+
   COMMONLY_USED_DATE_RANGES: [
     { start: 'now/d', end: 'now', label: 'Today' },
     { start: 'now/w', end: 'now', label: 'Week to date' },
@@ -19,11 +24,12 @@ export const CLIENT_DEFAULTS = {
     { start: 'now/y', end: 'now', label: 'Year to date' },
   ],
   /**
-   * Designate how many checks a monitor summary can have
-   * before condensing them.
+   * The beginning of the default date range is 15m ago.
    */
-  CONDENSED_CHECK_LIMIT: 12,
   DATE_RANGE_START: 'now-15m',
+  /**
+   * The end of the default date range is now.
+   */
   DATE_RANGE_END: 'now',
   FILTERS: '',
   MONITOR_LIST_PAGE_INDEX: 0,

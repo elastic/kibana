@@ -75,6 +75,7 @@ describe('Spy Routes', () => {
                 detailName: '',
                 tabName: HostsTableType.hosts,
                 search: '',
+                flowTarget: undefined,
               },
             }}
           />
@@ -106,6 +107,7 @@ describe('Spy Routes', () => {
                 detailName: undefined,
                 tabName: HostsTableType.hosts,
                 search: '?IdoNotWantToSeeYou="true"',
+                flowTarget: undefined,
               },
             }}
           />
@@ -156,6 +158,7 @@ describe('Spy Routes', () => {
               detailName: undefined,
               tabName: HostsTableType.hosts,
               search: '?IdoNotWantToSeeYou="true"',
+              flowTarget: undefined,
             },
           }}
         />

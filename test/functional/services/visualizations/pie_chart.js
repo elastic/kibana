@@ -28,8 +28,7 @@ export function PieChartProvider({ getService }) {
   const find = getService('find');
   const defaultFindTimeout = config.get('timeouts.find');
 
-  return new class PieChart {
-
+  return new (class PieChart {
     async filterOnPieSlice(name) {
       log.debug(`PieChart.filterOnPieSlice(${name})`);
       if (name) {
@@ -67,7 +66,9 @@ export function PieChartProvider({ getService }) {
     async getAllPieSliceStyles(name) {
       log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
       const pieSlices = await this.getAllPieSlices(name);
-      return await Promise.all(pieSlices.map(async pieSlice => await pieSlice.getAttribute('style')));
+      return await Promise.all(
+        pieSlices.map(async pieSlice => await pieSlice.getAttribute('style'))
+      );
     }
 
     async getPieChartData() {
@@ -86,7 +87,9 @@ export function PieChartProvider({ getService }) {
     async getPieChartLabels() {
       const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
 
-      const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
+      const getChartTypesPromises = chartTypes.map(
+        async chart => await chart.getAttribute('data-label')
+      );
       return await Promise.all(getChartTypesPromises);
     }
 
@@ -113,5 +116,5 @@ export function PieChartProvider({ getService }) {
         expect(pieData).to.eql(expectedLabels);
       });
     }
-  };
+  })();
 }

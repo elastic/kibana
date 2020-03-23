@@ -8,11 +8,10 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { useCallApmApi } from '../../../../../hooks/useCallApmApi';
 import { Config } from '../index';
-import { getOptionLabel } from '../../../../../../common/agent_configuration_constants';
-import { useKibanaCore } from '../../../../../../../observability/public';
-import { APMClient } from '../../../../../services/rest/createCallApmApi';
+import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { callApmApi } from '../../../../../services/rest/createCallApmApi';
+import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 
 interface Props {
   onDeleted: () => void;
@@ -21,11 +20,7 @@ interface Props {
 
 export function DeleteButton({ onDeleted, selectedConfig }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const {
-    notifications: { toasts }
-  } = useKibanaCore();
-
-  const callApmApi = useCallApmApi();
+  const { toasts } = useApmPluginContext().core.notifications;
 
   return (
     <EuiButtonEmpty
@@ -34,7 +29,7 @@ export function DeleteButton({ onDeleted, selectedConfig }: Props) {
       iconSide="right"
       onClick={async () => {
         setIsDeleting(true);
-        await deleteConfig(callApmApi, selectedConfig, toasts);
+        await deleteConfig(selectedConfig, toasts);
         setIsDeleting(false);
         onDeleted();
       }}
@@ -48,18 +43,23 @@ export function DeleteButton({ onDeleted, selectedConfig }: Props) {
 }
 
 async function deleteConfig(
-  callApmApi: APMClient,
   selectedConfig: Config,
   toasts: NotificationsStart['toasts']
 ) {
   try {
     await callApmApi({
-      pathname: '/api/apm/settings/agent-configuration/{configurationId}',
+      pathname: '/api/apm/settings/agent-configuration',
       method: 'DELETE',
       params: {
-        path: { configurationId: selectedConfig.id }
+        body: {
+          service: {
+            name: selectedConfig.service.name,
+            environment: selectedConfig.service.environment
+          }
+        }
       }
     });
+
     toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigSucceededTitle',

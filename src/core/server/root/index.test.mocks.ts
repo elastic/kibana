@@ -29,8 +29,14 @@ jest.doMock('../config/config_service', () => ({
   ConfigService: jest.fn(() => configService),
 }));
 
+import { rawConfigServiceMock } from '../config/raw_config_service.mock';
+export const rawConfigService = rawConfigServiceMock.create();
+jest.doMock('../config/raw_config_service', () => ({
+  RawConfigService: jest.fn(() => rawConfigService),
+}));
+
 export const mockServer = {
-  setupConfigSchemas: jest.fn(),
+  setupCoreConfig: jest.fn(),
   setup: jest.fn(),
   stop: jest.fn(),
   configService,

@@ -32,11 +32,7 @@ function renderIfStatement({ condition }, onVertexSelected) {
   return [
     renderStatementName('if', onVertexSelected),
     <EuiFlexItem key="ifContent" grow={false}>
-      <EuiCodeBlock
-        fontSize="s"
-        paddingSize="none"
-        transparentBackground={true}
-      >
+      <EuiCodeBlock fontSize="s" paddingSize="none" transparentBackground={true}>
         {condition}
       </EuiCodeBlock>
     </EuiFlexItem>,
@@ -56,9 +52,7 @@ function getStatementBody(isIf, statement, vertex, onShowVertexDetails) {
 function renderNestingSpacers(depth) {
   const spacers = [];
   for (let i = 0; i < depth; i += 1) {
-    spacers.push(
-      <div key={`spacer_${i}`} className="monPipelineViewer__spacer" />
-    );
+    spacers.push(<div key={`spacer_${i}`} className="monPipelineViewer__spacer" />);
   }
   return spacers;
 }
@@ -76,12 +70,7 @@ function renderStatement({
   onShowVertexDetails,
 }) {
   if (statement instanceof PluginStatementModel) {
-    return (
-      <PluginStatement
-        statement={statement}
-        onShowVertexDetails={onShowVertexDetails}
-      />
-    );
+    return <PluginStatement statement={statement} onShowVertexDetails={onShowVertexDetails} />;
   }
 
   const statementBody = getStatementBody(
@@ -92,12 +81,7 @@ function renderStatement({
   );
 
   return (
-    <CollapsibleStatement
-      expand={expand}
-      collapse={collapse}
-      isCollapsed={isCollapsed}
-      id={id}
-    >
+    <CollapsibleStatement expand={expand} collapse={collapse} isCollapsed={isCollapsed} id={id}>
       {statementBody}
     </CollapsibleStatement>
   );
@@ -108,9 +92,7 @@ export function Statement(props) {
 
   return (
     <li className={`monPipelineViewer__listItem`}>
-      <div className="monPipelineViewer__spaceContainer">
-        {renderNestingSpacers(depth)}
-      </div>
+      <div className="monPipelineViewer__spaceContainer">{renderNestingSpacers(depth)}</div>
       {renderStatement(props)}
     </li>
   );

@@ -16,38 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { first } from 'rxjs/operators';
 import { APICaller } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../../common/search';
+import { ES_SEARCH_STRATEGY } from '../../../common/search';
 import { ISearchStrategy, TSearchStrategyProvider } from '../i_search_strategy';
-import { ISearchContext } from '..';
+import { getDefaultSearchParams, ISearchContext } from '..';
 
 export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext,
   caller: APICaller
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
   return {
-    search: async (request: IEsSearchRequest) => {
-      if (request.debug) {
-        // eslint-disable-next-line
-        console.log(JSON.stringify(request, null, 2));
+    search: async (request, options) => {
+      const config = await context.config$.pipe(first()).toPromise();
+      const defaultParams = getDefaultSearchParams(config);
+
+      // Only default index pattern type is supported here.
+      // See data_enhanced for other type support.
+      if (!!request.indexType) {
+        throw new Error(`Unsupported index pattern type ${request.indexType}`);
       }
-      const esSearchResponse = (await caller('search', {
+
+      const params = {
+        ...defaultParams,
         ...request.params,
-        // TODO: could do something like this here?
-        // ...getCurrentSearchParams(context),
-      })) as SearchResponse<any>;
+      };
+      const rawResponse = (await caller('search', params, options)) as SearchResponse<any>;
 
       // The above query will either complete or timeout and throw an error.
       // There is no progress indication on this api.
-      return {
-        total: esSearchResponse._shards.total,
-        loaded:
-          esSearchResponse._shards.failed +
-          esSearchResponse._shards.skipped +
-          esSearchResponse._shards.successful,
-        rawResponse: esSearchResponse,
-      };
+      const { total, failed, successful } = rawResponse._shards;
+      const loaded = failed + successful;
+      return { total, loaded, rawResponse };
     },
   };
 };

@@ -6,58 +6,41 @@
 
 import _ from 'lodash';
 
-import { AbstractESSource } from './es_source';
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
-import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
-import { ES_SIZE_LIMIT } from '../../../common/constants';
+import { DEFAULT_MAX_BUCKETS_LIMIT, FIELD_ORIGIN, AGG_TYPE } from '../../../common/constants';
+import { ESDocField } from '../fields/es_doc_field';
+import { AbstractESAggSource, AGG_DELIMITER } from './es_agg_source';
+import { getField, addFieldToDSL, extractPropertiesFromBucket } from '../util/es_agg_utils';
 
 const TERMS_AGG_NAME = 'join';
 
-const aggSchemas = new Schemas([
-  {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
-    defaults: [
-      { schema: 'metric', type: 'count' }
-    ]
-  },
-  {
-    group: 'buckets',
-    name: 'segment',
-    title: 'Terms',
-    aggFilter: 'terms',
-    min: 1,
-    max: 1
-  }
-]);
+const FIELD_NAME_PREFIX = '__kbnjoin__';
+const GROUP_BY_DELIMITER = '_groupby_';
+const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
 
-export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName) {
+export function extractPropertiesMap(rawEsData, countPropertyName) {
   const propertiesMap = new Map();
   _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
-    const properties = {};
+    const properties = extractPropertiesFromBucket(termBucket, TERMS_BUCKET_KEYS_TO_IGNORE);
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
     }
-    propertyNames.forEach(propertyName => {
-      if (_.has(termBucket, [propertyName, 'value'])) {
-        properties[propertyName] = _.get(termBucket, [propertyName, 'value']);
-      }
-    });
-    propertiesMap.set((termBucket.key).toString(), properties);
+    propertiesMap.set(termBucket.key.toString(), properties);
   });
   return propertiesMap;
 }
 
-export class ESTermSource extends AbstractESSource {
-
+export class ESTermSource extends AbstractESAggSource {
   static type = 'ES_TERM_SOURCE';
 
+  constructor(descriptor, inspectorAdapters) {
+    super(descriptor, inspectorAdapters);
+    this._termField = new ESDocField({
+      fieldName: descriptor.term,
+      source: this,
+      origin: this.getOriginForField(),
+    });
+  }
 
   static renderEditor({}) {
     //no need to localize. this editor is never rendered.
@@ -65,60 +48,71 @@ export class ESTermSource extends AbstractESSource {
   }
 
   hasCompleteConfig() {
-    return (_.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term'));
+    return _.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term');
   }
 
-  getIndexPatternIds() {
-    return  [this._descriptor.indexPatternId];
+  getTermField() {
+    return this._termField;
   }
 
-  getTerm() {
-    return this._descriptor.term;
+  getOriginForField() {
+    return FIELD_ORIGIN.JOIN;
   }
 
   getWhereQuery() {
     return this._descriptor.whereQuery;
   }
 
-  _formatMetricKey(metric) {
-    const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
-    return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
+  getAggKey(aggType, fieldName) {
+    const metricKey =
+      aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : aggType;
+    return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${
+      this._descriptor.indexPatternTitle
+    }.${this._termField.getName()}`;
   }
 
-  _formatMetricLabel(metric) {
-    const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-    return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
+  getAggLabel(aggType, fieldName) {
+    return aggType === AGG_TYPE.COUNT
+      ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
+          defaultMessage: `Count of {indexPatternTitle}`,
+          values: { indexPatternTitle: this._descriptor.indexPatternTitle },
+        })
+      : super.getAggLabel(aggType, fieldName);
   }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
-
     if (!this.hasCompleteConfig()) {
       return [];
     }
 
-    const indexPattern = await this._getIndexPattern();
-    const searchSource  = await this._makeSearchSource(searchFilters, 0);
-    const configStates = this._makeAggConfigs();
-    const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
-    searchSource.setField('aggs', aggConfigs.toDsl());
-
-    const requestName = `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
-    const requestDesc = this._getRequestDescription(leftSourceName, leftFieldName);
-    const rawEsData = await this._runEsQuery(requestName, searchSource, registerCancelCallback, requestDesc);
-
-    const metricPropertyNames = configStates
-      .filter(configState => {
-        return configState.schema === 'metric' && configState.type !== 'count';
-      })
-      .map(configState => {
-        return configState.id;
-      });
-    const countConfigState = configStates.find(configState => {
-      return configState.type === 'count';
+    const indexPattern = await this.getIndexPattern();
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    const termsField = getField(indexPattern, this._termField.getName());
+    const termsAgg = { size: DEFAULT_MAX_BUCKETS_LIMIT };
+    searchSource.setField('aggs', {
+      [TERMS_AGG_NAME]: {
+        terms: addFieldToDSL(termsAgg, termsField),
+        aggs: { ...this.getValueAggsDsl(indexPattern) },
+      },
     });
-    const countPropertyName = _.get(countConfigState, 'id');
+
+    const rawEsData = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: `${this._descriptor.indexPatternTitle}.${this._termField.getName()}`,
+      searchSource,
+      registerCancelCallback,
+      requestDescription: i18n.translate('xpack.maps.source.esJoin.joinDescription', {
+        defaultMessage: `Elasticsearch terms aggregation request, left source: {leftSource}, right source: {rightSource}`,
+        values: {
+          leftSource: `${leftSourceName}:${leftFieldName}`,
+          rightSource: `${this._descriptor.indexPatternTitle}:${this._termField.getName()}`,
+        },
+      }),
+    });
+
+    const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
     return {
-      propertiesMap: extractPropertiesMap(rawEsData, metricPropertyNames, countPropertyName),
+      propertiesMap: extractPropertiesMap(rawEsData, countPropertyName),
     };
   }
 
@@ -126,82 +120,16 @@ export class ESTermSource extends AbstractESSource {
     return false;
   }
 
-  _getRequestDescription(leftSourceName, leftFieldName) {
-    const metrics = this._getValidMetrics().map(metric => {
-      return metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-    });
-    const joinStatement = [];
-    joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
-      defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
-      values: { leftSourceName, leftFieldName }
-    }));
-    joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._descriptor.term}`);
-    joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
-      defaultMessage: `for metrics {metrics}`,
-      values: { metrics: metrics.join(',') }
-    }));
-    return i18n.translate('xpack.maps.source.esJoin.joinDescription', {
-      defaultMessage: `Elasticsearch terms aggregation request for {description}`,
-      values: {
-        description: joinStatement.join(' ')
-      }
-    });
-  }
-
-  _makeAggConfigs() {
-    const metricAggConfigs = this.getMetricFields().map(metric => {
-      const metricAggConfig = {
-        id: metric.propertyKey,
-        enabled: true,
-        type: metric.type,
-        schema: 'metric',
-        params: {}
-      };
-      if (metric.type !== 'count') {
-        metricAggConfig.params = { field: metric.field };
-      }
-      return metricAggConfig;
-    });
-
-    return [
-      ...metricAggConfigs,
-      {
-        id: TERMS_AGG_NAME,
-        enabled: true,
-        type: 'terms',
-        schema: 'segment',
-        params: {
-          field: this._descriptor.term,
-          size: ES_SIZE_LIMIT
-        }
-      }
-    ];
-  }
-
   async getDisplayName() {
     //no need to localize. this is never rendered.
-    return `es_table ${this._descriptor.indexPatternId}`;
+    return `es_table ${this.getIndexPatternId()}`;
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
     return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 
-  async createESTooltipProperty(propertyName, rawValue) {
-    try {
-      const indexPattern = await this._getIndexPattern();
-      if (!indexPattern) {
-        return null;
-      }
-      return new ESTooltipProperty(propertyName, propertyName, rawValue, indexPattern);
-    } catch (e) {
-      return null;
-    }
-  }
-
   getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
+    return this.getMetricFields().map(esAggMetricField => esAggMetricField.getName());
   }
 }

@@ -16,15 +16,15 @@ import { ComponentStrings } from '../../../i18n';
 const { App: strings } = ComponentStrings;
 
 export class App extends React.PureComponent {
-  static childContextTypes = {
-    shortcuts: PropTypes.object.isRequired,
-  };
-
   static propTypes = {
     appState: PropTypes.object.isRequired,
     setAppReady: PropTypes.func.isRequired,
     setAppError: PropTypes.func.isRequired,
     onRouteChange: PropTypes.func.isRequired,
+  };
+
+  static childContextTypes = {
+    shortcuts: PropTypes.object.isRequired,
   };
 
   getChildContext() {

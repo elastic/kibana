@@ -8,11 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
-import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
-
-import { Editor } from '../editor';
-
-import { CanvasFunction } from '../../../types';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { ExpressionFunction } from '../../../../../../../src/plugins/expressions';
+import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   AutocompleteSuggestion,
   getAutocompleteSuggestions,
@@ -27,7 +25,7 @@ interface Props {
   /** Font size of text within the editor */
 
   /** Canvas function defintions */
-  functionDefinitions: CanvasFunction[];
+  functionDefinitions: ExpressionFunction[];
 
   /** Optional string for displaying error messages */
   error?: string;
@@ -48,7 +46,7 @@ export class ExpressionInput extends React.Component<Props> {
     onChange: PropTypes.func.isRequired,
   };
 
-  editor: monacoEditor.editor.IStandaloneCodeEditor | null;
+  editor: monaco.editor.IStandaloneCodeEditor | null;
 
   undoHistory: string[];
   redoHistory: string[];
@@ -115,7 +113,11 @@ export class ExpressionInput extends React.Component<Props> {
     this.props.onChange(value);
   };
 
-  provideSuggestions = (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
+  provideSuggestions = (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext
+  ) => {
     const text = model.getValue();
     const textRange = model.getFullModelRange();
 
@@ -126,25 +128,52 @@ export class ExpressionInput extends React.Component<Props> {
       endColumn: textRange.endColumn,
     });
 
-    const wordUntil = model.getWordUntilPosition(position);
-    const wordRange = new monacoEditor.Range(
-      position.lineNumber,
-      wordUntil.startColumn,
-      position.lineNumber,
-      wordUntil.endColumn
-    );
+    let wordRange: monaco.Range;
+    let aSuggestions;
 
-    const aSuggestions = getAutocompleteSuggestions(
-      this.props.functionDefinitions,
-      text,
-      text.length - lengthAfterPosition
-    );
+    if (context.triggerCharacter === '{') {
+      const wordUntil = model.getWordAtPosition(position.delta(0, -3));
+      if (wordUntil) {
+        wordRange = new monaco.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column
+        );
 
-    const suggestions = aSuggestions.map((s: AutocompleteSuggestion) => {
+        // Retrieve suggestions for subexpressions
+        // TODO: make this work for expressions nested more than one level deep
+        aSuggestions = getAutocompleteSuggestions(
+          this.props.functionDefinitions,
+          text.substring(0, text.length - lengthAfterPosition) + '}',
+          text.length - lengthAfterPosition
+        );
+      }
+    } else {
+      const wordUntil = model.getWordUntilPosition(position);
+      wordRange = new monaco.Range(
+        position.lineNumber,
+        wordUntil.startColumn,
+        position.lineNumber,
+        wordUntil.endColumn
+      );
+      aSuggestions = getAutocompleteSuggestions(
+        this.props.functionDefinitions,
+        text,
+        text.length - lengthAfterPosition
+      );
+    }
+
+    if (!aSuggestions) {
+      return { suggestions: [] };
+    }
+
+    const suggestions = aSuggestions.map((s: AutocompleteSuggestion, index) => {
+      const sortText = String.fromCharCode(index);
       if (s.type === 'argument') {
         return {
           label: s.argDef.name,
-          kind: monacoEditor.languages.CompletionItemKind.Field,
+          kind: monaco.languages.CompletionItemKind.Variable,
           documentation: { value: getArgReferenceStr(s.argDef), isTrusted: true },
           insertText: s.text,
           command: {
@@ -152,22 +181,24 @@ export class ExpressionInput extends React.Component<Props> {
             id: 'editor.action.triggerSuggest',
           },
           range: wordRange,
+          sortText,
         };
       } else if (s.type === 'value') {
         return {
           label: s.text,
-          kind: monacoEditor.languages.CompletionItemKind.Value,
+          kind: monaco.languages.CompletionItemKind.Value,
           insertText: s.text,
           command: {
             title: 'Trigger Suggestion Dialog',
             id: 'editor.action.triggerSuggest',
           },
           range: wordRange,
+          sortText,
         };
       } else {
         return {
           label: s.fnDef.name,
-          kind: monacoEditor.languages.CompletionItemKind.Function,
+          kind: monaco.languages.CompletionItemKind.Function,
           documentation: {
             value: getFunctionReferenceStr(s.fnDef),
             isTrusted: true,
@@ -178,6 +209,7 @@ export class ExpressionInput extends React.Component<Props> {
             id: 'editor.action.triggerSuggest',
           },
           range: wordRange,
+          sortText,
         };
       }
     });
@@ -187,7 +219,7 @@ export class ExpressionInput extends React.Component<Props> {
     };
   };
 
-  providerHover = (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
+  providerHover = (model: monaco.editor.ITextModel, position: monaco.Position) => {
     const text = model.getValue();
     const word = model.getWordAtPosition(position);
 
@@ -216,7 +248,7 @@ export class ExpressionInput extends React.Component<Props> {
       const startPos = model.getPositionAt(argStart);
       const endPos = model.getPositionAt(argEnd);
 
-      const argRange = new monacoEditor.Range(
+      const argRange = new monaco.Range(
         startPos.lineNumber,
         startPos.column,
         endPos.lineNumber,
@@ -243,10 +275,7 @@ export class ExpressionInput extends React.Component<Props> {
     };
   };
 
-  editorDidMount = (
-    editor: monacoEditor.editor.IStandaloneCodeEditor,
-    monaco: typeof monacoEditor
-  ) => {
+  editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     // Updating tab size for the editor
     const model = editor.getModel();
     if (model) {
@@ -268,12 +297,20 @@ export class ExpressionInput extends React.Component<Props> {
           error={error}
         >
           <div className="canvasExpressionInput__editor">
-            <Editor
+            <CodeEditor
               languageId={LANGUAGE_ID}
+              languageConfiguration={{
+                autoClosingPairs: [
+                  {
+                    open: '{',
+                    close: '}',
+                  },
+                ],
+              }}
               value={value}
               onChange={this.onChange}
               suggestionProvider={{
-                triggerCharacters: [' '],
+                triggerCharacters: [' ', '{'],
                 provideCompletionItems: this.provideSuggestions,
               }}
               hoverProvider={{

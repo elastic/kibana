@@ -28,10 +28,7 @@ describe('createMapStream()', () => {
   test('calls the function with each item in the source stream', async () => {
     const mapper = jest.fn();
 
-    await createPromiseFromStreams([
-      createListStream([ 'a', 'b', 'c' ]),
-      createMapStream(mapper),
-    ]);
+    await createPromiseFromStreams([createListStream(['a', 'b', 'c']), createMapStream(mapper)]);
 
     expect(mapper).toHaveBeenCalledTimes(3);
     expect(mapper).toHaveBeenCalledWith('a', 0);
@@ -41,9 +38,9 @@ describe('createMapStream()', () => {
 
   test('send the return value from the mapper on the output stream', async () => {
     const result = await createPromiseFromStreams([
-      createListStream([ 1, 2, 3 ]),
+      createListStream([1, 2, 3]),
       createMapStream(n => n * 100),
-      createConcatStream([])
+      createConcatStream([]),
     ]);
 
     expect(result).toEqual([100, 200, 300]);
@@ -51,14 +48,14 @@ describe('createMapStream()', () => {
 
   test('supports async mappers', async () => {
     const result = await createPromiseFromStreams([
-      createListStream([ 1, 2, 3 ]),
+      createListStream([1, 2, 3]),
       createMapStream(async (n, i) => {
         await delay(n);
         return n * i;
       }),
-      createConcatStream([])
+      createConcatStream([]),
     ]);
 
-    expect(result).toEqual([ 0, 2, 6]);
+    expect(result).toEqual([0, 2, 6]);
   });
 });

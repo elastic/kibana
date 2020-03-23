@@ -1,0 +1,139 @@
+#!/bin/groovy
+
+library 'kibana-pipeline-library'
+kibanaLibrary.load()
+
+def CI_GROUP_PARAM = params.CI_GROUP
+
+// Looks like 'oss:ciGroup:1', 'oss:firefoxSmoke', or 'all:serverMocha'
+def JOB_PARTS = CI_GROUP_PARAM.split(':')
+def IS_XPACK = JOB_PARTS[0] == 'xpack'
+def JOB = JOB_PARTS[1]
+def NEED_BUILD = JOB != 'serverMocha'
+def CI_GROUP = JOB_PARTS.size() > 2 ? JOB_PARTS[2] : ''
+def EXECUTIONS = params.NUMBER_EXECUTIONS.toInteger()
+def AGENT_COUNT = getAgentCount(EXECUTIONS)
+
+def worker = getWorkerFromParams(IS_XPACK, JOB, CI_GROUP)
+
+def workerFailures = []
+
+currentBuild.displayName += trunc(" ${params.GITHUB_OWNER}:${params.branch_specifier}", 24)
+currentBuild.description = "${params.CI_GROUP}<br />Agents: ${AGENT_COUNT}<br />Executions: ${params.NUMBER_EXECUTIONS}"
+
+kibanaPipeline(timeoutMinutes: 180) {
+  def agents = [:]
+  for(def agentNumber = 1; agentNumber <= AGENT_COUNT; agentNumber++) {
+    def agentNumberInside = agentNumber
+    def agentExecutions = floor(EXECUTIONS/AGENT_COUNT) + (agentNumber <= EXECUTIONS%AGENT_COUNT ? 1 : 0)
+    agents["agent-${agentNumber}"] = {
+      catchErrors {
+        print "Agent ${agentNumberInside} - ${agentExecutions} executions"
+
+        workers.functional('flaky-test-runner', {
+          if (NEED_BUILD) {
+            if (!IS_XPACK) {
+              kibanaPipeline.buildOss()
+              if (CI_GROUP == '1') {
+                runbld("./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
+              }
+            } else {
+              kibanaPipeline.buildXpack()
+            }
+          }
+        }, getWorkerMap(agentNumberInside, agentExecutions, worker, workerFailures))()
+      }
+    }
+  }
+
+  parallel(agents)
+
+  currentBuild.description += ", Failures: ${workerFailures.size()}"
+
+  if (workerFailures.size() > 0) {
+    print "There were ${workerFailures.size()} test suite failures."
+    print "The executions that failed were:"
+    print workerFailures.join("\n")
+    print "Please check 'Test Result' and 'Pipeline Steps' pages for more info"
+  }
+}
+
+def getWorkerFromParams(isXpack, job, ciGroup) {
+  if (!isXpack) {
+    if (job == 'serverMocha') {
+      return kibanaPipeline.functionalTestProcess('serverMocha', {
+        kibanaPipeline.bash(
+          """
+            source src/dev/ci_setup/setup_env.sh
+            node scripts/mocha
+          """,
+          "run `node scripts/mocha`"
+        )
+      })
+    } else if (job == 'firefoxSmoke') {
+      return kibanaPipeline.functionalTestProcess('firefoxSmoke', './test/scripts/jenkins_firefox_smoke.sh')
+    } else if(job == 'visualRegression') {
+      return kibanaPipeline.functionalTestProcess('visualRegression', './test/scripts/jenkins_visual_regression.sh')
+    } else {
+      return kibanaPipeline.ossCiGroupProcess(ciGroup)
+    }
+  }
+
+  if (job == 'firefoxSmoke') {
+    return kibanaPipeline.functionalTestProcess('xpack-firefoxSmoke', './test/scripts/jenkins_xpack_firefox_smoke.sh')
+  } else if(job == 'visualRegression') {
+    return kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh')
+  } else {
+    return kibanaPipeline.xpackCiGroupProcess(ciGroup)
+  }
+}
+
+def getWorkerMap(agentNumber, numberOfExecutions, worker, workerFailures, maxWorkerProcesses = 12) {
+  def workerMap = [:]
+  def numberOfWorkers = Math.min(numberOfExecutions, maxWorkerProcesses)
+
+  for(def i = 1; i <= numberOfWorkers; i++) {
+    def workerExecutions = floor(numberOfExecutions/numberOfWorkers + (i <= numberOfExecutions%numberOfWorkers ? 1 : 0))
+
+    workerMap["agent-${agentNumber}-worker-${i}"] = { workerNumber ->
+      for(def j = 0; j < workerExecutions; j++) {
+        print "Execute agent-${agentNumber} worker-${workerNumber}: ${j}"
+        withEnv([
+          "REMOVE_KIBANA_INSTALL_DIR=1",
+        ]) {
+          catchErrors {
+            try {
+              worker(workerNumber)
+            } catch (ex) {
+              workerFailures << "agent-${agentNumber} worker-${workerNumber}-${j}"
+              throw ex
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return workerMap
+}
+
+def getAgentCount(executions) {
+  // Increase agent count every 24 worker processess, up to 3 agents maximum
+  return Math.min(3, 1 + floor(executions/24))
+}
+
+def trunc(str, length) {
+  if (str.size() >= length) {
+    return str.take(length) + "..."
+  }
+
+  return str;
+}
+
+// All of the real rounding/truncating methods are sandboxed
+def floor(num) {
+  return num
+    .toString()
+    .split('\\.')[0]
+    .toInteger()
+}

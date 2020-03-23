@@ -23,7 +23,7 @@ import _ from 'lodash';
 
 import testSubjSelector from '@kbn/test-subj-selector';
 
-import { pkg } from '../../../../src/legacy/utils/package_json';
+import { pkg } from '../../../../src/core/server/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // @ts-ignore internal js that is passed to the browser as is
@@ -54,7 +54,7 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
   const lifecycle = getService('lifecycle');
 
   let currentTest: Test | undefined;
-  lifecycle.on('beforeEachTest', (test: Test) => {
+  lifecycle.beforeEachTest.add(test => {
     currentTest = test;
   });
 
@@ -71,6 +71,13 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
 
   return new (class VisualTesting {
     public async snapshot(options: SnapshotOptions = {}) {
+      if (process.env.DISABLE_VISUAL_TESTING) {
+        log.warning(
+          'Capturing of percy snapshots disabled, would normally capture a snapshot here!'
+        );
+        return;
+      }
+
       log.debug('Capturing percy snapshot');
 
       if (!currentTest) {

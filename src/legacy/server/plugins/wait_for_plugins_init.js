@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /**
  * Tracks the individual queue for each kbnServer, rather than attaching
  * it to the kbnServer object via a property or something
@@ -28,11 +27,13 @@ const queues = new WeakMap();
 export function waitForInitSetupMixin(kbnServer) {
   queues.set(kbnServer, []);
 
-  kbnServer.afterPluginsInit = function (callback) {
+  kbnServer.afterPluginsInit = function(callback) {
     const queue = queues.get(kbnServer);
 
     if (!queue) {
-      throw new Error('Plugins have already initialized. Only use this method for setup logic that must wait for plugins to initialize.');
+      throw new Error(
+        'Plugins have already initialized. Only use this method for setup logic that must wait for plugins to initialize.'
+      );
     }
 
     queue.push(callback);

@@ -1,16 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PipelineViewer component passes expected props 1`] = `
-<EuiPage
-  restrictWidth={false}
->
-  <EuiPageBody
-    restrictWidth={false}
-  >
+<EuiPage>
+  <EuiPageBody>
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Logstash pipelines"
+          id="xpack.monitoring.logstash.pipeline_viewer.heading"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <EuiPageContent
       className="monPipelineViewer"
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <StatementSection
@@ -74,16 +78,20 @@ exports[`PipelineViewer component passes expected props 1`] = `
 `;
 
 exports[`PipelineViewer component renders DetailDrawer when selected vertex is not null 1`] = `
-<EuiPage
-  restrictWidth={false}
->
-  <EuiPageBody
-    restrictWidth={false}
-  >
+<EuiPage>
+  <EuiPageBody>
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Logstash pipelines"
+          id="xpack.monitoring.logstash.pipeline_viewer.heading"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <EuiPageContent
       className="monPipelineViewer"
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <StatementSection

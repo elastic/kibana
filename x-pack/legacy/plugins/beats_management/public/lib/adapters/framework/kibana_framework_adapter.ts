@@ -11,6 +11,8 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { UIRoutes } from 'ui/routes';
 import { isLeft } from 'fp-ts/lib/Either';
+import { npSetup } from 'ui/new_platform';
+import { SecurityPluginSetup } from '../../../../../../../plugins/security/public';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import {
   FrameworkAdapter,
@@ -58,7 +60,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   };
 
   public async waitUntilFrameworkReady(): Promise<void> {
-    const $injector = await this.onKibanaReady();
+    await this.onKibanaReady();
     const xpackInfo: any = this.xpackInfoService;
     let xpackInfoUnpacked: FrameworkInfo;
 
@@ -95,8 +97,10 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
     this.xpackInfo = xpackInfoUnpacked;
 
+    const securitySetup = ((npSetup.plugins as unknown) as { security?: SecurityPluginSetup })
+      .security;
     try {
-      this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+      this.shieldUser = (await securitySetup?.authc.getCurrentUser()) || null;
       const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
 
       if (isLeft(assertUser)) {

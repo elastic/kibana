@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timelion } from './timelion';
-import { demodata } from './demodata';
 import { essql } from './essql';
+import { esdocs } from './esdocs';
+import { demodata } from './demodata';
+import { timelion } from './timelion';
 
-export const datasourceSpecs = [timelion, demodata, essql];
+export const datasourceSpecs = [essql, esdocs, demodata, timelion];

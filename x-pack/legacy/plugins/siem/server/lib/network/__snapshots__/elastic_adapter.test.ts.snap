@@ -1,0 +1,1366 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Network Top N flow elasticsearch_adapter with FlowTarget=source Unhappy Path - No geo data getNetworkTopNFlow 1`] = `
+Object {
+  "edges": Array [
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "1.1.1.1",
+      },
+      "node": Object {
+        "_id": "1.1.1.1",
+        "network": Object {
+          "bytes_in": 11276023407,
+          "bytes_out": 1025631,
+        },
+        "source": Object {
+          "autonomous_system": Object {
+            "name": "Level 3 Parent, LLC",
+            "number": 3356,
+          },
+          "destination_ips": 345345,
+          "domain": Array [
+            "test.1.net",
+          ],
+          "flows": 1234567,
+          "ip": "1.1.1.1",
+          "location": null,
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "2.2.2.2",
+      },
+      "node": Object {
+        "_id": "2.2.2.2",
+        "network": Object {
+          "bytes_in": 5469323342,
+          "bytes_out": 2811441,
+        },
+        "source": Object {
+          "autonomous_system": Object {
+            "name": "Level 3 Parent, LLC",
+            "number": 3356,
+          },
+          "destination_ips": 345345,
+          "domain": Array [
+            "test.2.net",
+          ],
+          "flows": 1234567,
+          "ip": "2.2.2.2",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Philadelphia",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.9359,
+                "lon": -75.1534,
+              },
+              "region_iso_code": "US-PA",
+              "region_name": "Pennsylvania",
+            },
+          },
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "3.3.3.3",
+      },
+      "node": Object {
+        "_id": "3.3.3.3",
+        "network": Object {
+          "bytes_in": 3807671322,
+          "bytes_out": 4494034,
+        },
+        "source": Object {
+          "autonomous_system": Object {
+            "name": "Level 3 Parent, LLC",
+            "number": 3356,
+          },
+          "destination_ips": 345345,
+          "domain": Array [
+            "test.3.com",
+            "test.3-duplicate.com",
+          ],
+          "flows": 1234567,
+          "ip": "3.3.3.3",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Philadelphia",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.9359,
+                "lon": -75.1534,
+              },
+              "region_iso_code": "US-PA",
+              "region_name": "Pennsylvania",
+            },
+          },
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "4.4.4.4",
+      },
+      "node": Object {
+        "_id": "4.4.4.4",
+        "network": Object {
+          "bytes_in": 166517626,
+          "bytes_out": 3194782,
+        },
+        "source": Object {
+          "autonomous_system": Object {
+            "name": "Level 3 Parent, LLC",
+            "number": 3356,
+          },
+          "destination_ips": 345345,
+          "domain": Array [
+            "test.4.com",
+          ],
+          "flows": 1234567,
+          "ip": "4.4.4.4",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Philadelphia",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.9359,
+                "lon": -75.1534,
+              },
+              "region_iso_code": "US-PA",
+              "region_name": "Pennsylvania",
+            },
+          },
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "5.5.5.5",
+      },
+      "node": Object {
+        "_id": "5.5.5.5",
+        "network": Object {
+          "bytes_in": 104785026,
+          "bytes_out": 1838597,
+        },
+        "source": Object {
+          "autonomous_system": Object {
+            "name": "Level 3 Parent, LLC",
+            "number": 3356,
+          },
+          "destination_ips": 345345,
+          "domain": Array [
+            "test.5.com",
+          ],
+          "flows": 1234567,
+          "ip": "5.5.5.5",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Philadelphia",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.9359,
+                "lon": -75.1534,
+              },
+              "region_iso_code": "US-PA",
+              "region_name": "Pennsylvania",
+            },
+          },
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "6.6.6.6",
+      },
+      "node": Object {
+        "_id": "6.6.6.6",
+        "network": Object {
+          "bytes_in": 28804250,
+          "bytes_out": 482982,
+        },
+        "source": Object {
+          "autonomous_system": Object {
+            "name": "Level 3 Parent, LLC",
+            "number": 3356,
+          },
+          "destination_ips": 345345,
+          "domain": Array [
+            "test.6.com",
+          ],
+          "flows": 1234567,
+          "ip": "6.6.6.6",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Philadelphia",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.9359,
+                "lon": -75.1534,
+              },
+              "region_iso_code": "US-PA",
+              "region_name": "Pennsylvania",
+            },
+          },
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "7.7.7.7",
+      },
+      "node": Object {
+        "_id": "7.7.7.7",
+        "network": Object {
+          "bytes_in": 23032363,
+          "bytes_out": 400623,
+        },
+        "source": Object {
+          "autonomous_system": Object {
+            "name": "Level 3 Parent, LLC",
+            "number": 3356,
+          },
+          "destination_ips": 345345,
+          "domain": Array [
+            "test.7.com",
+          ],
+          "flows": 1234567,
+          "ip": "7.7.7.7",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Philadelphia",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.9359,
+                "lon": -75.1534,
+              },
+              "region_iso_code": "US-PA",
+              "region_name": "Pennsylvania",
+            },
+          },
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "8.8.8.8",
+      },
+      "node": Object {
+        "_id": "8.8.8.8",
+        "network": Object {
+          "bytes_in": 21424889,
+          "bytes_out": 344357,
+        },
+        "source": Object {
+          "autonomous_system": Object {
+            "name": "Level 3 Parent, LLC",
+            "number": 3356,
+          },
+          "destination_ips": 345345,
+          "domain": Array [
+            "test.8.com",
+          ],
+          "flows": 1234567,
+          "ip": "8.8.8.8",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Philadelphia",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.9359,
+                "lon": -75.1534,
+              },
+              "region_iso_code": "US-PA",
+              "region_name": "Pennsylvania",
+            },
+          },
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "9.9.9.9",
+      },
+      "node": Object {
+        "_id": "9.9.9.9",
+        "network": Object {
+          "bytes_in": 19205000,
+          "bytes_out": 355663,
+        },
+        "source": Object {
+          "autonomous_system": Object {
+            "name": "Level 3 Parent, LLC",
+            "number": 3356,
+          },
+          "destination_ips": 345345,
+          "domain": Array [
+            "test.9.com",
+          ],
+          "flows": 1234567,
+          "ip": "9.9.9.9",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Philadelphia",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.9359,
+                "lon": -75.1534,
+              },
+              "region_iso_code": "US-PA",
+              "region_name": "Pennsylvania",
+            },
+          },
+        },
+      },
+    },
+    Object {
+      "cursor": Object {
+        "tiebreaker": null,
+        "value": "10.10.10.10",
+      },
+      "node": Object {
+        "_id": "10.10.10.10",
+        "network": Object {
+          "bytes_in": 11407633,
+          "bytes_out": 199360,
+        },
+        "source": Object {
+          "autonomous_system": Object {
+            "name": "Level 3 Parent, LLC",
+            "number": 3356,
+          },
+          "destination_ips": 345345,
+          "domain": Array [
+            "test.10.com",
+          ],
+          "flows": 1234567,
+          "ip": "10.10.10.10",
+          "location": Object {
+            "flowTarget": "source",
+            "geo": Object {
+              "city_name": "Philadelphia",
+              "continent_name": "North America",
+              "country_iso_code": "US",
+              "location": Object {
+                "lat": 39.9359,
+                "lon": -75.1534,
+              },
+              "region_iso_code": "US-PA",
+              "region_name": "Pennsylvania",
+            },
+          },
+        },
+      },
+    },
+  ],
+  "inspect": Object {
+    "dsl": Array [
+      "{
+  \\"mockTopNFlowQueryDsl\\": \\"mockTopNFlowQueryDsl\\"
+}",
+    ],
+    "response": Array [
+      "{
+  \\"took\\": 122,
+  \\"timed_out\\": false,
+  \\"_shards\\": {
+    \\"total\\": 11,
+    \\"successful\\": 11,
+    \\"skipped\\": 0,
+    \\"failed\\": 0
+  },
+  \\"hits\\": {
+    \\"max_score\\": null,
+    \\"hits\\": []
+  },
+  \\"aggregations\\": {
+    \\"top_n_flow_count\\": {
+      \\"value\\": 545
+    },
+    \\"source\\": {
+      \\"buckets\\": [
+        {
+          \\"key\\": \\"1.1.1.1\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 11276023407
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 1025631
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": []
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.1.net\\"
+              }
+            ]
+          }
+        },
+        {
+          \\"key\\": \\"2.2.2.2\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 5469323342
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 2811441
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"geo\\": {
+                          \\"continent_name\\": \\"North America\\",
+                          \\"region_iso_code\\": \\"US-PA\\",
+                          \\"city_name\\": \\"Philadelphia\\",
+                          \\"country_iso_code\\": \\"US\\",
+                          \\"region_name\\": \\"Pennsylvania\\",
+                          \\"location\\": {
+                            \\"lon\\": -75.1534,
+                            \\"lat\\": 39.9359
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.2.net\\"
+              }
+            ]
+          }
+        },
+        {
+          \\"key\\": \\"3.3.3.3\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 3807671322
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 4494034
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"geo\\": {
+                          \\"continent_name\\": \\"North America\\",
+                          \\"region_iso_code\\": \\"US-PA\\",
+                          \\"city_name\\": \\"Philadelphia\\",
+                          \\"country_iso_code\\": \\"US\\",
+                          \\"region_name\\": \\"Pennsylvania\\",
+                          \\"location\\": {
+                            \\"lon\\": -75.1534,
+                            \\"lat\\": 39.9359
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.3.com\\"
+              },
+              {
+                \\"key\\": \\"test.3-duplicate.com\\"
+              }
+            ]
+          }
+        },
+        {
+          \\"key\\": \\"4.4.4.4\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 166517626
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 3194782
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"geo\\": {
+                          \\"continent_name\\": \\"North America\\",
+                          \\"region_iso_code\\": \\"US-PA\\",
+                          \\"city_name\\": \\"Philadelphia\\",
+                          \\"country_iso_code\\": \\"US\\",
+                          \\"region_name\\": \\"Pennsylvania\\",
+                          \\"location\\": {
+                            \\"lon\\": -75.1534,
+                            \\"lat\\": 39.9359
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.4.com\\"
+              }
+            ]
+          }
+        },
+        {
+          \\"key\\": \\"5.5.5.5\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 104785026
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 1838597
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"geo\\": {
+                          \\"continent_name\\": \\"North America\\",
+                          \\"region_iso_code\\": \\"US-PA\\",
+                          \\"city_name\\": \\"Philadelphia\\",
+                          \\"country_iso_code\\": \\"US\\",
+                          \\"region_name\\": \\"Pennsylvania\\",
+                          \\"location\\": {
+                            \\"lon\\": -75.1534,
+                            \\"lat\\": 39.9359
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.5.com\\"
+              }
+            ]
+          }
+        },
+        {
+          \\"key\\": \\"6.6.6.6\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 28804250
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 482982
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"geo\\": {
+                          \\"continent_name\\": \\"North America\\",
+                          \\"region_iso_code\\": \\"US-PA\\",
+                          \\"city_name\\": \\"Philadelphia\\",
+                          \\"country_iso_code\\": \\"US\\",
+                          \\"region_name\\": \\"Pennsylvania\\",
+                          \\"location\\": {
+                            \\"lon\\": -75.1534,
+                            \\"lat\\": 39.9359
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"doc_count_error_upper_bound\\": 0,
+            \\"sum_other_doc_count\\": 31,
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.6.com\\"
+              }
+            ]
+          }
+        },
+        {
+          \\"key\\": \\"7.7.7.7\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 23032363
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 400623
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"geo\\": {
+                          \\"continent_name\\": \\"North America\\",
+                          \\"region_iso_code\\": \\"US-PA\\",
+                          \\"city_name\\": \\"Philadelphia\\",
+                          \\"country_iso_code\\": \\"US\\",
+                          \\"region_name\\": \\"Pennsylvania\\",
+                          \\"location\\": {
+                            \\"lon\\": -75.1534,
+                            \\"lat\\": 39.9359
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"doc_count_error_upper_bound\\": 0,
+            \\"sum_other_doc_count\\": 0,
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.7.com\\"
+              }
+            ]
+          }
+        },
+        {
+          \\"key\\": \\"8.8.8.8\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 21424889
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 344357
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"geo\\": {
+                          \\"continent_name\\": \\"North America\\",
+                          \\"region_iso_code\\": \\"US-PA\\",
+                          \\"city_name\\": \\"Philadelphia\\",
+                          \\"country_iso_code\\": \\"US\\",
+                          \\"region_name\\": \\"Pennsylvania\\",
+                          \\"location\\": {
+                            \\"lon\\": -75.1534,
+                            \\"lat\\": 39.9359
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.8.com\\"
+              }
+            ]
+          }
+        },
+        {
+          \\"key\\": \\"9.9.9.9\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 19205000
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 355663
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"geo\\": {
+                          \\"continent_name\\": \\"North America\\",
+                          \\"region_iso_code\\": \\"US-PA\\",
+                          \\"city_name\\": \\"Philadelphia\\",
+                          \\"country_iso_code\\": \\"US\\",
+                          \\"region_name\\": \\"Pennsylvania\\",
+                          \\"location\\": {
+                            \\"lon\\": -75.1534,
+                            \\"lat\\": 39.9359
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.9.com\\"
+              }
+            ]
+          }
+        },
+        {
+          \\"key\\": \\"10.10.10.10\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 11407633
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 199360
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"geo\\": {
+                          \\"continent_name\\": \\"North America\\",
+                          \\"region_iso_code\\": \\"US-PA\\",
+                          \\"city_name\\": \\"Philadelphia\\",
+                          \\"country_iso_code\\": \\"US\\",
+                          \\"region_name\\": \\"Pennsylvania\\",
+                          \\"location\\": {
+                            \\"lon\\": -75.1534,
+                            \\"lat\\": 39.9359
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.10.com\\"
+              }
+            ]
+          }
+        },
+        {
+          \\"key\\": \\"11.11.11.11\\",
+          \\"flows\\": {
+            \\"value\\": 1234567
+          },
+          \\"destination_ips\\": {
+            \\"value\\": 345345
+          },
+          \\"bytes_in\\": {
+            \\"value\\": 11393327
+          },
+          \\"bytes_out\\": {
+            \\"value\\": 195914
+          },
+          \\"location\\": {
+            \\"doc_count\\": 14,
+            \\"top_geo\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"geo\\": {
+                          \\"continent_name\\": \\"North America\\",
+                          \\"region_iso_code\\": \\"US-PA\\",
+                          \\"city_name\\": \\"Philadelphia\\",
+                          \\"country_iso_code\\": \\"US\\",
+                          \\"region_name\\": \\"Pennsylvania\\",
+                          \\"location\\": {
+                            \\"lon\\": -75.1534,
+                            \\"lat\\": 39.9359
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"autonomous_system\\": {
+            \\"doc_count\\": 14,
+            \\"top_as\\": {
+              \\"hits\\": {
+                \\"total\\": {
+                  \\"value\\": 14,
+                  \\"relation\\": \\"eq\\"
+                },
+                \\"max_score\\": 1,
+                \\"hits\\": [
+                  {
+                    \\"_index\\": \\"filebeat-8.0.0-2019.06.19-000005\\",
+                    \\"_type\\": \\"_doc\\",
+                    \\"_id\\": \\"dd4fa2d4bd-692279846149410\\",
+                    \\"_score\\": 1,
+                    \\"_source\\": {
+                      \\"source\\": {
+                        \\"as\\": {
+                          \\"number\\": 3356,
+                          \\"organization\\": {
+                            \\"name\\": \\"Level 3 Parent, LLC\\"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          \\"domain\\": {
+            \\"buckets\\": [
+              {
+                \\"key\\": \\"test.11.com\\"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}",
+    ],
+  },
+  "pageInfo": Object {
+    "activePage": 0,
+    "fakeTotalCount": 50,
+    "showMorePagesIndicator": true,
+  },
+  "totalCount": 545,
+}
+`;

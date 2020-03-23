@@ -19,10 +19,10 @@ import { getPipelineCreateBreadcrumbs, getPipelineEditBreadcrumbs } from '../bre
 
 routes
   .when('/management/logstash/pipelines/pipeline/:id/edit', {
-    k7Breadcrumbs: getPipelineEditBreadcrumbs
+    k7Breadcrumbs: getPipelineEditBreadcrumbs,
   })
   .when('/management/logstash/pipelines/new-pipeline', {
-    k7Breadcrumbs: getPipelineCreateBreadcrumbs
+    k7Breadcrumbs: getPipelineCreateBreadcrumbs,
   })
   .defaults(/management\/logstash\/pipelines\/(new-pipeline|pipeline\/:id\/edit)/, {
     template: template,
@@ -35,12 +35,12 @@ routes
     },
     controllerAs: 'pipelineEditRoute',
     resolve: {
-      logstashTabs: ($injector) => {
+      logstashTabs: $injector => {
         const $route = $injector.get('$route');
         const pipelineId = $route.current.params.id;
         updateLogstashSections(pipelineId);
       },
-      pipeline: function ($injector) {
+      pipeline: function($injector) {
         const $route = $injector.get('$route');
         const pipelineService = $injector.get('pipelineService');
         const licenseService = $injector.get('logstashLicenseService');
@@ -50,37 +50,38 @@ routes
 
         if (!pipelineId) return new Pipeline();
 
-        return pipelineService.loadPipeline(pipelineId)
-          .then(pipeline => !!$route.current.params.clone ? pipeline.clone : pipeline)
+        return pipelineService
+          .loadPipeline(pipelineId)
+          .then(pipeline => (!!$route.current.params.clone ? pipeline.clone : pipeline))
           .catch(err => {
-            return licenseService.checkValidity()
-              .then(() => {
-                if (err.status !== 403) {
-                  toastNotifications.addDanger(i18n.translate('xpack.logstash.couldNotLoadPipelineErrorNotification', {
+            return licenseService.checkValidity().then(() => {
+              if (err.status !== 403) {
+                toastNotifications.addDanger(
+                  i18n.translate('xpack.logstash.couldNotLoadPipelineErrorNotification', {
                     defaultMessage: `Couldn't load pipeline. Error: '{errStatusText}'.`,
                     values: {
                       errStatusText: err.statusText,
                     },
-                  }));
-                }
+                  })
+                );
+              }
 
-                kbnUrl.redirect('/management/logstash/pipelines');
-                return Promise.reject();
-              });
+              kbnUrl.redirect('/management/logstash/pipelines');
+              return Promise.reject();
+            });
           });
       },
-      checkLicense: ($injector) => {
+      checkLicense: $injector => {
         const licenseService = $injector.get('logstashLicenseService');
         return licenseService.checkValidity();
       },
-      isUpgraded: ($injector) => {
+      isUpgraded: $injector => {
         const upgradeService = $injector.get('upgradeService');
         return upgradeService.executeUpgrade();
-      }
-    }
+      },
+    },
   });
 
-routes
-  .when('/management/logstash/pipelines/pipeline/:id', {
-    redirectTo: '/management/logstash/pipelines/pipeline/:id/edit'
-  });
+routes.when('/management/logstash/pipelines/pipeline/:id', {
+  redirectTo: '/management/logstash/pipelines/pipeline/:id/edit',
+});

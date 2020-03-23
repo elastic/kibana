@@ -5,27 +5,27 @@
  */
 
 import { registerTestBed } from '../../../../../../test_utils';
-import { FollowerIndexEdit } from '../../../public/app/sections/follower_index_edit';
-import { ccrStore } from '../../../public/app/store';
-import routing from '../../../public/app/services/routing';
+import { FollowerIndexEdit } from '../../../public/np_ready/app/sections/follower_index_edit';
+import { ccrStore } from '../../../public/np_ready/app/store';
+import routing from '../../../public/np_ready/app/services/routing';
 
 import { FOLLOWER_INDEX_EDIT_NAME } from './constants';
 
 const testBedConfig = {
   store: ccrStore,
   memoryRouter: {
-    onRouter: (router) => routing.reactRouter = router,
+    onRouter: router => (routing.reactRouter = router),
     // The follower index id to fetch is read from the router ":id" param
     // so we first set it in our initial entries
     initialEntries: [`/${FOLLOWER_INDEX_EDIT_NAME}`],
     // and then we declarae the :id param on the component route path
-    componentRoutePath: '/:id'
-  }
+    componentRoutePath: '/:id',
+  },
 };
 
 const initTestBed = registerTestBed(FollowerIndexEdit, testBedConfig);
 
-export const setup = (props) => {
+export const setup = props => {
   const testBed = initTestBed(props);
 
   // User actions
@@ -34,14 +34,14 @@ export const setup = (props) => {
   };
 
   const toggleAdvancedSettings = () => {
-    testBed.form.selectCheckBox('advancedSettingsToggle');
+    testBed.form.toggleEuiSwitch('advancedSettingsToggle');
   };
 
   return {
     ...testBed,
     actions: {
       clickSaveForm,
-      toggleAdvancedSettings
-    }
+      toggleAdvancedSettings,
+    },
   };
 };

@@ -10,17 +10,16 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
   EuiPanel,
   EuiSpacer,
   EuiButton
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { AgentConfigurationListAPIResponse } from '../../../../../server/lib/settings/agent_configuration/list_configurations';
-import { HomeLink } from '../../../shared/Links/apm/HomeLink';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AgentConfigurationListAPIResponse } from '../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
 import { AgentConfigurationList } from './AgentConfigurationList';
-import { useTrackPageview } from '../../../../../../infra/public';
+import { useTrackPageview } from '../../../../../../../../plugins/observability/public';
 import { AddEditFlyout } from './AddEditFlyout';
 
 export type Config = AgentConfigurationListAPIResponse[0];
@@ -61,30 +60,6 @@ export function AgentConfigurations() {
           }}
         />
       )}
-
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="l">
-            <h1>
-              {i18n.translate('xpack.apm.settings.agentConf.pageTitle', {
-                defaultMessage: 'Settings'
-              })}
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <HomeLink>
-            <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-              {i18n.translate(
-                'xpack.apm.settings.agentConf.returnToOverviewLinkLabel',
-                { defaultMessage: 'Return to overview' }
-              )}
-            </EuiButtonEmpty>
-          </HomeLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
 
       <EuiPanel>
         <EuiFlexGroup alignItems="center">

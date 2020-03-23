@@ -37,7 +37,7 @@ const SPLIT_MODES = {
 };
 
 export class Split extends Component {
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const { model } = nextProps;
     if (model.split_mode === 'filters' && !model.split_filters) {
       this.props.onChange({

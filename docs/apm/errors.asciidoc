@@ -10,12 +10,12 @@ This makes it very easy to quickly see which errors are affecting your services,
 and to take actions to rectify them.
 
 [role="screenshot"]
-image::apm/images/apm-errors-overview.png[Example view of the errors overview in the APM UI in Kibana]
+image::apm/images/apm-errors-overview.png[Example view of the errors overview in the APM app in Kibana]
 
 Selecting an error group ID or error message brings you to the *Error group*.
 
 [role="screenshot"]
-image::apm/images/apm-error-group.png[Example view of the error group page in the APM UI in Kibana]
+image::apm/images/apm-error-group.png[Example view of the error group page in the APM app in Kibana]
 
 Here, you'll see the error message, culprit, and the number of occurrences over time.
 
@@ -43,4 +43,4 @@ With Watcher, your team can set up reports within minutes.
 Watches are managed separately in the dedicated Watcher UI available in Advanced Settings.
 
 [role="screenshot"]
-image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher assistant for errors in APM UI in Kibana]
+image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher assistant for errors in APM app in Kibana]

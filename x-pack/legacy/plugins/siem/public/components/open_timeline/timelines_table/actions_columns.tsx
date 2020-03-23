@@ -4,68 +4,80 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+/* eslint-disable react/display-name */
 
-import { ACTION_COLUMN_WIDTH } from './common_styles';
-import { DeleteTimelineModalButton } from '../delete_timeline_modal';
+import {
+  ActionTimelineToShow,
+  DeleteTimelines,
+  EnableExportTimelineDownloader,
+  OnOpenTimeline,
+  OpenTimelineResult,
+  OnOpenDeleteTimelineModal,
+  TimelineActionsOverflowColumns,
+} from '../types';
 import * as i18n from '../translations';
-import { DeleteTimelines, OnOpenTimeline, OpenTimelineResult } from '../types';
 
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
  */
 export const getActionsColumns = ({
-  onOpenTimeline,
+  actionTimelineToShow,
   deleteTimelines,
-  showDeleteAction,
+  enableExportTimelineDownloader,
+  onOpenDeleteTimelineModal,
+  onOpenTimeline,
 }: {
+  actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
+  enableExportTimelineDownloader?: EnableExportTimelineDownloader;
+  onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
-  showDeleteAction: boolean;
-}) => {
+}): [TimelineActionsOverflowColumns] => {
   const openAsDuplicateColumn = {
-    align: 'center',
-    field: 'savedObjectId',
-    name: '',
-    render: (savedObjectId: string, timelineResult: OpenTimelineResult) => (
-      <EuiToolTip content={i18n.OPEN_AS_DUPLICATE}>
-        <EuiButtonIcon
-          aria-label={i18n.OPEN_AS_DUPLICATE}
-          data-test-subj="open-duplicate"
-          isDisabled={savedObjectId == null}
-          iconSize="s"
-          iconType="copy"
-          onClick={() =>
-            onOpenTimeline({
-              duplicate: true,
-              timelineId: `${timelineResult.savedObjectId}`,
-            })
-          }
-          size="s"
-        />
-      </EuiToolTip>
-    ),
-    sortable: false,
-    width: ACTION_COLUMN_WIDTH,
+    name: i18n.OPEN_AS_DUPLICATE,
+    icon: 'copy',
+    onClick: ({ savedObjectId }: OpenTimelineResult) => {
+      onOpenTimeline({
+        duplicate: true,
+        timelineId: savedObjectId ?? '',
+      });
+    },
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    description: i18n.OPEN_AS_DUPLICATE,
+    'data-test-subj': 'open-duplicate',
+  };
+
+  const exportTimelineAction = {
+    name: i18n.EXPORT_SELECTED,
+    icon: 'exportAction',
+    onClick: (selectedTimeline: OpenTimelineResult) => {
+      if (enableExportTimelineDownloader != null) enableExportTimelineDownloader(selectedTimeline);
+    },
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    description: i18n.EXPORT_SELECTED,
   };
 
   const deleteTimelineColumn = {
-    align: 'center',
-    field: 'savedObjectId',
-    name: '',
-    render: (savedObjectId: string, { title }: OpenTimelineResult) => (
-      <DeleteTimelineModalButton
-        deleteTimelines={deleteTimelines}
-        savedObjectId={savedObjectId}
-        title={title}
-      />
-    ),
-    sortable: false,
-    width: ACTION_COLUMN_WIDTH,
+    name: i18n.DELETE_SELECTED,
+    icon: 'trash',
+    onClick: (selectedTimeline: OpenTimelineResult) => {
+      if (onOpenDeleteTimelineModal != null) onOpenDeleteTimelineModal(selectedTimeline);
+    },
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    description: i18n.DELETE_SELECTED,
+    'data-test-subj': 'delete-timeline',
   };
 
-  return showDeleteAction && deleteTimelines != null
-    ? [openAsDuplicateColumn, deleteTimelineColumn]
-    : [openAsDuplicateColumn];
+  return [
+    {
+      width: '40px',
+      actions: [
+        actionTimelineToShow.includes('duplicate') ? openAsDuplicateColumn : null,
+        actionTimelineToShow.includes('export') ? exportTimelineAction : null,
+        actionTimelineToShow.includes('delete') && deleteTimelines != null
+          ? deleteTimelineColumn
+          : null,
+      ].filter(action => action != null),
+    },
+  ];
 };

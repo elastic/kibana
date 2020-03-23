@@ -1,0 +1,28 @@
+{
+  "cat.health": {
+    "url_params": {
+      "format": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "time": [
+        "d",
+        "h",
+        "m",
+        "s",
+        "ms",
+        "micros",
+        "nanos"
+      ],
+      "ts": "__flag__",
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/health"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-health.html"
+  }
+}

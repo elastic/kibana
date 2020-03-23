@@ -1,9 +1,0 @@
-{
-  "paths": {
-    "<%= camelCase(name) %>": "./"
-  },
-  "translations": [
-    "translations/zh-CN.json"
-  ]
-}
-

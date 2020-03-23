@@ -5,40 +5,38 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
-import { createStore, State } from '../../../../store';
-
-import { FlowTargetSelectConnected } from './index';
-import { IpOverviewId } from '../../../field_renderers/field_renderers';
+import { TestProviders } from '../../../../mock';
+import { FlowTargetSelectConnectedComponent } from './index';
+import { FlowTarget } from '../../../../graphql/types';
 
 describe('Flow Target Select Connected', () => {
-  const state: State = mockGlobalState;
-  let store = createStore(state, apolloClientObservable);
-
-  beforeEach(() => {
-    store = createStore(state, apolloClientObservable);
-  });
-  test('Pick Relative Date', () => {
+  test('renders correctly against snapshot flowTarget source', () => {
     const wrapper = mount(
-      <TestProviders store={store}>
-        <FlowTargetSelectConnected />
+      <TestProviders>
+        <MemoryRouter>
+          <FlowTargetSelectConnectedComponent flowTarget={FlowTarget.source} />
+        </MemoryRouter>
       </TestProviders>
     );
-    expect(store.getState().network.details.flowTarget).toEqual('source');
-    wrapper
-      .find('button')
-      .first()
-      .simulate('click');
+    expect(wrapper.find('Memo(FlowTargetSelectComponent)').prop('selectedTarget')).toEqual(
+      FlowTarget.source
+    );
+  });
 
-    wrapper.update();
-    wrapper
-      .find(`button#${IpOverviewId}-select-flow-target-destination`)
-      .first()
-      .simulate('click');
+  test('renders correctly against snapshot flowTarget destination', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <MemoryRouter>
+          <FlowTargetSelectConnectedComponent flowTarget={FlowTarget.destination} />
+        </MemoryRouter>
+      </TestProviders>
+    );
 
-    wrapper.update();
-    expect(store.getState().network.details.flowTarget).toEqual('destination');
+    expect(wrapper.find('Memo(FlowTargetSelectComponent)').prop('selectedTarget')).toEqual(
+      FlowTarget.destination
+    );
   });
 });

@@ -6,10 +6,8 @@
 
 import { RouteComponentProps } from 'react-router-dom';
 import { ActionCreator } from 'typescript-fsa';
-
-import { FlowTarget } from '../../graphql/types';
-import { GlobalTimeArgs } from '../../containers/global_time';
 import { InputsModelId } from '../../store/inputs/constants';
+import { GlobalTimeArgs } from '../../containers/global_time';
 
 export type SetAbsoluteRangeDatePicker = ActionCreator<{
   id: InputsModelId;
@@ -17,25 +15,9 @@ export type SetAbsoluteRangeDatePicker = ActionCreator<{
   to: number;
 }>;
 
-interface NetworkComponentReduxProps {
-  filterQuery: string;
-  queryExpression: string;
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
-}
-
-export type NetworkComponentProps = NetworkComponentReduxProps &
-  GlobalTimeArgs &
-  Partial<RouteComponentProps<{}>> & {
+export type NetworkComponentProps = Partial<RouteComponentProps<{}>> &
+  GlobalTimeArgs & {
     networkPagePath: string;
     hasMlUserPermissions: boolean;
     capabilitiesFetched: boolean;
   };
-
-interface IPDetailsComponentReduxProps {
-  filterQuery: string;
-  flowTarget: FlowTarget;
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
-}
-
-export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
-  GlobalTimeArgs & { detailName: string };

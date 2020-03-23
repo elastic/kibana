@@ -19,11 +19,11 @@
 
 import { createTagCloudFn } from './tag_cloud_fn';
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
 
 describe('interpreter/functions#tagcloud', () => {
-  const fn = functionWrapper(createTagCloudFn);
+  const fn = functionWrapper(createTagCloudFn());
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],

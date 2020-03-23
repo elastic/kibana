@@ -49,11 +49,11 @@ class StatusApp extends Component {
     this.state = {
       loading: true,
       fetchError: false,
-      data: null
+      data: null,
     };
   }
 
-  componentDidMount = async function () {
+  componentDidMount = async function() {
     const data = await loadStatus();
 
     if (data) {
@@ -61,7 +61,7 @@ class StatusApp extends Component {
     } else {
       this.setState({ fetchError: true, loading: false });
     }
-  }
+  };
 
   render() {
     const { buildNum, buildSha } = this.props;
@@ -69,9 +69,7 @@ class StatusApp extends Component {
 
     // If we're still loading, return early with a spinner
     if (loading) {
-      return (
-        <EuiLoadingSpinner size="l" />
-      );
+      return <EuiLoadingSpinner size="l" />;
     }
 
     if (fetchError) {
@@ -91,11 +89,7 @@ class StatusApp extends Component {
     return (
       <EuiPage className="stsPage">
         <EuiPageBody restrictWidth>
-
-          <ServerStatus
-            name={name}
-            serverState={serverState}
-          />
+          <ServerStatus name={name} serverState={serverState} />
 
           <EuiSpacer />
 
@@ -124,7 +118,7 @@ class StatusApp extends Component {
                           id="statusPage.statusApp.statusActions.buildText"
                           defaultMessage="BUILD {buildNum}"
                           values={{
-                            buildNum: (<strong>{ buildNum }</strong>),
+                            buildNum: <strong>{buildNum}</strong>,
                           }}
                         />
                       </p>
@@ -137,7 +131,7 @@ class StatusApp extends Component {
                           id="statusPage.statusApp.statusActions.commitText"
                           defaultMessage="COMMIT {buildSha}"
                           values={{
-                            buildSha: (<strong>{ buildSha }</strong>),
+                            buildSha: <strong>{buildSha}</strong>,
                           }}
                         />
                       </p>

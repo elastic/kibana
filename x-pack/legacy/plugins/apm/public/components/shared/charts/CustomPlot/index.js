@@ -13,6 +13,7 @@ import Legends from './Legends';
 import StaticPlot from './StaticPlot';
 import InteractivePlot from './InteractivePlot';
 import VoronoiPlot from './VoronoiPlot';
+import { AnnotationsPlot } from './AnnotationsPlot';
 import { createSelector } from 'reselect';
 import { getPlotValues } from './plotUtils';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
@@ -28,7 +29,8 @@ export class InnerCustomPlot extends PureComponent {
     seriesEnabledState: [],
     isDrawing: false,
     selectionStart: null,
-    selectionEnd: null
+    selectionEnd: null,
+    showAnnotations: true
   };
 
   getEnabledSeries = createSelector(
@@ -122,7 +124,7 @@ export class InnerCustomPlot extends PureComponent {
   }
 
   render() {
-    const { series, truncateLegends, width } = this.props;
+    const { series, truncateLegends, width, annotations } = this.props;
 
     if (!width) {
       return null;
@@ -166,6 +168,14 @@ export class InnerCustomPlot extends PureComponent {
             tickFormatX={this.props.tickFormatX}
           />
 
+          {this.state.showAnnotations && !isEmpty(annotations) && (
+            <AnnotationsPlot
+              plotValues={plotValues}
+              width={width}
+              annotations={annotations || []}
+            />
+          )}
+
           <InteractivePlot
             plotValues={plotValues}
             hoverX={this.props.hoverX}
@@ -192,6 +202,13 @@ export class InnerCustomPlot extends PureComponent {
           hiddenSeriesCount={hiddenSeriesCount}
           clickLegend={this.clickLegend}
           seriesEnabledState={this.state.seriesEnabledState}
+          hasAnnotations={!isEmpty(annotations)}
+          showAnnotations={this.state.showAnnotations}
+          onAnnotationsToggle={() => {
+            this.setState(({ showAnnotations }) => ({
+              showAnnotations: !showAnnotations
+            }));
+          }}
         />
       </Fragment>
     );
@@ -209,7 +226,14 @@ InnerCustomPlot.propTypes = {
   truncateLegends: PropTypes.bool,
   width: PropTypes.number.isRequired,
   height: PropTypes.number,
-  stackBy: PropTypes.string
+  stackBy: PropTypes.string,
+  annotations: PropTypes.arrayOf(
+    PropTypes.shape({
+      type: PropTypes.string,
+      id: PropTypes.string,
+      firstSeen: PropTypes.number
+    })
+  )
 };
 
 InnerCustomPlot.defaultProps = {

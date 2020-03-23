@@ -5,9 +5,8 @@
  */
 
 import { mount, ReactWrapper, shallow } from 'enzyme';
-import 'jest-styled-components';
 import React from 'react';
-import { IStackframe } from '../../../../../typings/es_schemas/raw/fields/Stackframe';
+import { IStackframe } from '../../../../../../../../plugins/apm/typings/es_schemas/raw/fields/stackframe';
 import { Stackframe } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
 
@@ -16,7 +15,7 @@ describe('Stackframe', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = stacktracesMock[0];
-      wrapper = mount(<Stackframe stackframe={stackframe} />);
+      wrapper = mount(<Stackframe id="test" stackframe={stackframe} />);
     });
 
     it('should render correctly', () => {
@@ -38,7 +37,7 @@ describe('Stackframe', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = { line: {} } as IStackframe;
-      wrapper = mount(<Stackframe stackframe={stackframe} />);
+      wrapper = mount(<Stackframe id="test" stackframe={stackframe} />);
     });
 
     it('should render only FrameHeading', () => {
@@ -55,7 +54,7 @@ describe('Stackframe', () => {
   it('should respect isLibraryFrame', () => {
     const stackframe = { line: {} } as IStackframe;
     const wrapper = shallow(
-      <Stackframe stackframe={stackframe} isLibraryFrame />
+      <Stackframe id="test" stackframe={stackframe} isLibraryFrame />
     );
     expect(wrapper.find('FrameHeading').prop('isLibraryFrame')).toBe(true);
   });

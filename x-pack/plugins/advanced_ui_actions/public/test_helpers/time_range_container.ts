@@ -8,7 +8,7 @@ import {
   ContainerInput,
   Container,
   ContainerOutput,
-  GetEmbeddableFactory,
+  EmbeddableStart,
 } from '../../../../../src/plugins/embeddable/public';
 import { TimeRange } from '../../../../../src/plugins/data/public';
 
@@ -17,7 +17,7 @@ import { TimeRange } from '../../../../../src/plugins/data/public';
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type InheritedChildrenInput = {
   timeRange: TimeRange;
   id?: string;
@@ -37,7 +37,7 @@ export class TimeRangeContainer extends Container<
   public readonly type = TIME_RANGE_CONTAINER;
   constructor(
     initialInput: ContainerTimeRangeInput,
-    getFactory: GetEmbeddableFactory,
+    getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: Container
   ) {
     super(initialInput, { embeddableLoaded: {} }, getFactory, parent);

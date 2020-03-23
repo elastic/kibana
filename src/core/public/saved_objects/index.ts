@@ -21,21 +21,33 @@ export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
+  SavedObjectsBulkUpdateOptions,
 } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
-export { SavedObjectsStart } from './saved_objects_service';
+export { SavedObjectsStart, SavedObjectsService } from './saved_objects_service';
+export {
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
+} from '../../server/types';
+
 export {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsMigrationVersion,
-} from '../../server/types';
+} from '../../types';

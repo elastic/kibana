@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React from 'react';
-import { JsonUploadAndParse } from '../../../../../file_upload/public';
+import { getFileUploadComponent } from '../../../kibana_services';
 
 export function ClientFileCreateSourceEditor({
   previewGeojsonFile,
@@ -15,8 +14,9 @@ export function ClientFileCreateSourceEditor({
   onRemove,
   onIndexReady,
 }) {
+  const FileUpload = getFileUploadComponent();
   return (
-    <JsonUploadAndParse
+    <FileUpload
       appName={'Maps'}
       isIndexingTriggered={isIndexingTriggered}
       onFileUpload={previewGeojsonFile}

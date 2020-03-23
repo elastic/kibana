@@ -21,7 +21,8 @@ const ErrorOverviewLink = ({ serviceName, query, ...rest }: Props) => {
     urlParams,
     'host',
     'containerId',
-    'podName'
+    'podName',
+    'serviceVersion'
   );
 
   return (

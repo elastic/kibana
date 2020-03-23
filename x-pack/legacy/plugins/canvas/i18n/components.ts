@@ -18,6 +18,17 @@ export const ComponentStrings = {
         defaultMessage: 'Embed Object',
       }),
   },
+  AdvancedFilter: {
+    getApplyButtonLabel: () =>
+      i18n.translate('xpack.canvas.renderer.advancedFilter.applyButtonLabel', {
+        defaultMessage: 'Apply',
+        description: 'This refers to applying the filter to the Canvas workpad',
+      }),
+    getInputPlaceholder: () =>
+      i18n.translate('xpack.canvas.renderer.advancedFilter.inputPlaceholder', {
+        defaultMessage: 'Enter filter expression',
+      }),
+  },
   App: {
     getLoadErrorMessage: (error: string) =>
       i18n.translate('xpack.canvas.app.loadErrorMessage', {
@@ -217,11 +228,11 @@ export const ComponentStrings = {
   DatasourceDatasourceComponent: {
     getChangeButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.changeButtonLabel', {
-        defaultMessage: 'Change your data source',
+        defaultMessage: 'Change element data source',
       }),
     getPreviewButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
-        defaultMessage: 'Preview',
+        defaultMessage: 'Preview data',
       }),
     getSaveButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.saveButtonLabel', {
@@ -257,6 +268,13 @@ export const ComponentStrings = {
         defaultMessage: 'No data source present',
       }),
   },
+  DropdownFilter: {
+    getMatchAllOptionLabel: () =>
+      i18n.translate('xpack.canvas.renderer.dropdownFilter.matchAllOptionLabel', {
+        defaultMessage: 'ANY',
+        description: 'The dropdown filter option to match any value in the field.',
+      }),
+  },
   ElementConfig: {
     getFailedLabel: () =>
       i18n.translate('xpack.canvas.elementConfig.failedLabel', {
@@ -276,7 +294,7 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.elementConfig.title', {
-        defaultMessage: 'Elements',
+        defaultMessage: 'Element status',
         description:
           '"Elements" refers to the individual text, images, or visualizations that you can add to a Canvas workpad',
       }),
@@ -465,6 +483,24 @@ export const ComponentStrings = {
         },
       }),
   },
+  FunctionFormContextError: {
+    getContextErrorMessage: (errorMessage: string) =>
+      i18n.translate('xpack.canvas.functionForm.contextError', {
+        defaultMessage: 'ERROR: {errorMessage}',
+        values: {
+          errorMessage,
+        },
+      }),
+  },
+  FunctionFormFunctionUnknown: {
+    getUnknownArgumentTypeErrorMessage: (expressionType: string) =>
+      i18n.translate('xpack.canvas.functionForm.functionUnknown.unknownArgumentTypeError', {
+        defaultMessage: 'Unknown expression type "{expressionType}"',
+        values: {
+          expressionType,
+        },
+      }),
+  },
   GroupSettings: {
     getSaveGroupDescription: () =>
       i18n.translate('xpack.canvas.groupSettings.saveGroupDescription', {
@@ -495,7 +531,7 @@ export const ComponentStrings = {
       }),
     getKeyboardShortcutsLinkLabel: () =>
       i18n.translate('xpack.canvas.helpMenu.keyboardShortcutsLinkLabel', {
-        defaultMessage: 'Keyboard Shortcuts',
+        defaultMessage: 'Keyboard shortcuts',
       }),
   },
   KeyboardShortcutsDoc: {
@@ -511,7 +547,7 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
-        defaultMessage: 'Keyboard Shortcuts',
+        defaultMessage: 'Keyboard shortcuts',
       }),
   },
   Link: {
@@ -545,7 +581,7 @@ export const ComponentStrings = {
       }),
     getBackgroundColorLabel: () =>
       i18n.translate('xpack.canvas.pageConfig.backgroundColorLabel', {
-        defaultMessage: 'Background Color',
+        defaultMessage: 'Background',
       }),
     getNoTransitionDropDownOptionLabel: () =>
       i18n.translate('xpack.canvas.pageConfig.transitions.noneDropDownOptionLabel', {
@@ -556,7 +592,7 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.pageConfig.title', {
-        defaultMessage: 'Page',
+        defaultMessage: 'Page styles',
       }),
     getTransitionLabel: () =>
       i18n.translate('xpack.canvas.pageConfig.transitionLabel', {
@@ -876,6 +912,16 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
         defaultMessage: 'Underline',
       }),
+    getFontColorLabel: () =>
+      i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
+        defaultMessage: 'Font Color',
+      }),
+  },
+  TimePicker: {
+    getApplyButtonLabel: () =>
+      i18n.translate('xpack.canvas.timePicker.applyButtonLabel', {
+        defaultMessage: 'Apply',
+      }),
   },
   Toolbar: {
     getEditorButtonLabel: () =>
@@ -960,12 +1006,16 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.workpadConfig.title', {
-        defaultMessage: 'Workpad',
+        defaultMessage: 'Workpad settings',
       }),
     getUSLetterButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadConfig.USLetterButtonLabel', {
         defaultMessage: 'US Letter',
-        description: 'This is referring to the dimentions of U.S. standard letter paper.',
+        description: 'This is referring to the dimensions of U.S. standard letter paper.',
+      }),
+    getBackgroundColorLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.backgroundColorLabel', {
+        defaultMessage: 'Background color',
       }),
   },
   WorkpadCreate: {

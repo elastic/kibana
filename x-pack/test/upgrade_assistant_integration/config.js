@@ -5,24 +5,27 @@
  */
 
 import path from 'path';
-import {
-  LegacyEsProvider,
-} from './services';
+import { LegacyEsProvider } from './services';
 
-export default async function ({ readConfigFile }) {
-
+export default async function({ readConfigFile }) {
   // Read the Kibana API integration tests config file so that we can utilize its services.
-  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
-  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
-  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
+  const kibanaAPITestsConfig = await readConfigFile(
+    require.resolve('../../../test/api_integration/config.js')
+  );
+  const xPackFunctionalTestsConfig = await readConfigFile(
+    require.resolve('../functional/config.js')
+  );
+  const kibanaCommonConfig = await readConfigFile(
+    require.resolve('../../../test/common/config.js')
+  );
 
   return {
     testFiles: [require.resolve('./upgrade_assistant')],
     servers: xPackFunctionalTestsConfig.get('servers'),
     services: {
+      ...kibanaCommonConfig.get('services'),
       supertest: kibanaAPITestsConfig.get('services.supertest'),
-      es: LegacyEsProvider,
-      esArchiver: kibanaCommonConfig.get('services.esArchiver'),
+      legacyEs: LegacyEsProvider,
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
@@ -38,6 +41,6 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
       dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
-    }
+    },
   };
 }

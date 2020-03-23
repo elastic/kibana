@@ -19,4 +19,4 @@
 
 export { KbnUrlProvider } from './url';
 export { RedirectWhenMissingProvider } from './redirect_when_missing';
-export { modifyUrl } from '../../../../core/public/utils';
+export { modifyUrl } from '../../../../core/utils';

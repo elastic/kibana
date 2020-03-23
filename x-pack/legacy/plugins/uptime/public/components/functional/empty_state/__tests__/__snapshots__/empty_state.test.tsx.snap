@@ -2,17 +2,6 @@
 
 exports[`EmptyState component does not render empty state with appropriate base path and no docs 1`] = `
 <EmptyStateComponent
-  basePath="foo"
-  data={
-    Object {
-      "statesIndexStatus": Object {
-        "docCount": Object {
-          "count": 0,
-        },
-        "indexExists": true,
-      },
-    }
-  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -116,16 +105,23 @@ exports[`EmptyState component does not render empty state with appropriate base 
     }
   }
   loading={false}
+  statesIndexStatus={
+    Object {
+      "docCount": 0,
+      "indexExists": true,
+    }
+  }
 >
   <DataMissing
-    basePath="foo"
     headingMessage="No uptime data found"
   >
     <EuiFlexGroup
+      data-test-subj="data-missing"
       justifyContent="center"
     >
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        data-test-subj="data-missing"
       >
         <EuiFlexItem
           grow={false}
@@ -152,18 +148,16 @@ exports[`EmptyState component does not render empty state with appropriate base 
                         id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                         values={
                           Object {
-                            "configureHeartbeatLink": <EuiLink
-                              color="primary"
-                              href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                            "configureHeartbeatLink": <ForwardRef
+                              href="/app/kibana#/home/tutorial/uptimeMonitors"
                               target="_blank"
-                              type="button"
                             >
                               <FormattedMessage
                                 defaultMessage="Configure Heartbeat"
                                 id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                 values={Object {}}
                               />
-                            </EuiLink>,
+                            </ForwardRef>,
                           }
                         }
                       />
@@ -188,21 +182,11 @@ exports[`EmptyState component does not render empty state with appropriate base 
                       size="xxl"
                       type="uptimeApp"
                     >
-                      <EuiIconEmpty
-                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                        focusable="false"
-                        style={null}
-                      >
-                        <svg
-                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                          focusable="false"
-                          height={16}
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
+                      <div
+                        color="subdued"
+                        data-euiicon-type="uptimeApp"
+                        size="xxl"
+                      />
                     </EuiIcon>
                     <EuiSpacer
                       size="s"
@@ -246,30 +230,26 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                 id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                                 values={
                                   Object {
-                                    "configureHeartbeatLink": <EuiLink
-                                      color="primary"
-                                      href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                    "configureHeartbeatLink": <ForwardRef
+                                      href="/app/kibana#/home/tutorial/uptimeMonitors"
                                       target="_blank"
-                                      type="button"
                                     >
                                       <FormattedMessage
                                         defaultMessage="Configure Heartbeat"
                                         id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                         values={Object {}}
                                       />
-                                    </EuiLink>,
+                                    </ForwardRef>,
                                   }
                                 }
                               >
                                 <EuiLink
-                                  color="primary"
-                                  href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
                                   target="_blank"
-                                  type="button"
                                 >
                                   <a
                                     className="euiLink euiLink--primary"
-                                    href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                    href="/app/kibana#/home/tutorial/uptimeMonitors"
                                     rel="noopener noreferrer"
                                     target="_blank"
                                   >
@@ -301,9 +281,8 @@ exports[`EmptyState component does not render empty state with appropriate base 
 </EmptyStateComponent>
 `;
 
-exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
+exports[`EmptyState component doesn't render child components when count is falsy 1`] = `
 <EmptyStateComponent
-  basePath=""
   intl={
     Object {
       "defaultFormats": Object {},
@@ -407,6 +386,7 @@ exports[`EmptyState component doesn't render child components when count is fals
     }
   }
   loading={false}
+  statesIndexStatus={null}
 >
   <EmptyStateLoading>
     <EuiEmptyPrompt
@@ -472,17 +452,6 @@ exports[`EmptyState component doesn't render child components when count is fals
 
 exports[`EmptyState component notifies when index does not exist 1`] = `
 <EmptyStateComponent
-  basePath="foo"
-  data={
-    Object {
-      "statesIndexStatus": Object {
-        "docCount": Object {
-          "count": 1,
-        },
-        "indexExists": false,
-      },
-    }
-  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -586,16 +555,23 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
     }
   }
   loading={false}
+  statesIndexStatus={
+    Object {
+      "docCount": 1,
+      "indexExists": false,
+    }
+  }
 >
   <DataMissing
-    basePath="foo"
     headingMessage="Uptime index not found"
   >
     <EuiFlexGroup
+      data-test-subj="data-missing"
       justifyContent="center"
     >
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        data-test-subj="data-missing"
       >
         <EuiFlexItem
           grow={false}
@@ -622,18 +598,16 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                         id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                         values={
                           Object {
-                            "configureHeartbeatLink": <EuiLink
-                              color="primary"
-                              href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                            "configureHeartbeatLink": <ForwardRef
+                              href="/app/kibana#/home/tutorial/uptimeMonitors"
                               target="_blank"
-                              type="button"
                             >
                               <FormattedMessage
                                 defaultMessage="Configure Heartbeat"
                                 id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                 values={Object {}}
                               />
-                            </EuiLink>,
+                            </ForwardRef>,
                           }
                         }
                       />
@@ -658,21 +632,11 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                       size="xxl"
                       type="uptimeApp"
                     >
-                      <EuiIconEmpty
-                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                        focusable="false"
-                        style={null}
-                      >
-                        <svg
-                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                          focusable="false"
-                          height={16}
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
+                      <div
+                        color="subdued"
+                        data-euiicon-type="uptimeApp"
+                        size="xxl"
+                      />
                     </EuiIcon>
                     <EuiSpacer
                       size="s"
@@ -716,30 +680,26 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                                 values={
                                   Object {
-                                    "configureHeartbeatLink": <EuiLink
-                                      color="primary"
-                                      href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                    "configureHeartbeatLink": <ForwardRef
+                                      href="/app/kibana#/home/tutorial/uptimeMonitors"
                                       target="_blank"
-                                      type="button"
                                     >
                                       <FormattedMessage
                                         defaultMessage="Configure Heartbeat"
                                         id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                         values={Object {}}
                                       />
-                                    </EuiLink>,
+                                    </ForwardRef>,
                                   }
                                 }
                               >
                                 <EuiLink
-                                  color="primary"
-                                  href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
                                   target="_blank"
-                                  type="button"
                                 >
                                   <a
                                     className="euiLink euiLink--primary"
-                                    href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                    href="/app/kibana#/home/tutorial/uptimeMonitors"
                                     rel="noopener noreferrer"
                                     target="_blank"
                                   >
@@ -787,7 +747,6 @@ exports[`EmptyState component renders child components when count is truthy 1`] 
 
 exports[`EmptyState component renders error message when an error occurs 1`] = `
 <EmptyStateComponent
-  basePath=""
   errors={
     Array [
       Object {
@@ -906,6 +865,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
     }
   }
   loading={false}
+  statesIndexStatus={null}
 >
   <EmptyStateError
     errors={
@@ -968,21 +928,11 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                       size="xxl"
                       type="securityApp"
                     >
-                      <EuiIconEmpty
-                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                        focusable="false"
-                        style={null}
-                      >
-                        <svg
-                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                          focusable="false"
-                          height={16}
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
+                      <div
+                        color="subdued"
+                        data-euiicon-type="securityApp"
+                        size="xxl"
+                      />
                     </EuiIcon>
                     <EuiSpacer
                       size="s"
@@ -1043,7 +993,6 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
 
 exports[`EmptyState component renders loading state if no errors or doc count 1`] = `
 <EmptyStateComponent
-  basePath=""
   intl={
     Object {
       "defaultFormats": Object {},
@@ -1147,6 +1096,7 @@ exports[`EmptyState component renders loading state if no errors or doc count 1`
     }
   }
   loading={true}
+  statesIndexStatus={null}
 >
   <EmptyStateLoading>
     <EuiEmptyPrompt

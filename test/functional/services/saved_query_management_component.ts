@@ -24,8 +24,18 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
+  const config = getService('config');
 
   class SavedQueryManagementComponent {
+    public async getCurrentlyLoadedQueryID() {
+      await this.openSavedQueryManagementComponent();
+      try {
+        return await testSubjects.getVisibleText('~saved-query-list-item-selected');
+      } catch {
+        return undefined;
+      }
+    }
+
     public async saveNewQuery(
       name: string,
       description: string,
@@ -118,15 +128,17 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       await testSubjects.setValue('saveQueryFormDescription', description);
 
       const currentIncludeFiltersValue =
-        (await testSubjects.getAttribute('saveQueryFormIncludeFiltersOption', 'checked')) ===
+        (await testSubjects.getAttribute('saveQueryFormIncludeFiltersOption', 'aria-checked')) ===
         'true';
       if (currentIncludeFiltersValue !== includeFilters) {
         await testSubjects.click('saveQueryFormIncludeFiltersOption');
       }
 
       const currentIncludeTimeFilterValue =
-        (await testSubjects.getAttribute('saveQueryFormIncludeTimeFilterOption', 'checked')) ===
-        'true';
+        (await testSubjects.getAttribute(
+          'saveQueryFormIncludeTimeFilterOption',
+          'aria-checked'
+        )) === 'true';
       if (currentIncludeTimeFilterValue !== includeTimeFilter) {
         await testSubjects.click('saveQueryFormIncludeTimeFilterOption');
       }
@@ -152,6 +164,10 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       if (isOpenAlready) return;
 
       await testSubjects.click('saved-query-management-popover-button');
+      await retry.waitFor('saved query management popover to have any text', async () => {
+        const queryText = await testSubjects.getVisibleText('saved-query-management-popover');
+        return queryText.length > 0;
+      });
     }
 
     async closeSavedQueryManagementComponent() {
@@ -166,7 +182,9 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
 
       await retry.try(async () => {
         await testSubjects.click('saved-query-management-save-button');
-        await testSubjects.existOrFail('saveQueryForm');
+        await testSubjects.existOrFail('saveQueryForm', {
+          timeout: config.get('timeouts.waitForExists'),
+        });
       });
     }
 

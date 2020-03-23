@@ -32,7 +32,7 @@ const FilterBadgeList = ({ onRemove, value }: Props) => (
         >
           <EuiBadge color="hollow">
             <BadgeText>{val}</BadgeText>
-            <EuiIcon type="cross"></EuiIcon>
+            <EuiIcon type="cross" />
           </EuiBadge>
         </button>
       </EuiFlexItem>

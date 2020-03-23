@@ -20,8 +20,7 @@
 import moment from 'moment-timezone';
 
 export function timezoneProvider(config) {
-  return function () {
-
+  return function() {
     if (config.isDefault('dateFormat:tz')) {
       const detectedTimezone = moment.tz.guess();
       if (detectedTimezone) return detectedTimezone;
@@ -29,7 +28,5 @@ export function timezoneProvider(config) {
     } else {
       return config.get('dateFormat:tz', 'Browser');
     }
-
   };
 }
-

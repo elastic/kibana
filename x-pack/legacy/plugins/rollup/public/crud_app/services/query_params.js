@@ -10,9 +10,12 @@ export function extractQueryParams(queryString) {
   }
 
   const extractedQueryParams = {};
-  const queryParamPairs = queryString.split('?')[1].split('&').map(paramString => paramString.split('='));
+  const queryParamPairs = queryString
+    .split('?')[1]
+    .split('&')
+    .map(paramString => paramString.split('='));
 
-  queryParamPairs.forEach(([ key, value ]) => {
+  queryParamPairs.forEach(([key, value]) => {
     extractedQueryParams[key] = decodeURIComponent(value);
   });
 

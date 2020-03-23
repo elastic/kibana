@@ -25,3 +25,7 @@ export * from './index_name';
 export * from './contains_char';
 export * from './starts_with';
 export * from './index_pattern_field';
+export * from './lowercase_string';
+export * from './is_json';
+export * from './number_greater_than';
+export * from './number_smaller_than';

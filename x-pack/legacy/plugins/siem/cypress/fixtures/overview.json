@@ -29,7 +29,8 @@
         "endgameRegistry": 396,
         "endgameSecurity": 397,
         "filebeatSystemModule": 890,
-        "winlogbeat": 100,
+        "winlogbeatSecurity": 70,
+        "winlogbeatMWSysmonOperational": 30,
         "__typename": "OverviewHostData"
       },
       "__typename": "Source"

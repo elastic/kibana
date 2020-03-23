@@ -15,7 +15,7 @@ image::infrastructure/images/metrics-explorer-screen.png[Metrics Explorer in Kib
 
 * Metrics Explorer uses data collected from {metricbeat-ref}/metricbeat-overview.html[Metricbeat].
 * You need read permissions on `metricbeat-*` or the metric index specified in the Metrics configuration.
-* Metrics Explorer uses the timestamp field set in the Infrastructure configuration.
+* Metrics Explorer uses the timestamp field from the *Settings* tab.
 By default that is set to `@timestamp`.
 * The interval for the X Axis is set to `auto`.
 The bucket size is determined by the time range.
@@ -44,7 +44,7 @@ In this step we'll leave the aggregation dropdown set to *Average* but you can t
 
 4. In the *graph per* dropdown, enter `host.name` and select this field.
 You will see a separate graph for each host you are monitoring.
-If you are collecting metrics for multiple hosts, you will see something like the screenshot above.
+If you are collecting metrics for multiple hosts, multiple graphics are displayed.
 If you only have metrics for a single host, you will see a single graph.
 Congratulations! Either way, you've explored your first metric.
 

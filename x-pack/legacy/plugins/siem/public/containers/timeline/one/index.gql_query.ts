@@ -55,6 +55,7 @@ export const oneTimelineQuery = gql`
         end
       }
       description
+      eventType
       eventIdToNoteIds {
         eventId
         note
@@ -71,6 +72,27 @@ export const oneTimelineQuery = gql`
         fullName
         userName
         favoriteDate
+      }
+      filters {
+        meta {
+          alias
+          controlledBy
+          disabled
+          field
+          formattedValue
+          index
+          key
+          negate
+          params
+          type
+          value
+        }
+        query
+        exists
+        match_all
+        missing
+        range
+        script
       }
       kqlMode
       kqlQuery {
@@ -107,6 +129,7 @@ export const oneTimelineQuery = gql`
         version
       }
       title
+      savedQueryId
       sort {
         columnId
         sortDirection

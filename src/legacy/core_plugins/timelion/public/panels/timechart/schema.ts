@@ -17,24 +17,28 @@
  * under the License.
  */
 
-import './flot';
+import '../../../../vis_type_timelion/public/flot';
 import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import { timefilter } from 'ui/timefilter';
 // @ts-ignore
 import observeResize from '../../lib/observe_resize';
-// @ts-ignore
-import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
-import { TimelionStartDependencies } from '../../plugin';
-import { tickFormatters } from '../../services/tick_formatters';
-import { xaxisFormatterProvider } from './xaxis_formatter';
-import { generateTicksProvider } from './tick_generator';
+import {
+  calculateInterval,
+  DEFAULT_TIME_FORMAT,
+  // @ts-ignore
+} from '../../../../../../plugins/timelion/common/lib';
+import { tickFormatters } from '../../../../vis_type_timelion/public/helpers/tick_formatters';
+import { TimelionVisualizationDependencies } from '../../plugin';
+import { xaxisFormatterProvider } from '../../../../vis_type_timelion/public/helpers/xaxis_formatter';
+import { generateTicksProvider } from '../../../../vis_type_timelion/public/helpers/tick_generator';
 
 const DEBOUNCE_DELAY = 50;
 
-export function timechartFn(dependencies: TimelionStartDependencies) {
+export function timechartFn(dependencies: TimelionVisualizationDependencies) {
   const { $rootScope, $compile, uiSettings } = dependencies;
+
   return function() {
     return {
       help: 'Draw a timeseries chart',
@@ -225,7 +229,6 @@ export function timechartFn(dependencies: TimelionStartDependencies) {
           }
 
           let i;
-          let j;
           const dataset = plot.getData();
           if (legendCaption) {
             legendCaption.text(
@@ -236,21 +239,23 @@ export function timechartFn(dependencies: TimelionStartDependencies) {
           }
           for (i = 0; i < dataset.length; ++i) {
             const series = dataset[i];
+            const useNearestPoint = series.lines.show && !series.lines.steps;
             const precision = _.get(series, '_meta.precision', 2);
 
             if (series._hide) continue;
 
-            // Nearest point
-            for (j = 0; j < series.data.length; ++j) {
-              if (series.data[j][0] > pos.x) break;
-            }
+            const currentPoint = series.data.find((point: any, index: number) => {
+              if (index + 1 === series.data.length) {
+                return true;
+              }
+              if (useNearestPoint) {
+                return pos.x - point[0] < series.data[index + 1][0] - pos.x;
+              } else {
+                return pos.x < series.data[index + 1][0];
+              }
+            });
 
-            let y;
-            try {
-              y = series.data[j][1];
-            } catch (e) {
-              y = null;
-            }
+            const y = currentPoint[1];
 
             if (y != null) {
               let label = y.toFixed(precision);

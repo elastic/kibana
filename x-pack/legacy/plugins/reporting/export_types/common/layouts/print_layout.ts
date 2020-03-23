@@ -6,27 +6,21 @@
 import path from 'path';
 import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { LevelLogger } from '../../../server/lib';
-import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
-import { KbnServer } from '../../../types';
+import { HeadlessChromiumDriver } from '../../../server/browsers';
+import { ServerFacade } from '../../../types';
 import { LayoutTypes } from '../constants';
-import { Layout, LayoutSelectorDictionary, Size } from './layout';
+import { getDefaultLayoutSelectors, Layout, LayoutSelectorDictionary, Size } from './layout';
 import { CaptureConfig } from './types';
 
 export class PrintLayout extends Layout {
   public readonly selectors: LayoutSelectorDictionary = {
+    ...getDefaultLayoutSelectors(),
     screenshot: '[data-shared-item]',
-    renderComplete: '[data-shared-item]',
-    itemsCountAttribute: 'data-shared-items-count',
-    timefilterFromAttribute: 'data-shared-timefilter-from',
-    timefilterToAttribute: 'data-shared-timefilter-to',
-    toastHeader: '[data-test-subj="euiToastHeader"]',
   };
-
   public readonly groupCount = 2;
-
   private captureConfig: CaptureConfig;
 
-  constructor(server: KbnServer) {
+  constructor(server: ServerFacade) {
     super(LayoutTypes.PRINT);
     this.captureConfig = server.config().get('xpack.reporting.capture');
   }
@@ -81,7 +75,7 @@ export class PrintLayout extends Layout {
       args: [this.selectors.screenshot, elementSize.height, elementSize.width],
     };
 
-    await browser.evaluate(evalOptions);
+    await browser.evaluate(evalOptions, { context: 'PositionElements' }, logger);
   }
 
   public getPdfImageSize() {

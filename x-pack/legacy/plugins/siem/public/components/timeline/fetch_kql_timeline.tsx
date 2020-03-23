@@ -5,37 +5,22 @@
  */
 
 import { memo, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
+import { IIndexPattern } from 'src/plugins/data/public';
 
-import { inputsModel, KueryFilterQuery, timelineSelectors, State } from '../../store';
+import { timelineSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useUpdateKql } from '../../utils/kql/use_update_kql';
 
-interface TimelineKqlFetchRedux {
-  kueryFilterQuery: KueryFilterQuery | null;
-  kueryFilterQueryDraft: KueryFilterQuery | null;
-}
-
-interface TimelineKqlFetchDispatch {
-  setTimelineQuery: ActionCreator<{
-    id: string;
-    inputId: InputsModelId;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch | inputsModel.RefetchKql | null;
-  }>;
-}
-
 export interface TimelineKqlFetchProps {
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   inputId: InputsModelId;
 }
 
-type OwnProps = TimelineKqlFetchProps & TimelineKqlFetchRedux & TimelineKqlFetchDispatch;
+type OwnProps = TimelineKqlFetchProps & PropsFromRedux;
 
 const TimelineKqlFetchComponent = memo<OwnProps>(
   ({ id, indexPattern, inputId, kueryFilterQuery, kueryFilterQueryDraft, setTimelineQuery }) => {
@@ -50,13 +35,19 @@ const TimelineKqlFetchComponent = memo<OwnProps>(
           kueryFilterQuery,
           kueryFilterQueryDraft,
           storeType: 'timelineType',
-          type: null,
           timelineId: id,
         }),
       });
     }, [kueryFilterQueryDraft, kueryFilterQuery, id]);
     return null;
-  }
+  },
+  (prevProps, nextProps) =>
+    prevProps.id === nextProps.id &&
+    prevProps.inputId === nextProps.inputId &&
+    prevProps.setTimelineQuery === nextProps.setTimelineQuery &&
+    deepEqual(prevProps.kueryFilterQuery, nextProps.kueryFilterQuery) &&
+    deepEqual(prevProps.kueryFilterQueryDraft, nextProps.kueryFilterQueryDraft) &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern)
 );
 
 const makeMapStateToProps = () => {
@@ -71,9 +62,12 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const TimelineKqlFetch = connect(
-  makeMapStateToProps,
-  {
-    setTimelineQuery: inputsActions.setQuery,
-  }
-)(TimelineKqlFetchComponent);
+const mapDispatchToProps = {
+  setTimelineQuery: inputsActions.setQuery,
+};
+
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const TimelineKqlFetch = connector(TimelineKqlFetchComponent);

@@ -36,7 +36,7 @@
  * ````
  */
 
-import { Option } from '@elastic/eui/src/components/selectable/types';
+import { EuiSelectableOption } from '@elastic/eui';
 import { SerializerFunc } from '../hook_form_lib';
 
 export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
@@ -45,7 +45,7 @@ export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
    *
    * @param value The Eui Selectable options array
    */
-  optionsToSelectedValue(options: Option[]): string[] {
+  optionsToSelectedValue(options: EuiSelectableOption[]): string[] {
     return options.filter(option => option.checked === 'on').map(option => option.label);
   },
 };
@@ -69,24 +69,21 @@ export const stripEmptyFields = (
 ): { [key: string]: any } => {
   const { types = ['string', 'object'], recursive = false } = options || {};
 
-  return Object.entries(object).reduce(
-    (acc, [key, value]) => {
-      const type = typeof value;
-      const shouldStrip = types.includes(type as 'string');
+  return Object.entries(object).reduce((acc, [key, value]) => {
+    const type = typeof value;
+    const shouldStrip = types.includes(type as 'string');
 
-      if (shouldStrip && type === 'string' && value.trim() === '') {
-        return acc;
-      } else if (type === 'object' && !Array.isArray(value) && value !== null) {
-        if (Object.keys(value).length === 0 && shouldStrip) {
-          return acc;
-        } else if (recursive) {
-          value = stripEmptyFields({ ...value }, options);
-        }
-      }
-
-      acc[key] = value;
+    if (shouldStrip && type === 'string' && value.trim() === '') {
       return acc;
-    },
-    {} as { [key: string]: any }
-  );
+    } else if (type === 'object' && !Array.isArray(value) && value !== null) {
+      if (Object.keys(value).length === 0 && shouldStrip) {
+        return acc;
+      } else if (recursive) {
+        value = stripEmptyFields({ ...value }, options);
+      }
+    }
+
+    acc[key] = value;
+    return acc;
+  }, {} as { [key: string]: any });
 };

@@ -32,11 +32,7 @@ describe('Header', () => {
       filteredCount: 2,
     };
 
-    const component = shallow(
-      <Header
-        {...props}
-      />
-    );
+    const component = shallow(<Header {...props} />);
 
     expect(component).toMatchSnapshot();
   });

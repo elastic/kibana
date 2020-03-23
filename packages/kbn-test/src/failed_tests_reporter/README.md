@@ -12,10 +12,10 @@ copy(`wget "${Array.from($$('a[href$=".xml"]')).filter(a => a.innerText === 'Dow
 
 This copies a script to download the reports, which you should execute in the `test/junit` directory.
 
-Next, run the CLI in `--dry-run` mode so that it doesn't actually communicate with Github.
+Next, run the CLI in `--no-github-update` mode so that it doesn't actually communicate with Github and `--no-report-update` to prevent the script from mutating the reports on disk and instead log the updated report.
 
 ```sh
-node scripts/report_failed_tests.js --verbose --dry-run --build-url foo
+node scripts/report_failed_tests.js --verbose --no-github-update --no-report-update
 ```
 
-If you specify the `GITHUB_TOKEN` environment variable then `--dry-run` will execute read operations but still won't execute write operations.
+Unless you specify the `GITHUB_TOKEN` environment variable requests to read existing issues will use anonymous access which is limited to 60 requests per hour.

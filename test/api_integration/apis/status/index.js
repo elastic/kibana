@@ -17,9 +17,8 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('status', () => {
     loadTestFile(require.resolve('./status'));
   });
 }
-

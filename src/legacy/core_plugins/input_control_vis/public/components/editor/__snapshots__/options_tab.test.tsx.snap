@@ -1,0 +1,72 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OptionsTab should renders OptionsTab 1`] = `
+<EuiForm>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    id="updateFiltersOnChange"
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
+      label={
+        <FormattedMessage
+          defaultMessage="Update Kibana filters on each change"
+          id="inputControl.editor.optionsTab.updateFilterLabel"
+          values={Object {}}
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    id="useTimeFilter"
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      data-test-subj="inputControlEditorUseTimeFilterCheckbox"
+      label={
+        <FormattedMessage
+          defaultMessage="Use time filter"
+          id="inputControl.editor.optionsTab.useTimeFilterLabel"
+          values={Object {}}
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    id="pinFilters"
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      data-test-subj="inputControlEditorPinFiltersCheckbox"
+      label={
+        <FormattedMessage
+          defaultMessage="Pin filters for all applications"
+          id="inputControl.editor.optionsTab.pinFiltersLabel"
+          values={Object {}}
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiForm>
+`;

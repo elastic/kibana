@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -119,7 +119,6 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
       // query ES directory to ensure namespace was or wasn't specified
       const { _source } = await es.get({
         id: `${expectedSpacePrefix}${savedObject.type}:${savedObject.id}`,
-        type: '_doc',
         index: '.kibana',
       });
 

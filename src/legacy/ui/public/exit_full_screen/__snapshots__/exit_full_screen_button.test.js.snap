@@ -8,32 +8,49 @@ exports[`is rendered 1`] = `
   >
     In full screen mode, press ESC to exit.
   </p>
-  <div
-    class="dshExitFullScreenButton"
-  >
+  <div>
     <button
       aria-label="Exit full screen mode"
-      class="kuiButton dshExitFullScreenButton__mode"
-      type="hollow"
+      class="dshExitFullScreenButton"
+      data-test-subj="exitFullScreenModeLogo"
     >
       <span
-        class="kuiButton__inner"
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
       >
-        <span>
-          <span
-            class="dshExitFullScreenButton__logo"
-            data-test-subj="exitFullScreenModeLogo"
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            data-euiicon-type="logoElastic"
           />
-          <span
-            class="dshExitFullScreenButton__text"
-            data-test-subj="exitFullScreenModeText"
-          >
-            Exit full screen
-            <span
-              class="kuiIcon fa fa-angle-left"
-            />
-          </span>
-        </span>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+          data-test-subj="exitFullScreenModeText"
+        >
+          <div>
+            <p
+              class="euiTitle euiTitle--xxxsmall dshExitFullScreenButton__title"
+            >
+              Elastic Kibana
+            </p>
+            <div
+              class="euiText euiText--extraSmall dshExitFullScreenButton__text"
+            >
+              <p>
+                Exit full screen
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="dshExitFullScreenButton__icon"
+            data-euiicon-type="fullScreen"
+          />
+        </div>
       </span>
     </button>
   </div>

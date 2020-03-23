@@ -53,12 +53,9 @@ describe('getKpiHosts', () => {
   let data: KpiHostsData;
   const mockCallWithRequest = jest.fn();
   const mockFramework: FrameworkAdapter = {
-    version: 'mock',
     callWithRequest: mockCallWithRequest,
-    exposeStaticDir: jest.fn(),
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
-    getSavedObjectsService: jest.fn(),
   };
   let EsKpiHosts: ElasticsearchKpiHostsAdapter;
 
@@ -169,12 +166,9 @@ describe('getKpiHostDetails', () => {
   let data: KpiHostDetailsData;
   const mockCallWithRequest = jest.fn();
   const mockFramework: FrameworkAdapter = {
-    version: 'mock',
     callWithRequest: mockCallWithRequest,
-    exposeStaticDir: jest.fn(),
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
-    getSavedObjectsService: jest.fn(),
   };
   let EsKpiHosts: ElasticsearchKpiHostsAdapter;
 

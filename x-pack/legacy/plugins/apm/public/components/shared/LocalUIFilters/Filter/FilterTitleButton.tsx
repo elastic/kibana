@@ -8,12 +8,12 @@ import React from 'react';
 import { EuiButtonEmpty, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 
-const Button = styled(EuiButtonEmpty).attrs({
+const Button = styled(EuiButtonEmpty).attrs(() => ({
   contentProps: {
     className: 'alignLeft'
   },
   color: 'text'
-})`
+}))`
   width: 100%;
 
   .alignLeft {

@@ -7,12 +7,11 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
-import { pure } from 'recompose';
+import { connect, ConnectedProps } from 'react-redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewNetworkQuery, OverviewNetworkData } from '../../../graphql/types';
+import { useUiSetting } from '../../../lib/kibana';
 import { State } from '../../../store';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
@@ -30,10 +29,6 @@ export interface OverviewNetworkArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface OverviewNetworkReducer {
-  isInspected: boolean;
-}
-
 export interface OverviewNetworkProps extends QueryTemplateProps {
   children: (args: OverviewNetworkArgs) => React.ReactNode;
   sourceId: string;
@@ -41,7 +36,7 @@ export interface OverviewNetworkProps extends QueryTemplateProps {
   startDate: number;
 }
 
-export const OverviewNetworkComponentQuery = pure<OverviewNetworkProps & OverviewNetworkReducer>(
+export const OverviewNetworkComponentQuery = React.memo<OverviewNetworkProps & PropsFromRedux>(
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
     <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
       query={overviewNetworkQuery}
@@ -55,7 +50,7 @@ export const OverviewNetworkComponentQuery = pure<OverviewNetworkProps & Overvie
           to: endDate,
         },
         filterQuery: createFilter(filterQuery),
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
         inspect: isInspected,
       }}
     >
@@ -86,4 +81,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const OverviewNetworkQuery = connect(makeMapStateToProps)(OverviewNetworkComponentQuery);
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const OverviewNetworkQuery = connector(OverviewNetworkComponentQuery);

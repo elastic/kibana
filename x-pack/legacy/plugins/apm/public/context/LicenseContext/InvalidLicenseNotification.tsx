@@ -6,10 +6,10 @@
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibanaCore } from '../../../../observability/public';
+import { useApmPluginContext } from '../../hooks/useApmPluginContext';
 
 export function InvalidLicenseNotification() {
-  const core = useKibanaCore();
+  const { core } = useApmPluginContext();
   const manageLicenseURL = core.http.basePath.prepend(
     '/app/kibana#/management/elasticsearch/license_management'
   );

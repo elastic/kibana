@@ -33,7 +33,7 @@ jest.mock('../components/table', () => ({
   // Note: this seems to fix React complaining about non lowercase attributes
   Table: () => {
     return 'table';
-  }
+  },
 }));
 
 const helpers = {

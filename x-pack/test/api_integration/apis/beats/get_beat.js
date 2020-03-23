@@ -7,10 +7,10 @@
 import expect from '@kbn/expect';
 import { ES_INDEX_NAME } from './constants';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('get_beat_configuration', () => {
     const archive = 'beats/list';

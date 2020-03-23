@@ -5,27 +5,20 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
 
 export class ToolbarOverlay extends React.Component {
-
   _renderToolsControl() {
     const { addFilters, geoFields } = this.props;
-    if (!addFilters || !geoFields.length
-    ) {
+    if (!addFilters || !geoFields.length) {
       return null;
     }
 
     return (
       <EuiFlexItem>
-        <ToolsControl
-          geoFields={geoFields}
-        />
+        <ToolsControl geoFields={geoFields} />
       </EuiFlexItem>
     );
   }
@@ -39,13 +32,11 @@ export class ToolbarOverlay extends React.Component {
         alignItems="flexStart"
         gutterSize="s"
       >
-
         <EuiFlexItem>
           <SetViewControl />
         </EuiFlexItem>
 
         {this._renderToolsControl()}
-
       </EuiFlexGroup>
     );
   }

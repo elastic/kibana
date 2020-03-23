@@ -18,5 +18,12 @@
  */
 
 export { ToastsService, ToastsSetup, ToastsStart } from './toasts_service';
-export { ErrorToastOptions, ToastsApi, ToastInput } from './toasts_api';
-export { EuiGlobalToastListToast as Toast } from '@elastic/eui';
+export {
+  ErrorToastOptions,
+  ToastOptions,
+  ToastsApi,
+  ToastInput,
+  IToasts,
+  ToastInputFields,
+  Toast,
+} from './toasts_api';

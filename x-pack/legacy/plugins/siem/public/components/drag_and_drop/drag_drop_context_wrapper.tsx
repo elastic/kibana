@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, noop } from 'lodash/fp';
-import * as React from 'react';
-import { DragDropContext, DropResult, DragStart } from 'react-beautiful-dnd';
-import { connect } from 'react-redux';
+import { noop } from 'lodash/fp';
+import React, { useCallback } from 'react';
+import { DropResult, DragDropContext } from 'react-beautiful-dnd';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
 import { dragAndDropModel, dragAndDropSelectors } from '../../store';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
@@ -20,6 +21,7 @@ import {
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
   IS_DRAGGING_CLASS_NAME,
+  IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
   providerWasDroppedOnTimeline,
   providerWasDroppedOnTimelineButton,
   draggableIsField,
@@ -28,7 +30,6 @@ import {
 interface Props {
   browserFields: BrowserFields;
   children: React.ReactNode;
-  dataProviders?: dragAndDropModel.IdToDataProvider;
   dispatch: Dispatch;
 }
 
@@ -57,26 +58,34 @@ const onDragEndHandler = ({
 /**
  * DragDropContextWrapperComponent handles all drag end events
  */
-export const DragDropContextWrapperComponent = React.memo<Props>(
+export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux>(
   ({ browserFields, children, dataProviders, dispatch }) => {
-    function onDragEnd(result: DropResult) {
-      enableScrolling();
+    const onDragEnd = useCallback(
+      (result: DropResult) => {
+        enableScrolling();
 
-      if (dataProviders != null) {
-        onDragEndHandler({
-          browserFields,
-          result,
-          dataProviders,
-          dispatch,
-        });
-      }
+        if (dataProviders != null) {
+          onDragEndHandler({
+            browserFields,
+            result,
+            dataProviders,
+            dispatch,
+          });
+        }
 
-      if (!draggableIsField(result)) {
-        document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
-      }
-    }
+        if (!draggableIsField(result)) {
+          document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
+        }
+
+        if (draggableIsField(result)) {
+          document.body.classList.remove(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
+        }
+      },
+      [browserFields, dataProviders]
+    );
     return (
-      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
+      // @ts-ignore
+      <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture}>
         {children}
       </DragDropContext>
     );
@@ -94,17 +103,20 @@ DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 const emptyDataProviders: dragAndDropModel.IdToDataProvider = {}; // stable reference
 
 const mapStateToProps = (state: State) => {
-  const dataProviders = defaultTo(
-    emptyDataProviders,
-    dragAndDropSelectors.dataProvidersSelector(state)
-  );
+  const dataProviders = dragAndDropSelectors.dataProvidersSelector(state) ?? emptyDataProviders;
 
   return { dataProviders };
 };
 
-export const DragDropContextWrapper = connect(mapStateToProps)(DragDropContextWrapperComponent);
+const connector = connect(mapStateToProps);
 
-const onDragStart = (initial: DragStart) => {
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const DragDropContextWrapper = connector(DragDropContextWrapperComponent);
+
+DragDropContextWrapper.displayName = 'DragDropContextWrapper';
+
+const onBeforeCapture = (before: BeforeCapture) => {
   const x =
     window.pageXOffset !== undefined
       ? window.pageXOffset
@@ -117,8 +129,12 @@ const onDragStart = (initial: DragStart) => {
 
   window.onscroll = () => window.scrollTo(x, y);
 
-  if (!draggableIsField(initial)) {
+  if (!draggableIsField(before)) {
     document.body.classList.add(IS_DRAGGING_CLASS_NAME);
+  }
+
+  if (draggableIsField(before)) {
+    document.body.classList.add(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
   }
 };
 

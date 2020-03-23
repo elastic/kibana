@@ -235,14 +235,19 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       await this.goToListingPage();
       await this.searchForWorkspaceWithName(name);
       await find.clickByLinkText(name);
+      // wait for nodes to show up
+      if (!(await find.existsByCssSelector('.gphNode', 10000))) {
+        throw new Error('nodes did not show up');
+      }
+      // let force simulation settle down before continuing
       await PageObjects.common.sleep(5000);
     }
 
     async deleteGraph(name: string) {
-      await this.searchForWorkspaceWithName(name);
       await testSubjects.click('checkboxSelectAll');
       await this.clickDeleteSelectedWorkspaces();
       await PageObjects.common.clickConfirmOnModal();
+      await testSubjects.find('graphCreateGraphPromptButton');
     }
 
     async getWorkspaceCount() {

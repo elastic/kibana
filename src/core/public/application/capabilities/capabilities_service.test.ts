@@ -17,53 +17,46 @@
  * under the License.
  */
 
-import { InjectedMetadataService } from '../../injected_metadata';
+import { httpServiceMock, HttpSetupMock } from '../../http/http_service.mock';
 import { CapabilitiesService } from './capabilities_service';
-import { LegacyApp, App } from '../types';
+
+const mockedCapabilities = {
+  catalogue: {},
+  management: {},
+  navLinks: {
+    app1: true,
+    app2: false,
+    legacyApp1: true,
+    legacyApp2: false,
+  },
+  foo: { feature: true },
+  bar: { feature: true },
+};
 
 describe('#start', () => {
-  const injectedMetadata = new InjectedMetadataService({
-    injectedMetadata: {
-      version: 'kibanaVersion',
-      capabilities: {
-        catalogue: {},
-        management: {},
-        navLinks: {
-          app1: true,
-          app2: false,
-          legacyApp1: true,
-          legacyApp2: false,
-        },
-        foo: { feature: true },
-        bar: { feature: true },
-      },
-    } as any,
-  }).start();
+  let http: HttpSetupMock;
 
-  const apps = new Map([
-    ['app1', { id: 'app1' }],
-    ['app2', { id: 'app2', capabilities: { app2: { feature: true } } }],
-  ] as Array<[string, App]>);
-  const legacyApps = new Map([
-    ['legacyApp1', { id: 'legacyApp1' }],
-    ['legacyApp2', { id: 'legacyApp2', capabilities: { app2: { feature: true } } }],
-  ] as Array<[string, LegacyApp]>);
+  beforeEach(() => {
+    http = httpServiceMock.createStartContract();
+    http.post.mockReturnValue(Promise.resolve(mockedCapabilities));
+  });
 
-  it('filters available apps based on returned navLinks', async () => {
+  it('only returns capabilities for given appIds', async () => {
     const service = new CapabilitiesService();
-    const startContract = await service.start({ apps, legacyApps, injectedMetadata });
-    expect(startContract.availableApps).toEqual(new Map([['app1', { id: 'app1' }]]));
-    expect(startContract.availableLegacyApps).toEqual(
-      new Map([['legacyApp1', { id: 'legacyApp1' }]])
-    );
+    const { capabilities } = await service.start({
+      http,
+      appIds: ['app1', 'app2', 'legacyApp1', 'legacyApp2'],
+    });
+
+    // @ts-ignore TypeScript knows this shouldn't be possible
+    expect(() => (capabilities.foo = 'foo')).toThrowError();
   });
 
   it('does not allow Capabilities to be modified', async () => {
     const service = new CapabilitiesService();
     const { capabilities } = await service.start({
-      apps,
-      legacyApps,
-      injectedMetadata,
+      http,
+      appIds: ['app1', 'app2', 'legacyApp1', 'legacyApp2'],
     });
 
     // @ts-ignore TypeScript knows this shouldn't be possible

@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { isPipelineMonitoringSupportedInVersion } from '../pipelines';
 
 describe('pipelines', () => {
-
   describe('isPipelineMonitoringSupportedInVersion', () => {
     it('returns false if lower major version than supported version is supplied', () => {
       const logstashVersion = '5.7.1';
@@ -25,5 +24,4 @@ describe('pipelines', () => {
       expect(isPipelineMonitoringSupportedInVersion(logstashVersion)).to.be(true);
     });
   });
-
 });

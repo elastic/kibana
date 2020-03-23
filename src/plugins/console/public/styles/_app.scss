@@ -1,0 +1,100 @@
+// TODO: Move all of the styles here (should be modularised by, e.g., CSS-in-JS or CSS modules).
+@import '@elastic/eui/src/components/header/variables';
+
+#consoleRoot {
+  height: calc(100vh - calc(#{$euiHeaderChildSize} * 2));
+  display: flex;
+  flex: 1 1 auto;
+  // Make sure the editor actions don't create scrollbars on this container
+  // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
+  overflow: hidden;
+}
+
+.consoleContainer {
+  padding: $euiSizeS;
+}
+
+.conApp {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.conApp__editor {
+  width: 100%;
+  display: flex;
+  flex: 0 0 auto;
+
+  // Required on IE11 to render ace editor correctly after first input.
+  position: relative;
+
+  &__spinner {
+    width: 100%;
+  }
+}
+
+.conApp__output {
+  display: flex;
+  flex: 1 1 1px;
+}
+
+.conApp__editorContent,
+.conApp__outputContent {
+  height: 100%;
+  flex: 1 1 1px;
+}
+
+.conApp__editorActions {
+  button {
+    line-height: inherit;
+  }
+
+  position: absolute;
+  z-index: $euiZLevel1;
+  top: 0;
+  // Adjust for possible scrollbars
+  right: $euiSize;
+  line-height: 1;
+  // For IE11
+  min-width: 40px;
+}
+
+.conApp__editorActionButton {
+  padding: 0 $euiSizeXS;
+  appearance: none;
+  border: none;
+  background: none;
+}
+
+.conApp__editorActionButton--success {
+  color: $euiColorSuccess;
+}
+
+.conApp__resizer {
+  @include kbnResizer;
+  // Give the aria selection border priority when the divider is selected on IE11 and Chrome
+  z-index: $euiZLevel1;
+}
+
+// SASSTODO: This component seems to not be used anymore?
+// Possibly replaced by the Ace version
+.conApp__autoComplete {
+  position: absolute;
+  left: -1000px;
+  visibility: hidden;
+  /* by pass any other element in ace and resize bar, but not modal popups  */
+  z-index: $euiZLevel1 + 2;
+  margin-top: 22px;
+}
+
+.conApp__settingsModal {
+  min-width: 460px;
+}
+
+.conApp__requestProgressBarContainer {
+  position: relative;
+  z-index: $euiZLevel2;
+}
+
+.conApp__tabsExtension {
+  border-bottom: $euiBorderThin;
+}

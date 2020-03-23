@@ -18,11 +18,13 @@
  */
 
 import { sortBy } from 'lodash';
-import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { NavLinkWrapper, ChromeNavLinkUpdateableFields, ChromeNavLink } from './nav_link';
+
 import { InternalApplicationStart } from '../../application';
 import { HttpStart } from '../../http';
+import { ChromeNavLink, ChromeNavLinkUpdateableFields, NavLinkWrapper } from './nav_link';
+import { toNavLink } from './to_nav_link';
 
 interface StartDeps {
   application: InternalApplicationStart;
@@ -70,6 +72,10 @@ export interface ChromeNavLinks {
   /**
    * Update the navlink for the given id with the updated attributes.
    * Returns the updated navlink or `undefined` if it does not exist.
+   *
+   * @deprecated Uses the {@link AppBase.updater$} property when registering
+   * your application with {@link ApplicationSetup.register} instead.
+   *
    * @param id
    * @param values
    */
@@ -95,45 +101,43 @@ export interface ChromeNavLinks {
   getForceAppSwitcherNavigation$(): Observable<boolean>;
 }
 
+type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLinkWrapper>;
+
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
-    const appLinks = [...application.availableApps].map(
-      ([appId, app]) =>
-        [
-          appId,
-          new NavLinkWrapper({
-            ...app,
-            legacy: false,
-            baseUrl: relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
-          }),
-        ] as [string, NavLinkWrapper]
+    const appLinks$ = application.applications$.pipe(
+      map(apps => {
+        return new Map(
+          [...apps]
+            .filter(([, app]) => !app.chromeless)
+            .map(([appId, app]) => [appId, toNavLink(app, http.basePath)])
+        );
+      })
     );
 
-    const legacyAppLinks = [...application.availableLegacyApps].map(
-      ([appId, app]) =>
-        [
-          appId,
-          new NavLinkWrapper({
-            ...app,
-            legacy: true,
-            baseUrl: relativeToAbsolute(http.basePath.prepend(app.appUrl)),
-          }),
-        ] as [string, NavLinkWrapper]
-    );
+    // now that availableApps$ is an observable, we need to keep record of all
+    // manual link modifications to be able to re-apply then after every
+    // availableApps$ changes.
+    const linkUpdaters$ = new BehaviorSubject<LinksUpdater[]>([]);
+    const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
 
-    const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(
-      new Map([...legacyAppLinks, ...appLinks])
-    );
+    combineLatest([appLinks$, linkUpdaters$])
+      .pipe(
+        map(([appLinks, linkUpdaters]) => {
+          return linkUpdaters.reduce((links, updater) => updater(links), appLinks);
+        })
+      )
+      .subscribe(navlinks => {
+        navLinks$.next(navlinks);
+      });
+
     const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
 
     return {
       getNavLinks$: () => {
-        return navLinks$.pipe(
-          map(sortNavLinks),
-          takeUntil(this.stop$)
-        );
+        return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
       },
 
       get(id: string) {
@@ -154,7 +158,10 @@ export class NavLinksService {
           return;
         }
 
-        navLinks$.next(new Map([...navLinks$.value.entries()].filter(([linkId]) => linkId === id)));
+        const updater: LinksUpdater = navLinks =>
+          new Map([...navLinks.entries()].filter(([linkId]) => linkId === id));
+
+        linkUpdaters$.next([...linkUpdaters$.value, updater]);
       },
 
       update(id: string, values: ChromeNavLinkUpdateableFields) {
@@ -162,17 +169,17 @@ export class NavLinksService {
           return;
         }
 
-        navLinks$.next(
+        const updater: LinksUpdater = navLinks =>
           new Map(
-            [...navLinks$.value.entries()].map(([linkId, link]) => {
+            [...navLinks.entries()].map(([linkId, link]) => {
               return [linkId, link.id === id ? link.update(values) : link] as [
                 string,
                 NavLinkWrapper
               ];
             })
-          )
-        );
+          );
 
+        linkUpdaters$.next([...linkUpdaters$.value, updater]);
         return this.get(id);
       },
 
@@ -192,12 +199,8 @@ export class NavLinksService {
 }
 
 function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
-  return sortBy([...navLinks.values()].map(link => link.properties), 'order');
-}
-
-function relativeToAbsolute(url: string) {
-  // convert all link urls to absolute urls
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
+  return sortBy(
+    [...navLinks.values()].map(link => link.properties),
+    'order'
+  );
 }

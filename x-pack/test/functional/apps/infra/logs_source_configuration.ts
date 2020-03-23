@@ -5,17 +5,20 @@
  */
 
 import expect from '@kbn/expect';
+import { DATES } from './constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const infraLogStream = getService('infraLogStream');
+  const logsUi = getService('logsUi');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'infraLogs']);
+  const retry = getService('retry');
 
   describe('Logs Source Configuration', function() {
     this.tags('smoke');
+
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
@@ -32,8 +35,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can change the log indices to a pattern that matches nothing', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/settings');
-        await infraSourceConfigurationForm.getForm();
+        await pageObjects.infraLogs.navigateToTab('settings');
+
+        await retry.try(async () => {
+          await infraSourceConfigurationForm.getForm();
+        });
 
         const nameInput = await infraSourceConfigurationForm.getNameInput();
         await nameInput.clearValueWithKeyboard({ charByChar: true });
@@ -47,13 +53,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the no indices screen when no indices match the pattern', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/stream');
-        await pageObjects.infraLogs.getNoLogsIndicesPrompt();
+        await logsUi.logStreamPage.navigateTo();
+
+        await retry.try(async () => {
+          await logsUi.logStreamPage.getNoLogsIndicesPrompt();
+        });
       });
 
       it('can change the log indices back to a pattern that matches something', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/settings');
-        await infraSourceConfigurationForm.getForm();
+        await pageObjects.infraLogs.navigateToTab('settings');
+
+        await retry.try(async () => {
+          await infraSourceConfigurationForm.getForm();
+        });
 
         const logIndicesInput = await infraSourceConfigurationForm.getLogIndicesInput();
         await logIndicesInput.clearValueWithKeyboard({ charByChar: true });
@@ -63,16 +75,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the default log columns with their headers', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/stream');
-        const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
+        await logsUi.logStreamPage.navigateTo({
+          logPosition: {
+            start: DATES.metricsAndLogs.stream.startWithData,
+            end: DATES.metricsAndLogs.stream.endWithData,
+          },
+        });
 
-        expect(columnHeaderLabels).to.eql(['Timestamp', 'event.dataset', 'Message']);
+        await retry.try(async () => {
+          const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
-        const logStreamEntries = await infraLogStream.getStreamEntries();
+          expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'event.dataset', 'Message']);
+        });
+
+        const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
         expect(logStreamEntries.length).to.be.greaterThan(0);
 
         const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await infraLogStream.getLogColumnsOfStreamEntry(
+        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
           firstLogStreamEntry
         );
 
@@ -80,32 +100,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can change the log columns', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/settings');
-        await infraSourceConfigurationForm.getForm();
+        await pageObjects.infraLogs.navigateToTab('settings');
+
+        await retry.try(async () => {
+          await infraSourceConfigurationForm.getForm();
+        });
 
         await infraSourceConfigurationForm.removeAllLogColumns();
         await infraSourceConfigurationForm.addTimestampLogColumn();
         await infraSourceConfigurationForm.addFieldLogColumn('host.name');
 
-        // await infraSourceConfigurationForm.moveLogColumn(0, 1);
-
         await infraSourceConfigurationForm.saveConfiguration();
       });
 
       it('renders the changed log columns with their headers', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/stream');
-        const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
+        await logsUi.logStreamPage.navigateTo({
+          logPosition: {
+            start: DATES.metricsAndLogs.stream.startWithData,
+            end: DATES.metricsAndLogs.stream.endWithData,
+          },
+        });
 
-        // TODO: make test more robust
-        // expect(columnHeaderLabels).to.eql(['host.name', 'Timestamp']);
-        expect(columnHeaderLabels).to.eql(['Timestamp', 'host.name']);
+        await retry.try(async () => {
+          const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
-        const logStreamEntries = await infraLogStream.getStreamEntries();
+          expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'host.name']);
+        });
+
+        const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
 
         expect(logStreamEntries.length).to.be.greaterThan(0);
 
         const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await infraLogStream.getLogColumnsOfStreamEntry(
+        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
           firstLogStreamEntry
         );
 

@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import listingFixture from './fixtures/listing';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/singlecluster-yellow-platinum';
     const timeRange = {
       min: '2017-08-29T17:24:17.000Z',
-      max: '2017-08-29T17:26:08.000Z'
+      max: '2017-08-29T17:26:08.000Z',
     };
 
     before('load archive', () => {

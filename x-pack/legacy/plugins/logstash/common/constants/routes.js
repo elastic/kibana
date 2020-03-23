@@ -6,5 +6,5 @@
 
 export const ROUTES = {
   API_ROOT: '/api/logstash',
-  MONITORING_API_ROOT: '/api/monitoring'
+  MONITORING_API_ROOT: '/api/monitoring',
 };

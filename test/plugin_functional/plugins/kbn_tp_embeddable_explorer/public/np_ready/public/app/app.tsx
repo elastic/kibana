@@ -19,20 +19,15 @@
 import { EuiTab } from '@elastic/eui';
 import React, { Component } from 'react';
 import { CoreStart } from 'src/core/public';
-import {
-  GetEmbeddableFactory,
-  GetEmbeddableFactories,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
-import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';
-import { HelloWorldContainerExample } from './hello_world_container_example';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { UiActionsService } from '../../../../../../../../src/plugins/ui_actions/public';
 import { DashboardContainerExample } from './dashboard_container_example';
 import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
 
 export interface AppProps {
-  getActions: TGetActionsCompatibleWithTrigger;
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getActions: UiActionsService['getTriggerCompatibleActions'];
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
@@ -45,14 +40,6 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
   constructor(props: AppProps) {
     super(props);
     this.tabs = [
-      {
-        id: 'helloWorldContainer',
-        name: 'Hello World Container',
-      },
-      {
-        id: 'helloWorldEmbeddable',
-        name: 'Hello World Embeddable',
-      },
       {
         id: 'dashboardContainer',
         name: 'Dashboard Container',
@@ -96,32 +83,6 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
 
   private getContentsForTab() {
     switch (this.state.selectedTabId) {
-      case 'helloWorldContainer': {
-        return (
-          <HelloWorldContainerExample
-            getActions={this.props.getActions}
-            getEmbeddableFactory={this.props.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
-            overlays={this.props.overlays}
-            notifications={this.props.notifications}
-            inspector={this.props.inspector}
-            SavedObjectFinder={this.props.SavedObjectFinder}
-          />
-        );
-      }
-      case 'helloWorldEmbeddable': {
-        return (
-          <ContactCardEmbeddableExample
-            getActions={this.props.getActions}
-            getEmbeddableFactory={this.props.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
-            overlays={this.props.overlays}
-            notifications={this.props.notifications}
-            inspector={this.props.inspector}
-            SavedObjectFinder={this.props.SavedObjectFinder}
-          />
-        );
-      }
       case 'dashboardContainer': {
         return (
           <DashboardContainerExample

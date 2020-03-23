@@ -7,10 +7,10 @@
 import { mockNow } from '../../utils/testHelpers';
 import { clearCache, callApi } from '../rest/callApi';
 import { SessionStorageMock } from './SessionStorageMock';
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 
-type HttpMock = HttpServiceBase & {
-  get: jest.SpyInstance<HttpServiceBase['get']>;
+type HttpMock = HttpSetup & {
+  get: jest.SpyInstance<HttpSetup['get']>;
 };
 
 describe('callApi', () => {
@@ -48,7 +48,7 @@ describe('callApi', () => {
     it('should not add debug param for non-APM endpoints', async () => {
       await callApi(http, { pathname: `/api/kibana` });
 
-      expect(http.get).toHaveBeenCalledWith('/api/kibana', {});
+      expect(http.get).toHaveBeenCalledWith('/api/kibana', { query: {} });
     });
   });
 

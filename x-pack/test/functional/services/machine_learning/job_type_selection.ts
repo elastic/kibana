@@ -36,5 +36,23 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     async assertPopulationJobWizardOpen() {
       await testSubjects.existOrFail('mlPageJobWizard population');
     },
+
+    async selectAdvancedJob() {
+      await testSubjects.clickWhenNotDisabled('mlJobTypeLinkAdvancedJob');
+      await this.assertAdvancedJobWizardOpen();
+    },
+
+    async assertAdvancedJobWizardOpen() {
+      await testSubjects.existOrFail('mlPageJobWizard advanced');
+    },
+
+    async selectCategorizationJob() {
+      await testSubjects.clickWhenNotDisabled('mlJobTypeLinkCategorizationJob');
+      await this.assertCategorizationJobWizardOpen();
+    },
+
+    async assertCategorizationJobWizardOpen() {
+      await testSubjects.existOrFail('mlPageJobWizard categorization');
+    },
   };
 }

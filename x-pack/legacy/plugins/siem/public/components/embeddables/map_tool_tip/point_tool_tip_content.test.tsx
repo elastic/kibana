@@ -4,68 +4,72 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import { shallow } from 'enzyme';
+import React from 'react';
 import { FeatureProperty } from '../types';
-import { getRenderedFieldValue, PointToolTipContent } from './point_tool_tip_content';
+import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
 import { TestProviders } from '../../../mock';
 import { getEmptyStringTag } from '../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
+import { useMountAppended } from '../../../utils/use_mount_appended';
+import { FlowTarget } from '../../../graphql/types';
 
 describe('PointToolTipContent', () => {
+  const mount = useMountAppended();
+
   const mockFeatureProps: FeatureProperty[] = [
     {
       _propertyKey: 'host.name',
       _rawValue: 'testPropValue',
-      getESFilters: () => new Promise(resolve => setTimeout(resolve)),
     },
   ];
-  const mockFeaturePropsFilters: Record<string, object> = { 'host.name': {} };
+
+  const mockFeaturePropsArrayValue: FeatureProperty[] = [
+    {
+      _propertyKey: 'host.name',
+      _rawValue: ['testPropValue1', 'testPropValue2'],
+    },
+  ];
 
   test('renders correctly against snapshot', () => {
-    const addFilters = jest.fn();
     const closeTooltip = jest.fn();
 
     const wrapper = shallow(
       <TestProviders>
-        <PointToolTipContent
+        <PointToolTipContentComponent
           contextId={'contextId'}
           featureProps={mockFeatureProps}
-          featurePropsFilters={mockFeaturePropsFilters}
-          addFilters={addFilters}
           closeTooltip={closeTooltip}
         />
       </TestProviders>
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper.find('PointToolTipContentComponent')).toMatchSnapshot();
   });
 
-  test('tooltip closes when filter for value hover action is clicked', () => {
-    const addFilters = jest.fn();
+  test('renders array filter correctly', () => {
     const closeTooltip = jest.fn();
 
     const wrapper = mount(
       <TestProviders>
-        <PointToolTipContent
+        <PointToolTipContentComponent
           contextId={'contextId'}
-          featureProps={mockFeatureProps}
-          featurePropsFilters={mockFeaturePropsFilters}
-          addFilters={addFilters}
+          featureProps={mockFeaturePropsArrayValue}
           closeTooltip={closeTooltip}
         />
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="hover-actions-${mockFeatureProps[0]._propertyKey}"]`)
-      .first()
-      .simulate('mouseenter');
-    wrapper
-      .find(`[data-test-subj="add-to-filter-${mockFeatureProps[0]._propertyKey}"]`)
-      .first()
-      .simulate('click');
-    expect(closeTooltip).toHaveBeenCalledTimes(1);
-    expect(addFilters).toHaveBeenCalledTimes(1);
+    expect(wrapper.find('[data-test-subj="add-to-kql-host.name"]').prop('filter')).toEqual({
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'host.name',
+        negate: false,
+        params: { query: 'testPropValue1' },
+        type: 'phrase',
+        value: 'testPropValue1',
+      },
+      query: { match: { 'host.name': { query: 'testPropValue1', type: 'phrase' } } },
+    });
   });
 
   describe('#getRenderedFieldValue', () => {
@@ -82,13 +86,15 @@ describe('PointToolTipContent', () => {
 
     test('it returns IPDetailsLink if field is source.ip', () => {
       const value = '127.0.0.1';
-      expect(getRenderedFieldValue('source.ip', value)).toStrictEqual(<IPDetailsLink ip={value} />);
+      expect(getRenderedFieldValue('source.ip', value)).toStrictEqual(
+        <IPDetailsLink ip={value} flowTarget={FlowTarget.source} />
+      );
     });
 
     test('it returns IPDetailsLink if field is destination.ip', () => {
       const value = '127.0.0.1';
       expect(getRenderedFieldValue('destination.ip', value)).toStrictEqual(
-        <IPDetailsLink ip={value} />
+        <IPDetailsLink ip={value} flowTarget={FlowTarget.destination} />
       );
     });
 

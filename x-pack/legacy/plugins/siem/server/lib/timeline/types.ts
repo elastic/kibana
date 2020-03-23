@@ -9,8 +9,12 @@
 import * as runtimeTypes from 'io-ts';
 
 import { unionWithNullType } from '../framework';
-import { NoteSavedObjectToReturnRuntimeType } from '../note/types';
-import { PinnedEventToReturnSavedObjectRuntimeType } from '../pinned_event/types';
+import { NoteSavedObjectToReturnRuntimeType, NoteSavedObject } from '../note/types';
+import {
+  PinnedEventToReturnSavedObjectRuntimeType,
+  PinnedEventSavedObject,
+} from '../pinned_event/types';
+import { SavedObjectsClient, KibanaRequest } from '../../../../../../../src/core/server';
 
 /*
  *  ColumnHeader Types
@@ -57,6 +61,33 @@ const SavedDataProviderRuntimeType = runtimeTypes.partial({
   kqlQuery: unionWithNullType(runtimeTypes.string),
   queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
   and: unionWithNullType(runtimeTypes.array(SavedDataProviderQueryMatchRuntimeType)),
+});
+
+/*
+ *  Filters Types
+ */
+const SavedFilterMetaRuntimeType = runtimeTypes.partial({
+  alias: unionWithNullType(runtimeTypes.string),
+  controlledBy: unionWithNullType(runtimeTypes.string),
+  disabled: unionWithNullType(runtimeTypes.boolean),
+  field: unionWithNullType(runtimeTypes.string),
+  formattedValue: unionWithNullType(runtimeTypes.string),
+  index: unionWithNullType(runtimeTypes.string),
+  key: unionWithNullType(runtimeTypes.string),
+  negate: unionWithNullType(runtimeTypes.boolean),
+  params: unionWithNullType(runtimeTypes.string),
+  type: unionWithNullType(runtimeTypes.string),
+  value: unionWithNullType(runtimeTypes.string),
+});
+
+const SavedFilterRuntimeType = runtimeTypes.partial({
+  exists: unionWithNullType(runtimeTypes.string),
+  meta: unionWithNullType(SavedFilterMetaRuntimeType),
+  match_all: unionWithNullType(runtimeTypes.string),
+  missing: unionWithNullType(runtimeTypes.string),
+  query: unionWithNullType(runtimeTypes.string),
+  range: unionWithNullType(runtimeTypes.string),
+  script: unionWithNullType(runtimeTypes.string),
 });
 
 /*
@@ -109,11 +140,14 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   description: unionWithNullType(runtimeTypes.string),
+  eventType: unionWithNullType(runtimeTypes.string),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
+  filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
   kqlMode: unionWithNullType(runtimeTypes.string),
   kqlQuery: unionWithNullType(SavedFilterQueryQueryRuntimeType),
   title: unionWithNullType(runtimeTypes.string),
   dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
+  savedQueryId: unionWithNullType(runtimeTypes.string),
   sort: unionWithNullType(SavedSortRuntimeType),
   created: unionWithNullType(runtimeTypes.number),
   createdBy: unionWithNullType(runtimeTypes.string),
@@ -169,3 +203,54 @@ export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
 
 export interface AllTimelineSavedObject
   extends runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType> {}
+
+export interface ExportTimelineRequestParams {
+  body: { ids: string[] };
+  query: {
+    file_name: string;
+    exclude_export_details: boolean;
+  };
+}
+
+export type ExportTimelineRequest = KibanaRequest<
+  unknown,
+  ExportTimelineRequestParams['query'],
+  ExportTimelineRequestParams['body'],
+  'post'
+>;
+
+export type ExportTimelineSavedObjectsClient = Pick<
+  SavedObjectsClient,
+  | 'get'
+  | 'errors'
+  | 'create'
+  | 'bulkCreate'
+  | 'delete'
+  | 'find'
+  | 'bulkGet'
+  | 'update'
+  | 'bulkUpdate'
+>;
+
+export type ExportedGlobalNotes = Array<Exclude<NoteSavedObject, 'eventId'>>;
+export type ExportedEventNotes = NoteSavedObject[];
+
+export interface ExportedNotes {
+  eventNotes: ExportedEventNotes;
+  globalNotes: ExportedGlobalNotes;
+}
+
+export type ExportedTimelines = TimelineSavedObject &
+  ExportedNotes & {
+    pinnedEventIds: string[];
+  };
+
+export interface BulkGetInput {
+  type: string;
+  id: string;
+}
+
+export type NotesAndPinnedEventsByTimelineId = Record<
+  string,
+  { notes: NoteSavedObject[]; pinnedEvents: PinnedEventSavedObject[] }
+>;

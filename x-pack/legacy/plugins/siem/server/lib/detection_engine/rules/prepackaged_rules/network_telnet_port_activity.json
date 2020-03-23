@@ -1,0 +1,69 @@
+{
+  "description": "This rule detects network events that may indicate the use of Telnet traffic.\nTelnet is commonly used by system administrators to remotely control older or embed ed\nsystems using the command line shell. It should almost never be directly exposed to\nthe Internet, as it is frequently targeted and exploited by threat actors as an\ninitial access or back-door vector. As a plain-text protocol, it may also expose\nusernames and passwords to anyone capable of observing the traffic.\n",
+  "false_positives": [
+    "IoT (Internet of Things) devices and networks may use telnet and can be excluded if\n    desired. Some business work-flows may use Telnet for administration of older devices. These\n    often have a predictable behavior. Telnet activity involving an unusual source or destination\n    may be more suspicious. Telnet activity involving a production server that has no known\n    associated Telnet work-flow or business requirement is often suspicious."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Telnet Port Activity",
+  "query": "network.transport: tcp and destination.port: 23",
+  "risk_score": 47,
+  "rule_id": "34fde489-94b0-4500-a76f-b8a157cf9269",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "reference": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

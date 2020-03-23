@@ -16,35 +16,58 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin } from '.';
-import { searchSetupMock } from './search/mocks';
+
+import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsContract } from '.';
+import { fieldFormatsMock } from '../common/field_formats/mocks';
+import { searchSetupMock, searchStartMock } from './search/mocks';
+import { queryServiceMock } from './query/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
 const autocompleteMock: any = {
-  addProvider: jest.fn(),
-  getProvider: jest.fn(),
-  clearProviders: jest.fn(),
+  getValueSuggestions: jest.fn(),
+  getQuerySuggestions: jest.fn(),
+  hasQuerySuggestions: jest.fn(),
 };
 
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {
-    autocomplete: autocompleteMock as Setup['autocomplete'],
+  const querySetupMock = queryServiceMock.createSetupContract();
+  return {
+    autocomplete: autocompleteMock,
     search: searchSetupMock,
+    fieldFormats: fieldFormatsMock as DataPublicPluginSetup['fieldFormats'],
+    query: querySetupMock,
   };
-
-  return setupContract;
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = {
-    autocomplete: autocompleteMock as Start['autocomplete'],
-    getSuggestions: jest.fn(),
-    search: { search: jest.fn() },
+  const queryStartMock = queryServiceMock.createStartContract();
+  return {
+    actions: {
+      createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']),
+    },
+    autocomplete: autocompleteMock,
+    search: searchStartMock,
+    fieldFormats: fieldFormatsMock as DataPublicPluginStart['fieldFormats'],
+    query: queryStartMock,
+    ui: {
+      IndexPatternSelect: jest.fn(),
+      SearchBar: jest.fn(),
+    },
+    indexPatterns: ({
+      make: () => ({
+        fieldsFetcher: {
+          fetchForWildcard: jest.fn(),
+        },
+      }),
+      get: jest.fn().mockReturnValue(Promise.resolve({})),
+    } as unknown) as IndexPatternsContract,
   };
-  return startContract;
 };
+
+export { searchSourceMock } from './search/mocks';
+export { getCalculateAutoTimeExpression } from './search/aggs';
 
 export const dataPluginMock = {
   createSetupContract,

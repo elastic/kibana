@@ -7,21 +7,23 @@
 import React from 'react';
 import moment from 'moment-timezone';
 import { Provider } from 'react-redux';
-import { fetchedPolicies, fetchedNodes } from '../../public/store/actions';
-import { indexLifecycleManagementStore } from '../../public/store';
-import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
-import { EditPolicy } from '../../public/sections/edit_policy';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import { setHttpClient } from '../../public/services/api';
-setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
+
+import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
+import { fetchedPolicies, fetchedNodes } from '../../public/np_ready/application/store/actions';
+import { indexLifecycleManagementStore } from '../../public/np_ready/application/store';
+import { EditPolicy } from '../../public/np_ready/application/sections/edit_policy';
+import { init as initHttp } from '../../public/np_ready/application/services/http';
+import { init as initUiMetric } from '../../public/np_ready/application/services/ui_metric';
+import { init as initNotification } from '../../public/np_ready/application/services/notification';
 import {
   positiveNumbersAboveZeroErrorMessage,
-  numberRequiredMessage,
   positiveNumberRequiredMessage,
+  numberRequiredMessage,
   maximumAgeRequiredMessage,
   maximumSizeRequiredMessage,
   policyNameRequiredMessage,
@@ -31,7 +33,15 @@ import {
   policyNameMustBeDifferentErrorMessage,
   policyNameAlreadyUsedErrorMessage,
   maximumDocumentsRequiredMessage,
-} from '../../public/store/selectors/lifecycle';
+} from '../../public/np_ready/application/store/selectors/lifecycle';
+
+initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
+initUiMetric(() => () => {});
+initNotification({
+  addDanger: () => {},
+});
+
+jest.mock('ui/new_platform');
 
 let server;
 let store;
@@ -57,7 +67,7 @@ for (let i = 0; i < 105; i++) {
     linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
     name: `testy${i}`,
     policy: {
-      ...policy
+      ...policy,
     },
   });
 }
@@ -66,7 +76,7 @@ window.TextEncoder = null;
 let component;
 const activatePhase = (rendered, phase) => {
   const testSubject = `enablePhaseSwitch-${phase}`;
-  findTestSubject(rendered, testSubject).simulate('change', { target: { checked: true } });
+  findTestSubject(rendered, testSubject).simulate('click');
   rendered.update();
 };
 const expectedErrorMessages = (rendered, expectedErrorMessages) => {
@@ -82,8 +92,8 @@ const expectedErrorMessages = (rendered, expectedErrorMessages) => {
     expect(foundErrorMessage).toBe(true);
   });
 };
-const noRollover = (rendered) => {
-  findTestSubject(rendered, 'rolloverSwitch').simulate('change', { target: { checked: false } });
+const noRollover = rendered => {
+  findTestSubject(rendered, 'rolloverSwitch').simulate('click');
   rendered.update();
 };
 const getNodeAttributeSelect = (rendered, phase) => {
@@ -129,9 +139,7 @@ describe('edit policy', () => {
     test('should show error when trying to save empty form', () => {
       const rendered = mountWithIntl(component);
       save(rendered);
-      expectedErrorMessages(rendered, [
-        policyNameRequiredMessage,
-      ]);
+      expectedErrorMessages(rendered, [policyNameRequiredMessage]);
     });
     test('should show error when trying to save policy name with space', () => {
       const rendered = mountWithIntl(component);
@@ -155,7 +163,7 @@ describe('edit policy', () => {
         </Provider>
       );
       const rendered = mountWithIntl(component);
-      findTestSubject(rendered, 'saveAsNewSwitch').simulate('change', { target: { checked: true } });
+      findTestSubject(rendered, 'saveAsNewSwitch').simulate('click');
       rendered.update();
       setPolicyName(rendered, 'testy0');
       save(rendered);
@@ -186,7 +194,11 @@ describe('edit policy', () => {
       maxAgeInput.simulate('change', { target: { value: '' } });
       rendered.update();
       save(rendered);
-      expectedErrorMessages(rendered, [maximumSizeRequiredMessage, maximumAgeRequiredMessage, maximumDocumentsRequiredMessage]);
+      expectedErrorMessages(rendered, [
+        maximumSizeRequiredMessage,
+        maximumAgeRequiredMessage,
+        maximumDocumentsRequiredMessage,
+      ]);
     });
     test('should show number above 0 required error when trying to save with -1 for max size', () => {
       const rendered = mountWithIntl(component);
@@ -239,17 +251,18 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
+      setPhaseAfter(rendered, 'warm', '');
       save(rendered);
       expectedErrorMessages(rendered, [numberRequiredMessage]);
     });
-    test('should show positive number required above zero error when trying to save warm phase with 0 for after', () => {
+    test('should allow 0 for phase timing', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 0);
       save(rendered);
-      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+      expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save warm phase with -1 for after', () => {
       const rendered = mountWithIntl(component);
@@ -275,7 +288,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
-      findTestSubject(rendered, 'shrinkSwitch').simulate('change', { target: { checked: true } });
+      findTestSubject(rendered, 'shrinkSwitch').simulate('click');
       rendered.update();
       setPhaseAfter(rendered, 'warm', 1);
       const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
@@ -290,7 +303,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 1);
-      findTestSubject(rendered, 'shrinkSwitch').simulate('change', { target: { checked: true } });
+      findTestSubject(rendered, 'shrinkSwitch').simulate('click');
       rendered.update();
       const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
       shrinkInput.simulate('change', { target: { value: '-1' } });
@@ -304,7 +317,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 1);
-      findTestSubject(rendered, 'forceMergeSwitch').simulate('change', { target: { checked: true } });
+      findTestSubject(rendered, 'forceMergeSwitch').simulate('click');
       rendered.update();
       const shrinkInput = rendered.find('input#warm-selectedForceMergeSegments');
       shrinkInput.simulate('change', { target: { value: '0' } });
@@ -318,7 +331,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 1);
-      findTestSubject(rendered, 'forceMergeSwitch').simulate('change', { target: { checked: true } });
+      findTestSubject(rendered, 'forceMergeSwitch').simulate('click');
       rendered.update();
       const shrinkInput = rendered.find('input#warm-selectedForceMergeSegments');
       shrinkInput.simulate('change', { target: { value: '-1' } });
@@ -346,7 +359,7 @@ describe('edit policy', () => {
       expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
     test('should show node attributes input when attributes exist', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': [ 'node1' ] }));
+      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -358,7 +371,7 @@ describe('edit policy', () => {
       expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': [ 'node1' ] }));
+      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -379,14 +392,14 @@ describe('edit policy', () => {
     });
   });
   describe('cold phase', () => {
-    test('should show positive number required error when trying to save cold phase with 0 for after', () => {
+    test('should allow 0 for phase timing', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', 0);
       save(rendered);
-      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+      expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save cold phase with -1 for after', () => {
       const rendered = mountWithIntl(component);
@@ -417,7 +430,7 @@ describe('edit policy', () => {
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
     test('should show node attributes input when attributes exist', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': [ 'node1' ] }));
+      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -429,7 +442,7 @@ describe('edit policy', () => {
       expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': [ 'node1' ] }));
+      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -460,14 +473,14 @@ describe('edit policy', () => {
     });
   });
   describe('delete phase', () => {
-    test('should show positive number required error when trying to save delete phase with 0 for after', () => {
+    test('should allow 0 for phase timing', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'delete');
       setPhaseAfter(rendered, 'delete', 0);
       save(rendered);
-      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+      expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save delete phase with -1 for after', () => {
       const rendered = mountWithIntl(component);

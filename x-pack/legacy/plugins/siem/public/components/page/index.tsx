@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import {
-  EuiBadge,
-  EuiBadgeProps,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiPage,
-} from '@elastic/eui';
-import styled, { injectGlobal } from 'styled-components';
+import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
+import styled, { createGlobalStyle } from 'styled-components';
 
-// SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
-// eslint-disable-next-line no-unused-expressions
-injectGlobal`
+/*
+  SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
+  and `EuiPopover`, `EuiToolTip` global styles
+*/
+export const AppGlobalStyle = createGlobalStyle`
+  /* dirty hack to fix draggables with tooltip on FF */
+  body#siem-app {
+    position: static;
+  }
+  /* end of dirty hack to fix draggables with tooltip on FF */
+  
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
@@ -25,12 +25,38 @@ injectGlobal`
   div.application {
     background-color: rgba(0,0,0,0);
   }
+
+  .euiPopover__panel.euiPopover__panel-isOpen {
+    z-index: 9900 !important;
+  }
+  .euiToolTip {
+    z-index: 9950 !important;
+  }
+
+  /* 
+    overrides the default styling of euiComboBoxOptionsList because it's implemented
+    as a popover, so it's not selectable as a child of the styled component
+  */
+  .euiComboBoxOptionsList {
+    z-index: 9999;
+  }
+
+  /* overrides default styling in angular code that was not theme-friendly */
+  .euiPanel-loading-hide-border {
+    border: none;
+  }
 `;
 
 export const DescriptionListStyled = styled(EuiDescriptionList)`
   ${({ theme }) => `
     dt {
       font-size: ${theme.eui.euiFontSizeXS} !important;
+    }
+    dd {
+      width: fit-content;
+    }
+    dd > div {
+      width: fit-content;
     }
   `}
 `;
@@ -79,10 +105,10 @@ export const PageHeader = styled.div`
 PageHeader.displayName = 'PageHeader';
 
 export const FooterContainer = styled.div`
+  flex: 0;
   bottom: 0;
   color: #666;
   left: 0;
-  padding: 8px;
   position: fixed;
   text-align: left;
   user-select: none;
@@ -127,13 +153,9 @@ export const Pane1FlexContent = styled.div`
 
 Pane1FlexContent.displayName = 'Pane1FlexContent';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// const Badge = styled(EuiBadge)`
-//   margin-left: 5px;
-// `;
-export const CountBadge = (props: EuiBadgeProps) => (
-  <EuiBadge {...props} style={{ marginLeft: '5px' }} />
-);
+export const CountBadge = styled(EuiBadge)`
+  margin-left: 5px;
+`;
 
 CountBadge.displayName = 'CountBadge';
 
@@ -143,13 +165,9 @@ export const Spacer = styled.span`
 
 Spacer.displayName = 'Spacer';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// export const Badge = styled(EuiBadge)`
-//   vertical-align: top;
-// `;
-export const Badge = (props: EuiBadgeProps) => (
-  <EuiBadge {...props} style={{ verticalAlign: 'top' }} />
-);
+export const Badge = styled(EuiBadge)`
+  vertical-align: top;
+`;
 
 Badge.displayName = 'Badge';
 

@@ -11,12 +11,19 @@ import { i18n } from '@kbn/i18n';
 import { createSpatialFilterWithGeometry } from '../../../elasticsearch_geo_utils';
 import { GEO_JSON_TYPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
+import { UrlOverflowService } from 'ui/error_url_overflow';
+import rison from 'rison-node';
+
+// over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.
+const META_OVERHEAD = 100;
+
+const urlOverflow = new UrlOverflowService();
 
 export class FeatureGeometryFilterForm extends Component {
-
   state = {
     isLoading: false,
-  }
+    errorMsg: undefined,
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -43,9 +50,16 @@ export class FeatureGeometryFilterForm extends Component {
     }
 
     return preIndexedShape;
-  }
+  };
 
-  _createFilter = async ({ geometryLabel, indexPatternId, geoFieldName, geoFieldType, relation }) => {
+  _createFilter = async ({
+    geometryLabel,
+    indexPatternId,
+    geoFieldName,
+    geoFieldType,
+    relation,
+  }) => {
+    this.setState({ errorMsg: undefined });
     const preIndexedShape = await this._loadPreIndexedShape();
     if (!this._isMounted) {
       // do not create filter if component is unmounted
@@ -61,9 +75,25 @@ export class FeatureGeometryFilterForm extends Component {
       geoFieldType,
       relation,
     });
+
+    // Ensure filter will not overflow URL. Filters that contain geometry can be extremely large.
+    // No elasticsearch support for pre-indexed shapes and geo_point spatial queries.
+    if (
+      window.location.href.length + rison.encode(filter).length + META_OVERHEAD >
+      urlOverflow.failLength()
+    ) {
+      this.setState({
+        errorMsg: i18n.translate('xpack.maps.tooltip.geometryFilterForm.filterTooLargeMessage', {
+          defaultMessage:
+            'Cannot create filter. Filters are added to the URL, and this shape has too many vertices to fit in the URL.',
+        }),
+      });
+      return;
+    }
+
     this.props.addFilters([filter]);
     this.props.onClose();
-  }
+  };
 
   _renderHeader() {
     return (
@@ -73,11 +103,7 @@ export class FeatureGeometryFilterForm extends Component {
         onClick={this.props.showPropertiesView}
       >
         <span className="euiContextMenu__itemLayout">
-          <EuiIcon
-            type="arrowLeft"
-            size="m"
-            className="euiContextMenu__icon"
-          />
+          <EuiIcon type="arrowLeft" size="m" className="euiContextMenu__icon" />
 
           <span className="euiContextMenu__text">
             <FormattedMessage
@@ -93,15 +119,21 @@ export class FeatureGeometryFilterForm extends Component {
   _renderForm() {
     return (
       <GeometryFilterForm
-        buttonLabel={i18n.translate('xpack.maps.tooltip.geometryFilterForm.createFilterButtonLabel', {
-          defaultMessage: 'Create filter'
-        })}
+        buttonLabel={i18n.translate(
+          'xpack.maps.tooltip.geometryFilterForm.createFilterButtonLabel',
+          {
+            defaultMessage: 'Create filter',
+          }
+        )}
         geoFields={this.props.geoFields}
         intitialGeometryLabel={this.props.geometry.type.toLowerCase()}
         onSubmit={this._createFilter}
-        isFilterGeometryClosed={this.props.geometry.type !== GEO_JSON_TYPE.LINE_STRING
-          && this.props.geometry.type !== GEO_JSON_TYPE.MULTI_LINE_STRING}
+        isFilterGeometryClosed={
+          this.props.geometry.type !== GEO_JSON_TYPE.LINE_STRING &&
+          this.props.geometry.type !== GEO_JSON_TYPE.MULTI_LINE_STRING
+        }
         isLoading={this.state.isLoading}
+        errorMsg={this.state.errorMsg}
       />
     );
   }

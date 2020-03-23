@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('Monitoring app', function () {
+export default function({ loadTestFile }) {
+  describe('Monitoring app', function() {
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./feature_controls'));
@@ -13,7 +13,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./cluster/list'));
     loadTestFile(require.resolve('./cluster/overview'));
     loadTestFile(require.resolve('./cluster/alerts'));
-    loadTestFile(require.resolve('./enable_monitoring'));
     // loadTestFile(require.resolve('./cluster/license'));
 
     loadTestFile(require.resolve('./elasticsearch/overview'));
@@ -40,5 +39,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./beats/beat_detail'));
 
     loadTestFile(require.resolve('./time_filter'));
+    loadTestFile(require.resolve('./enable_monitoring'));
   });
 }

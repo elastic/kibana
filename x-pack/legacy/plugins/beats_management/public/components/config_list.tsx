@@ -28,7 +28,7 @@ const pagination = {
   hidePerPageOptions: true,
 };
 
-const ConfigListUi: React.SFC<ComponentProps> = props => (
+const ConfigListUi: React.FC<ComponentProps> = props => (
   <EuiBasicTable
     items={props.configs.list || []}
     itemId="id"

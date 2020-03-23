@@ -4,14 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  initElasticsearchHelpers
-} from './elasticsearch';
+export { initElasticsearchHelpers } from './elasticsearch';
 
-export {
-  getRandomString,
-} from './random';
+export { getRandomString } from './random';
 
-export {
-  wait,
-} from './utils';
+export { wait } from './utils';

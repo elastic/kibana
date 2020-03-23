@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header rendering renders correctly against snapshot 1`] = `
-<TimelineHeaderContainer
-  data-test-subj="timelineHeader"
->
+<Fragment>
   <DataProviders
     browserFields={Object {}}
     dataProviders={
@@ -150,6 +148,7 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
     show={true}
   />
   <Connect(StatefulSearchOrFilterComponent)
+    browserFields={Object {}}
     indexPattern={
       Object {
         "fields": Array [
@@ -231,11 +230,17 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
             "searchable": true,
             "type": "string",
           },
+          Object {
+            "aggregatable": true,
+            "name": "host.name",
+            "searchable": true,
+            "type": "string",
+          },
         ],
         "title": "filebeat-*,auditbeat-*,packetbeat-*",
       }
     }
     timelineId="foo"
   />
-</TimelineHeaderContainer>
+</Fragment>
 `;

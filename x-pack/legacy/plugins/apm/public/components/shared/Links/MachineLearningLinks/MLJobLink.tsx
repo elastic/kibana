@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { getMlJobId } from '../../../../../common/ml_job_constants';
+import { getMlJobId } from '../../../../../../../../plugins/apm/common/ml_job_constants';
 import { MLLink } from './MLLink';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
   transactionType?: string;
 }
 
-export const MLJobLink: React.SFC<Props> = ({
+export const MLJobLink: React.FC<Props> = ({
   serviceName,
   transactionType,
   children

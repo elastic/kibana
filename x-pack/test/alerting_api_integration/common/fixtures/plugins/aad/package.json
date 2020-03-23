@@ -1,0 +1,7 @@
+{
+  "name": "aad-fixtures",
+  "version": "0.0.0",
+  "kibana": {
+    "version": "kibana"
+  }
+}

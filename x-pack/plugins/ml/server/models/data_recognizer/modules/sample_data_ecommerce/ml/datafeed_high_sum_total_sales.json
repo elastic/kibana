@@ -1,0 +1,9 @@
+{
+  "job_id": "JOB_ID",
+  "indices": ["INDEX_PATTERN_NAME"],
+  "query": {
+    "bool": {
+      "filter": [{ "term": { "_index": "kibana_sample_data_ecommerce" } }]
+    }
+  }
+}

@@ -8,23 +8,29 @@
     {
       "key": 579340,
       "count": 8,
-      "sample": {
-        "transactionId": "99437ee4-08d4-41f5-9b2b-93cc32ec3dfb"
-      }
+      "samples": [
+        {
+          "transactionId": "99437ee4-08d4-41f5-9b2b-93cc32ec3dfb"
+        }
+      ]
     },
     {
       "key": 695208,
       "count": 23,
-      "sample": {
-        "transactionId": "d327611b-e999-4942-a94f-c60208940180"
-      }
+      "samples": [
+        {
+          "transactionId": "d327611b-e999-4942-a94f-c60208940180"
+        }
+      ]
     },
     {
       "key": 811076,
       "count": 49,
-      "sample": {
-        "transactionId": "99c50a5b-44b4-4289-a3d1-a2815d128192"
-      }
+      "samples": [
+        {
+          "transactionId": "99c50a5b-44b4-4289-a3d1-a2815d128192"
+        }
+      ]
     },
     {
       "key": 926944,
@@ -39,9 +45,11 @@
     {
       "key": 1158680,
       "count": 13,
-      "sample": {
-        "transactionId": "8486d3e2-7f15-48df-aa37-6ee9955adbd2"
-      }
+      "samples": [
+        {
+          "transactionId": "8486d3e2-7f15-48df-aa37-6ee9955adbd2"
+        }
+      ]
     },
     {
       "key": 1274548,

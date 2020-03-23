@@ -14,7 +14,8 @@ import {
   EuiPageContentBody,
   EuiIcon,
   EuiIconTip,
-  EuiTextColor
+  EuiTextColor,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
 import './ccr.css';
@@ -35,7 +36,7 @@ export class Ccr extends Component {
 
   toggleShards(index, shards) {
     const itemIdToExpandedRowMap = {
-      ...this.state.itemIdToExpandedRowMap
+      ...this.state.itemIdToExpandedRowMap,
     };
 
     if (itemIdToExpandedRowMap[index]) {
@@ -43,7 +44,7 @@ export class Ccr extends Component {
     } else {
       let pagination = {
         initialPageSize: 5,
-        pageSizeOptions: [5, 10, 20]
+        pageSizeOptions: [5, 10, 20],
       };
 
       if (shards.length <= pagination.initialPageSize) {
@@ -56,25 +57,31 @@ export class Ccr extends Component {
           columns={[
             {
               field: 'shardId',
-              name: i18n.translate('xpack.monitoring.elasticsearch.ccr.shardsTable.shardColumnTitle', {
-                defaultMessage: 'Shard'
-              }),
+              name: i18n.translate(
+                'xpack.monitoring.elasticsearch.ccr.shardsTable.shardColumnTitle',
+                {
+                  defaultMessage: 'Shard',
+                }
+              ),
               render: shardId => {
                 return (
                   <EuiLink href={`#/elasticsearch/ccr/${index}/shard/${shardId}`}>
                     {shardId}
                   </EuiLink>
                 );
-              }
+              },
             },
             {
-              render: () => null
+              render: () => null,
             },
             {
               field: 'syncLagOps',
-              name: i18n.translate('xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumnTitle', {
-                defaultMessage: 'Sync Lag (ops)'
-              }),
+              name: i18n.translate(
+                'xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumnTitle',
+                {
+                  defaultMessage: 'Sync Lag (ops)',
+                }
+              ),
               render: (syncLagOps, data) => (
                 <span>
                   {syncLagOps}
@@ -82,64 +89,66 @@ export class Ccr extends Component {
                   <EuiIconTip
                     size="m"
                     type="iInCircle"
-                    content={(
+                    content={
                       <Fragment>
                         <span>
                           <FormattedMessage
                             id="xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumn.leaderLagTooltip"
                             defaultMessage="Leader lag: {syncLagOpsLeader}"
                             values={{
-                              syncLagOpsLeader: data.syncLagOpsLeader
+                              syncLagOpsLeader: data.syncLagOpsLeader,
                             }}
                           />
                         </span>
-                        <br/>
+                        <br />
                         <span>
                           <FormattedMessage
                             id="xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumn.followerLagTooltip"
                             defaultMessage="Follower lag: {syncLagOpsFollower}"
                             values={{
-                              syncLagOpsFollower: data.syncLagOpsFollower
+                              syncLagOpsFollower: data.syncLagOpsFollower,
                             }}
                           />
                         </span>
                       </Fragment>
-                    )}
+                    }
                     position="right"
                   />
                 </span>
-              )
+              ),
             },
             {
               field: 'syncLagTime',
               name: i18n.translate(
                 'xpack.monitoring.elasticsearch.ccr.shardsTable.lastFetchTimeColumnTitle',
                 {
-                  defaultMessage: 'Last fetch time'
+                  defaultMessage: 'Last fetch time',
                 }
               ),
-              render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
+              render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>,
             },
             {
               field: 'opsSynced',
-              name: i18n.translate('xpack.monitoring.elasticsearch.ccr.shardsTable.opsSyncedColumnTitle', {
-                defaultMessage: 'Ops synced'
-              }),
+              name: i18n.translate(
+                'xpack.monitoring.elasticsearch.ccr.shardsTable.opsSyncedColumnTitle',
+                {
+                  defaultMessage: 'Ops synced',
+                }
+              ),
             },
             {
               field: 'error',
-              name: i18n.translate('xpack.monitoring.elasticsearch.ccr.shardsTable.errorColumnTitle', {
-                defaultMessage: 'Error'
-              }),
-              render: error => (
-                <EuiTextColor color="danger">
-                  {error}
-                </EuiTextColor>
-              )
-            }
+              name: i18n.translate(
+                'xpack.monitoring.elasticsearch.ccr.shardsTable.errorColumnTitle',
+                {
+                  defaultMessage: 'Error',
+                }
+              ),
+              render: error => <EuiTextColor color="danger">{error}</EuiTextColor>,
+            },
           ]}
           executeQueryOptions={{
-            defaultFields: ['shardId']
+            defaultFields: ['shardId'],
           }}
           sorting={true}
           pagination={pagination}
@@ -155,7 +164,7 @@ export class Ccr extends Component {
 
     let pagination = {
       initialPageSize: 5,
-      pageSizeOptions: [5, 10, 20]
+      pageSizeOptions: [5, 10, 20],
     };
 
     if (items.length <= pagination.initialPageSize) {
@@ -175,9 +184,12 @@ export class Ccr extends Component {
         columns={[
           {
             field: 'index',
-            name: i18n.translate('xpack.monitoring.elasticsearch.ccr.ccrListingTable.indexColumnTitle', {
-              defaultMessage: 'Index'
-            }),
+            name: i18n.translate(
+              'xpack.monitoring.elasticsearch.ccr.ccrListingTable.indexColumnTitle',
+              {
+                defaultMessage: 'Index',
+              }
+            ),
             sortable: true,
             render: (index, { shards }) => {
               const expanded = !!this.state.itemIdToExpandedRowMap[index];
@@ -185,17 +197,20 @@ export class Ccr extends Component {
                 <EuiLink onClick={() => this.toggleShards(index, shards)}>
                   {index}
                   &nbsp;
-                  { expanded ? <EuiIcon type="arrowUp" /> : <EuiIcon type="arrowDown" /> }
+                  {expanded ? <EuiIcon type="arrowUp" /> : <EuiIcon type="arrowDown" />}
                 </EuiLink>
               );
-            }
+            },
           },
           {
             field: 'follows',
             sortable: true,
-            name: i18n.translate('xpack.monitoring.elasticsearch.ccr.ccrListingTable.followsColumnTitle', {
-              defaultMessage: 'Follows'
-            }),
+            name: i18n.translate(
+              'xpack.monitoring.elasticsearch.ccr.ccrListingTable.followsColumnTitle',
+              {
+                defaultMessage: 'Follows',
+              }
+            ),
           },
           {
             field: 'syncLagOps',
@@ -203,7 +218,7 @@ export class Ccr extends Component {
             name: i18n.translate(
               'xpack.monitoring.elasticsearch.ccr.ccrListingTable.syncLagOpsColumnTitle',
               {
-                defaultMessage: 'Sync Lag (ops)'
+                defaultMessage: 'Sync Lag (ops)',
               }
             ),
           },
@@ -213,10 +228,10 @@ export class Ccr extends Component {
             name: i18n.translate(
               'xpack.monitoring.elasticsearch.ccr.ccrListingTable.lastFetchTimeColumnTitle',
               {
-                defaultMessage: 'Last fetch time'
+                defaultMessage: 'Last fetch time',
               }
             ),
-            render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
+            render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>,
           },
           {
             field: 'opsSynced',
@@ -224,27 +239,26 @@ export class Ccr extends Component {
             name: i18n.translate(
               'xpack.monitoring.elasticsearch.ccr.ccrListingTable.opsSyncedColumnTitle',
               {
-                defaultMessage: 'Ops synced'
+                defaultMessage: 'Ops synced',
               }
             ),
           },
           {
             field: 'error',
             sortable: true,
-            name: i18n.translate('xpack.monitoring.elasticsearch.ccr.ccrListingTable.errorColumnTitle', {
-              defaultMessage: 'Error'
-            }),
-            render: error => (
-              <EuiTextColor color="danger">
-                {error}
-              </EuiTextColor>
-            )
-          }
+            name: i18n.translate(
+              'xpack.monitoring.elasticsearch.ccr.ccrListingTable.errorColumnTitle',
+              {
+                defaultMessage: 'Error',
+              }
+            ),
+            render: error => <EuiTextColor color="danger">{error}</EuiTextColor>,
+          },
         ]}
         items={items}
         pagination={pagination}
         executeQueryOptions={{
-          defaultFields: ['index', 'follows']
+          defaultFields: ['index', 'follows'],
         }}
         sorting={sorting}
         itemId="id"
@@ -257,10 +271,16 @@ export class Ccr extends Component {
     return (
       <EuiPage>
         <EuiPageBody>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.elasticsearch.ccr.heading"
+                defaultMessage="CCR"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiPageContent>
-            <EuiPageContentBody>
-              {this.renderTable()}
-            </EuiPageContentBody>
+            <EuiPageContentBody>{this.renderTable()}</EuiPageContentBody>
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

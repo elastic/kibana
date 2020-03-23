@@ -25,11 +25,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
+  const security = getService('security');
+  const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
   describe('visual builder', function describeIndexTests() {
     this.tags('smoke');
     beforeEach(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
@@ -80,7 +82,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should verify gauge label and count display', async () => {
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
@@ -96,7 +98,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should verify topN label and count display', async () => {
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
@@ -111,16 +113,19 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       });
       after(async () => {
+        await security.testUser.restoreDefaults();
         await esArchiver.unload('kibana_sample_data_flights');
       });
+
       it('should be able to switch between index patterns', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('156');
         await PageObjects.visualBuilder.clickPanelOptions('metric');
-        const fromTime = '2018-10-22 00:00:00.000';
-        const toTime = '2018-10-28 23:59:59.999';
+        const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
+        const toTime = 'Oct 28, 2018 @ 23:59:59.999';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
         await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');

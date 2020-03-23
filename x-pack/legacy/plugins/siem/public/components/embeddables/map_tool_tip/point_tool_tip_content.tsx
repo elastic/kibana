@@ -5,69 +5,59 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import * as i18n from '../translations';
 import { sourceDestinationFieldMappings } from '../map_config';
-import { WithHoverActions } from '../../with_hover_actions';
-import { HoverActionsContainer } from '../../page/add_to_kql';
+import {
+  AddFilterToGlobalSearchBar,
+  createFilter,
+} from '../../page/add_filter_to_global_search_bar';
 import { getEmptyTagValue, getOrEmptyTagFromValue } from '../../empty_value';
 import { DescriptionListStyled } from '../../page';
 import { FeatureProperty } from '../types';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
 import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
+import { FlowTarget } from '../../../graphql/types';
 
 interface PointToolTipContentProps {
   contextId: string;
   featureProps: FeatureProperty[];
-  featurePropsFilters: Record<string, object>;
-  addFilters?(filter: object): void;
   closeTooltip?(): void;
 }
 
-export const PointToolTipContent = React.memo<PointToolTipContentProps>(
-  ({ contextId, featureProps, featurePropsFilters, addFilters, closeTooltip }) => {
-    const featureDescriptionListItems = featureProps.map(property => ({
-      title: sourceDestinationFieldMappings[property._propertyKey],
+export const PointToolTipContentComponent = ({
+  contextId,
+  featureProps,
+  closeTooltip,
+}: PointToolTipContentProps) => {
+  const featureDescriptionListItems = featureProps.map(
+    ({ _propertyKey: key, _rawValue: value }) => ({
+      title: sourceDestinationFieldMappings[key],
       description: (
-        <WithHoverActions
-          data-test-subj={`hover-actions-${property._propertyKey}`}
-          hoverContent={
-            <HoverActionsContainer>
-              <EuiToolTip content={i18n.FILTER_FOR_VALUE}>
-                <EuiIcon
-                  data-test-subj={`add-to-filter-${property._propertyKey}`}
-                  type="filter"
-                  onClick={() => {
-                    if (closeTooltip != null && addFilters != null) {
-                      closeTooltip();
-                      addFilters(featurePropsFilters[property._propertyKey]);
-                    }
-                  }}
-                />
-              </EuiToolTip>
-            </HoverActionsContainer>
-          }
-          render={() =>
-            property._rawValue != null ? (
-              <DefaultFieldRenderer
-                rowItems={
-                  Array.isArray(property._rawValue) ? property._rawValue : [property._rawValue]
-                }
-                attrName={property._propertyKey}
-                idPrefix={`map-point-tooltip-${contextId}-${property._propertyKey}-${property._rawValue}`}
-                render={item => getRenderedFieldValue(property._propertyKey, item)}
-              />
-            ) : (
-              getEmptyTagValue()
-            )
-          }
-        />
+        <AddFilterToGlobalSearchBar
+          filter={createFilter(key, Array.isArray(value) ? value[0] : value)}
+          onFilterAdded={closeTooltip}
+          data-test-subj={`add-to-kql-${key}`}
+        >
+          {value != null ? (
+            <DefaultFieldRenderer
+              rowItems={Array.isArray(value) ? value : [value]}
+              attrName={key}
+              idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
+              render={item => getRenderedFieldValue(key, item)}
+            />
+          ) : (
+            getEmptyTagValue()
+          )}
+        </AddFilterToGlobalSearchBar>
       ),
-    }));
+    })
+  );
 
-    return <DescriptionListStyled listItems={featureDescriptionListItems} />;
-  }
-);
+  return <DescriptionListStyled listItems={featureDescriptionListItems} />;
+};
+
+PointToolTipContentComponent.displayName = 'PointToolTipContentComponent';
+
+export const PointToolTipContent = React.memo(PointToolTipContentComponent);
 
 PointToolTipContent.displayName = 'PointToolTipContent';
 
@@ -77,7 +67,8 @@ export const getRenderedFieldValue = (field: string, value: string) => {
   } else if (['host.name'].includes(field)) {
     return <HostDetailsLink hostName={value} />;
   } else if (['source.ip', 'destination.ip'].includes(field)) {
-    return <IPDetailsLink ip={value} />;
+    const flowTarget = field.split('.')[0] as FlowTarget;
+    return <IPDetailsLink ip={value} flowTarget={flowTarget} />;
   }
   return <>{value}</>;
 };

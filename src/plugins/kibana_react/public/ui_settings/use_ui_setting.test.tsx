@@ -24,10 +24,10 @@ import { useUiSetting$ } from './use_ui_setting';
 import { createKibanaReactContext } from '../context';
 import { KibanaServices } from '../context/types';
 import { Subject } from 'rxjs';
-import { useObservable } from '../util/use_observable';
 import { coreMock } from '../../../../core/public/mocks';
+import useObservable from 'react-use/lib/useObservable';
 
-jest.mock('../util/use_observable');
+jest.mock('react-use/lib/useObservable');
 const useObservableSpy = (useObservable as any) as jest.SpyInstance;
 useObservableSpy.mockImplementation((observable, def) => def);
 
@@ -106,7 +106,7 @@ describe('useUiSetting', () => {
 });
 
 describe('useUiSetting$', () => {
-  const TestConsumer$: React.FC<{
+  const TestConsumerX: React.FC<{
     setting: string;
     newValue?: string;
   }> = ({ setting, newValue = '' }) => {
@@ -126,7 +126,7 @@ describe('useUiSetting$', () => {
 
     ReactDOM.render(
       <Provider>
-        <TestConsumer$ setting="foo" />
+        <TestConsumerX setting="foo" />
       </Provider>,
       container
     );
@@ -143,7 +143,7 @@ describe('useUiSetting$', () => {
 
     ReactDOM.render(
       <Provider>
-        <TestConsumer$ setting="non_existing" />
+        <TestConsumerX setting="non_existing" />
       </Provider>,
       container
     );
@@ -159,7 +159,7 @@ describe('useUiSetting$', () => {
 
     ReactDOM.render(
       <Provider>
-        <TestConsumer$ setting="theme:darkMode" />
+        <TestConsumerX setting="theme:darkMode" />
       </Provider>,
       container
     );
@@ -174,7 +174,7 @@ describe('useUiSetting$', () => {
 
     ReactDOM.render(
       <Provider>
-        <TestConsumer$ setting="a" newValue="c" />
+        <TestConsumerX setting="a" newValue="c" />
       </Provider>,
       container
     );

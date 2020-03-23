@@ -29,7 +29,7 @@ function generator({ imageFlavor }) {
   server.name: kibana
   server.host: "0"
   elasticsearch.hosts: [ "http://elasticsearch:9200" ]
-  ${ !imageFlavor ? 'xpack.monitoring.ui.container.elasticsearch.enabled: true' : '' }
+  ${!imageFlavor ? 'xpack.monitoring.ui.container.elasticsearch.enabled: true' : ''}
   `);
 }
 

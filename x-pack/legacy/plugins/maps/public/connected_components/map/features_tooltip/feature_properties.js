@@ -5,21 +5,15 @@
  */
 
 import React from 'react';
-import {
-  EuiCallOut,
-  EuiLoadingSpinner,
-  EuiTextAlign,
-  EuiButtonIcon
-} from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiTextAlign, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export class FeatureProperties extends React.Component {
-
   state = {
     properties: null,
     loadPropertiesErrorMsg: null,
     prevWidth: null,
-    prevHeight: null
+    prevHeight: null,
   };
 
   componentDidMount() {
@@ -40,7 +34,7 @@ export class FeatureProperties extends React.Component {
   _loadProperties = () => {
     this._fetchProperties({
       nextFeatureId: this.props.featureId,
-      nextLayerId: this.props.layerId
+      nextLayerId: this.props.layerId,
     });
   };
 
@@ -61,18 +55,21 @@ export class FeatureProperties extends React.Component {
     if (this.state.properties && this._node) {
       this.setState({
         prevWidth: this._node.clientWidth,
-        prevHeight: this._node.clientHeight
+        prevHeight: this._node.clientHeight,
       });
     }
 
     let properties;
     try {
-      properties = await this.props.loadFeatureProperties({ layerId: nextLayerId, featureId: nextFeatureId });
+      properties = await this.props.loadFeatureProperties({
+        layerId: nextLayerId,
+        featureId: nextFeatureId,
+      });
     } catch (error) {
       if (this._isMounted) {
         this.setState({
           properties: [],
-          loadPropertiesErrorMsg: error.message
+          loadPropertiesErrorMsg: error.message,
         });
       }
       return;
@@ -85,7 +82,7 @@ export class FeatureProperties extends React.Component {
 
     if (this._isMounted) {
       this.setState({
-        properties
+        properties,
       });
     }
   };
@@ -101,7 +98,7 @@ export class FeatureProperties extends React.Component {
           className="mapFeatureTooltip__filterButton"
           iconType="plusInCircle"
           title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
-            defaultMessage: 'Filter on property'
+            defaultMessage: 'Filter on property',
           })}
           onClick={async () => {
             this.props.onCloseTooltip();
@@ -109,7 +106,7 @@ export class FeatureProperties extends React.Component {
             this.props.addFilters(filters);
           }}
           aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
-            defaultMessage: 'Filter on property'
+            defaultMessage: 'Filter on property',
           })}
           data-test-subj="mapTooltipCreateFilterButton"
         />
@@ -122,22 +119,20 @@ export class FeatureProperties extends React.Component {
       return (
         <EuiCallOut
           title={i18n.translate('xpack.maps.tooltip.unableToLoadContentTitle', {
-            defaultMessage: 'Unable to load tooltip content'
+            defaultMessage: 'Unable to load tooltip content',
           })}
           color="danger"
           iconType="alert"
           size="s"
         >
-          <p>
-            {this.state.loadPropertiesErrorMsg}
-          </p>
+          <p>{this.state.loadPropertiesErrorMsg}</p>
         </EuiCallOut>
       );
     }
 
     if (!this.state.properties) {
       const loadingMsg = i18n.translate('xpack.maps.tooltip.loadingMsg', {
-        defaultMessage: 'Loading'
+        defaultMessage: 'Loading',
       });
       // Use width/height of last viewed properties while displaying loading status
       // to avoid resizing component during loading phase and bouncing tooltip container around
@@ -148,7 +143,7 @@ export class FeatureProperties extends React.Component {
       }
       return (
         <EuiTextAlign textAlign="center" style={style}>
-          <EuiLoadingSpinner size="m"/>
+          <EuiLoadingSpinner size="m" />
           {loadingMsg}
         </EuiTextAlign>
       );
@@ -158,9 +153,7 @@ export class FeatureProperties extends React.Component {
       const label = tooltipProperty.getPropertyName();
       return (
         <tr key={label}>
-          <td className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel">
-            {label}
-          </td>
+          <td className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel">{label}</td>
           <td
             className="eui-textOverflowWrap"
             /*
@@ -177,16 +170,9 @@ export class FeatureProperties extends React.Component {
     });
 
     return (
-      <table
-        className="mapFeatureTooltip_table"
-        ref={node => this._node = node}
-      >
-        <tbody>
-          {rows}
-        </tbody>
+      <table className="mapFeatureTooltip_table" ref={node => (this._node = node)}>
+        <tbody>{rows}</tbody>
       </table>
     );
   }
-
 }
-

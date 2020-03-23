@@ -17,19 +17,27 @@
  * under the License.
  */
 
-import { EuiGlobalToastList, EuiGlobalToastListToast as Toast } from '@elastic/eui';
-
+import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
 
+import { MountWrapper } from '../../utils';
+import { Toast } from './toasts_api';
+
 interface Props {
   toasts$: Rx.Observable<Toast[]>;
-  dismissToast: (t: Toast) => void;
+  dismissToast: (toastId: string) => void;
 }
 
 interface State {
   toasts: Toast[];
 }
+
+const convertToEui = (toast: Toast): EuiToast => ({
+  ...toast,
+  title: typeof toast.title === 'function' ? <MountWrapper mount={toast.title} /> : toast.title,
+  text: typeof toast.text === 'function' ? <MountWrapper mount={toast.text} /> : toast.text,
+});
 
 export class GlobalToastList extends React.Component<Props, State> {
   public state: State = {
@@ -54,8 +62,8 @@ export class GlobalToastList extends React.Component<Props, State> {
     return (
       <EuiGlobalToastList
         data-test-subj="globalToastList"
-        toasts={this.state.toasts}
-        dismissToast={this.props.dismissToast}
+        toasts={this.state.toasts.map(convertToEui)}
+        dismissToast={({ id }) => this.props.dismissToast(id)}
         /**
          * This prop is overriden by the individual toasts that are added.
          * Use `Infinity` here so that it's obvious a timeout hasn't been

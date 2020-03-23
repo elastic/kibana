@@ -9,11 +9,14 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { Error } from '../../../public/components/error';
 import { Popover } from '../../../public/components/popover';
+import { RendererStrings } from '../../../i18n';
+
+const { error: strings } = RendererStrings;
 
 export const error = () => ({
   name: 'error',
-  displayName: 'Error information',
-  help: 'Render error data in a way that is helpful to users',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const draw = () => {

@@ -10,20 +10,22 @@ import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import {
   EmbeddableFactory,
-  ErrorEmbeddable
+  ErrorEmbeddable,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { MapEmbeddable } from './map_embeddable';
-import { indexPatternService } from '../kibana_services';
+import { getIndexPatternService } from '../kibana_services';
 
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
-import { createMapStore } from '../reducers/store';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
 import { addLayerWithoutDataSync } from '../actions/map_actions';
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInitialLayers } from '../angular/get_initial_layers';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../angular/services/gis_map_saved_object_loader';
-import 'ui/vis/map/service_settings';
+import { bindSetupCoreAndPlugins, bindStartCoreAndPlugins } from '../plugin';
+import { npSetup, npStart } from 'ui/new_platform';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
   type = MAP_SAVED_OBJECT_TYPE;
@@ -38,13 +40,18 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
         getIconForSavedObject: () => APP_ICON,
       },
     });
+    // Init required services. Necessary while in legacy
+    bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
+    bindStartCoreAndPlugins(npStart.core, npStart.plugins);
   }
   isEditable() {
     return capabilities.get().maps.save;
   }
 
   // Not supported yet for maps types.
-  canCreateNew() { return false; }
+  canCreateNew() {
+    return false;
+  }
 
   getDisplayName() {
     return i18n.translate('xpack.maps.embeddableDisplayName', {
@@ -62,14 +69,16 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
       });
       queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
     } catch (error) {
-      throw new Error(i18n.translate('xpack.maps.mapEmbeddableFactory.invalidLayerList', {
-        defaultMessage: 'Unable to load map, malformed layer list',
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.mapEmbeddableFactory.invalidLayerList', {
+          defaultMessage: 'Unable to load map, malformed layer list',
+        })
+      );
     }
 
-    const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
+    const promises = queryableIndexPatternIds.map(async indexPatternId => {
       try {
-        return await indexPatternService.get(indexPatternId);
+        return await getIndexPatternService().get(indexPatternId);
       } catch (error) {
         // Unable to load index pattern, better to not throw error so map embeddable can render
         // Error will be surfaced by map embeddable since it too will be unable to locate the index pattern
@@ -86,11 +95,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     return await savedObjectLoader.get(savedObjectId);
   }
 
-  async createFromSavedObject(
-    savedObjectId,
-    input,
-    parent
-  ) {
+  async createFromSavedObject(savedObjectId, input, parent) {
     const savedMap = await this._fetchSavedMap(savedObjectId);
     const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
@@ -110,20 +115,17 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     try {
       embeddable.updateInput(mergeInputWithSavedMap(input, savedMap));
     } catch (error) {
-      throw new Error(i18n.translate('xpack.maps.mapEmbeddableFactory.invalidSavedObject', {
-        defaultMessage: 'Unable to load map, malformed saved object',
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.mapEmbeddableFactory.invalidSavedObject', {
+          defaultMessage: 'Unable to load map, malformed saved object',
+        })
+      );
     }
 
     return embeddable;
   }
 
-  async createFromState(
-    state,
-    input,
-    parent,
-    renderTooltipContent,
-  ) {
+  async createFromState(state, input, parent, renderTooltipContent, eventHandlers) {
     const layerList = state && state.layerList ? state.layerList : getInitialLayers();
     const indexPatterns = await this._getIndexPatterns(layerList);
 
@@ -137,13 +139,17 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
       },
       input,
       parent,
-      renderTooltipContent
+      renderTooltipContent,
+      eventHandlers
     );
   }
 
   async create(input) {
     window.location.href = chrome.addBasePath(createMapPath(''));
-    return new ErrorEmbeddable('Maps can only be created with createFromSavedObject or createFromState', input);
+    return new ErrorEmbeddable(
+      'Maps can only be created with createFromSavedObject or createFromState',
+      input
+    );
   }
 }
 

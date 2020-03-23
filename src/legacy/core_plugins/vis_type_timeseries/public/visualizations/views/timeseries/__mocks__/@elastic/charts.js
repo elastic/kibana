@@ -38,8 +38,7 @@ export const ScaleType = {
   Time: 'time',
 };
 
-export const getSpecId = x => `id:${x}`;
-export const getGroupId = x => `groupId:${x}`;
-
 export const BarSeries = () => null;
 export const AreaSeries = () => null;
+
+export { LIGHT_THEME, DARK_THEME } from '@elastic/charts';

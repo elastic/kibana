@@ -82,11 +82,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 export const Datasource = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('stateArgs', 'updateArgs', ({ args }) => args),
   withState('selecting', 'setSelecting', false),
   withState('previewing', 'setPreviewing', false),

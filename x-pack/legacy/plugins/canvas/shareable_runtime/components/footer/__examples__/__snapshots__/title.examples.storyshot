@@ -19,6 +19,11 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "flexShrink": 0,
+        }
+      }
     >
       <a
         className="euiLink euiLink--primary"
@@ -26,14 +31,9 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
         rel=""
         title="Powered by Elastic.co"
       >
-        <svg
-          className="euiIcon euiIcon--large euiIcon-isLoading"
-          focusable="false"
-          height={16}
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          data-euiicon-type="logoElastic"
+          size="l"
         />
       </a>
     </div>
@@ -83,6 +83,11 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "flexShrink": 0,
+        }
+      }
     >
       <a
         className="euiLink euiLink--primary"
@@ -90,14 +95,9 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
         rel=""
         title="Powered by Elastic.co"
       >
-        <svg
-          className="euiIcon euiIcon--large euiIcon-isLoading"
-          focusable="false"
-          height={16}
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          data-euiicon-type="logoElastic"
+          size="l"
         />
       </a>
     </div>
@@ -147,6 +147,11 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "flexShrink": 0,
+        }
+      }
     >
       <a
         className="euiLink euiLink--primary"
@@ -154,14 +159,9 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
         rel=""
         title="Powered by Elastic.co"
       >
-        <svg
-          className="euiIcon euiIcon--large euiIcon-isLoading"
-          focusable="false"
-          height={16}
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          data-euiicon-type="logoElastic"
+          size="l"
         />
       </a>
     </div>

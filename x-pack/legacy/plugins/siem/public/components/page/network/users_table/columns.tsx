@@ -73,6 +73,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
       }),
   },
   {
+    align: 'right',
     field: 'node.user.count',
     name: i18n.DOCUMENT_COUNT,
     truncateText: false,

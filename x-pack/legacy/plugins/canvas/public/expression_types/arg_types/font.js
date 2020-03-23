@@ -24,7 +24,11 @@ export const FontArgInput = props => {
   const spec = mapValues(chainArgs, '[0]');
 
   function handleChange(newSpec) {
-    const newValue = set(argValue, ['chain', 0, 'arguments'], mapValues(newSpec, v => [v]));
+    const newValue = set(
+      argValue,
+      ['chain', 0, 'arguments'],
+      mapValues(newSpec, v => [v])
+    );
     return onValueChange(newValue);
   }
 

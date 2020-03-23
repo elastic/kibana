@@ -33,7 +33,7 @@ const gridAtEquator = {
   '9': [4.8, 4.8],
   '10': [1.2, 0.595],
   '11': [0.149, 0.149],
-  '12': [0.037, 0.019]
+  '12': [0.037, 0.019],
 };
 
 export function gridDimensions(precision) {

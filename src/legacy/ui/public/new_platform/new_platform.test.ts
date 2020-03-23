@@ -17,14 +17,29 @@
  * under the License.
  */
 
-import { setRootControllerMock } from './new_platform.test.mocks';
-import { legacyAppRegister, __reset__ } from './new_platform';
+jest.mock('history');
+
+import { setRootControllerMock, historyMock } from './new_platform.test.mocks';
+import {
+  legacyAppRegister,
+  __reset__,
+  __setup__,
+  __start__,
+  PluginsSetup,
+  PluginsStart,
+} from './new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import * as dataServices from '../../../../plugins/data/public/services';
+import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
+import { coreMock } from '../../../../core/public/mocks';
+import { npSetup, npStart } from './__mocks__';
 
 describe('ui/new_platform', () => {
   describe('legacyAppRegister', () => {
     beforeEach(() => {
       setRootControllerMock.mockReset();
       __reset__();
+      __setup__(coreMock.createSetup({ basePath: '/test/base/path' }) as any, {} as any);
     });
 
     const registerApp = () => {
@@ -57,9 +72,33 @@ describe('ui/new_platform', () => {
       const elementMock = [document.createElement('div')];
 
       controller(scopeMock, elementMock);
+      expect(mountMock).toHaveBeenCalledWith({
+        element: elementMock[0],
+        appBasePath: '/test/base/path/app/test',
+        onAppLeave: expect.any(Function),
+        history: historyMock,
+      });
+    });
+
+    test('controller calls deprecated context app.mount when invoked', () => {
+      const unmountMock = jest.fn();
+      // Two arguments changes how this is called.
+      const mountMock = jest.fn((context, params) => unmountMock);
+      legacyAppRegister({
+        id: 'test',
+        title: 'Test',
+        mount: mountMock,
+      });
+      const controller = setRootControllerMock.mock.calls[0][1];
+      const scopeMock = { $on: jest.fn() };
+      const elementMock = [document.createElement('div')];
+
+      controller(scopeMock, elementMock);
       expect(mountMock).toHaveBeenCalledWith(expect.any(Object), {
         element: elementMock[0],
-        appBasePath: '',
+        appBasePath: '/test/base/path/app/test',
+        onAppLeave: expect.any(Function),
+        history: historyMock,
       });
     });
 
@@ -78,6 +117,27 @@ describe('ui/new_platform', () => {
       expect(event).toEqual('$destroy');
       eventHandler();
       expect(unmountMock).toHaveBeenCalled();
+    });
+  });
+
+  describe('service getters', () => {
+    const services: Record<string, Function> = dataServices;
+    const getters = Object.keys(services).filter(k => k.substring(0, 3) === 'get');
+
+    getters.forEach(g => {
+      it(`sets a value for ${g}`, () => {
+        __reset__();
+        __setup__(
+          (coreMock.createSetup() as unknown) as LegacyCoreSetup,
+          (npSetup.plugins as unknown) as PluginsSetup
+        );
+        __start__(
+          (coreMock.createStart() as unknown) as LegacyCoreStart,
+          (npStart.plugins as unknown) as PluginsStart
+        );
+
+        expect(services[g]()).toBeDefined();
+      });
     });
   });
 });

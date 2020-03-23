@@ -3,11 +3,11 @@
 
 In the Visualize application, you can shape your data using a variety
 of charts, tables, and maps, and more. In this tutorial, you'll create four
-visualizations: 
+visualizations:
 
 * <<tutorial-visualize-pie, Pie chart>>
 * <<tutorial-visualize-bar, Bar chart>>
-* <<tutorial-visualize-map, Coordinate map>>
+* <<tutorial-visualize-map, Map>>
 * <<tutorial-visualize-markdown, Markdown widget>>
 
 [float]
@@ -25,7 +25,7 @@ types in Kibana.
 image::images/tutorial-visualize-wizard-step-1.png[]
 . Click *Pie*.
 
-. In *Choose a source*, select the `ba*` index pattern. 
+. In *Choose a source*, select the `ba*` index pattern.
 +
 Initially, the pie contains a single "slice."
 That's because the default search matched all documents.
@@ -76,7 +76,7 @@ in a ring around the balance ranges.
 [role="screenshot"]
 image::images/tutorial-visualize-pie-3.png[]
 
-. To save this chart so you can use it later, click *Save* in 
+. To save this chart so you can use it later, click *Save* in
 the top menu bar and enter `Pie Example`.
 
 [float]
@@ -123,44 +123,10 @@ you did at the beginning of the tutorial, when you marked the `play_name` field
 as `not analyzed`.
 
 [float]
-[[tutorial-visualize-map]]
-=== Coordinate map
-
-Using a coordinate map, you can visualize geographic information in the log file sample data.
-
-. Create a *Coordinate map* and set the search source to `logstash*`.
-+
-You haven't defined any buckets yet, so the visualization is a map of the world.
-
-. Set the time.
-.. In the time filter, click *Show dates*.
-.. Click the start date, then *Absolute*.
-.. Set the *Start date* to May 18, 2015.
-.. In the time filter, click *now*, then *Absolute*.
-.. Set the *End date* to May 20, 2015.
-
-. Map the geo coordinates from the log files.
-
-.. In the *Buckets* pane, click *Add > Geo coordinates*.
-.. Set *Aggregation* to *Geohash*.
-.. Set *Field* to *geo.coordinates*.
-
-. Click *Apply changes* image:images/apply-changes-button.png[].
-+
-The map now looks like this:
-+
-[role="screenshot"]
-image::images/tutorial-visualize-map-2.png[]
-
-. Navigate the map by clicking and dragging.  Use the controls
-on the left to zoom the map and set filters.
-. *Save* this map with the name `Map Example`.
-
-[float]
 [[tutorial-visualize-markdown]]
 === Markdown
 
-The final visualization is a Markdown widget that renders formatted text.
+Create a Markdown widget to add formatted text to your dashboard.
 
 . Create a *Markdown* visualization.
 . Copy the following text into the text box.
@@ -178,3 +144,41 @@ The Markdown renders in the preview pane.
 image::images/tutorial-visualize-md-2.png[]
 
 . *Save* this visualization with the name `Markdown Example`.
+
+[float]
+[[tutorial-visualize-map]]
+=== Map
+
+Using <<maps>>, you can visualize geographic information in the log file sample data.
+
+. Click *Maps* in the New Visualization
+menu to create a Map.
+
+. Set the time.
+.. In the time filter, click *Show dates*.
+.. Click the start date, then *Absolute*.
+.. Set the *Start date* to May 18, 2015.
+.. In the time filter, click *now*, then *Absolute*.
+.. Set the *End date* to May 20, 2015.
+.. Click *Update*
+
+. Map the geo coordinates from the log files.
+
+.. Click *Add layer*.
+.. Click the *Grid aggregation* data source.
+.. Set *Index pattern* to *logstash*.
+.. Click the *Add layer* button.
+
+. Set the layer style.
+.. For *Fill color*, select the yellow to red color ramp.
+.. For *Border color*, select white.
+.. Click *Save & close*.
++
+The map now looks like this:
++
+[role="screenshot"]
+image::images/tutorial-visualize-map-2.png[]
+
+. Navigate the map by clicking and dragging.  Use the controls
+on the left to zoom the map and set filters.
+. *Save* this map with the name `Map Example`.

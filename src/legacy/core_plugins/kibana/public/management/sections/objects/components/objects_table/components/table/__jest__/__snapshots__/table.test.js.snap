@@ -67,6 +67,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
               <FormattedMessage
@@ -94,6 +95,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
@@ -124,6 +126,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         Array [
           Object {
             "align": "center",
+            "data-test-subj": "savedObjectsTableRowType",
             "description": "Type of the saved object",
             "field": "type",
             "name": "Type",
@@ -132,6 +135,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "width": "50px",
           },
           Object {
+            "data-test-subj": "savedObjectsTableRowTitle",
             "dataType": "string",
             "description": "Title of the saved object",
             "field": "meta.title",
@@ -143,6 +147,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "actions": Array [
               Object {
                 "available": [Function],
+                "data-test-subj": "savedObjectsTableAction-inspect",
                 "description": "Inspect this saved object",
                 "icon": "inspect",
                 "name": "Inspect",
@@ -150,6 +155,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
                 "type": "icon",
               },
               Object {
+                "data-test-subj": "savedObjectsTableAction-relationships",
                 "description": "View the relationships this saved object has to other saved objects",
                 "icon": "kqlSelector",
                 "name": "Relationships",
@@ -196,11 +202,13 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         }
       }
       responsive={true}
+      rowProps={[Function]}
       selection={
         Object {
           "onSelectionChange": [Function],
         }
       }
+      tableLayout="fixed"
     />
   </div>
 </Fragment>
@@ -272,6 +280,7 @@ exports[`Table should render normally 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
               <FormattedMessage
@@ -299,6 +308,7 @@ exports[`Table should render normally 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
@@ -329,6 +339,7 @@ exports[`Table should render normally 1`] = `
         Array [
           Object {
             "align": "center",
+            "data-test-subj": "savedObjectsTableRowType",
             "description": "Type of the saved object",
             "field": "type",
             "name": "Type",
@@ -337,6 +348,7 @@ exports[`Table should render normally 1`] = `
             "width": "50px",
           },
           Object {
+            "data-test-subj": "savedObjectsTableRowTitle",
             "dataType": "string",
             "description": "Title of the saved object",
             "field": "meta.title",
@@ -348,6 +360,7 @@ exports[`Table should render normally 1`] = `
             "actions": Array [
               Object {
                 "available": [Function],
+                "data-test-subj": "savedObjectsTableAction-inspect",
                 "description": "Inspect this saved object",
                 "icon": "inspect",
                 "name": "Inspect",
@@ -355,6 +368,7 @@ exports[`Table should render normally 1`] = `
                 "type": "icon",
               },
               Object {
+                "data-test-subj": "savedObjectsTableAction-relationships",
                 "description": "View the relationships this saved object has to other saved objects",
                 "icon": "kqlSelector",
                 "name": "Relationships",
@@ -401,11 +415,13 @@ exports[`Table should render normally 1`] = `
         }
       }
       responsive={true}
+      rowProps={[Function]}
       selection={
         Object {
           "onSelectionChange": [Function],
         }
       }
+      tableLayout="fixed"
     />
   </div>
 </Fragment>

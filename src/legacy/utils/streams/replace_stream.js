@@ -80,6 +80,6 @@ export function createReplaceStream(toReplace, replacement) {
 
       buffer = null;
       callback();
-    }
+    },
   });
 }

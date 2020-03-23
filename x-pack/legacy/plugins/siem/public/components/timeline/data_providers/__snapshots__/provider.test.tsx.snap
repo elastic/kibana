@@ -1,21 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Provider rendering renders correctly against snapshot 1`] = `
-<Component
-  dataProvider={
-    Object {
-      "and": Array [],
-      "enabled": true,
-      "excluded": false,
-      "id": "id-Provider 1",
-      "kqlQuery": "",
-      "name": "Provider 1",
-      "queryMatch": Object {
-        "field": "name",
-        "operator": ":",
-        "value": "Provider 1",
-      },
-    }
-  }
+<ProviderItemBadge
+  deleteProvider={[Function]}
+  field="name"
+  isEnabled={true}
+  isExcluded={false}
+  kqlQuery=""
+  operator=":"
+  providerId="id-Provider 1"
+  toggleEnabledProvider={[Function]}
+  toggleExcludedProvider={[Function]}
+  val="Provider 1"
 />
 `;

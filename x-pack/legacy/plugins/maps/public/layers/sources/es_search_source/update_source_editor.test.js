@@ -6,49 +6,44 @@
 
 jest.mock('../../../kibana_services', () => ({}));
 
+jest.mock('./load_index_settings', () => ({
+  loadIndexSettings: async () => {
+    return { maxInnerResultWindow: 100 };
+  },
+}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
 import { UpdateSourceEditor } from './update_source_editor';
+import { SCALING_TYPES } from '../../../../common/constants';
 
 const defaultProps = {
   indexPatternId: 'indexPattern1',
   onChange: () => {},
   filterByMapBounds: true,
-  tooltipProperties: [],
+  tooltipFields: [],
   sortOrder: 'DESC',
-  useTopHits: false,
+  scalingType: SCALING_TYPES.LIMIT,
   topHitsSplitField: 'trackId',
   topHitsSize: 1,
 };
 
 test('should render update source editor', async () => {
-  const component = shallow(
-    <UpdateSourceEditor
-      {...defaultProps}
-    />
-  );
+  const component = shallow(<UpdateSourceEditor {...defaultProps} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('should enable sort order select when sort field provided', async () => {
-  const component = shallow(
-    <UpdateSourceEditor
-      {...defaultProps}
-      sortField="@timestamp"
-    />
-  );
+  const component = shallow(<UpdateSourceEditor {...defaultProps} sortField="@timestamp" />);
 
   expect(component).toMatchSnapshot();
 });
 
-test('should render top hits form when useTopHits is true', async () => {
+test('should render top hits form when scaling type is TOP_HITS', async () => {
   const component = shallow(
-    <UpdateSourceEditor
-      {...defaultProps}
-      useTopHits={true}
-    />
+    <UpdateSourceEditor {...defaultProps} scalingType={SCALING_TYPES.TOP_HITS} />
   );
 
   expect(component).toMatchSnapshot();

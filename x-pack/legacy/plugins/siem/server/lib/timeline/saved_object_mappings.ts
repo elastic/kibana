@@ -130,6 +130,9 @@ export const timelineSavedObjectMappings: {
       description: {
         type: 'text',
       },
+      eventType: {
+        type: 'keyword',
+      },
       favorite: {
         properties: {
           keySearch: {
@@ -143,6 +146,65 @@ export const timelineSavedObjectMappings: {
           },
           favoriteDate: {
             type: 'date',
+          },
+        },
+      },
+      filters: {
+        properties: {
+          meta: {
+            properties: {
+              alias: {
+                type: 'text',
+              },
+              controlledBy: {
+                type: 'text',
+              },
+              disabled: {
+                type: 'boolean',
+              },
+              field: {
+                type: 'text',
+              },
+              formattedValue: {
+                type: 'text',
+              },
+              index: {
+                type: 'keyword',
+              },
+              key: {
+                type: 'keyword',
+              },
+              negate: {
+                type: 'boolean',
+              },
+              params: {
+                type: 'text',
+              },
+              type: {
+                type: 'keyword',
+              },
+              value: {
+                type: 'text',
+              },
+            },
+          },
+          exists: {
+            type: 'text',
+          },
+          match_all: {
+            type: 'text',
+          },
+          missing: {
+            type: 'text',
+          },
+          query: {
+            type: 'text',
+          },
+          range: {
+            type: 'text',
+          },
+          script: {
+            type: 'text',
           },
         },
       },
@@ -182,6 +244,9 @@ export const timelineSavedObjectMappings: {
             type: 'date',
           },
         },
+      },
+      savedQueryId: {
+        type: 'keyword',
       },
       sort: {
         properties: {

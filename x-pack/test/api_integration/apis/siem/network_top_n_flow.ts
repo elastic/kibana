@@ -10,7 +10,7 @@ import {
   Direction,
   FlowTargetSourceDest,
   GetNetworkTopNFlowQuery,
-  NetworkTopNFlowFields,
+  NetworkTopTablesFields,
 } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -39,7 +39,7 @@ export default function({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               flowTarget: FlowTargetSourceDest.source,
-              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
+              sort: { field: NetworkTopTablesFields.bytes_in, direction: Direction.desc },
               pagination: {
                 activePage: 0,
                 cursorStart: 0,
@@ -76,7 +76,7 @@ export default function({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               flowTarget: FlowTargetSourceDest.source,
-              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.asc },
+              sort: { field: NetworkTopTablesFields.bytes_in, direction: Direction.asc },
               pagination: {
                 activePage: 0,
                 cursorStart: 0,
@@ -112,7 +112,7 @@ export default function({ getService }: FtrProviderContext) {
                 to: TO,
                 from: FROM,
               },
-              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
+              sort: { field: NetworkTopTablesFields.bytes_in, direction: Direction.desc },
               flowTarget: FlowTargetSourceDest.destination,
               pagination: {
                 activePage: 0,
@@ -146,7 +146,7 @@ export default function({ getService }: FtrProviderContext) {
                 to: TO,
                 from: FROM,
               },
-              sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
+              sort: { field: NetworkTopTablesFields.bytes_in, direction: Direction.desc },
               flowTarget: FlowTargetSourceDest.source,
               pagination: {
                 activePage: 1,

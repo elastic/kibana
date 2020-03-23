@@ -18,12 +18,19 @@
  */
 
 export { ISearchSetup } from './i_search_setup';
-export * from '../../common';
 
 export { ISearchContext } from './i_search_context';
 
-export { IRequestTypesMap, IResponseTypesMap } from './i_search';
+export {
+  ISearch,
+  ISearchCancel,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+} from './i_search';
 
 export { TStrategyTypes } from './strategy_types';
 
 export { TSearchStrategyProvider } from './i_search_strategy';
+
+export { getDefaultSearchParams } from './es_search';

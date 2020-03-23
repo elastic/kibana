@@ -32,7 +32,7 @@ describe('Canvas Shareable Workpad API', () => {
   test('Placed successfully with default properties', async () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
-    const wrapper = mount(<div kbn-canvas-shareable="canvas" kbn-canvas-url="workpad.json"></div>, {
+    const wrapper = mount(<div kbn-canvas-shareable="canvas" kbn-canvas-url="workpad.json" />, {
       attachTo: container,
     });
 
@@ -46,11 +46,7 @@ describe('Canvas Shareable Workpad API', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const wrapper = mount(
-      <div
-        kbn-canvas-shareable="canvas"
-        kbn-canvas-height="350"
-        kbn-canvas-url="workpad.json"
-      ></div>,
+      <div kbn-canvas-shareable="canvas" kbn-canvas-height="350" kbn-canvas-url="workpad.json" />,
       {
         attachTo: container,
       }
@@ -69,11 +65,7 @@ describe('Canvas Shareable Workpad API', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const wrapper = mount(
-      <div
-        kbn-canvas-shareable="canvas"
-        kbn-canvas-width="400"
-        kbn-canvas-url="workpad.json"
-      ></div>,
+      <div kbn-canvas-shareable="canvas" kbn-canvas-width="400" kbn-canvas-url="workpad.json" />,
       {
         attachTo: container,
       }
@@ -97,7 +89,7 @@ describe('Canvas Shareable Workpad API', () => {
         kbn-canvas-width="350"
         kbn-canvas-height="350"
         kbn-canvas-url="workpad.json"
-      ></div>,
+      />,
       {
         attachTo: container,
       }
@@ -116,7 +108,7 @@ describe('Canvas Shareable Workpad API', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const wrapper = mount(
-      <div kbn-canvas-shareable="canvas" kbn-canvas-page="0" kbn-canvas-url="workpad.json"></div>,
+      <div kbn-canvas-shareable="canvas" kbn-canvas-page="0" kbn-canvas-url="workpad.json" />,
       {
         attachTo: container,
       }

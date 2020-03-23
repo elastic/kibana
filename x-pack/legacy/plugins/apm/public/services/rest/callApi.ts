@@ -7,12 +7,13 @@
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
-import { HttpServiceBase, HttpFetchOptions } from 'kibana/public';
+import { HttpSetup, HttpFetchOptions } from 'kibana/public';
 
-export type FetchOptions = HttpFetchOptions & {
+export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   pathname: string;
   forceCache?: boolean;
   method?: string;
+  body?: any;
 };
 
 function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
@@ -20,15 +21,14 @@ function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
     sessionStorage.getItem('apm_debug') === 'true' &&
     startsWith(fetchOptions.pathname, '/api/apm');
 
-  if (!debugEnabled) {
-    return fetchOptions;
-  }
+  const { body, ...rest } = fetchOptions;
 
   return {
-    ...fetchOptions,
+    ...rest,
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     query: {
       ...fetchOptions.query,
-      _debug: true
+      ...(debugEnabled ? { _debug: true } : {})
     }
   };
 }
@@ -42,7 +42,7 @@ export function clearCache() {
 export type CallApi = typeof callApi;
 
 export async function callApi<T = void>(
-  http: HttpServiceBase,
+  http: HttpSetup,
   fetchOptions: FetchOptions
 ): Promise<T> {
   const cacheKey = getCacheKey(fetchOptions);

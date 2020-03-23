@@ -10,16 +10,14 @@ import { registerHelpers } from './rollup.test_helpers';
 import { API_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
-  const {
-    createIndexWithMappings,
-    getJobPayload,
-    createJob,
-    cleanUp,
-  } = registerHelpers({ supertest, es });
+  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } = registerHelpers({
+    supertest,
+    es,
+  });
 
   describe('search', () => {
     const URI = `${API_BASE_PATH}/search`;
@@ -28,7 +26,7 @@ export default function ({ getService }) {
       const { body } = await supertest
         .post(URI)
         .set('kbn-xsrf', 'xxx')
-        .send([{ index: 'unknown', query: {} } ])
+        .send([{ index: 'unknown', query: {} }])
         .expect(404);
 
       expect(body.message).to.contain('no such index [unknown]');
@@ -43,7 +41,7 @@ export default function ({ getService }) {
       const { body } = await supertest
         .post(URI)
         .set('kbn-xsrf', 'xxx')
-        .send([{ index: rollupIndex, query: { size: 0 } } ])
+        .send([{ index: rollupIndex, query: { size: 0 } }])
         .expect(200);
 
       // make sure total hits is an integer and not an object

@@ -4,49 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { i18n } from '@kbn/i18n';
-
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
-import { JobDocOutputExecuted, KbnServer, ExecuteImmediateJobFactory } from '../../../types';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
+import { ReportingCore } from '../../../server';
+import { cryptoFactory } from '../../../server/lib';
 import {
-  CONTENT_TYPE_CSV,
-  CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-  PLUGIN_ID,
-} from '../../../common/constants';
-import { CsvResultFromSearch, JobDocPayloadPanelCsv, FakeRequest } from '../types';
+  ExecuteJobFactory,
+  ImmediateExecuteFn,
+  JobDocOutput,
+  Logger,
+  RequestFacade,
+  ServerFacade,
+} from '../../../types';
+import { CsvResultFromSearch } from '../../csv/types';
+import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
 
-type ExecuteJobFn = (
-  jobId: string | null,
-  job: JobDocPayloadPanelCsv,
-  realRequest?: Request
-) => Promise<JobDocOutputExecuted>;
-
-function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
+export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
+  JobParamsPanelCsv
+>> = async function executeJobFactoryFn(
+  reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
+) {
   const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, [
-    PLUGIN_ID,
-    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-    'execute-job',
-  ]);
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
+  const generateCsv = createGenerateCsv(reporting, server, elasticsearch, parentLogger);
 
   return async function executeJob(
     jobId: string | null,
     job: JobDocPayloadPanelCsv,
-    realRequest?: Request
-  ): Promise<JobDocOutputExecuted> {
+    realRequest?: RequestFacade
+  ): Promise<JobDocOutput> {
     // There will not be a jobID for "immediate" generation.
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"
     const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
 
     const { jobParams } = job;
-    const { isImmediate, panel, visType } = jobParams;
+    const { isImmediate, panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
+
+    if (!panel) {
+      i18n.translate(
+        'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToAccessPanel',
+        { defaultMessage: 'Failed to access panel metadata for job execution' }
+      );
+    }
 
     jobLogger.debug(`Execute job generating [${visType}] csv`);
 
-    let requestObject: Request | FakeRequest;
+    let requestObject: RequestFacade | FakeRequest;
     if (isImmediate && realRequest) {
       jobLogger.info(`Executing job from immediate API`);
       requestObject = realRequest;
@@ -80,10 +89,8 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
     let maxSizeReached = false;
     let size = 0;
     try {
-      const generateCsv = createGenerateCsv(jobLogger);
       const generateResults: CsvResultFromSearch = await generateCsv(
         requestObject,
-        server,
         visType as string,
         panel,
         jobParams
@@ -108,8 +115,4 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
       size,
     };
   };
-}
-
-export const executeJobFactory: ExecuteImmediateJobFactory = oncePerServer(
-  executeJobFactoryFn as ExecuteImmediateJobFactory
-);
+};

@@ -5,6 +5,7 @@
  */
 
 import { resolve } from 'path';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { init } from './init';
 import { mappings } from './server/mappings';
 import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
@@ -22,19 +23,16 @@ export function canvas(kibana) {
         description: 'Data driven workpads',
         icon: 'plugins/canvas/icon.svg',
         euiIconType: 'canvasApp',
-        main: 'plugins/canvas/app',
+        main: 'plugins/canvas/legacy_start',
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
-      interpreter: [
-        'plugins/canvas/browser_functions',
-        'plugins/canvas/renderers',
-        'plugins/canvas/interpreter_expression_types',
-      ],
+      interpreter: ['plugins/canvas/legacy_register_interpreter'],
       styleSheetPaths: resolve(__dirname, 'public/style/index.scss'),
       hacks: [
         // window.onerror override
         'plugins/canvas/lib/window_error_handler.js',
       ],
-      home: ['plugins/canvas/register_feature'],
+      home: ['plugins/canvas/legacy_register_feature'],
       mappings,
       migrations,
       savedObjectsManagement: {

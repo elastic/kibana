@@ -8,8 +8,8 @@ import React from 'react';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME
-} from '../../../../../common/elasticsearch_fieldnames';
-import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+} from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import { APMError } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 import { DiscoverLink } from './DiscoverLink';
 
 function getDiscoverQuery(error: APMError, kuery?: string) {
@@ -24,7 +24,7 @@ function getDiscoverQuery(error: APMError, kuery?: string) {
     _a: {
       interval: 'auto',
       query: {
-        language: 'lucene',
+        language: 'kuery',
         query
       },
       sort: { '@timestamp': 'desc' }
@@ -32,7 +32,7 @@ function getDiscoverQuery(error: APMError, kuery?: string) {
   };
 }
 
-const DiscoverErrorLink: React.SFC<{
+const DiscoverErrorLink: React.FC<{
   readonly error: APMError;
   readonly kuery?: string;
 }> = ({ error, kuery, children }) => {

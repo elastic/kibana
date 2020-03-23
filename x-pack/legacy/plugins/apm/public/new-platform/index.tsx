@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin } from './plugin';
+import { PluginInitializer } from '../../../../../../src/core/public';
+import { ApmPlugin, ApmPluginSetup, ApmPluginStart } from './plugin';
 
-export function plugin() {
-  return new Plugin();
-}
+export const plugin: PluginInitializer<
+  ApmPluginSetup,
+  ApmPluginStart
+> = pluginInitializerContext => new ApmPlugin(pluginInitializerContext);

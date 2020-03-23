@@ -26,9 +26,24 @@ setting to preserve the same key across multiple restarts and multiple instances
 [[reporting-kibana-server-settings]]
 ==== Kibana server settings
 
-Reporting uses the Kibana interface to generate reports. In most cases, you don't need
-to configure Reporting to communicate with Kibana. However, if you use a reverse-proxy
-to access Kibana, you must set the proxy port, protocol, and hostname.
+Reporting opens the {kib} web interface in a server process to generate 
+screenshots of {kib} visualizations. In most cases, the default settings 
+will work and you don't need to configure Reporting to communicate with {kib}. 
+However, if your client connections must go through a reverse-proxy
+to access {kib}, Reporting configuration must have the proxy port, protocol, 
+and hostname set in the `xpack.reporting.kibanaServer.*` settings.
+
+[NOTE] 
+====
+If a reverse-proxy carries encrypted traffic from end-user 
+clients back to a {kib} server, the proxy port, protocol, and hostname 
+in Reporting settings must be valid for the encryption that the Reporting 
+browser will receive. Encrypted communications will fail if there are 
+mismatches in the host information between the request and the certificate on the server.
+
+Configuring the `xpack.reporting.kibanaServer` settings to point to a
+proxy host requires that the Kibana server has network access to the proxy.
+====
 
 `xpack.reporting.kibanaServer.port`::
 The port for accessing Kibana, if different from the `server.port` value.
@@ -39,8 +54,14 @@ The protocol for accessing Kibana, typically `http` or `https`.
 `xpack.reporting.kibanaServer.hostname`::
 The hostname for accessing {kib}, if different from the `server.host` value.
 
-NOTE: Configuring the `xpack.reporting.kibanaServer` settings to point to a
-proxy host requires that the Kibana server has network access to the proxy.
+[NOTE]
+============
+Reporting authenticates requests on the Kibana page only when the hostname matches the
+`xpack.reporting.kibanaServer.hostname` setting. Therefore Reporting would fail if the
+set value redirects to another server. For that reason, `"0"` is an invalid setting
+because, in the Reporting browser, it becomes an automatic redirect to `"0.0.0.0"`.
+============
+
 
 [float]
 [[reporting-job-queue-settings]]
@@ -74,6 +95,8 @@ index for any pending Reporting jobs. Defaults to `3000` (3 seconds).
 [[xpack-reporting-q-timeout]]`xpack.reporting.queue.timeout`::
 How long each worker has to produce a report. If your machine is slow or under
 heavy load, you might need to increase this timeout. Specified in milliseconds.
+If a Reporting job execution time goes over this time limit, the job will be
+marked as a failure and there will not be a download available.
 Defaults to `120000` (two minutes).
 
 [float]
@@ -82,6 +105,26 @@ Defaults to `120000` (two minutes).
 
 Reporting works by capturing screenshots from Kibana. The following settings
 control the capturing process.
+
+`xpack.reporting.capture.timeouts.openUrl`::
+How long to allow the Reporting browser to wait for the initial data of the
+Kibana page to load. Defaults to `30000` (30 seconds).
+
+`xpack.reporting.capture.timeouts.waitForElements`::
+How long to allow the Reporting browser to wait for the visualization panels to
+load on the Kibana page. Defaults to `30000` (30 seconds).
+
+`xpack.reporting.capture.timeouts.renderComplete`::
+How long to allow the Reporting brwoser to wait for each visualization to
+signal that it is done renderings. Defaults to `30000` (30 seconds).
+
+[NOTE]
+============
+If any timeouts from `xpack.reporting.capture.timeouts.*` settings occur when
+running a report job, Reporting will log the error and try to continue
+capturing the page with a screenshot. As a result, a download will be
+available, but there will likely be errors in the visualizations in the report.
+============
 
 `xpack.reporting.capture.maxAttempts`::
 If capturing a report fails for any reason, Kibana will re-attempt othe reporting

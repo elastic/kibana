@@ -22,7 +22,6 @@ import { resolve as resolveUrl } from 'url';
 
 import {
   SavedObject,
-  SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
@@ -33,9 +32,10 @@ import {
 import {
   isAutoCreateIndexError,
   showAutoCreateIndexErrorPage,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
-import { HttpFetchOptions, HttpServiceBase } from '../http';
+import { HttpFetchOptions, HttpSetup } from '../http';
 
 type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
 
@@ -60,9 +60,7 @@ export interface SavedObjectsCreateOptions {
  *
  * @public
  */
-export interface SavedObjectsBulkCreateObject<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> extends SavedObjectsCreateOptions {
+export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions {
   type: string;
   attributes: T;
 }
@@ -74,6 +72,20 @@ export interface SavedObjectsBulkCreateOptions {
 }
 
 /** @public */
+export interface SavedObjectsBulkUpdateObject<T = unknown> {
+  type: string;
+  id: string;
+  attributes: T;
+  version?: string;
+  references?: SavedObjectReference[];
+}
+
+/** @public */
+export interface SavedObjectsBulkUpdateOptions {
+  namespace?: string;
+}
+
+/** @public */
 export interface SavedObjectsUpdateOptions {
   version?: string;
   /** {@inheritDoc SavedObjectsMigrationVersion} */
@@ -82,9 +94,7 @@ export interface SavedObjectsUpdateOptions {
 }
 
 /** @public */
-export interface SavedObjectsBatchResponse<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> {
+export interface SavedObjectsBatchResponse<T = unknown> {
   savedObjects: Array<SimpleSavedObject<T>>;
 }
 
@@ -96,9 +106,7 @@ export interface SavedObjectsBatchResponse<
  *
  * @public
  */
-export interface SavedObjectsFindResponsePublic<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> {
   total: number;
   perPage: number;
   page: number;
@@ -107,7 +115,7 @@ export interface SavedObjectsFindResponsePublic<
 interface BatchQueueEntry {
   type: string;
   id: string;
-  resolve: <T extends SavedObjectAttributes>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
+  resolve: <T = unknown>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
   reject: (reason?: any) => void;
 }
 
@@ -141,7 +149,7 @@ export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
  * @public
  */
 export class SavedObjectsClient {
-  private http: HttpServiceBase;
+  private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
 
   /**
@@ -177,7 +185,7 @@ export class SavedObjectsClient {
   );
 
   /** @internal */
-  constructor(http: HttpServiceBase) {
+  constructor(http: HttpSetup) {
     this.http = http;
     this.batchQueue = [];
   }
@@ -190,7 +198,7 @@ export class SavedObjectsClient {
    * @param options
    * @returns
    */
-  public create = <T extends SavedObjectAttributes>(
+  public create = <T = unknown>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -283,7 +291,7 @@ export class SavedObjectsClient {
    * @property {object} [options.hasReference] - { type, id }
    * @returns A find result with objects matching the specified search.
    */
-  public find = <T extends SavedObjectAttributes>(
+  public find = <T = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
@@ -331,10 +339,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns The saved object for the given type and id.
    */
-  public get = <T extends SavedObjectAttributes>(
-    type: string,
-    id: string
-  ): Promise<SimpleSavedObject<T>> => {
+  public get = <T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
@@ -385,7 +390,7 @@ export class SavedObjectsClient {
    * @prop {object} options.migrationVersion - The optional migrationVersion of this document
    * @returns
    */
-  public update<T extends SavedObjectAttributes>(
+  public update<T = unknown>(
     type: string,
     id: string,
     attributes: T,
@@ -411,9 +416,28 @@ export class SavedObjectsClient {
     });
   }
 
-  private createSavedObject<T extends SavedObjectAttributes>(
-    options: SavedObject<T>
-  ): SimpleSavedObject<T> {
+  /**
+   * Update multiple documents at once
+   *
+   * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
+   * @returns The result of the update operation containing both failed and updated saved objects.
+   */
+  public bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[] = []) {
+    const path = this.getPath(['_bulk_update']);
+
+    return this.savedObjectsFetch(path, {
+      method: 'PUT',
+      body: JSON.stringify(objects),
+    }).then(resp => {
+      resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
+      return renameKeys<
+        PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,
+        SavedObjectsBatchResponse
+      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
+    });
+  }
+
+  private createSavedObject<T = unknown>(options: SavedObject<T>): SimpleSavedObject<T> {
     return new SimpleSavedObject(this, options);
   }
 
@@ -427,11 +451,7 @@ export class SavedObjectsClient {
    * uses `{response: {status: number}}`.
    */
   private savedObjectsFetch(path: string, { method, query, body }: HttpFetchOptions) {
-    return this.http.fetch(path, { method, query, body }).catch(err => {
-      const kfetchError = Object.assign(err, { res: err.response });
-      delete kfetchError.response;
-      return Promise.reject(kfetchError);
-    });
+    return this.http.fetch(path, { method, query, body });
   }
 }
 

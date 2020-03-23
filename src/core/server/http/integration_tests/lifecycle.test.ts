@@ -18,48 +18,28 @@
  */
 
 import supertest from 'supertest';
-import { ByteSizeValue } from '@kbn/config-schema';
 import request from 'request';
-import { BehaviorSubject } from 'rxjs';
 
 import { ensureRawRequest } from '../router';
 import { HttpService } from '../http_service';
 
-import { CoreContext } from '../../core_context';
-import { Env } from '../../config';
-import { getEnvOptions } from '../../config/__mocks__/env';
-import { configServiceMock } from '../../config/config_service.mock';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { createHttpServer } from '../test_utils';
 
 let server: HttpService;
 
 let logger: ReturnType<typeof loggingServiceMock.create>;
-let env: Env;
-let coreContext: CoreContext;
-const configService = configServiceMock.create();
+
 const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
   context: contextSetup,
 };
-configService.atPath.mockReturnValue(
-  new BehaviorSubject({
-    hosts: ['localhost'],
-    maxPayload: new ByteSizeValue(1024),
-    autoListen: true,
-    ssl: {
-      enabled: false,
-    },
-  } as any)
-);
 
 beforeEach(() => {
   logger = loggingServiceMock.create();
-  env = Env.createDefault(getEnvOptions());
-
-  coreContext = { coreId: Symbol('core'), env, logger, configService: configService as any };
-  server = new HttpService(coreContext);
+  server = createHttpServer({ logger });
 });
 
 afterEach(async () => {
@@ -77,7 +57,7 @@ interface StorageData {
 }
 
 describe('OnPreAuth', () => {
-  it('supports registering request inceptors', async () => {
+  it('supports registering a request interceptor', async () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
@@ -181,7 +161,7 @@ describe('OnPreAuth', () => {
     expect(result.header['www-authenticate']).toBe('challenge');
   });
 
-  it("doesn't expose error details if interceptor throws", async () => {
+  it('does not expose error details if interceptor throws', async () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
@@ -408,7 +388,7 @@ describe('Auth', () => {
   const cookieOptions = {
     name: 'sid',
     encryptionKey: 'something_at_least_32_characters',
-    validate: () => true,
+    validate: () => ({ isValid: true }),
     isSecure: false,
   };
 
@@ -433,6 +413,23 @@ describe('Auth', () => {
     await supertest(innerServer.listener)
       .get('/')
       .expect(200, { content: 'ok' });
+  });
+
+  it('blocks access to a resource if credentials are not provided', async () => {
+    const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({ body: { content: 'ok' } })
+    );
+    registerAuth((req, res, t) => t.notHandled());
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(401);
+
+    expect(result.body.message).toBe('Unauthorized');
   });
 
   it('enables auth for a route by default if registerAuth has been called', async () => {
@@ -512,11 +509,9 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     const redirectTo = '/redirect-url';
-    registerAuth((req, res) =>
-      res.redirected({
-        headers: {
-          location: redirectTo,
-        },
+    registerAuth((req, res, t) =>
+      t.redirected({
+        location: redirectTo,
       })
     );
     await server.start();
@@ -525,6 +520,19 @@ describe('Auth', () => {
       .get('/')
       .expect(302);
     expect(response.header.location).toBe(redirectTo);
+  });
+
+  it('throws if redirection url is not provided', async () => {
+    const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    registerAuth((req, res, t) => t.redirected({} as any));
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect(500);
   });
 
   it(`doesn't expose internal error details`, async () => {
@@ -741,6 +749,7 @@ describe('Auth', () => {
       res.ok({
         headers: {
           'www-authenticate': 'from handler',
+          'another-header': 'yet another header',
         },
       })
     );
@@ -754,7 +763,7 @@ describe('Auth', () => {
     expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Server rewrites a response header [www-authenticate].",
+          "onPreResponseHandler rewrote a response header [www-authenticate].",
         ],
       ]
     `);
@@ -789,7 +798,7 @@ describe('Auth', () => {
     expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Server rewrites a response header [www-authenticate].",
+          "onPreResponseHandler rewrote a response header [www-authenticate].",
         ],
       ]
     `);
@@ -884,7 +893,7 @@ describe('Auth', () => {
       ]
     `);
   });
-  // eslint-disable-next-line
+
   it(`doesn't share request object between interceptors`, async () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
@@ -911,5 +920,166 @@ describe('Auth', () => {
     await supertest(innerServer.listener)
       .get('/')
       .expect(200, { customField: 'undefined' });
+  });
+});
+
+describe('OnPreResponse', () => {
+  it('supports registering response inceptors', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+
+    const callingOrder: string[] = [];
+    registerOnPreResponse((req, res, t) => {
+      callingOrder.push('first');
+      return t.next();
+    });
+
+    registerOnPreResponse((req, res, t) => {
+      callingOrder.push('second');
+      return t.next();
+    });
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect(200, 'ok');
+
+    expect(callingOrder).toEqual(['first', 'second']);
+  });
+
+  it('supports additional headers attachments', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({
+        headers: {
+          'x-my-header': 'foo',
+        },
+      })
+    );
+
+    registerOnPreResponse((req, res, t) =>
+      t.next({
+        headers: {
+          'x-kibana-header': 'value',
+        },
+      })
+    );
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(200);
+
+    expect(result.header['x-kibana-header']).toBe('value');
+    expect(result.header['x-my-header']).toBe('foo');
+  });
+
+  it('logs a warning if interceptor rewrites response header', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({
+        headers: { 'x-kibana-header': 'value' },
+      })
+    );
+    registerOnPreResponse((req, res, t) =>
+      t.next({
+        headers: { 'x-kibana-header': 'value' },
+      })
+    );
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect(200);
+
+    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "onPreResponseHandler rewrote a response header [x-kibana-header].",
+        ],
+      ]
+    `);
+  });
+
+  it("doesn't expose error details if interceptor throws", async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
+    registerOnPreResponse((req, res, t) => {
+      throw new Error('reason');
+    });
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(500);
+
+    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          [Error: reason],
+        ],
+      ]
+    `);
+  });
+
+  it('returns internal error if interceptor returns unexpected result', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    registerOnPreResponse((req, res, t) => ({} as any));
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(500);
+
+    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          [Error: Unexpected result from OnPreResponse. Expected OnPreResponseResult, but given: [object Object].],
+        ],
+      ]
+    `);
+  });
+
+  it('cannot change response statusCode', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    registerOnPreResponse((req, res, t) => {
+      res.statusCode = 500;
+      return t.next();
+    });
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect(200);
   });
 });

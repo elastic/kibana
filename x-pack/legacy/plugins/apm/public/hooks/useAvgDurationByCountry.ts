@@ -9,7 +9,7 @@ import { useUrlParams } from './useUrlParams';
 
 export function useAvgDurationByCountry() {
   const {
-    urlParams: { serviceName, start, end },
+    urlParams: { serviceName, start, end, transactionName },
     uiFilters
   } = useUrlParams();
 
@@ -24,13 +24,14 @@ export function useAvgDurationByCountry() {
             query: {
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters)
+              uiFilters: JSON.stringify(uiFilters),
+              transactionName
             }
           }
         });
       }
     },
-    [serviceName, start, end, uiFilters]
+    [serviceName, start, end, uiFilters, transactionName]
   );
 
   return {

@@ -4,8 +4,7 @@
 [float]
 === Hosted Kibana
 
-If you are running our https://cloud.elastic.co[hosted Elasticsearch Service]
-on Elastic Cloud, you can access Kibana with a single click.
+If you are running our hosted Elasticsearch Service on Elastic Cloud, you access Kibana with a single click. (You can {ess-trial}[sign up for a free trial] and start exploring data in minutes.)
 
 [float]
 === Installing Kibana Yourself
@@ -54,8 +53,8 @@ Formulae are available from the Elastic Homebrew tap for installing {kib} on mac
 <<brew>>
 
 IMPORTANT: If your Elasticsearch installation is protected by
-{xpack-ref}/elasticsearch-security.html[{security}] see
-{kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana] for
+{ref}/elasticsearch-security.html[{security}] see
+{kibana-ref}/using-kibana-with-security.html[Configuring security in Kibana] for
 additional setup instructions.
 
 include::install/targz.asciidoc[]

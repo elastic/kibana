@@ -147,6 +147,11 @@ describe('getInfraHref', () => {
     expect(getInfraKubernetesHref(summary, '')).toBeUndefined();
   });
 
+  it('getInfraKubernetesHref returns undefined when checks are null', () => {
+    summary.state.checks![0]!.kubernetes!.pod!.uid = null;
+    expect(getInfraKubernetesHref(summary, '')).toBeUndefined();
+  });
+
   it('getInfraIpHref creates a link for valid parameters', () => {
     const result = getInfraIpHref(summary, 'bar');
     expect(result).toMatchSnapshot();
@@ -158,6 +163,11 @@ describe('getInfraHref', () => {
 
   it('getInfraIpHref returns undefined when ip is undefined', () => {
     summary.state.checks = [];
+    expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
+  });
+
+  it('getInfraIpHref returns undefined when ip is null', () => {
+    summary.state.checks![0].monitor.ip = null;
     expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
   });
 

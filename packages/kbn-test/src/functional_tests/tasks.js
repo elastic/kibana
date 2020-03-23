@@ -59,6 +59,19 @@ const makeSuccessMessage = options => {
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function runTests(options) {
+  if (!process.env.KBN_NP_PLUGINS_BUILT) {
+    const log = options.createLogger();
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning(
+      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
+    );
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+  }
+
   for (const configPath of options.configs) {
     const log = options.createLogger();
     const opts = {
@@ -82,12 +95,20 @@ export async function runTests(options) {
     await withProcRunner(log, async procs => {
       const config = await readConfigFile(log, configPath);
 
-      const es = await runElasticsearch({ config, options: opts });
-      await runKibanaServer({ procs, config, options: opts });
-      await runFtr({ configPath, options: opts });
-
-      await procs.stop('kibana');
-      await es.cleanup();
+      let es;
+      try {
+        es = await runElasticsearch({ config, options: opts });
+        await runKibanaServer({ procs, config, options: opts });
+        await runFtr({ configPath, options: opts });
+      } finally {
+        try {
+          await procs.stop('kibana');
+        } finally {
+          if (es) {
+            await es.cleanup();
+          }
+        }
+      }
     });
   }
 }

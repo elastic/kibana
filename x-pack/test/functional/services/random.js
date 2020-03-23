@@ -13,7 +13,7 @@ export function RandomProvider({ getService }) {
   log.debug('randomness seed: %j', seed);
   const chance = new Chance(seed);
 
-  return new class Random {
+  return new (class Randomness {
     int(min = 3, max = 15) {
       return chance.integer({ min, max });
     }
@@ -37,5 +37,5 @@ export function RandomProvider({ getService }) {
     pickOne(list) {
       return chance.pickone(list);
     }
-  };
+  })();
 }

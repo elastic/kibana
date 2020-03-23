@@ -9,12 +9,12 @@ import {
   euiStyled,
   EuiTheme,
   EuiThemeProvider,
-  injectGlobal,
+  createGlobalStyle,
   keyframes,
   withTheme,
 } from './eui_styled_components';
 
-export { css, euiStyled, EuiTheme, EuiThemeProvider, injectGlobal, keyframes, withTheme };
+export { css, euiStyled, EuiTheme, EuiThemeProvider, createGlobalStyle, keyframes, withTheme };
 // In order to to mimic the styled-components module we need to ignore the following
 // eslint-disable-next-line import/no-default-export
 export default euiStyled;

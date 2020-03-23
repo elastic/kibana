@@ -17,14 +17,15 @@
  * under the License.
  */
 
-import { Plugin } from '.';
+import { EmbeddableStart, EmbeddableSetup } from '.';
+import { EmbeddablePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
 
 // eslint-disable-next-line
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
-export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
+export type Setup = jest.Mocked<EmbeddableSetup>;
+export type Start = jest.Mocked<EmbeddableStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
@@ -35,7 +36,6 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    registerEmbeddableFactory: jest.fn(),
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
   };
@@ -43,7 +43,7 @@ const createStartContract = (): Start => {
 };
 
 const createInstance = () => {
-  const plugin = new Plugin({} as any);
+  const plugin = new EmbeddablePublicPlugin({} as any);
   const setup = plugin.setup(coreMock.createSetup(), {
     uiActions: uiActionsPluginMock.createSetupContract(),
   });

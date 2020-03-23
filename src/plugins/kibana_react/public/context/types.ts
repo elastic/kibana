@@ -22,8 +22,6 @@ import { CoreStart } from '../../../../core/public';
 import { KibanaReactOverlays } from '../overlays';
 import { KibanaReactNotifications } from '../notifications';
 
-export { CoreStart };
-
 export type KibanaServices = Partial<CoreStart>;
 
 export interface KibanaReactContextValue<Services extends KibanaServices> {

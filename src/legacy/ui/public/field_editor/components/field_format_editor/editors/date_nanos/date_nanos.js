@@ -19,21 +19,11 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiCode,
-  EuiFieldText,
-  EuiFormRow,
-  EuiIcon,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
-import {
-  DefaultFormatEditor
-} from '../default';
+import { DefaultFormatEditor } from '../default';
 
-import {
-  FormatEditorSamples
-} from '../../samples';
+import { FormatEditorSamples } from '../../samples';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -45,7 +35,7 @@ export class DateNanosFormatEditor extends DefaultFormatEditor {
     this.state.sampleInputs = [
       '2015-01-01T12:10:30.123456789Z',
       '2019-05-08T06:55:21.567891234Z',
-      '2019-08-06T17:22:30.987654321Z'
+      '2019-08-06T17:22:30.987654321Z',
     ];
   }
 
@@ -62,7 +52,7 @@ export class DateNanosFormatEditor extends DefaultFormatEditor {
               id="common.ui.fieldEditor.date.momentLabel"
               defaultMessage="Moment.js format pattern (Default: {defaultPattern})"
               values={{
-                defaultPattern: <EuiCode>{defaultPattern}</EuiCode>
+                defaultPattern: <EuiCode>{defaultPattern}</EuiCode>,
               }}
             />
           }
@@ -71,7 +61,11 @@ export class DateNanosFormatEditor extends DefaultFormatEditor {
           helpText={
             <span>
               <EuiLink target="_blank" href="https://momentjs.com/">
-                <FormattedMessage id="common.ui.fieldEditor.date.documentationLabel" defaultMessage="Documentation" />&nbsp;
+                <FormattedMessage
+                  id="common.ui.fieldEditor.date.documentationLabel"
+                  defaultMessage="Documentation"
+                />
+                &nbsp;
                 <EuiIcon type="link" />
               </EuiLink>
             </span>
@@ -81,15 +75,13 @@ export class DateNanosFormatEditor extends DefaultFormatEditor {
             data-test-subj="dateEditorPattern"
             value={formatParams.pattern}
             placeholder={defaultPattern}
-            onChange={(e) => {
+            onChange={e => {
               this.onChange({ pattern: e.target.value });
             }}
             isInvalid={!!error}
           />
         </EuiFormRow>
-        <FormatEditorSamples
-          samples={samples}
-        />
+        <FormatEditorSamples samples={samples} />
       </Fragment>
     );
   }

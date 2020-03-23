@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
-import { ESFilter } from 'elasticsearch';
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE
-} from '../../../common/elasticsearch_fieldnames';
-import { getMlJobId, getMlPrefix } from '../../../common/ml_job_constants';
+} from '../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import {
+  getMlJobId,
+  getMlPrefix
+} from '../../../../../../plugins/apm/common/ml_job_constants';
 import { callApi } from './callApi';
+import { ESFilter } from '../../../../../../plugins/apm/typings/elasticsearch';
+import { callApmApi } from './createCallApmApi';
 
 interface MlResponseItem {
   id: string;
@@ -32,7 +35,13 @@ interface StartedMLJobApiResponse {
   jobs: MlResponseItem[];
 }
 
-const { core } = npStart;
+async function getTransactionIndices(http: HttpSetup) {
+  const indices = await callApmApi({
+    method: 'GET',
+    pathname: `/api/apm/settings/apm-indices`
+  });
+  return indices['apm_oss.transactionIndices'];
+}
 
 export async function startMLJob({
   serviceName,
@@ -41,11 +50,9 @@ export async function startMLJob({
 }: {
   serviceName: string;
   transactionType: string;
-  http: HttpServiceBase;
+  http: HttpSetup;
 }) {
-  const indexPatternName = core.injectedMetadata.getInjectedVar(
-    'apmTransactionIndices'
-  );
+  const transactionIndices = await getTransactionIndices(http);
   const groups = ['apm', serviceName.toLowerCase()];
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -56,17 +63,17 @@ export async function startMLJob({
   return callApi<StartedMLJobApiResponse>(http, {
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,
-    body: JSON.stringify({
+    body: {
       prefix: getMlPrefix(serviceName, transactionType),
       groups,
-      indexPatternName,
+      indexPatternName: transactionIndices,
       startDatafeed: true,
       query: {
         bool: {
           filter
         }
       }
-    })
+    }
   });
 }
 
@@ -85,7 +92,7 @@ export async function getHasMLJob({
 }: {
   serviceName: string;
   transactionType: string;
-  http: HttpServiceBase;
+  http: HttpSetup;
 }) {
   try {
     await callApi<MLJobApiResponse>(http, {

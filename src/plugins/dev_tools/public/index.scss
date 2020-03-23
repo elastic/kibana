@@ -1,0 +1,21 @@
+// Prefix all styles with "dev" to avoid conflicts.
+// Examples
+//   devChart
+//   devChart__legend
+//   devChart__legend--small
+//   devChart__legend-isLoading
+
+.devApp__container,
+.devApp {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+.devApp {
+  height: 100%;
+}

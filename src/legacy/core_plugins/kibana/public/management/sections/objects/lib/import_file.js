@@ -31,7 +31,7 @@ export async function importFile(file, overwriteAll = false) {
       'Content-Type': undefined,
     },
     query: {
-      overwrite: overwriteAll
+      overwrite: overwriteAll,
     },
   });
 }

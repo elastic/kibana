@@ -46,7 +46,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */
-    goToTimeRange(fromTime = '2015-09-19 06:31:44.000', toTime = '2015-09-23 18:31:44.000') {
+    goToTimeRange(fromTime?: string, toTime?: string) {
+      fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
+      toTime = toTime || PageObjects.timePicker.defaultEndTime;
       return PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     },
 
@@ -101,8 +103,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the specified dimension to the specified operation and (optinally) field.
      *
-     * @param opts.from - the text of the dimension being changed
-     * @param opts.to - the desired operation for the dimension
+     * @param opts.dimension - the selector of the dimension being changed
+     * @param opts.operation - the desired operation ID for the dimension
      * @param opts.field - the desired field for the dimension
      */
     async configureDimension(opts: { dimension: string; operation?: string; field?: string }) {
@@ -122,18 +124,31 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Save the current Lens visualization.
+     * Removes the dimension matching a specific test subject
      */
-    save() {
-      return testSubjects.click('lnsApp_saveButton');
+    async removeDimension(dimensionTestSubj: string) {
+      await find.clickByCssSelector(
+        `[data-test-subj="${dimensionTestSubj}"] [data-test-subj="indexPattern-dimensionPopover-remove"]`
+      );
     },
 
-    setTitle(title: string) {
-      return testSubjects.setValue('lns_ChartTitle', title);
+    /**
+     * Save the current Lens visualization.
+     */
+    async save(title: string) {
+      await testSubjects.click('lnsApp_saveButton');
+      await testSubjects.setValue('savedObjectTitle', title);
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+        testSubjects
+          .missingOrFail('confirmSaveSavedObjectButton')
+          .then(() => true)
+          .catch(() => false)
+      );
     },
 
     getTitle() {
-      return testSubjects.getAttribute('lns_ChartTitle', 'value');
+      return testSubjects.getVisibleText('lns_ChartTitle');
     },
   });
 }

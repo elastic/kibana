@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Render } from '../../../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   column: string;
   compact: boolean;
   filterGroup: string;
 }
-export function timefilterControl(): ExpressionFunction<
+export function timefilterControl(): ExpressionFunctionDefinition<
   'timefilterControl',
   null,
   Arguments,
@@ -25,9 +25,7 @@ export function timefilterControl(): ExpressionFunction<
     name: 'timefilterControl',
     aliases: [],
     type: 'render',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     help,
     args: {
       column: {
@@ -36,6 +34,7 @@ export function timefilterControl(): ExpressionFunction<
         help: argHelp.column,
         default: '@timestamp',
       },
+      // TODO: remove this deprecated arg
       compact: {
         types: ['boolean'],
         help: argHelp.compact,
@@ -47,7 +46,7 @@ export function timefilterControl(): ExpressionFunction<
         help: argHelp.filterGroup,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       return {
         type: 'render',
         as: 'time_filter',

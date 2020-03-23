@@ -6,18 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  loadJobs as sendLoadJobsRequest,
-  deserializeJobs,
-  showApiError,
-} from '../../services';
-import {
-  LOAD_JOBS_START,
-  LOAD_JOBS_SUCCESS,
-  LOAD_JOBS_FAILURE,
-} from '../action_types';
+import { loadJobs as sendLoadJobsRequest, deserializeJobs, showApiError } from '../../services';
+import { LOAD_JOBS_START, LOAD_JOBS_SUCCESS, LOAD_JOBS_FAILURE } from '../action_types';
 
-export const loadJobs = () => async (dispatch) => {
+export const loadJobs = () => async dispatch => {
   dispatch({
     type: LOAD_JOBS_START,
   });
@@ -28,16 +20,19 @@ export const loadJobs = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: LOAD_JOBS_FAILURE,
-      payload: { error }
+      payload: { error },
     });
 
-    return showApiError(error, i18n.translate('xpack.rollupJobs.loadAction.errorTitle', {
-      defaultMessage: 'Error loading rollup jobs',
-    }));
+    return showApiError(
+      error,
+      i18n.translate('xpack.rollupJobs.loadAction.errorTitle', {
+        defaultMessage: 'Error loading rollup jobs',
+      })
+    );
   }
 
   dispatch({
     type: LOAD_JOBS_SUCCESS,
-    payload: { jobs: deserializeJobs(jobs) }
+    payload: { jobs: deserializeJobs(jobs) },
   });
 };

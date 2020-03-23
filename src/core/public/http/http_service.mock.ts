@@ -20,12 +20,14 @@
 import { HttpService } from './http_service';
 import { HttpSetup } from './types';
 import { BehaviorSubject } from 'rxjs';
+import { BasePath } from './base_path';
 
-type ServiceSetupMockType = jest.Mocked<HttpSetup> & {
-  basePath: jest.Mocked<HttpSetup['basePath']>;
+export type HttpSetupMock = jest.Mocked<HttpSetup> & {
+  basePath: BasePath;
+  anonymousPaths: jest.Mocked<HttpSetup['anonymousPaths']>;
 };
 
-const createServiceMock = ({ basePath = '' } = {}): ServiceSetupMockType => ({
+const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   fetch: jest.fn(),
   get: jest.fn(),
   head: jest.fn(),
@@ -34,20 +36,18 @@ const createServiceMock = ({ basePath = '' } = {}): ServiceSetupMockType => ({
   patch: jest.fn(),
   delete: jest.fn(),
   options: jest.fn(),
-  basePath: {
-    get: jest.fn(() => basePath),
-    prepend: jest.fn(path => `${basePath}${path}`),
-    remove: jest.fn(),
+  basePath: new BasePath(basePath),
+  anonymousPaths: {
+    register: jest.fn(),
+    isAnonymous: jest.fn(),
   },
-  addLoadingCount: jest.fn(),
+  addLoadingCountSource: jest.fn(),
   getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
-  stop: jest.fn(),
   intercept: jest.fn(),
-  removeAllInterceptors: jest.fn(),
 });
 
 const createMock = ({ basePath = '' } = {}) => {
-  const mocked: jest.Mocked<Required<HttpService>> = {
+  const mocked: jest.Mocked<PublicMethodsOf<HttpService>> = {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),

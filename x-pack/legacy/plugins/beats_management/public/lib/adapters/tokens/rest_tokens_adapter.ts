@@ -12,12 +12,11 @@ export class RestTokensAdapter implements CMTokensAdapter {
   constructor(private readonly REST: RestAPIAdapter) {}
 
   public async createEnrollmentTokens(numTokens: number = 1): Promise<string[]> {
-    const results = (await this.REST.post<ReturnTypeBulkCreate<string>>(
-      '/api/beats/enrollment_tokens',
-      {
+    const results = (
+      await this.REST.post<ReturnTypeBulkCreate<string>>('/api/beats/enrollment_tokens', {
         num_tokens: numTokens,
-      }
-    )).results;
+      })
+    ).results;
     return results.map(result => result.item);
   }
 }

@@ -7,14 +7,13 @@
 import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { CountryFlag } from '../../../source_destination/country_flag';
 import {
   AutonomousSystemItem,
   FlowTargetSourceDest,
   NetworkTopNFlowEdges,
-  TopNFlowNetworkEcsField,
+  TopNetworkTablesEcsField,
 } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -32,8 +31,8 @@ export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
-  Columns<TopNFlowNetworkEcsField['bytes_in']>,
-  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<TopNetworkTablesEcsField['bytes_in']>,
+  Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>
 ];
@@ -42,15 +41,13 @@ export type NetworkTopNFlowColumnsIpDetails = [
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
-  Columns<TopNFlowNetworkEcsField['bytes_in']>,
-  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<TopNetworkTablesEcsField['bytes_in']>,
+  Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopNFlowEdges>
 ];
 
 export const getNetworkTopNFlowColumns = (
-  indexPattern: StaticIndexPattern,
   flowTarget: FlowTargetSourceDest,
-  type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopNFlowColumns => [
   {
@@ -83,7 +80,7 @@ export const getNetworkTopNFlowColumns = (
                     <Provider dataProvider={dataProvider} />
                   </DragEffects>
                 ) : (
-                  <IPDetailsLink ip={ip} />
+                  <IPDetailsLink ip={ip} flowTarget={flowTarget} />
                 )
               }
             />
@@ -233,12 +230,11 @@ export const getNetworkTopNFlowColumns = (
 ];
 
 export const getNFlowColumnsCurated = (
-  indexPattern: StaticIndexPattern,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopNFlowColumns | NetworkTopNFlowColumnsIpDetails => {
-  const columns = getNetworkTopNFlowColumns(indexPattern, flowTarget, type, tableId);
+  const columns = getNetworkTopNFlowColumns(flowTarget, tableId);
 
   // Columns to exclude from host details pages
   if (type === networkModel.NetworkType.details) {

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
-<Connect(HostsTableComponent)
+<HostsTable
   data={
     Array [
       Object {
@@ -146,6 +146,12 @@ exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
         Object {
           "aggregatable": true,
           "name": "agent.test8",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "host.name",
           "searchable": true,
           "type": "string",
         },

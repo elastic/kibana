@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -37,15 +36,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Logs');
       });
 
       describe('logs landing page without data', () => {
         it(`shows 'Change source configuration' button`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'logs', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '', undefined, {
             basePath: '/s/custom_space',
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
@@ -78,19 +75,26 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.not.contain('Logs');
       });
 
-      it('logs landing page renders not found page', async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'logs', {
+      it(`logs app is inaccessible and Application Not Found message is rendered`, async () => {
+        await PageObjects.common.navigateToApp('infraLogs', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: true,
-          shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('~infraNotFoundPage');
+        await testSubjects.existOrFail('~appNotFoundPageContent');
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
+          'infraLogs',
+          '/stream',
+          undefined,
+          {
+            basePath: '/s/custom_space',
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
+        await testSubjects.existOrFail('~appNotFoundPageContent');
       });
     });
   });

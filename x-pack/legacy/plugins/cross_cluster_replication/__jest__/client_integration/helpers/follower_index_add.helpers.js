@@ -5,20 +5,20 @@
  */
 
 import { registerTestBed } from '../../../../../../test_utils';
-import { FollowerIndexAdd } from '../../../public/app/sections/follower_index_add';
-import { ccrStore } from '../../../public/app/store';
-import routing from '../../../public/app/services/routing';
+import { FollowerIndexAdd } from '../../../public/np_ready/app/sections/follower_index_add';
+import { ccrStore } from '../../../public/np_ready/app/store';
+import routing from '../../../public/np_ready/app/services/routing';
 
 const testBedConfig = {
   store: ccrStore,
   memoryRouter: {
-    onRouter: (router) => routing.reactRouter = router
-  }
+    onRouter: router => (routing.reactRouter = router),
+  },
 };
 
 const initTestBed = registerTestBed(FollowerIndexAdd, testBedConfig);
 
-export const setup = (props) => {
+export const setup = props => {
   const testBed = initTestBed(props);
 
   // User actions
@@ -27,14 +27,14 @@ export const setup = (props) => {
   };
 
   const toggleAdvancedSettings = () => {
-    testBed.form.selectCheckBox('advancedSettingsToggle');
+    testBed.form.toggleEuiSwitch('advancedSettingsToggle');
   };
 
   return {
     ...testBed,
     actions: {
       clickSaveForm,
-      toggleAdvancedSettings
-    }
+      toggleAdvancedSettings,
+    },
   };
 };

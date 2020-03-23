@@ -57,4 +57,10 @@ export class Delayed {
   public onChange(onChangeCallback: Callback) {
     this.onChangeCallback = onChangeCallback;
   }
+
+  public destroy() {
+    if (this.timeoutId) {
+      window.clearTimeout(this.timeoutId);
+    }
+  }
 }

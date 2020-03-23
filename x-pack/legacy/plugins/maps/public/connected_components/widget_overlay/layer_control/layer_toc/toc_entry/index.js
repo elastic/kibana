@@ -7,12 +7,9 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
-import { FLYOUT_STATE } from '../../../../../reducers/ui';
-import {
-  updateFlyout,
-  hideTOCDetails,
-  showTOCDetails,
-} from '../../../../../actions/ui_actions';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FLYOUT_STATE } from '../../../../../../../../../plugins/maps/public/reducers/ui.js';
+import { updateFlyout, hideTOCDetails, showTOCDetails } from '../../../../../actions/ui_actions';
 import { getIsReadOnly, getOpenTOCDetails } from '../../../../../selectors/ui_selectors';
 import {
   fitToLayerExtent,
@@ -20,9 +17,14 @@ import {
   toggleLayerVisible,
   removeTransientLayer,
   cloneLayer,
+  removeLayer,
 } from '../../../../../actions/map_actions';
 
-import { hasDirtyState, getSelectedLayer, isUsingSearch } from '../../../../../selectors/map_selectors';
+import {
+  hasDirtyState,
+  getSelectedLayer,
+  isUsingSearch,
+} from '../../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}, ownProps) {
   return {
@@ -36,7 +38,7 @@ function mapStateToProps(state = {}, ownProps) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return ({
+  return {
     openLayerPanel: async layerId => {
       await dispatch(removeTransientLayer());
       await dispatch(setSelectedLayer(layerId));
@@ -51,13 +53,16 @@ function mapDispatchToProps(dispatch) {
     cloneLayer: layerId => {
       dispatch(cloneLayer(layerId));
     },
+    removeLayer: layerId => {
+      dispatch(removeLayer(layerId));
+    },
     hideTOCDetails: layerId => {
       dispatch(hideTOCDetails(layerId));
     },
     showTOCDetails: layerId => {
       dispatch(showTOCDetails(layerId));
     },
-  });
+  };
 }
 
 const connectedTOCEntry = connect(mapStateToProps, mapDispatchToProps)(TOCEntry);

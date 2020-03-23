@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
+import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
+import { CONTEXT_GETTIMERANGE } from './constants';
 import { TimeRange } from './types';
 
 export const getTimeRange = async (
@@ -16,28 +17,30 @@ export const getTimeRange = async (
 ): Promise<TimeRange | null> => {
   logger.debug('getting timeRange');
 
-  const timeRange: TimeRange | null = await browser.evaluate({
-    fn: (fromAttribute, toAttribute) => {
-      const fromElement = document.querySelector(`[${fromAttribute}]`);
-      const toElement = document.querySelector(`[${toAttribute}]`);
+  const timeRange: TimeRange | null = await browser.evaluate(
+    {
+      fn: durationAttribute => {
+        const durationElement = document.querySelector(`[${durationAttribute}]`);
 
-      if (!fromElement || !toElement) {
-        return null;
-      }
+        if (!durationElement) {
+          return null;
+        }
 
-      const from = fromElement.getAttribute(fromAttribute);
-      const to = toElement.getAttribute(toAttribute);
-      if (!to || !from) {
-        return null;
-      }
+        const duration = durationElement.getAttribute(durationAttribute);
+        if (!duration) {
+          return null;
+        }
 
-      return { from, to };
+        return { duration };
+      },
+      args: [layout.selectors.timefilterDurationAttribute],
     },
-    args: [layout.selectors.timefilterFromAttribute, layout.selectors.timefilterToAttribute],
-  });
+    { context: CONTEXT_GETTIMERANGE },
+    logger
+  );
 
   if (timeRange) {
-    logger.debug(`timeRange from ${timeRange.from} to ${timeRange.to}`);
+    logger.info(`timeRange: ${timeRange.duration}`);
   } else {
     logger.debug('no timeRange');
   }

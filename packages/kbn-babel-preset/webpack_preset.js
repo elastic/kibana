@@ -25,7 +25,9 @@ module.exports = () => {
         {
           useBuiltIns: 'entry',
           modules: false,
-          corejs: 3,
+          // Please read the explanation for this
+          // in node_preset.js
+          corejs: '3.2.1',
         },
       ],
       require('./common_preset'),
@@ -33,6 +35,12 @@ module.exports = () => {
     plugins: [
       require.resolve('@babel/plugin-transform-modules-commonjs'),
       require.resolve('@babel/plugin-syntax-dynamic-import'),
-    ]
+      [
+        require.resolve('babel-plugin-styled-components'),
+        {
+          fileName: false,
+        },
+      ],
+    ],
   };
 };

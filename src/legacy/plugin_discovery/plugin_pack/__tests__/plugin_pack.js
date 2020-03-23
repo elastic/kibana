@@ -55,7 +55,7 @@ describe('plugin discovery/plugin pack', () => {
       sinon.assert.calledWithExactly(provider, {
         Plugin: sinon.match(Class => {
           return Class.prototype instanceof PluginSpec;
-        }, 'Subclass of PluginSpec')
+        }, 'Subclass of PluginSpec'),
       });
     });
 
@@ -68,7 +68,7 @@ describe('plugin discovery/plugin pack', () => {
       const pack = new PluginPack({
         path: '/dev/null',
         pkg: { name: 'foo', version: 'kibana' },
-        provider: ({ Plugin }) => new Plugin({})
+        provider: ({ Plugin }) => new Plugin({}),
       });
 
       const specs = pack.getPluginSpecs();
@@ -81,10 +81,7 @@ describe('plugin discovery/plugin pack', () => {
       const pack = new PluginPack({
         path: '/dev/null',
         pkg: { name: 'foo', version: 'kibana' },
-        provider: ({ Plugin }) => [
-          new Plugin({}),
-          new Plugin({}),
-        ]
+        provider: ({ Plugin }) => [new Plugin({}), new Plugin({})],
       });
 
       const specs = pack.getPluginSpecs();
@@ -99,9 +96,9 @@ describe('plugin discovery/plugin pack', () => {
       const otherPack = new PluginPack({
         path: '/dev/null',
         pkg: { name: 'foo', version: 'kibana' },
-        provider: (api) => {
+        provider: api => {
           OtherPluginSpecClass = api.Plugin;
-        }
+        },
       });
 
       // call getPluginSpecs() on other pack to get it's api.Plugin class
@@ -115,7 +112,7 @@ describe('plugin discovery/plugin pack', () => {
         new PluginPack({ provider: () => true }),
         new PluginPack({ provider: () => new Date() }),
         new PluginPack({ provider: () => /foo.*bar/ }),
-        new PluginPack({ provider: () => function () {} }),
+        new PluginPack({ provider: () => function() {} }),
         new PluginPack({ provider: () => new OtherPluginSpecClass({}) }),
       ];
 

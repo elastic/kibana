@@ -5,16 +5,14 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
-import * as React from 'react';
+import React from 'react';
 
 import { TruncatableText } from '.';
 
 describe('TruncatableText', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<TruncatableText>{'Hiding in plain sight'}</TruncatableText>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it adds the hidden overflow style', () => {

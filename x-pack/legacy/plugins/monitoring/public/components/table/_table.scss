@@ -39,3 +39,8 @@
 .monTableCell__splitNumber {
   @include euiFontSizeM;
 }
+
+.monElasticsearchIndicesTable__status {
+  display: flex;
+  align-items: center;
+}

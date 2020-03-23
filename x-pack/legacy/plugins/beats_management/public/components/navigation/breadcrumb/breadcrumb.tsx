@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Component } from 'react';
-import { RouteProps } from 'react-router';
+import { RouteProps } from 'react-router-dom';
 import { BASE_PATH } from '../../../../common/constants';
 import { BreadcrumbConsumer } from './consumer';
 import { Breadcrumb as BreadcrumbData, BreadcrumbContext } from './types';
@@ -48,7 +48,7 @@ interface BreadcrumbProps extends RouteProps {
   parentBreadcrumbs?: BreadcrumbData[];
 }
 
-export const Breadcrumb: React.SFC<BreadcrumbProps> = ({ title, path, parentBreadcrumbs }) => (
+export const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, path, parentBreadcrumbs }) => (
   <BreadcrumbConsumer>
     {context => (
       <BreadcrumbManager

@@ -50,7 +50,7 @@ export class FieldFormatEditor extends PureComponent {
 
     return (
       <Fragment>
-        { EditorComponent ? (
+        {EditorComponent ? (
           <EditorComponent
             fieldType={fieldType}
             format={fieldFormat}

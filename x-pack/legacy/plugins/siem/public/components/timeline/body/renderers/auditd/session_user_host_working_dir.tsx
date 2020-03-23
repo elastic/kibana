@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { DraggableBadge } from '../../../../draggables';
 
@@ -25,7 +24,7 @@ interface Props {
   session: string | null | undefined;
 }
 
-export const SessionUserHostWorkingDir = pure<Props>(
+export const SessionUserHostWorkingDir = React.memo<Props>(
   ({ eventId, contextId, hostName, userName, primary, secondary, workingDirectory, session }) => (
     <>
       <TokensFlexItem grow={false} component="span">

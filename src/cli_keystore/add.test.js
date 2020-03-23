@@ -17,22 +17,23 @@
  * under the License.
  */
 
-const mockKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH'
-  + 'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M'
-  + 'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
+const mockKeystoreData =
+  '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH' +
+  'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M' +
+  'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
 jest.mock('fs', () => ({
-  readFileSync: jest.fn().mockImplementation((path) => {
+  readFileSync: jest.fn().mockImplementation(path => {
     if (!path.includes('nonexistent')) {
       return JSON.stringify(mockKeystoreData);
     }
 
     throw { code: 'ENOENT' };
   }),
-  existsSync: jest.fn().mockImplementation((path) => {
+  existsSync: jest.fn().mockImplementation(path => {
     return !path.includes('nonexistent');
   }),
-  writeFileSync: jest.fn()
+  writeFileSync: jest.fn(),
 }));
 
 import sinon from 'sinon';
@@ -61,7 +62,7 @@ describe('Kibana keystore', () => {
 
     it('returns an error for a nonexistent keystore', async () => {
       const keystore = new Keystore('/data/nonexistent.keystore');
-      const message = 'ERROR: Kibana keystore not found. Use \'create\' command to create one.';
+      const message = "ERROR: Kibana keystore not found. Use 'create' command to create one.";
 
       await add(keystore, 'foo');
 
@@ -130,7 +131,6 @@ describe('Kibana keystore', () => {
 
     it('persists updated keystore', async () => {
       prompt.question.returns(Promise.resolve('bar\n'));
-
 
       const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');

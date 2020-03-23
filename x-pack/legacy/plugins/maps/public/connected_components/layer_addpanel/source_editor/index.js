@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { connect } from 'react-redux';
 import { SourceEditor } from './view';
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../../../plugins/maps/public/reducers/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
@@ -18,4 +17,3 @@ function mapStateToProps(state = {}) {
 
 const connectedFlyOut = connect(mapStateToProps)(SourceEditor);
 export { connectedFlyOut as SourceEditor };
-

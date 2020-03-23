@@ -17,12 +17,12 @@
  * under the License.
  */
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
 import { createMarkdownVisFn } from './markdown_fn';
 
 describe('interpreter/functions#markdown', () => {
-  const fn = functionWrapper(createMarkdownVisFn);
+  const fn = functionWrapper(createMarkdownVisFn());
   const args = {
     font: { spec: { fontSize: 12 } },
     openLinksInNewTab: true,

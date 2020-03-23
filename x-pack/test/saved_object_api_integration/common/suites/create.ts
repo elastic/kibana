@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -82,7 +82,6 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     // query ES directory to ensure namespace was or wasn't specified
     const { _source } = await es.get({
       id: `${expectedSpacePrefix}${spaceAwareType}:${resp.body.id}`,
-      type: '_doc',
       index: '.kibana',
     });
 
@@ -121,7 +120,6 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     // query ES directory to ensure namespace wasn't specified
     const { _source } = await es.get({
       id: `${notSpaceAwareType}:${resp.body.id}`,
-      type: '_doc',
       index: '.kibana',
     });
 

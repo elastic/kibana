@@ -22,6 +22,10 @@ import { TStrategyTypes } from './strategy_types';
 import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../common/search/es_search';
 import { IEsSearchRequest } from './es_search';
 
+export interface ISearchOptions {
+  signal?: AbortSignal;
+}
+
 export interface IRequestTypesMap {
   [ES_SEARCH_STRATEGY]: IEsSearchRequest;
   [key: string]: IKibanaSearchRequest;
@@ -34,9 +38,18 @@ export interface IResponseTypesMap {
 
 export type ISearchGeneric = <T extends TStrategyTypes = typeof ES_SEARCH_STRATEGY>(
   request: IRequestTypesMap[T],
+  options?: ISearchOptions,
   strategy?: T
 ) => Promise<IResponseTypesMap[T]>;
 
+export type ISearchCancelGeneric = <T extends TStrategyTypes = typeof ES_SEARCH_STRATEGY>(
+  id: string,
+  strategy?: T
+) => Promise<void>;
+
 export type ISearch<T extends TStrategyTypes> = (
-  request: IRequestTypesMap[T]
+  request: IRequestTypesMap[T],
+  options?: ISearchOptions
 ) => Promise<IResponseTypesMap[T]>;
+
+export type ISearchCancel<T extends TStrategyTypes> = (id: string) => Promise<void>;

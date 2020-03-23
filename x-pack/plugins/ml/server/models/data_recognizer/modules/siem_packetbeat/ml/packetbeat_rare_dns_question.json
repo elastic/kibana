@@ -1,0 +1,38 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "SIEM Packetbeat: Looks for unusual DNS activity that could indicate command-and-control activity (beta)",
+  "groups": [
+    "siem",
+    "packetbeat",
+    "dns"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "rare by \"dns.question.name\"",
+        "function": "rare",
+        "by_field_name": "dns.question.name"
+      }
+    ],
+    "influencers": [
+      "host.name"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-siem-packetbeat",
+    "custom_urls": [
+      {
+        "url_name": "Host Details",
+        "url_value": "siem#/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      }
+    ]
+  }
+}

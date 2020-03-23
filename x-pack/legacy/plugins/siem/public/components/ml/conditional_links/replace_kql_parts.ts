@@ -9,8 +9,5 @@ import { replaceKqlCommasWithOr } from './replace_kql_commas_with_or';
 import { removeKqlVariables } from './remove_kql_variables';
 
 export const replaceKQLParts = (kqlQuery: string): string => {
-  return flow(
-    replaceKqlCommasWithOr,
-    removeKqlVariables
-  )(kqlQuery);
+  return flow(replaceKqlCommasWithOr, removeKqlVariables)(kqlQuery);
 };

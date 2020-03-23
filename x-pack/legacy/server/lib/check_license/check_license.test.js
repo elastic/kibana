@@ -13,34 +13,41 @@ import {
   LICENSE_TYPE_BASIC,
 } from '../../../common/constants';
 
-describe('check_license', function () {
-
+describe('check_license', function() {
   const pluginName = 'Foo';
   const minimumLicenseRequired = LICENSE_TYPE_BASIC;
   let mockLicenseInfo;
-  beforeEach(() => mockLicenseInfo = {});
+  beforeEach(() => (mockLicenseInfo = {}));
 
   describe('license information is undefined', () => {
-    beforeEach(() => mockLicenseInfo = undefined);
+    beforeEach(() => (mockLicenseInfo = undefined));
 
     it('should set status to unavailable', () => {
-      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS_UNAVAILABLE);
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(
+        LICENSE_STATUS_UNAVAILABLE
+      );
     });
 
     it('should set a message', () => {
-      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).not.toBe(undefined);
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).not.toBe(
+        undefined
+      );
     });
   });
 
   describe('license information is not available', () => {
-    beforeEach(() => mockLicenseInfo.isAvailable = () => false);
+    beforeEach(() => (mockLicenseInfo.isAvailable = () => false));
 
     it('should set status to unavailable', () => {
-      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS_UNAVAILABLE);
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(
+        LICENSE_STATUS_UNAVAILABLE
+      );
     });
 
     it('should set a message', () => {
-      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).not.toBe(undefined);
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).not.toBe(
+        undefined
+      );
     });
   });
 
@@ -57,11 +64,15 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
         it('should set status to valid', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS_VALID);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(
+            LICENSE_STATUS_VALID
+          );
         });
 
         it('should not set a message', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).toBe(undefined);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).toBe(
+            undefined
+          );
         });
       });
 
@@ -69,11 +80,15 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
         it('should set status to inactive', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS_EXPIRED);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(
+            LICENSE_STATUS_EXPIRED
+          );
         });
 
         it('should set a message', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).not.toBe(undefined);
+          expect(
+            checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message
+          ).not.toBe(undefined);
         });
       });
     });
@@ -85,11 +100,15 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
         it('should set status to valid', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS_VALID);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(
+            LICENSE_STATUS_VALID
+          );
         });
 
         it('should not set a message', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).toBe(undefined);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).toBe(
+            undefined
+          );
         });
       });
 
@@ -97,11 +116,15 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
         it('should set status to inactive', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS_EXPIRED);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(
+            LICENSE_STATUS_EXPIRED
+          );
         });
 
         it('should set a message', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message).not.toBe(undefined);
+          expect(
+            checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).message
+          ).not.toBe(undefined);
         });
       });
     });

@@ -1,0 +1,869 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RuleEditorFlyout don't render after closing the flyout 1`] = `""`;
+
+exports[`RuleEditorFlyout don't render when not opened 1`] = `""`;
+
+exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 1`] = `
+<Fragment>
+  <EuiFlyout
+    aria-labelledby="flyoutTitle"
+    className="ml-rule-editor-flyout"
+    closeButtonAriaLabel="Closes this dialog"
+    hideCloseButton={false}
+    maxWidth={false}
+    onClose={[Function]}
+    ownFocus={false}
+    size="m"
+  >
+    <EuiFlyoutHeader
+      hasBorder={true}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h1
+          id="flyoutTitle"
+        >
+          <FormattedMessage
+            defaultMessage="Create rule"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <DetectorDescriptionList
+        anomaly={
+          Object {
+            "detectorIndex": 0,
+            "jobId": "farequote_no_by",
+            "source": Object {
+              "function": "mean",
+            },
+          }
+        }
+        detector={
+          Object {
+            "detector_description": "mean(responsetime)",
+            "detector_index": 0,
+            "field_name": "responsetime",
+            "function": "mean",
+          }
+        }
+        job={
+          Object {
+            "analysis_config": Object {
+              "bucket_span": "5m",
+              "detectors": Array [
+                Object {
+                  "detector_description": "mean(responsetime)",
+                  "detector_index": 0,
+                  "field_name": "responsetime",
+                  "function": "mean",
+                },
+                Object {
+                  "custom_rules": Array [
+                    Object {
+                      "actions": Array [
+                        "skip_result",
+                      ],
+                      "conditions": Array [
+                        Object {
+                          "applies_to": "diff_from_typical",
+                          "operator": "lte",
+                          "value": 123,
+                        },
+                      ],
+                    },
+                  ],
+                  "detector_description": "min(responsetime)",
+                  "detector_index": 1,
+                  "field_name": "responsetime",
+                  "function": "max",
+                },
+              ],
+            },
+            "description": "Overall response time",
+            "job_id": "farequote_no_by",
+          }
+        }
+      />
+      <EuiSpacer
+        size="m"
+      />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
+            values={
+              Object {
+                "learnMoreLink": <ForwardRef
+                  href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-rules.html"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    defaultMessage="Learn more"
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
+                    values={Object {}}
+                  />
+                </ForwardRef>,
+              }
+            }
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            defaultMessage="Action"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+      <ActionsSection
+        actions={
+          Array [
+            "skip_result",
+          ]
+        }
+        onSkipModelUpdateChange={[Function]}
+        onSkipResultChange={[Function]}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            defaultMessage="Conditions"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiCheckbox
+        checked={true}
+        className="scope-enable-checkbox"
+        compressed={false}
+        disabled={true}
+        id="enable_conditions_checkbox"
+        indeterminate={false}
+        label="Add numeric conditions for when the rule applies. Multiple conditions are combined using AND."
+        onChange={[Function]}
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <ConditionsSection
+        addCondition={[Function]}
+        conditions={
+          Array [
+            Object {
+              "applies_to": "actual",
+              "operator": "lt",
+              "value": 1,
+            },
+          ]
+        }
+        deleteCondition={[Function]}
+        isEnabled={true}
+        updateCondition={[Function]}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ScopeSection
+        filterListIds={Array []}
+        isEnabled={false}
+        onEnabledChange={[Function]}
+        partitioningFieldNames={Array []}
+        updateScope={[Function]}
+      />
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        title={
+          <FormattedMessage
+            defaultMessage="Rerun job"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
+            values={Object {}}
+          />
+        }
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Changes to rules take effect for new results only."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
+            values={Object {}}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            defaultMessage="To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.howToApplyChangesToExistingResultsDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiCallOut>
+    </EuiFlyoutBody>
+    <EuiFlyoutFooter>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="left"
+            iconType="cross"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Close"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            fill={true}
+            isDisabled={false}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
+  </EuiFlyout>
+</Fragment>
+`;
+
+exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] = `
+<Fragment>
+  <EuiFlyout
+    aria-labelledby="flyoutTitle"
+    className="ml-rule-editor-flyout"
+    closeButtonAriaLabel="Closes this dialog"
+    hideCloseButton={false}
+    maxWidth={false}
+    onClose={[Function]}
+    ownFocus={false}
+    size="m"
+  >
+    <EuiFlyoutHeader
+      hasBorder={true}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h1
+          id="flyoutTitle"
+        >
+          <FormattedMessage
+            defaultMessage="Edit rule"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.editRuleTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <DetectorDescriptionList
+        anomaly={
+          Object {
+            "detectorIndex": 1,
+            "jobId": "farequote_no_by",
+            "source": Object {
+              "function": "max",
+            },
+          }
+        }
+        detector={
+          Object {
+            "custom_rules": Array [
+              Object {
+                "actions": Array [
+                  "skip_result",
+                ],
+                "conditions": Array [
+                  Object {
+                    "applies_to": "diff_from_typical",
+                    "operator": "lte",
+                    "value": 123,
+                  },
+                ],
+              },
+            ],
+            "detector_description": "min(responsetime)",
+            "detector_index": 1,
+            "field_name": "responsetime",
+            "function": "max",
+          }
+        }
+        job={
+          Object {
+            "analysis_config": Object {
+              "bucket_span": "5m",
+              "detectors": Array [
+                Object {
+                  "detector_description": "mean(responsetime)",
+                  "detector_index": 0,
+                  "field_name": "responsetime",
+                  "function": "mean",
+                },
+                Object {
+                  "custom_rules": Array [
+                    Object {
+                      "actions": Array [
+                        "skip_result",
+                      ],
+                      "conditions": Array [
+                        Object {
+                          "applies_to": "diff_from_typical",
+                          "operator": "lte",
+                          "value": 123,
+                        },
+                      ],
+                    },
+                  ],
+                  "detector_description": "min(responsetime)",
+                  "detector_index": 1,
+                  "field_name": "responsetime",
+                  "function": "max",
+                },
+              ],
+            },
+            "description": "Overall response time",
+            "job_id": "farequote_no_by",
+          }
+        }
+      />
+      <EuiSpacer
+        size="m"
+      />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
+            values={
+              Object {
+                "learnMoreLink": <ForwardRef
+                  href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-rules.html"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    defaultMessage="Learn more"
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
+                    values={Object {}}
+                  />
+                </ForwardRef>,
+              }
+            }
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            defaultMessage="Action"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+      <ActionsSection
+        actions={
+          Array [
+            "skip_result",
+          ]
+        }
+        onSkipModelUpdateChange={[Function]}
+        onSkipResultChange={[Function]}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            defaultMessage="Conditions"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiCheckbox
+        checked={true}
+        className="scope-enable-checkbox"
+        compressed={false}
+        disabled={true}
+        id="enable_conditions_checkbox"
+        indeterminate={false}
+        label="Add numeric conditions for when the rule applies. Multiple conditions are combined using AND."
+        onChange={[Function]}
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <ConditionsSection
+        addCondition={[Function]}
+        conditions={
+          Array [
+            Object {
+              "applies_to": "diff_from_typical",
+              "operator": "lte",
+              "value": 123,
+            },
+          ]
+        }
+        deleteCondition={[Function]}
+        isEnabled={true}
+        updateCondition={[Function]}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ScopeSection
+        filterListIds={Array []}
+        isEnabled={false}
+        onEnabledChange={[Function]}
+        partitioningFieldNames={Array []}
+        updateScope={[Function]}
+      />
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        title={
+          <FormattedMessage
+            defaultMessage="Rerun job"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
+            values={Object {}}
+          />
+        }
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Changes to rules take effect for new results only."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
+            values={Object {}}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            defaultMessage="To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.howToApplyChangesToExistingResultsDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiCallOut>
+    </EuiFlyoutBody>
+    <EuiFlyoutFooter>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="left"
+            iconType="cross"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Close"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            fill={true}
+            isDisabled={false}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
+  </EuiFlyout>
+</Fragment>
+`;
+
+exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions only 1`] = `
+<Fragment>
+  <EuiFlyout
+    aria-labelledby="flyoutTitle"
+    className="ml-rule-editor-flyout"
+    closeButtonAriaLabel="Closes this dialog"
+    hideCloseButton={false}
+    maxWidth={false}
+    onClose={[Function]}
+    ownFocus={false}
+    size="m"
+  >
+    <EuiFlyoutHeader
+      hasBorder={true}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h1
+          id="flyoutTitle"
+        >
+          <FormattedMessage
+            defaultMessage="Create rule"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <DetectorDescriptionList
+        anomaly={
+          Object {
+            "detectorIndex": 0,
+            "jobId": "farequote_no_by",
+            "source": Object {
+              "function": "mean",
+            },
+          }
+        }
+        detector={
+          Object {
+            "detector_description": "mean(responsetime)",
+            "detector_index": 0,
+            "field_name": "responsetime",
+            "function": "mean",
+          }
+        }
+        job={
+          Object {
+            "analysis_config": Object {
+              "bucket_span": "5m",
+              "detectors": Array [
+                Object {
+                  "detector_description": "mean(responsetime)",
+                  "detector_index": 0,
+                  "field_name": "responsetime",
+                  "function": "mean",
+                },
+                Object {
+                  "custom_rules": Array [
+                    Object {
+                      "actions": Array [
+                        "skip_result",
+                      ],
+                      "conditions": Array [
+                        Object {
+                          "applies_to": "diff_from_typical",
+                          "operator": "lte",
+                          "value": 123,
+                        },
+                      ],
+                    },
+                  ],
+                  "detector_description": "min(responsetime)",
+                  "detector_index": 1,
+                  "field_name": "responsetime",
+                  "function": "max",
+                },
+              ],
+            },
+            "description": "Overall response time",
+            "job_id": "farequote_no_by",
+          }
+        }
+      />
+      <EuiSpacer
+        size="m"
+      />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
+            values={
+              Object {
+                "learnMoreLink": <ForwardRef
+                  href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-rules.html"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    defaultMessage="Learn more"
+                    id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
+                    values={Object {}}
+                  />
+                </ForwardRef>,
+              }
+            }
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            defaultMessage="Action"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+      <ActionsSection
+        actions={
+          Array [
+            "skip_result",
+          ]
+        }
+        onSkipModelUpdateChange={[Function]}
+        onSkipResultChange={[Function]}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            defaultMessage="Conditions"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiCheckbox
+        checked={true}
+        className="scope-enable-checkbox"
+        compressed={false}
+        disabled={true}
+        id="enable_conditions_checkbox"
+        indeterminate={false}
+        label="Add numeric conditions for when the rule applies. Multiple conditions are combined using AND."
+        onChange={[Function]}
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <ConditionsSection
+        addCondition={[Function]}
+        conditions={Array []}
+        deleteCondition={[Function]}
+        isEnabled={true}
+        updateCondition={[Function]}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ScopeSection
+        filterListIds={Array []}
+        isEnabled={false}
+        onEnabledChange={[Function]}
+        partitioningFieldNames={Array []}
+        updateScope={[Function]}
+      />
+      <EuiCallOut
+        color="warning"
+        iconType="help"
+        title={
+          <FormattedMessage
+            defaultMessage="Rerun job"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
+            values={Object {}}
+          />
+        }
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Changes to rules take effect for new results only."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
+            values={Object {}}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            defaultMessage="To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job."
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.howToApplyChangesToExistingResultsDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiCallOut>
+    </EuiFlyoutBody>
+    <EuiFlyoutFooter>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="left"
+            iconType="cross"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Close"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            fill={true}
+            isDisabled={true}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
+  </EuiFlyout>
+</Fragment>
+`;
+
+exports[`RuleEditorFlyout renders the select action component for a detector with a rule 1`] = `
+<Fragment>
+  <EuiFlyout
+    aria-labelledby="flyoutTitle"
+    className="ml-rule-editor-flyout"
+    closeButtonAriaLabel="Closes this dialog"
+    hideCloseButton={false}
+    maxWidth={false}
+    onClose={[Function]}
+    ownFocus={false}
+    size="m"
+  >
+    <EuiFlyoutHeader
+      hasBorder={true}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h1
+          id="flyoutTitle"
+        >
+          <FormattedMessage
+            defaultMessage="Edit rules"
+            id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <SelectRuleAction
+        addItemToFilterList={[Function]}
+        anomaly={
+          Object {
+            "detectorIndex": 1,
+            "jobId": "farequote_no_by",
+            "source": Object {
+              "function": "max",
+            },
+          }
+        }
+        deleteRuleAtIndex={[Function]}
+        job={
+          Object {
+            "analysis_config": Object {
+              "bucket_span": "5m",
+              "detectors": Array [
+                Object {
+                  "detector_description": "mean(responsetime)",
+                  "detector_index": 0,
+                  "field_name": "responsetime",
+                  "function": "mean",
+                },
+                Object {
+                  "custom_rules": Array [
+                    Object {
+                      "actions": Array [
+                        "skip_result",
+                      ],
+                      "conditions": Array [
+                        Object {
+                          "applies_to": "diff_from_typical",
+                          "operator": "lte",
+                          "value": 123,
+                        },
+                      ],
+                    },
+                  ],
+                  "detector_description": "min(responsetime)",
+                  "detector_index": 1,
+                  "field_name": "responsetime",
+                  "function": "max",
+                },
+              ],
+            },
+            "description": "Overall response time",
+            "job_id": "farequote_no_by",
+          }
+        }
+        setEditRuleIndex={[Function]}
+        updateRuleAtIndex={[Function]}
+      />
+    </EuiFlyoutBody>
+    <EuiFlyoutFooter>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="left"
+            iconType="cross"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Close"
+              id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
+  </EuiFlyout>
+</Fragment>
+`;

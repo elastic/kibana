@@ -68,11 +68,7 @@ export const FullscreenControl = compose(
   getContext({
     router: PropTypes.object,
   }),
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('transition', 'setTransition', null),
   withState('prevSelectedPageNumber', 'setPrevSelectedPageNumber', 0),
   withProps(({ selectedPageNumber, prevSelectedPageNumber, transition }) => {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ViewStrings } from '../../strings';
+import { ViewStrings } from '../../../i18n';
 
 const { Markdown: strings } = ViewStrings;
 
@@ -28,6 +28,17 @@ export const markdown = () => ({
     {
       name: 'font',
       argType: 'font',
+    },
+    {
+      name: 'openLinksInNewTab',
+      displayName: strings.getOpenLinksInNewTabDisplayName(),
+      help: strings.getOpenLinksInNewTabHelp(),
+      label: strings.getOpenLinksInNewTabLabelName(),
+      argType: 'toggle',
+      default: false,
+      options: {
+        labelValue: 'Open all links in a new tab',
+      },
     },
   ],
 });

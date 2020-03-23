@@ -10,5 +10,6 @@ export default function lensApiIntegrationTests({ loadTestFile }: FtrProviderCon
   describe('Lens', () => {
     loadTestFile(require.resolve('./existing_fields'));
     loadTestFile(require.resolve('./field_stats'));
+    loadTestFile(require.resolve('./telemetry'));
   });
 }

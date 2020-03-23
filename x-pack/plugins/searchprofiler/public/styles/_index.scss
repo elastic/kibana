@@ -1,0 +1,66 @@
+@import '@elastic/eui/src/components/header/variables';
+
+@import 'mixins';
+
+@import 'components/highlight_details_flyout';
+@import 'components/profile_tree';
+@import 'components/percentage_badge';
+
+@import 'containers/main';
+@import 'containers/profile_query_editor';
+
+.prfDevTool__licenseWarning {
+  &__container {
+    max-width: 1000px;
+  }
+}
+
+.prfDevTool__page {
+  height: 100%;
+  display: flex;
+  flex: 1 1 auto;
+
+  &__body {
+    height: 100%;
+    flex: 1 1 auto;
+  }
+
+  &__pageBody {
+    height: 100%;
+    flex: 1 1 auto;
+  }
+
+  &__pageBodyContent {
+    height: 100%;
+  }
+
+  &__pageBodyContentBody {
+    height: 100%;
+  }
+
+  &__pageContentBodyContent {
+    height: 100%;
+  }
+
+  &__bodyGroup {
+    height: 100%;
+  }
+}
+
+.appRoot {
+  height: calc(100vh - calc(#{$euiHeaderChildSize} * 2));
+  overflow: hidden;
+  flex-shrink: 1;
+}
+
+.prfDevTool__detail {
+  font-size: $euiFontSizeS;
+  padding-left: $euiSizeL - 3px; // Alignment is weird
+  margin-bottom: $euiSizeS;
+  display: flex;
+  justify-content: space-between;
+
+  .euiLink {
+    flex-shrink: 0;
+  }
+}

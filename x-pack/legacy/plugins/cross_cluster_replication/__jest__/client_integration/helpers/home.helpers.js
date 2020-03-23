@@ -5,9 +5,9 @@
  */
 
 import { registerTestBed } from '../../../../../../test_utils';
-import { CrossClusterReplicationHome } from '../../../public/app/sections/home/home';
-import { ccrStore } from '../../../public/app/store';
-import routing from '../../../public/app/services/routing';
+import { CrossClusterReplicationHome } from '../../../public/np_ready/app/sections/home/home';
+import { ccrStore } from '../../../public/np_ready/app/store';
+import routing from '../../../public/np_ready/app/services/routing';
 import { BASE_PATH } from '../../../common/constants';
 
 const testBedConfig = {
@@ -15,8 +15,8 @@ const testBedConfig = {
   memoryRouter: {
     initialEntries: [`${BASE_PATH}/follower_indices`],
     componentRoutePath: `${BASE_PATH}/:section`,
-    onRouter: (router) => routing.reactRouter = router
-  }
+    onRouter: router => (routing.reactRouter = router),
+  },
 };
 
 export const setup = registerTestBed(CrossClusterReplicationHome, testBedConfig);

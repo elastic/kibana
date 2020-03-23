@@ -5,18 +5,13 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
-import * as React from 'react';
+import React from 'react';
 
-import { flyoutHeaderHeight } from '../';
 import { TestProviders } from '../../../mock';
-
 import { Pane } from '.';
 
 const testFlyoutHeight = 980;
 const testWidth = 640;
-const usersViewing = ['elastic'];
 
 describe('Pane', () => {
   test('renders correctly against snapshot', () => {
@@ -24,17 +19,15 @@ describe('Pane', () => {
       <TestProviders>
         <Pane
           flyoutHeight={testFlyoutHeight}
-          headerHeight={flyoutHeaderHeight}
           onClose={jest.fn()}
           timelineId={'test'}
-          usersViewing={usersViewing}
           width={testWidth}
         >
           <span>{'I am a child of flyout'}</span>
         </Pane>
       </TestProviders>
     );
-    expect(toJson(EmptyComponent)).toMatchSnapshot();
+    expect(EmptyComponent.find('Pane')).toMatchSnapshot();
   });
 
   test('it should NOT let the flyout expand to take up the full width of the element that contains it', () => {
@@ -42,10 +35,8 @@ describe('Pane', () => {
       <TestProviders>
         <Pane
           flyoutHeight={testFlyoutHeight}
-          headerHeight={flyoutHeaderHeight}
           onClose={jest.fn()}
           timelineId={'test'}
-          usersViewing={usersViewing}
           width={testWidth}
         >
           <span>{'I am a child of flyout'}</span>
@@ -53,79 +44,7 @@ describe('Pane', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="eui-flyout"]').get(0).props.maxWidth).toEqual('95%');
-  });
-
-  test('it applies timeline styles to the EuiFlyout', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Pane
-          flyoutHeight={testFlyoutHeight}
-          headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
-          timelineId={'test'}
-          usersViewing={usersViewing}
-          width={testWidth}
-        >
-          <span>{'I am a child of flyout'}</span>
-        </Pane>
-      </TestProviders>
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="eui-flyout"]')
-        .first()
-        .hasClass('timeline-flyout')
-    ).toEqual(true);
-  });
-
-  test('it applies timeline styles to the EuiFlyoutHeader', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Pane
-          flyoutHeight={testFlyoutHeight}
-          headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
-          timelineId={'test'}
-          usersViewing={usersViewing}
-          width={testWidth}
-        >
-          <span>{'I am a child of flyout'}</span>
-        </Pane>
-      </TestProviders>
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="eui-flyout-header"]')
-        .first()
-        .hasClass('timeline-flyout-header')
-    ).toEqual(true);
-  });
-
-  test('it applies timeline styles to the EuiFlyoutBody', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Pane
-          flyoutHeight={testFlyoutHeight}
-          headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
-          timelineId={'test'}
-          usersViewing={usersViewing}
-          width={testWidth}
-        >
-          <span>{'I am a child of flyout'}</span>
-        </Pane>
-      </TestProviders>
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="eui-flyout-body"]')
-        .first()
-        .hasClass('timeline-flyout-body')
-    ).toEqual(true);
+    expect(wrapper.find('Resizable').get(0).props.maxWidth).toEqual('95vw');
   });
 
   test('it should render a resize handle', () => {
@@ -133,10 +52,8 @@ describe('Pane', () => {
       <TestProviders>
         <Pane
           flyoutHeight={testFlyoutHeight}
-          headerHeight={flyoutHeaderHeight}
           onClose={jest.fn()}
           timelineId={'test'}
-          usersViewing={usersViewing}
           width={testWidth}
         >
           <span>{'I am a child of flyout'}</span>
@@ -152,74 +69,19 @@ describe('Pane', () => {
     ).toEqual(true);
   });
 
-  test('it should render an empty title', () => {
+  test('it should render children', () => {
     const wrapper = mount(
       <TestProviders>
         <Pane
           flyoutHeight={testFlyoutHeight}
-          headerHeight={flyoutHeaderHeight}
           onClose={jest.fn()}
           timelineId={'test'}
-          usersViewing={usersViewing}
-          width={testWidth}
-        >
-          <span>{'I am a child of flyout'}</span>
-        </Pane>
-      </TestProviders>
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="timeline-title"]')
-        .first()
-        .text()
-    ).toContain('');
-  });
-
-  test('it should render the flyout body', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Pane
-          flyoutHeight={testFlyoutHeight}
-          headerHeight={flyoutHeaderHeight}
-          onClose={jest.fn()}
-          timelineId={'test'}
-          usersViewing={usersViewing}
           width={testWidth}
         >
           <span>{'I am a mock body'}</span>
         </Pane>
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="eui-flyout-body"]')
-        .first()
-        .text()
-    ).toContain('I am a mock body');
-  });
-
-  test('it should invoke onClose when the close button is clicked', () => {
-    const closeMock = jest.fn();
-    const wrapper = mount(
-      <TestProviders>
-        <Pane
-          flyoutHeight={testFlyoutHeight}
-          headerHeight={flyoutHeaderHeight}
-          onClose={closeMock}
-          timelineId={'test'}
-          usersViewing={usersViewing}
-          width={testWidth}
-        >
-          <span>{'I am a mock child'}</span>
-        </Pane>
-      </TestProviders>
-    );
-    wrapper
-      .find('[data-test-subj="close-timeline"] button')
-      .first()
-      .simulate('click');
-
-    expect(closeMock).toBeCalled();
+    expect(wrapper.first().text()).toContain('I am a mock body');
   });
 });

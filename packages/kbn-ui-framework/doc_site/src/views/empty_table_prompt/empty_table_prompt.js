@@ -26,13 +26,13 @@ export function EmptyTablePrompt() {
     <KuiEmptyTablePrompt
       actions={
         <KuiLinkButton
-          icon={<KuiButtonIcon type="create"/>}
+          icon={<KuiButtonIcon type="create" />}
           aria-label="Add a new item"
           data-test-subj="addNewPromptButton"
           buttonType="primary"
           href="#"
         >
-            Add a new item
+          Add a new item
         </KuiLinkButton>
       }
       message="Uh oh, You have no items!"

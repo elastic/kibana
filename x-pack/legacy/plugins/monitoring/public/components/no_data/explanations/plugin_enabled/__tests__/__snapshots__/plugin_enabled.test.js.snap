@@ -26,32 +26,20 @@ Array [
   >
     <p>
       We checked the cluster settings and found that 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           xpack.monitoring.enabled
         </code>
       </span>
        is set to 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           false
         </code>
       </span>
        set, which disables monitoring. Removing the 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           xpack.monitoring.enabled: false
         </code>
       </span>

@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint max-len: 0 */
-
 import { topHitsTimeToSort } from './top_hits_time_to_sort';
 
 describe('topHitsTimeToSort', () => {
-
   test('Should handle missing layerListJSON attribute', () => {
     const attributes = {
       title: 'my map',
@@ -26,16 +23,17 @@ describe('topHitsTimeToSort', () => {
           type: 'ES_SEARCH',
           topHitsSplitField: 'gpsId',
           topHitsTimeField: '@timestamp',
-        }
-      }
+        },
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(topHitsTimeToSort({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON: '[{\"sourceDescriptor\":{\"type\":\"ES_SEARCH\",\"topHitsSplitField\":\"gpsId\",\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\"}}]',
+      layerListJSON:
+        '[{"sourceDescriptor":{"type":"ES_SEARCH","topHitsSplitField":"gpsId","sortField":"@timestamp","sortOrder":"desc"}}]',
     });
   });
 
@@ -45,12 +43,12 @@ describe('topHitsTimeToSort', () => {
         sourceDescriptor: {
           type: 'ES_SEARCH',
           topHitsSplitField: 'gpsId',
-        }
-      }
+        },
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(topHitsTimeToSort({ attributes })).toEqual({
       title: 'my map',

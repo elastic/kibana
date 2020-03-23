@@ -1,0 +1,8 @@
+{
+  "name": "Simplest Saved Query",
+  "description": "Using a saved_id called test-saved-id but does not provide a pre-defined filter or query",
+  "risk_score": 5,
+  "severity": "high",
+  "type": "saved_query",
+  "saved_id": "test-saved-id"
+}

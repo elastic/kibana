@@ -5,7 +5,7 @@
  */
 jest.mock('ui/new_platform');
 import { savedVisualization } from './saved_visualization';
-import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
+import { buildEmbeddableFilters } from '../../../public/lib/build_embeddable_filters';
 
 const filterContext = {
   and: [
@@ -27,14 +27,14 @@ describe('savedVisualization', () => {
   };
 
   it('accepts null context', () => {
-    const expression = fn(null, args, {});
+    const expression = fn(null, args, {} as any);
 
     expect(expression.input.filters).toEqual([]);
     expect(expression.input.timeRange).toBeUndefined();
   });
 
   it('accepts filter context', () => {
-    const expression = fn(filterContext, args, {});
+    const expression = fn(filterContext, args, {} as any);
     const embeddableFilters = buildEmbeddableFilters(filterContext.and);
 
     expect(expression.input.filters).toEqual(embeddableFilters.filters);

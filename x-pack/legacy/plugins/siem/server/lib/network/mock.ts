@@ -5,7 +5,7 @@
  */
 
 import { defaultIndexPattern } from '../../../default_index_pattern';
-import { Direction, FlowTargetSourceDest, NetworkTopNFlowFields } from '../../graphql/types';
+import { Direction, FlowTargetSourceDest, NetworkTopTablesFields } from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
 
@@ -54,13 +54,12 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     'pageInfo.__typename',
     '__typename',
   ],
-  networkTopNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+  networkTopNFlowSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
   flowTarget: FlowTargetSourceDest.source,
 };
 
 export const mockRequest = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetNetworkTopNFlowQuery',
     variables: {
       filterQuery: '',
@@ -80,7 +79,7 @@ export const mockRequest = {
     $ip: String
     $filterQuery: String
     $pagination: PaginationInputPaginated!
-    $sort: NetworkTopNFlowSortField!
+    $sort: NetworkTopTablesSortField!
     $flowTarget: FlowTargetSourceDest!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
@@ -1507,10 +1506,10 @@ export const mockOptionsIp: NetworkTopNFlowRequestOptions = {
 
 export const mockRequestIp = {
   ...mockRequest,
-  payload: {
-    ...mockRequest.payload,
+  body: {
+    ...mockRequest.body,
     variables: {
-      ...mockRequest.payload.variables,
+      ...mockRequest.body.variables,
       ip: '1.1.1.1',
     },
   },

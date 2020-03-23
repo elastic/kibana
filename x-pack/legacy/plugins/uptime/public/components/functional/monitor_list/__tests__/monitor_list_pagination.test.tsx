@@ -13,7 +13,7 @@ import {
 } from '../../../../../common/graphql/types';
 import { MonitorListComponent } from '../monitor_list';
 
-describe('MonitorList component', () => {
+describe('MonitorListPagination component', () => {
   let result: MonitorSummaryResult;
 
   beforeEach(() => {
@@ -89,17 +89,13 @@ describe('MonitorList component', () => {
           },
         },
       ],
-      totalSummaryCount: {
-        count: 2,
-      },
+      totalSummaryCount: 2,
     };
   });
 
   it('renders the monitor list', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
-        absoluteStartDate={123}
-        absoluteEndDate={125}
         dangerColor="danger"
         data={{ monitorStates: result }}
         loading={false}
@@ -114,8 +110,6 @@ describe('MonitorList component', () => {
   it('renders a no items message when no data is provided', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
-        absoluteStartDate={123}
-        absoluteEndDate={125}
         dangerColor="danger"
         data={{}}
         loading={false}

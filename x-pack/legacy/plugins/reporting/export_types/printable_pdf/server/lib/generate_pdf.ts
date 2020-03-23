@@ -4,32 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
-import { toArray, mergeMap } from 'rxjs/operators';
-import moment from 'moment-timezone';
 import { groupBy } from 'lodash';
+import * as Rx from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
-import { KbnServer, ConditionalHeaders } from '../../../../types';
+import { ConditionalHeaders, HeadlessChromiumDriverFactory, ServerFacade } from '../../../../types';
+import { createLayout } from '../../../common/layouts';
+import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
+import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
+import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
-import { createLayout } from '../../../common/layouts';
-import { TimeRange } from '../../../common/lib/screenshots/types';
-import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
 
-interface ScreenshotData {
-  base64EncodedData: string;
-  title: string;
-  description: string;
-}
-
-interface UrlScreenshot {
-  screenshots: ScreenshotData[];
-  timeRange: TimeRange;
-}
-
-const getTimeRange = (urlScreenshots: UrlScreenshot[]) => {
+const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
@@ -39,13 +26,11 @@ const getTimeRange = (urlScreenshots: UrlScreenshot[]) => {
   return null;
 };
 
-const formatDate = (date: Date, timezone: string) => {
-  return moment.tz(date, timezone).format('llll');
-};
-
-function generatePdfObservableFn(server: KbnServer) {
-  const screenshotsObservable = screenshotsObservableFactory(server);
-  const captureConcurrency = 1;
+export function generatePdfObservableFactory(
+  server: ServerFacade,
+  browserDriverFactory: HeadlessChromiumDriverFactory
+) {
+  const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
 
   return function generatePdfObservable(
     logger: LevelLogger,
@@ -54,35 +39,27 @@ function generatePdfObservableFn(server: KbnServer) {
     browserTimezone: string,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
-    logo: string
-  ) {
+    logo?: string
+  ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
     const layout = createLayout(server, layoutParams) as LayoutInstance;
-
-    const screenshots$ = Rx.from(urls).pipe(
-      mergeMap(
-        url => screenshotsObservable({ logger, url, conditionalHeaders, layout, browserTimezone }),
-        captureConcurrency
-      )
-    );
-
-    return screenshots$.pipe(
-      toArray(),
-      mergeMap(async (urlScreenshots: UrlScreenshot[]) => {
+    const screenshots$ = screenshotsObservable({
+      logger,
+      urls,
+      conditionalHeaders,
+      layout,
+      browserTimezone,
+    }).pipe(
+      mergeMap(async (results: ScreenshotResults[]) => {
         const pdfOutput = pdf.create(layout, logo);
 
         if (title) {
-          const timeRange = getTimeRange(urlScreenshots);
-          title += timeRange
-            ? ` — ${formatDate(timeRange.from, browserTimezone)} to ${formatDate(
-                timeRange.to,
-                browserTimezone
-              )}`
-            : '';
+          const timeRange = getTimeRange(results);
+          title += timeRange ? ` - ${timeRange.duration}` : '';
           pdfOutput.setTitle(title);
         }
 
-        urlScreenshots.forEach(({ screenshots }) => {
-          screenshots.forEach(screenshot => {
+        results.forEach(r => {
+          r.screenshots.forEach(screenshot => {
             pdfOutput.addImage(screenshot.base64EncodedData, {
               title: screenshot.title,
               description: screenshot.description,
@@ -91,11 +68,19 @@ function generatePdfObservableFn(server: KbnServer) {
         });
 
         pdfOutput.generate();
-        const buffer = await pdfOutput.getBuffer();
-        return buffer;
+
+        return {
+          buffer: await pdfOutput.getBuffer(),
+          warnings: results.reduce((found, current) => {
+            if (current.error) {
+              found.push(current.error.message);
+            }
+            return found;
+          }, [] as string[]),
+        };
       })
     );
+
+    return screenshots$;
   };
 }
-
-export const generatePdfObservableFactory = oncePerServer(generatePdfObservableFn);

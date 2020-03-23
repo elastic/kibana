@@ -4,37 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cleanup, renderHook } from 'react-hooks-testing-library';
-import { delay } from '../utils/testHelpers';
+import { renderHook } from '@testing-library/react-hooks';
+import { delay, MockApmPluginContextWrapper } from '../utils/testHelpers';
 import { useFetcher } from './useFetcher';
-import { KibanaCoreContext } from '../../../observability/public/context/kibana_core';
-import { LegacyCoreStart } from 'kibana/public';
-import React from 'react';
 
-afterEach(cleanup);
-
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-});
-
-// Wrap the hook with a provider so it can useKibanaCore
-const wrapper = ({ children }: { children?: React.ReactNode }) => (
-  <KibanaCoreContext.Provider
-    value={
-      ({
-        notifications: { toasts: { addWarning: () => {} } }
-      } as unknown) as LegacyCoreStart
-    }
-  >
-    {children}
-  </KibanaCoreContext.Provider>
-);
+// Wrap the hook with a provider so it can useApmPluginContext
+const wrapper = MockApmPluginContextWrapper;
 
 describe('useFetcher', () => {
   describe('when resolving after 500ms', () => {

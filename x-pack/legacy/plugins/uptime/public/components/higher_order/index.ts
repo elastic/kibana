@@ -5,3 +5,4 @@
  */
 
 export { UptimeGraphQLQueryProps, withUptimeGraphQL } from './uptime_graphql_query';
+export { ResponsiveWrapperProps, withResponsiveWrapper } from './responsive_wrapper';

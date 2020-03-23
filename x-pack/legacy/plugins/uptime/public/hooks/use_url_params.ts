@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import qs from 'querystring';
-import { useContext } from 'react';
-import { UptimeRefreshContext } from '../contexts';
+import { parse, stringify } from 'query-string';
+import { useLocation, useHistory } from 'react-router-dom';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
 type GetUrlParams = () => UptimeUrlParams;
@@ -15,25 +14,26 @@ type UpdateUrlParams = (updatedParams: { [key: string]: string | number | boolea
 export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 
 export const useUrlParams: UptimeUrlParamsHook = () => {
-  const refreshContext = useContext(UptimeRefreshContext);
+  const location = useLocation();
+  const history = useHistory();
 
   const getUrlParams: GetUrlParams = () => {
     let search: string | undefined;
-    if (refreshContext.location) {
-      search = refreshContext.location.search;
+    if (location) {
+      search = location.search;
     }
 
-    const params = search ? { ...qs.parse(search[0] === '?' ? search.slice(1) : search) } : {};
+    const params = search
+      ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false })
+      : {};
+
     return getSupportedUrlParams(params);
   };
 
   const updateUrlParams: UpdateUrlParams = updatedParams => {
-    if (!refreshContext.history || !refreshContext.location) return;
-    const {
-      history,
-      location: { pathname, search },
-    } = refreshContext;
-    const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
+    if (!history || !location) return;
+    const { pathname, search } = location;
+    const currentParams = parse(search[0] === '?' ? search.slice(1) : search, { sort: false });
     const mergedParams = {
       ...currentParams,
       ...updatedParams,
@@ -41,7 +41,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
 
     history.push({
       pathname,
-      search: qs.stringify(
+      search: stringify(
         // drop any parameters that have no value
         Object.keys(mergedParams).reduce((params, key) => {
           const value = mergedParams[key];
@@ -52,7 +52,8 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
             ...params,
             [key]: value,
           };
-        }, {})
+        }, {}),
+        { sort: false }
       ),
     });
   };

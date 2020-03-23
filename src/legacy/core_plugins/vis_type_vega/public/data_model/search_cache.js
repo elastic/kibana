@@ -20,7 +20,6 @@
 import LruCache from 'lru-cache';
 
 export class SearchCache {
-
   constructor(es, cacheOpts) {
     this._es = es;
     this._cache = new LruCache(cacheOpts);

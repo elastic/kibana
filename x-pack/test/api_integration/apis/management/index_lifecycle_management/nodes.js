@@ -10,15 +10,15 @@ import { registerHelpers } from './nodes.helpers';
 import { NODE_CUSTOM_ATTRIBUTE } from './constants';
 import { initElasticsearchHelpers } from './lib';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
 
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const { getNodesStats } = initElasticsearchHelpers(es);
   const { loadNodes, getNodeDetails } = registerHelpers({ supertest });
 
-  describe('nodes', function () {
+  describe('nodes', function() {
     // Cloud disallows setting custom node attributes, so we can't use `NODE_CUSTOM_ATTRIBUTE`
     // to retrieve the IDs we expect.
     this.tags(['skipCloud']);

@@ -5,13 +5,14 @@
  */
 
 import _ from 'lodash';
-import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../../../plugins/maps/public/reducers/ui';
 
 const MAP_EMBEDDABLE_INPUT_KEYS = [
   'hideFilterActions',
   'isLayerTOCOpen',
   'openTOCDetails',
-  'mapCenter'
+  'mapCenter',
 ];
 
 export function mergeInputWithSavedMap(input, savedMap) {

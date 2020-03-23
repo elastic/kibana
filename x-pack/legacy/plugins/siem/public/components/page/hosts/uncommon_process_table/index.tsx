@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { connect } from 'react-redux';
-import { pure } from 'recompose';
-import { ActionCreator } from 'typescript-fsa';
+/* eslint-disable react/display-name */
+
+import React, { useCallback, useMemo } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { hostsActions } from '../../../../store/actions';
 import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../graphql/types';
@@ -32,24 +32,6 @@ interface OwnProps {
   type: hostsModel.HostsType;
 }
 
-interface UncommonProcessTableReduxProps {
-  activePage: number;
-  limit: number;
-}
-
-interface UncommonProcessTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-  updateTableLimit: ActionCreator<{
-    limit: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-}
-
 export type UncommonProcessTableColumns = [
   Columns<UncommonProcessesEdges>,
   Columns<UncommonProcessesEdges>,
@@ -59,9 +41,7 @@ export type UncommonProcessTableColumns = [
   Columns<UncommonProcessesEdges>
 ];
 
-type UncommonProcessTableProps = OwnProps &
-  UncommonProcessTableReduxProps &
-  UncommonProcessTableDispatchProps;
+type UncommonProcessTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -82,7 +62,7 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
   }
 };
 
-const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
+const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
   ({
     activePage,
     data,
@@ -97,39 +77,51 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     updateTableActivePage,
     updateTableLimit,
     type,
-  }) => (
-    <PaginatedTable
-      activePage={activePage}
-      columns={getUncommonColumnsCurated(type)}
-      dataTestSubj={`table-${tableType}`}
-      headerCount={totalCount}
-      headerTitle={i18n.UNCOMMON_PROCESSES}
-      headerUnit={i18n.UNIT(totalCount)}
-      id={id}
-      isInspect={isInspect}
-      itemsPerRow={rowItems}
-      limit={limit}
-      loading={loading}
-      loadPage={newActivePage => loadPage(newActivePage)}
-      pageOfItems={data}
-      showMorePagesIndicator={showMorePagesIndicator}
-      totalCount={fakeTotalCount}
-      updateLimitPagination={newLimit =>
+  }) => {
+    const updateLimitPagination = useCallback(
+      newLimit =>
         updateTableLimit({
           hostsType: type,
           limit: newLimit,
           tableType,
-        })
-      }
-      updateActivePage={newPage =>
+        }),
+      [type, updateTableLimit]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
         updateTableActivePage({
           activePage: newPage,
           hostsType: type,
           tableType,
-        })
-      }
-    />
-  )
+        }),
+      [type, updateTableActivePage]
+    );
+
+    const columns = useMemo(() => getUncommonColumnsCurated(type), [type]);
+
+    return (
+      <PaginatedTable
+        activePage={activePage}
+        columns={columns}
+        dataTestSubj={`table-${tableType}`}
+        headerCount={totalCount}
+        headerTitle={i18n.UNCOMMON_PROCESSES}
+        headerUnit={i18n.UNIT(totalCount)}
+        id={id}
+        isInspect={isInspect}
+        itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadPage={loadPage}
+        pageOfItems={data}
+        showMorePagesIndicator={showMorePagesIndicator}
+        totalCount={fakeTotalCount}
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
+      />
+    );
+  }
 );
 
 UncommonProcessTableComponent.displayName = 'UncommonProcessTableComponent';
@@ -139,13 +131,18 @@ const makeMapStateToProps = () => {
   return (state: State, { type }: OwnProps) => getUncommonProcessesSelector(state, type);
 };
 
-export const UncommonProcessTable = connect(
-  makeMapStateToProps,
-  {
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
-  }
-)(UncommonProcessTableComponent);
+const mapDispatchToProps = {
+  updateTableActivePage: hostsActions.updateTableActivePage,
+  updateTableLimit: hostsActions.updateTableLimit,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const UncommonProcessTable = connector(UncommonProcessTableComponent);
+
+UncommonProcessTable.displayName = 'UncommonProcessTable';
 
 const getUncommonColumns = (): UncommonProcessTableColumns => [
   {
@@ -161,16 +158,20 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
     width: '20%',
   },
   {
+    align: 'right',
     name: i18n.NUMBER_OF_HOSTS,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
+    width: '8%',
   },
   {
+    align: 'right',
     name: i18n.NUMBER_OF_INSTANCES,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => defaultToEmptyTag(node.instances),
+    width: '8%',
   },
   {
     name: i18n.HOSTS,
@@ -225,7 +226,10 @@ export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessT
   const columns: UncommonProcessTableColumns = getUncommonColumns();
   if (pageType === HostsType.details) {
     return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce((acc, name) => {
-      acc.splice(acc.findIndex(column => column.name === name), 1);
+      acc.splice(
+        acc.findIndex(column => column.name === name),
+        1
+      );
       return acc;
     }, columns);
   } else {

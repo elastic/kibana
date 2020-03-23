@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { memoize } from 'lodash';
-import { KbnServer } from '../types';
+import { ServerFacade } from '../types';
 
-export const createMockServer = ({ settings = {} }: any): KbnServer => {
+export const createMockServer = ({ settings = {} }: any): ServerFacade => {
   const mockServer = {
-    expose: () => {
-      ' ';
-    },
     config: memoize(() => ({ get: jest.fn() })),
     info: {
       protocol: 'http',
@@ -24,10 +21,6 @@ export const createMockServer = ({ settings = {} }: any): KbnServer => {
         }),
       },
     },
-    savedObjects: {
-      getScopedSavedObjectsClient: jest.fn(),
-    },
-    uiSettingsServiceFactory: jest.fn().mockReturnValue({ get: jest.fn() }),
   };
 
   const defaultSettings: any = {
@@ -41,5 +34,5 @@ export const createMockServer = ({ settings = {} }: any): KbnServer => {
     return key in settings ? settings[key] : defaultSettings[key];
   });
 
-  return (mockServer as unknown) as KbnServer;
+  return (mockServer as unknown) as ServerFacade;
 };

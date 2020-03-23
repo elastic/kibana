@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -51,8 +51,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 400,
       error: 'Bad Request',
-      message: '"value" must be an object',
-      validation: { source: 'payload', keys: ['value'] },
+      message: '[request body]: expected a plain object value, but found [null] instead.',
     });
   };
 
@@ -60,11 +59,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 400,
       error: 'Bad Request',
-      message: `child \"objects\" fails because [\"objects\" at position 0 fails because [child \"type\" fails because [\"type\" must be one of [canvas-element, canvas-workpad, config, dashboard, globaltype, index-pattern, lens, map, query, search, url, visualization]]]]`,
-      validation: {
-        source: 'payload',
-        keys: ['objects.0.type'],
-      },
+      message: `Trying to export object(s) with non-exportable types: hiddentype:hiddentype_1`,
     });
   };
 
@@ -104,6 +99,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
           .send({
             type: 'visualization',
+            excludeExportDetails: true,
           })
           .auth(user.username, user.password)
           .expect(tests.spaceAwareType.statusCode)
@@ -120,6 +116,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
                 id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
               },
             ],
+            excludeExportDetails: true,
           })
           .auth(user.username, user.password)
           .expect(tests.spaceAwareType.statusCode)
@@ -137,6 +134,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
                   id: `hiddentype_1`,
                 },
               ],
+              excludeExportDetails: true,
             })
             .auth(user.username, user.password)
             .expect(tests.hiddenType.statusCode)

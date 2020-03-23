@@ -21,8 +21,7 @@ import React from 'react';
 import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
 import uuid from 'uuid';
 
-import { FieldHook } from '../../hook_form_lib';
-import { getFieldValidityAndErrorMessage } from '../helpers';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;
@@ -36,7 +35,7 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
 
   return (
     <EuiFormRow
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

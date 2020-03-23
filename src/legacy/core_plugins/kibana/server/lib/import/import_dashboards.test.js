@@ -21,7 +21,6 @@ import { importDashboards } from './import_dashboards';
 import sinon from 'sinon';
 
 describe('importDashboards(req)', () => {
-
   let req;
   let bulkCreateStub;
   beforeEach(() => {
@@ -33,23 +32,32 @@ describe('importDashboards(req)', () => {
         objects: [
           { id: 'dashboard-01', type: 'dashboard', attributes: { panelJSON: '{}' } },
           { id: 'panel-01', type: 'visualization', attributes: { visState: '{}' } },
-        ]
+        ],
       },
       getSavedObjectsClient() {
         return {
-          bulkCreate: bulkCreateStub
+          bulkCreate: bulkCreateStub,
         };
       },
     };
-
   });
 
   test('should call bulkCreate with each asset', () => {
     return importDashboards(req).then(() => {
       expect(bulkCreateStub.calledOnce).toEqual(true);
       expect(bulkCreateStub.args[0][0]).toEqual([
-        { id: 'dashboard-01', type: 'dashboard', attributes: { panelJSON: '{}' }, migrationVersion: {} },
-        { id: 'panel-01', type: 'visualization', attributes: { visState: '{}' }, migrationVersion: {} },
+        {
+          id: 'dashboard-01',
+          type: 'dashboard',
+          attributes: { panelJSON: '{}' },
+          migrationVersion: {},
+        },
+        {
+          id: 'panel-01',
+          type: 'visualization',
+          attributes: { visState: '{}' },
+          migrationVersion: {},
+        },
       ]);
     });
   });
@@ -67,9 +75,13 @@ describe('importDashboards(req)', () => {
     return importDashboards(req).then(() => {
       expect(bulkCreateStub.calledOnce).toEqual(true);
       expect(bulkCreateStub.args[0][0]).toEqual([
-        { id: 'dashboard-01', type: 'dashboard', attributes: { panelJSON: '{}' }, migrationVersion: {} },
+        {
+          id: 'dashboard-01',
+          type: 'dashboard',
+          attributes: { panelJSON: '{}' },
+          migrationVersion: {},
+        },
       ]);
     });
   });
-
 });

@@ -81,6 +81,7 @@ exports[`Table should render normally 1`] = `
       Object {
         "actions": Array [
           Object {
+            "data-test-subj": "editFieldFormat",
             "description": "Edit",
             "icon": "pencil",
             "name": "Edit",
@@ -93,7 +94,6 @@ exports[`Table should render normally 1`] = `
       },
     ]
   }
-  executeQueryOptions={Object {}}
   items={
     Array [
       Object {
@@ -129,17 +129,17 @@ exports[`Table should render normally 1`] = `
   }
   responsive={true}
   sorting={true}
+  tableLayout="fixed"
 />
 `;
 
 exports[`Table should render the boolean template (false) 1`] = `<span />`;
 
 exports[`Table should render the boolean template (true) 1`] = `
-<EuiIconEmpty
+<div
   aria-label="Is searchable"
-  className="euiIcon euiIcon--medium euiIcon--secondary euiIcon-isLoading"
-  focusable="false"
-  style={null}
+  color="secondary"
+  data-euiicon-type="dot"
 />
 `;
 

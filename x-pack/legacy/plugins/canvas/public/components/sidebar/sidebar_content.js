@@ -93,10 +93,6 @@ const branches = [
 ];
 
 export const SidebarContent = compose(
-  connect(
-    mapStateToProps,
-    null,
-    mergeProps
-  ),
+  connect(mapStateToProps, null, mergeProps),
   ...branches
 )(GlobalConfig);

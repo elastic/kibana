@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ParsedUrlQuery } from 'querystring';
+import { ParsedQuery } from 'query-string';
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
 
 /**
@@ -20,7 +20,7 @@ export interface URLMeaningfulParts {
   protocol?: string | null;
   slashes?: boolean | null;
   port?: string | null;
-  query: ParsedUrlQuery;
+  query: ParsedQuery;
 }
 
 /**

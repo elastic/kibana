@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-import { initServerWithKibana, KibanaServer } from './server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
     configPrefix: 'xpack.uptime',
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['alerting', 'kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.uptime.pluginDescription', {
@@ -28,11 +28,9 @@ export const uptime = (kibana: any) =>
         }),
         main: 'plugins/uptime/app',
         order: 8900,
-        url: '/app/uptime/',
+        url: '/app/uptime#/',
+        category: DEFAULT_APP_CATEGORIES.observability,
       },
       home: ['plugins/uptime/register_feature'],
-    },
-    init(server: KibanaServer) {
-      initServerWithKibana(server);
     },
   });

@@ -19,8 +19,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     after(async () => await esArchiver.unload(archive));
     it('loads and displays uptime data based on date range', async () => {
       await pageObjects.uptime.loadDataAndGoToMonitorPage(
-        '2019-09-10 12:40:08.078',
-        '2019-09-11 19:40:08.078',
+        'Sep 10, 2019 @ 12:40:08.078',
+        'Sep 11, 2019 @ 19:40:08.078',
         '0000-intermittent',
         '0000-intermittent'
       );

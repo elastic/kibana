@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
-import React from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'redux';
+import React, { useCallback, useMemo } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
 import { networkActions } from '../../../../store/network';
-import { FlowTarget, UsersEdges, UsersFields, UsersSortField } from '../../../../graphql/types';
+import {
+  Direction,
+  FlowTarget,
+  UsersEdges,
+  UsersFields,
+  UsersSortField,
+} from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable, SortingBasicTable } from '../../../paginated_table';
 
@@ -32,28 +37,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface UsersTableReduxProps {
-  activePage: number;
-  limit: number;
-  usersSortField: UsersSortField;
-}
-
-interface UsersTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    tableType: networkModel.IpDetailsTableType;
-  }>;
-  updateUsersLimit: ActionCreator<{
-    limit: number;
-    networkType: networkModel.NetworkType;
-  }>;
-  updateUsersSort: ActionCreator<{
-    usersSort: UsersSortField;
-    networkType: networkModel.NetworkType;
-  }>;
-}
-
-type UsersTableProps = OwnProps & UsersTableReduxProps & UsersTableDispatchProps;
+type UsersTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -68,30 +52,72 @@ const rowItems: ItemsPerRow[] = [
 
 export const usersTableId = 'users-table';
 
-class UsersTableComponent extends React.PureComponent<UsersTableProps> {
-  public render() {
-    const {
-      activePage,
-      data,
-      fakeTotalCount,
+const UsersTableComponent = React.memo<UsersTableProps>(
+  ({
+    activePage,
+    data,
+    fakeTotalCount,
+    flowTarget,
+    id,
+    isInspect,
+    limit,
+    loading,
+    loadPage,
+    showMorePagesIndicator,
+    totalCount,
+    type,
+    updateNetworkTable,
+    sort,
+  }) => {
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        }),
+      [type, updateNetworkTable]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type, updateNetworkTable]
+    );
+
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const splitField = criteria.sort.field.split('.');
+          const newUsersSort: UsersSortField = {
+            field: getSortFromString(splitField[splitField.length - 1]),
+            direction: criteria.sort.direction as Direction,
+          };
+          if (!deepEqual(newUsersSort, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: { sort: newUsersSort },
+            });
+          }
+        }
+      },
+      [sort, type, updateNetworkTable]
+    );
+
+    const columns = useMemo(() => getUsersColumns(flowTarget, usersTableId), [
       flowTarget,
-      id,
-      isInspect,
-      limit,
-      loading,
-      loadPage,
-      showMorePagesIndicator,
-      totalCount,
-      type,
-      updateTableActivePage,
-      updateUsersLimit,
-      usersSortField,
-    } = this.props;
+      usersTableId,
+    ]);
 
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getUsersColumns(flowTarget, usersTableId)}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
@@ -102,38 +128,19 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
-        onChange={this.onChange}
+        loadPage={loadPage}
+        onChange={onChange}
         pageOfItems={data}
-        sorting={getSortField(usersSortField)}
+        sorting={getSortField(sort)}
         totalCount={fakeTotalCount}
-        updateActivePage={newPage =>
-          updateTableActivePage({
-            activePage: newPage,
-            tableType,
-          })
-        }
-        updateLimitPagination={newLimit => updateUsersLimit({ limit: newLimit, networkType: type })}
+        updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }
+);
 
-  private onChange = (criteria: Criteria) => {
-    if (criteria.sort != null) {
-      const splitField = criteria.sort.field.split('.');
-      const newUsersSort: UsersSortField = {
-        field: getSortFromString(splitField[splitField.length - 1]),
-        direction: criteria.sort.direction,
-      };
-      if (!isEqual(newUsersSort, this.props.usersSortField)) {
-        this.props.updateUsersSort({
-          usersSortField: newUsersSort,
-          networkType: this.props.type,
-        });
-      }
-    }
-  };
-}
+UsersTableComponent.displayName = 'UsersTableComponent';
 
 const makeMapStateToProps = () => {
   const getUsersSelector = networkSelectors.usersSelector();
@@ -142,14 +149,15 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const UsersTable = connect(
-  makeMapStateToProps,
-  {
-    updateTableActivePage: networkActions.updateIpDetailsTableActivePage,
-    updateUsersLimit: networkActions.updateUsersLimit,
-    updateUsersSort: networkActions.updateUsersSort,
-  }
-)(UsersTableComponent);
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const UsersTable = connector(UsersTableComponent);
 
 const getSortField = (sortField: UsersSortField): SortingBasicTable => {
   switch (sortField.field) {

@@ -22,38 +22,51 @@ automatically when you submit a PR.
 
 Smoke Tests are located in `siem/cypress/integration/smoke_tests`
 
-## Test Helpers
+## Structure
 
-_Test helpers_ are functions that may be re-used across tests.
+### Tasks
 
-- Reusable code and CSS selectors should be added to
-`siem/cypress/integration/lib`, as described below.
+_Tasks_ are functions that my be re-used across tests. Inside the _tasks_ folder there are some other folders that represents 
+the page to which we will perform the actions. For each folder we are going to create a file for each one of the sections that
+ has the page.
 
-### Reusable Test Helper Functions and CSS Selectors
+i.e.
+- tasks
+  - hosts
+    - events.ts
 
-The `cypress/integration/lib` directory contains code intended to be re-used
-across many different tests. Add reusable test helper functions and CSS
-selectors to directories under `cypress/integration/lib`.
+### Screens
 
-- Files named `helpers.ts` (e.g. `siem/cypress/integration/lib/login/helpers.ts`)
-contain functions (e.g. `login`) that may be imported and invoked from multiple tests.
+In _screens_ folder we are going to find all the elements we want to interact in our tests. Inside _screens_ fonder there
+are some other folders that represents the page that contains the elements the tests are going to interact with. For each 
+folder we are going to create a file for each one of the sections that the page has.
 
-- Files named `selectors.ts` export CSS selectors for re-use. For example,
-`siem/cypress/integration/lib/login/selectors.ts` exports the following selector
-that matches the Username text area in the Kibana login page:
-
-```sh
-export const USERNAME = '[data-test-subj="loginUsername"]';
-```
+i.e.
+- tasks
+  - hosts
+    - events.ts      
 
 ## Mock Data
 
 We prefer not to mock API responses in most of our smoke tests, but sometimes
 it's necessary because a test must assert that a specific value is rendered,
 and it's not possible to derive that value based on the data in the
-envrionment where tests are running.
+environment where tests are running.
 
 Mocked responses API from the server are located in `siem/cypress/fixtures`.
+
+## Speeding up test execution time
+
+Loading the web page takes a big amount of time, in order to minimize that impact, the following points should be
+taken into consideration until another solution is implemented:
+
+- Don't refresh the page for every test to clean the state of it.
+- Instead, group the tests that are similar in different contexts.
+- For every context login only once, clean the state between tests if needed without re-loading the page.
+- All tests in a spec file must be order-independent. 
+    - If you need to reload the page to make the tests order-independent, consider to create a new context.
+
+Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
 ## Authentication
 
@@ -196,6 +209,30 @@ running via the command line:
 cd x-pack/legacy/plugins/siem
 CYPRESS_baseUrl=http://localhost:5601 CYPRESS_ELASTICSEARCH_USERNAME=elastic CYPRESS_ELASTICSEARCH_PASSWORD=<password> yarn cypress:run
 ```
+
+## Running (Headless) Tests on the Command Line as a Jenkins execution
+
+To run (headless) tests as a Jenkins execution.
+
+1. First bootstrap kibana changes from the Kibana root directory:
+
+```sh
+yarn kbn bootstrap
+```
+
+2. Launch Cypress command line test runner:
+
+```sh 
+cd x-pack/legacy/plugins/siem
+yarn cypress:run-as-ci
+```
+
+Note that with this type of execution you don't need to have running a kibana and elasticsearch instance. This is because
+ the command, as it would happen in the CI, will launch the instances. The elasticsearch instance will be fed with the data 
+ placed in: `x-pack/test/siem_cypress/es_archives`.
+ 
+As in this case we want to mimic a CI execution we want to execute the tests with the same set of data, this is why 
+in this case does not make sense to override Cypress environment variables.    
 
 ## Reporting
 

@@ -8,6 +8,9 @@ import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
 import { CanvasWorkpad } from '../.../../../../../types';
+import { ArgTypesStrings } from '../../../../i18n';
+
+const { ContainerStyle: strings } = ArgTypesStrings;
 
 export interface Arguments {
   backgroundColor: string;
@@ -27,6 +30,7 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ getArgValue, setArgVa
       onChange={color => setArgValue('backgroundColor', color)}
       colors={workpad.colors}
       anchorPosition="leftCenter"
+      ariaLabel={strings.getDisplayName()}
     />
   </div>
 );

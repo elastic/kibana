@@ -51,7 +51,9 @@ export class Subject<T> {
   }
 
   next(value: T) {
-    this.value = value;
-    this.callbacks.forEach(fn => fn(value));
+    if (value !== this.value) {
+      this.value = value;
+      this.callbacks.forEach(fn => fn(value));
+    }
   }
 }

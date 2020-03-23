@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ConfigurationAdapter } from '../configuration';
+import { InmemoryConfigurationAdapter } from '../configuration/inmemory_configuration_adapter';
 
 import { SourcesAdapter, SourceConfiguration } from './index';
 import { PartialSourceConfigurations } from './types';
@@ -15,7 +16,11 @@ interface ConfigurationWithSources {
 export class ConfigurationSourcesAdapter implements SourcesAdapter {
   private readonly configuration: ConfigurationAdapter<ConfigurationWithSources>;
 
-  constructor(configuration: ConfigurationAdapter<ConfigurationWithSources>) {
+  constructor(
+    configuration: ConfigurationAdapter<
+      ConfigurationWithSources
+    > = new InmemoryConfigurationAdapter({ sources: {} })
+  ) {
     this.configuration = configuration;
   }
 

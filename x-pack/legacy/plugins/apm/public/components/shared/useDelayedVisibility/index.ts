@@ -26,6 +26,10 @@ export function useDelayedVisibility(
       setIsVisible(visibility);
     });
     delayedRef.current = delayed;
+
+    return () => {
+      delayed.destroy();
+    };
   }, [hideDelayMs, showDelayMs, minimumVisibleDuration]);
 
   useEffect(() => {

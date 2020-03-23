@@ -19,7 +19,7 @@
 
 import { httpServiceMock } from '../../../../../core/public/mocks';
 
-export const newPlatformHttp = httpServiceMock.createSetupContract();
+const newPlatformHttp = httpServiceMock.createSetupContract({ basePath: 'npBasePath' });
 jest.doMock('ui/new_platform', () => ({
   npSetup: {
     core: { http: newPlatformHttp },

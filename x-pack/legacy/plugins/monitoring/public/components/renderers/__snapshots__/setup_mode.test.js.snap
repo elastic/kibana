@@ -78,6 +78,8 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
             <EuiButton
               color="danger"
               fill={true}
+              iconSide="right"
+              iconType="flag"
               onClick={[Function]}
               size="s"
             >
@@ -173,6 +175,8 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
             <EuiButton
               color="danger"
               fill={true}
+              iconSide="right"
+              iconType="flag"
               onClick={[Function]}
               size="s"
             >

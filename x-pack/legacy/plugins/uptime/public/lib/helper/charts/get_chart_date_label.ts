@@ -34,7 +34,7 @@ export const getChartDateLabel = (dateRangeStart: number, dateRangeEnd: number) 
     delta < CHART_FORMAT_LIMITS.THIRTY_SIX_HOURS &&
     !isWithinCurrentDate(dateRangeStart, dateRangeEnd)
   ) {
-    formatString = 'MM-dd ';
+    formatString = 'MM-DD ';
   }
   return formatString + getLabelFormat(delta);
 };

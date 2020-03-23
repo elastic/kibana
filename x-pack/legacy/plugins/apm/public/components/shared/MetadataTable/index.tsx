@@ -9,42 +9,50 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
+  EuiFieldSearch
 } from '@elastic/eui';
-import React from 'react';
-import { get, pick, isEmpty } from 'lodash';
-import { EuiText } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DottedKeyValueTable } from '../DottedKeyValueTable';
+import { isEmpty } from 'lodash';
+import { EuiText } from '@elastic/eui';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
-import { Section as SectionType } from './sections';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { APMError } from '../../../../typings/es_schemas/ui/APMError';
-import { Span } from '../../../../typings/es_schemas/ui/Span';
-
-type Item = Transaction | APMError | Span;
+import { HeightRetainer } from '../HeightRetainer';
+import { Section } from './Section';
+import { history } from '../../../utils/history';
+import { fromQuery, toQuery } from '../Links/url_helpers';
+import { useLocation } from '../../../hooks/useLocation';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { SectionsWithRows, filterSectionsByTerm } from './helper';
 
 interface Props {
-  item: Item;
-  sections: SectionType[];
+  sections: SectionsWithRows;
 }
 
-const filterSections = (sections: SectionType[], item: Item) =>
-  sections
-    .map(section => {
-      const data: Record<string, unknown> = get(item, section.key);
-      return {
-        ...section,
-        data: section.properties ? pick(data, section.properties) : data
-      };
-    })
-    .filter(({ required, data }) => required || !isEmpty(data));
+export function MetadataTable({ sections }: Props) {
+  const location = useLocation();
+  const { urlParams } = useUrlParams();
+  const { searchTerm = '' } = urlParams;
 
-export function MetadataTable({ item, sections }: Props) {
-  const filteredSections = filterSections(sections, item);
+  const filteredSections = filterSectionsByTerm(sections, searchTerm);
+
+  const onSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.trim().toLowerCase();
+      history.replace({
+        ...location,
+        search: fromQuery({
+          ...toQuery(location.search),
+          searchTerm: value
+        })
+      });
+    },
+    [location]
+  );
+  const noResultFound = Boolean(searchTerm) && isEmpty(filteredSections);
   return (
     <React.Fragment>
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
         <EuiFlexItem grow={false}>
           <ElasticDocsLink section="/apm/get-started" path="/metadata.html">
             <EuiText size="s">
@@ -52,40 +60,49 @@ export function MetadataTable({ item, sections }: Props) {
             </EuiText>
           </ElasticDocsLink>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFieldSearch
+            onChange={onSearchChange}
+            placeholder={i18n.translate('xpack.apm.searchInput.filter', {
+              defaultMessage: 'Filter...'
+            })}
+            style={{
+              width: 400
+            }}
+            isInvalid={noResultFound}
+            value={searchTerm}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
-      {filteredSections.map(section => (
-        <div key={section.key}>
-          <EuiTitle size="xs">
-            <h6>{section.label}</h6>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <Section propData={section.data} propKey={section.key} />
-          <EuiSpacer size="xl" />
-        </div>
-      ))}
+      <HeightRetainer>
+        {filteredSections.map(section => (
+          <div key={section.key}>
+            <EuiTitle size="xs">
+              <h6>{section.label}</h6>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <Section keyValuePairs={section.rows} />
+            <EuiSpacer size="xl" />
+          </div>
+        ))}
+        {noResultFound && <NoResultFound value={searchTerm} />}
+      </HeightRetainer>
     </React.Fragment>
   );
 }
 
-function Section({
-  propData = {},
-  propKey
-}: {
-  propData?: Record<string, unknown>;
-  propKey?: string;
-}) {
-  if (isEmpty(propData)) {
-    return (
+const NoResultFound = ({ value }: { value: string }) => (
+  <EuiFlexGroup justifyContent="spaceAround">
+    <EuiFlexItem grow={false}>
       <EuiText size="s">
         {i18n.translate(
-          'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
-          { defaultMessage: 'No data available' }
+          'xpack.apm.propertiesTable.agentFeature.noResultFound',
+          {
+            defaultMessage: `No results for "{value}".`,
+            values: { value }
+          }
         )}
       </EuiText>
-    );
-  }
-
-  return (
-    <DottedKeyValueTable data={propData} parentKey={propKey} maxDepth={5} />
-  );
-}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

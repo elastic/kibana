@@ -5,28 +5,28 @@
  */
 
 jest.mock('../layers/vector_layer', () => {});
+jest.mock('../layers/blended_vector_layer', () => {});
 jest.mock('../layers/heatmap_layer', () => {});
 jest.mock('../layers/vector_tile_layer', () => {});
 jest.mock('../layers/sources/all_sources', () => {});
-jest.mock('../reducers/non_serializable_instances', () => ({
+jest.mock('../layers/joins/inner_join', () => {});
+jest.mock('../../../../../plugins/maps/public/reducers/non_serializable_instances', () => ({
   getInspectorAdapters: () => {
     return {};
-  }
+  },
 }));
-jest.mock('ui/timefilter', () => ({
-  timefilter: {
+jest.mock('../kibana_services', () => ({
+  getTimeFilter: () => ({
     getTime: () => {
       return {
         to: 'now',
-        from: 'now-15m'
+        from: 'now-15m',
       };
-    }
-  }
+    },
+  }),
 }));
 
-import {
-  getTimeFilters,
-} from './map_selectors';
+import { getTimeFilters } from './map_selectors';
 
 describe('getTimeFilters', () => {
   it('should return timeFilters when contained in state', () => {
@@ -35,10 +35,10 @@ describe('getTimeFilters', () => {
         mapState: {
           timeFilters: {
             to: '2001-01-01',
-            from: '2001-12-31'
-          }
-        }
-      }
+            from: '2001-12-31',
+          },
+        },
+      },
     };
     expect(getTimeFilters(state)).toEqual({ to: '2001-01-01', from: '2001-12-31' });
   });
@@ -47,9 +47,9 @@ describe('getTimeFilters', () => {
     const state = {
       map: {
         mapState: {
-          timeFilters: null
-        }
-      }
+          timeFilters: null,
+        },
+      },
     };
     expect(getTimeFilters(state)).toEqual({ to: 'now', from: 'now-15m' });
   });

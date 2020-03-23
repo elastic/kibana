@@ -1,0 +1,110 @@
+[[supported-aggregations]]
+== Supported aggregations
+
+Use the supported aggregations to build your visualizations.
+
+[float]
+[[visualize-metric-aggregations]]
+=== Metric aggregations
+
+Metric aggregations extract field from documents to generate data values.
+
+{ref}/search-aggregations-metrics-avg-aggregation.html[Average]:: The mean value.
+
+{ref}/search-aggregations-metrics-valuecount-aggregation.html[Count]:: The total number of documents that match the query, which allows you to visualize the number of documents in a bucket. Count is the default value.
+
+{ref}/search-aggregations-metrics-max-aggregation.html[Max]:: The highest value.
+
+{ref}/search-aggregations-metrics-percentile-aggregation.html[Median]:: The value that is in the 50% percentile.
+
+{ref}/search-aggregations-metrics-min-aggregation.html[Min]:: The lowest value.
+
+{ref}/search-aggregations-metrics-percentile-rank-aggregation.html[Percentile ranks]:: Returns the percentile rankings for the values in the specified numeric field. Select a numeric field from the drop-down, then specify one or more percentile rank values in the *Values* fields.
+
+{ref}/search-aggregations-metrics-percentile-aggregation.html[Percentiles]:: Divides the
+values in a numeric field into specified percentile bands. Select a field from the drop-down, then specify one or more ranges in the *Percentiles* fields.
+
+Standard Deviation:: Requires a numeric field. Uses the {ref}/search-aggregations-metrics-extendedstats-aggregation.html[_extended stats_] aggregation.
+
+{ref}/search-aggregations-metrics-sum-aggregation.html[Sum]:: The total value.
+
+{ref}/search-aggregations-metrics-top-hits-aggregation.html[Top hit]:: Returns a sample of individual documents. When the Top Hit aggregation is matched to more than one document, you must choose a technique for combining the values. Techniques include average, minimum, maximum, and sum.
+
+Unique Count:: The {ref}/search-aggregations-metrics-cardinality-aggregation.html[Cardinality] of the field within the bucket.
+
+Alternatively, you can override the field values with a script using JSON input. For example:
+
+[source,shell]
+{ "script" : "doc['grade'].value * 1.2" }
+
+The example implements a {es} {ref}/search-aggregations.html[Script Value Source], which replaces
+the value in the metric. The options available depend on the aggregation you choose.
+
+[float]
+[[visualize-parent-pipeline-aggregations]]
+=== Parent pipeline aggregations
+
+Parent pipeline aggregations assume the bucket aggregations are ordered and are especially useful for time series data. For each parent pipeline aggregation, you must define a bucket aggregation and metric aggregation.
+
+You can also nest these aggregations. For example, if you want to produce a third derivative.
+
+{ref}/search-aggregations-pipeline-bucket-script-aggregation.html[Bucket script]:: Executes a script that performs computations for each bucket that specifies metrics in the parent multi-bucket aggregation.
+
+{ref}/search-aggregations-pipeline-cumulative-sum-aggregation.html[Cumulative sum]:: Calculates the cumulative sum of a specified metric in a parent histogram.
+
+{ref}/search-aggregations-pipeline-derivative-aggregation.html[Derivative]:: Calculates the derivative of specific metrics.
+
+{ref}/search-aggregations-pipeline-movavg-aggregation.html[Moving avg]:: Slides a window across the data and emits the average value of the window.
+
+{ref}/search-aggregations-pipeline-serialdiff-aggregation.html[Serial diff]:: Values in a time series are subtracted from itself at different time lags or periods.
+
+[float]
+[[visualize-sibling-pipeline-aggregations]]
+=== Sibling pipeline aggregations
+
+Sibling pipeline aggregations condense many buckets into one. For each sibling pipeline aggregation, you must define a bucket aggregations and metric aggregation.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Average bucket]:: Calculates the mean, or average, value of a specified metric in a sibling aggregation.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Max Bucket]:: Calculates the maximum value of a specified metric in a sibling aggregation.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Min Bucket]:: Calculates the minimum value of a specified metric in a sibling aggregation.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Sum Bucket]:: Calculates the sum of the values of a specified metric in a sibling aggregation.
+
+[float]
+[[visualize-bucket-aggregations]]
+=== Bucket aggregations
+
+Bucket aggregations sort documents into buckets, depending on the contents of the document.
+
+{ref}/search-aggregations-bucket-datehistogram-aggregation.html[Date histogram]:: Splits a date field into buckets by interval. If the date field is the primary time field for the index pattern, it chooses an automatic interval for you. Intervals are labeled at the start of the interval, using the date-key returned by {es}. For example, the tooltip for a monthly interval displays the first day of the month.
+
+{ref}/search-aggregations-bucket-daterange-aggregation.html[Date range]:: Reports values that are within a range of dates that you specify. You can specify the ranges for the dates using {ref}/common-options.html#date-math[_date math_] expressions.
+
+{ref}/search-aggregations-bucket-filter-aggregation.html[Filter]:: Each filter creates a bucket of documents. You can specify a filter as a
+<<kuery-query, KQL>> or <<lucene-query, Lucene>> query string.
+
+{ref}/search-aggregations-bucket-geohashgrid-aggregation.html[Geohash]:: Displays points based on a geohash. Supported by the tile map and data table visualizations.
+
+{ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile]:: Groups points based on web map tiling. Supported by the tile map and data table visualizations.
+
+{ref}/search-aggregations-bucket-histogram-aggregation.html[Histogram]:: Builds from a numeric field.
+
+{ref}/search-aggregations-bucket-iprange-aggregation.html[IPv4 range]:: Specify ranges of IPv4 addresses.
+
+{ref}/search-aggregations-bucket-range-aggregation.html[Range]:: Specify ranges of values for a numeric field.
+
+{ref}/search-aggregations-bucket-significantterms-aggregation.html[Significant terms]:: Returns interesting or unusual occurrences of terms in a set. Supports {es} {ref}/search-aggregations-bucket-terms-aggregation.html#_filtering_values_4[exclude and include patterns].
+
+{ref}/search-aggregations-bucket-terms-aggregation.html[Terms]:: Specify the top or bottom _n_ elements of a given field to display, ordered by count or a custom metric. Supports {es} {ref}/search-aggregations-bucket-terms-aggregation.html#_filtering_values_4[exclude and include patterns].
+
+{kib} filters string fields with only regular expression patterns, and does not filter numeric fields or match with arrays.
+
+For example:
+
+* You want to exclude the metricbeat process from your visualization of top processes: `metricbeat.*`
+* You only want to show processes collecting beats: `.*beat`
+* You want to exclude two specific values, the string `"empty"` and `"none"`: `empty|none`
+
+Patterns are case sensitive.

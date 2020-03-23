@@ -6,7 +6,6 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -25,7 +24,7 @@ describe('EmptyValue', () => {
 
   test('it renders against snapshot', () => {
     const wrapper = shallow(<p>{getEmptyString()}</p>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('#getEmptyValue', () => {

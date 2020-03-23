@@ -16,80 +16,87 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { esKuery } from '../../../../../plugins/data/server';
 
-import { fromKueryExpression } from '@kbn/es-query';
+import { validateFilterKueryNode, validateConvertFilterToKueryNode } from './filter_utils';
 
-import {
-  validateFilterKueryNode,
-  getSavedObjectTypeIndexPatterns,
-  validateConvertFilterToKueryNode,
-} from './filter_utils';
-import { SavedObjectsIndexPattern } from './cache_index_patterns';
-
-const mockIndexPatterns: SavedObjectsIndexPattern = {
-  fields: [
-    {
-      name: 'updatedAt',
+const mockMappings = {
+  properties: {
+    updatedAt: {
       type: 'date',
-      aggregatable: true,
-      searchable: true,
     },
-    {
-      name: 'foo.title',
-      type: 'text',
-      aggregatable: true,
-      searchable: true,
+    foo: {
+      properties: {
+        title: {
+          type: 'text',
+        },
+        description: {
+          type: 'text',
+        },
+        bytes: {
+          type: 'number',
+        },
+      },
     },
-    {
-      name: 'foo.description',
-      type: 'text',
-      aggregatable: true,
-      searchable: true,
+    bar: {
+      properties: {
+        foo: {
+          type: 'text',
+        },
+        description: {
+          type: 'text',
+        },
+      },
     },
-    {
-      name: 'foo.bytes',
-      type: 'number',
-      aggregatable: true,
-      searchable: true,
+    alert: {
+      properties: {
+        actions: {
+          type: 'nested',
+          properties: {
+            group: {
+              type: 'keyword',
+            },
+            actionRef: {
+              type: 'keyword',
+            },
+            actionTypeId: {
+              type: 'keyword',
+            },
+            params: {
+              enabled: false,
+              type: 'object',
+            },
+          },
+        },
+      },
     },
-    {
-      name: 'bar.foo',
-      type: 'text',
-      aggregatable: true,
-      searchable: true,
+    hiddenType: {
+      properties: {
+        description: {
+          type: 'text',
+        },
+      },
     },
-    {
-      name: 'bar.description',
-      type: 'text',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'hiddentype.description',
-      type: 'text',
-      aggregatable: true,
-      searchable: true,
-    },
-  ],
-  title: 'mock',
+  },
 };
 
 describe('Filter Utils', () => {
   describe('#validateConvertFilterToKueryNode', () => {
     test('Validate a simple filter', () => {
       expect(
-        validateConvertFilterToKueryNode(['foo'], 'foo.attributes.title: "best"', mockIndexPatterns)
-      ).toEqual(fromKueryExpression('foo.title: "best"'));
+        validateConvertFilterToKueryNode(['foo'], 'foo.attributes.title: "best"', mockMappings)
+      ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
     });
     test('Assemble filter kuery node saved object attributes with one saved object type', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo'],
           'foo.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)',
-          mockIndexPatterns
+          mockMappings
         )
       ).toEqual(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           '(type: foo and updatedAt: 5678654567) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or foo.description :*)'
         )
       );
@@ -100,10 +107,10 @@ describe('Filter Utils', () => {
         validateConvertFilterToKueryNode(
           ['foo', 'bar'],
           'foo.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)',
-          mockIndexPatterns
+          mockMappings
         )
       ).toEqual(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           '(type: foo and updatedAt: 5678654567) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or foo.description :*)'
         )
       );
@@ -114,13 +121,23 @@ describe('Filter Utils', () => {
         validateConvertFilterToKueryNode(
           ['foo', 'bar'],
           '(bar.updatedAt: 5678654567 OR foo.updatedAt: 5678654567) and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or bar.attributes.description :*)',
-          mockIndexPatterns
+          mockMappings
         )
       ).toEqual(
-        fromKueryExpression(
+        esKuery.fromKueryExpression(
           '((type: bar and updatedAt: 5678654567) or (type: foo and updatedAt: 5678654567)) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or bar.description :*)'
         )
       );
+    });
+
+    test('Assemble filter with a nested filter', () => {
+      expect(
+        validateConvertFilterToKueryNode(
+          ['alert'],
+          'alert.attributes.actions:{ actionTypeId: ".server-log" }',
+          mockMappings
+        )
+      ).toEqual(esKuery.fromKueryExpression('alert.actions:{ actionTypeId: ".server-log" }'));
     });
 
     test('Lets make sure that we are throwing an exception if we get an error', () => {
@@ -128,7 +145,7 @@ describe('Filter Utils', () => {
         validateConvertFilterToKueryNode(
           ['foo', 'bar'],
           'updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)',
-          mockIndexPatterns
+          mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
         `"This key 'updatedAt' need to be wrapped by a saved object type like foo,bar: Bad Request"`
@@ -137,20 +154,20 @@ describe('Filter Utils', () => {
 
     test('Lets make sure that we are throwing an exception if we are using hiddentype with types', () => {
       expect(() => {
-        validateConvertFilterToKueryNode([], 'hiddentype.title: "title"', mockIndexPatterns);
+        validateConvertFilterToKueryNode([], 'hiddentype.title: "title"', mockMappings);
       }).toThrowErrorMatchingInlineSnapshot(`"This type hiddentype is not allowed: Bad Request"`);
     });
   });
 
   describe('#validateFilterKueryNode', () => {
     test('Validate filter query through KueryNode - happy path', () => {
-      const validationObject = validateFilterKueryNode(
-        fromKueryExpression(
+      const validationObject = validateFilterKueryNode({
+        astFilter: esKuery.fromKueryExpression(
           'foo.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
-        ['foo'],
-        getSavedObjectTypeIndexPatterns(['foo'], mockIndexPatterns)
-      );
+        types: ['foo'],
+        indexMapping: mockMappings,
+      });
 
       expect(validationObject).toEqual([
         {
@@ -198,14 +215,34 @@ describe('Filter Utils', () => {
       ]);
     });
 
+    test('Validate nested filter query through KueryNode - happy path', () => {
+      const validationObject = validateFilterKueryNode({
+        astFilter: esKuery.fromKueryExpression(
+          'alert.attributes.actions:{ actionTypeId: ".server-log" }'
+        ),
+        types: ['alert'],
+        indexMapping: mockMappings,
+        hasNestedKey: true,
+      });
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.1',
+          error: null,
+          isSavedObjectAttr: false,
+          key: 'alert.attributes.actions.actionTypeId',
+          type: 'alert',
+        },
+      ]);
+    });
+
     test('Return Error if key is not wrapper by a saved object type', () => {
-      const validationObject = validateFilterKueryNode(
-        fromKueryExpression(
+      const validationObject = validateFilterKueryNode({
+        astFilter: esKuery.fromKueryExpression(
           'updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
-        ['foo'],
-        getSavedObjectTypeIndexPatterns(['foo'], mockIndexPatterns)
-      );
+        types: ['foo'],
+        indexMapping: mockMappings,
+      });
 
       expect(validationObject).toEqual([
         {
@@ -254,13 +291,13 @@ describe('Filter Utils', () => {
     });
 
     test('Return Error if key of a saved object type is not wrapped with attributes', () => {
-      const validationObject = validateFilterKueryNode(
-        fromKueryExpression(
+      const validationObject = validateFilterKueryNode({
+        astFilter: esKuery.fromKueryExpression(
           'foo.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.description :*)'
         ),
-        ['foo'],
-        getSavedObjectTypeIndexPatterns(['foo'], mockIndexPatterns)
-      );
+        types: ['foo'],
+        indexMapping: mockMappings,
+      });
 
       expect(validationObject).toEqual([
         {
@@ -311,13 +348,13 @@ describe('Filter Utils', () => {
     });
 
     test('Return Error if filter is not using an allowed type', () => {
-      const validationObject = validateFilterKueryNode(
-        fromKueryExpression(
+      const validationObject = validateFilterKueryNode({
+        astFilter: esKuery.fromKueryExpression(
           'bar.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
-        ['foo'],
-        getSavedObjectTypeIndexPatterns(['foo'], mockIndexPatterns)
-      );
+        types: ['foo'],
+        indexMapping: mockMappings,
+      });
 
       expect(validationObject).toEqual([
         {
@@ -366,13 +403,13 @@ describe('Filter Utils', () => {
     });
 
     test('Return Error if filter is using an non-existing key in the index patterns of the saved object type', () => {
-      const validationObject = validateFilterKueryNode(
-        fromKueryExpression(
+      const validationObject = validateFilterKueryNode({
+        astFilter: esKuery.fromKueryExpression(
           'foo.updatedAt33: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.header: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
-        ['foo'],
-        getSavedObjectTypeIndexPatterns(['foo'], mockIndexPatterns)
-      );
+        types: ['foo'],
+        indexMapping: mockMappings,
+      });
 
       expect(validationObject).toEqual([
         {
@@ -420,36 +457,28 @@ describe('Filter Utils', () => {
         },
       ]);
     });
-  });
 
-  describe('#getSavedObjectTypeIndexPatterns', () => {
-    test('Get index patterns related to your type', () => {
-      const indexPatternsFilterByType = getSavedObjectTypeIndexPatterns(['foo'], mockIndexPatterns);
+    test('Return Error if filter is using an non-existing key null key', () => {
+      const validationObject = validateFilterKueryNode({
+        astFilter: esKuery.fromKueryExpression('foo.attributes.description: hello AND bye'),
+        types: ['foo'],
+        indexMapping: mockMappings,
+      });
 
-      expect(indexPatternsFilterByType).toEqual([
+      expect(validationObject).toEqual([
         {
-          name: 'updatedAt',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
+          astPath: 'arguments.0',
+          error: null,
+          isSavedObjectAttr: false,
+          key: 'foo.attributes.description',
+          type: 'foo',
         },
         {
-          name: 'foo.title',
-          type: 'text',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'foo.description',
-          type: 'text',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'foo.bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
+          astPath: 'arguments.1',
+          error: 'The key is empty and needs to be wrapped by a saved object type like foo',
+          isSavedObjectAttr: false,
+          key: null,
+          type: null,
         },
       ]);
     });

@@ -29,7 +29,7 @@ export function MachineLearningJobStatusIcon({ status }) {
       type={type}
       label={i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.statusIconLabel', {
         defaultMessage: 'Job Status: {status}',
-        values: { status }
+        values: { status },
       })}
     />
   );

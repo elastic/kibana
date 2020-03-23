@@ -17,7 +17,10 @@ export function MachineLearningNavigationProvider({
 
   return {
     async navigateToMl() {
-      return await PageObjects.common.navigateToApp('ml');
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('ml');
+        await testSubjects.existOrFail('mlPageOverview', { timeout: 2000 });
+      });
     },
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
@@ -32,12 +35,10 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToArea(linkSubject: string, pageSubject: string) {
-      await retry.tryForTime(2 * 60 * 1000, async () => {
-        if ((await testSubjects.exists(`${linkSubject} selected`)) === false) {
-          await testSubjects.click(linkSubject);
-          await testSubjects.existOrFail(`${linkSubject} selected`, { timeout: 30 * 1000 });
-          await testSubjects.existOrFail(pageSubject, { timeout: 30 * 1000 });
-        }
+      await testSubjects.click(linkSubject);
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(`${linkSubject} & ~selected`);
+        await testSubjects.existOrFail(pageSubject);
       });
     },
 
@@ -51,11 +52,11 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToOverview() {
-      await this.navigateToArea('mlMainTab overview', 'mlPageOverview');
+      await this.navigateToArea('~mlMainTab & ~overview', 'mlPageOverview');
     },
 
     async navigateToAnomalyDetection() {
-      await this.navigateToArea('mlMainTab anomalyDetection', 'mlPageJobManagement');
+      await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
       await this.assertTabsExist('mlSubTab', [
         'jobManagement',
         'anomalyExplorer',
@@ -65,33 +66,33 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToDataFrameAnalytics() {
-      await this.navigateToArea('mlMainTab dataFrameAnalytics', 'mlPageDataFrameAnalytics');
+      await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
       await this.assertTabsExist('mlSubTab', []);
     },
 
     async navigateToDataVisualizer() {
-      await this.navigateToArea('mlMainTab dataVisualizer', 'mlPageDataVisualizerSelector');
+      await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
       await this.assertTabsExist('mlSubTab', []);
     },
 
     async navigateToJobManagement() {
       await this.navigateToAnomalyDetection();
-      await this.navigateToArea('mlSubTab jobManagement', 'mlPageJobManagement');
+      await this.navigateToArea('~mlSubTab & ~jobManagement', 'mlPageJobManagement');
     },
 
     async navigateToAnomalyExplorer() {
       await this.navigateToAnomalyDetection();
-      await this.navigateToArea('mlSubTab anomalyExplorer', 'mlPageAnomalyExplorer');
+      await this.navigateToArea('~mlSubTab & ~anomalyExplorer', 'mlPageAnomalyExplorer');
     },
 
     async navigateToSingleMetricViewer() {
       await this.navigateToAnomalyDetection();
-      await this.navigateToArea('mlSubTab singleMetricViewer', 'mlPageSingleMetricViewer');
+      await this.navigateToArea('~mlSubTab & ~singleMetricViewer', 'mlPageSingleMetricViewer');
     },
 
     async navigateToSettings() {
       await this.navigateToAnomalyDetection();
-      await this.navigateToArea('mlSubTab settings', 'mlPageSettings');
+      await this.navigateToArea('~mlSubTab & ~settings', 'mlPageSettings');
     },
   };
 }

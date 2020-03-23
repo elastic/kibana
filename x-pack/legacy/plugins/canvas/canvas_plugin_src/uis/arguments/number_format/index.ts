@@ -10,7 +10,7 @@ import { AdvancedSettings } from '../../../../public/lib/kibana_advanced_setting
 // @ts-ignore untyped local lib
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
-import { ArgumentStrings } from '../../../strings';
+import { ArgumentStrings } from '../../../../i18n';
 
 const { NumberFormat: strings } = ArgumentStrings;
 

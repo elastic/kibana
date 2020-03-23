@@ -19,7 +19,7 @@
 
 import Url from 'url';
 
-import Axios, { AxiosRequestConfig } from 'axios';
+import Axios, { AxiosRequestConfig, AxiosInstance } from 'axios';
 import parseLinkHeader from 'parse-link-header';
 import { ToolingLog, isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
 
@@ -33,6 +33,15 @@ export interface GithubIssue {
   body: string;
 }
 
+/**
+ * Minimal GithubIssue type that can be easily replicated by dry-run helpers
+ */
+export interface GithubIssueMini {
+  number: GithubIssue['number'];
+  body: GithubIssue['body'];
+  html_url: GithubIssue['html_url'];
+}
+
 type RequestOptions = AxiosRequestConfig & {
   safeForDryRun?: boolean;
   maxAttempts?: number;
@@ -40,25 +49,34 @@ type RequestOptions = AxiosRequestConfig & {
 };
 
 export class GithubApi {
-  private readonly x = Axios.create({
-    headers: {
-      Authorization: `token ${this.token}`,
-      'User-Agent': 'elastic/kibana#failed_test_reporter',
-    },
-  });
+  private readonly log: ToolingLog;
+  private readonly token: string | undefined;
+  private readonly dryRun: boolean;
+  private readonly x: AxiosInstance;
 
   /**
    * Create a GithubApi helper object, if token is undefined requests won't be
    * sent, but will instead be logged.
    */
-  constructor(
-    private readonly log: ToolingLog,
-    private readonly token: string | undefined,
-    private readonly dryRun: boolean
-  ) {
-    if (!token && !dryRun) {
+  constructor(options: {
+    log: GithubApi['log'];
+    token: GithubApi['token'];
+    dryRun: GithubApi['dryRun'];
+  }) {
+    this.log = options.log;
+    this.token = options.token;
+    this.dryRun = options.dryRun;
+
+    if (!this.token && !this.dryRun) {
       throw new TypeError('token parameter is required');
     }
+
+    this.x = Axios.create({
+      headers: {
+        ...(this.token ? { Authorization: `token ${this.token}` } : {}),
+        'User-Agent': 'elastic/kibana#failed_test_reporter',
+      },
+    });
   }
 
   private failedTestIssuesPageCache: {
@@ -153,7 +171,7 @@ export class GithubApi {
   }
 
   async createIssue(title: string, body: string, labels?: string[]) {
-    const resp = await this.request(
+    const resp = await this.request<GithubIssueMini>(
       {
         method: 'POST',
         url: Url.resolve(BASE_URL, 'issues'),
@@ -164,11 +182,13 @@ export class GithubApi {
         },
       },
       {
+        body,
+        number: 999,
         html_url: 'https://dryrun',
       }
     );
 
-    return resp.data.html_url;
+    return resp.data;
   }
 
   private async request<T>(

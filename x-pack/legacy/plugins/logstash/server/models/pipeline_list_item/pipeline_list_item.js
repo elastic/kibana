@@ -19,7 +19,7 @@ export class PipelineListItem {
       id: this.id,
       description: this.description,
       last_modified: this.last_modified,
-      username: this.username
+      username: this.username,
     };
 
     return json;
@@ -34,7 +34,7 @@ export class PipelineListItem {
       id: pipeline._id,
       description: get(pipeline, '_source.description'),
       last_modified: get(pipeline, '_source.last_modified'),
-      username: get(pipeline, '_source.username')
+      username: get(pipeline, '_source.username'),
     };
 
     return new PipelineListItem(opts);

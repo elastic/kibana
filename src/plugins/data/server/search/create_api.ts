@@ -30,15 +30,28 @@ export function createApi({
   caller: APICaller;
 }) {
   const api: IRouteHandlerSearchContext = {
-    search: async (request, strategyName) => {
-      const name = strategyName ? strategyName : DEFAULT_SEARCH_STRATEGY;
+    search: async (request, options, strategyName) => {
+      if (request.debug) {
+        // eslint-disable-next-line
+        console.log(JSON.stringify(request, null, 2));
+      }
+      const name = strategyName ?? DEFAULT_SEARCH_STRATEGY;
       const strategyProvider = searchStrategies[name];
       if (!strategyProvider) {
         throw new Error(`No strategy found for ${strategyName}`);
       }
       // Give providers access to other search strategies by injecting this function
       const strategy = await strategyProvider(caller, api.search);
-      return strategy.search(request);
+      return strategy.search(request, options);
+    },
+    cancel: async (id, strategyName) => {
+      const name = strategyName ?? DEFAULT_SEARCH_STRATEGY;
+      const strategyProvider = searchStrategies[name];
+      if (!strategyProvider) {
+        throw new Error(`No strategy found for ${strategyName}`);
+      }
+      const strategy = await strategyProvider(caller, api.search);
+      return strategy.cancel && strategy.cancel(id);
     },
   };
   return api;

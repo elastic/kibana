@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { configureAppAngularModule } from './angular_config';
+export { configureAppAngularModule } from '../../../../plugins/kibana_legacy/public';

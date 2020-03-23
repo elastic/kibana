@@ -17,17 +17,10 @@
  * under the License.
  */
 
-import {
-  applyMiddleware,
-  createStore,
-  compose,
-} from 'redux';
+import { applyMiddleware, createStore, compose } from 'redux';
 import thunk from 'redux-thunk';
-import { browserHistory } from 'react-router';
-import {
-  routerMiddleware,
-  routerReducer,
-} from 'react-router-redux';
+import { browserHistory } from 'react-router'; // eslint-disable-line
+import { routerMiddleware, routerReducer } from 'react-router-redux';
 
 import codeViewerReducer from './reducers/code_viewer_reducer';
 import sandboxReducer from './reducers/sandbox_reducer';
@@ -47,12 +40,10 @@ export default function configureStore(initialState) {
     };
   }
 
-  const finalStore = compose(
-    applyMiddleware(
-      thunk,
-      routerMiddleware(browserHistory)
-    )
-  )(createStore)(rootReducer, initialState);
+  const finalStore = compose(applyMiddleware(thunk, routerMiddleware(browserHistory)))(createStore)(
+    rootReducer,
+    initialState
+  );
 
   return finalStore;
 }

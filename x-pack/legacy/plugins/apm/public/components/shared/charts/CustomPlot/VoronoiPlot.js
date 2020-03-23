@@ -32,7 +32,10 @@ class VoronoiPlot extends PureComponent {
         onMouseLeave={this.props.onMouseLeave}
       >
         <Voronoi
-          extent={[[XY_MARGIN.left, XY_MARGIN.top], [XY_WIDTH, XY_HEIGHT]]}
+          extent={[
+            [XY_MARGIN.left, XY_MARGIN.top],
+            [XY_WIDTH, XY_HEIGHT]
+          ]}
           nodes={xValuesCombined}
           onHover={this.props.onHover}
           onMouseDown={this.props.onMouseDown}

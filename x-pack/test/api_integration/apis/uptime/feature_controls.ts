@@ -5,15 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { docCountQueryString } from '../../../../legacy/plugins/uptime/public/queries';
-import { SecurityService, SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
+import { API_URLS } from '../../../../legacy/plugins/uptime/common/constants';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
 
   const expect404 = (result: any) => {
     expect(result.error).to.be(undefined);
@@ -27,31 +26,11 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     expect(result.response).to.have.property('statusCode', 200);
   };
 
-  const executeGraphQLQuery = async (username: string, password: string, spaceId?: string) => {
-    const basePath = spaceId ? `/s/${spaceId}` : '';
-    const getDocCountQuery = {
-      operationName: null,
-      query: docCountQueryString,
-      variables: {
-        dateRangeStart: '2019-01-28T17:40:08.078Z',
-        dateRangeEnd: '2019-01-28T19:00:16.078Z',
-      },
-    };
-
-    return await supertest
-      .post(`${basePath}/api/uptime/graphql`)
-      .auth(username, password)
-      .set('kbn-xsrf', 'foo')
-      .send({ ...getDocCountQuery })
-      .then((response: any) => ({ error: undefined, response }))
-      .catch((error: any) => ({ error, response: undefined }));
-  };
-
-  const executeIsValidRequest = async (username: string, password: string, spaceId?: string) => {
+  const executeRESTAPIQuery = async (username: string, password: string, spaceId?: string) => {
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
     return await supertest
-      .get(`${basePath}/api/uptime/is_valid`)
+      .get(basePath + API_URLS.INDEX_STATUS)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
       .then((response: any) => ({ error: undefined, response }))
@@ -61,10 +40,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const executePingsRequest = async (username: string, password: string, spaceId?: string) => {
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
+    const url = `${basePath}${API_URLS.PINGS}?sort=desc&dateRangeStart=${PINGS_DATE_RANGE_START}&dateRangeEnd=${PINGS_DATE_RANGE_END}`;
     return await supertest
-      .get(
-        `${basePath}/api/uptime/pings?sort=desc&dateRangeStart=${PINGS_DATE_RANGE_START}&dateRangeEnd=${PINGS_DATE_RANGE_END}`
-      )
+      .get(url)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
       .then((response: any) => ({ error: undefined, response }))
@@ -72,9 +50,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   };
 
   describe('feature controls', () => {
-    it(`APIs can't be accessed by heartbeat-* read privileges role`, async () => {
-      const username = 'logstash_read';
-      const roleName = 'logstash_read';
+    it(`APIs can be accessed by heartbeat-* read privileges role`, async () => {
+      const username = 'heartbeat_read';
+      const roleName = 'heartbeat_read';
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
@@ -94,11 +72,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           full_name: 'a kibana user',
         });
 
-        const graphQLResult = await executeGraphQLQuery(username, password);
+        const graphQLResult = await executeRESTAPIQuery(username, password);
         expect404(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password);
-        expect404(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password);
         expect404(pingsResult);
@@ -136,11 +111,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           full_name: 'a kibana user',
         });
 
-        const graphQLResult = await executeGraphQLQuery(username, password);
+        const graphQLResult = await executeRESTAPIQuery(username, password);
         expectResponse(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password);
-        expectResponse(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password);
         expectResponse(pingsResult);
@@ -181,11 +153,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           full_name: 'a kibana user',
         });
 
-        const graphQLResult = await executeGraphQLQuery(username, password);
+        const graphQLResult = await executeRESTAPIQuery(username, password);
         expect404(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password);
-        expect404(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password);
         expect404(pingsResult);
@@ -253,22 +222,16 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       it('user_1 can access APIs in space_1', async () => {
-        const graphQLResult = await executeGraphQLQuery(username, password, space1Id);
+        const graphQLResult = await executeRESTAPIQuery(username, password, space1Id);
         expectResponse(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password, space1Id);
-        expectResponse(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password, space1Id);
         expectResponse(pingsResult);
       });
 
       it(`user_1 can't access APIs in space_2`, async () => {
-        const graphQLResult = await executeGraphQLQuery(username, password);
+        const graphQLResult = await executeRESTAPIQuery(username, password);
         expect404(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password);
-        expect404(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password);
         expect404(pingsResult);

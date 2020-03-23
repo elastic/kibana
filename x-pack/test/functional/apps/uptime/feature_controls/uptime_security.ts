@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -65,10 +64,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows uptime navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
-          'Uptime',
-          'Management',
-        ]);
+        expect(navLinks.map(link => link.text)).to.eql(['Uptime', 'Management']);
       });
 
       it('can navigate to Uptime app', async () => {
@@ -118,9 +114,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows uptime navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Uptime', 'Management']);
       });
 
@@ -171,9 +165,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show uptime navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Uptime');
       });
 

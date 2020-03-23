@@ -8,37 +8,50 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox } from '@elastic/eui';
+import { AGG_TYPE } from '../../common/constants';
 
 const AGG_OPTIONS = [
   {
     label: i18n.translate('xpack.maps.metricSelect.averageDropDownOptionLabel', {
       defaultMessage: 'Average',
     }),
-    value: 'avg',
+    value: AGG_TYPE.AVG,
   },
   {
     label: i18n.translate('xpack.maps.metricSelect.countDropDownOptionLabel', {
       defaultMessage: 'Count',
     }),
-    value: 'count',
+    value: AGG_TYPE.COUNT,
   },
   {
     label: i18n.translate('xpack.maps.metricSelect.maxDropDownOptionLabel', {
       defaultMessage: 'Max',
     }),
-    value: 'max',
+    value: AGG_TYPE.MAX,
   },
   {
     label: i18n.translate('xpack.maps.metricSelect.minDropDownOptionLabel', {
       defaultMessage: 'Min',
     }),
-    value: 'min',
+    value: AGG_TYPE.MIN,
   },
   {
     label: i18n.translate('xpack.maps.metricSelect.sumDropDownOptionLabel', {
       defaultMessage: 'Sum',
     }),
-    value: 'sum',
+    value: AGG_TYPE.SUM,
+  },
+  {
+    label: i18n.translate('xpack.maps.metricSelect.termsDropDownOptionLabel', {
+      defaultMessage: 'Top term',
+    }),
+    value: AGG_TYPE.TERMS,
+  },
+  {
+    label: i18n.translate('xpack.maps.metricSelect.cardinalityDropDownOptionLabel', {
+      defaultMessage: 'Unique count',
+    }),
+    value: AGG_TYPE.UNIQUE_COUNT,
   },
 ];
 

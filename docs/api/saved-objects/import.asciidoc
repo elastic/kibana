@@ -4,15 +4,23 @@
 <titleabbrev>Import objects</titleabbrev>
 ++++
 
-experimental[] Create a set of {kib} saved objects from a file created by the export API.
+experimental[] Create sets of {kib} saved objects from a file created by the export API.
 
 [[saved-objects-api-import-request]]
 ==== Request
 
-`POST /api/saved_objects/_import`
+`POST <kibana host>:<port>/api/saved_objects/_import`
+
+`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_import`
+
+[[saved-objects-api-import-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[saved-objects-api-import-query-params]]
-==== Query parameter
+==== Query parameters
 
 `overwrite`::
   (Optional, boolean) Overwrites saved objects.
@@ -28,33 +36,34 @@ The request body must include the multipart/form-data type.
 [[saved-objects-api-import-response-body]]
 ==== Response body
 
-`success`:: 
-  Top-level property that indicates if the import was successful. 
+`success`::
+  Top-level property that indicates if the import was successful.
 
-`successCount`:: 
+`successCount`::
   Indicates the number of successfully imported records.
 
 `errors`::
   (array) Indicates the import was unsuccessful and specifies the objects that failed to import.
-  
+
 [[saved-objects-api-import-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
     Indicates a successful call.
 
 ==== Examples
 
 Import an index pattern and dashboard:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson <1>
+$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
+// KIBANA
 
 The `file.ndjson` file contains the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
@@ -62,7 +71,7 @@ The `file.ndjson` file contains the following:
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "success": true,
@@ -72,14 +81,15 @@ The API returns the following:
 
 Import an index pattern and dashboard that includes a conflict on the index pattern:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
+// KIBANA
 
 The `file.ndjson` file contains the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
@@ -87,7 +97,7 @@ The `file.ndjson` file contains the following:
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "success": false,
@@ -107,14 +117,15 @@ The API returns the following:
 
 Import a visualization and dashboard with an index pattern for the visualization reference that doesn't exist:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 $ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
+// KIBANA
 
 The `file.ndjson` file contains the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}
@@ -122,7 +133,7 @@ The `file.ndjson` file contains the following:
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
   "success": false,
   "successCount": 0,

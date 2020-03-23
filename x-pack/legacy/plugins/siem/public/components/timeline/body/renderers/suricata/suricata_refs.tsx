@@ -5,8 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { ExternalLinkIcon } from '../../../../external_link_icon';
@@ -18,7 +17,7 @@ const LinkEuiFlexItem = styled(EuiFlexItem)`
 
 LinkEuiFlexItem.displayName = 'LinkEuiFlexItem';
 
-export const SuricataRefs = pure<{ signatureId: number }>(({ signatureId }) => {
+export const SuricataRefs = React.memo<{ signatureId: number }>(({ signatureId }) => {
   const links = getLinksFromSignature(signatureId);
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>

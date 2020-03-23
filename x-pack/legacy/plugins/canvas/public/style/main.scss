@@ -31,7 +31,7 @@ $canvasElementCardWidth: 210px;
 
 .canvasTextArea__code {
   @include euiScrollBar;
-  font-size: $euiFontSize;
+  font-size: $euiFontSizeS;
   font-family: $euiCodeFontFamily;
   width: 100%;
   max-width: 100%;

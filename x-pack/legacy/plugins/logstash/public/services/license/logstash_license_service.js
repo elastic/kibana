@@ -34,7 +34,11 @@ export class LogstashLicenseService {
 
   notifyAndRedirect() {
     toastNotifications.addDanger({
-      title: <MarkdownSimple>{this.xpackInfoService.get(`features.${PLUGIN.ID}.message`)}</MarkdownSimple>,
+      title: (
+        <MarkdownSimple>
+          {this.xpackInfoService.get(`features.${PLUGIN.ID}.message`)}
+        </MarkdownSimple>
+      ),
     });
     this.kbnUrlService.redirect('/management');
   }

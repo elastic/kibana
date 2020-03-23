@@ -5,8 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { Empty } from './empty';
 import { TestProviders } from '../../../mock/test_providers';
@@ -14,12 +13,8 @@ import { TestProviders } from '../../../mock/test_providers';
 describe('Empty', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>
-          <Empty />
-        </TestProviders>
-      );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      const wrapper = shallow(<Empty />);
+      expect(wrapper).toMatchSnapshot();
     });
 
     const dropMessage = ['Drop', 'anything', 'highlighted', 'here'];

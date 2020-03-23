@@ -1,0 +1,39 @@
+{
+  "description": "This rule detects network events that may indicate the use of SSH traffic\nfrom the Internet. SSH is commonly used by system administrators to remotely\ncontrol a system using the command line shell. If it is exposed to the Internet,\nit should be done with strong security controls as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
+  "false_positives": [
+    "SSH connections may be made directly to Internet destinations in order to access Linux\n    cloud server instances but such connections are usually made only by engineers. In such cases,\n    only SSH gateways, bastions or jump servers may be expected Internet destinations and can be\n    exempted from this rule. SSH may be required by some work-flows such as remote access and support\n    for specialized software products and servers. Such work-flows are usually known and not unexpected.\n    Usage that is unfamiliar to server or network owners can be unexpected and suspicious."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "SSH (Secure Shell) to the Internet",
+  "query": "network.transport: tcp and destination.port:22 and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 21,
+  "rule_id": "6f1500bc-62d7-4eb9-8601-7485e87da2f4",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

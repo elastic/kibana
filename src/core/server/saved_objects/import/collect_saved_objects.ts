@@ -42,10 +42,10 @@ export async function collectSavedObjects({
   supportedTypes,
 }: CollectSavedObjectsOptions) {
   const errors: SavedObjectsImportError[] = [];
-  const collectedObjects: SavedObject[] = await createPromiseFromStreams([
+  const collectedObjects: Array<SavedObject<{ title: string }>> = await createPromiseFromStreams([
     readStream,
     createLimitStream(objectLimit),
-    createFilterStream<SavedObject>(obj => {
+    createFilterStream<SavedObject<{ title: string }>>(obj => {
       if (supportedTypes.includes(obj.type)) {
         return true;
       }

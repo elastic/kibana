@@ -19,9 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 
   describe('export', () => {
@@ -37,7 +37,30 @@ export default function ({ getService }) {
               type: ['index-pattern', 'search', 'visualization', 'dashboard'],
             })
             .expect(200)
-            .then((resp) => {
+            .then(resp => {
+              const objects = resp.text.split('\n').map(JSON.parse);
+              expect(objects).to.have.length(4);
+              expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[0]).to.have.property('type', 'index-pattern');
+              expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[1]).to.have.property('type', 'visualization');
+              expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
+              expect(objects[2]).to.have.property('type', 'dashboard');
+              expect(objects[3]).to.have.property('exportedCount', 3);
+              expect(objects[3]).to.have.property('missingRefCount', 0);
+              expect(objects[3].missingReferences).to.have.length(0);
+            });
+        });
+
+        it('should exclude the export details if asked', async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              type: ['index-pattern', 'search', 'visualization', 'dashboard'],
+              excludeExportDetails: true,
+            })
+            .expect(200)
+            .then(resp => {
               const objects = resp.text.split('\n').map(JSON.parse);
               expect(objects).to.have.length(3);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
@@ -62,15 +85,18 @@ export default function ({ getService }) {
               ],
             })
             .expect(200)
-            .then((resp) => {
+            .then(resp => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(3);
+              expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
               expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
               expect(objects[1]).to.have.property('type', 'visualization');
               expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
               expect(objects[2]).to.have.property('type', 'dashboard');
+              expect(objects[3]).to.have.property('exportedCount', 3);
+              expect(objects[3]).to.have.property('missingRefCount', 0);
+              expect(objects[3].missingReferences).to.have.length(0);
             });
         });
 
@@ -82,15 +108,18 @@ export default function ({ getService }) {
               type: ['dashboard'],
             })
             .expect(200)
-            .then((resp) => {
+            .then(resp => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(3);
+              expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
               expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
               expect(objects[1]).to.have.property('type', 'visualization');
               expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
               expect(objects[2]).to.have.property('type', 'dashboard');
+              expect(objects[3]).to.have.property('exportedCount', 3);
+              expect(objects[3]).to.have.property('missingRefCount', 0);
+              expect(objects[3].missingReferences).to.have.length(0);
             });
         });
 
@@ -100,18 +129,21 @@ export default function ({ getService }) {
             .send({
               includeReferencesDeep: true,
               type: ['dashboard'],
-              search: 'Requests*'
+              search: 'Requests*',
             })
             .expect(200)
-            .then((resp) => {
+            .then(resp => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(3);
+              expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
               expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
               expect(objects[1]).to.have.property('type', 'visualization');
               expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
               expect(objects[2]).to.have.property('type', 'dashboard');
+              expect(objects[3]).to.have.property('exportedCount', 3);
+              expect(objects[3]).to.have.property('missingRefCount', 0);
+              expect(objects[3].missingReferences).to.have.length(0);
             });
         });
 
@@ -127,7 +159,7 @@ export default function ({ getService }) {
               ],
             })
             .expect(400)
-            .then((resp) => {
+            .then(resp => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -159,12 +191,28 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'child "type" fails because ["type" at position 0 fails because ' +
-                  '["0" must be one of [config, dashboard, index-pattern, query, search, url, visualization]]]',
-                validation: {
-                  source: 'payload',
-                  keys: ['type.0'],
-                }
+                message: 'Trying to export non-exportable type(s): wigwags',
+              });
+            });
+        });
+
+        it(`should return 400 when exporting objects with unsupported type`, async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              objects: [
+                {
+                  type: 'wigwags',
+                  id: '1',
+                },
+              ],
+            })
+            .expect(400)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'Trying to export object(s) with non-exportable types: wigwags:1',
               });
             });
         });
@@ -178,12 +226,11 @@ export default function ({ getService }) {
           await supertest
             .post('/api/saved_objects/_export')
             .expect(400)
-            .then((resp) => {
+            .then(resp => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '"value" must be an object',
-                validation: { source: 'payload', keys: [ 'value' ] },
+                message: '[request body]: expected a plain object value, but found [null] instead.',
               });
             });
         });
@@ -193,47 +240,55 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_export')
             .send({
               type: 'dashboard',
+              excludeExportDetails: true,
             })
             .expect(200)
-            .then((resp) => {
-              expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
+            .then(resp => {
+              expect(resp.headers['content-disposition']).to.eql(
+                'attachment; filename="export.ndjson"'
+              );
               expect(resp.headers['content-type']).to.eql('application/ndjson');
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.eql([{
-                attributes: {
-                  description: '',
-                  hits: 0,
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+              expect(objects).to.eql([
+                {
+                  attributes: {
+                    description: '',
+                    hits: 0,
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON:
+                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+                    },
+                    optionsJSON: objects[0].attributes.optionsJSON,
+                    panelsJSON: objects[0].attributes.panelsJSON,
+                    refreshInterval: {
+                      display: 'Off',
+                      pause: false,
+                      value: 0,
+                    },
+                    timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+                    timeRestore: true,
+                    timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+                    title: 'Requests',
+                    version: 1,
                   },
-                  optionsJSON: objects[0].attributes.optionsJSON,
-                  panelsJSON: objects[0].attributes.panelsJSON,
-                  refreshInterval: {
-                    display: 'Off',
-                    pause: false,
-                    value: 0,
-                  },
-                  timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-                  timeRestore: true,
-                  timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-                  title: 'Requests',
-                  version: 1,
+                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                  migrationVersion: objects[0].migrationVersion,
+                  references: [
+                    {
+                      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                      name: 'panel_0',
+                      type: 'visualization',
+                    },
+                  ],
+                  type: 'dashboard',
+                  updated_at: '2017-09-21T18:57:40.826Z',
+                  version: objects[0].version,
                 },
-                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: objects[0].migrationVersion,
-                references: [
-                  {
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    name: 'panel_0',
-                    type: 'visualization',
-                  },
-                ],
-                type: 'dashboard',
-                updated_at: '2017-09-21T18:57:40.826Z',
-                version: objects[0].version,
-              }]);
+              ]);
               expect(objects[0].migrationVersion).to.be.ok();
-              expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
+              expect(() =>
+                JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
+              ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
             });
@@ -244,47 +299,55 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_export')
             .send({
               type: ['dashboard'],
+              excludeExportDetails: true,
             })
             .expect(200)
-            .then((resp) => {
-              expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
+            .then(resp => {
+              expect(resp.headers['content-disposition']).to.eql(
+                'attachment; filename="export.ndjson"'
+              );
               expect(resp.headers['content-type']).to.eql('application/ndjson');
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.eql([{
-                attributes: {
-                  description: '',
-                  hits: 0,
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+              expect(objects).to.eql([
+                {
+                  attributes: {
+                    description: '',
+                    hits: 0,
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON:
+                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+                    },
+                    optionsJSON: objects[0].attributes.optionsJSON,
+                    panelsJSON: objects[0].attributes.panelsJSON,
+                    refreshInterval: {
+                      display: 'Off',
+                      pause: false,
+                      value: 0,
+                    },
+                    timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+                    timeRestore: true,
+                    timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+                    title: 'Requests',
+                    version: 1,
                   },
-                  optionsJSON: objects[0].attributes.optionsJSON,
-                  panelsJSON: objects[0].attributes.panelsJSON,
-                  refreshInterval: {
-                    display: 'Off',
-                    pause: false,
-                    value: 0,
-                  },
-                  timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-                  timeRestore: true,
-                  timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-                  title: 'Requests',
-                  version: 1,
+                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                  migrationVersion: objects[0].migrationVersion,
+                  references: [
+                    {
+                      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                      name: 'panel_0',
+                      type: 'visualization',
+                    },
+                  ],
+                  type: 'dashboard',
+                  updated_at: '2017-09-21T18:57:40.826Z',
+                  version: objects[0].version,
                 },
-                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: objects[0].migrationVersion,
-                references: [
-                  {
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    name: 'panel_0',
-                    type: 'visualization',
-                  },
-                ],
-                type: 'dashboard',
-                updated_at: '2017-09-21T18:57:40.826Z',
-                version: objects[0].version,
-              }]);
+              ]);
               expect(objects[0].migrationVersion).to.be.ok();
-              expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
+              expect(() =>
+                JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
+              ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
             });
@@ -300,47 +363,55 @@ export default function ({ getService }) {
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                 },
               ],
+              excludeExportDetails: true,
             })
             .expect(200)
-            .then((resp) => {
-              expect(resp.headers['content-disposition']).to.eql('attachment; filename="export.ndjson"');
+            .then(resp => {
+              expect(resp.headers['content-disposition']).to.eql(
+                'attachment; filename="export.ndjson"'
+              );
               expect(resp.headers['content-type']).to.eql('application/ndjson');
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.eql([{
-                attributes: {
-                  description: '',
-                  hits: 0,
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+              expect(objects).to.eql([
+                {
+                  attributes: {
+                    description: '',
+                    hits: 0,
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON:
+                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+                    },
+                    optionsJSON: objects[0].attributes.optionsJSON,
+                    panelsJSON: objects[0].attributes.panelsJSON,
+                    refreshInterval: {
+                      display: 'Off',
+                      pause: false,
+                      value: 0,
+                    },
+                    timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+                    timeRestore: true,
+                    timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+                    title: 'Requests',
+                    version: 1,
                   },
-                  optionsJSON: objects[0].attributes.optionsJSON,
-                  panelsJSON: objects[0].attributes.panelsJSON,
-                  refreshInterval: {
-                    display: 'Off',
-                    pause: false,
-                    value: 0,
-                  },
-                  timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-                  timeRestore: true,
-                  timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-                  title: 'Requests',
-                  version: 1,
+                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                  migrationVersion: objects[0].migrationVersion,
+                  references: [
+                    {
+                      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                      name: 'panel_0',
+                      type: 'visualization',
+                    },
+                  ],
+                  type: 'dashboard',
+                  updated_at: '2017-09-21T18:57:40.826Z',
+                  version: objects[0].version,
                 },
-                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: objects[0].migrationVersion,
-                references: [
-                  {
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    name: 'panel_0',
-                    type: 'visualization',
-                  },
-                ],
-                type: 'dashboard',
-                updated_at: '2017-09-21T18:57:40.826Z',
-                version: objects[0].version,
-              }]);
+              ]);
               expect(objects[0].migrationVersion).to.be.ok();
-              expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
+              expect(() =>
+                JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
+              ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
             });
@@ -357,14 +428,14 @@ export default function ({ getService }) {
                   id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                 },
               ],
+              excludeExportDetails: true,
             })
             .expect(400)
-            .then((resp) => {
+            .then(resp => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '"value" contains a conflict between exclusive peers [type, objects]',
-                validation: { source: 'payload', keys: [ 'value' ] },
+                message: `Can't specify both "types" and "objects" properties when exporting`,
               });
             });
         });
@@ -382,14 +453,12 @@ export default function ({ getService }) {
               },
             })
             .expect(200)
-            .then((resp) => {
+            .then(resp => {
               customVisId = resp.body.id;
             });
         });
         after(async () => {
-          await supertest
-            .delete(`/api/saved_objects/visualization/${customVisId}`)
-            .expect(200);
+          await supertest.delete(`/api/saved_objects/visualization/${customVisId}`).expect(200);
           await esArchiver.unload('saved_objects/10k');
         });
 
@@ -398,13 +467,14 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_export')
             .send({
               type: ['dashboard', 'visualization', 'search', 'index-pattern'],
+              excludeExportDetails: true,
             })
             .expect(400)
-            .then((resp) => {
+            .then(resp => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: `Can't export more than 10000 objects`
+                message: `Can't export more than 10000 objects`,
               });
             });
         });
@@ -412,22 +482,24 @@ export default function ({ getService }) {
     });
 
     describe('without kibana index', () => {
-      before(async () => (
-        // just in case the kibana server has recreated it
-        await es.indices.delete({
-          index: '.kibana',
-          ignore: [404],
-        })
-      ));
+      before(
+        async () =>
+          // just in case the kibana server has recreated it
+          await es.indices.delete({
+            index: '.kibana',
+            ignore: [404],
+          })
+      );
 
       it('should return empty response', async () => {
         await supertest
           .post('/api/saved_objects/_export')
           .send({
             type: ['index-pattern', 'search', 'visualization', 'dashboard'],
+            excludeExportDetails: true,
           })
           .expect(200)
-          .then((resp) => {
+          .then(resp => {
             expect(resp.text).to.eql('');
           });
       });

@@ -25,7 +25,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
 
   return new (class AppsMenu {
     /**
-     * Get the text and href from each of the links in the apps menu
+     * Get the attributes from each of the links in the apps menu
      */
     public async readLinks() {
       const appMenu = await testSubjects.find('navDrawer');
@@ -37,10 +37,19 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
           return {
             text: $(link).text(),
             href: $(link).attr('href'),
+            disabled: $(link).attr('disabled') != null,
           };
         });
 
       return links;
+    }
+
+    /**
+     * Get the attributes from the link with the given name.
+     * @param name
+     */
+    public async getLink(name: string) {
+      return (await this.readLinks()).find(nl => nl.text === name);
     }
 
     /**

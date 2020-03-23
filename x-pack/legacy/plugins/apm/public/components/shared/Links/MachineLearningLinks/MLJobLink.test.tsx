@@ -8,25 +8,8 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLJobLink } from './MLJobLink';
-import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
-import { LegacyCoreStart } from 'src/core/public';
 
 describe('MLJobLink', () => {
-  beforeEach(() => {
-    const coreMock = ({
-      http: {
-        basePath: {
-          prepend: (path: string) => `/basepath${path}`
-        }
-      }
-    } as unknown) as LegacyCoreStart;
-
-    spyOn(kibanaCore, 'useKibanaCore').and.returnValue(coreMock);
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
   it('should produce the correct URL', async () => {
     const href = await getRenderedHref(
       () => (

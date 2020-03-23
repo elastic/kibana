@@ -24,6 +24,5 @@
  *  @param  {String} newType
  *  @return {Function}
  */
-export const alias = (newType) => (next) => (acc, spec, type, pluginSpec) => (
-  next(acc, spec, newType, pluginSpec)
-);
+export const alias = newType => next => (acc, spec, type, pluginSpec) =>
+  next(acc, spec, newType, pluginSpec);

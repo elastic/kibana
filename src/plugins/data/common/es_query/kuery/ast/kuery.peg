@@ -1,0 +1,412 @@
+/**
+ * To generate the parsing module (kuery.js), run `grunt peg`
+ * To watch changes and generate on file change, run `grunt watch:peg`
+ */
+
+// Initialization block
+{
+  const { errorOnLuceneSyntax, parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
+  const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
+  const buildLiteralNode = nodeTypes.literal.buildNode;
+  const buildWildcardNode = nodeTypes.wildcard.buildNode;
+  const buildNamedArgNode = nodeTypes.namedArg.buildNode;
+  const { wildcardSymbol } = nodeTypes.wildcard;
+}
+
+start
+  = Space* query:OrQuery? trailing:OptionalSpace {
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    if (query !== null) return query;
+    return nodeTypes.function.buildNode('is', '*', '*');
+  }
+
+OrQuery
+  = &{ return errorOnLuceneSyntax; } LuceneQuery
+  / left:AndQuery Or right:OrQuery {
+    const cursor = [left, right].find(node => node.type === 'cursor');
+    if (cursor) return cursor;
+    return buildFunctionNode('or', [left, right]);
+  }
+  / AndQuery
+
+AndQuery
+  = left:NotQuery And right:AndQuery {
+    const cursor = [left, right].find(node => node.type === 'cursor');
+    if (cursor) return cursor;
+    return buildFunctionNode('and', [left, right]);
+  }
+  / NotQuery
+
+NotQuery
+  = Not query:SubQuery {
+    if (query.type === 'cursor') return query;
+    return buildFunctionNode('not', [query]);
+  }
+  / SubQuery
+
+SubQuery
+  = '(' Space* query:OrQuery trailing:OptionalSpace ')' {
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    return query;
+  }
+  / NestedQuery
+
+NestedQuery
+  = field:Field Space* ':' Space* '{' Space* query:OrQuery trailing:OptionalSpace '}' {
+      if (query.type === 'cursor') {
+        return {
+          ...query,
+          nestedPath: query.nestedPath ? `${field.value}.${query.nestedPath}` : field.value,
+        }
+      };
+
+      if (trailing.type === 'cursor') {
+        return {
+          ...trailing,
+          suggestionTypes: ['conjunction']
+        };
+      }
+      return buildFunctionNode('nested', [field, query]);
+    }
+    / Expression
+
+Expression
+  = FieldRangeExpression
+  / FieldValueExpression
+  / ValueExpression
+
+Field "fieldName"
+  = Literal
+
+FieldRangeExpression
+  = field:Field Space* operator:RangeOperator Space* value:Literal {
+    if (value.type === 'cursor') {
+      return {
+        ...value,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    const range = buildNamedArgNode(operator, value);
+    return buildFunctionNode('range', [field, range]);
+  }
+
+FieldValueExpression
+  = field:Field Space* ':' Space* partial:ListOfValues {
+    if (partial.type === 'cursor') {
+      return {
+        ...partial,
+        fieldName: field.value,
+        suggestionTypes: ['value', 'conjunction']
+      };
+    }
+    return partial(field);
+  }
+
+ValueExpression
+  = partial:Value {
+    if (partial.type === 'cursor') {
+      const fieldName = `${partial.prefix}${partial.suffix}`.trim();
+      return {
+        ...partial,
+        fieldName,
+        suggestionTypes: ['field', 'operator', 'conjunction']
+      };
+    }
+    const field = buildLiteralNode(null);
+    return partial(field);
+  }
+
+ListOfValues
+  = '(' Space* partial:OrListOfValues trailing:OptionalSpace ')' {
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    return partial;
+  }
+  / Value
+
+OrListOfValues
+  = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
+    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+    if (cursor) {
+      return {
+        ...cursor,
+        suggestionTypes: ['value']
+      };
+    }
+    return (field) => buildFunctionNode('or', [partialLeft(field), partialRight(field)]);
+  }
+  / AndListOfValues
+
+AndListOfValues
+  = partialLeft:NotListOfValues And partialRight:AndListOfValues {
+    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+    if (cursor) {
+      return {
+        ...cursor,
+        suggestionTypes: ['value']
+      };
+    }
+    return (field) => buildFunctionNode('and', [partialLeft(field), partialRight(field)]);
+  }
+  / NotListOfValues
+
+NotListOfValues
+  = Not partial:ListOfValues {
+    if (partial.type === 'cursor') {
+      return {
+        ...list,
+        suggestionTypes: ['value']
+      };
+    }
+    return (field) => buildFunctionNode('not', [partial(field)]);
+  }
+  / ListOfValues
+
+Value "value"
+  = value:QuotedString {
+    if (value.type === 'cursor') return value;
+    const isPhrase = buildLiteralNode(true);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+  }
+  / value:UnquotedLiteral {
+    if (value.type === 'cursor') return value;
+
+    if (!allowLeadingWildcards && value.type === 'wildcard' && nodeTypes.wildcard.hasLeadingWildcard(value)) {
+      error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
+    }
+
+    const isPhrase = buildLiteralNode(false);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+  }
+
+Or "OR"
+  = Space+ 'or'i Space+
+  / &{ return errorOnLuceneSyntax; } LuceneOr
+
+And "AND"
+  = Space+ 'and'i Space+
+  / &{ return errorOnLuceneSyntax; } LuceneAnd
+
+Not "NOT"
+  = 'not'i Space+
+  / &{ return errorOnLuceneSyntax; } LuceneNot
+
+Literal "literal"
+  = QuotedString / UnquotedLiteral
+
+QuotedString
+  = '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
+    const { start, end } = location();
+    return {
+      type: 'cursor',
+      start: start.offset,
+      end: end.offset - cursor.length,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+      text: text().replace(cursor, '')
+    };
+  }
+  / '"' chars:QuotedCharacter* '"' {
+    return buildLiteralNode(chars.join(''));
+  }
+
+QuotedCharacter
+  = EscapedWhitespace
+  / '\\' char:[\\"] { return char; }
+  / !Cursor char:[^"] { return char; }
+
+UnquotedLiteral
+  = prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
+    const { start, end } = location();
+    return {
+      type: 'cursor',
+      start: start.offset,
+      end: end.offset - cursor.length,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+      text: text().replace(cursor, '')
+    };
+  }
+  / chars:UnquotedCharacter+ {
+    const sequence = chars.join('').trim();
+    if (sequence === 'null') return buildLiteralNode(null);
+    if (sequence === 'true') return buildLiteralNode(true);
+    if (sequence === 'false') return buildLiteralNode(false);
+    if (chars.includes(wildcardSymbol)) return buildWildcardNode(sequence);
+    const number = Number(sequence);
+    const value = isNaN(number) ? sequence : number;
+    return buildLiteralNode(value);
+  }
+
+UnquotedCharacter
+  = EscapedWhitespace
+  / EscapedSpecialCharacter
+  / EscapedKeyword
+  / Wildcard
+  / !SpecialCharacter !Keyword !Cursor char:. { return char; }
+
+Wildcard
+  = '*' { return wildcardSymbol; }
+
+OptionalSpace
+  = prefix:Space* cursor:Cursor suffix:Space* {
+    const { start, end } = location();
+    return {
+      type: 'cursor',
+      start: start.offset,
+      end: end.offset - cursor.length,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+      text: text().replace(cursor, '')
+    };
+  }
+  / Space*
+
+EscapedWhitespace
+  = '\\t' { return '\t'; }
+  / '\\r' { return '\r'; }
+  / '\\n' { return '\n'; }
+
+EscapedSpecialCharacter
+  = '\\' char:SpecialCharacter { return char; }
+
+EscapedKeyword
+  = '\\' keyword:('or'i / 'and'i / 'not'i) { return keyword; }
+
+Keyword
+  = Or / And / Not
+
+SpecialCharacter
+  = [\\():<>"*{}]
+
+RangeOperator
+  = '<=' { return 'lte'; }
+  / '>=' { return 'gte'; }
+  / '<' { return 'lt'; }
+  / '>' { return 'gt'; }
+
+Space "whitespace"
+  = [\ \t\r\n]
+
+Cursor
+  = &{ return parseCursor; } '@kuery-cursor@' { return cursorSymbol; }
+
+// Temporary error rules (to help users transition from Lucene... should be removed at some point)
+
+LuceneOr
+  =  Space* '||' Space* {
+    error('LuceneOr');
+  }
+
+LuceneAnd
+  = Space* '&&' Space* {
+    error('LuceneAnd');
+  }
+  / '+' {
+    error('LuceneAnd');
+  }
+
+LuceneNot
+  = '-' {
+    error('LuceneNot');
+  }
+  / '!' {
+    error('LuceneNot');
+  }
+
+LuceneQuery
+  = LuceneFieldQuery
+  / LuceneValue
+  / LuceneExists
+
+LuceneFieldQuery
+  = LuceneLiteral Space* ':' Space* LuceneValue
+
+LuceneValue
+  = LuceneRange
+  / LuceneWildcard
+  / LuceneRegex
+  / LuceneFuzzy
+  / LuceneProximity
+  / LuceneBoost
+
+LuceneExists
+  = '_exists_' Space* ':' Space* LuceneLiteral {
+    error('LuceneExists');
+  }
+
+LuceneRange
+  = RangeOperator Space* LuceneLiteral {
+    error('LuceneRange');
+  }
+  / LuceneRangeStart Space* LuceneLiteral LuceneTo LuceneLiteral LuceneRangeEnd {
+    error('LuceneRange');
+  }
+
+LuceneWildcard
+  = (LuceneUnquotedCharacter / '*')* '?' LuceneWildcard* {
+    error('LuceneWildcard');
+  }
+
+LuceneRegex
+  = '/' [^/]* '/' {
+    error('LuceneRegex');
+  }
+
+LuceneFuzzy
+  = LuceneUnquotedLiteral '~' [0-9]* {
+    error('LuceneFuzzy');
+  }
+
+LuceneProximity
+  = QuotedString '~' [0-9]* {
+    error('LuceneProximity');
+  }
+
+LuceneBoost
+  = LuceneLiteral '^' [0-9]* {
+    error('LuceneBoost');
+  }
+
+LuceneLiteral
+  = QuotedString / LuceneUnquotedLiteral
+
+LuceneUnquotedLiteral
+  = LuceneUnquotedCharacter+
+
+LuceneUnquotedCharacter
+  = EscapedWhitespace
+  / EscapedLuceneSpecialCharacter
+  / !LuceneSpecialCharacter !LuceneKeyword .
+
+LuceneKeyword
+  = Or / And / LuceneOr / LuceneAnd / LuceneNot / LuceneTo
+
+EscapedLuceneSpecialCharacter
+  = '\\' LuceneSpecialCharacter { return char; }
+
+LuceneSpecialCharacter
+  = '+' / '-' / '=' / '>' / '<' / '!' / '(' / ')' / '{' / '}' / '[' / ']' / '^' / '"' / '~' / '*' / '?' / ':' / '\\' / '/'
+
+LuceneTo
+  = Space+ 'TO' Space+
+
+LuceneRangeStart
+  = '[' / '{'
+
+LuceneRangeEnd
+  = ']' / '}'

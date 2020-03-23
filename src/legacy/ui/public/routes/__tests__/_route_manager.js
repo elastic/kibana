@@ -27,29 +27,33 @@ let routes; // will contain an new instance of RouteManager for each test
 const chainableMethods = [
   { name: 'when', args: ['', {}] },
   { name: 'otherwise', args: [{}] },
-  { name: 'defaults', args: [/regexp/, {}] }
+  { name: 'defaults', args: [/regexp/, {}] },
 ];
 
 let $rp;
-describe('routes/route_manager', function () {
-  beforeEach(ngMock.module('kibana', function ($routeProvider) {
-    $rp = $routeProvider;
-    sinon.stub($rp, 'otherwise');
-    sinon.stub($rp, 'when');
-  }));
+describe('routes/route_manager', function() {
+  beforeEach(
+    ngMock.module('kibana', function($routeProvider) {
+      $rp = $routeProvider;
+      sinon.stub($rp, 'otherwise');
+      sinon.stub($rp, 'when');
+    })
+  );
 
-  beforeEach(ngMock.inject(function () {
-    routes = new RouteManager();
-  }));
+  beforeEach(
+    ngMock.inject(function() {
+      routes = new RouteManager();
+    })
+  );
 
-  it('should have chainable methods: ' + _.pluck(chainableMethods, 'name').join(', '), function () {
-    chainableMethods.forEach(function (meth) {
+  it('should have chainable methods: ' + _.pluck(chainableMethods, 'name').join(', '), function() {
+    chainableMethods.forEach(function(meth) {
       expect(routes[meth.name].apply(routes, _.clone(meth.args))).to.be(routes);
     });
   });
 
-  describe('#otherwise', function () {
-    it('should forward the last otherwise route', function () {
+  describe('#otherwise', function() {
+    it('should forward the last otherwise route', function() {
       const otherRoute = {};
       routes.otherwise({});
       routes.otherwise(otherRoute);
@@ -61,16 +65,16 @@ describe('routes/route_manager', function () {
     });
   });
 
-  describe('#when', function () {
-    it('should merge the additions into the when() defined routes', function () {
+  describe('#when', function() {
+    it('should merge the additions into the when() defined routes', function() {
       routes.when('/some/route');
       routes.when('/some/other/route');
 
       // add the addition resolve to every route
       routes.defaults(/.*/, {
         resolve: {
-          addition: function () {}
-        }
+          addition: function() {},
+        },
       });
 
       routes.config($rp);
@@ -85,21 +89,21 @@ describe('routes/route_manager', function () {
     });
   });
 
-  describe('#config', function () {
-    it('should add defined routes to the global $routeProvider service in order', function () {
+  describe('#config', function() {
+    it('should add defined routes to the global $routeProvider service in order', function() {
       const args = [
         ['/one', {}],
-        ['/two', {}]
+        ['/two', {}],
       ];
 
-      args.forEach(function (a) {
+      args.forEach(function(a) {
         routes.when(a[0], a[1]);
       });
 
       routes.config($rp);
 
       expect($rp.when.callCount).to.be(args.length);
-      _.times(args.length, function (i) {
+      _.times(args.length, function(i) {
         const call = $rp.when.getCall(i);
         const a = args.shift();
 
@@ -108,7 +112,7 @@ describe('routes/route_manager', function () {
       });
     });
 
-    it('sets route.reloadOnSearch to false by default', function () {
+    it('sets route.reloadOnSearch to false by default', function() {
       routes.when('/nothing-set');
       routes.when('/no-reload', { reloadOnSearch: false });
       routes.when('/always-reload', { reloadOnSearch: true });
@@ -119,18 +123,6 @@ describe('routes/route_manager', function () {
       expect($rp.when.secondCall.args[1]).to.have.property('reloadOnSearch', false);
       expect($rp.when.lastCall.args[1]).to.have.property('reloadOnSearch', true);
     });
-
-    it('sets route.requireDefaultIndex to false by default', function () {
-      routes.when('/nothing-set');
-      routes.when('/no-index-required', { requireDefaultIndex: false });
-      routes.when('/index-required', { requireDefaultIndex: true });
-      routes.config($rp);
-
-      expect($rp.when.callCount).to.be(3);
-      expect($rp.when.firstCall.args[1]).to.have.property('requireDefaultIndex', false);
-      expect($rp.when.secondCall.args[1]).to.have.property('requireDefaultIndex', false);
-      expect($rp.when.lastCall.args[1]).to.have.property('requireDefaultIndex', true);
-    });
   });
 
   describe('#defaults()', () => {
@@ -139,13 +131,25 @@ describe('routes/route_manager', function () {
       routes.when('/bar', { name: 'bar' });
       routes.when('/baz', { name: 'baz' });
       routes.defaults(/^\/ba/, {
-        withDefaults: true
+        withDefaults: true,
       });
       routes.config($rp);
 
-      sinon.assert.calledWithExactly($rp.when, '/foo', sinon.match({ name: 'foo', withDefaults: undefined }));
-      sinon.assert.calledWithExactly($rp.when, '/bar', sinon.match({ name: 'bar', withDefaults: true }));
-      sinon.assert.calledWithExactly($rp.when, '/baz', sinon.match({ name: 'baz', withDefaults: true }));
+      sinon.assert.calledWithExactly(
+        $rp.when,
+        '/foo',
+        sinon.match({ name: 'foo', withDefaults: undefined })
+      );
+      sinon.assert.calledWithExactly(
+        $rp.when,
+        '/bar',
+        sinon.match({ name: 'bar', withDefaults: true })
+      );
+      sinon.assert.calledWithExactly(
+        $rp.when,
+        '/baz',
+        sinon.match({ name: 'baz', withDefaults: true })
+      );
     });
 
     it('does not override values specified in the route', () => {
@@ -170,33 +174,45 @@ describe('routes/route_manager', function () {
       routes.config($rp);
 
       sinon.assert.calledThrice($rp.when);
-      sinon.assert.calledWithExactly($rp.when, '/foo', sinon.match({
-        name: 'foo',
-        funcs: sinon.match({
-          all: sinon.match.func,
-          fooFunc: sinon.match.func,
-          barFunc: undefined,
-          bazFunc: undefined,
+      sinon.assert.calledWithExactly(
+        $rp.when,
+        '/foo',
+        sinon.match({
+          name: 'foo',
+          funcs: sinon.match({
+            all: sinon.match.func,
+            fooFunc: sinon.match.func,
+            barFunc: undefined,
+            bazFunc: undefined,
+          }),
         })
-      }));
-      sinon.assert.calledWithExactly($rp.when, '/bar', sinon.match({
-        name: 'bar',
-        funcs: sinon.match({
-          all: sinon.match.func,
-          fooFunc: undefined,
-          barFunc: sinon.match.func,
-          bazFunc: undefined,
+      );
+      sinon.assert.calledWithExactly(
+        $rp.when,
+        '/bar',
+        sinon.match({
+          name: 'bar',
+          funcs: sinon.match({
+            all: sinon.match.func,
+            fooFunc: undefined,
+            barFunc: sinon.match.func,
+            bazFunc: undefined,
+          }),
         })
-      }));
-      sinon.assert.calledWithExactly($rp.when, '/baz', sinon.match({
-        name: 'baz',
-        funcs: sinon.match({
-          all: sinon.match.func,
-          fooFunc: undefined,
-          barFunc: undefined,
-          bazFunc: sinon.match.func,
+      );
+      sinon.assert.calledWithExactly(
+        $rp.when,
+        '/baz',
+        sinon.match({
+          name: 'baz',
+          funcs: sinon.match({
+            all: sinon.match.func,
+            fooFunc: undefined,
+            barFunc: undefined,
+            bazFunc: sinon.match.func,
+          }),
         })
-      }));
+      );
     });
   });
 });

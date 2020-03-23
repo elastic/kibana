@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiGlobalToastList, EuiGlobalToastListToast as Toast, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiGlobalToastList, EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { createContext, Dispatch, useReducer, useContext, useState } from 'react';
+import React, { createContext, Dispatch, useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
 
 import { ModalAllErrors } from './modal_all_errors';
 import * as i18n from './translations';
+
+export * from './utils';
+export * from './errors';
 
 export interface AppToast extends Toast {
   errors?: string[];
@@ -59,6 +62,12 @@ export const ManageGlobalToaster = ({ children }: ManageGlobalToasterProps) => {
   );
 };
 
+const GlobalToasterListContainer = styled.div`
+  position: absolute;
+  right: 0;
+  bottom: 0;
+`;
+
 interface GlobalToasterProps {
   toastLifeTimeMs?: number;
 }
@@ -81,13 +90,15 @@ export const GlobalToaster = ({ toastLifeTimeMs = 5000 }: GlobalToasterProps) =>
   return (
     <>
       {toasts.length > 0 && !isShowing && (
-        <EuiGlobalToastList
-          toasts={[formatToErrorToastIfNeeded(toasts[0], toggle)]}
-          dismissToast={({ id }) => {
-            dispatch({ type: 'deleteToaster', id });
-          }}
-          toastLifeTimeMs={toastLifeTimeMs}
-        />
+        <GlobalToasterListContainer>
+          <EuiGlobalToastList
+            toasts={[formatToErrorToastIfNeeded(toasts[0], toggle)]}
+            dismissToast={({ id }) => {
+              dispatch({ type: 'deleteToaster', id });
+            }}
+            toastLifeTimeMs={toastLifeTimeMs}
+          />
+        </GlobalToasterListContainer>
       )}
       {toastInModal != null && (
         <ModalAllErrors isShowing={isShowing} toast={toastInModal} toggle={toggle} />

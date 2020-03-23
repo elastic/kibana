@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { Provider } from 'react-redux';
 
 import { apolloClientObservable, mockGlobalState } from '../../mock';
@@ -30,7 +29,7 @@ describe('Error Toast Dispatcher', () => {
           <ErrorToastDispatcher toastLifeTimeMs={9999999999} />
         </Provider>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('Connect(ErrorToastDispatcherComponent)')).toMatchSnapshot();
     });
   });
 });

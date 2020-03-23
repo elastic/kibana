@@ -89,15 +89,35 @@ export interface FakeRequest {
 }
 
 /**
- * Represents an Elasticsearch cluster API client and allows to call API on behalf
- * of the internal Kibana user and the actual user that is derived from the request
- * headers (via `asScoped(...)`).
+ * Represents an Elasticsearch cluster API client created by the platform.
+ * It allows to call API on behalf of the internal Kibana user and
+ * the actual user that is derived from the request headers (via `asScoped(...)`).
  *
  * See {@link ClusterClient}.
  *
  * @public
  */
-export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+
+/**
+ * Represents an Elasticsearch cluster API client created by a plugin.
+ * It allows to call API on behalf of the internal Kibana user and
+ * the actual user that is derived from the request headers (via `asScoped(...)`).
+ *
+ * See {@link ClusterClient}.
+ *
+ * @public
+ */
+export type ICustomClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+
+/**
+ A user credentials container.
+ * It accommodates the necessary auth credentials to impersonate the current user.
+ *
+ * @public
+ * See {@link KibanaRequest}.
+ */
+export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
 
 /**
  * {@inheritDoc IClusterClient}
@@ -131,6 +151,8 @@ export class ClusterClient implements IClusterClient {
   /**
    * Calls specified endpoint with provided clientParams on behalf of the
    * Kibana internal user.
+   * See {@link APICaller}.
+   *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
    * @param options - Options that affect the way we call the API and process the result.
@@ -163,15 +185,16 @@ export class ClusterClient implements IClusterClient {
   }
 
   /**
-   * Creates an instance of `ScopedClusterClient` based on the configuration the
+   * Creates an instance of {@link IScopedClusterClient} based on the configuration the
    * current cluster client that exposes additional `callAsCurrentUser` method
    * scoped to the provided req. Consumers shouldn't worry about closing
    * scoped client instances, these will be automatically closed as soon as the
    * original cluster client isn't needed anymore and closed.
-   * @param request - Request the `ScopedClusterClient` instance will be scoped to.
+   *
+   * @param request - Request the `IScopedClusterClient` instance will be scoped to.
    * Supports request optionality, Legacy.Request & FakeRequest for BWC with LegacyPlatform
    */
-  public asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient {
+  public asScoped(request?: ScopeableRequest): IScopedClusterClient {
     // It'd have been quite expensive to create and configure client for every incoming
     // request since it involves parsing of the config, reading of the SSL certificate and
     // key files etc. Moreover scoped client needs two Elasticsearch JS clients at the same
@@ -197,6 +220,8 @@ export class ClusterClient implements IClusterClient {
   /**
    * Calls specified endpoint with provided clientParams on behalf of the
    * user initiated request to the Kibana server (via HTTP request headers).
+   * See {@link APICaller}.
+   *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
    * @param options - Options that affect the way we call the API and process the result.

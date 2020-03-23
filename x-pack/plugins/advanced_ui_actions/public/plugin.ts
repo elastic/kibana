@@ -10,30 +10,46 @@ import {
   CoreStart,
   Plugin,
 } from '../../../../src/core/public';
-import { IUiActionsStart, IUiActionsSetup } from '../../../../src/plugins/ui_actions/public';
+import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
+import { UiActionsStart, UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-  Setup as EmbeddableSetup,
-  Start as EmbeddableStart,
+  EmbeddableSetup,
+  EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
-import { CustomTimeRangeAction } from './custom_time_range_action';
+import {
+  CustomTimeRangeAction,
+  CUSTOM_TIME_RANGE,
+  TimeRangeActionContext,
+} from './custom_time_range_action';
 
-import { CustomTimeRangeBadge } from './custom_time_range_badge';
+import {
+  CustomTimeRangeBadge,
+  CUSTOM_TIME_RANGE_BADGE,
+  TimeBadgeActionContext,
+} from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 interface StartDependencies {
   embeddable: EmbeddableStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 
 export type Setup = void;
 export type Start = void;
+
+declare module '../../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [CUSTOM_TIME_RANGE]: TimeRangeActionContext;
+    [CUSTOM_TIME_RANGE_BADGE]: TimeBadgeActionContext;
+  }
+}
 
 export class AdvancedUiActionsPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
@@ -44,21 +60,22 @@ export class AdvancedUiActionsPublicPlugin
   public start(core: CoreStart, { uiActions }: StartDependencies): Start {
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
+    const { openModal } = createReactOverlays(core);
     const timeRangeAction = new CustomTimeRangeAction({
-      openModal: core.overlays.openModal,
+      openModal,
       dateFormat,
       commonlyUsedRanges,
     });
     uiActions.registerAction(timeRangeAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, timeRangeAction.id);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, timeRangeAction);
 
     const timeRangeBadge = new CustomTimeRangeBadge({
-      openModal: core.overlays.openModal,
+      openModal,
       dateFormat,
       commonlyUsedRanges,
     });
     uiActions.registerAction(timeRangeBadge);
-    uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge.id);
+    uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
   }
 
   public stop() {}

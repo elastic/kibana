@@ -19,23 +19,20 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
+  const listingTable = getService('listingTable');
 
   describe('dashboard save', function describeIndexTests() {
     this.tags('smoke');
     const dashboardName = 'Dashboard Save Test';
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';
 
-    before(async function () {
+    before(async function() {
       await PageObjects.dashboard.initTests();
     });
 
-    after(async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-    });
-
-    it('warns on duplicate name for new dashboard', async function () {
+    it('warns on duplicate name for new dashboard', async function() {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(dashboardName);
 
@@ -43,69 +40,84 @@ export default function ({ getPageObjects }) {
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { waitDialogIsClosed: false });
+      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, {
+        waitDialogIsClosed: false,
+      });
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
     });
 
-    it('does not save on reject confirmation', async function () {
+    it('does not save on reject confirmation', async function() {
       await PageObjects.dashboard.cancelSave();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
+      const countOfDashboards = await listingTable.searchAndGetItemsCount(
+        'dashboard',
+        dashboardName
+      );
       expect(countOfDashboards).to.equal(1);
     });
 
-    it('Saves on confirm duplicate title warning', async function () {
+    it('Saves on confirm duplicate title warning', async function() {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { waitDialogIsClosed: false });
+      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, {
+        waitDialogIsClosed: false,
+      });
 
+      await PageObjects.dashboard.ensureDuplicateTitleCallout();
       await PageObjects.dashboard.clickSave();
 
       // This is important since saving a new dashboard will cause a refresh of the page. We have to
       // wait till it finishes reloading or it might reload the url after simulating the
       // dashboard landing page click.
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
+      const countOfDashboards = await listingTable.searchAndGetItemsCount(
+        'dashboard',
+        dashboardName
+      );
       expect(countOfDashboards).to.equal(2);
     });
 
-    it('Does not warn when you save an existing dashboard with the title it already has, and that title is a duplicate',
-      async function () {
-        await PageObjects.dashboard.selectDashboard(dashboardName);
-        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-        await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.dashboard.saveDashboard(dashboardName);
-
-        await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
-      }
-    );
-
-    it('Warns you when you Save as New Dashboard, and the title is a duplicate', async function () {
+    it('Does not warn when you save an existing dashboard with the title it already has, and that title is a duplicate', async function() {
+      await listingTable.clickItemLink('dashboard', dashboardName);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       await PageObjects.dashboard.switchToEditMode();
-      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { saveAsNew: true });
+      await PageObjects.dashboard.saveDashboard(dashboardName);
+
+      await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
+    });
+
+    it('Warns you when you Save as New Dashboard, and the title is a duplicate', async function() {
+      await PageObjects.dashboard.switchToEditMode();
+      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, {
+        saveAsNew: true,
+      });
 
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
 
       await PageObjects.dashboard.cancelSave();
     });
 
-    it('Does not warn when only the prefix matches', async function () {
+    it('Does not warn when only the prefix matches', async function() {
       await PageObjects.dashboard.saveDashboard(dashboardName.split(' ')[0]);
 
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
     });
 
-    it('Warns when case is different', async function () {
+    it('Warns when case is different', async function() {
       await PageObjects.dashboard.switchToEditMode();
-      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase(), { waitDialogIsClosed: false });
+      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase(), {
+        waitDialogIsClosed: false,
+      });
 
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
 
       await PageObjects.dashboard.cancelSave();
     });
 
-    it('Saves new Dashboard using the Enter key', async function () {
+    it('Saves new Dashboard using the Enter key', async function() {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.enterDashboardTitleAndPressEnter(dashboardNameEnterKey);
@@ -114,10 +126,13 @@ export default function ({ getPageObjects }) {
       // wait till it finishes reloading or it might reload the url after simulating the
       // dashboard landing page click.
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardNameEnterKey);
+      const countOfDashboards = await listingTable.searchAndGetItemsCount(
+        'dashboard',
+        dashboardNameEnterKey
+      );
       expect(countOfDashboards).to.equal(1);
     });
-
   });
 }

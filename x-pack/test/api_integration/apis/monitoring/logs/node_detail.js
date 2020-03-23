@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import nodeDetailFixture from './fixtures/node_detail';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/logs';
     const timeRange = {
       min: '2019-03-15T16:19:22.161Z',
-      max: '2019-03-15T17:19:22.161Z'
+      max: '2019-03-15T17:19:22.161Z',
     };
 
     before('load archive', () => {
@@ -28,7 +28,9 @@ export default function ({ getService }) {
 
     it('should get logs for the specific node', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/ZR3ZlJLUTV2V_GlplB83jQ/elasticsearch/nodes/-pH5RhfsRl6FDeTPwD5vEw')
+        .post(
+          '/api/monitoring/v1/clusters/ZR3ZlJLUTV2V_GlplB83jQ/elasticsearch/nodes/-pH5RhfsRl6FDeTPwD5vEw'
+        )
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange, is_advanced: false })
         .expect(200);

@@ -10,15 +10,14 @@ import { LayoutInstance } from '../../layouts/layout';
 
 export interface ScreenshotObservableOpts {
   logger: LevelLogger;
-  url: string;
+  urls: string[];
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
   browserTimezone: string;
 }
 
 export interface TimeRange {
-  from: any;
-  to: any;
+  duration: string;
 }
 
 export interface AttributesMap {
@@ -31,7 +30,19 @@ export interface ElementsPositionAndAttribute {
 }
 
 export interface Screenshot {
-  base64EncodedData: any;
-  title: any;
-  description: any;
+  base64EncodedData: Buffer;
+  title: string;
+  description: string;
+}
+
+export interface ScreenSetupData {
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
+  timeRange: TimeRange | null;
+  error?: Error;
+}
+
+export interface ScreenshotResults {
+  timeRange: TimeRange | null;
+  screenshots: Screenshot[];
+  error?: Error;
 }

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { get } from 'lodash/fp';
 import React from 'react';
 
@@ -15,15 +17,9 @@ export const suricataRowRenderer: RowRenderer = {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'suricata';
   },
-  renderRow: ({ browserFields, data, children, timelineId }) => {
-    return (
-      <>
-        {children}
-
-        <RowRendererContainer>
-          <SuricataDetails data={data} browserFields={browserFields} timelineId={timelineId} />
-        </RowRendererContainer>
-      </>
-    );
-  },
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <SuricataDetails data={data} browserFields={browserFields} timelineId={timelineId} />
+    </RowRendererContainer>
+  ),
 };

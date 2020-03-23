@@ -7,6 +7,8 @@
 import React, { useMemo, useState } from 'react';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { history } from '../utils/history';
+import { useUrlParams } from '../hooks/useUrlParams';
+import { useFetcher } from '../hooks/useFetcher';
 
 const ChartsSyncContext = React.createContext<{
   hoverX: number | null;
@@ -17,6 +19,31 @@ const ChartsSyncContext = React.createContext<{
 
 const ChartsSyncContextProvider: React.FC = ({ children }) => {
   const [time, setTime] = useState<number | null>(null);
+  const { urlParams, uiFilters } = useUrlParams();
+
+  const { start, end, serviceName } = urlParams;
+  const { environment } = uiFilters;
+
+  const { data = { annotations: [] } } = useFetcher(
+    callApmApi => {
+      if (start && end && serviceName) {
+        return callApmApi({
+          pathname: '/api/apm/services/{serviceName}/annotations',
+          params: {
+            path: {
+              serviceName
+            },
+            query: {
+              start,
+              end,
+              environment
+            }
+          }
+        });
+      }
+    },
+    [start, end, environment, serviceName]
+  );
 
   const value = useMemo(() => {
     const hoverXHandlers = {
@@ -43,11 +70,12 @@ const ChartsSyncContextProvider: React.FC = ({ children }) => {
           })
         });
       },
-      hoverX: time
+      hoverX: time,
+      annotations: data.annotations
     };
 
     return { ...hoverXHandlers };
-  }, [time, setTime]);
+  }, [time, data.annotations]);
 
   return <ChartsSyncContext.Provider value={value} children={children} />;
 };

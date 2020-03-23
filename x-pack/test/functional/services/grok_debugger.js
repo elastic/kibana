@@ -22,7 +22,7 @@ export function GrokDebuggerProvider({ getService }) {
   const SUBJ_BTN_TOGGLE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} > btnToggleCustomPatternsInput`;
   const SUBJ_BTN_SIMULATE = `${SUBJ_CONTAINER} > btnSimulate`;
 
-  return new class GrokDebugger {
+  return new (class GrokDebugger {
     async clickSimulate() {
       await testSubjects.click(SUBJ_BTN_SIMULATE);
     }
@@ -49,7 +49,7 @@ export function GrokDebuggerProvider({ getService }) {
 
     async assertExists() {
       await retry.try(async () => {
-        if (!await testSubjects.exists(SUBJ_CONTAINER)) {
+        if (!(await testSubjects.exists(SUBJ_CONTAINER))) {
           throw new Error('Expected to find the grok debugger');
         }
       });
@@ -64,20 +64,24 @@ export function GrokDebuggerProvider({ getService }) {
 
     async assertPatternInputSyntaxHighlighting(expectedHighlights) {
       const patternInputElement = await testSubjects.find(SUBJ_UI_ACE_PATTERN_INPUT);
-      const highlightedElements = await patternInputElement.findAllByXpath('.//div[@class="ace_line"]/*');
+      const highlightedElements = await patternInputElement.findAllByXpath(
+        './/div[@class="ace_line"]/*'
+      );
 
       expect(highlightedElements.length).to.be(expectedHighlights.length);
-      await Promise.all(highlightedElements.map(async (element, index) => {
-        const highlightClass = await element.getAttribute('class');
-        const highlightedContent = await element.getVisibleText();
+      await Promise.all(
+        highlightedElements.map(async (element, index) => {
+          const highlightClass = await element.getAttribute('class');
+          const highlightedContent = await element.getVisibleText();
 
-        const expectedHighlight = expectedHighlights[index];
-        const expectedHighlightClass = `ace_${expectedHighlight.token}`;
-        const expectedHighlightedContent = expectedHighlight.content;
+          const expectedHighlight = expectedHighlights[index];
+          const expectedHighlightClass = `ace_${expectedHighlight.token}`;
+          const expectedHighlightedContent = expectedHighlight.content;
 
-        expect(highlightClass).to.be(expectedHighlightClass);
-        expect(highlightedContent).to.be(expectedHighlightedContent);
-      }));
+          expect(highlightClass).to.be(expectedHighlightClass);
+          expect(highlightedContent).to.be(expectedHighlightedContent);
+        })
+      );
     }
-  };
+  })();
 }

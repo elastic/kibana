@@ -16,17 +16,16 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
       await testSubjects.existOrFail('mlPopulationSplitFieldSelect > comboBoxInput');
     },
 
-    async assertPopulationFieldSelection(identifier: string) {
+    async assertPopulationFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlPopulationSplitFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectPopulationField(identifier: string) {
       await comboBox.set('mlPopulationSplitFieldSelect > comboBoxInput', identifier);
-      await this.assertPopulationFieldSelection(identifier);
+      await this.assertPopulationFieldSelection([identifier]);
     },
 
     async assertDetectorSplitFieldInputExists(detectorPosition: number) {
@@ -35,12 +34,14 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
       );
     },
 
-    async assertDetectorSplitFieldSelection(detectorPosition: number, identifier: string) {
+    async assertDetectorSplitFieldSelection(
+      detectorPosition: number,
+      expectedIdentifier: string[]
+    ) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         `mlDetector ${detectorPosition} > mlByFieldSelect  > comboBoxInput`
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectDetectorSplitField(detectorPosition: number, identifier: string) {
@@ -48,7 +49,7 @@ export function MachineLearningJobWizardPopulationProvider({ getService }: FtrPr
         `mlDetector ${detectorPosition} > mlByFieldSelect  > comboBoxInput`,
         identifier
       );
-      await this.assertDetectorSplitFieldSelection(detectorPosition, identifier);
+      await this.assertDetectorSplitFieldSelection(detectorPosition, [identifier]);
     },
 
     async assertDetectorSplitExists(detectorPosition: number) {

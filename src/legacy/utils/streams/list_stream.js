@@ -39,6 +39,6 @@ export function createListStream(items = []) {
       if (!queue.length) {
         this.push(null);
       }
-    }
+    },
   });
 }

@@ -127,9 +127,8 @@ export const epicPersistNote = (
 
 export const createTimelineNoteEpic = <State>(): Epic<Action, Action, State> => action$ =>
   action$.pipe(
-    withLatestFrom(),
-    filter(([action]) => timelineNoteActionsType.includes(action.type)),
-    switchMap(([action]) => {
+    filter(action => timelineNoteActionsType.includes(action.type)),
+    switchMap(action => {
       dispatcherTimelinePersistQueue.next({ action });
       return empty();
     })

@@ -19,11 +19,7 @@
 
 import React from 'react';
 
-import {
-  KuiToolBar,
-  KuiToolBarSearchBox,
-  KuiPager
-} from '../../../../components';
+import { KuiToolBar, KuiToolBarSearchBox, KuiPager } from '../../../../components';
 
 export const ToolBarPager = () => (
   <KuiToolBar>

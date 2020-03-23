@@ -29,13 +29,46 @@ test('handles object as input', () => {
   expect(type.validate(value)).toEqual(expected);
 });
 
+test('properly parse the value if input is a string', () => {
+  const type = schema.mapOf(schema.string(), schema.string());
+  const value = `{"name": "foo"}`;
+  const expected = new Map([['name', 'foo']]);
+
+  expect(type.validate(value)).toEqual(expected);
+});
+
+test('fails if string input cannot be parsed', () => {
+  const type = schema.mapOf(schema.string(), schema.string());
+  expect(() => type.validate(`invalidjson`)).toThrowErrorMatchingInlineSnapshot(
+    `"could not parse map value from json input"`
+  );
+});
+
+test('fails with correct type if parsed input is not an object', () => {
+  const type = schema.mapOf(schema.string(), schema.string());
+  expect(() => type.validate('[1,2,3]')).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [Map] or [object] but got [Array]"`
+  );
+});
+
 test('fails when not receiving expected value type', () => {
   const type = schema.mapOf(schema.string(), schema.string());
   const value = {
     name: 123,
   };
 
-  expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
+    `"[name]: expected value of type [string] but got [number]"`
+  );
+});
+
+test('fails after parsing when not receiving expected value type', () => {
+  const type = schema.mapOf(schema.string(), schema.string());
+  const value = `{"name": 123}`;
+
+  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
+    `"[name]: expected value of type [string] but got [number]"`
+  );
 });
 
 test('fails when not receiving expected key type', () => {
@@ -44,12 +77,25 @@ test('fails when not receiving expected key type', () => {
     name: 'foo',
   };
 
-  expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
+    `"[key(\\"name\\")]: expected value of type [number] but got [string]"`
+  );
+});
+
+test('fails after parsing when not receiving expected key type', () => {
+  const type = schema.mapOf(schema.number(), schema.string());
+  const value = `{"name": "foo"}`;
+
+  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
+    `"[key(\\"name\\")]: expected value of type [number] but got [string]"`
+  );
 });
 
 test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.mapOf(schema.string(), schema.string());
-  expect(() => type.validate([], {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate([], {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
+    `"[foo-namespace]: expected value of type [Map] or [object] but got [Array]"`
+  );
 });
 
 test('includes namespace in failure when wrong value type', () => {
@@ -58,7 +104,9 @@ test('includes namespace in failure when wrong value type', () => {
     name: 123,
   };
 
-  expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
+    `"[foo-namespace.name]: expected value of type [string] but got [number]"`
+  );
 });
 
 test('includes namespace in failure when wrong key type', () => {
@@ -67,7 +115,9 @@ test('includes namespace in failure when wrong key type', () => {
     name: 'foo',
   };
 
-  expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
+    `"[foo-namespace.key(\\"name\\")]: expected value of type [number] but got [string]"`
+  );
 });
 
 test('returns default value if undefined', () => {
@@ -107,4 +157,42 @@ test('object within mapOf', () => {
   const expected = new Map([['foo', { bar: 123 }]]);
 
   expect(type.validate(value)).toEqual(expected);
+});
+
+test('enforces required object fields within mapOf', () => {
+  const type = schema.mapOf(
+    schema.string(),
+    schema.object({
+      bar: schema.object({
+        baz: schema.number(),
+      }),
+    })
+  );
+  const value = {
+    foo: {},
+  };
+
+  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
+    `"[foo.bar.baz]: expected value of type [number] but got [undefined]"`
+  );
+});
+
+test('error preserves full path', () => {
+  const type = schema.object({
+    grandParentKey: schema.object({
+      parentKey: schema.mapOf(schema.string({ minLength: 2 }), schema.number()),
+    }),
+  });
+
+  expect(() =>
+    type.validate({ grandParentKey: { parentKey: { a: 'some-value' } } })
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[grandParentKey.parentKey.key(\\"a\\")]: value has length [1] but it must have a minimum length of [2]."`
+  );
+
+  expect(() =>
+    type.validate({ grandParentKey: { parentKey: { ab: 'some-value' } } })
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[grandParentKey.parentKey.ab]: expected value of type [number] but got [string]"`
+  );
 });

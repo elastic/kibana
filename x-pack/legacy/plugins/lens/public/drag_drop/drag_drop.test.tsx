@@ -14,7 +14,7 @@ jest.useFakeTimers();
 describe('DragDrop', () => {
   test('renders if nothing is being dragged', () => {
     const component = render(
-      <DragDrop value="hello" draggable>
+      <DragDrop value="hello" draggable label="dragging">
         Hello!
       </DragDrop>
     );
@@ -50,7 +50,9 @@ describe('DragDrop', () => {
 
     const component = mount(
       <ChildDragDropProvider dragging={undefined} setDragging={setDragging}>
-        <DragDrop value={value}>Hello!</DragDrop>
+        <DragDrop value={value} draggable={true} label="drag label">
+          Hello!
+        </DragDrop>
       </ChildDragDropProvider>
     );
 
@@ -58,7 +60,7 @@ describe('DragDrop', () => {
 
     jest.runAllTimers();
 
-    expect(dataTransfer.setData).toBeCalledWith('text', 'dragging');
+    expect(dataTransfer.setData).toBeCalledWith('text', 'drag label');
     expect(setDragging).toBeCalledWith(value);
   });
 
@@ -71,7 +73,7 @@ describe('DragDrop', () => {
 
     const component = mount(
       <ChildDragDropProvider dragging="hola" setDragging={setDragging}>
-        <DragDrop onDrop={onDrop} value={value}>
+        <DragDrop onDrop={onDrop} droppable={true} value={value}>
           Hello!
         </DragDrop>
       </ChildDragDropProvider>
@@ -85,6 +87,30 @@ describe('DragDrop', () => {
     expect(stopPropagation).toBeCalled();
     expect(setDragging).toBeCalledWith(undefined);
     expect(onDrop).toBeCalledWith('hola');
+  });
+
+  test('drop function is not called on droppable=false', async () => {
+    const preventDefault = jest.fn();
+    const stopPropagation = jest.fn();
+    const setDragging = jest.fn();
+    const onDrop = jest.fn();
+
+    const component = mount(
+      <ChildDragDropProvider dragging="hola" setDragging={setDragging}>
+        <DragDrop onDrop={onDrop} droppable={false} value={{}}>
+          Hello!
+        </DragDrop>
+      </ChildDragDropProvider>
+    );
+
+    component
+      .find('[data-test-subj="lnsDragDrop"]')
+      .simulate('drop', { preventDefault, stopPropagation });
+
+    expect(preventDefault).toBeCalled();
+    expect(stopPropagation).toBeCalled();
+    expect(setDragging).toBeCalledWith(undefined);
+    expect(onDrop).not.toHaveBeenCalled();
   });
 
   test('droppable is reflected in the className', () => {

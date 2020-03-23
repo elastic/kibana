@@ -88,8 +88,8 @@ test('returns config at path as observable', async () => {
     .pipe(first())
     .toPromise();
 
-  expect(exampleConfig.get('key')).toEqual('value');
-  expect(exampleConfig.getFlattenedPaths()).toEqual(['key']);
+  expect(exampleConfig.key).toEqual('value');
+  expect(Object.keys(exampleConfig)).toEqual(['key']);
 });
 
 test("pushes new configs when reloading even if config at path hasn't changed", async () => {
@@ -110,19 +110,15 @@ test("pushes new configs when reloading even if config at path hasn't changed", 
   configService.reloadConfig();
 
   expect(valuesReceived).toMatchInlineSnapshot(`
-Array [
-  ObjectToConfigAdapter {
-    "rawConfig": Object {
-      "key": "value",
-    },
-  },
-  ObjectToConfigAdapter {
-    "rawConfig": Object {
-      "key": "value",
-    },
-  },
-]
-`);
+    Array [
+      Object {
+        "key": "value",
+      },
+      Object {
+        "key": "value",
+      },
+    ]
+  `);
 });
 
 test('pushes new config when reloading and config at path has changed', async () => {
@@ -143,10 +139,10 @@ test('pushes new config when reloading and config at path has changed', async ()
   configService.reloadConfig();
 
   expect(valuesReceived).toHaveLength(2);
-  expect(valuesReceived[0].get('key')).toEqual('value');
-  expect(valuesReceived[0].getFlattenedPaths()).toEqual(['key']);
-  expect(valuesReceived[1].get('key')).toEqual('new value');
-  expect(valuesReceived[1].getFlattenedPaths()).toEqual(['key']);
+  expect(valuesReceived[0].key).toEqual('value');
+  expect(Object.keys(valuesReceived[0])).toEqual(['key']);
+  expect(valuesReceived[1].key).toEqual('new value');
+  expect(Object.keys(valuesReceived[1])).toEqual(['key']);
 });
 
 test('completes config observables when stopped', done => {

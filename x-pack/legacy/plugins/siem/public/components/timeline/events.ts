@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ColumnHeader } from './body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { ColumnId } from './body/column_id';
 import { SortDirection } from './body/sort';
 import { QueryOperator } from './data_providers/data_provider';
@@ -72,8 +72,20 @@ export type OnChangeDroppableAndProvider = (providerId: string) => void;
 /** Invoked when a user pins an event */
 export type OnPinEvent = (eventId: string) => void;
 
+/** Invoked when a user checks/un-checks a row */
+export type OnRowSelected = ({
+  eventIds,
+  isSelected,
+}: {
+  eventIds: string[];
+  isSelected: boolean;
+}) => void;
+
+/** Invoked when a user checks/un-checks the select all checkbox  */
+export type OnSelectAll = ({ isSelected }: { isSelected: boolean }) => void;
+
 /** Invoked when columns are updated */
-export type OnUpdateColumns = (columns: ColumnHeader[]) => void;
+export type OnUpdateColumns = (columns: ColumnHeaderOptions[]) => void;
 
 /** Invoked when a user unpins an event */
 export type OnUnPinEvent = (eventId: string) => void;

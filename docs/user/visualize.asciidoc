@@ -3,171 +3,139 @@
 
 [partintro]
 --
-_Visualize_ enables you to create visualizations of the data in your
-Elasticsearch indices. You can then build <<dashboard, dashboards>> that
-display related visualizations.
+_Visualize_ enables you to create visualizations of the data from your {es} indices, which you can then add to dashboards for analysis.
 
-Kibana visualizations are based on Elasticsearch queries. By using a
-series of Elasticsearch {ref}/search-aggregations.html[aggregations]
-to extract and process your data, you can create charts that show
-you the trends, spikes, and dips you need to know about.
+{kib} visualizations are based on {es} queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
-You can create visualizations from a search saved from <<discover, Discover>>
-or start with a new search query.
---
+To begin, open *Visualize*, then click *Create new visualization*.
 
-[[createvis]]
-== Creating a Visualization
+[float]
+[[visualization-types]]
+== Types of visualizations
 
-To create a visualization:
+{kib} supports several types of visualizations.
 
-. Click on *Visualize* in the side navigation.
-. Click the *Create new visualization* button or the **+** button.
-. Choose the visualization type:
-+
-* *Basic charts*
-[horizontal]
-<<xy-chart,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
-<<heatmap-chart,Heat maps>>:: Shade cells within a matrix.
-<<pie-chart,Pie chart>>:: Display each source's contribution to a total.
-* *Data*
-[horizontal]
-<<data-table,Data table>>:: Display the raw data of a composed aggregation.
-<<metric-chart,Metric>>:: Display a single number.
-<<goal-chart,Goal and Gauge>>:: Display a gauge.
-* *Maps*
-[horizontal]
-<<tilemap,Coordinate map>>:: Associate the results of an aggregation with geographic locations.
-<<regionmap,Region map>>:: Thematic maps where a shape's color intensity corresponds to a metric's value.
-locations.
-* *Time Series*
-[horizontal]
-<<timelion,Timelion>>:: Compute and combine data from multiple time series
+<<lens,Lens>>::
+Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
+
+<<most-frequent,Most frequently used visualizations>>::
+
+* *Line, area, and bar charts* &mdash; Compares different series in X/Y charts.
+
+* *Pie chart* &mdash; Displays each source contribution to a total.
+
+* *Data table* &mdash; Flattens aggregations into table format.
+
+* *Metric* &mdash; Displays a single number.
+
+* *Goal and gauge* &mdash; Displays a number with progress indicators.
+
+* *Tag cloud* &mdash; Displays words in a cloud, where the size of the word corresponds to its importance.
+
+<<TSVB,TSVB>>:: Visualizes time series data using pipeline aggregations.
+
+<<timelion,Timelion>>:: Computes and combine data from multiple time series
 data sets.
-<<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
-* *Other*
-[horizontal]
-<<controls,Controls>>:: Controls provide the ability to add interactive inputs to Kibana Dashboards.
-<<markdown-widget,Markdown widget>>:: Display free-form information or
-instructions.
-<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance.
-<<vega-graph,Vega graph>>:: Support for user-defined graphs, external data sources, images, and user-defined interactivity.
-. Specify a search query to retrieve the data for your visualization:
-** To enter new search criteria, select the index pattern for the indices that
-contain the data you want to visualize. This opens the visualization builder
+
+<<visualize-maps, Maps>>::
+* *<<maps,Elastic Maps>>* &mdash; Displays geospatial data in {kib}.
+
+* <<heat-map,Heat map>>:: Display shaded cells within a matrix.
+
+<<for-dashboard,Dashboard tools>>::
+
+* *Markdown widget* &mdash; Displays free-form information or instructions.
+
+* *Controls* &mdash; Adds interactive inputs to a dashboard.
+
+<<vega-graph,Vega>>:: Completes control over query and display.
+
+[float]
+[[choose-your-data]]
+== Choose your data
+
+Specify a search query to retrieve the data for your visualization, or used rolled up data.
+
+* To enter new search criteria, select the <<index-patterns, index pattern>> for the indices that
+contain the data you want to visualize. The visualization builder opens
 with a wildcard query that matches all of the documents in the selected
 indices.
-** To build a visualization from a saved search, click the name of the saved
-search you want to use. This opens the visualization builder and loads the
+
+* To build a visualization from a saved search, click the name of the saved
+search you want to use. The visualization builder opens and loads the
 selected query.
 +
 NOTE: When you build a visualization from a saved search, any subsequent
-modifications to the saved search are automatically reflected in the
-visualization. To disable automatic updates, you can disconnect a visualization
-from the saved search.
+modifications to the saved search are reflected in the
+visualization. To disable automatic updates, delete the visualization
+on the *Saved Object* page.
 
-. In the visualization builder, choose the metric aggregation for the
-visualization's Y axis:
+* To build a visualization using <<rollup-index-pattern,rolled up data>>, select
+the index pattern that includes the data. Rolled up data is summarized into
+time buckets that can be split into sub buckets for numeric field values or
+terms. To lower granularity, use a time aggregation that uses and combines
+several time buckets. For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up data>>.
 
-* *Metric Aggregations*:
+[float]
+[[vis-inspector]]
+== Inspect visualizations
 
-* {ref}/search-aggregations-metrics-valuecount-aggregation.html[count]
-* {ref}/search-aggregations-metrics-avg-aggregation.html[average]
-* {ref}/search-aggregations-metrics-sum-aggregation.html[sum]
-* {ref}/search-aggregations-metrics-min-aggregation.html[min]
-* {ref}/search-aggregations-metrics-max-aggregation.html[max]
-* {ref}/search-aggregations-metrics-stats-aggregation.html[standard deviation]
-* {ref}/search-aggregations-metrics-cardinality-aggregation.html[unique count]
-* {ref}/search-aggregations-metrics-percentile-aggregation.html[median] (50th percentile)
-* {ref}/search-aggregations-metrics-percentile-aggregation.html[percentiles]
-* {ref}/search-aggregations-metrics-percentile-rank-aggregation.html[percentile ranks]
-* {ref}/search-aggregations-metrics-top-hits-aggregation.html[top hit]
-* {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geo centroid]
+Many visualizations allow you to inspect the query and data behind the visualization.
 
+. In the {kib} toolbar, click *Inspect*.
+. To download the data, click *Download CSV*, then choose one of the following options:
+* *Formatted CSV* - Downloads the data in table format.
+* *Raw CSV* - Downloads the data as provided.
+. To view the requests for collecting data, select *Requests* from the *View*
+dropdown.
 
-* *Parent Pipeline Aggregations*:
+[float]
+[[save-visualize]]
+== Save visualizations
+To use your visualizations in <<dashboard, dashboards>>, you must save them.
 
-* {ref}/search-aggregations-pipeline-derivative-aggregation.html[derivative]
-* {ref}/search-aggregations-pipeline-cumulative-sum-aggregation.html[cumulative sum]
-* {ref}/search-aggregations-pipeline-movavg-aggregation.html[moving average]
-* {ref}/search-aggregations-pipeline-serialdiff-aggregation.html[serial diff]
+. In the {kib} toolbar, click *Save*.
+. Enter the visualization *Title* and optional *Description*, then *Save* the visualization.
 
+To access the saved visualization, go to *Management > {kib} > Saved Objects*.
 
-* *Sibling Pipeline Aggregations*:
+[float]
+[[save-visualization-read-only-access]]
+==== Read only access
+When you have insufficient privileges to save visualizations, the following indicator is
+displayed and the *Save* button is not visible.
 
-* {ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[average bucket]
-* {ref}/search-aggregations-pipeline-sum-bucket-aggregation.html[sum bucket]
-* {ref}/search-aggregations-pipeline-min-bucket-aggregation.html[min bucket]
-* {ref}/search-aggregations-pipeline-max-bucket-aggregation.html[max bucket]
+For more information, refer to <<xpack-security-authorization>>.
 
+[role="screenshot"]
+image::visualize/images/read-only-badge.png[Example of Visualize's read only access indicator in Kibana's header]
 
-. For the visualizations X axis, select a bucket aggregation:
-+
-* {ref}/search-aggregations-bucket-datehistogram-aggregation.html[date histogram]
-* {ref}/search-aggregations-bucket-range-aggregation.html[range]
-* {ref}/search-aggregations-bucket-terms-aggregation.html[terms]
-* {ref}/search-aggregations-bucket-filters-aggregation.html[filters]
-* {ref}/search-aggregations-bucket-significantterms-aggregation.html[significant terms]
+[float]
+[[visualize-share-options]]
+== Share visualizations
 
-For example, if you're indexing Apache server logs, you could build bar chart
-that shows the distribution of incoming requests by geographic location by
-specifying a terms aggregation on the `geo.src` field:
+When you've finished your visualization, you can share it outside of {kib}.
 
-image::images/bar-terms-agg.jpg[]
+From the *Share* menu, you can:
 
-The y-axis shows the number of requests received from each country, and the
-countries are displayed across the x-axis.
+* Embed the code in a web page. Users must have {kib} access
+to view an embedded visualization.
+* Share a direct link to a {kib} visualization.
+* Generate a PDF report.
+* Generate a PNG report.
 
-Bar, line, or area chart visualizations use _metrics_ for the y-axis and
-_buckets_ for the x-axis. Buckets are analogous to SQL `GROUP BY`
-statements. Pie charts, use the metric for the slice size and the bucket
-for the number of slices.
+--
+include::{kib-repo-dir}/visualize/aggregations.asciidoc[]
 
-You can further break down the data by specifying sub aggregations. The first
-aggregation determines the data set for any subsequent aggregations. Sub
-aggregations are applied in order--you can drag the aggregations to change the
-order in which they're applied.
+include::{kib-repo-dir}/visualize/lens.asciidoc[]
 
-For example, you could add a terms sub aggregation on the `geo.dest` field to
-the Country of Origin bar chart to see the locations those requests were
-targeting.
+include::{kib-repo-dir}/visualize/most-frequent.asciidoc[]
 
-image::images/bar-terms-subagg.jpg[]
-
-For more information about working with sub aggregations, see
-https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
-Aggregation Execution Order, and You].
-
-include::{kib-repo-dir}/visualize/saving.asciidoc[]
-
-include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
-
-include::{kib-repo-dir}/visualize/xychart.asciidoc[]
-
-include::{kib-repo-dir}/visualize/controls.asciidoc[]
-
-include::{kib-repo-dir}/visualize/datatable.asciidoc[]
-
-include::{kib-repo-dir}/visualize/markdown.asciidoc[]
-
-include::{kib-repo-dir}/visualize/metric.asciidoc[]
-
-include::{kib-repo-dir}/visualize/goal.asciidoc[]
-
-include::{kib-repo-dir}/visualize/pie.asciidoc[]
+include::{kib-repo-dir}/visualize/tsvb.asciidoc[]
+include::{kib-repo-dir}/visualize/timelion.asciidoc[]
 
 include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
 
-include::{kib-repo-dir}/visualize/regionmap.asciidoc[]
-
-include::{kib-repo-dir}/visualize/timelion.asciidoc[]
-
-include::{kib-repo-dir}/visualize/tsvb.asciidoc[]
-
-include::{kib-repo-dir}/visualize/tagcloud.asciidoc[]
-
-include::{kib-repo-dir}/visualize/heatmap.asciidoc[]
+include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
 
 include::{kib-repo-dir}/visualize/vega.asciidoc[]
-
-include::{kib-repo-dir}/visualize/inspector.asciidoc[]

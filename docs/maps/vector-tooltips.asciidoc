@@ -1,0 +1,41 @@
+[role="xpack"]
+[[vector-tooltip]]
+=== Vector tooltips
+Vector tooltips display attributes for the features at your mouse location.
+These tooltips give users an in-depth insight into what's going on in the map.
+
+If more than one feature exists at a location, the tooltip displays the
+attributes for the top feature, and notes the number of features at that location.
+The following image shows a tooltip with three features at the current location.
+The tooltip displays attributes for the top feature, the green circle.
+
+[role="screenshot"]
+image::maps/images/multifeature_tooltip.png[]
+
+[float]
+[[maps-vector-tooltip-formatting]]
+
+==== Formatting tooltips
+
+You can format the attributes in a tooltip by adding <<managing-fields, field formatters>> to your
+Kibana index pattern. You can use field formatters to round numbers, provide units,
+and even display images in your tooltip.
+
+[float]
+[[maps-vector-tooltip-locking]]
+==== Locking a tooltip at the current location
+You can lock a tooltip in place by clicking a location on the map.
+With locked tooltips you can:
+
+* Page through features.
+* Create a <<maps-phrase-filter, phrase filter>> from a feature attribute value.
+* Create a <<maps-spatial-filters, spatial filter>> from a feature's geometry.
+
+This image shows a locked tooltip with features from three layers.
+The tooltip displays attributes
+for the second feature, the blue New York State polygon.  The tooltip includes
+controls for paging through the features and a dropdown menu for filtering
+the features by layer.
+
+[role="screenshot"]
+image::maps/images/locked_tooltip.png[]

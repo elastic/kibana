@@ -6,7 +6,6 @@
 
 import { EuiSwitch } from '@elastic/eui';
 import React from 'react';
-import { pure } from 'recompose';
 
 import * as i18n from './translations';
 
@@ -15,7 +14,7 @@ interface Props {
   onChange: () => void;
 }
 
-export const IsPtrIncluded = pure<Props>(({ isPtrIncluded, onChange }) => (
+export const IsPtrIncluded = React.memo<Props>(({ isPtrIncluded, onChange }) => (
   <EuiSwitch
     name="switch-ptr-included"
     label={i18n.INCLUDE_PTR_RECORDS}

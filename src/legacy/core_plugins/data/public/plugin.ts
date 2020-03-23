@@ -18,57 +18,20 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { SearchService, SearchStart, createSearchBar, StatetfulSearchBarProps } from './search';
-import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterStart } from './filter';
-import { TimefilterService, TimefilterSetup } from './timefilter';
-import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
-import {
-  LegacyDependenciesPluginSetup,
-  LegacyDependenciesPluginStart,
-} from './shim/legacy_dependencies_plugin';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
-
-/**
- * Interface for any dependencies on other plugins' `setup` contracts.
- *
- * @internal
- */
-export interface DataPluginSetupDependencies {
-  __LEGACY: LegacyDependenciesPluginSetup;
-}
-
-export interface DataPluginStartDependencies {
-  data: DataPublicPluginStart;
-  __LEGACY: LegacyDependenciesPluginStart;
-}
 
 /**
  * Interface for this plugin's returned `setup` contract.
  *
  * @public
  */
-export interface DataSetup {
-  query: QuerySetup;
-  timefilter: TimefilterSetup;
-  indexPatterns: IndexPatternsSetup;
-}
+export interface DataSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * Interface for this plugin's returned `start` contract.
  *
  * @public
  */
-export interface DataStart {
-  query: QuerySetup;
-  timefilter: TimefilterSetup;
-  indexPatterns: IndexPatternsStart;
-  filter: FilterStart;
-  search: SearchStart;
-  ui: {
-    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
-  };
-}
+export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * Data Plugin - public
@@ -81,73 +44,15 @@ export interface DataStart {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin
-  implements
-    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
-  // Exposed services, sorted alphabetically
-  private readonly filter: FilterService = new FilterService();
-  private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
-  private readonly query: QueryService = new QueryService();
-  private readonly search: SearchService = new SearchService();
-  private readonly timefilter: TimefilterService = new TimefilterService();
 
-  private setupApi!: DataSetup;
-
-  public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
-    const { uiSettings } = core;
-
-    const timefilterService = this.timefilter.setup({
-      uiSettings,
-      store: __LEGACY.storage,
-    });
-    this.setupApi = {
-      indexPatterns: this.indexPatterns.setup(),
-      query: this.query.setup(),
-      timefilter: timefilterService,
-    };
-
-    return this.setupApi;
+export class DataPlugin implements Plugin<DataSetup, DataStart> {
+  public setup(core: CoreSetup) {
+    return {};
   }
 
-  public start(core: CoreStart, { __LEGACY, data }: DataPluginStartDependencies): DataStart {
-    const { uiSettings, http, notifications, savedObjects } = core;
-
-    const indexPatternsService = this.indexPatterns.start({
-      uiSettings,
-      savedObjectsClient: savedObjects.client,
-      http,
-      notifications,
-    });
-
-    const filterService = this.filter.start({
-      uiSettings,
-      indexPatterns: indexPatternsService.indexPatterns,
-    });
-
-    const SearchBar = createSearchBar({
-      core,
-      data,
-      store: __LEGACY.storage,
-      timefilter: this.setupApi.timefilter,
-      filterManager: filterService.filterManager,
-    });
-
-    return {
-      ...this.setupApi!,
-      indexPatterns: indexPatternsService,
-      filter: filterService,
-      search: this.search.start(savedObjects.client),
-      ui: {
-        SearchBar,
-      },
-    };
+  public start(core: CoreStart): DataStart {
+    return {};
   }
 
-  public stop() {
-    this.indexPatterns.stop();
-    this.filter.stop();
-    this.query.stop();
-    this.search.stop();
-    this.timefilter.stop();
-  }
+  public stop() {}
 }

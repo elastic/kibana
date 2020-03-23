@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uiRoutes from 'ui/routes';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { LicenseViewController } from './controller';
@@ -13,11 +13,11 @@ import { CODE_PATH_LICENSE } from '../../../common/constants';
 uiRoutes.when('/license', {
   template,
   resolve: {
-    clusters: (Private) => {
+    clusters: Private => {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_LICENSE] });
-    }
+    },
   },
   controllerAs: 'licenseView',
-  controller: LicenseViewController
+  controller: LicenseViewController,
 });

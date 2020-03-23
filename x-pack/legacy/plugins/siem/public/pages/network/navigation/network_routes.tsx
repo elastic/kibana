@@ -6,41 +6,25 @@
 
 import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FlowTargetSourceDest } from '../../../graphql/types';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 
 import { IPsQueryTabBody } from './ips_query_tab_body';
-import { AnomaliesQueryTabBody } from './anomalies_query_tab_body';
+import { CountriesQueryTabBody } from './countries_query_tab_body';
+import { HttpQueryTabBody } from './http_query_tab_body';
+import { AnomaliesQueryTabBody } from '../../../containers/anomalies/anomalies_query_tab_body';
+import { AnomaliesNetworkTable } from '../../../components/ml/tables/anomalies_network_table';
 import { DnsQueryTabBody } from './dns_query_tab_body';
 import { ConditionalFlexGroup } from './conditional_flex_group';
 import { NetworkRoutesProps, NetworkRouteType } from './types';
+import { TlsQueryTabBody } from './tls_query_tab_body';
+import { Anomaly } from '../../../components/ml/types';
+import { NetworkAlertsQueryTabBody } from './alerts_query_tab_body';
 
-export const NetworkRoutes = ({
-  networkPagePath,
-  type,
-  to,
-  filterQuery,
-  isInitializing,
-  from,
-  indexPattern,
-  setQuery,
-  setAbsoluteRangeDatePicker,
-}: NetworkRoutesProps) => {
-  const narrowDateRange = useCallback(
-    (score, interval) => {
-      const fromTo = scoreIntervalToDateTime(score, interval);
-      setAbsoluteRangeDatePicker({
-        id: 'global',
-        from: fromTo.from,
-        to: fromTo.to,
-      });
-    },
-    [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
-  );
-
-  const tabProps = {
+export const NetworkRoutes = React.memo<NetworkRoutesProps>(
+  ({
     networkPagePath,
     type,
     to,
@@ -49,42 +33,115 @@ export const NetworkRoutes = ({
     from,
     indexPattern,
     setQuery,
-  };
+    setAbsoluteRangeDatePicker,
+  }) => {
+    const narrowDateRange = useCallback(
+      (score: Anomaly, interval: string) => {
+        const fromTo = scoreIntervalToDateTime(score, interval);
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
+        });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
+    const updateDateRange = useCallback(
+      (min: number, max: number) => {
+        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
 
-  const anomaliesProps = {
-    from,
-    to,
-    isInitializing,
-    type,
-    narrowDateRange,
-  };
+    const networkAnomaliesFilterQuery = {
+      bool: {
+        should: [
+          {
+            exists: {
+              field: 'source.ip',
+            },
+          },
+          {
+            exists: {
+              field: 'destination.ip',
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    };
 
-  return (
-    <Switch>
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.dns})`}
-        render={() => <DnsQueryTabBody {...tabProps} />}
-      />
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.ips})`}
-        render={() => (
-          <ConditionalFlexGroup direction="column">
-            <EuiFlexItem>
-              <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
-            </EuiFlexItem>
+    const commonProps = {
+      startDate: from,
+      endDate: to,
+      skip: isInitializing,
+      type,
+      narrowDateRange,
+      setQuery,
+      filterQuery,
+    };
 
-            <EuiFlexItem>
-              <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
-            </EuiFlexItem>
-          </ConditionalFlexGroup>
-        )}
-      />
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}
-        render={() => <AnomaliesQueryTabBody {...anomaliesProps} />}
-      />
-    </Switch>
-  );
-};
+    const tabProps = {
+      ...commonProps,
+      indexPattern,
+      updateDateRange,
+    };
+
+    const anomaliesProps = {
+      ...commonProps,
+      anomaliesFilterQuery: networkAnomaliesFilterQuery,
+      AnomaliesTableComponent: AnomaliesNetworkTable,
+    };
+
+    return (
+      <Switch>
+        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.dns})`}>
+          <DnsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.flows})`}>
+          <>
+            <ConditionalFlexGroup direction="column">
+              <EuiFlexItem>
+                <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
+              </EuiFlexItem>
+            </ConditionalFlexGroup>
+            <EuiSpacer />
+            <ConditionalFlexGroup direction="column">
+              <EuiFlexItem>
+                <CountriesQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <CountriesQueryTabBody
+                  {...tabProps}
+                  flowTarget={FlowTargetSourceDest.destination}
+                />
+              </EuiFlexItem>
+            </ConditionalFlexGroup>
+          </>
+        </Route>
+        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.http})`}>
+          <HttpQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.tls})`}>
+          <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
+        </Route>
+        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}>
+          <AnomaliesQueryTabBody
+            {...anomaliesProps}
+            AnomaliesTableComponent={AnomaliesNetworkTable}
+          />
+        </Route>
+        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.alerts})`}>
+          <NetworkAlertsQueryTabBody {...tabProps} />
+        </Route>
+      </Switch>
+    );
+  }
+);
 
 NetworkRoutes.displayName = 'NetworkRoutes';

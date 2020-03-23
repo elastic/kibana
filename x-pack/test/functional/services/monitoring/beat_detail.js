@@ -24,8 +24,7 @@ export function MonitoringBeatDetailProvider({ getService }) {
   const SUBJ_SUMMARY_EVENTS_DROPPED = `${SUBJ_SUMMARY_02} > eventsDropped`;
   const SUBJ_SUMMARY_BYTES_WRITTEN = `${SUBJ_SUMMARY_02} > bytesWritten`;
 
-  return new class BeatDetail {
-
+  return new (class BeatDetail {
     async isOnDetail() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_DETAIL_PAGE));
       return pageId !== null;
@@ -46,6 +45,5 @@ export function MonitoringBeatDetailProvider({ getService }) {
         eventsTotal: await testSubjects.getVisibleText(SUBJ_SUMMARY_EVENTS_TOTAL),
       };
     }
-
-  };
+  })();
 }

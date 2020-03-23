@@ -53,9 +53,10 @@ discover-app .discover-table-footer {
  *  Visualize Editor Tweaks
  */
 
-/* hide unusable controls */
-visualization-editor .visEditor--default > :not(.visEditor__canvas) {
-  display: none;
+/* hide unusable controls
+*  !important is required to override resizable panel inline display */
+visualization-editor .visEditor--default > :not(.visEditor__visualization) {
+  display: none !important;
 }
 
 /** THIS IS FOR TSVB UNTIL REFACTOR **/
@@ -90,11 +91,6 @@ visualize-app .visEditor__canvas {
 .visualize .leaflet-container .leaflet-top.leaflet-left/* tilemap controls */ ,
 .visualize paginate-controls /* page numbers */ {
   display: none;
-}
-
-/* slightly increate legend text size for readability */
-.visualize visualize-legend .visLegend__valueTitle {
-  font-size: 1.2em;
 }
 
 /* Ensure the min-height of the small breakpoint isn't used */

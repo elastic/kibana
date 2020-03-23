@@ -5,14 +5,15 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
 import { TestProviders } from '../../../../../mock';
 import { PrimarySecondaryUserInfo, nilOrUnSet } from './primary_secondary_user_info';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('UserPrimarySecondary', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the default PrimarySecondaryUserInfo', () => {
       const wrapper = shallow(
@@ -24,11 +25,11 @@ describe('UserPrimarySecondary', () => {
           secondary="secondary-1"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should render user name only if that is all that is present', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -43,7 +44,7 @@ describe('UserPrimarySecondary', () => {
     });
 
     test('should render user name only if the others are in unset mode', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -58,7 +59,7 @@ describe('UserPrimarySecondary', () => {
     });
 
     test('should render primary name only if that is all that is present', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -73,7 +74,7 @@ describe('UserPrimarySecondary', () => {
     });
 
     test('should render primary name only if the others are in unset mode', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -88,7 +89,7 @@ describe('UserPrimarySecondary', () => {
     });
 
     test('should render the secondary name only if that is all that is present', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -103,7 +104,7 @@ describe('UserPrimarySecondary', () => {
     });
 
     test('should render the secondary name only if the others are in unset mode', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -118,7 +119,7 @@ describe('UserPrimarySecondary', () => {
     });
 
     test('should render the user name if all three are the same', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -133,7 +134,7 @@ describe('UserPrimarySecondary', () => {
     });
 
     test('should render the primary with as if all three are different', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"

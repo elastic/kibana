@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { Capabilities, CapabilitiesService } from './capabilities_service';
+export { Capabilities } from '../../../types/capabilities';
+export { CapabilitiesService } from './capabilities_service';

@@ -36,12 +36,9 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockResolvedValue(mockResponseNetwork);
       const mockFramework: FrameworkAdapter = {
-        version: 'mock',
         callWithRequest: mockCallWithRequest,
-        exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -72,12 +69,9 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockResolvedValue(mockNoDataResponse);
       const mockFramework: FrameworkAdapter = {
-        version: 'mock',
         callWithRequest: mockCallWithRequest,
-        exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -112,12 +106,9 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockResolvedValue(mockResponseHost);
       const mockFramework: FrameworkAdapter = {
-        version: 'mock',
         callWithRequest: mockCallWithRequest,
-        exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -149,16 +140,14 @@ describe('Siem Overview elasticsearch_adapter', () => {
       mockNoDataResponse.aggregations.system_module.process_count.doc_count = 0;
       mockNoDataResponse.aggregations.system_module.user_count.doc_count = 0;
       mockNoDataResponse.aggregations.system_module.filebeat_count.doc_count = 0;
-      mockNoDataResponse.aggregations.winlog_count.doc_count = 0;
+      mockNoDataResponse.aggregations.winlog_module.security_event_count.doc_count = 0;
+      mockNoDataResponse.aggregations.winlog_module.mwsysmon_operational_event_count.doc_count = 0;
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockResolvedValue(mockNoDataResponse);
       const mockFramework: FrameworkAdapter = {
-        version: 'mock',
         callWithRequest: mockCallWithRequest,
-        exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -189,7 +178,8 @@ describe('Siem Overview elasticsearch_adapter', () => {
           endgameRegistry: 0,
           endgameSecurity: 0,
           filebeatSystemModule: 0,
-          winlogbeat: 0,
+          winlogbeatSecurity: 0,
+          winlogbeatMWSysmonOperational: 0,
         });
       });
     });

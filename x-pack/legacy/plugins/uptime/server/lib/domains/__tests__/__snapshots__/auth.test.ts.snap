@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Auth domain lib throws for inactive license 1`] = `"this.adapter.getLicenseType is not a function"`;
-
-exports[`Auth domain lib throws for null license 1`] = `"Missing license information"`;
-
-exports[`Auth domain lib throws for unsupported license type 1`] = `"License not supported"`;
-
-exports[`Auth domain lib throws if request is not authenticated 1`] = `"Missing authentication"`;

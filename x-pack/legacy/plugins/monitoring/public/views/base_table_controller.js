@@ -18,7 +18,6 @@ import { tableStorageGetter, tableStorageSetter } from 'plugins/monitoring/compo
  * This is expected to be extended, and behavior enabled using super();
  */
 export class MonitoringViewBaseTableController extends MonitoringViewBaseController {
-
   /**
    * Create a table view controller
    * - used by parent class:

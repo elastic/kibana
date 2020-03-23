@@ -13,11 +13,8 @@ import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
   getLogEntryRateRequestPayloadRT,
   getLogEntryRateSuccessReponsePayloadRT,
-} from '../../../../legacy/plugins/infra/common/http_api/log_analysis';
-import {
-  createPlainError,
-  throwErrors,
-} from '../../../../legacy/plugins/infra/common/runtime_types';
+} from '../../../../plugins/infra/common/http_api/log_analysis';
+import { createPlainError, throwErrors } from '../../../../plugins/infra/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TIME_BEFORE_START = 1569934800000;
@@ -66,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(logEntryRateBuckets.data.histogramBuckets).to.not.be.empty();
           expect(
             logEntryRateBuckets.data.histogramBuckets.some(bucket => {
-              return bucket.dataSets.some(dataSet => dataSet.anomalies.length > 0);
+              return bucket.partitions.some(partition => partition.anomalies.length > 0);
             })
           ).to.be(true);
         });

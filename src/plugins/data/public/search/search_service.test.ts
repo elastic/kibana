@@ -25,16 +25,17 @@ import { CoreSetup } from '../../../../core/public';
 describe('Search service', () => {
   let searchService: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup>;
-  const opaqueId = Symbol();
+
   beforeEach(() => {
-    searchService = new SearchService({ opaqueId });
+    searchService = new SearchService();
     mockCoreSetup = coreMock.createSetup();
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const setup = searchService.setup(mockCoreSetup);
-      expect(setup).toHaveProperty('registerSearchStrategyContext');
+      const setup = searchService.setup(mockCoreSetup, {
+        version: '8',
+      } as any);
       expect(setup).toHaveProperty('registerSearchStrategyProvider');
     });
   });

@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, merge as mergeObject, set, omit } from 'lodash/fp';
+import {
+  get,
+  has,
+  merge as mergeObject,
+  set,
+  omit,
+  isObject,
+  toString as fpToString,
+} from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, Observable, empty, merge } from 'rxjs';
@@ -20,7 +28,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
+import { esFilters, Filter, MatchAllFilter } from '../../../../../../../src/plugins/data/public';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
   PersistTimelineMutation,
@@ -40,6 +48,7 @@ import {
   removeColumn,
   removeProvider,
   updateColumns,
+  updateEventType,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
@@ -52,13 +61,15 @@ import {
   updateTimeline,
   updateTitle,
   updateAutoSaveMsg,
+  setFilters,
+  setSavedQueryId,
   startTimelineSaving,
   endTimelineSaving,
   createTimeline,
   addTimeline,
   showCallOutUnauthorizedMsg,
 } from './actions';
-import { TimelineModel } from './model';
+import { ColumnHeaderOptions, TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
 import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
@@ -81,11 +92,14 @@ const timelineActionsType = [
   dataProviderEdited.type,
   removeColumn.type,
   removeProvider.type,
+  setFilters.type,
+  setSavedQueryId.type,
   updateColumns.type,
   updateDataProviderEnabled.type,
   updateDataProviderExcluded.type,
   updateDataProviderKqlQuery.type,
   updateDescription.type,
+  updateEventType.type,
   updateKqlMode.type,
   updateProviders.type,
   updateSort.type,
@@ -107,20 +121,11 @@ export const createTimelineEpic = <State>(): Epic<
   state$,
   { selectNotesByIdSelector, timelineByIdSelector, timelineTimeRangeSelector, apolloClient$ }
 ) => {
-  const timeline$ = state$.pipe(
-    map(timelineByIdSelector),
-    filter(isNotNull)
-  );
+  const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
-  const notes$ = state$.pipe(
-    map(selectNotesByIdSelector),
-    filter(isNotNull)
-  );
+  const notes$ = state$.pipe(map(selectNotesByIdSelector), filter(isNotNull));
 
-  const timelineTimeRange$ = state$.pipe(
-    map(timelineTimeRangeSelector),
-    filter(isNotNull)
-  );
+  const timelineTimeRange$ = state$.pipe(map(timelineTimeRangeSelector), filter(isNotNull));
 
   return merge(
     action$.pipe(
@@ -244,14 +249,17 @@ const timelineInput: TimelineInput = {
   columns: null,
   dataProviders: null,
   description: null,
+  eventType: null,
+  filters: null,
   kqlMode: null,
   kqlQuery: null,
   title: null,
   dateRange: null,
+  savedQueryId: null,
   sort: null,
 };
 
-const convertTimelineAsInput = (
+export const convertTimelineAsInput = (
   timeline: TimelineModel,
   timelineTimeRange: TimeRange
 ): TimelineInput =>
@@ -264,7 +272,64 @@ const convertTimelineAsInput = (
       } else if (key === 'columns' && get(key, timeline) != null) {
         return set(
           key,
-          get(key, timeline).map((col: ColumnHeader) => omit(['width', '__typename'], col)),
+          get(key, timeline).map((col: ColumnHeaderOptions) => omit(['width', '__typename'], col)),
+          acc
+        );
+      } else if (key === 'filters' && get(key, timeline) != null) {
+        const filters = get(key, timeline);
+        return set(
+          key,
+          filters != null
+            ? filters.map((myFilter: Filter) => {
+                const basicFilter = omit(['$state'], myFilter);
+                return {
+                  ...basicFilter,
+                  meta: {
+                    ...basicFilter.meta,
+                    field:
+                      (esFilters.isMatchAllFilter(basicFilter) ||
+                        esFilters.isPhraseFilter(basicFilter) ||
+                        esFilters.isPhrasesFilter(basicFilter) ||
+                        esFilters.isRangeFilter(basicFilter)) &&
+                      basicFilter.meta.field != null
+                        ? convertToString(basicFilter.meta.field)
+                        : null,
+                    value:
+                      basicFilter.meta.value != null
+                        ? convertToString(basicFilter.meta.value)
+                        : null,
+                    params:
+                      basicFilter.meta.params != null
+                        ? convertToString(basicFilter.meta.params)
+                        : null,
+                  },
+                  ...(esFilters.isMatchAllFilter(basicFilter)
+                    ? {
+                        match_all: convertToString((basicFilter as MatchAllFilter).match_all),
+                      }
+                    : { match_all: null }),
+                  ...(esFilters.isMissingFilter(basicFilter) && basicFilter.missing != null
+                    ? { missing: convertToString(basicFilter.missing) }
+                    : { missing: null }),
+                  ...(esFilters.isExistsFilter(basicFilter) && basicFilter.exists != null
+                    ? { exists: convertToString(basicFilter.exists) }
+                    : { exists: null }),
+                  ...((esFilters.isQueryStringFilter(basicFilter) ||
+                    get('query', basicFilter) != null) &&
+                  basicFilter.query != null
+                    ? { query: convertToString(basicFilter.query) }
+                    : { query: null }),
+                  ...(esFilters.isRangeFilter(basicFilter) && basicFilter.range != null
+                    ? { range: convertToString(basicFilter.range) }
+                    : { range: null }),
+                  ...(esFilters.isRangeFilter(basicFilter) &&
+                  basicFilter.script !=
+                    null /* TODO remove it when PR50713 is merged || esFilters.isPhraseFilter(basicFilter) */
+                    ? { script: convertToString(basicFilter.script) }
+                    : { script: null }),
+                };
+              })
+            : [],
           acc
         );
       }
@@ -280,3 +345,14 @@ const omitTypenameInTimeline = (
   oldTimeline: TimelineModel,
   newTimeline: TimelineResult
 ): TimelineModel => JSON.parse(JSON.stringify(mergeObject(oldTimeline, newTimeline)), omitTypename);
+
+const convertToString = (obj: unknown) => {
+  try {
+    if (isObject(obj)) {
+      return JSON.stringify(obj);
+    }
+    return fpToString(obj);
+  } catch {
+    return '';
+  }
+};

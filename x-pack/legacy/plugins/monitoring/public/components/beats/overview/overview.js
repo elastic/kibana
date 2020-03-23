@@ -19,7 +19,8 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiPanel,
-  EuiPageContent
+  EuiPageContent,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -31,42 +32,42 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
         <EuiFlexItem>
           <EuiPanel>
             <EuiTitle size="s">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
                   defaultMessage="Active Beats in Last Day"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
-            <EuiSpacer size="s"/>
+            <EuiSpacer size="s" />
             <LatestActive latestActive={latestActive} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel>
             <EuiTitle size="s">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
                   defaultMessage="Top 5 Beat Types in Last Day"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
-            <EuiSpacer size="s"/>
+            <EuiSpacer size="s" />
             <LatestTypes latestTypes={latestTypes} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel>
             <EuiTitle size="s">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
                   defaultMessage="Top 5 Versions in Last Day"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
-            <EuiSpacer size="s"/>
+            <EuiSpacer size="s" />
             <LatestVersions latestVersions={latestVersions} />
           </EuiPanel>
         </EuiFlexItem>
@@ -75,18 +76,12 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
   }
 
   const calloutMsg = i18n.translate('xpack.monitoring.beats.overview.noActivityDescription', {
-    defaultMessage: 'Hi there! This area is where your latest Beats activity would show up, ' +
-      `but you don't seem to have any activity within the last day.`
+    defaultMessage:
+      'Hi there! This area is where your latest Beats activity would show up, ' +
+      `but you don't seem to have any activity within the last day.`,
   });
 
-
-  return (
-    <EuiCallOut
-      title={calloutMsg}
-      iconType="gear"
-      data-test-subj="noRecentActivityMessage"
-    />
-  );
+  return <EuiCallOut title={calloutMsg} iconType="gear" data-test-subj="noRecentActivityMessage" />;
 }
 
 export function BeatsOverview({
@@ -107,10 +102,7 @@ export function BeatsOverview({
   const charts = seriesToShow.map((data, index) => (
     <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
       <EuiPanel>
-        <MonitoringTimeseriesContainer
-          series={data}
-          {...props}
-        />
+        <MonitoringTimeseriesContainer series={data} {...props} />
       </EuiPanel>
     </EuiFlexItem>
   ));
@@ -118,13 +110,19 @@ export function BeatsOverview({
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.beats.overview.heading"
+              defaultMessage="Beats Overview"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPageContent>
           <Stats stats={stats} />
           {renderLatestActive(latestActive, latestTypes, latestVersions)}
-          <EuiSpacer size="s"/>
-          <EuiFlexGroup wrap>
-            {charts}
-          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

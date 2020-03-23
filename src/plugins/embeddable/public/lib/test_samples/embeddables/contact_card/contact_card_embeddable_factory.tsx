@@ -19,9 +19,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 
 import { CoreStart } from 'src/core/public';
+import { toMountPoint } from '../../../../../../kibana_react/public';
 import { EmbeddableFactory } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
@@ -35,13 +36,13 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
 
   constructor(
     options: EmbeddableFactoryOptions<any>,
-    private readonly execTrigger: TExecuteTriggerActions,
+    private readonly execTrigger: UiActionsStart['executeTriggerActions'],
     private readonly overlays: CoreStart['overlays']
   ) {
     super(options);
   }
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 
@@ -54,16 +55,18 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
   public getExplicitInput(): Promise<Partial<ContactCardEmbeddableInput>> {
     return new Promise(resolve => {
       const modalSession = this.overlays.openModal(
-        <ContactCardInitializer
-          onCancel={() => {
-            modalSession.close();
-            resolve(undefined);
-          }}
-          onCreate={(input: { firstName: string; lastName?: string }) => {
-            modalSession.close();
-            resolve(input);
-          }}
-        />,
+        toMountPoint(
+          <ContactCardInitializer
+            onCancel={() => {
+              modalSession.close();
+              resolve(undefined);
+            }}
+            onCreate={(input: { firstName: string; lastName?: string }) => {
+              modalSession.close();
+              resolve(input);
+            }}
+          />
+        ),
         {
           'data-test-subj': 'createContactCardEmbeddable',
         }

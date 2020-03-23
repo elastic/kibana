@@ -7,4 +7,6 @@
 import { transitions } from '../transitions';
 import { transitionsRegistry } from './transitions_registry';
 
-transitions.forEach(spec => transitionsRegistry.register(spec));
+export function loadTransitions() {
+  transitions.forEach(spec => transitionsRegistry.register(spec));
+}

@@ -18,7 +18,4 @@
  */
 
 export { HttpService } from './http_service';
-export { HttpFetchError } from './http_fetch_error';
-export { HttpInterceptHaltError } from './http_intercept_halt_error';
-export { HttpInterceptController } from './http_intercept_controller';
 export * from './types';

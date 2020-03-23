@@ -15,8 +15,8 @@ describe('Config class', () => {
     configJson = {
       graph: {
         vertices: [],
-        edges: []
-      }
+        edges: [],
+      },
     };
   });
 

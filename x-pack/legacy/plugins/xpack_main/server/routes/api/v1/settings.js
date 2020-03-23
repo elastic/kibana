@@ -5,11 +5,11 @@
  */
 
 import { boomify } from 'boom';
+import { get } from 'lodash';
 import { KIBANA_SETTINGS_TYPE } from '../../../../../monitoring/common/constants';
-import { getKibanaInfoForStats } from '../../../../../monitoring/server/kibana_monitoring/lib';
 
 const getClusterUuid = async callCluster => {
-  const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
+  const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
   return uuid;
 };
 
@@ -23,8 +23,8 @@ export function settingsRoute(server, kbnServer) {
       const callCluster = (...args) => callWithRequest(req, ...args); // All queries from HTTP API must use authentication headers from the request
 
       try {
-        const { collectorSet } = server.usage;
-        const settingsCollector = collectorSet.getCollectorByType(KIBANA_SETTINGS_TYPE);
+        const { usageCollection } = server.newPlatform.setup.plugins;
+        const settingsCollector = usageCollection.getCollectorByType(KIBANA_SETTINGS_TYPE);
 
         let settings = await settingsCollector.fetch(callCluster);
         if (!settings) {
@@ -32,20 +32,30 @@ export function settingsRoute(server, kbnServer) {
         }
         const uuid = await getClusterUuid(callCluster);
 
-        const kibana = getKibanaInfoForStats({
-          kbnServerStatus: kbnServer.status,
-          kbnServerVersion: kbnServer.version,
-          config: server.config()
-        });
+        const snapshotRegex = /-snapshot/i;
+        const config = server.config();
+        const status = kbnServer.status.toJSON();
+        const kibana = {
+          uuid: config.get('server.uuid'),
+          name: config.get('server.name'),
+          index: config.get('kibana.index'),
+          host: config.get('server.host'),
+          port: config.get('server.port'),
+          locale: config.get('i18n.locale'),
+          transport_address: `${config.get('server.host')}:${config.get('server.port')}`,
+          version: kbnServer.version.replace(snapshotRegex, ''),
+          snapshot: snapshotRegex.test(kbnServer.version),
+          status: get(status, 'overall.state'),
+        };
 
         return {
           cluster_uuid: uuid,
           settings: {
             ...settings,
             kibana,
-          }
+          },
         };
-      } catch(err) {
+      } catch (err) {
         req.log(['error'], err); // FIXME doesn't seem to log anything useful if ES times out
         if (err.isBoom) {
           return err;
@@ -53,6 +63,6 @@ export function settingsRoute(server, kbnServer) {
           return boomify(err, { statusCode: err.statusCode, message: err.message });
         }
       }
-    }
+    },
   });
 }

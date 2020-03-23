@@ -20,16 +20,18 @@
 import { deleteAll } from '../../lib';
 
 export const CleanNodeBuildsTask = {
-  description:
-    'Cleaning npm from node',
+  description: 'Cleaning npm from node',
 
   async run(config, log, build) {
     for (const platform of config.getNodePlatforms()) {
-      await deleteAll([
-        build.resolvePathForPlatform(platform, 'node/lib/node_modules'),
-        build.resolvePathForPlatform(platform, 'node/bin/npm'),
-        build.resolvePathForPlatform(platform, 'node/bin/npx'),
-      ], log);
+      await deleteAll(
+        [
+          build.resolvePathForPlatform(platform, 'node/lib/node_modules'),
+          build.resolvePathForPlatform(platform, 'node/bin/npm'),
+          build.resolvePathForPlatform(platform, 'node/bin/npx'),
+        ],
+        log
+      );
     }
   },
 };

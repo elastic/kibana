@@ -11,9 +11,8 @@ import d3 from 'd3';
 import { HistogramInner } from '../index';
 import response from './response.json';
 import {
-  getTimeFormatter,
   asDecimal,
-  timeUnit
+  getDurationFormatter
 } from '../../../../../utils/formatters';
 import { toJson } from '../../../../../utils/testHelpers';
 import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/index';
@@ -25,8 +24,7 @@ describe('Histogram', () => {
   beforeEach(() => {
     const buckets = getFormattedBuckets(response.buckets, response.bucketSize);
     const xMax = d3.max(buckets, d => d.x);
-    const timeFormatter = getTimeFormatter(xMax);
-    const unit = timeUnit(xMax);
+    const timeFormatter = getDurationFormatter(xMax);
 
     wrapper = mount(
       <HistogramInner
@@ -34,15 +32,14 @@ describe('Histogram', () => {
         bucketSize={response.bucketSize}
         transactionId="myTransactionId"
         onClick={onClick}
-        formatX={timeFormatter}
+        formatX={time => timeFormatter(time).formatted}
         formatYShort={t => `${asDecimal(t)} occ.`}
         formatYLong={t => `${asDecimal(t)} occurrences`}
-        tooltipHeader={bucket =>
-          `${timeFormatter(bucket.x0, { withUnit: false })} - ${timeFormatter(
-            bucket.x,
-            { withUnit: false }
-          )} ${unit}`
-        }
+        tooltipHeader={bucket => {
+          const xFormatted = timeFormatter(bucket.x);
+          const x0Formatted = timeFormatter(bucket.x0);
+          return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
+        }}
         width={800}
       />
     );
@@ -98,9 +95,11 @@ describe('Histogram', () => {
     it('should update state with "hoveredBucket"', () => {
       expect(wrapper.state()).toEqual({
         hoveredBucket: {
-          sample: {
-            transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
-          },
+          samples: [
+            {
+              transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
+            }
+          ],
           style: { cursor: 'pointer' },
           xCenter: 869010,
           x0: 811076,
@@ -126,9 +125,11 @@ describe('Histogram', () => {
 
     it('should call onClick with bucket', () => {
       expect(onClick).toHaveBeenCalledWith({
-        sample: {
-          transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
-        },
+        samples: [
+          {
+            transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
+          }
+        ],
         style: { cursor: 'pointer' },
         xCenter: 869010,
         x0: 811076,

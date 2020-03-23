@@ -4,91 +4,93 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import {
+  CheckRecognizerProps,
   CloseJobsResponse,
-  Group,
-  IndexPatternResponse,
-  IndexPatternSavedObject,
-  Job,
+  ErrorResponse,
+  GetModulesProps,
+  JobSummary,
   MlSetupArgs,
+  Module,
+  RecognizerModule,
   SetupMlResponse,
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
-import {
-  throwIfNotOk,
-  throwIfErrorAttached,
-  throwIfErrorAttachedToSetup,
-} from '../ml/api/throw_if_not_ok';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../common/constants';
-
-const emptyIndexPattern: IndexPatternSavedObject[] = [];
+import { throwIfErrorAttached, throwIfErrorAttachedToSetup } from '../ml/api/throw_if_not_ok';
+import { KibanaServices } from '../../lib/kibana';
 
 /**
- * Fetches ML Groups Data
+ * Checks the ML Recognizer API to see if a given indexPattern has any compatible modules
  *
- * @param headers
+ * @param indexPatternName ES index pattern to check for compatible modules
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
  */
-export const groupsData = async (
-  headers: Record<string, string | undefined>,
-  signal: AbortSignal
-): Promise<Group[]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/groups`, {
+export const checkRecognizer = async ({
+  indexPatternName,
+  signal,
+}: CheckRecognizerProps): Promise<RecognizerModule[]> =>
+  KibanaServices.get().http.fetch<RecognizerModule[]>(
+    `/api/ml/modules/recognize/${indexPatternName}`,
+    {
+      method: 'GET',
+      asSystemRequest: true,
+      signal,
+    }
+  );
+
+/**
+ * Returns ML Module for given moduleId. Returns all modules if no moduleId specified
+ *
+ * @param moduleId id of the module to retrieve
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> =>
+  KibanaServices.get().http.fetch<Module[]>(`/api/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
-    },
+    asSystemRequest: true,
     signal,
   });
-  await throwIfNotOk(response);
-  return response.json();
-};
 
 /**
  * Creates ML Jobs + Datafeeds for the given configTemplate + indexPatternName
  *
  * @param configTemplate - name of configTemplate to setup
  * @param indexPatternName - default index pattern configTemplate should be installed with
+ * @param jobIdErrorFilter - if provided, filters all errors except for given jobIds
  * @param groups - list of groups to add to jobs being installed
  * @param prefix - prefix to be added to job name
- * @param headers
+ *
+ * @throws An error if response is not OK
  */
 export const setupMlJob = async ({
   configTemplate,
   indexPatternName = 'auditbeat-*',
+  jobIdErrorFilter = [],
   groups = ['siem'],
   prefix = '',
-  headers = {},
 }: MlSetupArgs): Promise<SetupMlResponse> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/setup/${configTemplate}`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify({
-      prefix,
-      groups,
-      indexPatternName,
-      startDatafeed: false,
-      useDedicatedIndex: true,
-    }),
-    headers: {
-      'kbn-system-api': 'true',
-      'content-type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
-    },
-  });
-  await throwIfNotOk(response);
-  const json = await response.json();
-  throwIfErrorAttachedToSetup(json);
-  return json;
+  const response = await KibanaServices.get().http.fetch<SetupMlResponse>(
+    `/api/ml/modules/setup/${configTemplate}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        prefix,
+        groups,
+        indexPatternName,
+        startDatafeed: false,
+        useDedicatedIndex: true,
+      }),
+      asSystemRequest: true,
+    }
+  );
+
+  throwIfErrorAttachedToSetup(response, jobIdErrorFilter);
+  return response;
 };
 
 /**
@@ -96,143 +98,88 @@ export const setupMlJob = async ({
  *
  * @param datafeedIds
  * @param start
- * @param headers
+ *
+ * @throws An error if response is not OK
  */
-export const startDatafeeds = async (
-  datafeedIds: string[],
-  headers: Record<string, string | undefined>,
-  start = 0
-): Promise<StartDatafeedResponse> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/force_start_datafeeds`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify({
-      datafeedIds,
-      ...(start !== 0 && { start }),
-    }),
-    headers: {
-      'kbn-system-api': 'true',
-      'content-type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
-    },
-  });
-  await throwIfNotOk(response);
-  const json = await response.json();
-  throwIfErrorAttached(json, datafeedIds);
-  return json;
+export const startDatafeeds = async ({
+  datafeedIds,
+  start = 0,
+}: {
+  datafeedIds: string[];
+  start: number;
+}): Promise<StartDatafeedResponse> => {
+  const response = await KibanaServices.get().http.fetch<StartDatafeedResponse>(
+    '/api/ml/jobs/force_start_datafeeds',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        datafeedIds,
+        ...(start !== 0 && { start }),
+      }),
+      asSystemRequest: true,
+    }
+  );
+
+  throwIfErrorAttached(response, datafeedIds);
+  return response;
 };
 
 /**
  * Stops the given dataFeedIds and sets the corresponding Job's jobState to closed
  *
  * @param datafeedIds
- * @param headers
- */
-export const stopDatafeeds = async (
-  datafeedIds: string[],
-  headers: Record<string, string | undefined>
-): Promise<[StopDatafeedResponse, CloseJobsResponse]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-  const stopDatafeedsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/stop_datafeeds`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify({
-      datafeedIds,
-    }),
-    headers: {
-      'kbn-system-api': 'true',
-      'content-type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
-    },
-  });
-
-  await throwIfNotOk(stopDatafeedsResponse);
-  const stopDatafeedsResponseJson = await stopDatafeedsResponse.json();
-
-  const datafeedPrefix = 'datafeed-';
-  const closeJobsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/close_jobs`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify({
-      jobIds: datafeedIds.map(dataFeedId =>
-        dataFeedId.startsWith(datafeedPrefix)
-          ? dataFeedId.substring(datafeedPrefix.length)
-          : dataFeedId
-      ),
-    }),
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
-    },
-  });
-
-  await throwIfNotOk(closeJobsResponse);
-  return [stopDatafeedsResponseJson, await closeJobsResponse.json()];
-};
-
-/**
- * Fetches Job Details for given jobIds
  *
- * @param jobIds
- * @param headers
+ * @throws An error if response is not OK
  */
-export const jobsSummary = async (
-  jobIds: string[],
-  headers: Record<string, string | undefined>,
-  signal: AbortSignal
-): Promise<Job[]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/jobs_summary`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify({ jobIds }),
-    headers: {
-      'content-type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      'kbn-system-api': 'true',
-      ...headers,
-    },
-    signal,
-  });
-  await throwIfNotOk(response);
-  return response.json();
-};
-
-/**
- * Fetches Configured Index Patterns from the Kibana saved objects API (as ML does during create job flow)
- * TODO: Used by more than just ML now -- refactor to shared component https://github.com/elastic/siem-team/issues/448
- * @param headers
- */
-export const getIndexPatterns = async (
-  headers: Record<string, string | undefined>,
-  signal: AbortSignal
-): Promise<IndexPatternSavedObject[]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-  const response = await fetch(
-    `${chrome.getBasePath()}/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000`,
+export const stopDatafeeds = async ({
+  datafeedIds,
+}: {
+  datafeedIds: string[];
+}): Promise<[StopDatafeedResponse | ErrorResponse, CloseJobsResponse]> => {
+  const stopDatafeedsResponse = await KibanaServices.get().http.fetch<StopDatafeedResponse>(
+    '/api/ml/jobs/stop_datafeeds',
     {
-      method: 'GET',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': kbnVersion,
-        'kbn-system-api': 'true',
-        ...headers,
-      },
-      signal,
+      method: 'POST',
+      body: JSON.stringify({
+        datafeedIds,
+      }),
+      asSystemRequest: true,
     }
   );
-  await throwIfNotOk(response);
-  const results: IndexPatternResponse = await response.json();
 
-  if (results.saved_objects && Array.isArray(results.saved_objects)) {
-    return results.saved_objects;
-  } else {
-    return emptyIndexPattern;
-  }
+  const datafeedPrefix = 'datafeed-';
+  const closeJobsResponse = await KibanaServices.get().http.fetch<CloseJobsResponse>(
+    '/api/ml/jobs/close_jobs',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        jobIds: datafeedIds.map(dataFeedId =>
+          dataFeedId.startsWith(datafeedPrefix)
+            ? dataFeedId.substring(datafeedPrefix.length)
+            : dataFeedId
+        ),
+      }),
+      asSystemRequest: true,
+    }
+  );
+
+  return [stopDatafeedsResponse, closeJobsResponse];
 };
+
+/**
+ * Fetches a summary of all ML jobs currently installed
+ *
+ * NOTE: If not sending jobIds in the body, you must at least send an empty body or the server will
+ * return a 500
+ *
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> =>
+  KibanaServices.get().http.fetch<JobSummary[]>('/api/ml/jobs/jobs_summary', {
+    method: 'POST',
+    body: JSON.stringify({}),
+    asSystemRequest: true,
+    signal,
+  });

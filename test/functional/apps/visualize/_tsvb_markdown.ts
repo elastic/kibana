@@ -43,7 +43,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await visualBuilder.resetPage();
         await visualBuilder.clickMarkdown();
-        await timePicker.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        await timePicker.setAbsoluteRange(
+          'Sep 22, 2015 @ 06:00:00.000',
+          'Sep 22, 2015 @ 11:00:00.000'
+        );
       });
 
       it('should render subtabs and table variables markdown components', async () => {
@@ -118,7 +121,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.markdownSwitchSubTab('data');
         await visualBuilder.cloneSeries();
 
-        retry.try(async function seriesCountCheck() {
+        await retry.try(async function seriesCountCheck() {
           const seriesLength = (await visualBuilder.getSeries()).length;
           expect(seriesLength).to.be.equal(2);
         });
@@ -128,7 +131,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.markdownSwitchSubTab('data');
         await visualBuilder.createNewAgg();
 
-        retry.try(async function aggregationCountCheck() {
+        await retry.try(async function aggregationCountCheck() {
           const aggregationLength = await visualBuilder.getAggregationCount();
           expect(aggregationLength).to.be.equal(2);
         });

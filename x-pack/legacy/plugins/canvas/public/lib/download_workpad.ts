@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import fileSaver from 'file-saver';
-import chrome from 'ui/chrome';
 import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../common/lib/constants';
 import { ErrorStrings } from '../../i18n';
 // @ts-ignore untyped local
@@ -37,9 +36,8 @@ export const downloadRenderedWorkpad = async (renderedWorkpad: CanvasRenderedWor
   }
 };
 
-export const downloadRuntime = async () => {
+export const downloadRuntime = async (basePath: string) => {
   try {
-    const basePath = chrome.getBasePath();
     const path = `${basePath}${API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD}`;
     window.open(path);
     return;

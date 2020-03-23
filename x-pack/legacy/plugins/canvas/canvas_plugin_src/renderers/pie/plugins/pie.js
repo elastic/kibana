@@ -683,7 +683,14 @@ function init(plot) {
           const p4Y = radius * Math.sin(s.startAngle + s.angle / 1.5);
           const p5X = radius * Math.cos(s.startAngle + s.angle);
           const p5Y = radius * Math.sin(s.startAngle + s.angle);
-          const arrPoly = [[0, 0], [p1X, p1Y], [p2X, p2Y], [p3X, p3Y], [p4X, p4Y], [p5X, p5Y]];
+          const arrPoly = [
+            [0, 0],
+            [p1X, p1Y],
+            [p2X, p2Y],
+            [p3X, p3Y],
+            [p4X, p4Y],
+            [p5X, p5Y],
+          ];
           const arrPoint = [x, y];
 
           // TODO: perhaps do some mathmatical trickery here with the Y-coordinate to compensate for pie tilt?

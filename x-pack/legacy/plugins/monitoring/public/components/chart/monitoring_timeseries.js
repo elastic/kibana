@@ -31,7 +31,7 @@ export function MonitoringTimeseries({ series, onBrush }) {
     return {
       color: getColor(s.metric.app, index),
       data: s.data,
-      label: s.metric.label
+      label: s.metric.label,
     };
   });
   const firstSeries = first(series);

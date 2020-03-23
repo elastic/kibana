@@ -1,0 +1,120 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EnabledFeatures renders as expected 1`] = `
+<SectionPanel
+  collapsible={true}
+  data-test-subj="enabled-features-panel"
+  description="Customize visible features"
+  initiallyCollapsed={true}
+  title={
+    <span>
+      <FormattedMessage
+        defaultMessage="Customize feature display"
+        id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
+        values={Object {}}
+      />
+       
+      <EuiText
+        color="danger"
+        size="s"
+        style={
+          Object {
+            "display": "inline-block",
+          }
+        }
+      >
+        <em>
+          <FormattedMessage
+            defaultMessage="(no features visible)"
+            id="xpack.spaces.management.enabledSpaceFeatures.noFeaturesEnabledMessage"
+            values={Object {}}
+          />
+        </em>
+      </EuiText>
+    </span>
+  }
+>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiTitle
+        size="xs"
+      >
+        <h3>
+          <FormattedMessage
+            defaultMessage="Control which features are visible in this space."
+            id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
+            values={Object {}}
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiText
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="The feature is hidden in the UI, but is not disabled."
+            id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
+            values={Object {}}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            defaultMessage="Want to secure access? Go to {rolesLink}."
+            id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
+            values={
+              Object {
+                "rolesLink": <ForwardRef
+                  href="#/management/security/roles"
+                >
+                  <FormattedMessage
+                    defaultMessage="Roles"
+                    id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
+                    values={Object {}}
+                  />
+                </ForwardRef>,
+              }
+            }
+          />
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <FeatureTable
+        features={
+          Array [
+            Object {
+              "app": Array [],
+              "icon": "spacesApp",
+              "id": "feature-1",
+              "name": "Feature 1",
+              "privileges": Object {},
+            },
+            Object {
+              "app": Array [],
+              "icon": "spacesApp",
+              "id": "feature-2",
+              "name": "Feature 2",
+              "privileges": Object {},
+            },
+          ]
+        }
+        onChange={[MockFunction]}
+        space={
+          Object {
+            "disabledFeatures": Array [
+              "feature-1",
+              "feature-2",
+            ],
+            "id": "my-space",
+            "name": "my space",
+          }
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</SectionPanel>
+`;

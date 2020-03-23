@@ -36,7 +36,7 @@ import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
 
-export const TopNSeries = injectI18n(function (props) {
+export const TopNSeries = injectI18n(function(props) {
   const {
     panel,
     model,
@@ -98,14 +98,20 @@ export const TopNSeries = injectI18n(function (props) {
       <div className="tvbSeries__body">
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
-            <FormattedMessage id="visTypeTimeseries.topN.tab.metricsLabel" defaultMessage="Metrics" />
+            <FormattedMessage
+              id="visTypeTimeseries.topN.tab.metricsLabel"
+              defaultMessage="Metrics"
+            />
           </EuiTab>
           <EuiTab
             data-test-subj="seriesOptions"
             isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
           >
-            <FormattedMessage id="visTypeTimeseries.topN.tab.optionsLabel" defaultMessage="Options" />
+            <FormattedMessage
+              id="visTypeTimeseries.topN.tab.optionsLabel"
+              defaultMessage="Options"
+            />
           </EuiTab>
         </EuiTabs>
         {seriesBody}

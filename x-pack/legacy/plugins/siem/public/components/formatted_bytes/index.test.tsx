@@ -5,61 +5,51 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { mockFrameworks, getMockKibanaUiSetting } from '../../mock';
+import { useUiSetting$ } from '../../lib/kibana';
 
-import { PreferenceFormattedBytes } from '.';
+import { PreferenceFormattedBytesComponent } from '.';
 
-const mockUseKibanaUiSetting: jest.Mock = useKibanaUiSetting as jest.Mock;
-jest.mock('../../lib/settings/use_kibana_ui_setting', () => ({
-  useKibanaUiSetting: jest.fn(),
-}));
+jest.mock('../../lib/kibana');
+const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
 
-describe('formatted_bytes', () => {
-  describe('PreferenceFormattedBytes', () => {
-    describe('rendering', () => {
-      const bytes = '2806422';
+const DEFAULT_BYTES_FORMAT_VALUE = '0,0.[0]b'; // kibana's default for this setting
+const bytes = '2806422';
 
-      test('renders correctly against snapshot', () => {
-        mockUseKibanaUiSetting.mockImplementation(
-          getMockKibanaUiSetting(mockFrameworks.default_browser)
-        );
-        const wrapper = shallow(<PreferenceFormattedBytes value={bytes} />);
-        expect(toJson(wrapper)).toMatchSnapshot();
-      });
+describe('PreferenceFormattedBytes', () => {
+  test('renders correctly against snapshot', () => {
+    mockUseUiSetting$.mockImplementation(() => [DEFAULT_BYTES_FORMAT_VALUE]);
+    const wrapper = shallow(<PreferenceFormattedBytesComponent value={bytes} />);
 
-      test('it renders bytes to hardcoded format when no configuration exists', () => {
-        mockUseKibanaUiSetting.mockImplementation(() => [null]);
-        const wrapper = mount(<PreferenceFormattedBytes value={bytes} />);
-        expect(wrapper.text()).toEqual('2.7MB');
-      });
+    expect(wrapper).toMatchSnapshot();
+  });
 
-      test('it renders bytes according to the default format', () => {
-        mockUseKibanaUiSetting.mockImplementation(
-          getMockKibanaUiSetting(mockFrameworks.default_browser)
-        );
-        const wrapper = mount(<PreferenceFormattedBytes value={bytes} />);
-        expect(wrapper.text()).toEqual('2.7MB');
-      });
+  test('it renders bytes to Numeral formatting when no format setting exists', () => {
+    mockUseUiSetting$.mockImplementation(() => [null]);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
 
-      test('it renders bytes supplied as a number according to the default format', () => {
-        mockUseKibanaUiSetting.mockImplementation(
-          getMockKibanaUiSetting(mockFrameworks.default_browser)
-        );
-        const wrapper = mount(<PreferenceFormattedBytes value={+bytes} />);
-        expect(wrapper.text()).toEqual('2.7MB');
-      });
+    expect(wrapper.text()).toEqual('2,806,422');
+  });
 
-      test('it renders bytes according to new format', () => {
-        mockUseKibanaUiSetting.mockImplementation(
-          getMockKibanaUiSetting(mockFrameworks.bytes_short)
-        );
-        const wrapper = mount(<PreferenceFormattedBytes value={bytes} />);
-        expect(wrapper.text()).toEqual('3MB');
-      });
-    });
+  test('it renders bytes according to the default format', () => {
+    mockUseUiSetting$.mockImplementation(() => [DEFAULT_BYTES_FORMAT_VALUE]);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
+
+    expect(wrapper.text()).toEqual('2.7MB');
+  });
+
+  test('it renders bytes supplied as a number according to the default format', () => {
+    mockUseUiSetting$.mockImplementation(() => [DEFAULT_BYTES_FORMAT_VALUE]);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={+bytes} />);
+
+    expect(wrapper.text()).toEqual('2.7MB');
+  });
+
+  test('it renders bytes according to new format', () => {
+    mockUseUiSetting$.mockImplementation(() => ['0b']);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
+
+    expect(wrapper.text()).toEqual('3MB');
   });
 });

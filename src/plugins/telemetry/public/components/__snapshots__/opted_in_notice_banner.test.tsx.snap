@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OptInDetailsComponent renders as expected 1`] = `
+<EuiCallOut
+  title="Help us improve the Elastic Stack"
+>
+  <FormattedMessage
+    defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our {privacyStatementLink}. To stop collection, {disableLink}."
+    id="telemetry.telemetryOptedInNoticeDescription"
+    values={
+      Object {
+        "disableLink": <ForwardRef
+          href="kibana#/management/kibana/settings"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="disable usage data here"
+            id="telemetry.telemetryOptedInDisableUsage"
+            values={Object {}}
+          />
+        </ForwardRef>,
+        "privacyStatementLink": <ForwardRef
+          href="https://www.elastic.co/legal/privacy-statement"
+          onClick={[Function]}
+          rel="noopener"
+          target="_blank"
+        >
+          <FormattedMessage
+            defaultMessage="Privacy Statement"
+            id="telemetry.telemetryOptedInPrivacyStatement"
+            values={Object {}}
+          />
+        </ForwardRef>,
+      }
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButton
+    onClick={[Function]}
+    size="s"
+  >
+    <FormattedMessage
+      defaultMessage="Dismiss"
+      id="telemetry.telemetryOptedInDismissMessage"
+      values={Object {}}
+    />
+  </EuiButton>
+</EuiCallOut>
+`;

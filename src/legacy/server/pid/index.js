@@ -23,20 +23,20 @@ import Bluebird from 'bluebird';
 import { unlinkSync as unlink } from 'fs';
 const writeFile = Bluebird.promisify(require('fs').writeFile);
 
-export default Bluebird.method(function (kbnServer, server, config) {
+export default Bluebird.method(function(kbnServer, server, config) {
   const path = config.get('pid.file');
   if (!path) return;
 
   const pid = String(process.pid);
 
   return writeFile(path, pid, { flag: 'wx' })
-    .catch(function (err) {
+    .catch(function(err) {
       if (err.code !== 'EEXIST') throw err;
 
       const message = `pid file already exists at ${path}`;
       const metadata = {
         path: path,
-        pid: pid
+        pid: pid,
       };
 
       if (config.get('pid.exclusive')) {
@@ -47,26 +47,26 @@ export default Bluebird.method(function (kbnServer, server, config) {
 
       return writeFile(path, pid);
     })
-    .then(function () {
-
+    .then(function() {
       server.logWithMetadata(['pid', 'debug'], `wrote pid file to ${path}`, {
         path: path,
-        pid: pid
+        pid: pid,
       });
 
-      const clean = _.once(function () {
+      const clean = _.once(function() {
         unlink(path);
       });
 
       process.once('exit', clean); // for "natural" exits
-      process.once('SIGINT', function () { // for Ctrl-C exits
+      process.once('SIGINT', function() {
+        // for Ctrl-C exits
         clean();
 
         // resend SIGINT
         process.kill(process.pid, 'SIGINT');
       });
 
-      process.on('unhandledRejection', function (reason) {
+      process.on('unhandledRejection', function(reason) {
         server.log(['warning'], `Detected an unhandled Promise rejection.\n${reason}`);
       });
     });

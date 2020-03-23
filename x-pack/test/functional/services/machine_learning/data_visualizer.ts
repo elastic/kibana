@@ -17,5 +17,15 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
     async assertDataVisualizerIndexDataCardExists() {
       await testSubjects.existOrFail('mlDataVisualizerCardIndexData');
     },
+
+    async navigateToIndexPatternSelection() {
+      await testSubjects.click('mlDataVisualizerSelectIndexButton');
+      await testSubjects.existOrFail('mlPageSourceSelection');
+    },
+
+    async navigateToFileUpload() {
+      await testSubjects.click('mlDataVisualizerUploadFileButton');
+      await testSubjects.existOrFail('mlPageFileDataVisualizerUpload');
+    },
   };
 }

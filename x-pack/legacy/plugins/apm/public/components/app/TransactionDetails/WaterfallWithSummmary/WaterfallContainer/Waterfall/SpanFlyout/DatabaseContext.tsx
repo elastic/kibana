@@ -18,7 +18,7 @@ import SyntaxHighlighter, {
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
+import { Span } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
 import {
   borderRadius,
   fontFamilyCode,
@@ -33,7 +33,7 @@ registerLanguage('sql', sql);
 
 const DatabaseStatement = styled.div`
   padding: ${px(units.half)} ${px(unit)};
-  background: ${tint(0.1, theme.euiColorWarning)}
+  background: ${tint(0.1, theme.euiColorWarning)};
   border-radius: ${borderRadius};
   border: 1px solid ${theme.euiColorLightShade};
   font-family: ${fontFamilyCode};

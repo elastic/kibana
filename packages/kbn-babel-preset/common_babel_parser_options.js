@@ -28,6 +28,6 @@ module.exports = {
     'exportDefaultFrom',
     'exportNamespaceFrom',
     'objectRestSpread',
-    'throwExpressions'
+    'throwExpressions',
   ],
 };

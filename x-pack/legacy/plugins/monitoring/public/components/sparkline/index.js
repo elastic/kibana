@@ -18,11 +18,11 @@ export class Sparkline extends React.Component {
     this.handleSparklineRef = this.handleSparklineRef.bind(this);
 
     this.state = {
-      tooltip: undefined
+      tooltip: undefined,
     };
   }
 
-  componentWillReceiveProps({ series, options }) {
+  UNSAFE_componentWillReceiveProps({ series, options }) {
     if (!isEqual(options, this.props.options)) {
       this.sparklineFlotChart.shutdown();
       this.makeSparklineFlotChart(options);
@@ -34,13 +34,18 @@ export class Sparkline extends React.Component {
   }
 
   makeSparklineFlotChart(overrideFlotOptions) {
-    this.sparklineFlotChart = new SparklineFlotChart(this.chartElem, this.props.series,
-      this.props.onBrush, this.onHover, overrideFlotOptions);
+    this.sparklineFlotChart = new SparklineFlotChart(
+      this.chartElem,
+      this.props.series,
+      this.props.onBrush,
+      this.onHover,
+      overrideFlotOptions
+    );
   }
 
   onHover(dataPoint) {
     this.setState({
-      tooltip: dataPoint
+      tooltip: dataPoint,
     });
   }
 
@@ -60,27 +65,28 @@ export class Sparkline extends React.Component {
 
     const styles = {
       tooltipContainer: {
-        top: this.state.tooltip.yPosition - (tooltipHeightInPx / 2),
+        top: this.state.tooltip.yPosition - tooltipHeightInPx / 2,
       },
       tooltip: {
         height: tooltipHeightInPx,
         width: tooltipWidthInPx,
       },
       leftCaret: {
-        width: caretWidthInPx
+        width: caretWidthInPx,
       },
       rightCaret: {
-        width: caretWidthInPx
-      }
+        width: caretWidthInPx,
+      },
     };
 
-    const plotMiddleX = this.state.tooltip.plotLeft + (this.state.tooltip.plotWidth / 2);
+    const plotMiddleX = this.state.tooltip.plotLeft + this.state.tooltip.plotWidth / 2;
     const tooltipContainerWidthInPx = tooltipWidthInPx + caretWidthInPx;
     if (this.state.tooltip.xPosition > plotMiddleX) {
       // The point is in the right half of the plot; position the tooltip
       // to the left of the point
       styles.rightCaret.display = 'block';
-      styles.tooltipContainer.left = this.state.tooltip.xPosition - tooltipContainerWidthInPx - marginBetweenPointAndCaretInPx;
+      styles.tooltipContainer.left =
+        this.state.tooltip.xPosition - tooltipContainerWidthInPx - marginBetweenPointAndCaretInPx;
     } else {
       // The point is in the left half of the plot; position the tooltip
       // to the right of the point
@@ -89,17 +95,15 @@ export class Sparkline extends React.Component {
     }
 
     return (
-      <div
-        className="monSparklineTooltip__container"
-        style={styles.tooltipContainer}
-      >
+      <div className="monSparklineTooltip__container" style={styles.tooltipContainer}>
         <i className="fa fa-caret-left monSparklineTooltip__caret" style={styles.leftCaret} />
-        <div
-          className="monSparklineTooltip"
-          style={styles.tooltip}
-        >
-          <div className="monSparklineTooltip__yValue">{this.props.tooltip.yValueFormatter(this.state.tooltip.yValue)}</div>
-          <div className="monSparklineTooltip__xValue">{this.props.tooltip.xValueFormatter(this.state.tooltip.xValue)}</div>
+        <div className="monSparklineTooltip" style={styles.tooltip}>
+          <div className="monSparklineTooltip__yValue">
+            {this.props.tooltip.yValueFormatter(this.state.tooltip.yValue)}
+          </div>
+          <div className="monSparklineTooltip__xValue">
+            {this.props.tooltip.xValueFormatter(this.state.tooltip.xValue)}
+          </div>
         </div>
         <i className="fa fa-caret-right monSparklineTooltip__caret" style={styles.rightCaret} />
       </div>
@@ -118,10 +122,7 @@ export class Sparkline extends React.Component {
   render() {
     return (
       <div>
-        <div
-          className="monSparkline"
-          ref={this.handleSparklineRef}
-        />
+        <div className="monSparkline" ref={this.handleSparklineRef} />
         {this.renderTooltip()}
       </div>
     );
@@ -133,12 +134,12 @@ Sparkline.propTypes = {
   tooltip: PropTypes.shape({
     enabled: PropTypes.bool,
     xValueFormatter: PropTypes.func,
-    yValueFormatter: PropTypes.func
+    yValueFormatter: PropTypes.func,
   }),
   options: PropTypes.shape({
     xaxis: PropTypes.shape({
       min: PropTypes.number,
-      max: PropTypes.number
-    })
-  })
+      max: PropTypes.number,
+    }),
+  }),
 };

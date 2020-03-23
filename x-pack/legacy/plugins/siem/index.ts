@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
+import { Root } from 'joi';
 
-import KbnServer from '../../../../src/legacy/server/kbn_server';
-import { initServerWithKibana } from './server/kibana.index';
+import { plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
 
 import {
@@ -23,28 +23,30 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_FROM,
   DEFAULT_TO,
+  DEFAULT_SIGNALS_INDEX,
+  ENABLE_NEWS_FEED_SETTING,
+  NEWS_FEED_URL_SETTING,
+  NEWS_FEED_URL_SETTING_DEFAULT,
+  SIGNALS_INDEX_KEY,
+  IP_REPUTATION_LINKS_SETTING,
+  IP_REPUTATION_LINKS_SETTING_DEFAULT,
 } from './common/constants';
-import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
 import { defaultIndexPattern } from './default_index_pattern';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function siem(kibana: any) {
+export const siem = (kibana: any) => {
   return new kibana.Plugin({
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch'],
-    // Uncomment these lines to turn on alerting and action for detection engine and comment the other
-    // require statement out. These are hidden behind feature flags at the moment so if you turn
-    // these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
-    // and legacy plugins cannot have optional requirements.
-    // require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
+    require: ['kibana', 'elasticsearch', 'alerting', 'actions', 'triggers_actions_ui'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {
           defaultMessage: 'Explore your SIEM App',
         }),
-        main: 'plugins/siem/app',
+        main: 'plugins/siem/legacy',
         euiIconType: 'securityAnalyticsApp',
         title: APP_NAME,
         listed: false,
@@ -61,6 +63,7 @@ export function siem(kibana: any) {
           order: 9000,
           title: APP_NAME,
           url: `/app/${APP_ID}`,
+          category: DEFAULT_APP_CATEGORIES.security,
         },
       ],
       uiSettingDefaults: {
@@ -120,18 +123,71 @@ export function siem(kibana: any) {
           category: ['siem'],
           requiresPageReload: true,
         },
+        [ENABLE_NEWS_FEED_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.enableNewsFeedLabel', {
+            defaultMessage: 'News feed',
+          }),
+          value: true,
+          description: i18n.translate('xpack.siem.uiSettings.enableNewsFeedDescription', {
+            defaultMessage: '<p>Enables the News feed</p>',
+          }),
+          type: 'boolean',
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [NEWS_FEED_URL_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.newsFeedUrl', {
+            defaultMessage: 'News feed URL',
+          }),
+          value: NEWS_FEED_URL_SETTING_DEFAULT,
+          description: i18n.translate('xpack.siem.uiSettings.newsFeedUrlDescription', {
+            defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [IP_REPUTATION_LINKS_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.ipReputationLinks', {
+            defaultMessage: 'IP Reputation Links',
+          }),
+          value: IP_REPUTATION_LINKS_SETTING_DEFAULT,
+          type: 'json',
+          description: i18n.translate('xpack.siem.uiSettings.ipReputationLinksDescription', {
+            defaultMessage:
+              'Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
       },
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const newPlatform = ((server as unknown) as KbnServer).newPlatform;
-      if (server.plugins.alerting != null) {
-        server.plugins.alerting.setup.registerType(
-          signalsAlertType({ logger: newPlatform.coreContext.logger.get('plugins', APP_ID) })
-        );
-      }
-      server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
-      initServerWithKibana(server);
+      const { coreContext, env, setup, start } = server.newPlatform;
+      const initializerContext = { ...coreContext, env };
+      const __legacy = {
+        config: server.config,
+        route: server.route.bind(server),
+      };
+
+      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
+      const pluginInstance = plugin(initializerContext);
+      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
+      pluginInstance.setup(setup.core, setup.plugins, __legacy);
+      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
+      pluginInstance.start(start.core, start.plugins);
+    },
+    config(Joi: Root) {
+      // See x-pack/plugins/siem/server/config.ts if you're adding another
+      // value where the configuration has to be duplicated at the moment.
+      // When we move over to the new platform completely this will be
+      // removed and only server/config.ts should be used.
+      return Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+          [SIGNALS_INDEX_KEY]: Joi.string().default(DEFAULT_SIGNALS_INDEX),
+        })
+        .default();
     },
   });
-}
+};

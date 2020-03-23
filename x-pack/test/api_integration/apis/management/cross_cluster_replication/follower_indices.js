@@ -12,9 +12,9 @@ import { registerHelpers as registerElasticSearchHelpers, getRandomString } from
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
 import { registerHelpers as registerFollowerIndicesnHelpers } from './follower_indices.helpers';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const { addCluster, deleteAllClusters } = registerRemoteClustersHelpers(supertest);
   const {
@@ -26,15 +26,12 @@ export default function ({ getService }) {
 
   const { createIndex, deleteAllIndices } = registerElasticSearchHelpers(es);
 
-  describe('follower indices', function () {
+  describe('follower indices', function() {
     this.tags(['skipCloud']);
 
     before(() => addCluster());
 
-    after(() => Promise.all([
-      deleteAllIndices(),
-      unfollowAll().then(deleteAllClusters)
-    ]));
+    after(() => Promise.all([deleteAllIndices(), unfollowAll().then(deleteAllClusters)]));
 
     describe('list()', () => {
       it('should return an empty array when there are no follower indices', async () => {
@@ -50,13 +47,13 @@ export default function ({ getService }) {
         payload.remoteCluster = 'unknown-cluster';
 
         const { body } = await createFollowerIndex(undefined, payload).expect(404);
-        expect(body.cause[0]).to.contain('no such remote cluster');
+        expect(body.attributes.cause[0]).to.contain('no such remote cluster');
       });
 
       it('should throw a 404 error trying to follow an unknown index', async () => {
         const payload = getFollowerIndexPayload();
         const { body } = await createFollowerIndex(undefined, payload).expect(404);
-        expect(body.cause[0]).to.contain('no such index');
+        expect(body.attributes.cause[0]).to.contain('no such index');
       });
 
       it('should create a follower index that follows an existing remote index', async () => {
@@ -78,7 +75,7 @@ export default function ({ getService }) {
         const name = getRandomString();
         const { body } = await getFollowerIndex(name).expect(404);
 
-        expect(body.cause[0]).to.contain('no such index');
+        expect(body.attributes.cause[0]).to.contain('no such index');
       });
 
       it('should return a follower index that was created', async () => {

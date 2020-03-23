@@ -19,11 +19,12 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const browser = getService('browser');
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -34,10 +35,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
 
   describe('saved queries saved objects', function describeIndexTests() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
-
-    before(async function () {
+    before(async function() {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 
@@ -46,17 +44,17 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('saved query management component functionality', function () {
-      before(async function () {
+    describe('saved query management component functionality', function() {
+      before(async function() {
         // set up a query with filters and a time filter
         log.debug('set up a query with filters to save');
         await queryBar.setQuery('response:200');
         await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
-        const fromTime = '2015-09-20 08:00:00.000';
-        const toTime = '2015-09-21 08:00:00.000';
+        const fromTime = 'Sep 20, 2015 @ 08:00:00.000';
+        const toTime = 'Sep 21, 2015 @ 08:00:00.000';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       });
 
@@ -79,15 +77,23 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('reinstates filters and the time filter when a saved query has filters and a time filter included', async () => {
-        const fromTime = '2015-09-19 06:31:44.000';
-        const toTime = '2015-09-23 18:31:44.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
-        expect(timePickerValues.start).to.not.eql(fromTime);
-        expect(timePickerValues.end).to.not.eql(toTime);
+        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
+        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
+      });
+
+      it('preserves the currently loaded query when the page is reloaded', async () => {
+        await browser.refresh();
+        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
+        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
+        expect(await PageObjects.discover.getHitCount()).to.be('2,792');
+        expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
 
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
@@ -136,12 +142,11 @@ export default function ({ getService, getPageObjects }) {
         expect(await queryBar.getQueryString()).to.eql('response:404');
       });
 
-      it('allows clearing the currently loaded saved query', async () =>   {
+      it('allows clearing the currently loaded saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         expect(await queryBar.getQueryString()).to.eql('');
       });
-
     });
   });
 }

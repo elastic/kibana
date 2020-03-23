@@ -8,11 +8,11 @@ import { get, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import chrome from 'ui/chrome';
+import chrome from 'plugins/monitoring/np_imports/ui/chrome';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { MANAGEMENT_BASE_PATH } from 'plugins/xpack_main/components';
 import { License } from 'plugins/monitoring/components';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 
 const REACT_NODE_ID = 'licenseReact';
@@ -34,10 +34,12 @@ export class LicenseViewController {
     const title = $injector.get('title');
     const $route = $injector.get('$route');
 
-    const cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+    const cluster = find($route.current.locals.clusters, {
+      cluster_uuid: globalState.cluster_uuid,
+    });
     $scope.cluster = cluster;
     const routeTitle = i18n.translate('xpack.monitoring.license.licenseRouteTitle', {
-      defaultMessage: 'License'
+      defaultMessage: 'License',
     });
     title($scope.cluster, routeTitle);
 
@@ -52,11 +54,13 @@ export class LicenseViewController {
   }
 
   renderReact($scope) {
+    const injector = chrome.dangerouslyGetActiveInjector();
+    const timezone = injector.get('config').get('dateFormat:tz');
     $scope.$evalAsync(() => {
       const { isPrimaryCluster, license, isExpired, uploadLicensePath } = this;
       let expiryDate = license.expiry_date_in_millis;
       if (license.expiry_date_in_millis !== undefined) {
-        expiryDate = formatDateTimeLocal(license.expiry_date_in_millis);
+        expiryDate = formatDateTimeLocal(license.expiry_date_in_millis, timezone);
       }
 
       // Mount the React component to the template

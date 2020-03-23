@@ -4,37 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { SnapshotHistogram } from './charts';
-import { Snapshot } from './snapshot';
-import { UptimeAppColors } from '../../uptime_app';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { PingHistogram, Snapshot } from '../connected';
 
-interface StatusPanelProps {
-  absoluteDateRangeStart: number;
-  absoluteDateRangeEnd: number;
-  colors: UptimeAppColors;
-  sharedProps: { [key: string]: any };
-}
+const STATUS_CHART_HEIGHT = '160px';
 
-export const StatusPanel = ({
-  absoluteDateRangeStart,
-  absoluteDateRangeEnd,
-  colors: { danger, success },
-  sharedProps,
-}: StatusPanelProps) => (
+export const StatusPanel = ({}) => (
   <EuiPanel>
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={2}>
-        <Snapshot variables={sharedProps} />
+        <Snapshot height={STATUS_CHART_HEIGHT} />
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
-        <SnapshotHistogram
-          absoluteStartDate={absoluteDateRangeStart}
-          absoluteEndDate={absoluteDateRangeEnd}
-          variables={sharedProps}
-          height="160px"
-        />
+        <PingHistogram height={STATUS_CHART_HEIGHT} isResponsive={true} />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

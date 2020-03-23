@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { FeaturesService } from '../../common/services';
 import { SpaceScenarios } from '../scenarios';
 
 export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProviderContext) {
-  const spacesService: SpacesService = getService('spaces');
+  const spacesService = getService('spaces');
   const featuresService: FeaturesService = getService('features');
 
   describe('ui capabilities', function() {
     this.tags('ciGroup9');
 
     before(async () => {
-      const features = await featuresService.get();
+      // we're using a basic license, so if we want to disable all features, we have to ignore the valid licenses
+      const features = await featuresService.get({ ignoreValidLicenses: true });
       for (const space of SpaceScenarios) {
         const disabledFeatures =
           space.disabledFeatures === '*' ? Object.keys(features) : space.disabledFeatures;

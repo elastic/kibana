@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
 import { createTileMapFn } from './tile_map_fn';
 
 jest.mock('ui/new_platform');
@@ -25,21 +26,21 @@ jest.mock('ui/vis/map/convert_to_geojson', () => ({
   convertToGeoJson: jest.fn().mockReturnValue({
     featureCollection: {
       type: 'FeatureCollection',
-      features: []
+      features: [],
     },
     meta: {
       min: null,
       max: null,
       geohashPrecision: null,
-      geohashGridDimensionsAtEquator: null
-    }
+      geohashGridDimensionsAtEquator: null,
+    },
   }),
 }));
 
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 describe('interpreter/functions#tilemap', () => {
-  const fn = functionWrapper(createTileMapFn);
+  const fn = functionWrapper(createTileMapFn());
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],
@@ -58,21 +59,21 @@ describe('interpreter/functions#tilemap', () => {
       enabled: false,
       options: {
         format: 'image/png',
-        transparent: true
-      }
+        transparent: true,
+      },
     },
     dimensions: {
       metric: {
         accessor: 0,
         format: {
-          id: 'number'
+          id: 'number',
         },
         params: {},
-        aggType: 'count'
+        aggType: 'count',
       },
       geohash: null,
-      geocentroid: null
-    }
+      geocentroid: null,
+    },
   };
 
   beforeEach(() => {

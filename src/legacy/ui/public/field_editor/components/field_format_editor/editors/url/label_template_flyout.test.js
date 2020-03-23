@@ -18,24 +18,18 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { LabelTemplateFlyoutComponent } from './label_template_flyout';
+import { LabelTemplateFlyout } from './label_template_flyout';
 
 describe('LabelTemplateFlyout', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <LabelTemplateFlyoutComponent
-        isVisible={true}
-      />
-    );
+    const component = shallowWithI18nProvider(<LabelTemplateFlyout isVisible={true} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should not render if not visible', async () => {
-    const component = shallowWithIntl(
-      <LabelTemplateFlyoutComponent />
-    );
+    const component = shallowWithI18nProvider(<LabelTemplateFlyout />);
     expect(component).toMatchSnapshot();
   });
 });

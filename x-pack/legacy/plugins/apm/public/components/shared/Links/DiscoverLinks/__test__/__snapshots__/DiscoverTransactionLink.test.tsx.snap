@@ -5,7 +5,7 @@ Object {
   "_a": Object {
     "interval": "auto",
     "query": Object {
-      "language": "lucene",
+      "language": "kuery",
       "query": "processor.event:\\"transaction\\" AND transaction.id:\\"8b60bd32ecc6e150\\" AND trace.id:\\"8b60bd32ecc6e1506735a8b6cfcf175c\\"",
     },
   },

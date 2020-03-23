@@ -16,12 +16,12 @@ describe('Monitoring Breadcrumbs Service', () => {
       licenseService: {},
       breadcrumbsService: breadcrumbsProvider(),
       attributes: {
-        name: 'alerts'
-      }
+        name: 'alerts',
+      },
     });
     expect(controller.breadcrumbs).to.eql([
       { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
-      { url: '#/overview', label: 'test-cluster-foo' }
+      { url: '#/overview', label: 'test-cluster-foo' },
     ]);
   });
 
@@ -32,11 +32,11 @@ describe('Monitoring Breadcrumbs Service', () => {
       licenseService: {},
       breadcrumbsService: breadcrumbsProvider(),
       attributes: {
-        name: 'overview'
-      }
+        name: 'overview',
+      },
     });
     expect(controller.breadcrumbs).to.eql([
-      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' }
+      { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
     ]);
   });
 
@@ -54,14 +54,14 @@ describe('Monitoring Breadcrumbs Service', () => {
         page: 'advanced',
         tabIconClass: 'fa star',
         tabIconLabel: 'Master Node',
-      }
+      },
     });
     expect(controller.breadcrumbs).to.eql([
       { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
       { url: '#/overview', label: 'test-cluster-foo' },
       { url: '#/elasticsearch', label: 'Elasticsearch' },
       { url: '#/elasticsearch/nodes', label: 'Nodes', testSubj: 'breadcrumbEsNodes' },
-      { url: null, label: 'es-node-name-01' }
+      { url: null, label: 'es-node-name-01' },
     ]);
   });
 
@@ -73,13 +73,13 @@ describe('Monitoring Breadcrumbs Service', () => {
       breadcrumbsService: breadcrumbsProvider(),
       attributes: {
         product: 'kibana',
-        name: 'overview'
-      }
+        name: 'overview',
+      },
     });
     expect(controller.breadcrumbs).to.eql([
       { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
       { url: '#/overview', label: 'test-cluster-foo' },
-      { url: null, label: 'Kibana' }
+      { url: null, label: 'Kibana' },
     ]);
   });
 
@@ -94,13 +94,13 @@ describe('Monitoring Breadcrumbs Service', () => {
       breadcrumbsService: breadcrumbsProvider(),
       attributes: {
         product: 'logstash',
-        name: 'listing'
-      }
+        name: 'listing',
+      },
     });
     expect(controller.breadcrumbs).to.eql([
       { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
       { url: '#/overview', label: 'test-cluster-foo' },
-      { url: null, label: 'Logstash' }
+      { url: null, label: 'Logstash' },
     ]);
   });
 
@@ -117,14 +117,14 @@ describe('Monitoring Breadcrumbs Service', () => {
         product: 'logstash',
         page: 'pipeline',
         pipelineId: 'main',
-        pipelineHash: '42ee890af9...'
-      }
+        pipelineHash: '42ee890af9...',
+      },
     });
     expect(controller.breadcrumbs).to.eql([
       { url: '#/home', label: 'Clusters', testSubj: 'breadcrumbClusters' },
       { url: '#/overview', label: 'test-cluster-foo' },
       { url: '#/logstash', label: 'Logstash' },
-      { url: '#/logstash/pipelines', label: 'Pipelines' }
+      { url: '#/logstash/pipelines', label: 'Pipelines' },
     ]);
   });
 });

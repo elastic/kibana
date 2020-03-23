@@ -17,22 +17,12 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
-
-/* eslint-disable @kbn/eslint/no-restricted-paths */
+// eslint-disable-next-line
 import { npSetup, npStart } from 'ui/new_platform';
-// @ts-ignore
-import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
-
+import { PluginInitializerContext } from '../../../../../../core/public';
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core, {
-  __LEGACY: {
-    VisFiltersProvider,
-    createFilter,
-  },
-});
-export const start = pluginInstance.start(npStart.core);
+export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);

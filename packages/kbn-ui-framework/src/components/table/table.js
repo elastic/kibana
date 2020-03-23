@@ -23,9 +23,13 @@ import classNames from 'classnames';
 
 export const KuiTable = ({ children, shrinkToContent, className, ...rest }) => {
   const classes = classNames('kuiTable', className, {
-    'kuiTable--fluid': shrinkToContent
+    'kuiTable--fluid': shrinkToContent,
   });
-  return <table className={classes} {...rest} >{children}</table>;
+  return (
+    <table className={classes} {...rest}>
+      {children}
+    </table>
+  );
 };
 KuiTable.propTypes = {
   shrinkToContent: PropTypes.bool,
@@ -33,5 +37,5 @@ KuiTable.propTypes = {
   className: PropTypes.string,
 };
 KuiTable.defaultProps = {
-  shrinkToContent: false
+  shrinkToContent: false,
 };

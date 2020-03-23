@@ -58,11 +58,11 @@ export class Relationships extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.getRelationshipData();
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.savedObject.id !== this.props.savedObject.id) {
       this.getRelationshipData();
     }

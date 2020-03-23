@@ -18,157 +18,185 @@
  */
 
 import { SavedObjectsManagement } from './management';
+import { SavedObjectsType } from '../types';
+import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 
-describe('isImportAndExportable()', () => {
-  it('returns false for unknown types', () => {
-    const management = new SavedObjectsManagement();
-    const result = management.isImportAndExportable('bar');
-    expect(result).toBe(false);
-  });
+describe('SavedObjectsManagement', () => {
+  let registry: SavedObjectTypeRegistry;
+  let management: SavedObjectsManagement;
 
-  it('returns true for explicitly importable and exportable type', () => {
-    const management = new SavedObjectsManagement({
-      foo: {
-        isImportableAndExportable: true,
-      },
+  const registerType = (type: Partial<SavedObjectsType>) =>
+    registry.registerType({
+      name: 'unknown',
+      hidden: false,
+      namespaceAgnostic: false,
+      mappings: { properties: {} },
+      migrations: {},
+      ...type,
     });
-    const result = management.isImportAndExportable('foo');
-    expect(result).toBe(true);
+
+  beforeEach(() => {
+    registry = new SavedObjectTypeRegistry();
+    management = new SavedObjectsManagement(registry);
   });
 
-  it('returns false for explicitly importable and exportable type', () => {
-    const management = new SavedObjectsManagement({
-      foo: {
-        isImportableAndExportable: false,
-      },
+  describe('isImportAndExportable()', () => {
+    it('returns false for unknown types', () => {
+      const result = management.isImportAndExportable('bar');
+      expect(result).toBe(false);
     });
-    const result = management.isImportAndExportable('foo');
-    expect(result).toBe(false);
-  });
-});
 
-describe('getDefaultSearchField()', () => {
-  it('returns empty for unknown types', () => {
-    const management = new SavedObjectsManagement();
-    const result = management.getDefaultSearchField('bar');
-    expect(result).toEqual(undefined);
-  });
-
-  it('returns explicit value', () => {
-    const management = new SavedObjectsManagement({
-      foo: {
-        defaultSearchField: 'value',
-      },
-    });
-    const result = management.getDefaultSearchField('foo');
-    expect(result).toEqual('value');
-  });
-});
-
-describe('getIcon', () => {
-  it('returns empty for unknown types', () => {
-    const management = new SavedObjectsManagement();
-    const result = management.getIcon('bar');
-    expect(result).toEqual(undefined);
-  });
-
-  it('returns explicit value', () => {
-    const management = new SavedObjectsManagement({
-      foo: {
-        icon: 'value',
-      },
-    });
-    const result = management.getIcon('foo');
-    expect(result).toEqual('value');
-  });
-});
-
-describe('getTitle', () => {
-  it('returns empty for unknown type', () => {
-    const management = new SavedObjectsManagement();
-    const result = management.getTitle({
-      id: '1',
-      type: 'foo',
-      attributes: {},
-      references: [],
-    });
-    expect(result).toEqual(undefined);
-  });
-
-  it('returns explicit value', () => {
-    const management = new SavedObjectsManagement({
-      foo: {
-        getTitle() {
-          return 'called';
+    it('returns true for explicitly importable and exportable type', () => {
+      registerType({
+        name: 'foo',
+        management: {
+          importableAndExportable: true,
         },
-      },
-    });
-    const result = management.getTitle({
-      id: '1',
-      type: 'foo',
-      attributes: {},
-      references: [],
-    });
-    expect(result).toEqual('called');
-  });
-});
+      });
 
-describe('getEditUrl()', () => {
-  it('returns empty for unknown type', () => {
-    const management = new SavedObjectsManagement();
-    const result = management.getEditUrl({
-      id: '1',
-      type: 'foo',
-      attributes: {},
-      references: [],
+      const result = management.isImportAndExportable('foo');
+      expect(result).toBe(true);
     });
-    expect(result).toEqual(undefined);
-  });
 
-  it('returns explicit value', () => {
-    const management = new SavedObjectsManagement({
-      foo: {
-        getEditUrl() {
-          return 'called';
+    it('returns false for explicitly importable and exportable type', () => {
+      registerType({
+        name: 'foo',
+        management: {
+          importableAndExportable: false,
         },
-      },
-    });
-    const result = management.getEditUrl({
-      id: '1',
-      type: 'foo',
-      attributes: {},
-      references: [],
-    });
-    expect(result).toEqual('called');
-  });
-});
+      });
 
-describe('getInAppUrl()', () => {
-  it('returns empty array for unknown type', () => {
-    const management = new SavedObjectsManagement();
-    const result = management.getInAppUrl({
-      id: '1',
-      type: 'foo',
-      attributes: {},
-      references: [],
+      const result = management.isImportAndExportable('foo');
+      expect(result).toBe(false);
     });
-    expect(result).toEqual(undefined);
   });
 
-  it('returns explicit value', () => {
-    const management = new SavedObjectsManagement({
-      foo: {
-        getInAppUrl() {
-          return { path: 'called', uiCapabilitiesPath: 'my.path' };
+  describe('getDefaultSearchField()', () => {
+    it('returns empty for unknown types', () => {
+      const result = management.getDefaultSearchField('bar');
+      expect(result).toEqual(undefined);
+    });
+
+    it('returns explicit value', () => {
+      registerType({
+        name: 'foo',
+        management: {
+          defaultSearchField: 'value',
         },
-      },
+      });
+
+      const result = management.getDefaultSearchField('foo');
+      expect(result).toEqual('value');
     });
-    const result = management.getInAppUrl({
-      id: '1',
-      type: 'foo',
-      attributes: {},
-      references: [],
+  });
+
+  describe('getIcon()', () => {
+    it('returns empty for unknown types', () => {
+      const result = management.getIcon('bar');
+      expect(result).toEqual(undefined);
     });
-    expect(result).toEqual({ path: 'called', uiCapabilitiesPath: 'my.path' });
+
+    it('returns explicit value', () => {
+      registerType({
+        name: 'foo',
+        management: {
+          icon: 'value',
+        },
+      });
+      const result = management.getIcon('foo');
+      expect(result).toEqual('value');
+    });
+  });
+
+  describe('getTitle()', () => {
+    it('returns empty for unknown type', () => {
+      const result = management.getTitle({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [],
+      });
+      expect(result).toEqual(undefined);
+    });
+
+    it('returns explicit value', () => {
+      registerType({
+        name: 'foo',
+        management: {
+          getTitle() {
+            return 'called';
+          },
+        },
+      });
+      const result = management.getTitle({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [],
+      });
+      expect(result).toEqual('called');
+    });
+  });
+
+  describe('getEditUrl()', () => {
+    it('returns empty for unknown type', () => {
+      const result = management.getEditUrl({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [],
+      });
+      expect(result).toEqual(undefined);
+    });
+
+    it('returns explicit value', () => {
+      registerType({
+        name: 'foo',
+        management: {
+          getEditUrl() {
+            return 'called';
+          },
+        },
+      });
+
+      const result = management.getEditUrl({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [],
+      });
+      expect(result).toEqual('called');
+    });
+  });
+
+  describe('getInAppUrl()', () => {
+    it('returns empty array for unknown type', () => {
+      const result = management.getInAppUrl({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [],
+      });
+      expect(result).toEqual(undefined);
+    });
+
+    it('returns explicit value', () => {
+      registerType({
+        name: 'foo',
+        management: {
+          getInAppUrl() {
+            return { path: 'called', uiCapabilitiesPath: 'my.path' };
+          },
+        },
+      });
+
+      const result = management.getInAppUrl({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [],
+      });
+      expect(result).toEqual({ path: 'called', uiCapabilitiesPath: 'my.path' });
+    });
   });
 });

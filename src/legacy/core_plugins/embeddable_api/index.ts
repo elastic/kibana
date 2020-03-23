@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import { resolve } from 'path';
 import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
-  });
+  return new kibana.Plugin({});
 }

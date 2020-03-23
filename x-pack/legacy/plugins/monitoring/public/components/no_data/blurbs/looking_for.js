@@ -15,7 +15,7 @@ export const LookingFor = () => {
         <h2>
           <FormattedMessage
             id="xpack.monitoring.noData.blurbs.lookingForMonitoringDataTitle"
-            defaultMessage="We&apos;re looking for your monitoring data"
+            defaultMessage="We're looking for your monitoring data"
           />
         </h2>
       </EuiTitle>

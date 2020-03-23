@@ -8,7 +8,6 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 
 import { NetworkDnsFields, NetworkDnsItem } from '../../../../graphql/types';
-import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
@@ -26,7 +25,7 @@ export type NetworkDnsColumns = [
   Columns<NetworkDnsItem['dnsBytesOut']>
 ];
 
-export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDnsColumns => [
+export const getNetworkDnsColumns = (): NetworkDnsColumns => [
   {
     field: `node.${NetworkDnsFields.dnsName}`,
     name: i18n.REGISTERED_DOMAIN,
@@ -69,6 +68,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.queryCount}`,
     name: i18n.TOTAL_QUERIES,
     sortable: true,
@@ -83,6 +83,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.uniqueDomains}`,
     name: i18n.UNIQUE_DOMAINS,
     sortable: true,
@@ -97,6 +98,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.dnsBytesIn}`,
     name: i18n.DNS_BYTES_IN,
     sortable: true,
@@ -111,6 +113,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.dnsBytesOut}`,
     name: i18n.DNS_BYTES_OUT,
     sortable: true,

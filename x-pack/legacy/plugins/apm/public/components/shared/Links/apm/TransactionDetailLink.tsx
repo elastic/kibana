@@ -27,7 +27,11 @@ export const TransactionDetailLink = ({
 }: Props) => {
   const { urlParams } = useUrlParams();
 
-  const persistedFilters = pickKeys(urlParams, 'transactionResult');
+  const persistedFilters = pickKeys(
+    urlParams,
+    'transactionResult',
+    'serviceVersion'
+  );
 
   return (
     <APMLink

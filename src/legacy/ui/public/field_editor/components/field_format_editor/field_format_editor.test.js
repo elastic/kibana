@@ -24,7 +24,7 @@ import { FieldFormatEditor } from './field_format_editor';
 
 class TestEditor extends PureComponent {
   render() {
-    if(this.props) {
+    if (this.props) {
       return null;
     }
     return <div>Test editor</div>;
@@ -42,7 +42,7 @@ describe('FieldFormatEditor', () => {
         fieldFormatEditors={{
           getEditor: () => {
             return TestEditor;
-          }
+          },
         }}
         onChange={() => {}}
         onError={() => {}}
@@ -62,7 +62,7 @@ describe('FieldFormatEditor', () => {
         fieldFormatEditors={{
           getEditor: () => {
             return null;
-          }
+          },
         }}
         onChange={() => {}}
         onError={() => {}}

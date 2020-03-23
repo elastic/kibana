@@ -13,7 +13,6 @@ import { DRAW_TYPE } from '../../../../../common/constants';
 const noop = () => {};
 
 export class DrawTooltip extends Component {
-
   state = {
     x: undefined,
     y: undefined,
@@ -43,15 +42,28 @@ export class DrawTooltip extends Component {
   }
 
   render() {
-    const instructions = this.props.drawState.drawType === DRAW_TYPE.BOUNDS
-      ? i18n.translate('xpack.maps.drawTooltip.boundsInstructions', {
-        defaultMessage: 'Click to start rectangle. Click again to finish.'
-      })
-      : i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
-        defaultMessage: 'Click to add vertex. Double click to finish.'
+    let instructions;
+    if (this.props.drawState.drawType === DRAW_TYPE.BOUNDS) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.boundsInstructions', {
+        defaultMessage:
+          'Click to start rectangle. Move mouse to adjust rectangle size. Click again to finish.',
       });
+    } else if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.distanceInstructions', {
+        defaultMessage: 'Click to set point. Move mouse to adjust distance. Click to finish.',
+      });
+    } else if (this.props.drawState.drawType === DRAW_TYPE.POLYGON) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
+        defaultMessage: 'Click to start shape. Click to add vertex. Double click to finish.',
+      });
+    } else {
+      // unknown draw type, tooltip not needed
+      return null;
+    }
 
-    const tooltipAnchor = <div style={{ height: '26px', width: '26px', background: 'transparent' }}/>;
+    const tooltipAnchor = (
+      <div style={{ height: '26px', width: '26px', background: 'transparent' }} />
+    );
 
     return (
       <EuiPopover
@@ -63,7 +75,7 @@ export class DrawTooltip extends Component {
         ref={this._popoverRef}
         style={{
           pointerEvents: 'none',
-          transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`
+          transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`,
         }}
       >
         <EuiText color="subdued" size="xs">
@@ -76,7 +88,7 @@ export class DrawTooltip extends Component {
   _hideTooltip = () => {
     this._updateTooltipLocation.cancel();
     this.setState({ isOpen: false });
-  }
+  };
 
   _updateTooltipLocation = _.throttle(({ lngLat }) => {
     const mouseLocation = this.props.mbMap.project(lngLat);
@@ -85,5 +97,5 @@ export class DrawTooltip extends Component {
       x: mouseLocation.x,
       y: mouseLocation.y,
     });
-  }, 100)
+  }, 100);
 }

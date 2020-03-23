@@ -47,14 +47,14 @@ it('builds light themed SASS', async () => {
 
   expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
-"foo bar {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: #e6f0f8 url(./images/img.png) url(ui/assets/favicons/favicon.ico); }
-/*# sourceMappingURL=... */"
-`);
+    "foo bar {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      background: #e6f0f8 url(./images/img.png) url(ui/assets/favicons/favicon.ico); }
+    /*# sourceMappingURL=... */"
+  `);
 });
 
 it('builds dark themed SASS', async () => {
@@ -72,14 +72,14 @@ it('builds dark themed SASS', async () => {
 
   expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
-"foo bar {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: #232635 url(./images/img.png) url(ui/assets/favicons/favicon.ico); }
-/*# sourceMappingURL=... */"
-`);
+    "foo bar {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      background: #232635 url(./images/img.png) url(ui/assets/favicons/favicon.ico); }
+    /*# sourceMappingURL=... */"
+  `);
 });
 
 it('rewrites url imports', async () => {
@@ -101,14 +101,14 @@ it('rewrites url imports', async () => {
 
   expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
-"foo bar {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: #232635 url(__REPLACE_WITH_PUBLIC_PATH__foo/bar/images/img.png) url(__REPLACE_WITH_PUBLIC_PATH__ui/favicons/favicon.ico); }
-/*# sourceMappingURL=... */"
-`);
+    "foo bar {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      background: #232635 url(__REPLACE_WITH_PUBLIC_PATH__foo/bar/images/img.png) url(__REPLACE_WITH_PUBLIC_PATH__ui/favicons/favicon.ico); }
+    /*# sourceMappingURL=... */"
+  `);
 
   expect(
     Buffer.compare(
@@ -118,9 +118,9 @@ it('rewrites url imports', async () => {
   ).toBe(0);
 
   expect(await globby('**/*', { cwd: TMP })).toMatchInlineSnapshot(`
-Array [
-  "style.css",
-  "images/img.png",
-]
-`);
+    Array [
+      "style.css",
+      "images/img.png",
+    ]
+  `);
 });

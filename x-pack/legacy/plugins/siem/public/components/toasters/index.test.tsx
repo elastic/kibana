@@ -8,7 +8,20 @@ import { cloneDeep, set } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React, { useEffect } from 'react';
 
-import { AppToast, useStateToaster, ManageGlobalToaster, GlobalToaster } from '.';
+import {
+  AppToast,
+  useStateToaster,
+  ManageGlobalToaster,
+  GlobalToaster,
+  displayErrorToast,
+} from '.';
+
+jest.mock('uuid', () => {
+  return {
+    v1: jest.fn(() => '27261ae0-0bbb-11ea-b0ea-db767b07ea47'),
+    v4: jest.fn(() => '9e1f72a9-7c73-4b7f-a562-09940f7daf4a'),
+  };
+});
 
 const mockToast: AppToast = {
   color: 'danger',
@@ -47,7 +60,6 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
       expect(wrapper.find('[data-test-subj="add-toaster-id-super-id"]').exists()).toBe(true);
     });
     test('we can delete a toast in the reducer', () => {
@@ -61,7 +73,7 @@ describe('Toaster', () => {
         return (
           <>
             <button
-              data-test-subj="add-toast"
+              data-test-subj="delete-toast"
               type="button"
               onClick={() => dispatch({ type: 'deleteToaster', id: mockToast.id })}
             />
@@ -79,10 +91,9 @@ describe('Toaster', () => {
           <DeleteToaster />
         </ManageGlobalToaster>
       );
-      wrapper.update();
+
       expect(wrapper.find('[data-test-subj="delete-toaster-id-super-id"]').exists()).toBe(true);
-      wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
+      wrapper.find('[data-test-subj="delete-toast"]').simulate('click');
       expect(wrapper.find('[data-test-subj="delete-toaster-id-super-id"]').exists()).toBe(false);
     });
   });
@@ -111,7 +122,6 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
 
       expect(wrapper.find('.euiGlobalToastList').exists()).toBe(true);
       expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
@@ -144,7 +154,6 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
 
       expect(wrapper.find('.euiGlobalToastList').exists()).toBe(true);
       expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test ERROR');
@@ -190,12 +199,10 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
 
       expect(wrapper.find('button[data-test-subj="toastCloseButton"]').length).toBe(1);
       expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
       wrapper.find('button[data-test-subj="delete-toast"]').simulate('click');
-      wrapper.update();
       expect(wrapper.find('.euiToast').length).toBe(1);
       expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test II');
     });
@@ -230,11 +237,7 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
-
       wrapper.find('button[data-test-subj="toaster-show-all-error-modal"]').simulate('click');
-
-      wrapper.update();
 
       expect(wrapper.find('.euiToast').length).toBe(0);
     });
@@ -270,20 +273,32 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      wrapper.update();
-
       expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test II');
+
       wrapper.find('button[data-test-subj="toaster-show-all-error-modal"]').simulate('click');
-
-      wrapper.update();
-
       expect(wrapper.find('.euiToast').length).toBe(0);
+
       wrapper.find('button[data-test-subj="modal-all-errors-close"]').simulate('click');
-
-      wrapper.update();
-
       expect(wrapper.find('.euiToast').length).toBe(1);
       expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
+    });
+  });
+
+  describe('displayErrorToast', () => {
+    test('dispatches toast with correct title and message', () => {
+      const mockErrorToast = {
+        toast: {
+          color: 'danger',
+          errors: ['message'],
+          iconType: 'alert',
+          id: '9e1f72a9-7c73-4b7f-a562-09940f7daf4a',
+          title: 'Title',
+        },
+        type: 'addToaster',
+      };
+      const dispatchToasterMock = jest.fn();
+      displayErrorToast('Title', ['message'], dispatchToasterMock);
+      expect(dispatchToasterMock.mock.calls[0][0]).toEqual(mockErrorToast);
     });
   });
 });

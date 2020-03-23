@@ -58,7 +58,12 @@ export const SeriesConfig = props => {
 
       <EuiFormRow
         id={htmlId('series_filter')}
-        label={<FormattedMessage id="visTypeTimeseries.seriesConfig.filterLabel" defaultMessage="Filter" />}
+        label={
+          <FormattedMessage
+            id="visTypeTimeseries.seriesConfig.filterLabel"
+            defaultMessage="Filter"
+          />
+        }
         fullWidth
       >
         <QueryBarWrapper
@@ -81,7 +86,10 @@ export const SeriesConfig = props => {
           <EuiFormRow
             id={htmlId('template')}
             label={
-              <FormattedMessage id="visTypeTimeseries.seriesConfig.templateLabel" defaultMessage="Template" />
+              <FormattedMessage
+                id="visTypeTimeseries.seriesConfig.templateLabel"
+                defaultMessage="Template"
+              />
             }
             helpText={
               <span>

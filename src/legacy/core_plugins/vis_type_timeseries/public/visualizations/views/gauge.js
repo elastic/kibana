@@ -21,8 +21,8 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { isBackgroundInverted, isBackgroundDark } from '../../../common/set_is_reversed';
-import { getLastValue } from '../../../common/get_last_value';
+import { isBackgroundInverted, isBackgroundDark } from '../../lib/set_is_reversed';
+import { getLastValue } from '../../../../../../plugins/vis_type_timeseries/common/get_last_value';
 import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';
 import reactcss from 'reactcss';
@@ -42,7 +42,7 @@ export class Gauge extends Component {
     this.handleResize = this.handleResize.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const check = () => {
       this.timeout = setTimeout(() => {
         const newState = calculateCoordinates(this.inner, this.resize, this.state);

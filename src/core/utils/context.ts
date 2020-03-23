@@ -23,6 +23,11 @@ import { pick } from '.';
 import { CoreId, PluginOpaqueId } from '../server';
 
 /**
+ * Make all properties in T optional, except for the properties whose keys are in the union K
+ */
+type PartialExceptFor<T, K extends keyof T> = Partial<T> & Pick<T, K>;
+
+/**
  * A function that returns a context value for a specific key of given context type.
  *
  * @remarks
@@ -39,7 +44,8 @@ export type IContextProvider<
   THandler extends HandlerFunction<any>,
   TContextName extends keyof HandlerContextType<THandler>
 > = (
-  context: Partial<HandlerContextType<THandler>>,
+  // context.core will always be available, but plugin contexts are typed as optional
+  context: PartialExceptFor<HandlerContextType<THandler>, 'core'>,
   ...rest: HandlerParameters<THandler>
 ) =>
   | Promise<HandlerContextType<THandler>[TContextName]>
@@ -254,23 +260,20 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
     return [...this.contextProviders]
       .sort(sortByCoreFirst(this.coreId))
       .filter(([contextName]) => contextsToBuild.has(contextName))
-      .reduce(
-        async (contextPromise, [contextName, { provider, source: providerSource }]) => {
-          const resolvedContext = await contextPromise;
+      .reduce(async (contextPromise, [contextName, { provider, source: providerSource }]) => {
+        const resolvedContext = await contextPromise;
 
-          // For the next provider, only expose the context available based on the dependencies of the plugin that
-          // registered that provider.
-          const exposedContext = pick(resolvedContext, [
-            ...this.getContextNamesForSource(providerSource),
-          ]) as Partial<HandlerContextType<THandler>>;
+        // For the next provider, only expose the context available based on the dependencies of the plugin that
+        // registered that provider.
+        const exposedContext = pick(resolvedContext, [
+          ...this.getContextNamesForSource(providerSource),
+        ]) as PartialExceptFor<HandlerContextType<THandler>, 'core'>;
 
-          return {
-            ...resolvedContext,
-            [contextName]: await provider(exposedContext, ...contextArgs),
-          };
-        },
-        Promise.resolve({}) as Promise<HandlerContextType<THandler>>
-      );
+        return {
+          ...resolvedContext,
+          [contextName]: await provider(exposedContext, ...contextArgs),
+        };
+      }, Promise.resolve({}) as Promise<HandlerContextType<THandler>>);
   }
 
   private getContextNamesForSource(

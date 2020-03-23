@@ -5,17 +5,20 @@
  */
 
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
+
+import { SiemPageName } from '../../pages/home/types';
+
+import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';
 
 export type TimelineComponentProps = RouteComponentProps<{
   search: string;
 }>;
 
-export const TIMELINES_PAGE_NAME = 'timelines';
-
 export const RedirectToTimelinesPage = ({ location: { search } }: TimelineComponentProps) => (
-  <RedirectWrapper to={`/${TIMELINES_PAGE_NAME}${search}`} />
+  <RedirectWrapper to={`/${SiemPageName.timelines}${search}`} />
 );
 
-export const getTimelinesUrl = () => `#/link-to/${TIMELINES_PAGE_NAME}`;
+export const getTimelinesUrl = (search?: string) =>
+  `#/link-to/${SiemPageName.timelines}${appendSearch(search)}`;

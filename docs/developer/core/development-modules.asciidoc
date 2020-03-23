@@ -13,15 +13,6 @@ To prevent this from being an issue the ui module provides "autoloading"
 modules. The sole purpose of these modules is to extend the environment with
 certain components. Here is a breakdown of those modules:
 
-- *`import 'ui/autoload/styles'`*
-    Imports all styles at the root of `src/legacy/ui/public/styles`
-
-- *`import 'ui/autoload/directives'`*
-    Imports all directives in `src/legacy/ui/public/directives`
-
-- *`import 'ui/autoload/filters'`*
-    Imports all filters in `src/legacy/ui/public/filters`
-
 - *`import 'ui/autoload/modules'`*
     Imports angular and several ui services and "components" which Kibana
     depends on without importing. The full list of imports is hard coded in the
@@ -29,7 +20,7 @@ certain components. Here is a breakdown of those modules:
     the required modules and import them were they are actually necessary.
 
 - *`import 'ui/autoload/all'`*
-    Imports all of the above modules
+    Imports all of the modules
 
 [float]
 ==== Resolving Require Paths
@@ -69,4 +60,4 @@ Here is how import/require statements are resolved to a file:
     ** path/index + '.js'
     ** path/index + '.json'
     ** path/index
-  * if none of the above paths matches then an error is thrown
+  * if none of the paths matches then an error is thrown

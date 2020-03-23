@@ -43,8 +43,4 @@ const mergeProps = (stateProps, dispatchProps) => {
   };
 };
 
-export const PageConfig = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(Component);
+export const PageConfig = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);

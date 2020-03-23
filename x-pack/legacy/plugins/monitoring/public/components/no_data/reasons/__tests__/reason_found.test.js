@@ -8,6 +8,19 @@ import React from 'react';
 import { renderWithIntl } from '../../../../../../../../test_utils/enzyme_helpers';
 import { ReasonFound } from '../';
 
+// Mocking to prevent errors with React portal.
+// Temporary until https://github.com/elastic/kibana/pull/55877 provides other alternatives.
+jest.mock('@elastic/eui/lib/components/code/code', () => {
+  const React = require.requireActual('react');
+  return {
+    EuiCode: ({ children }) => (
+      <span>
+        <code>{children}</code>
+      </span>
+    ),
+  };
+});
+
 const enabler = {};
 
 describe('ReasonFound', () => {
@@ -17,7 +30,7 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.collection.interval',
           data: '-1',
-          context: 'cluster'
+          context: 'cluster',
         }}
         enabler={enabler}
       />
@@ -31,7 +44,7 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.exporters',
           data: 'myMonitoringClusterExporter1',
-          context: 'node001foo'
+          context: 'node001foo',
         }}
         enabler={enabler}
       />
@@ -45,7 +58,7 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.exporters.cloud_enabled',
           data: 'false',
-          context: 'fakeContext'
+          context: 'fakeContext',
         }}
         enabled={enabler}
       />
@@ -59,7 +72,7 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.enabled',
           data: 'false',
-          context: 'node001foo'
+          context: 'node001foo',
         }}
         enabler={enabler}
       />

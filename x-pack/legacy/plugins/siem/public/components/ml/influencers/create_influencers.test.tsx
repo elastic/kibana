@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import toJson from 'enzyme-to-json';
 import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
 import { shallow, mount } from 'enzyme';
@@ -20,7 +19,7 @@ describe('create_influencers', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<span>{createInfluencers(anomalies.anomalies[0].influencers)}</span>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it returns an empty string when influencers is undefined', () => {

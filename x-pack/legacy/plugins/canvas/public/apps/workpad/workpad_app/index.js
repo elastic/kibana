@@ -35,10 +35,7 @@ const mapDispatchToProps = dispatch => ({
 const branches = [branch(({ workpad }) => workpad == null, renderComponent(LoadWorkpad))];
 
 export const WorkpadApp = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps),
   ...branches,
   withElementsLoadedTelemetry
 )(Component);

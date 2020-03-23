@@ -21,12 +21,12 @@ import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
-import { VegaPluginSetupDependencies } from './plugin';
+import { VegaPluginSetupDependencies, VegaPluginStartDependencies } from './plugin';
 import { LegacyDependenciesPlugin } from './shim';
 import { plugin } from '.';
 
-const plugins: Readonly<VegaPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
+const setupPlugins: Readonly<VegaPluginSetupDependencies> = {
+  ...npSetup.plugins,
   visualizations: visualizationsSetup,
 
   // Temporary solution
@@ -34,7 +34,11 @@ const plugins: Readonly<VegaPluginSetupDependencies> = {
   __LEGACY: new LegacyDependenciesPlugin(),
 };
 
+const startPlugins: Readonly<VegaPluginStartDependencies> = {
+  ...npStart.plugins,
+};
+
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core);
+export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
+export const start = pluginInstance.start(npStart.core, startPlugins);

@@ -12,7 +12,7 @@ audit logging to get a holistic view of all security related events.
 {kib} defers to {es}'s security model for authentication, data
 index authorization, and features that are driven by cluster-wide privileges.
 For more information on enabling audit logging in {es}, see
-{stack-ov}/auditing.html[Auditing Security Events].
+{ref}/auditing.html[Auditing security events].
 
 [IMPORTANT]
 ============================================================================

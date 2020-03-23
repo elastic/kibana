@@ -17,63 +17,61 @@
  * under the License.
  */
 
-
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
     this.tags('smoke');
-    before(async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
-
+    before(async function() {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
 
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('inspector table', function indexPatternCreation() {
-      it('should update table header when columns change', async function () {
+      it('should update table header when columns change', async function() {
         await inspector.open();
         await inspector.expectTableHeaders(['Count']);
+        await inspector.close();
 
         log.debug('Add Average Metric on machine.ram field');
-        await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
-        await PageObjects.visualize.selectAggregation('Average', 'metrics');
-        await PageObjects.visualize.selectField('machine.ram', 'metrics');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickBucket('Y-axis', 'metrics');
+        await PageObjects.visEditor.selectAggregation('Average', 'metrics');
+        await PageObjects.visEditor.selectField('machine.ram', 'metrics');
+        await PageObjects.visEditor.clickGo();
         await inspector.open();
         await inspector.expectTableHeaders(['Count', 'Average machine.ram']);
+        await inspector.close();
       });
 
-      describe('filtering on inspector table values', function () {
-        before(async function () {
+      describe('filtering on inspector table values', function() {
+        before(async function() {
           log.debug('Add X-axis terms agg on machine.os.raw');
-          await PageObjects.visualize.clickBucket('X-axis');
-          await PageObjects.visualize.selectAggregation('Terms');
-          await PageObjects.visualize.selectField('machine.os.raw');
-          await PageObjects.visualize.setSize(2);
-          await PageObjects.visualize.toggleOtherBucket(3);
-          await PageObjects.visualize.clickGo();
+          await PageObjects.visEditor.clickBucket('X-axis');
+          await PageObjects.visEditor.selectAggregation('Terms');
+          await PageObjects.visEditor.selectField('machine.os.raw');
+          await PageObjects.visEditor.setSize(2);
+          await PageObjects.visEditor.toggleOtherBucket(3);
+          await PageObjects.visEditor.clickGo();
         });
 
-        beforeEach(async function () {
+        beforeEach(async function() {
           await inspector.open();
-          await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         });
 
-        afterEach(async function () {
+        afterEach(async function() {
           await inspector.close();
           await filterBar.removeFilter('machine.os.raw');
-          await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         });
 
-        it('should allow filtering for values', async function () {
+        it('should allow filtering for values', async function() {
           await inspector.expectTableData([
             ['win 8', '2,904', '13,031,579,645.108'],
             ['win xp', '2,858', '13,073,190,186.423'],
@@ -81,12 +79,10 @@ export default function ({ getService, getPageObjects }) {
           ]);
 
           await inspector.filterForTableCell(1, 1);
-          await inspector.expectTableData([
-            ['win 8', '2,904', '13,031,579,645.108'],
-          ]);
+          await inspector.expectTableData([['win 8', '2,904', '13,031,579,645.108']]);
         });
 
-        it('should allow filtering out values', async function () {
+        it('should allow filtering out values', async function() {
           await inspector.filterOutTableCell(1, 1);
           await inspector.expectTableData([
             ['win xp', '2,858', '13,073,190,186.423'],
@@ -95,7 +91,7 @@ export default function ({ getService, getPageObjects }) {
           ]);
         });
 
-        it('should allow filtering for other values', async function () {
+        it('should allow filtering for other values', async function() {
           await inspector.filterForTableCell(1, 3);
           await inspector.expectTableData([
             ['win 7', '2,814', '13,186,695,551.251'],
@@ -104,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
           ]);
         });
 
-        it('should allow filtering out other values', async function () {
+        it('should allow filtering out other values', async function() {
           await inspector.filterOutTableCell(1, 3);
           await inspector.expectTableData([
             ['win 8', '2,904', '13,031,579,645.108'],

@@ -13,7 +13,7 @@ import { copyToSpaceTestSuiteFactory } from '../../common/suites/copy_to_space';
 export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     copyToSpaceTest,

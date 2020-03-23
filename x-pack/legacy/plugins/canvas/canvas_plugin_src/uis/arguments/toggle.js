@@ -8,20 +8,32 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { ArgumentStrings } from '../../strings';
+import { ArgumentStrings } from '../../../i18n';
 
 const { Toggle: strings } = ArgumentStrings;
 
-const ToggleArgInput = ({ onValueChange, argValue, argId, renderError }) => {
+const ToggleArgInput = ({ onValueChange, argValue, argId, renderError, typeInstance }) => {
   const handleChange = () => onValueChange(!argValue);
   if (typeof argValue !== 'boolean') {
     renderError();
     return null;
   }
   return (
-    <EuiFormRow display="rowCompressed">
-      <EuiSwitch compressed id={argId} checked={argValue} onChange={handleChange} />
-    </EuiFormRow>
+    <div>
+      <EuiFormRow display="rowCompressed">
+        <EuiSwitch
+          compressed
+          id={argId}
+          checked={argValue}
+          onChange={handleChange}
+          className="canvasArg__form"
+          aria-label={typeInstance.displayName}
+          resize="none"
+          label={typeInstance.options.labelValue}
+          showLabel
+        />
+      </EuiFormRow>
+    </div>
   );
 };
 
@@ -29,6 +41,8 @@ ToggleArgInput.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.string, PropTypes.object]).isRequired,
   argId: PropTypes.string.isRequired,
+  labelValue: PropTypes.string,
+  showLabelValue: PropTypes.bool,
   renderError: PropTypes.func.isRequired,
 };
 
@@ -36,6 +50,6 @@ export const toggle = () => ({
   name: 'toggle',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  simpleTemplate: templateFromReactComponent(ToggleArgInput),
+  template: templateFromReactComponent(ToggleArgInput),
   default: 'false',
 });

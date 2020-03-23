@@ -5,9 +5,23 @@
  */
 
 export const deserializeAutoFollowPattern = (
-  { name, pattern: { remote_cluster, leader_index_patterns, follow_index_pattern } } = { pattern: {} } // eslint-disable-line camelcase
+  {
+    name,
+    pattern: {
+      active,
+      // eslint-disable-next-line camelcase
+      remote_cluster,
+      // eslint-disable-next-line camelcase
+      leader_index_patterns,
+      // eslint-disable-next-line camelcase
+      follow_index_pattern,
+    },
+  } = {
+    pattern: {},
+  }
 ) => ({
   name,
+  active,
   remoteCluster: remote_cluster,
   leaderIndexPatterns: leader_index_patterns,
   followIndexPattern: follow_index_pattern,

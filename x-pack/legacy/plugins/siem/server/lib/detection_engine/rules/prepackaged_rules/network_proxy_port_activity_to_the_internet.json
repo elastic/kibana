@@ -1,0 +1,39 @@
+{
+  "description": "This rule detects events that may describe network events of proxy use to the\nInternet. It includes popular HTTP proxy ports and SOCKS proxy ports. Typically,\nenvironments will use an internal IP address for a proxy server. It can also\nbe used to circumvent network controls and detection mechanisms.\n",
+  "false_positives": [
+    "Some proxied applications may use these ports but this usually occurs in local traffic using private IPs\n    which this rule does not match. Proxies are widely used as a security technology but in enterprise environments\n    this is usually local traffic which this rule does not match. Internet proxy services using these ports can be\n    white-listed if desired. Some screen recording applications may use these ports. Proxy port activity involving\n    an unusual source or destination may be more suspicious. Some cloud environments may use this port when VPNs or\n    direct connects are not in use and cloud instances are accessed across the Internet. Because these ports are in\n    the ephemeral range, this rule may false under certain conditions such as when a NATed web server replies to a\n    client which has used a port in the range by coincidence. In this case, such servers can be excluded if desired."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Proxy Port Activity to the Internet",
+  "query": "network.transport: tcp and destination.port: (3128 or 8080 or 1080) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 47,
+  "rule_id": "ad0e5e75-dd89-4875-8d0a-dfdc1828b5f3",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

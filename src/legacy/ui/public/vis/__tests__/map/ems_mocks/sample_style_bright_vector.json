@@ -41,11 +41,11 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "https://tiles.maps.elastic.co/data/v3.json"
+      "url": "/data/v3.json"
     }
   },
-  "sprite": "https://tiles.maps.elastic.co/styles/osm-bright/sprite",
-  "glyphs": "https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf",
+  "sprite": "/styles/osm-bright/sprite",
+  "glyphs": "/fonts/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",

@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  FlowTarget,
-  IpOverviewData,
-  TlsSortField,
-  TlsData,
-  UsersData,
-  UsersSortField,
-} from '../../graphql/types';
+import { FlowTarget, IpOverviewData, UsersData, UsersSortField } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions, RequestOptionsPaginated } from '../framework';
 
 import { IpDetailsAdapter } from './types';
@@ -22,14 +15,9 @@ export interface IpOverviewRequestOptions extends RequestOptions {
   ip: string;
 }
 
-export interface TlsRequestOptions extends RequestOptionsPaginated {
-  ip: string;
-  tlsSortField: TlsSortField;
-  flowTarget: FlowTarget;
-}
 export interface UsersRequestOptions extends RequestOptionsPaginated {
   ip: string;
-  usersSortField: UsersSortField;
+  sort: UsersSortField;
   flowTarget: FlowTarget;
 }
 
@@ -41,10 +29,6 @@ export class IpDetails {
     options: IpOverviewRequestOptions
   ): Promise<IpOverviewData> {
     return this.adapter.getIpDetails(req, options);
-  }
-
-  public async getTls(req: FrameworkRequest, options: TlsRequestOptions): Promise<TlsData> {
-    return this.adapter.getTls(req, options);
   }
 
   public async getUsers(req: FrameworkRequest, options: UsersRequestOptions): Promise<UsersData> {

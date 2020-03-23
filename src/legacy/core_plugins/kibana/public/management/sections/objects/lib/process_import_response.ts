@@ -24,7 +24,7 @@ import {
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
-} from 'src/core/server';
+} from 'src/core/public';
 
 export interface ProcessedImportResponse {
   failedImports: Array<{

@@ -79,12 +79,3 @@ Object {
   },
 }
 `;
-
-exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getSeriesColors() should match a snapshot 1`] = `
-Map {
-  Object {
-    "colorValues": Array [],
-    "specId": "IT",
-  } => "rgb(224, 0, 221)",
-}
-`;

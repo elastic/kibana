@@ -38,7 +38,7 @@ function getExpectedProjectsAndGraph(runMock: any) {
 }
 
 let command: ICommand;
-let config: ICommandConfig;
+let config: Omit<ICommandConfig, 'kbn'>;
 beforeEach(() => {
   command = {
     description: 'test description',

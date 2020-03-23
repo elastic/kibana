@@ -9,8 +9,11 @@ import 'jquery';
 import '../../lib/flot-charts';
 
 import { debounce, includes } from 'lodash';
+import { RendererStrings } from '../../../i18n';
 import { size } from './plugins/size';
 import { text } from './plugins/text';
+
+const { plot: strings } = RendererStrings;
 
 const render = (domNode, config, handlers) => {
   // TODO: OH NOES
@@ -66,7 +69,7 @@ const render = (domNode, config, handlers) => {
 
 export const plot = () => ({
   name: 'plot',
-  displayName: 'Coordinate plot',
-  help: 'Render an XY plot from your data',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   render,
 });

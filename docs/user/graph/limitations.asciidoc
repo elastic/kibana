@@ -1,12 +1,12 @@
 [role="xpack"]
 [[graph-limitations]]
-=== Graph limitations
+== Graph limitations
 ++++
 <titleabbrev>Limitations</titleabbrev>
 ++++
 
-[float]
-==== Limited support for multiple indices
+[discrete]
+=== Limited support for multiple indices
 The graph API can explore multiple indices, types, or aliases in a
 single API request, but the assumption is that each "hop" it performs
 is querying the same set of indices. Currently, it is not possible to

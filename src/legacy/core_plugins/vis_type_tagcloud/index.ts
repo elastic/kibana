@@ -25,7 +25,7 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 const tagCloudPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'tagcloud',
-    require: ['kibana', 'elasticsearch', 'interpreter', 'expressions'],
+    require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),

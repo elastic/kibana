@@ -5,9 +5,8 @@
  */
 
 import { shallow, ShallowWrapper } from 'enzyme';
-import 'jest-styled-components';
 import React from 'react';
-import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
+import { APMError } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 
 describe('DiscoverErrorLink without kuery', () => {

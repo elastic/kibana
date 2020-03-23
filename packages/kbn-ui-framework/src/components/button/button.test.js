@@ -21,20 +21,14 @@ import React from 'react';
 import { render, shallow } from 'enzyme';
 import sinon from 'sinon';
 
-import {
-  BUTTON_TYPES,
-  KuiButton,
-} from './button';
+import { BUTTON_TYPES, KuiButton } from './button';
 
 describe('KuiButton', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
-      const $button = render(
-        <KuiButton aria-label="aria label" />
-      );
+      const $button = render(<KuiButton aria-label="aria label" />);
 
-      expect($button)
-        .toMatchSnapshot();
+      expect($button).toMatchSnapshot();
     });
 
     test('HTML attributes are rendered', () => {
@@ -48,8 +42,7 @@ describe('KuiButton', () => {
         />
       );
 
-      expect($button)
-        .toMatchSnapshot();
+      expect($button).toMatchSnapshot();
     });
   });
 
@@ -58,12 +51,7 @@ describe('KuiButton', () => {
       BUTTON_TYPES.forEach(buttonType => {
         describe(`${buttonType}`, () => {
           test(`renders the ${buttonType} class`, () => {
-            const $button = render(
-              <KuiButton
-                buttonType={buttonType}
-                aria-label="aria label"
-              />
-            );
+            const $button = render(<KuiButton buttonType={buttonType} aria-label="aria label" />);
             expect($button).toMatchSnapshot();
           });
         });
@@ -72,55 +60,35 @@ describe('KuiButton', () => {
 
     describe('icon', () => {
       test('is rendered with children', () => {
-        const $button = render(
-          <KuiButton icon="Icon">
-            Hello
-          </KuiButton>
-        );
+        const $button = render(<KuiButton icon="Icon">Hello</KuiButton>);
 
-        expect($button)
-          .toMatchSnapshot();
+        expect($button).toMatchSnapshot();
       });
 
       test('is rendered without children', () => {
-        const $button = render(
-          <KuiButton
-            icon="Icon"
-            aria-label="aria label"
-          />
-        );
+        const $button = render(<KuiButton icon="Icon" aria-label="aria label" />);
 
-        expect($button)
-          .toMatchSnapshot();
+        expect($button).toMatchSnapshot();
       });
     });
 
     describe('iconPosition', () => {
       test('moves the icon to the right', () => {
         const $button = render(
-          <KuiButton
-            icon="Icon"
-            iconPosition="right"
-          >
+          <KuiButton icon="Icon" iconPosition="right">
             Hello
           </KuiButton>
         );
 
-        expect($button)
-          .toMatchSnapshot();
+        expect($button).toMatchSnapshot();
       });
     });
 
     describe('children', () => {
       test('is rendered', () => {
-        const $button = render(
-          <KuiButton>
-            Hello
-          </KuiButton>
-        );
+        const $button = render(<KuiButton>Hello</KuiButton>);
 
-        expect($button)
-          .toMatchSnapshot();
+        expect($button).toMatchSnapshot();
       });
     });
 
@@ -128,12 +96,7 @@ describe('KuiButton', () => {
       test(`isn't called upon instantiation`, () => {
         const onClickHandler = sinon.stub();
 
-        shallow(
-          <KuiButton
-            onClick={onClickHandler}
-            aria-label="aria label"
-          />
-        );
+        shallow(<KuiButton onClick={onClickHandler} aria-label="aria label" />);
 
         sinon.assert.notCalled(onClickHandler);
       });
@@ -141,12 +104,7 @@ describe('KuiButton', () => {
       test('is called when the button is clicked', () => {
         const onClickHandler = sinon.stub();
 
-        const $button = shallow(
-          <KuiButton
-            onClick={onClickHandler}
-            aria-label="aria label"
-          />
-        );
+        const $button = shallow(<KuiButton onClick={onClickHandler} aria-label="aria label" />);
 
         $button.simulate('click');
 
@@ -156,28 +114,15 @@ describe('KuiButton', () => {
 
     describe('isLoading', () => {
       test('renders a spinner', () => {
-        const $button = render(
-          <KuiButton
-            isLoading
-            aria-label="aria label"
-          />
-        );
+        const $button = render(<KuiButton isLoading aria-label="aria label" />);
 
-        expect($button)
-          .toMatchSnapshot();
+        expect($button).toMatchSnapshot();
       });
 
       test(`doesn't render the icon prop`, () => {
-        const $button = render(
-          <KuiButton
-            isLoading
-            icon="Icon"
-            aria-label="aria label"
-          />
-        );
+        const $button = render(<KuiButton isLoading icon="Icon" aria-label="aria label" />);
 
-        expect($button)
-          .toMatchSnapshot();
+        expect($button).toMatchSnapshot();
       });
     });
   });

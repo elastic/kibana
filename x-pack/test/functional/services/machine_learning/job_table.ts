@@ -157,6 +157,11 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       });
     }
 
+    public async refreshJobList() {
+      await testSubjects.click('mlRefreshJobListButton');
+      await this.waitForJobsToLoad();
+    }
+
     public async waitForJobsToLoad() {
       await testSubjects.existOrFail('~mlJobListTable', { timeout: 60 * 1000 });
       await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
@@ -171,6 +176,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async assertJobRowFields(jobId: string, expectedRow: object) {
+      await this.refreshJobList();
       const rows = await this.parseJobTable();
       const jobRow = rows.filter(row => row.id === jobId)[0];
       expect(jobRow).to.eql(expectedRow);
@@ -202,11 +208,20 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       expect(modelSizeStats).to.have.property('model_bytes');
       delete modelSizeStats.model_bytes;
 
+      // remove categorization fields from validation until
+      // the ES version is updated
+      delete modelSizeStats.categorization_status;
+      delete modelSizeStats.categorized_doc_count;
+      delete modelSizeStats.dead_category_count;
+      delete modelSizeStats.frequent_category_count;
+      delete modelSizeStats.rare_category_count;
+      delete modelSizeStats.total_category_count;
+
       expect(modelSizeStats).to.eql(expectedModelSizeStats);
     }
 
     public async clickActionsMenu(jobId: string) {
-      retry.tryForTime(30 * 1000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         if (!(await testSubjects.exists('mlActionButtonDeleteJob'))) {
           await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
           await testSubjects.existOrFail('mlActionButtonDeleteJob', { timeout: 5000 });
@@ -229,6 +244,16 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     public async confirmDeleteJobModal() {
       await testSubjects.click('mlDeleteJobConfirmModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
+    }
+
+    public async clickOpenJobInSingleMetricViewerButton(jobId: string) {
+      await testSubjects.click(`~openJobsInSingleMetricViewer-${jobId}`);
+      await testSubjects.existOrFail('~mlPageSingleMetricViewer');
+    }
+
+    public async clickOpenJobInAnomalyExplorerButton(jobId: string) {
+      await testSubjects.click(`~openJobsInSingleAnomalyExplorer-${jobId}`);
+      await testSubjects.existOrFail('~mlPageAnomalyExplorer');
     }
   })();
 }

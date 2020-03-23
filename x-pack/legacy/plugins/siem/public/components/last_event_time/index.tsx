@@ -5,18 +5,20 @@
  */
 
 import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo } from 'react';
 
 import { LastEventIndexKey } from '../../graphql/types';
 import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
 import { getEmptyTagValue } from '../empty_value';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
 
 export interface LastEventTimeProps {
   hostName?: string;
   indexKey: LastEventIndexKey;
   ip?: string;
 }
+
 export const LastEventTime = memo<LastEventTimeProps>(({ hostName, indexKey, ip }) => {
   const { loading, lastSeen, errorMessage } = useLastEventTimeQuery(
     indexKey,
@@ -37,6 +39,7 @@ export const LastEventTime = memo<LastEventTimeProps>(({ hostName, indexKey, ip 
       </EuiToolTip>
     );
   }
+
   return (
     <>
       {loading && <EuiLoadingSpinner size="m" />}
@@ -44,15 +47,13 @@ export const LastEventTime = memo<LastEventTimeProps>(({ hostName, indexKey, ip 
         ? lastSeen
         : !loading &&
           lastSeen != null && (
-            <EuiToolTip data-test-subj="last_event_time" position="bottom" content={lastSeen}>
-              <FormattedMessage
-                id="xpack.siem.headerPage.pageSubtitle"
-                defaultMessage="Last event: {beat}"
-                values={{
-                  beat: <FormattedRelative value={new Date(lastSeen)} />,
-                }}
-              />
-            </EuiToolTip>
+            <FormattedMessage
+              id="xpack.siem.headerPage.pageSubtitle"
+              defaultMessage="Last event: {beat}"
+              values={{
+                beat: <FormattedRelativePreferenceDate value={lastSeen} />,
+              }}
+            />
           )}
       {!loading && lastSeen == null && getEmptyTagValue()}
     </>

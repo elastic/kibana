@@ -96,10 +96,11 @@ export class Tokens {
     if (refreshToken) {
       let invalidatedTokensCount;
       try {
-        invalidatedTokensCount = (await this.options.client.callAsInternalUser(
-          'shield.deleteAccessToken',
-          { body: { refresh_token: refreshToken } }
-        )).invalidated_tokens;
+        invalidatedTokensCount = (
+          await this.options.client.callAsInternalUser('shield.deleteAccessToken', {
+            body: { refresh_token: refreshToken },
+          })
+        ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate refresh token: ${err.message}`);
         // We don't re-throw the error here to have a chance to invalidate access token if it's provided.
@@ -120,10 +121,11 @@ export class Tokens {
     if (accessToken) {
       let invalidatedTokensCount;
       try {
-        invalidatedTokensCount = (await this.options.client.callAsInternalUser(
-          'shield.deleteAccessToken',
-          { body: { token: accessToken } }
-        )).invalidated_tokens;
+        invalidatedTokensCount = (
+          await this.options.client.callAsInternalUser('shield.deleteAccessToken', {
+            body: { token: accessToken },
+          })
+        ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate access token: ${err.message}`);
         invalidationError = err;
@@ -148,21 +150,10 @@ export class Tokens {
   /**
    * Tries to determine whether specified error that occurred while trying to authenticate request
    * using access token happened because access token is expired. We treat all `401 Unauthorized`
-   * as such. Another use case that we should temporarily support (until elastic/elasticsearch#38866
-   * is fixed) is when token document has been removed and ES responds with `500 Internal Server Error`.
+   * as such.
    * @param err Error returned from Elasticsearch.
    */
   public static isAccessTokenExpiredError(err?: any) {
-    const errorStatusCode = getErrorStatusCode(err);
-    return (
-      errorStatusCode === 401 ||
-      (errorStatusCode === 500 &&
-        !!(
-          err &&
-          err.body &&
-          err.body.error &&
-          err.body.error.reason === 'token document is missing and must be present'
-        ))
-    );
+    return getErrorStatusCode(err) === 401;
   }
 }

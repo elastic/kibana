@@ -30,18 +30,18 @@ export function wrapRouteWithPrep(route, setup) {
   userWork.limit = _.keys(route.resolve).length;
 
   const resolve = {
-    __prep__: function ($injector) {
+    __prep__: function($injector) {
       return $injector.invoke(setup.doWork, setup, { userWork });
-    }
+    },
   };
 
   // send each user resolve to the userWork queue, which will prevent it from running before the
   // prep is complete
-  _.forOwn(route.resolve || {}, function (expr, name) {
-    resolve[name] = function ($injector, Promise) {
+  _.forOwn(route.resolve || {}, function(expr, name) {
+    resolve[name] = function($injector, Promise) {
       const defer = createDefer(Promise);
       userWork.push(defer);
-      return defer.promise.then(function () {
+      return defer.promise.then(function() {
         return $injector[angular.isString(expr) ? 'get' : 'invoke'](expr);
       });
     };
@@ -50,4 +50,3 @@ export function wrapRouteWithPrep(route, setup) {
   // we're copied everything over so now overwrite
   route.resolve = resolve;
 }
-

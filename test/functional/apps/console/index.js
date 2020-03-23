@@ -17,13 +17,13 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
+export default function({ getService, loadTestFile }) {
   const browser = getService('browser');
 
-  describe('console app', function () {
+  describe('console app', function() {
     this.tags('ciGroup1');
 
-    before(async function () {
+    before(async function() {
       await browser.setWindowSize(1300, 1100);
     });
 

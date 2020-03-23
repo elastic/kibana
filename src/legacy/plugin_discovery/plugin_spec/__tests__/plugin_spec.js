@@ -66,12 +66,14 @@ describe('plugin discovery/plugin spec', () => {
       it('throws if spec.publicDir is truthy and not a string', () => {
         function assert(publicDir) {
           expect(() => new PluginSpec(fooPack, { publicDir })).to.throwError(error => {
-            expect(error.message).to.contain(`The "path" argument must be of type string. Received type ${typeof publicDir}`);
+            expect(error.message).to.contain(
+              `The "path" argument must be of type string. Received type ${typeof publicDir}`
+            );
           });
         }
 
         assert(1);
-        assert(function () {});
+        assert(function() {});
         assert([]);
         assert(/a.*b/);
       });
@@ -125,7 +127,7 @@ describe('plugin discovery/plugin spec', () => {
     describe('#getId()', () => {
       it('uses spec.id', () => {
         const spec = new PluginSpec(fooPack, {
-          id: 'bar'
+          id: 'bar',
         });
 
         expect(spec.getId()).to.be('bar');
@@ -141,7 +143,7 @@ describe('plugin discovery/plugin spec', () => {
     describe('#getVersion()', () => {
       it('uses spec.version', () => {
         const spec = new PluginSpec(fooPack, {
-          version: 'bar'
+          version: 'bar',
         });
 
         expect(spec.getVersion()).to.be('bar');
@@ -160,7 +162,7 @@ describe('plugin discovery/plugin spec', () => {
           const spec = new PluginSpec(fooPack, { configPrefix });
           const config = {
             get: sinon.spy(configGetImpl),
-            has: sinon.stub()
+            has: sinon.stub(),
           };
 
           return { spec, config };
@@ -203,7 +205,7 @@ describe('plugin discovery/plugin spec', () => {
           const spec = new PluginSpec(fooPack, { isEnabled });
           const config = {
             get: sinon.stub(),
-            has: sinon.stub()
+            has: sinon.stub(),
           };
 
           return { isEnabled, spec, config };
@@ -250,14 +252,14 @@ describe('plugin discovery/plugin spec', () => {
               name: 'expkv',
               version: '1.0.0',
               kibana: {
-                version: '6.0.0'
-              }
-            }
+                version: '6.0.0',
+              },
+            },
           });
 
           const spec = new PluginSpec(pack, {
             version: '2.0.0',
-            kibanaVersion: '5.0.0'
+            kibanaVersion: '5.0.0',
           });
 
           expect(spec.getExpectedKibanaVersion()).to.be('5.0.0');
@@ -271,9 +273,9 @@ describe('plugin discovery/plugin spec', () => {
               name: 'expkv',
               version: '1.0.0',
               kibana: {
-                version: '6.0.0'
-              }
-            }
+                version: '6.0.0',
+              },
+            },
           });
 
           const spec = new PluginSpec(pack, {
@@ -290,7 +292,7 @@ describe('plugin discovery/plugin spec', () => {
             pkg: {
               name: 'expkv',
               version: '1.0.0',
-            }
+            },
           });
 
           const spec = new PluginSpec(pack, {
@@ -307,7 +309,7 @@ describe('plugin discovery/plugin spec', () => {
             pkg: {
               name: 'expkv',
               version: '1.0.0',
-            }
+            },
           });
 
           const spec = new PluginSpec(pack, {});
@@ -321,7 +323,9 @@ describe('plugin discovery/plugin spec', () => {
       it('passes this.getExpectedKibanaVersion() and arg to isVersionCompatible(), returns its result', () => {
         const spec = new PluginSpec(fooPack, { version: '1.0.0' });
         sinon.stub(spec, 'getExpectedKibanaVersion').returns('foo');
-        const isVersionCompatible = sinon.stub(IsVersionCompatibleNS, 'isVersionCompatible').returns('bar');
+        const isVersionCompatible = sinon
+          .stub(IsVersionCompatibleNS, 'isVersionCompatible')
+          .returns('bar');
         expect(spec.isVersionCompatible('baz')).to.be('bar');
 
         sinon.assert.calledOnce(spec.getExpectedKibanaVersion);
@@ -365,7 +369,7 @@ describe('plugin discovery/plugin spec', () => {
       describe('spec.publicDir is an absolute path', () => {
         it('returns the path', () => {
           const spec = new PluginSpec(fooPack, {
-            publicDir: '/var/www/public'
+            publicDir: '/var/www/public',
           });
 
           expect(spec.getPublicDir()).to.be('/var/www/public');
@@ -378,7 +382,7 @@ describe('plugin discovery/plugin spec', () => {
     describe('#getExportSpecs()', () => {
       it('returns spec.uiExports', () => {
         const spec = new PluginSpec(fooPack, {
-          uiExports: 'foo'
+          uiExports: 'foo',
         });
 
         expect(spec.getExportSpecs()).to.be('foo');
@@ -388,7 +392,7 @@ describe('plugin discovery/plugin spec', () => {
     describe('#getPreInitHandler()', () => {
       it('returns spec.preInit', () => {
         const spec = new PluginSpec(fooPack, {
-          preInit: 'foo'
+          preInit: 'foo',
         });
 
         expect(spec.getPreInitHandler()).to.be('foo');
@@ -398,7 +402,7 @@ describe('plugin discovery/plugin spec', () => {
     describe('#getInitHandler()', () => {
       it('returns spec.init', () => {
         const spec = new PluginSpec(fooPack, {
-          init: 'foo'
+          init: 'foo',
         });
 
         expect(spec.getInitHandler()).to.be('foo');
@@ -409,7 +413,7 @@ describe('plugin discovery/plugin spec', () => {
       describe('spec.configPrefix is truthy', () => {
         it('returns spec.configPrefix', () => {
           const spec = new PluginSpec(fooPack, {
-            configPrefix: 'foo.bar.baz'
+            configPrefix: 'foo.bar.baz',
           });
 
           expect(spec.getConfigPrefix()).to.be('foo.bar.baz');
@@ -436,7 +440,7 @@ describe('plugin discovery/plugin spec', () => {
     describe('#getConfigSchemaProvider()', () => {
       it('returns spec.config', () => {
         const spec = new PluginSpec(fooPack, {
-          config: 'foo'
+          config: 'foo',
         });
 
         expect(spec.getConfigSchemaProvider()).to.be('foo');
@@ -445,11 +449,11 @@ describe('plugin discovery/plugin spec', () => {
 
     describe('#readConfigValue()', () => {
       const spec = new PluginSpec(fooPack, {
-        configPrefix: 'foo.bar'
+        configPrefix: 'foo.bar',
       });
 
       const config = {
-        get: sinon.stub()
+        get: sinon.stub(),
       };
 
       afterEach(() => config.get.resetHistory());
@@ -482,7 +486,7 @@ describe('plugin discovery/plugin spec', () => {
     describe('#getDeprecationsProvider()', () => {
       it('returns spec.deprecations', () => {
         const spec = new PluginSpec(fooPack, {
-          deprecations: 'foo'
+          deprecations: 'foo',
         });
 
         expect(spec.getDeprecationsProvider()).to.be('foo');

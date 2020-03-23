@@ -25,7 +25,7 @@ export function KuiLocalTitle({ className, children, ...rest }) {
   const classes = classnames('kuiLocalTitle', className);
   return (
     <div className={classes} {...rest}>
-      { children }
+      {children}
     </div>
   );
 }

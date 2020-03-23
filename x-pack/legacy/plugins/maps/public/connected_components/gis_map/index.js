@@ -6,7 +6,8 @@
 
 import { connect } from 'react-redux';
 import { GisMap } from './view';
-import { FLYOUT_STATE } from '../../reducers/ui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FLYOUT_STATE } from '../../../../../../plugins/maps/public/reducers/ui';
 import { exitFullScreen } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
 import { triggerRefreshTimer, cancelAllInFlightRequests } from '../../actions/map_actions';
@@ -14,7 +15,8 @@ import {
   areLayersLoaded,
   getRefreshConfig,
   getMapInitError,
-  getQueryableUniqueIndexPatternIds
+  getQueryableUniqueIndexPatternIds,
+  isToolbarOverlayHidden,
 } from '../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
@@ -28,6 +30,7 @@ function mapStateToProps(state = {}) {
     refreshConfig: getRefreshConfig(state),
     mapInitError: getMapInitError(state),
     indexPatternIds: getQueryableUniqueIndexPatternIds(state),
+    hideToolbarOverlay: isToolbarOverlayHidden(state),
   };
 }
 

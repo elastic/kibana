@@ -14,6 +14,6 @@ export class GrokdebuggerRequest {
   }
 
   get upstreamJSON() {
-    return pick(this, [ 'rawEvent', 'pattern', 'customPatterns' ]);
+    return pick(this, ['rawEvent', 'pattern', 'customPatterns']);
   }
 }

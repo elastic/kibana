@@ -6,25 +6,25 @@
     <md:KeyDescriptor use="signing">
       <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
         <ds:X509Data>
-          <!-- This certificate is extracted from kibana/test/dev_certs/server.crt and should always be in sync with it -->
-          <ds:X509Certificate>MIIDMDCCAhgCCQCkOD7fnHiQrTANBgkqhkiG9w0BAQUFADBZMQswCQYDVQQGEwJB
-            VTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50ZXJuZXQgV2lkZ2l0
-            cyBQdHkgTHRkMRIwEAYDVQQDEwlsb2NhbGhvc3QwIBcNMTYwMTE5MjExNjQ5WhgP
-            MjA4NDAyMDYyMTE2NDlaMFkxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0
-            YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxEjAQBgNVBAMT
-            CWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALR63SnR
-            LW/Dgl0Vuy8gB6KjWwvajRWeXNgvlf6LX56oNsUFREHBLQlC2uT5R26F3tOqCDbs
-            MFNoyDjMBinXRRFJJ2Sokue7GSsGvBv41LMTHnO/MeCCbEOqghJS/QI89cV+u+Aw
-            9U+v426KAlCa1sGuE2+3/JvqdBQyheiukmGLiJ0OofpfgpYuFmKi2uYBKU3qzjUx
-            D01wQ4rCpq5nEnksGhgBeBDnheYmmDsj/wDvnz1exK/WprvTiHQ5MwuIQ4OybwgV
-            WDF+zv8PXrObrsZvD/ulrjh1cakvnCe2kDYEKMRiHUDesHS2jNJkBUe+FJo4/E3U
-            pFoYOtdoBe69BIUCAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAQhjF91G0R662XJJ7
-            jGMudA9VbRVCow8s68I/GWPZmpKxPAxwz0xiv1eFIoiP416LX9amnx3yAmUoN4Wr
-            Cq0jsgyT1AOiSCdxkvYsqQG3SFVVt5BDLjThH66Vxi7Bach6SyATa1NG588mg7n9
-            pPJ4A1rcj+5kZuwnd52kfVLP+535lylwMyoyJa2AskieRPLNSzus2eUDTR6F+9Mb
-            eLOwp5rMl2nNYfLXUCSqEeC6uPu0yq6Tu0N0SjThfKndd2NU1fk3zyOjxyCIhGPe
-            G8VhrPY4lkJ9EE9Tuq095jwd1+q9fYzlKZWhOmg+IcOwUMgbgeWpeZTAhUIZAnia
-            4UH6NA==
+          <!-- This certificate is extracted from KBN_CERT_PATH in @kbn/dev-utils and should always be in sync with it -->
+          <ds:X509Certificate>MIIDOTCCAiGgAwIBAgIVANNWkg9lzNiLqNkMFhFKHcXyaZmqMA0GCSqGSIb3DQEB
+CwUAMDQxMjAwBgNVBAMTKUVsYXN0aWMgQ2VydGlmaWNhdGUgVG9vbCBBdXRvZ2Vu
+ZXJhdGVkIENBMCAXDTE5MTIyNzE3MDM0MloYDzIwNjkxMjE0MTcwMzQyWjARMQ8w
+DQYDVQQDEwZraWJhbmEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCQ
+wYYbQtbRBKJ4uNZc2+IgRU+7NNL21ZebQlEIMgK7jAqOMrsW2b5DATz41Fd+GQFU
+FUYYjwo+PQj6sJHshOJo/gNb32HrydvMI7YPvevkszkuEGCfXxQ3Dw2RTACLgD0Q
+OCkwHvn3TMf0loloV/ePGWaZDYZaXi3a5DdWi/HFFoJysgF0JV2f6XyKhJkGaEfJ
+s9pWX269zH/XQvGNx4BEimJpYB8h4JnDYPFIiQdqj+sl2b+kS1hH9kL5gBAMXjFU
+vcNnX+PmyTjyJrGo75k0ku+spBf1bMwuQt3uSmM+TQIXkvFDmS0DOVESrpA5EC1T
+BUGRz6o/I88Xx4Mud771AgMBAAGjYzBhMB0GA1UdDgQWBBQLB1Eo23M3Ss8MsFaz
+V+Twcb3PmDAfBgNVHSMEGDAWgBQa7SYOe8NGcF00EbwPHA91YCsHSTAUBgNVHREE
+DTALgglsb2NhbGhvc3QwCQYDVR0TBAIwADANBgkqhkiG9w0BAQsFAAOCAQEAnEl/
+z5IElIjvkK4AgMPrNcRlvIGDt2orEik7b6Jsq6/RiJQ7cSsYTZf7xbqyxNsUOTxv
++frj47MEN448H2nRvUxH29YR3XygV5aEwADSAhwaQWn0QfWTCZbJTmSoNEDtDOzX
+TGDlAoCD9s9Xz9S1JpxY4H+WWRZrBSDM6SC1c6CzuEeZRuScNAjYD5mh2v6fOlSy
+b8xJWSg0AFlJPCa3ZsA2SKbNqI0uNfJTnkXRm88Z2NHcgtlADbOLKauWfCrpgsCk
+cZgo6yAYkOM148h/8wGla1eX+iE1R72NUABGydu8MSQKvc0emWJkGsC1/KqPlf/O
+eOUsdwn1yDKHRxDHyA==
           </ds:X509Certificate>
         </ds:X509Data>
       </ds:KeyInfo>

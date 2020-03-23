@@ -17,21 +17,20 @@
  * under the License.
  */
 
-import { UiStatsMetric, UiStatsMetricType } from './ui_stats';
+import { UiStatsMetric } from './ui_stats';
+import { UserAgentMetric } from './user_agent';
+import { ApplicationUsageCurrent } from './application_usage';
 
-export {
-  UiStatsMetric,
-  createUiStatsMetric,
-  UiStatsMetricReport,
-  UiStatsMetricType,
-} from './ui_stats';
+export { UiStatsMetric, createUiStatsMetric, UiStatsMetricType } from './ui_stats';
 export { Stats } from './stats';
+export { trackUsageAgent } from './user_agent';
+export { ApplicationUsage, ApplicationUsageCurrent } from './application_usage';
 
-export type Metric = UiStatsMetric<UiStatsMetricType>;
-export type MetricType = keyof typeof METRIC_TYPE;
-
+export type Metric = UiStatsMetric | UserAgentMetric | ApplicationUsageCurrent;
 export enum METRIC_TYPE {
   COUNT = 'count',
   LOADED = 'loaded',
   CLICK = 'click',
+  USER_AGENT = 'user_agent',
+  APPLICATION_USAGE = 'application_usage',
 }

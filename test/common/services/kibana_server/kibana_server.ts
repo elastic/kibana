@@ -32,7 +32,7 @@ export function KibanaServerProvider({ getService }: FtrProviderContext) {
   const kbn = new KbnClient(log, [url], defaults);
 
   if (defaults) {
-    lifecycle.on('beforeTests', async () => {
+    lifecycle.beforeTests.add(async () => {
       await kbn.uiSettings.update(defaults);
     });
   }

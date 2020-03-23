@@ -20,12 +20,11 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { indexPatternService } from '../../../kibana_services';
-
-import { start as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
-const { SearchBar } = data.ui;
+import { getIndexPatternService } from '../../../kibana_services';
+import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 
 import { npStart } from 'ui/new_platform';
+const { SearchBar } = npStart.plugins.data.ui;
 
 export class FilterEditor extends Component {
   state = {
@@ -43,11 +42,12 @@ export class FilterEditor extends Component {
   }
 
   _loadIndexPatterns = async () => {
-    const indexPatternIds = this.props.layer.getIndexPatternIds();
+    // Filter only effects source so only load source indices.
+    const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
     const indexPatterns = [];
     const getIndexPatternPromises = indexPatternIds.map(async indexPatternId => {
       try {
-        const indexPattern = await indexPatternService.get(indexPatternId);
+        const indexPattern = await getIndexPatternService().get(indexPatternId);
         indexPatterns.push(indexPattern);
       } catch (err) {
         // unable to fetch index pattern
@@ -78,6 +78,10 @@ export class FilterEditor extends Component {
     this._close();
   };
 
+  _onApplyGlobalQueryChange = applyGlobalQuery => {
+    this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', applyGlobalQuery);
+  };
+
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
     const { uiSettings } = npStart.core;
@@ -89,6 +93,7 @@ export class FilterEditor extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._close}
         anchorPosition="leftCenter"
+        ownFocus
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar
@@ -147,11 +152,11 @@ export class FilterEditor extends Component {
     const openButtonLabel =
       query && query.query
         ? i18n.translate('xpack.maps.layerPanel.filterEditor.editFilterButtonLabel', {
-          defaultMessage: 'Edit filter',
-        })
+            defaultMessage: 'Edit filter',
+          })
         : i18n.translate('xpack.maps.layerPanel.filterEditor.addFilterButtonLabel', {
-          defaultMessage: 'Add filter',
-        });
+            defaultMessage: 'Add filter',
+          });
     const openButtonIcon = query && query.query ? 'pencil' : 'plusInCircleFilled';
 
     return (
@@ -173,7 +178,7 @@ export class FilterEditor extends Component {
           <h5>
             <FormattedMessage
               id="xpack.maps.layerPanel.filterEditor.title"
-              defaultMessage="Filter"
+              defaultMessage="Filtering"
             />
           </h5>
         </EuiTitle>
@@ -183,6 +188,16 @@ export class FilterEditor extends Component {
         {this._renderQuery()}
 
         <EuiTextAlign textAlign="center">{this._renderQueryPopover()}</EuiTextAlign>
+
+        <EuiSpacer size="m" />
+
+        <GlobalFilterCheckbox
+          label={i18n.translate('xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel', {
+            defaultMessage: `Apply global filter to layer data`,
+          })}
+          applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
+          setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+        />
       </Fragment>
     );
   }

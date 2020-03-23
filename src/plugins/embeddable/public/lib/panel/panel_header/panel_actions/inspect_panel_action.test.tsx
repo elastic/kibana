@@ -28,33 +28,33 @@ import {
 } from '../../../test_samples';
 // eslint-disable-next-line
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
-import { FilterStateStore } from '@kbn/es-query';
 import {
   EmbeddableFactory,
   EmbeddableOutput,
   isErrorEmbeddable,
   ErrorEmbeddable,
 } from '../../../embeddables';
-import { GetEmbeddableFactory } from '../../../types';
 import { of } from '../../../../tests/helpers';
+import { esFilters } from '../../../../../../../plugins/data/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 
 const setup = async () => {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-  const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+  const getFactory = (id: string) => embeddableFactories.get(id);
   const container = new FilterableContainer(
     {
       id: 'hello',
       panels: {},
       filters: [
         {
-          $state: { store: FilterStateStore.APP_STATE },
+          $state: { store: esFilters.FilterStateStore.APP_STATE },
           meta: { disabled: false, alias: 'name', negate: false },
           query: { match: {} },
         },
       ],
     },
-    getFactory
+    getFactory as EmbeddableStart['getEmbeddableFactory']
   );
 
   const embeddable: FilterableEmbeddable | ErrorEmbeddable = await container.addNewEmbeddable<

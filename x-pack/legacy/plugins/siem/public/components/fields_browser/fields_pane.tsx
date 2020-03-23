@@ -5,12 +5,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { pure } from 'recompose';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 
 import { Category } from './category';
 import { FieldBrowserProps } from './types';
@@ -34,7 +33,7 @@ const NoFieldsFlexGroup = styled(EuiFlexGroup)`
 NoFieldsFlexGroup.displayName = 'NoFieldsFlexGroup';
 
 type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'timelineId'> & {
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -57,9 +56,9 @@ type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'ti
   /**
    * Invoked to add or remove a column from the timeline
    */
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 };
-export const FieldsPane = pure<Props>(
+export const FieldsPane = React.memo<Props>(
   ({
     columnHeaders,
     filteredBrowserFields,

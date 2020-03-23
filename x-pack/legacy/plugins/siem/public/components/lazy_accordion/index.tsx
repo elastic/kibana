@@ -5,7 +5,7 @@
  */
 
 import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 type Props = Pick<EuiAccordionProps, Exclude<keyof EuiAccordionProps, 'initialIsOpen'>> & {
   forceExpand?: boolean;
@@ -42,19 +42,19 @@ export const LazyAccordion = React.memo<Props>(
     renderExpandedContent,
   }) => {
     const [expanded, setExpanded] = useState(false);
-    const onCollapsedClick = () => {
+    const onCollapsedClick = useCallback(() => {
       setExpanded(true);
       if (onExpand != null) {
         onExpand();
       }
-    };
+    }, [onExpand]);
 
-    const onExpandedClick = () => {
+    const onExpandedClick = useCallback(() => {
       setExpanded(false);
       if (onCollapse != null) {
         onCollapse();
       }
-    };
+    }, [onCollapse]);
 
     return (
       <>

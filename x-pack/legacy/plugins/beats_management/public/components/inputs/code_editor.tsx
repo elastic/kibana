@@ -41,7 +41,7 @@ class CodeEditor extends Component<
     setValue(defaultValue || '');
   }
 
-  public componentWillReceiveProps(nextProps: ComponentProps) {
+  public UNSAFE_componentWillReceiveProps(nextProps: ComponentProps) {
     if (nextProps.isFormSubmitted()) {
       this.showError();
     }
@@ -93,13 +93,11 @@ class CodeEditor extends Component<
         error={error ? getErrorMessage() : []}
       >
         <EuiCodeEditor
-          id={id}
           name={name}
           mode={mode}
           theme="github"
           value={getValue() || ''}
           isReadOnly={isReadOnly || false}
-          isInvalid={error}
           onChange={this.handleChange}
           onBlur={this.handleBlur}
           width={fullWidth ? '100%' : undefined}

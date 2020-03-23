@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
 import { PalettePicker } from '../../../public/components/palette_picker';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { ArgumentStrings } from '../../strings';
+import { ArgumentStrings } from '../../../i18n';
 
 const { Palette: strings } = ArgumentStrings;
 
@@ -61,7 +61,9 @@ const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
 
   const palette = astToPalette(argValue);
 
-  return <PalettePicker value={palette} onChange={handleChange} />;
+  return (
+    <PalettePicker value={palette} onChange={handleChange} ariaLabel={strings.getDisplayName()} />
+  );
 };
 
 PaletteArgInput.propTypes = {

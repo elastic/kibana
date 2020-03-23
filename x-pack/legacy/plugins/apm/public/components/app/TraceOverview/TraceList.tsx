@@ -8,9 +8,10 @@ import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { ITransactionGroup } from '../../../../server/lib/transaction_groups/transform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ITransactionGroup } from '../../../../../../../plugins/apm/server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
-import { asMillis } from '../../../utils/formatters';
+import { convertTo } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
@@ -66,7 +67,11 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asMillis(value)
+    render: (time: number) =>
+      convertTo({
+        unit: 'milliseconds',
+        microseconds: time
+      }).formatted
   },
   {
     field: 'transactionsPerMinute',

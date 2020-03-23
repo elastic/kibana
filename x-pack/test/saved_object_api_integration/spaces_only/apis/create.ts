@@ -12,18 +12,14 @@ import { createTestSuiteFactory } from '../../common/suites/create';
 const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
   expect(resp.body).to.eql({
     error: 'Bad Request',
-    message: '"namespace" is not allowed',
+    message: '[request body.namespace]: definition for this key is missing',
     statusCode: 400,
-    validation: {
-      keys: ['namespace'],
-      source: 'payload',
-    },
   });
 };
 
 export default function({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 
   const {

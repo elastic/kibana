@@ -4,27 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { Ecs } from '../../../../../graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../drag_and_drop/helpers';
 import { ExternalLinkIcon } from '../../../../external_link_icon';
-import { GoogleLink, VirusTotalLink } from '../../../../links';
+import { GoogleLink, ReputationLink } from '../../../../links';
 import { Provider } from '../../../../timeline/data_providers/provider';
 import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 import * as i18n from './translations';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// const Badge = styled(EuiBadge)`
-//   vertical-align: top;
-// `;
-const Badge = (props: EuiBadgeProps) => <EuiBadge {...props} style={{ verticalAlign: 'top' }} />;
+const Badge = styled(EuiBadge)`
+  vertical-align: top;
+`;
 
 Badge.displayName = 'Badge';
 
@@ -64,7 +61,7 @@ export const md5StringRenderer: StringRenderer = (value: string) => `md5: ${valu
 export const sha1StringRenderer: StringRenderer = (value: string) =>
   `sha1: ${value.substr(0, 7)}...`;
 
-export const DraggableZeekElement = pure<{
+export const DraggableZeekElement = React.memo<{
   id: string;
   field: string;
   value: string | null | undefined;
@@ -108,42 +105,53 @@ export const DraggableZeekElement = pure<{
 
 DraggableZeekElement.displayName = 'DraggableZeekElement';
 
-export const Link = pure<{ value: string | null | undefined; link?: string | null }>(
-  ({ value, link }) => {
-    if (value != null) {
-      if (link != null) {
-        return (
-          <LinkFlexItem grow={false}>
-            <div>
-              <GoogleLink link={link}>{value}</GoogleLink>
-              <ExternalLinkIcon />
-            </div>
-          </LinkFlexItem>
-        );
-      } else {
-        return (
-          <LinkFlexItem grow={false}>
-            <div>
-              <GoogleLink link={value} />
-              <ExternalLinkIcon />
-            </div>
-          </LinkFlexItem>
-        );
-      }
+interface LinkProps {
+  value: string | null | undefined;
+  link?: string | null;
+}
+
+export const Link = React.memo<LinkProps>(({ value, link }) => {
+  if (value != null) {
+    if (link != null) {
+      return (
+        <LinkFlexItem grow={false}>
+          <div>
+            <GoogleLink link={link}>{value}</GoogleLink>
+            <ExternalLinkIcon />
+          </div>
+        </LinkFlexItem>
+      );
     } else {
-      return null;
+      return (
+        <LinkFlexItem grow={false}>
+          <div>
+            <GoogleLink link={value} />
+            <ExternalLinkIcon />
+          </div>
+        </LinkFlexItem>
+      );
     }
+  } else {
+    return null;
   }
-);
+});
 
 Link.displayName = 'Link';
 
-export const TotalVirusLinkSha = pure<{ value: string | null | undefined }>(({ value }) =>
+interface TotalVirusLinkShaProps {
+  value: string | null | undefined;
+}
+
+export const TotalVirusLinkSha = React.memo<TotalVirusLinkShaProps>(({ value }) =>
   value != null ? (
     <LinkFlexItem grow={false}>
       <div>
-        <VirusTotalLink link={value}>{value}</VirusTotalLink>
-        <ExternalLinkIcon />
+        <ReputationLink
+          domain={value}
+          overflowIndexStart={1}
+          showDomain={true}
+          data-test-subj="reputationLinkSha"
+        />
       </div>
     </LinkFlexItem>
   ) : null
@@ -188,7 +196,12 @@ export const extractStateValue = (state: string | null | undefined): string | nu
 export const constructDroppedValue = (dropped: boolean | null | undefined): string | null =>
   dropped != null ? String(dropped) : null;
 
-export const ZeekSignature = pure<{ data: Ecs; timelineId: string }>(({ data, timelineId }) => {
+interface ZeekSignatureProps {
+  data: Ecs;
+  timelineId: string;
+}
+
+export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, timelineId }) => {
   const id = `zeek-signature-draggable-zeek-element-${timelineId}-${data._id}`;
   const sessionId: string | null | undefined = get('zeek.session_id[0]', data);
   const dataSet: string | null | undefined = get('event.dataset[0]', data);

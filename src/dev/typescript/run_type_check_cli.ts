@@ -80,7 +80,7 @@ export function runTypeCheckCli() {
   }
 
   const tscArgs = ['--noEmit', '--pretty', ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : [])];
-  const projects = filterProjectsByFlag(opts.project);
+  const projects = filterProjectsByFlag(opts.project).filter(p => !p.disableTypeCheck);
 
   if (!projects.length) {
     log.error(`Unable to find project at ${opts.project}`);
@@ -88,7 +88,7 @@ export function runTypeCheckCli() {
   }
 
   execInProjects(log, projects, process.execPath, project => [
-    ...(project.name === 'x-pack' ? ['--max-old-space-size=2048'] : []),
+    ...(project.name === 'x-pack' ? ['--max-old-space-size=4096'] : []),
     require.resolve('typescript/bin/tsc'),
     ...['--project', project.tsConfigPath],
     ...tscArgs,

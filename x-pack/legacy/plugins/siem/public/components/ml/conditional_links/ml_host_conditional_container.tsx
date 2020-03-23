@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse, stringify } from 'query-string';
 import React from 'react';
 
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
-import { QueryString } from 'ui/utils/query_string';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_helpers';
-import { replaceKqlQueryLocationForHostPage } from './replace_kql_query_location_for_host_page';
+import { SiemPageName } from '../../../pages/home/types';
+import { HostsTableType } from '../../../store/hosts/model';
+
+import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 interface QueryStringType {
   '?_g': string;
-  kqlQuery: string | null;
+  query: string | null;
   timerange: string | null;
 }
 
@@ -28,14 +31,18 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
       exact
       path={url}
       render={({ location }) => {
-        const queryStringDecoded: QueryStringType = QueryString.decode(
-          location.search.substring(1)
-        );
-        if (queryStringDecoded.kqlQuery != null) {
-          queryStringDecoded.kqlQuery = replaceKQLParts(queryStringDecoded.kqlQuery);
+        const queryStringDecoded = parse(location.search.substring(1), {
+          sort: false,
+        }) as Required<QueryStringType>;
+
+        if (queryStringDecoded.query != null) {
+          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
-        const reEncoded = QueryString.encode(queryStringDecoded);
-        return <Redirect to={`/hosts?${reEncoded}`} />;
+        const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+          sort: false,
+          encode: false,
+        });
+        return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;
       }}
     />
     <Route
@@ -46,37 +53,48 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
           params: { hostName },
         },
       }) => {
-        const queryStringDecoded: QueryStringType = QueryString.decode(
-          location.search.substring(1)
-        );
-        if (queryStringDecoded.kqlQuery != null) {
-          queryStringDecoded.kqlQuery = replaceKQLParts(queryStringDecoded.kqlQuery);
+        const queryStringDecoded = parse(location.search.substring(1), {
+          sort: false,
+        }) as Required<QueryStringType>;
+
+        if (queryStringDecoded.query != null) {
+          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
         if (emptyEntity(hostName)) {
-          if (queryStringDecoded.kqlQuery != null) {
-            queryStringDecoded.kqlQuery = replaceKqlQueryLocationForHostPage(
-              queryStringDecoded.kqlQuery
-            );
-          }
-          const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts/anomalies?${reEncoded}`} />;
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
+
+          return (
+            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+          );
         } else if (multipleEntities(hostName)) {
           const hosts: string[] = getMultipleEntities(hostName);
-          if (queryStringDecoded.kqlQuery != null) {
-            queryStringDecoded.kqlQuery = addEntitiesToKql(
-              ['host.name'],
-              hosts,
-              queryStringDecoded.kqlQuery
-            );
-            queryStringDecoded.kqlQuery = replaceKqlQueryLocationForHostPage(
-              queryStringDecoded.kqlQuery
-            );
-          }
-          const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts/anomalies?${reEncoded}`} />;
+          queryStringDecoded.query = addEntitiesToKql(
+            ['host.name'],
+            hosts,
+            queryStringDecoded.query || ''
+          );
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
+
+          return (
+            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+          );
         } else {
-          const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts/${hostName}/anomalies?${reEncoded}`} />;
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
+
+          return (
+            <Redirect
+              to={`/${SiemPageName.hosts}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
+            />
+          );
         }
       }}
     />

@@ -18,4 +18,11 @@
  */
 
 export { LoadingIndicator } from './loading_indicator';
-export { Header, HeaderWrapper } from './header';
+export {
+  Header,
+  ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionMenuCustomLink,
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+  ChromeHelpExtensionMenuGitHubLink,
+} from './header';

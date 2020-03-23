@@ -24,8 +24,8 @@ test('should not render relation select when geo field is geo_point', async () =
           geoFieldName: 'my geo field',
           geoFieldType: 'geo_point',
           indexPatternTitle: 'My index',
-          indexPatternId: 1
-        }
+          indexPatternId: 1,
+        },
       ]}
     />
   );
@@ -42,8 +42,8 @@ test('should render relation select when geo field is geo_shape', async () => {
           geoFieldName: 'my geo field',
           geoFieldType: 'geo_shape',
           indexPatternTitle: 'My index',
-          indexPatternId: 1
-        }
+          indexPatternId: 1,
+        },
       ]}
     />
   );
@@ -60,10 +60,29 @@ test('should not show "within" relation when filter geometry is not closed', asy
           geoFieldName: 'my geo field',
           geoFieldType: 'geo_shape',
           indexPatternTitle: 'My index',
-          indexPatternId: 1
-        }
+          indexPatternId: 1,
+        },
       ]}
       isFilterGeometryClosed={false}
+    />
+  );
+
+  expect(component).toMatchSnapshot();
+});
+
+test('should render error message', async () => {
+  const component = shallow(
+    <GeometryFilterForm
+      {...defaultProps}
+      geoFields={[
+        {
+          geoFieldName: 'my geo field',
+          geoFieldType: 'geo_point',
+          indexPatternTitle: 'My index',
+          indexPatternId: 1,
+        },
+      ]}
+      errorMsg="Simulated error"
     />
   );
 

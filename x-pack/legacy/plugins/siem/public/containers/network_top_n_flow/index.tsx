@@ -8,16 +8,17 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   FlowTargetSourceDest,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesSortField,
   PageInfoPaginated,
 } from '../../graphql/types';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
@@ -50,10 +51,10 @@ export interface NetworkTopNFlowComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  topNFlowSort: NetworkTopNFlowSortField;
+  sort: NetworkTopTablesSortField;
 }
 
-type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps;
+type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps & WithKibanaProps;
 
 class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   NetworkTopNFlowProps,
@@ -67,6 +68,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       endDate,
       flowTarget,
       filterQuery,
+      kibana,
       id = `${ID}-${flowTarget}`,
       ip,
       isInspected,
@@ -74,16 +76,16 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       skip,
       sourceId,
       startDate,
-      topNFlowSort,
+      sort,
     } = this.props;
     const variables: GetNetworkTopNFlowQuery.Variables = {
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: topNFlowSort,
+      sort,
       sourceId,
       timerange: {
         interval: '12h',
@@ -140,17 +142,19 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   }
 }
 
-const mapStateToProps = (
-  state: State,
-  { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps
-) => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget, type);
+const makeMapStateToProps = () => {
+  const getTopNFlowSelector = networkSelectors.topNFlowSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const { isInspected } = getQuery(state, id);
-  return {
-    ...getNetworkTopNFlowSelector(state),
-    isInspected,
+  return (state: State, { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getTopNFlowSelector(state, type, flowTarget),
+      isInspected,
+    };
   };
 };
 
-export const NetworkTopNFlowQuery = connect(mapStateToProps)(NetworkTopNFlowComponentQuery);
+export const NetworkTopNFlowQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(NetworkTopNFlowComponentQuery);

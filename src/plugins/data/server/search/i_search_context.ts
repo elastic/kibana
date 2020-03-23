@@ -16,8 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup } from '../../../../core/server';
+
+import { Observable } from 'rxjs';
+import { CoreSetup, SharedGlobalConfig } from '../../../../core/server';
 
 export interface ISearchContext {
   core: CoreSetup;
+  config$: Observable<SharedGlobalConfig>;
 }

@@ -21,26 +21,26 @@ export const registerHelpers = ({ supertest }) => {
       index: {
         lifecycle: {
           name: 'my_policy',
-        }
-      }
+        },
+      },
     },
     mappings: {
       _source: {
-        enabled: false
+        enabled: false,
       },
       properties: {
         host_name: {
-          type: 'keyword'
+          type: 'keyword',
         },
         created_at: {
           type: 'date',
-          format: 'EEE MMM dd HH:mm:ss Z yyyy'
-        }
-      }
+          format: 'EEE MMM dd HH:mm:ss Z yyyy',
+        },
+      },
     },
     aliases: {
-      alias1: {}
-    }
+      alias1: {},
+    },
   });
 
   const createTemplate = payload =>
@@ -51,7 +51,11 @@ export const registerHelpers = ({ supertest }) => {
 
   const deleteTemplates = templatesToDelete =>
     supertest
-      .delete(`${API_BASE_PATH}/templates/${templatesToDelete.map(template => encodeURIComponent(template)).join(',')}`)
+      .delete(
+        `${API_BASE_PATH}/templates/${templatesToDelete
+          .map(template => encodeURIComponent(template))
+          .join(',')}`
+      )
       .set('kbn-xsrf', 'xxx');
 
   const updateTemplate = (payload, templateName) =>

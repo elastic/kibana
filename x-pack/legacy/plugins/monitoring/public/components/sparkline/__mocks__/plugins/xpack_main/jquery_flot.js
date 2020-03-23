@@ -9,12 +9,12 @@
 function $() {
   return {
     on: jest.fn(),
-    off: jest.fn()
+    off: jest.fn(),
   };
 }
 
 $.plot = () => ({
-  shutdown: jest.fn()
+  shutdown: jest.fn(),
 });
 
 module.exports = $;

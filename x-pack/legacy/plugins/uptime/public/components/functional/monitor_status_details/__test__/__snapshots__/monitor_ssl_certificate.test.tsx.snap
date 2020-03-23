@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorStatusBar component renders 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--s"
+  />,
+  <div
+    aria-label="SSL certificate expires in 2 months"
+    class="euiText euiText--small euiText--constrainedWidth"
+  >
+    SSL certificate expires 
+    <span
+      class="euiBadge euiBadge--iconLeft"
+      style="background-color:#d3dae6;color:#000"
+    >
+      <span
+        class="euiBadge__content"
+      >
+        <span
+          class="euiBadge__text"
+        >
+          in 2 months
+        </span>
+      </span>
+    </span>
+  </div>,
+]
+`;
+
+exports[`MonitorStatusBar component renders null if invalid date 1`] = `null`;

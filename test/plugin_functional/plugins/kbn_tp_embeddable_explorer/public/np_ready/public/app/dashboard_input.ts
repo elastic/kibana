@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ViewMode, CONTACT_CARD_EMBEDDABLE, HELLO_WORLD_EMBEDDABLE_TYPE } from '../embeddable_api';
-import { DashboardContainerInput } from '../../../../../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
+import { ViewMode, CONTACT_CARD_EMBEDDABLE, HELLO_WORLD_EMBEDDABLE } from '../embeddable_api';
+import { DashboardContainerInput } from '../../../../../../../../src/plugins/dashboard/public';
 
 export const dashboardInput: DashboardContainerInput = {
   panels: {
@@ -30,7 +30,7 @@ export const dashboardInput: DashboardContainerInput = {
         y: 15,
         i: '1',
       },
-      type: HELLO_WORLD_EMBEDDABLE_TYPE,
+      type: HELLO_WORLD_EMBEDDABLE,
       explicitInput: {
         id: '1',
       },

@@ -161,7 +161,10 @@ describe('elasticsearch_adapter', () => {
 
     test('will return two hosts correctly', () => {
       const hosts = getHosts(bucket2.hosts.buckets);
-      expect(hosts).toEqual([{ id: ['123'], name: ['host-1'] }, { id: ['345'], name: ['host-2'] }]);
+      expect(hosts).toEqual([
+        { id: ['123'], name: ['host-1'] },
+        { id: ['345'], name: ['host-2'] },
+      ]);
     });
 
     test('will return a dot notation host', () => {

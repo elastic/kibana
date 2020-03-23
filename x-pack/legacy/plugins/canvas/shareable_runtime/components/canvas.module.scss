@@ -18,5 +18,7 @@
 
 :global .kbnCanvas :local .page {
   position: absolute;
-  transform-origin: center center;
+  transform-origin: left top;
+  top: 0;
+  left: 0;
 }

@@ -1,0 +1,51 @@
+{
+  "description": "Identifies scrobj.dll loaded into unusual Microsoft processes. This may indicate a malicious scriptlet is being executed in the target process.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Suspicious Script Object Execution",
+  "query": "event.code: 1 and scrobj.dll and (process.name:certutil.exe or process.name:regsvr32.exe or process.name:rundll32.exe)",
+  "risk_score": 21,
+  "rule_id": "b7333d08-be4b-4cb4-b81e-924ae37b3143",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1064",
+          "name": "Scripting",
+          "reference": "https://attack.mitre.org/techniques/T1064/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1064",
+          "name": "Scripting",
+          "reference": "https://attack.mitre.org/techniques/T1064/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

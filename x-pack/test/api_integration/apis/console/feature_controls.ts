@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecurityService, SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function securityTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
 
   describe('/api/console/proxy', () => {
     it('cannot be accessed by an anonymous user', async () => {
@@ -31,6 +30,29 @@ export default function securityTests({ getService }: FtrProviderContext) {
           password,
           roles: [roleName],
           full_name: 'a kibana user',
+        });
+
+        await supertest
+          .post(`/api/console/proxy?method=GET&path=${encodeURIComponent('/_cat')}`)
+          .auth(username, password)
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200);
+      } finally {
+        await security.user.delete(username);
+      }
+    });
+
+    it('can be accessed by kibana_admin role', async () => {
+      const username = 'kibana_admin';
+      const roleName = 'kibana_admin';
+      try {
+        const password = `${username}-password`;
+
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana admin',
         });
 
         await supertest

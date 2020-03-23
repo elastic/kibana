@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { TagFactory } from '../../../public/lib/tag';
+import { TagStrings as strings } from '../../../i18n';
+const euiVisPalette = euiPaletteColorBlind();
 
-export const graphic: TagFactory = () => ({ name: 'graphic', color: '#E6C220' });
+export const graphic: TagFactory = () => ({
+  name: strings.graphic(),
+  color: euiVisPalette[5],
+});

@@ -26,7 +26,7 @@ function filterBy(items, key, filter) {
 }
 
 function getCounts(fields, sourceFilters, fieldFilter = '') {
-  const fieldCount = _.countBy(filterBy(fields, 'name', fieldFilter), function (field) {
+  const fieldCount = _.countBy(filterBy(fields, 'name', fieldFilter), function(field) {
     return field.scripted ? 'scripted' : 'indexed';
   });
 
@@ -40,7 +40,7 @@ function getCounts(fields, sourceFilters, fieldFilter = '') {
 }
 
 export function IndicesEditSectionsProvider() {
-  return function (indexPattern, fieldFilter, indexPatternListProvider) {
+  return function(indexPattern, fieldFilter, indexPatternListProvider) {
     const totalCount = getCounts(indexPattern.fields, indexPattern.sourceFilters);
     const filteredCount = getCounts(indexPattern.fields, indexPattern.sourceFilters, fieldFilter);
 

@@ -15,24 +15,36 @@ describe('ChartPlaceHolder', () => {
     {
       key: 'mockKeyA',
       color: 'mockColor',
-      value: [{ x: 'a', y: 0 }, { x: 'b', y: 0 }],
+      value: [
+        { x: 'a', y: 0 },
+        { x: 'b', y: 0 },
+      ],
     },
     {
       key: 'mockKeyB',
       color: 'mockColor',
-      value: [{ x: 'a', y: 0 }, { x: 'b', y: 0 }],
+      value: [
+        { x: 'a', y: 0 },
+        { x: 'b', y: 0 },
+      ],
     },
   ];
   const mockDataUnexpectedValue = [
     {
       key: 'mockKeyA',
       color: 'mockColor',
-      value: [{ x: 'a', y: '' }, { x: 'b', y: 0 }],
+      value: [
+        { x: 'a', y: '' },
+        { x: 'b', y: 0 },
+      ],
     },
     {
       key: 'mockKeyB',
       color: 'mockColor',
-      value: [{ x: 'a', y: {} }, { x: 'b', y: 0 }],
+      value: [
+        { x: 'a', y: {} },
+        { x: 'b', y: 0 },
+      ],
     },
   ];
 

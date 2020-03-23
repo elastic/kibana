@@ -17,56 +17,10 @@
  * under the License.
  */
 
-// /// Define plugin function
-import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
+import { DataPlugin as Plugin } from './plugin';
 
 export function plugin() {
   return new Plugin();
 }
 
-// /// Export types & static code
-
-/** @public types */
-export { DataSetup, DataStart };
-
-export { FilterBar, ApplyFiltersPopover } from './filter';
-export {
-  Field,
-  FieldType,
-  FieldListInterface,
-  IndexPattern,
-  IndexPatterns,
-  StaticIndexPattern,
-} from './index_patterns';
-export { Query, QueryBarInput } from './query';
-export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
-
-/** @public static code */
-export * from '../common';
-export {
-  FilterManager,
-  FilterStateManager,
-  uniqFilters,
-  extractTimeFilter,
-  changeTimeFilter,
-  onlyDisabledFiltersChanged,
-} from './filter/filter_manager';
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  isFilterable,
-  IndexPatternSelect,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
-} from './index_patterns';
-
-export { TimeHistoryContract, TimefilterContract, getTime, InputTimeRange } from './timefilter';
+export { DataSetup, DataStart } from './plugin';

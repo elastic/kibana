@@ -6,8 +6,7 @@
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
@@ -38,11 +37,12 @@ interface Props {
   sshMethod: string | null | undefined;
   sshSignature: string | null | undefined;
   text: string | null | undefined;
+  userDomain: string | null | undefined;
   userName: string | null | undefined;
   workingDirectory: string | null | undefined;
 }
 
-export const SystemGenericLine = pure<Props>(
+export const SystemGenericLine = React.memo<Props>(
   ({
     contextId,
     hostName,
@@ -58,14 +58,16 @@ export const SystemGenericLine = pure<Props>(
     sshSignature,
     sshMethod,
     text,
+    userDomain,
     userName,
     workingDirectory,
   }) => (
     <>
-      <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
+      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
         <UserHostWorkingDir
           contextId={contextId}
           eventId={id}
+          userDomain={userDomain}
           userName={userName}
           hostName={hostName}
           workingDirectory={workingDirectory}
@@ -76,6 +78,8 @@ export const SystemGenericLine = pure<Props>(
         <TokensFlexItem grow={false} component="span">
           <ProcessDraggable
             contextId={contextId}
+            endgamePid={undefined}
+            endgameProcessName={undefined}
             eventId={id}
             processPid={processPid}
             processName={processName}
@@ -136,11 +140,12 @@ interface GenericDetailsProps {
   timelineId: string;
 }
 
-export const SystemGenericDetails = pure<GenericDetailsProps>(
+export const SystemGenericDetails = React.memo<GenericDetailsProps>(
   ({ data, contextId, text, timelineId }) => {
     const id = data._id;
     const message: string | null = data.message != null ? data.message[0] : null;
     const hostName: string | null | undefined = get('host.name[0]', data);
+    const userDomain: string | null | undefined = get('user.domain[0]', data);
     const userName: string | null | undefined = get('user.name[0]', data);
     const outcome: string | null | undefined = get('event.outcome[0]', data);
     const packageName: string | null | undefined = get('system.audit.package.name[0]', data);
@@ -170,6 +175,7 @@ export const SystemGenericDetails = pure<GenericDetailsProps>(
           sshMethod={sshMethod}
           sshSignature={sshSignature}
           text={text}
+          userDomain={userDomain}
           userName={userName}
           workingDirectory={workingDirectory}
         />

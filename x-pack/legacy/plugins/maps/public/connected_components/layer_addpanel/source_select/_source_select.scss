@@ -3,10 +3,6 @@
   .euiCard__content {
     // sass-lint:disable-block no-important
     padding-top: 0 !important;
-
-    .euiBetaBadge {
-      margin: 0 12px !important;
-    }
   }
 
   .euiCard__top + .euiCard__content {

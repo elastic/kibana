@@ -52,41 +52,41 @@ class PipelineListUi extends React.Component {
 
   getEmptyPrompt = () => (
     <EuiEmptyPrompt
-      title={(
+      title={
         <h2>
           <FormattedMessage
             id="xpack.logstash.pipelineList.noPipelinesTitle"
             defaultMessage="No pipelines"
           />
         </h2>
-      )}
+      }
       titleSize="xs"
-      body={(
+      body={
         <FormattedMessage
           id="xpack.logstash.pipelineList.noPipelinesDescription"
           defaultMessage="There are no pipelines defined."
         />
-      )}
+      }
     />
   );
 
   getErrorPrompt = () => (
     <EuiEmptyPrompt
-      title={(
+      title={
         <h2>
           <FormattedMessage
             id="xpack.logstash.pipelineList.pipelinesLoadingErrorTitle"
             defaultMessage="Error"
           />
         </h2>
-      )}
+      }
       titleSize="xs"
-      body={(
+      body={
         <FormattedMessage
           id="xpack.logstash.pipelineList.pipelinesLoadingErrorDescription"
           defaultMessage="Error encountered while loading pipelines."
         />
-      )}
+      }
     />
   );
 
@@ -97,7 +97,8 @@ class PipelineListUi extends React.Component {
       message: (
         <div data-test-subj="loadingPipelines">
           <EuiLoadingSpinner size="m" />
-          &nbsp; <FormattedMessage
+          &nbsp;{' '}
+          <FormattedMessage
             id="xpack.logstash.pipelineList.pipelinesLoadingMessage"
             defaultMessage="Loading pipelines…"
           />
@@ -139,12 +140,17 @@ class PipelineListUi extends React.Component {
             }
           } else {
             this.setState({ isForbidden: false });
-            toastNotifications.addDanger(intl.formatMessage({
-              id: 'xpack.logstash.pipelineList.pipelineLoadingErrorNotification',
-              defaultMessage: `Couldn't load pipeline. Error: "{errStatusText}".`
-            }, {
-              errStatusText: err.statusText,
-            }));
+            toastNotifications.addDanger(
+              intl.formatMessage(
+                {
+                  id: 'xpack.logstash.pipelineList.pipelineLoadingErrorNotification',
+                  defaultMessage: `Couldn't load pipeline. Error: "{errStatusText}".`,
+                },
+                {
+                  errStatusText: err.statusText,
+                }
+              )
+            );
           }
         });
       });
@@ -167,12 +173,12 @@ class PipelineListUi extends React.Component {
       <EuiCallOut
         color="danger"
         iconType="cross"
-        title={(
+        title={
           <FormattedMessage
             id="xpack.logstash.pipelineList.noPermissionToManageTitle"
             defaultMessage="You do not have permission to manage Logstash pipelines."
           />
-        )}
+        }
       >
         <p>
           <FormattedMessage
@@ -213,43 +219,59 @@ class PipelineListUi extends React.Component {
         const { numSuccesses, numErrors } = results;
 
         if (numSuccesses === 1 && numErrors === 0) {
-          toastNotifications.addSuccess(intl.formatMessage({
-            id: 'xpack.logstash.pipelineList.pipelinesSuccessfullyDeletedNotification',
-            defaultMessage: 'Deleted "{id}"',
-          }, {
-            id: selection[0].id,
-          }));
+          toastNotifications.addSuccess(
+            intl.formatMessage(
+              {
+                id: 'xpack.logstash.pipelineList.pipelinesSuccessfullyDeletedNotification',
+                defaultMessage: 'Deleted "{id}"',
+              },
+              {
+                id: selection[0].id,
+              }
+            )
+          );
         } else if (numSuccesses) {
           let text;
           if (numErrors) {
-            text = intl.formatMessage({
-              id: 'xpack.logstash.pipelineList.pipelinesCouldNotBeDeletedDescription',
-              defaultMessage: `But {numErrors, plural, one {# Pipeline} other {# Pipelines}} couldn't be deleted.`,
-            }, {
-              numErrors,
-            });
+            text = intl.formatMessage(
+              {
+                id: 'xpack.logstash.pipelineList.pipelinesCouldNotBeDeletedDescription',
+                defaultMessage: `But {numErrors, plural, one {# Pipeline} other {# Pipelines}} couldn't be deleted.`,
+              },
+              {
+                numErrors,
+              }
+            );
           }
 
           toastNotifications.addSuccess({
-            title: intl.formatMessage({
-              id: 'xpack.logstash.pipelineList.successfullyDeletedPipelinesNotification',
-              defaultMessage:
-                'Deleted {numSuccesses} out of {numPipelinesSelected, plural, one {# Pipeline} other {# Pipelines}}',
-            }, {
-              numSuccesses,
-              numPipelinesSelected,
-              numPipelinesSelected,
-            }),
+            title: intl.formatMessage(
+              {
+                id: 'xpack.logstash.pipelineList.successfullyDeletedPipelinesNotification',
+                defaultMessage:
+                  'Deleted {numSuccesses} out of {numPipelinesSelected, plural, one {# Pipeline} other {# Pipelines}}',
+              },
+              {
+                numSuccesses,
+                numPipelinesSelected,
+                numPipelinesSelected,
+              }
+            ),
             text,
           });
         } else if (numErrors) {
-          toastNotifications.addError(intl.formatMessage({
-            id: 'xpack.logstash.pipelineList.couldNotDeletePipelinesNotification',
-            defaultMessage:
-              'Failed to delete {numErrors, plural, one {# Pipeline} other {# Pipelines}}',
-          }, {
-            numErrors,
-          }));
+          toastNotifications.addError(
+            intl.formatMessage(
+              {
+                id: 'xpack.logstash.pipelineList.couldNotDeletePipelinesNotification',
+                defaultMessage:
+                  'Failed to delete {numErrors, plural, one {# Pipeline} other {# Pipelines}}',
+              },
+              {
+                numErrors,
+              }
+            )
+          );
         }
 
         this.loadPipelines();
@@ -272,7 +294,9 @@ class PipelineListUi extends React.Component {
       <div data-test-subj="pipelineList">
         <EuiPageContent horizontalPosition="center">
           <EuiTitle size="m">
-            <h1><FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" /></h1>
+            <h1>
+              <FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" />
+            </h1>
           </EuiTitle>
           <EuiText color="subdued" size="s">
             <p>

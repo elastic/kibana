@@ -13,13 +13,13 @@ import { EuiFilterSelectItem } from '@elastic/eui';
 describe('FilterPopover component', () => {
   let props: FilterPopoverProps;
   let setState: jest.Mock<any, any>;
-  let useStateSpy: jest.SpyInstance<[unknown, React.Dispatch<unknown>], [unknown]>;
+  let useStateSpy: jest.SpyInstance<[unknown, React.Dispatch<unknown>], unknown[]>;
 
   beforeEach(() => {
     props = {
       fieldName: 'foo',
       id: 'test',
-      isLoading: false,
+      loading: false,
       items: ['first', 'second', 'third', 'fourth'],
       onFilterFieldChange: jest.fn(),
       selectedItems: ['first', 'third'],
@@ -47,7 +47,7 @@ describe('FilterPopover component', () => {
   });
 
   it('does not show item list when loading', () => {
-    props.isLoading = true;
+    props.loading = true;
     const wrapper = shallowWithIntl(<FilterPopover {...props} />);
     expect(wrapper).toMatchSnapshot();
   });

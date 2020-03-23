@@ -1,4 +1,5 @@
 <div id="maps-plugin"  ng-class="{mapFullScreen: isFullScreen}">
+
   <div id="maps-top-nav">
     <div>
       <kbn-top-nav
@@ -11,7 +12,7 @@
         show-save-query="showSaveQuery"
         query="query"
         saved-query="savedQuery"
-        on-query-submit="updateQueryAndDispatch"
+        on-query-submit="onQuerySubmit"
         filters="filters"
         on-filters-updated="updateFiltersAndDispatch"
         index-patterns="indexPatterns"
@@ -28,6 +29,7 @@
     </div>
   </div>
 
+  <h1 class="euiScreenReaderOnly">{{screenTitle}}</h1>
   <div id="react-maps-root"></div>
 
 </div>

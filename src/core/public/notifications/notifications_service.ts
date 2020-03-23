@@ -22,11 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 import { I18nStart } from '../i18n';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
-import { UiSettingsClientContract } from '../ui_settings';
+import { IUiSettingsClient } from '../ui_settings';
 import { OverlayStart } from '../overlays';
 
 interface SetupDeps {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 interface StartDeps {
@@ -85,10 +85,12 @@ export class NotificationsService {
 
 /** @public */
 export interface NotificationsSetup {
+  /** {@link ToastsSetup} */
   toasts: ToastsSetup;
 }
 
 /** @public */
 export interface NotificationsStart {
+  /** {@link ToastsStart} */
   toasts: ToastsStart;
 }

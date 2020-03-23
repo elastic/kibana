@@ -8,7 +8,7 @@ import { format as formatUrl } from 'url';
 
 import * as legacyElasticsearch from 'elasticsearch';
 
-import shieldPlugin from '../../../../legacy/server/lib/esjs_shield_plugin';
+import { elasticsearchClientPlugin } from '../../../../plugins/security/server/elasticsearch_client_plugin';
 
 export function LegacyEsProvider({ getService }) {
   const config = getService('config');
@@ -16,6 +16,6 @@ export function LegacyEsProvider({ getService }) {
   return new legacyElasticsearch.Client({
     host: formatUrl(config.get('servers.elasticsearch')),
     requestTimeout: config.get('timeouts.esRequestTimeout'),
-    plugins: [shieldPlugin]
+    plugins: [elasticsearchClientPlugin],
   });
 }

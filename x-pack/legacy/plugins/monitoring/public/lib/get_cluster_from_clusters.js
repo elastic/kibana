@@ -9,10 +9,14 @@ import _ from 'lodash';
 export function getClusterFromClusters(clusters, globalState) {
   const cluster = (() => {
     const existingCurrent = _.find(clusters, { cluster_uuid: globalState.cluster_uuid });
-    if (existingCurrent) { return existingCurrent; }
+    if (existingCurrent) {
+      return existingCurrent;
+    }
 
     const firstCluster = _.first(clusters);
-    if (firstCluster && firstCluster.cluster_uuid) { return firstCluster; }
+    if (firstCluster && firstCluster.cluster_uuid) {
+      return firstCluster;
+    }
 
     return null;
   })();

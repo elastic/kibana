@@ -18,14 +18,17 @@
  */
 
 import { createMetricVisFn } from './metric_vis_fn';
-
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
 
 jest.mock('ui/new_platform');
 
+jest.mock('../../vis_default_editor/public', () => ({
+  Schemas: class {},
+}));
+
 describe('interpreter/functions#metric', () => {
-  const fn = functionWrapper(createMetricVisFn);
+  const fn = functionWrapper(createMetricVisFn());
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],

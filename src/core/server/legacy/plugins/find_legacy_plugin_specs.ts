@@ -19,27 +19,26 @@
 
 import { Observable, merge, forkJoin } from 'rxjs';
 import { toArray, tap, distinct, map } from 'rxjs/operators';
+
 import {
   findPluginSpecs,
   defaultConfig,
   // @ts-ignore
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
-import { LoggerFactory } from '../../logging';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
-import { Config } from '../../config';
 
-export interface LegacyPluginPack {
-  getPath(): string;
-}
+import { LoggerFactory } from '../../logging';
+import { PackageInfo } from '../../config';
+import { LegacyPluginSpec, LegacyPluginPack, LegacyConfig } from '../types';
+import { getNavLinks } from './get_nav_links';
 
-export interface LegacyPluginSpec {
-  getId: () => unknown;
-  getExpectedKibanaVersion: () => string;
-  getConfigPrefix: () => string;
-}
-
-export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: LoggerFactory) {
-  const configToMutate: Config = defaultConfig(settings);
+export async function findLegacyPluginSpecs(
+  settings: unknown,
+  loggerFactory: LoggerFactory,
+  packageInfo: PackageInfo
+) {
+  const configToMutate: LegacyConfig = defaultConfig(settings);
   const {
     pack$,
     invalidDirectoryError$,
@@ -54,7 +53,7 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
     invalidDirectoryError$: Observable<{ path: string }>;
     invalidPackError$: Observable<{ path: string }>;
     otherError$: Observable<unknown>;
-    deprecation$: Observable<unknown>;
+    deprecation$: Observable<{ spec: LegacyPluginSpec; message: string }>;
     invalidVersionSpec$: Observable<LegacyPluginSpec>;
     spec$: Observable<LegacyPluginSpec>;
     disabledSpec$: Observable<LegacyPluginSpec>;
@@ -98,8 +97,7 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
       map(spec => {
         const name = spec.getId();
         const pluginVersion = spec.getExpectedKibanaVersion();
-        // @ts-ignore
-        const kibanaVersion = settings.pkg.version;
+        const kibanaVersion = packageInfo.version;
         return `Plugin "${name}" was disabled because it expected Kibana version "${pluginVersion}", and found "${kibanaVersion}".`;
       }),
       distinct(),
@@ -126,11 +124,14 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
     spec$.pipe(toArray()),
     log$.pipe(toArray())
   ).toPromise();
+  const uiExports = collectLegacyUiExports(pluginSpecs);
+  const navLinks = getNavLinks(uiExports, pluginSpecs);
 
   return {
     disabledPluginSpecs,
     pluginSpecs,
     pluginExtendedConfig: configToMutate,
-    uiExports: collectLegacyUiExports(pluginSpecs),
+    uiExports,
+    navLinks,
   };
 }

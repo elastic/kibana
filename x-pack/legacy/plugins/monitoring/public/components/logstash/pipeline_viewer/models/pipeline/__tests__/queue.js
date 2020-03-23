@@ -17,15 +17,15 @@ describe('Queue class', () => {
         source: {
           id: 'output',
           user: 'user',
-          password: 'password'
-        }
+          password: 'password',
+        },
       };
 
       queueVertex = {
         id: '__QUEUE__',
         hasExplicitId: false,
         stats: {},
-        meta
+        meta,
       };
     });
 

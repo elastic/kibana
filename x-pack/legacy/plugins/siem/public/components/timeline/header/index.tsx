@@ -5,11 +5,10 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import * as React from 'react';
-import styled from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import React from 'react';
+import { IIndexPattern } from 'src/plugins/data/public';
+import deepEqual from 'fast-deep-equal';
 
-import { Sort } from '../body/sort';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
 import {
@@ -29,7 +28,7 @@ interface Props {
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onDataProviderEdited: OnDataProviderEdited;
@@ -38,55 +37,65 @@ interface Props {
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
-  sort: Sort;
 }
 
-const TimelineHeaderContainer = styled.div`
-  width: 100%;
-`;
-
-TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
-
-export const TimelineHeader = React.memo<Props>(
-  ({
-    browserFields,
-    id,
-    indexPattern,
-    dataProviders,
-    onChangeDataProviderKqlQuery,
-    onChangeDroppableAndProvider,
-    onDataProviderEdited,
-    onDataProviderRemoved,
-    onToggleDataProviderEnabled,
-    onToggleDataProviderExcluded,
-    show,
-    showCallOutUnauthorizedMsg,
-  }) => (
-    <TimelineHeaderContainer data-test-subj="timelineHeader">
-      {showCallOutUnauthorizedMsg && (
-        <EuiCallOut
-          data-test-subj="timelineCallOutUnauthorized"
-          title={i18n.CALL_OUT_UNAUTHORIZED_MSG}
-          color="warning"
-          iconType="alert"
-          size="s"
-        />
-      )}
-      <DataProviders
-        browserFields={browserFields}
-        id={id}
-        dataProviders={dataProviders}
-        onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-        onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-        onDataProviderEdited={onDataProviderEdited}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-        show={show}
+const TimelineHeaderComponent: React.FC<Props> = ({
+  browserFields,
+  id,
+  indexPattern,
+  dataProviders,
+  onChangeDataProviderKqlQuery,
+  onChangeDroppableAndProvider,
+  onDataProviderEdited,
+  onDataProviderRemoved,
+  onToggleDataProviderEnabled,
+  onToggleDataProviderExcluded,
+  show,
+  showCallOutUnauthorizedMsg,
+}) => (
+  <>
+    {showCallOutUnauthorizedMsg && (
+      <EuiCallOut
+        data-test-subj="timelineCallOutUnauthorized"
+        title={i18n.CALL_OUT_UNAUTHORIZED_MSG}
+        color="warning"
+        iconType="alert"
+        size="s"
       />
-      <StatefulSearchOrFilter timelineId={id} indexPattern={indexPattern} />
-    </TimelineHeaderContainer>
-  )
+    )}
+    <DataProviders
+      browserFields={browserFields}
+      id={id}
+      dataProviders={dataProviders}
+      onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+      onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+      onDataProviderEdited={onDataProviderEdited}
+      onDataProviderRemoved={onDataProviderRemoved}
+      onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+      onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+      show={show}
+    />
+    <StatefulSearchOrFilter
+      browserFields={browserFields}
+      indexPattern={indexPattern}
+      timelineId={id}
+    />
+  </>
 );
 
-TimelineHeader.displayName = 'TimelineHeader';
+export const TimelineHeader = React.memo(
+  TimelineHeaderComponent,
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
+    prevProps.id === nextProps.id &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+    prevProps.onChangeDataProviderKqlQuery === nextProps.onChangeDataProviderKqlQuery &&
+    prevProps.onChangeDroppableAndProvider === nextProps.onChangeDroppableAndProvider &&
+    prevProps.onDataProviderEdited === nextProps.onDataProviderEdited &&
+    prevProps.onDataProviderRemoved === nextProps.onDataProviderRemoved &&
+    prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&
+    prevProps.onToggleDataProviderExcluded === nextProps.onToggleDataProviderExcluded &&
+    prevProps.show === nextProps.show &&
+    prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg
+);

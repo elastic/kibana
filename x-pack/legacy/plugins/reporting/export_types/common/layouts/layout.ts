@@ -26,15 +26,20 @@ export interface LayoutSelectorDictionary {
   screenshot: string;
   renderComplete: string;
   itemsCountAttribute: string;
-  timefilterFromAttribute: string;
-  timefilterToAttribute: string;
-  toastHeader: string;
+  timefilterDurationAttribute: string;
 }
 
 export interface PdfImageSize {
   width: number;
   height?: number;
 }
+
+export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
+  screenshot: '[data-shared-items-container]',
+  renderComplete: '[data-shared-item]',
+  itemsCountAttribute: 'data-shared-items-count',
+  timefilterDurationAttribute: 'data-shared-timefilter-duration',
+});
 
 export abstract class Layout {
   public id: string = '';
@@ -68,9 +73,11 @@ export interface LayoutParams {
   dimensions: Size;
 }
 
-export type LayoutInstance = Layout & {
+interface LayoutSelectors {
   // Fields that are not part of Layout: the instances
   // independently implement these fields on their own
   selectors: LayoutSelectorDictionary;
   positionElements?: (browser: HeadlessChromiumDriver, logger: LevelLogger) => Promise<void>;
-};
+}
+
+export type LayoutInstance = Layout & LayoutSelectors & Size;

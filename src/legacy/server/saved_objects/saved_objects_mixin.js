@@ -19,59 +19,31 @@
 
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import { first } from 'rxjs/operators';
 import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
-import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
-  ScopedSavedObjectsClientProvider,
-  SavedObjectsCacheIndexPatterns,
-  getSortedObjectsForExport,
-  importSavedObjects,
-  resolveImportErrors,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
 } from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
+import { convertTypesToLegacySchema } from '../../../core/server/saved_objects/utils';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
-import {
-  createBulkCreateRoute,
-  createBulkGetRoute,
-  createCreateRoute,
-  createDeleteRoute,
-  createFindRoute,
-  createGetRoute,
-  createUpdateRoute,
-  createExportRoute,
-  createImportRoute,
-  createResolveImportErrorsRoute,
-  createLogLegacyImportRoute,
-} from './routes';
-
-function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
-  const { savedObjectsManagement = {} } = kbnServer.uiExports;
-  return visibleTypes.filter(
-    type =>
-      savedObjectsManagement[type] &&
-      savedObjectsManagement[type].isImportableAndExportable === true
-  );
-}
-
-export async function savedObjectsMixin(kbnServer, server) {
+export function savedObjectsMixin(kbnServer, server) {
   const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
+  const typeRegistry = kbnServer.newPlatform.start.core.savedObjects.getTypeRegistry();
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+  const schema = new SavedObjectsSchema(convertTypesToLegacySchema(typeRegistry.getAllTypes()));
   const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
-  const importableAndExportableTypes = getImportableAndExportableTypes({ kbnServer, visibleTypes });
-  const cacheIndexPatterns = new SavedObjectsCacheIndexPatterns();
 
   server.decorate('server', 'kibanaMigrator', migrator);
   server.decorate(
     'server',
     'getSavedObjectsManagement',
-    () => new SavedObjectsManagement(kbnServer.uiExports.savedObjectsManagement)
+    () => new SavedObjectsManagement(typeRegistry)
   );
 
   const warn = message => server.log(['warning', 'saved-objects'], message);
@@ -82,36 +54,7 @@ export async function savedObjectsMixin(kbnServer, server) {
     return;
   }
 
-  const prereqs = {
-    getSavedObjectsClient: {
-      assign: 'savedObjectsClient',
-      method(req) {
-        return req.getSavedObjectsClient();
-      },
-    },
-  };
-  server.route(createBulkCreateRoute(prereqs));
-  server.route(createBulkGetRoute(prereqs));
-  server.route(createCreateRoute(prereqs));
-  server.route(createDeleteRoute(prereqs));
-  server.route(createFindRoute(prereqs));
-  server.route(createGetRoute(prereqs));
-  server.route(createUpdateRoute(prereqs));
-  server.route(createExportRoute(prereqs, server, importableAndExportableTypes));
-  server.route(createImportRoute(prereqs, server, importableAndExportableTypes));
-  server.route(createResolveImportErrorsRoute(prereqs, server, importableAndExportableTypes));
-  server.route(createLogLegacyImportRoute());
-
-  const serializer = new SavedObjectsSerializer(schema);
-
-  if (cacheIndexPatterns.getIndexPatternsService() == null) {
-    const adminClient = await server.newPlatform.__internals.elasticsearch.adminClient$
-      .pipe(first())
-      .toPromise();
-    cacheIndexPatterns.setIndexPatternsService(
-      server.indexPatternsServiceFactory({ callCluster: adminClient.callAsInternalUser })
-    );
-  }
+  const serializer = kbnServer.newPlatform.start.core.savedObjects.createSerializer();
 
   const createRepository = (callCluster, extraTypes = []) => {
     if (typeof callCluster !== 'function') {
@@ -130,28 +73,16 @@ export async function savedObjectsMixin(kbnServer, server) {
 
     return new SavedObjectsRepository({
       index: config.get('kibana.index'),
-      config,
-      cacheIndexPatterns,
       migrator,
       mappings,
-      schema,
+      typeRegistry,
       serializer,
       allowedTypes,
       callCluster,
     });
   };
 
-  const provider = new ScopedSavedObjectsClientProvider({
-    index: server.config().get('kibana.index'),
-    mappings,
-    defaultClientFactory({ request }) {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-      const callCluster = (...args) => callWithRequest(request, ...args);
-      const repository = createRepository(callCluster);
-
-      return new SavedObjectsClient(repository);
-    },
-  });
+  const provider = kbnServer.newPlatform.__internals.savedObjectsClientProvider;
 
   const service = {
     types: visibleTypes,
@@ -164,9 +95,9 @@ export async function savedObjectsMixin(kbnServer, server) {
       provider.addClientWrapperFactory(...args),
     importExport: {
       objectLimit: server.config().get('savedObjects.maxImportExportSize'),
-      importSavedObjects,
-      resolveImportErrors,
-      getSortedObjectsForExport,
+      importSavedObjects: importSavedObjectsFromStream,
+      resolveImportErrors: resolveSavedObjectsImportErrors,
+      getSortedObjectsForExport: exportSavedObjectsToStream,
     },
     schema,
   };

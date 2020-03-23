@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -26,7 +28,9 @@ import { LoadingSpinner, getCategoryPaneCategoryClassName, getFieldCount } from 
 import * as i18n from './translations';
 
 const CategoryName = styled.span<{ bold: boolean }>`
-  font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
+  .euiText {
+    font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
+  }
 `;
 
 CategoryName.displayName = 'CategoryName';
@@ -116,7 +120,7 @@ export const getCategoryColumns = ({
     name: '',
     sortable: true,
     truncateText: false,
-    render: (categoryId: string) => (
+    render: (categoryId: string, _: { categoryId: string }) => (
       <LinkContainer>
         <EuiLink data-test-subj="category-link" onClick={() => onCategorySelected(categoryId)}>
           <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">

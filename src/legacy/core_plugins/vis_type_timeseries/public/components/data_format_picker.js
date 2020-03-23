@@ -181,7 +181,10 @@ class DataFormatPickerUI extends Component {
             <EuiFormRow
               id={htmlId('from')}
               label={
-                <FormattedMessage id="visTypeTimeseries.dataFormatPicker.fromLabel" defaultMessage="From" />
+                <FormattedMessage
+                  id="visTypeTimeseries.dataFormatPicker.fromLabel"
+                  defaultMessage="From"
+                />
               }
             >
               <EuiComboBox
@@ -196,7 +199,12 @@ class DataFormatPickerUI extends Component {
           <EuiFlexItem grow={false}>
             <EuiFormRow
               id={htmlId('to')}
-              label={<FormattedMessage id="visTypeTimeseries.dataFormatPicker.toLabel" defaultMessage="To" />}
+              label={
+                <FormattedMessage
+                  id="visTypeTimeseries.dataFormatPicker.toLabel"
+                  defaultMessage="To"
+                />
+              }
             >
               <EuiComboBox
                 isClearable={false}
@@ -276,6 +284,7 @@ class DataFormatPickerUI extends Component {
               selectedOptions={selectedOption ? [selectedOption] : []}
               onChange={this.handleChange}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="tsvbDataFormatPicker"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -286,7 +295,9 @@ class DataFormatPickerUI extends Component {
 }
 
 DataFormatPickerUI.defaultProps = {
-  label: i18n.translate('visTypeTimeseries.defaultDataFormatterLabel', { defaultMessage: 'Data Formatter' }),
+  label: i18n.translate('visTypeTimeseries.defaultDataFormatterLabel', {
+    defaultMessage: 'Data Formatter',
+  }),
 };
 
 DataFormatPickerUI.propTypes = {

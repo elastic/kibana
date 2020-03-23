@@ -11,9 +11,11 @@ import { chain } from 'lodash';
  * Use title if found, otherwise use label
  */
 export function getTitle(series = []) {
-  return chain(series.map((s) => {
-    return s.metric.title || s.metric.label;
-  }))
+  return chain(
+    series.map(s => {
+      return s.metric.title || s.metric.label;
+    })
+  )
     .first()
     .value();
 }

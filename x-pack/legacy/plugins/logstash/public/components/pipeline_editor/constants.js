@@ -14,7 +14,8 @@ export const PIPELINE_EDITOR = {
     defaultMessage: 'Pipeline ID is required',
   }),
   ID_FORMAT_ERR_MSG: i18n.translate('xpack.logstash.idFormatErrorMessage', {
-    defaultMessage: 'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers',
+    defaultMessage:
+      'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers',
   }),
   QUEUE_TYPES: [
     {

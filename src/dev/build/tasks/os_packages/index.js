@@ -17,4 +17,8 @@
  * under the License.
  */
 
-export { CreateRpmPackageTask, CreateDebPackageTask, CreateDockerPackageTask } from './create_os_package_tasks';
+export {
+  CreateRpmPackageTask,
+  CreateDebPackageTask,
+  CreateDockerPackageTask,
+} from './create_os_package_tasks';

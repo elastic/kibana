@@ -4,22 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-import { JobDocPayload, JobParamPostPayload, ConditionalHeaders } from '../../types';
+import { CancellationToken } from '../../common/cancellation_token';
+import { JobDocPayload, JobParamPostPayload, ConditionalHeaders, RequestFacade } from '../../types';
+
+interface DocValueField {
+  field: string;
+  format: string;
+}
+
+interface SortOptions {
+  order: string;
+  unmapped_type: string;
+}
 
 export interface JobParamPostPayloadDiscoverCsv extends JobParamPostPayload {
   state?: {
     query: any;
-    sort: any[];
+    sort: Array<Record<string, SortOptions>>;
+    docvalue_fields: DocValueField[];
   };
 }
 
 export interface JobParamsDiscoverCsv {
   indexPatternId?: string;
-  post?: JobParamPostPayloadDiscoverCsv; // delete this
+  post?: JobParamPostPayloadDiscoverCsv;
 }
 
-export interface JobDocPayloadDiscoverCsv extends JobDocPayload {
+export interface JobDocPayloadDiscoverCsv extends JobDocPayload<JobParamsDiscoverCsv> {
+  basePath: string;
   searchRequest: any;
   fields: any;
   indexPatternSavedObject: any;
@@ -27,8 +39,74 @@ export interface JobDocPayloadDiscoverCsv extends JobDocPayload {
   conflictedTypesFields: any;
 }
 
-export type ESQueueCreateJobFnDiscoverCsv = (
-  jobParams: JobParamsDiscoverCsv,
-  headers: ConditionalHeaders,
-  request: Request
-) => Promise<JobParamsDiscoverCsv>;
+export interface SearchRequest {
+  index: string;
+  body:
+    | {
+        _source: {
+          excludes: string[];
+          includes: string[];
+        };
+        docvalue_fields: string[];
+        query:
+          | {
+              bool: {
+                filter: any[];
+                must_not: any[];
+                should: any[];
+                must: any[];
+              };
+            }
+          | any;
+        script_fields: any;
+        sort: Array<{
+          [key: string]: {
+            order: string;
+          };
+        }>;
+        stored_fields: string[];
+      }
+    | any;
+}
+
+type EndpointCaller = (method: string, params: any) => Promise<any>;
+
+type FormatsMap = Map<
+  string,
+  {
+    id: string;
+    params: {
+      pattern: string;
+    };
+  }
+>;
+
+export interface SavedSearchGeneratorResult {
+  content: string;
+  size: number;
+  maxSizeReached: boolean;
+  csvContainsFormulas?: boolean;
+}
+
+export interface CsvResultFromSearch {
+  type: string;
+  result: SavedSearchGeneratorResult;
+}
+
+export interface GenerateCsvParams {
+  searchRequest: SearchRequest;
+  callEndpoint: EndpointCaller;
+  fields: string[];
+  formatsMap: FormatsMap;
+  metaFields: string[];
+  conflictedTypesFields: string[];
+  cancellationToken: CancellationToken;
+  settings: {
+    separator: string;
+    quoteValues: boolean;
+    timezone: string | null;
+    maxSizeBytes: number;
+    scroll: { duration: string; size: number };
+    checkForFormulas?: boolean;
+  };
+}

@@ -19,7 +19,8 @@
 
 import { Readable } from 'stream';
 import { SavedObject } from '../types';
-import { resolveImportErrors } from './resolve_import_errors';
+import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
+import { savedObjectsClientMock } from '../../mocks';
 
 describe('resolveImportErrors()', () => {
   const savedObjects: SavedObject[] = [
@@ -62,16 +63,7 @@ describe('resolveImportErrors()', () => {
       ],
     },
   ];
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -88,7 +80,7 @@ describe('resolveImportErrors()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [],
     });
-    const result = await resolveImportErrors({
+    const result = await resolveSavedObjectsImportErrors({
       readStream,
       objectLimit: 4,
       retries: [],
@@ -115,7 +107,7 @@ describe('resolveImportErrors()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: savedObjects.filter(obj => obj.type === 'visualization' && obj.id === '3'),
     });
-    const result = await resolveImportErrors({
+    const result = await resolveSavedObjectsImportErrors({
       readStream,
       objectLimit: 4,
       retries: [
@@ -176,7 +168,7 @@ describe('resolveImportErrors()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects.filter(obj => obj.type === 'index-pattern' && obj.id === '1'),
     });
-    const result = await resolveImportErrors({
+    const result = await resolveSavedObjectsImportErrors({
       readStream,
       objectLimit: 4,
       retries: [
@@ -238,7 +230,7 @@ describe('resolveImportErrors()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects.filter(obj => obj.type === 'dashboard' && obj.id === '4'),
     });
-    const result = await resolveImportErrors({
+    const result = await resolveSavedObjectsImportErrors({
       readStream,
       objectLimit: 4,
       retries: [
@@ -316,9 +308,11 @@ describe('resolveImportErrors()', () => {
           statusCode: 409,
           message: 'conflict',
         },
+        attributes: {},
+        references: [],
       })),
     });
-    const result = await resolveImportErrors({
+    const result = await resolveSavedObjectsImportErrors({
       readStream,
       objectLimit: 4,
       retries: savedObjects.map(obj => ({
@@ -416,10 +410,12 @@ describe('resolveImportErrors()', () => {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
       ],
     });
-    const result = await resolveImportErrors({
+    const result = await resolveSavedObjectsImportErrors({
       readStream,
       objectLimit: 2,
       retries: [
@@ -507,7 +503,7 @@ describe('resolveImportErrors()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [],
     });
-    const result = await resolveImportErrors({
+    const result = await resolveSavedObjectsImportErrors({
       readStream,
       objectLimit: 5,
       retries: [
@@ -551,7 +547,7 @@ describe('resolveImportErrors()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects.filter(obj => obj.type === 'index-pattern' && obj.id === '1'),
     });
-    const result = await resolveImportErrors({
+    const result = await resolveSavedObjectsImportErrors({
       readStream,
       objectLimit: 4,
       retries: [

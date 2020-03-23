@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAvatar, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import React, { useState } from 'react';
-import styled, { injectGlobal } from 'styled-components';
+import React, { useState, useCallback, useMemo } from 'react';
 
+import { useThrottledResizeObserver } from '../../utils';
 import { Note } from '../../../lib/note';
 import { InputsModelId } from '../../../store/inputs/constants';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
@@ -21,43 +20,6 @@ type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
 type ToggleLock = ({ linkToId }: { linkToId: InputsModelId }) => void;
-
-// SIDE EFFECT: the following `injectGlobal` overrides `EuiPopover`
-// and `EuiToolTip` global styles:
-// eslint-disable-next-line no-unused-expressions
-injectGlobal`
-  .euiPopover__panel.euiPopover__panel-isOpen {
-    z-index: 9900 !important;
-  }
-  .euiToolTip {
-    z-index: 9950 !important;
-  }
-`;
-
-const Avatar = styled(EuiAvatar)`
-  margin-left: 5px;
-`;
-
-Avatar.displayName = 'Avatar';
-
-const DescriptionPopoverMenuContainer = styled.div`
-  margin-top: 15px;
-`;
-
-DescriptionPopoverMenuContainer.displayName = 'DescriptionPopoverMenuContainer';
-
-const SettingsIcon = styled(EuiIcon)`
-  margin-left: 4px;
-  cursor: pointer;
-`;
-
-SettingsIcon.displayName = 'SettingsIcon';
-
-const HiddenFlexItem = styled(EuiFlexItem)`
-  display: none;
-`;
-
-HiddenFlexItem.displayName = 'HiddenFlexItem';
 
 interface Props {
   associateNote: AssociateNote;
@@ -76,7 +38,6 @@ interface Props {
   updateNote: UpdateNote;
   updateTitle: UpdateTitle;
   usersViewing: string[];
-  width: number;
 }
 
 const rightGutter = 60; // px
@@ -88,7 +49,7 @@ const starIconWidth = 30;
 const nameWidth = 155;
 const descriptionWidth = 165;
 const noteWidth = 130;
-const settingsWidth = 50;
+const settingsWidth = 55;
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
 export const Properties = React.memo<Props>(
@@ -109,37 +70,36 @@ export const Properties = React.memo<Props>(
     updateNote,
     updateTitle,
     usersViewing,
-    width,
   }) => {
+    const { ref, width = 0 } = useThrottledResizeObserver(300);
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
+    const [showTimelineModal, setShowTimelineModal] = useState(false);
 
-    const onButtonClick = () => {
-      setShowActions(!showActions);
-    };
+    const onButtonClick = useCallback(() => setShowActions(!showActions), [showActions]);
+    const onToggleShowNotes = useCallback(() => setShowNotes(!showNotes), [showNotes]);
+    const onClosePopover = useCallback(() => setShowActions(false), []);
+    const onCloseTimelineModal = useCallback(() => setShowTimelineModal(false), []);
+    const onToggleLock = useCallback(() => toggleLock({ linkToId: 'timeline' }), [toggleLock]);
+    const onOpenTimelineModal = useCallback(() => {
+      onClosePopover();
+      setShowTimelineModal(true);
+    }, []);
 
-    const onToggleShowNotes = () => {
-      setShowNotes(!showNotes);
-    };
+    const datePickerWidth = useMemo(
+      () =>
+        width -
+        rightGutter -
+        starIconWidth -
+        nameWidth -
+        (width >= showDescriptionThreshold ? descriptionWidth : 0) -
+        noteWidth -
+        settingsWidth,
+      [width]
+    );
 
-    const onClosePopover = () => {
-      setShowActions(false);
-    };
-
-    const datePickerWidth =
-      width -
-      rightGutter -
-      starIconWidth -
-      nameWidth -
-      (width >= showDescriptionThreshold ? descriptionWidth : 0) -
-      noteWidth -
-      settingsWidth;
-
-    // Passing the styles directly to the component because the width is
-    // being calculated and is recommended by Styled Components for performance
-    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
     return (
-      <TimelineProperties style={{ width }} data-test-subj="timeline-properties">
+      <TimelineProperties ref={ref} data-test-subj="timeline-properties">
         <PropertiesLeft
           associateNote={associateNote}
           datePickerWidth={
@@ -156,9 +116,7 @@ export const Properties = React.memo<Props>(
           showNotesFromWidth={width >= showNotesThreshold}
           timelineId={timelineId}
           title={title}
-          toggleLock={() => {
-            toggleLock({ linkToId: 'timeline' });
-          }}
+          toggleLock={onToggleLock}
           updateDescription={updateDescription}
           updateIsFavorite={updateIsFavorite}
           updateNote={updateNote}
@@ -173,13 +131,17 @@ export const Properties = React.memo<Props>(
           noteIds={noteIds}
           onButtonClick={onButtonClick}
           onClosePopover={onClosePopover}
+          onCloseTimelineModal={onCloseTimelineModal}
+          onOpenTimelineModal={onOpenTimelineModal}
           onToggleShowNotes={onToggleShowNotes}
           showActions={showActions}
           showDescription={width < showDescriptionThreshold}
           showNotes={showNotes}
           showNotesFromWidth={width < showNotesThreshold}
+          showTimelineModal={showTimelineModal}
           showUsersView={title.length > 0}
           timelineId={timelineId}
+          title={title}
           updateDescription={updateDescription}
           updateNote={updateNote}
           usersViewing={usersViewing}

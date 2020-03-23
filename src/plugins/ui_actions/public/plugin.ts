@@ -17,38 +17,34 @@
  * under the License.
  */
 
-import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
-import { IUiActionsApi, IActionRegistry, ITriggerRegistry } from './types';
-import { createApi } from './api';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { UiActionsService } from './service';
+import { selectRangeTrigger, valueClickTrigger, applyFilterTrigger } from './triggers';
 
-export interface IUiActionsSetup {
-  attachAction: IUiActionsApi['attachAction'];
-  registerAction: IUiActionsApi['registerAction'];
-  registerTrigger: IUiActionsApi['registerTrigger'];
-}
+export type UiActionsSetup = Pick<
+  UiActionsService,
+  'attachAction' | 'detachAction' | 'registerAction' | 'registerTrigger'
+>;
 
-export type IUiActionsStart = IUiActionsApi;
+export type UiActionsStart = PublicMethodsOf<UiActionsService>;
 
-export class UiActionsPlugin implements Plugin<IUiActionsSetup, IUiActionsStart> {
-  private readonly triggers: ITriggerRegistry = new Map();
-  private readonly actions: IActionRegistry = new Map();
-  private api!: IUiActionsApi;
+export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
+  private readonly service = new UiActionsService();
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.api = createApi({ triggers: this.triggers, actions: this.actions }).api;
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup): UiActionsSetup {
+    this.service.registerTrigger(selectRangeTrigger);
+    this.service.registerTrigger(valueClickTrigger);
+    this.service.registerTrigger(applyFilterTrigger);
+    return this.service;
   }
 
-  public setup(core: CoreSetup): IUiActionsSetup {
-    return {
-      registerTrigger: this.api.registerTrigger,
-      registerAction: this.api.registerAction,
-      attachAction: this.api.attachAction,
-    };
+  public start(core: CoreStart): UiActionsStart {
+    return this.service;
   }
 
-  public start(core: CoreStart): IUiActionsStart {
-    return this.api;
+  public stop() {
+    this.service.clear();
   }
-
-  public stop() {}
 }

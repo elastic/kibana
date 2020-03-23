@@ -5,25 +5,27 @@
  */
 
 import { omit, pick, find } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable, DatatableColumn } from '../../../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   include: string;
   exclude: string;
 }
 
-export function columns(): ExpressionFunction<'columns', Datatable, Arguments, Datatable> {
+export function columns(): ExpressionFunctionDefinition<
+  'columns',
+  Datatable,
+  Arguments,
+  Datatable
+> {
   const { help, args: argHelp } = getFunctionHelp().columns;
 
   return {
     name: 'columns',
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       include: {
         aliases: ['_'],
@@ -35,10 +37,10 @@ export function columns(): ExpressionFunction<'columns', Datatable, Arguments, D
         help: argHelp.exclude,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { include, exclude } = args;
-      const { columns: contextColumns, rows: contextRows, ...rest } = context;
-      let result = { ...context };
+      const { columns: contextColumns, rows: contextRows, ...rest } = input;
+      let result = { ...input };
 
       if (exclude) {
         const fields = exclude.split(',').map(field => field.trim());

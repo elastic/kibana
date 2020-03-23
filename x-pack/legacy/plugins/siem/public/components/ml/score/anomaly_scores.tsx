@@ -23,36 +23,45 @@ interface Args {
 export const createJobKey = (score: Anomaly): string =>
   `${score.jobId}-${score.severity}-${score.entityName}-${score.entityValue}`;
 
-export const AnomalyScores = React.memo<Args>(
-  ({ anomalies, startDate, endDate, isLoading, narrowDateRange, limit }): JSX.Element => {
-    if (isLoading) {
-      return <EuiLoadingSpinner data-test-subj="anomaly-score-spinner" size="m" />;
-    } else if (anomalies == null || anomalies.anomalies.length === 0) {
-      return getEmptyTagValue();
-    } else {
-      return (
-        <>
-          <EuiFlexGroup gutterSize="none" responsive={false}>
-            {getTopSeverityJobs(anomalies.anomalies, limit).map((score, index) => {
-              const jobKey = createJobKey(score);
-              return (
-                <AnomalyScore
-                  key={jobKey}
-                  jobKey={jobKey}
-                  startDate={startDate}
-                  endDate={endDate}
-                  index={index}
-                  score={score}
-                  interval={anomalies.interval}
-                  narrowDateRange={narrowDateRange}
-                />
-              );
-            })}
-          </EuiFlexGroup>
-        </>
-      );
-    }
+export const AnomalyScoresComponent = ({
+  anomalies,
+  startDate,
+  endDate,
+  isLoading,
+  narrowDateRange,
+  limit,
+}: Args): JSX.Element => {
+  if (isLoading) {
+    return <EuiLoadingSpinner data-test-subj="anomaly-score-spinner" size="m" />;
+  } else if (anomalies == null || anomalies.anomalies.length === 0) {
+    return getEmptyTagValue();
+  } else {
+    return (
+      <>
+        <EuiFlexGroup gutterSize="none" responsive={false}>
+          {getTopSeverityJobs(anomalies.anomalies, limit).map((score, index) => {
+            const jobKey = createJobKey(score);
+            return (
+              <AnomalyScore
+                key={jobKey}
+                jobKey={jobKey}
+                startDate={startDate}
+                endDate={endDate}
+                index={index}
+                score={score}
+                interval={anomalies.interval}
+                narrowDateRange={narrowDateRange}
+              />
+            );
+          })}
+        </EuiFlexGroup>
+      </>
+    );
   }
-);
+};
+
+AnomalyScoresComponent.displayName = 'AnomalyScoresComponent';
+
+export const AnomalyScores = React.memo(AnomalyScoresComponent);
 
 AnomalyScores.displayName = 'AnomalyScores';

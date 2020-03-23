@@ -25,9 +25,11 @@ const createMockServer = () => {
     port: 8080,
     routes: {
       validate: {
-        failAction: (r, h, err) => { throw err; }
-      }
-    }
+        failAction: (r, h, err) => {
+          throw err;
+        },
+      },
+    },
   });
   return mockServer;
 };
@@ -44,13 +46,13 @@ describe(`POST /api/kibana/management/saved_objects/scroll/export`, () => {
       method: 'POST',
       url: `/api/kibana/management/saved_objects/scroll/export`,
       headers,
-      payload
+      payload,
     };
 
     const { result, statusCode } = await mockServer.inject(request);
     expect(statusCode).toEqual(400);
     expect(result).toMatchObject({
-      message: `child "typesToInclude" fails because ["typesToInclude" is required]`
+      message: `child "typesToInclude" fails because ["typesToInclude" is required]`,
     });
   });
 
@@ -59,9 +61,9 @@ describe(`POST /api/kibana/management/saved_objects/scroll/export`, () => {
     const mockClient = {
       find: jest.fn(() => {
         return {
-          saved_objects: []
+          saved_objects: [],
         };
-      })
+      }),
     };
 
     mockServer.decorate('request', 'getSavedObjectsClient', () => mockClient);
@@ -70,14 +72,14 @@ describe(`POST /api/kibana/management/saved_objects/scroll/export`, () => {
 
     const headers = {};
     const payload = {
-      typesToInclude: ['foo', 'bar']
+      typesToInclude: ['foo', 'bar'],
     };
 
     const request = {
       method: 'POST',
       url: `/api/kibana/management/saved_objects/scroll/export`,
       headers,
-      payload
+      payload,
     };
 
     const { result, statusCode } = await mockServer.inject(request);
@@ -87,7 +89,7 @@ describe(`POST /api/kibana/management/saved_objects/scroll/export`, () => {
     expect(mockClient.find).toHaveBeenCalledWith({
       page: 1,
       perPage: 1000,
-      type: ['foo', 'bar']
+      type: ['foo', 'bar'],
     });
   });
 });

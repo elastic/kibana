@@ -18,37 +18,45 @@
  */
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { CoreSetup } from 'src/core/public';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiContextMenuItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  // @ts-ignore
-  EuiSuperSelect,
   EuiTitle,
-  EuiText,
 } from '@elastic/eui';
 
+import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
+import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
 
 interface Props {
   onClose: () => void;
   container: IContainer;
-  getFactory: GetEmbeddableFactory;
-  getAllFactories: GetEmbeddableFactories;
+  getFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   notifications: CoreSetup['notifications'];
   SavedObjectFinder: React.ComponentType<any>;
 }
 
-export class AddPanelFlyout extends React.Component<Props> {
+interface State {
+  isCreateMenuOpen: boolean;
+}
+
+function capitalize([first, ...letters]: string) {
+  return `${first.toUpperCase()}${letters.join('')}`;
+}
+
+export class AddPanelFlyout extends React.Component<Props, State> {
   private lastToast: any;
+
+  public state = {
+    isCreateMenuOpen: false,
+  };
 
   constructor(props: Props) {
     super(props);
@@ -96,41 +104,19 @@ export class AddPanelFlyout extends React.Component<Props> {
     this.showToast(name);
   };
 
-  private getSelectCreateNewOptions() {
-    const list = [
-      {
-        value: 'createNew',
-        inputDisplay: (
-          <EuiText>
-            <FormattedMessage
-              id="embeddableApi.addPanel.createNewDefaultOption"
-              defaultMessage="Create new ..."
-            />
-          </EuiText>
-        ),
-      },
-      ...[...this.props.getAllFactories()]
-        .filter(
-          factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
-        )
-        .map(factory => ({
-          inputDisplay: (
-            <EuiText>
-              <FormattedMessage
-                id="embeddableApi.addPanel.createNew"
-                defaultMessage="Create new {factoryName}"
-                values={{
-                  factoryName: factory.getDisplayName(),
-                }}
-              />
-            </EuiText>
-          ),
-          value: factory.type,
-          'data-test-subj': `createNew-${factory.type}`,
-        })),
-    ];
-
-    return list;
+  private getCreateMenuItems(): ReactElement[] {
+    return [...this.props.getAllFactories()]
+      .filter(factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew())
+      .map(factory => (
+        <EuiContextMenuItem
+          key={factory.type}
+          data-test-subj={`createNew-${factory.type}`}
+          onClick={() => this.createNewEmbeddable(factory.type)}
+          className="embPanel__addItem"
+        >
+          {capitalize(factory.getDisplayName())}
+        </EuiContextMenuItem>
+      ));
   }
 
   public render() {
@@ -148,8 +134,11 @@ export class AddPanelFlyout extends React.Component<Props> {
         noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
           defaultMessage: 'No matching objects found.',
         })}
-      />
+      >
+        <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
+      </SavedObjectFinder>
     );
+
     return (
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
         <EuiFlyoutHeader hasBorder>
@@ -160,18 +149,6 @@ export class AddPanelFlyout extends React.Component<Props> {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{savedObjectsFinder}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={true}>
-              <EuiSuperSelect
-                data-test-subj="createNew"
-                options={this.getSelectCreateNewOptions()}
-                valueOfSelected="createNew"
-                onChange={(value: string) => this.createNewEmbeddable(value)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
       </EuiFlyout>
     );
   }
