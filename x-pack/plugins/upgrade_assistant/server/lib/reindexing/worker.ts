@@ -16,6 +16,10 @@ const POLL_INTERVAL = 30000;
 // If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
 const PAUSE_WINDOW = POLL_INTERVAL * 4;
 
+/**
+ * To avoid running the worker loop very tightly and causing a CPU bottleneck we use this
+ * padding to simulate an asynchronous sleep. See the description of the tight loop below.
+ */
 const WORKER_PADDING_MS = 500;
 
 /**
@@ -114,7 +118,7 @@ export class ReindexWorker {
         // Push each operation through the state machine and refresh.
         await Promise.all(this.inProgressOps.map(this.processNextStep));
         // TODO: This tight loop needs something to relax potentially high CPU demands so this padding is added.
-        // This scheduler should probably be revisited or removed in future.
+        // This scheduler should be revisited in future.
         await new Promise(res => setTimeout(res, WORKER_PADDING_MS));
         await this.refresh();
       }
