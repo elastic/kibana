@@ -82,5 +82,3 @@ export const [getAggs, setAggs] = createGetterSetter<DataPublicPluginStart['sear
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
-
-export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
