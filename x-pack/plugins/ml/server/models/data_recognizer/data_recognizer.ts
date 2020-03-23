@@ -1106,7 +1106,7 @@ export class DataRecognizer {
       this.jobsForModelMemoryEstimation = [];
     } else {
       this.jobsForModelMemoryEstimation = moduleConfig.jobs.filter(job => {
-        const override = jobSpecificOverrides.find(o => o.job_id === job.id);
+        const override = jobSpecificOverrides.find(o => `${jobPrefix}${o.job_id}` === job.id);
         return override?.analysis_limits?.model_memory_limit === undefined;
       });
     }
