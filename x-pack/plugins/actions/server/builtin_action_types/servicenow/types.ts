@@ -16,7 +16,7 @@ import {
 } from './schema';
 
 import { ServiceNow } from './lib';
-import { Incident } from './lib/types';
+import { Incident, IncidentResponse } from './lib/types';
 
 // config definition
 export type ConfigType = TypeOf<typeof ConfigSchema>;
@@ -50,11 +50,8 @@ export type IncidentHandlerArguments = CreateHandlerArguments & {
   incidentId: string | null;
 };
 
-export interface HandlerResponse {
-  incidentId: string;
-  number: string;
+export interface HandlerResponse extends IncidentResponse {
   comments?: SimpleComment[];
-  pushedDate: string;
 }
 
 export interface SimpleComment {

@@ -28,6 +28,8 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
+import { hasListsFeature } from '../../feature_flags';
+import { transformAlertToRuleAction } from '../../rules/transform_actions';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -101,6 +103,7 @@ export const transformAlertToRule = (
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+    actions: alert.actions.map(transformAlertToRuleAction),
     created_at: alert.createdAt.toISOString(),
     updated_at: alert.updatedAt.toISOString(),
     created_by: alert.createdBy,
@@ -133,6 +136,7 @@ export const transformAlertToRule = (
     to: alert.params.to,
     type: alert.params.type,
     threat: alert.params.threat,
+    throttle: alert.throttle,
     note: alert.params.note,
     version: alert.params.version,
     status: ruleStatus?.attributes.status,
@@ -141,13 +145,15 @@ export const transformAlertToRule = (
     last_success_at: ruleStatus?.attributes.lastSuccessAt,
     last_failure_message: ruleStatus?.attributes.lastFailureMessage,
     last_success_message: ruleStatus?.attributes.lastSuccessMessage,
+    // TODO: (LIST-FEATURE) Remove hasListsFeature() check once we have lists available for a release
+    lists: hasListsFeature() ? alert.params.lists : null,
   });
 };
 
-export const transformRulesToNdjson = (rules: Array<Partial<OutputRuleAlertRest>>): string => {
-  if (rules.length !== 0) {
-    const rulesString = rules.map(rule => JSON.stringify(rule)).join('\n');
-    return `${rulesString}\n`;
+export const transformDataToNdjson = (data: unknown[]): string => {
+  if (data.length !== 0) {
+    const dataString = data.map(rule => JSON.stringify(rule)).join('\n');
+    return `${dataString}\n`;
   } else {
     return '';
   }

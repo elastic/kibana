@@ -30,7 +30,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
+import { unhashUrl, removeQueryParam } from '../../../../../../../plugins/kibana_utils/public';
 import { MarkdownSimple, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
 import { addFatalError, kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import {
@@ -69,16 +69,7 @@ export function initEditorDirective(app, deps) {
   initVisualizationDirective(app, deps);
 }
 
-function VisualizeAppController(
-  $scope,
-  $route,
-  $window,
-  $injector,
-  $timeout,
-  kbnUrl,
-  kbnUrlStateStorage,
-  history
-) {
+function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlStateStorage, history) {
   const {
     indexPatterns,
     localStorage,
@@ -421,7 +412,7 @@ function VisualizeAppController(
 
     const addToDashMode =
       $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
-    kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+    removeQueryParam(history, DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
     $scope.isAddToDashMode = () => addToDashMode;
 
@@ -639,10 +630,10 @@ function VisualizeAppController(
               const savedVisualizationParsedUrl = new KibanaParsedUrl({
                 basePath: getBasePath(),
                 appId: kbnBaseUrl.slice('/app/'.length),
-                appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
+                appPath: `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(savedVis.id)}`,
               });
               // Manually insert a new url so the back button will open the saved visualization.
-              $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
+              history.replace(savedVisualizationParsedUrl.appPath);
               setActiveUrl(savedVisualizationParsedUrl.appPath);
 
               const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
@@ -658,7 +649,7 @@ function VisualizeAppController(
                 DashboardConstants.ADD_EMBEDDABLE_ID,
                 savedVis.id
               );
-              kbnUrl.change(dashboardParsedUrl.appPath);
+              history.push(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));

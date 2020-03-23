@@ -10,8 +10,17 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { foldLeftRight, getPaths } from './__mocks__/utils';
 import { exactCheck, findDifferencesRecursive } from './exact_check';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 
 describe('exact_check', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('it returns an error if given extra object properties', () => {
     const someType = t.exact(
       t.type({
