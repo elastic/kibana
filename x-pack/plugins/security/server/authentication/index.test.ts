@@ -415,6 +415,24 @@ describe('setupAuthentication()', () => {
     });
   });
 
+  describe('grantAPIKeyAsInternalUser()', () => {
+    let grantAPIKeyAsInternalUser: (request: KibanaRequest) => Promise<CreateAPIKeyResult | null>;
+    beforeEach(async () => {
+      grantAPIKeyAsInternalUser = (await setupAuthentication(mockSetupAuthenticationParams))
+        .grantAPIKeyAsInternalUser;
+    });
+
+    it('calls grantAsInternalUser', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const apiKeysInstance = jest.requireMock('./api_keys').APIKeys.mock.instances[0];
+      apiKeysInstance.grantAsInternalUser.mockResolvedValueOnce({ api_key: 'foo' });
+      await expect(grantAPIKeyAsInternalUser(request)).resolves.toEqual({
+        api_key: 'foo',
+      });
+      expect(apiKeysInstance.grantAsInternalUser).toHaveBeenCalledWith(request);
+    });
+  });
+
   describe('invalidateAPIKey()', () => {
     let invalidateAPIKey: (
       request: KibanaRequest,
