@@ -926,18 +926,6 @@
             },
             "statusDate": {
               "type": "date"
-            },
-            "lastLookBackDate": {
-              "type": "date",
-            },
-            "gap": {
-              "type": "integer"
-            },
-            "bulkCreateTimeDurations": {
-              "type": "object"
-            },
-            "searchAfterTimeDurations": {
-              "type": "object"
             }
           }
         },
