@@ -149,8 +149,11 @@
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse
 /src/legacy/core_plugins/ui_metric/ @elastic/pulse
+/src/plugins/telemetry/ @elastic/pulse
+/src/plugins/telemetry_collection_manager/ @elastic/pulse
+/src/plugins/telemetry_management_section/ @elastic/pulse
 /src/plugins/usage_collection/ @elastic/pulse
-/x-pack/legacy/plugins/telemetry/ @elastic/pulse
+/x-pack/plugins/telemetry_collection_xpack/ @elastic/pulse
 
 # Kibana Alerting Services
 /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
