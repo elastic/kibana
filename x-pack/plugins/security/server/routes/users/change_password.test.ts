@@ -188,7 +188,7 @@ describe('Change password', () => {
 
       expect(authc.login).toHaveBeenCalledTimes(1);
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'basic',
+        provider: { name: 'basic1' },
         value: { username, password: 'new-password' },
       });
     });
@@ -196,7 +196,7 @@ describe('Change password', () => {
     it('successfully changes own password if provided old password is correct for non-basic provider.', async () => {
       const mockUser = mockAuthenticatedUser({
         username: 'user',
-        authentication_provider: 'token',
+        authentication_provider: 'token1',
       });
       authc.getCurrentUser.mockReturnValue(mockUser);
       authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockUser));
@@ -215,7 +215,7 @@ describe('Change password', () => {
 
       expect(authc.login).toHaveBeenCalledTimes(1);
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'token',
+        provider: { name: 'token1' },
         value: { username, password: 'new-password' },
       });
     });
