@@ -45,7 +45,6 @@ import { PersistedState } from '../../../../../../../plugins/visualizations/publ
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
-import { VisSavedObject } from '../types';
 import { VisualizationsStartDeps } from '../plugin';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 
