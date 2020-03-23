@@ -75,16 +75,10 @@ class MockLayer {
   }
 }
 
-const makeProperty = options => {
-  return new DynamicColorProperty(
-    options,
-    VECTOR_STYLES.LINE_COLOR,
-    mockField,
-    new MockLayer(),
-    () => {
-      return x => x + '_format';
-    }
-  );
+const makeProperty = (options, field = mockField) => {
+  return new DynamicColorProperty(options, VECTOR_STYLES.LINE_COLOR, field, new MockLayer(), () => {
+    return x => x + '_format';
+  });
 };
 
 const defaultLegendParams = {
@@ -233,6 +227,71 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
       { key: 'US', count: 2 },
       { key: 'IN', count: 1 },
     ],
+  });
+});
+
+describe('supportsFieldMeta', () => {
+  test('should support it when field does for ordinals', () => {
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.ORDINAL,
+    };
+    const styleProp = makeProperty(dynamicStyleOptions);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(true);
+  });
+
+  test('should support it when field does for categories', () => {
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.CATEGORICAL,
+    };
+    const styleProp = makeProperty(dynamicStyleOptions);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(true);
+  });
+
+  test('should not support it when field does not', () => {
+    const field = Object.create(mockField);
+    field.supportsFieldMeta = function() {
+      return false;
+    };
+
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.ORDINAL,
+    };
+    const styleProp = makeProperty(dynamicStyleOptions, field);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(false);
+  });
+
+  test('should not support it when field config not complete', () => {
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.ORDINAL,
+    };
+    const styleProp = makeProperty(dynamicStyleOptions, null);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(false);
+  });
+
+  test('should not support it when using custom ramp for ordinals', () => {
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.ORDINAL,
+      useCustomColorRamp: true,
+      customColorRamp: [],
+    };
+    const styleProp = makeProperty(dynamicStyleOptions);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(false);
+  });
+
+  test('should not support it when using custom palette for categories', () => {
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.CATEGORICAL,
+      useCustomColorPalette: true,
+      customColorPalette: [],
+    };
+    const styleProp = makeProperty(dynamicStyleOptions);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(false);
   });
 });
 
