@@ -13,7 +13,7 @@ import {
   JobOverride,
   DataRecognizerConfigResponse,
 } from '../../../common/types/modules';
-import { RecognizeResult } from '../../../common/types/data_recognizer';
+import { RecognizeResult } from '../../models/data_recognizer/data_recognizer';
 
 export interface ModulesProvider {
   modulesProvider(
