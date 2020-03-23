@@ -7,6 +7,7 @@
 import { NotificationsStart } from 'kibana/public';
 import { Observable, of, Subject } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 
@@ -38,6 +39,13 @@ export const estimatorProvider = (notification: NotificationsStart) => {
         catchError(error => {
           // eslint-disable-next-line no-console
           console.error('Model memory limit could not be calculated', error);
+
+          notification.toasts.addError(error, {
+            title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
+              defaultMessage: 'Model memory limit could not be calculated',
+            }),
+          });
+
           return of(DEFAULT_MODEL_MEMORY_LIMIT);
         })
       );
