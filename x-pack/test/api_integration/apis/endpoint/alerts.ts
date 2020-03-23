@@ -29,8 +29,14 @@ export default function({ getService }: FtrProviderContext) {
 
   describe('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
-      before(() => esArchiver.load('endpoint/alerts/api_feature'));
-      after(() => esArchiver.unload('endpoint/alerts/api_feature'));
+      before(() => {
+        esArchiver.load('endpoint/alerts/api_feature');
+        esArchiver.load('endpoint/metadata/api_feature');
+      });
+      after(() => {
+        esArchiver.unload('endpoint/alerts/api_feature');
+        esArchiver.unload('endpoint/metadata/api_feature');
+      });
 
       it('should not support POST requests', async () => {
         await supertest
@@ -225,6 +231,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.id).to.eql(documentID);
         expect(body.prev).to.eql(`/api/endpoint/alerts/${prevDocumentID}`);
         expect(body.next).to.eql(null); // last alert, no more beyond this
+        expect(body.state.host.host.id).to.eql(body.host.id);
       });
 
       it('should return alert details by id, getting first alert', async () => {
