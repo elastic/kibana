@@ -5,7 +5,7 @@
  */
 
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FetcherResult, FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { history } from '../../../../../utils/history';
@@ -18,6 +18,16 @@ import { SettingsPage } from './SettingsPage/SettingsPage';
 import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 
 type PageStep = 'choose-service-step' | 'choose-settings-step' | 'review-step';
+
+function getInitialNewConfig(
+  existingConfig: AgentConfigurationIntake | undefined
+) {
+  return {
+    agent_name: existingConfig?.agent_name,
+    service: existingConfig?.service || {},
+    settings: existingConfig?.settings || {}
+  };
+}
 
 function setPage(pageStep: PageStep) {
   history.push({
@@ -57,21 +67,22 @@ export function AgentConfigurationCreateEdit({
   pageStep: PageStep;
   existingConfigResult?: FetcherResult<AgentConfiguration>;
 }) {
-  const [newConfig, setNewConfig] = useState<AgentConfigurationIntake>({
-    agent_name: undefined,
-    service: {},
-    settings: {}
-  });
-  const isEditMode = Boolean(existingConfigResult);
   const existingConfig = existingConfigResult?.data;
+  const isEditMode = Boolean(existingConfigResult);
+  const [newConfig, setNewConfig] = useState<AgentConfigurationIntake>(
+    getInitialNewConfig(existingConfig)
+  );
+
+  const resetSettings = useCallback(() => {
+    setNewConfig(_newConfig => ({
+      ..._newConfig,
+      settings: existingConfig?.settings || {}
+    }));
+  }, [existingConfig]);
 
   // update newConfig when existingConfig has loaded
   useEffect(() => {
-    setNewConfig({
-      agent_name: existingConfig?.agent_name,
-      service: existingConfig?.service || {},
-      settings: existingConfig?.settings || {}
-    });
+    setNewConfig(getInitialNewConfig(existingConfig));
   }, [existingConfig]);
 
   useEffect(() => {
@@ -122,6 +133,7 @@ export function AgentConfigurationCreateEdit({
           onClickEdit={() => setPage('choose-service-step')}
           newConfig={newConfig}
           setNewConfig={setNewConfig}
+          resetSettings={resetSettings}
           isEditMode={isEditMode}
         />
       )}

@@ -34,20 +34,12 @@ function FormRow({
   value?: string;
   onChange: (key: string, value: string) => void;
 }) {
-  const defaultInputPlaceholder = i18n.translate(
-    'xpack.apm.agentConfig.defaultInputPlaceholder',
-    {
-      defaultMessage: 'Set {settingsLabel}',
-      values: { settingsLabel: setting.label }
-    }
-  );
-
   switch (setting.type) {
     case 'float':
     case 'text': {
       return (
         <EuiFieldText
-          placeholder={setting.placeholder || defaultInputPlaceholder}
+          placeholder={setting.placeholder}
           value={value || ''}
           onChange={e => onChange(setting.key, e.target.value)}
         />
@@ -57,7 +49,7 @@ function FormRow({
     case 'integer': {
       return (
         <EuiFieldNumber
-          placeholder={setting.placeholder || defaultInputPlaceholder}
+          placeholder={setting.placeholder}
           value={(value as any) || ''}
           min={setting.min}
           max={setting.max}
@@ -96,7 +88,7 @@ function FormRow({
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiFieldNumber
-              placeholder={setting.placeholder || defaultInputPlaceholder}
+              placeholder={setting.placeholder}
               value={(amount as unknown) as number}
               onChange={e =>
                 onChange(

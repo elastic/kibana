@@ -15,6 +15,7 @@ import {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
 import {
   omitAllOption,
@@ -22,7 +23,7 @@ import {
 } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/useFetcher';
 import { FormRowSelect } from './FormRowSelect';
-import { CancelButton } from './CancelButton';
+import { APMLink } from '../../../../../shared/Links/apm/APMLink';
 
 interface Props {
   newConfig: AgentConfigurationIntake;
@@ -172,7 +173,14 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <EuiFlexGroup justifyContent="flexEnd">
         {/* Cancel button */}
         <EuiFlexItem grow={false}>
-          <CancelButton />
+          <APMLink path="/settings/agent-configuration">
+            <EuiButtonEmpty color="primary">
+              {i18n.translate(
+                'xpack.apm.agentConfig.servicePage.cancelButton',
+                { defaultMessage: 'Cancel' }
+              )}
+            </EuiButtonEmpty>
+          </APMLink>
         </EuiFlexItem>
 
         {/* Next button */}

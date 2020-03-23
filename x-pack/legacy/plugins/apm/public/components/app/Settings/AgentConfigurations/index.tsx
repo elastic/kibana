@@ -18,8 +18,7 @@ import { isEmpty } from 'lodash';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { AgentConfigurationList } from './List';
 import { useTrackPageview } from '../../../../../../../../plugins/observability/public';
-import { getAPMHref } from '../../../shared/Links/apm/APMLink';
-import { useLocation } from '../../../../hooks/useLocation';
+import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
 
 export function AgentConfigurations() {
   const { refetch, data = [], status } = useFetcher(
@@ -61,8 +60,7 @@ export function AgentConfigurations() {
 }
 
 function CreateConfigurationButton() {
-  const { search } = useLocation();
-  const href = getAPMHref('/settings/agent-configuration/create', search);
+  const href = createAgentConfigurationHref();
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">

@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { AgentName } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/fields/agent';
 import { history } from '../../../../../../utils/history';
 import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
@@ -33,7 +34,7 @@ import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext
 import { useUiTracker } from '../../../../../../../../../../plugins/observability/public';
 import { SettingFormRow } from './SettingFormRow';
 import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
-import { CancelButton } from '../ServicePage/CancelButton';
+import { APMLink } from '../../../../../shared/Links/apm/APMLink';
 
 function removeEmpty<T>(obj: T): T {
   return Object.fromEntries(
@@ -46,6 +47,7 @@ export function SettingsPage({
   unsavedChanges,
   newConfig,
   setNewConfig,
+  resetSettings,
   isEditMode,
   onClickEdit
 }: {
@@ -53,6 +55,7 @@ export function SettingsPage({
   unsavedChanges: Record<string, string>;
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
+  resetSettings: () => void;
   isEditMode: boolean;
   onClickEdit: () => void;
 }) {
@@ -209,7 +212,12 @@ export function SettingsPage({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <CancelButton color="ghost" />
+                  <EuiButtonEmpty color="ghost" onClick={resetSettings}>
+                    {i18n.translate(
+                      'xpack.apm.agentConfig.settingsPage.discardChangesButton',
+                      { defaultMessage: 'Discard changes' }
+                    )}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton

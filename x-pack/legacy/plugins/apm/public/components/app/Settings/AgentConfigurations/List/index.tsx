@@ -27,7 +27,7 @@ import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/ag
 import {
   createAgentConfigurationHref,
   editAgentConfigurationHref
-} from '../../../../shared/Links/apm/agentConfiguration';
+} from '../../../../shared/Links/apm/agentConfigurationLinks';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 type Config = AgentConfigurationListAPIResponse[0];
