@@ -19,6 +19,7 @@ import {
   formatScheduleStepData,
   formatAboutStepData,
   formatRule,
+  filterRuleFieldsForType,
 } from './helpers';
 import {
   mockDefineStepRule,
@@ -536,6 +537,50 @@ describe('helpers', () => {
       const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule);
 
       expect(result.id).toBeUndefined();
+    });
+  });
+
+  describe('filterRuleFieldsForType', () => {
+    let fields: DefineStepRule;
+
+    beforeEach(() => {
+      fields = mockDefineStepRule();
+    });
+
+    it('removes query fields if the type is machine learning', () => {
+      const result = filterRuleFieldsForType(fields, 'machine_learning');
+      expect(result).not.toHaveProperty('index');
+      expect(result).not.toHaveProperty('queryBar');
+    });
+
+    it('leaves ML fields if the type is machine learning', () => {
+      const result = filterRuleFieldsForType(fields, 'machine_learning');
+      expect(result).toHaveProperty('anomalyThreshold');
+      expect(result).toHaveProperty('machineLearningJobId');
+    });
+
+    it('leaves arbitrary fields if the type is machine learning', () => {
+      const result = filterRuleFieldsForType(fields, 'machine_learning');
+      expect(result).toHaveProperty('timeline');
+      expect(result).toHaveProperty('ruleType');
+    });
+
+    it('removes ML fields if the type is not machine learning', () => {
+      const result = filterRuleFieldsForType(fields, 'query');
+      expect(result).not.toHaveProperty('anomalyThreshold');
+      expect(result).not.toHaveProperty('machineLearningJobId');
+    });
+
+    it('leaves query fields if the type is query', () => {
+      const result = filterRuleFieldsForType(fields, 'query');
+      expect(result).toHaveProperty('index');
+      expect(result).toHaveProperty('queryBar');
+    });
+
+    it('leaves arbitrary fields if the type is query', () => {
+      const result = filterRuleFieldsForType(fields, 'query');
+      expect(result).toHaveProperty('timeline');
+      expect(result).toHaveProperty('ruleType');
     });
   });
 });
