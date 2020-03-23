@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { healthRoute, elasticsearchClientPlugin } from './health';
+import { healthRoute } from './health';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
@@ -25,47 +25,35 @@ describe('healthRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/api/alert/_health"`);
   });
 
-  it('uses a custom Elasticsearch client with a custom security api plugin', async () => {
+  it('queries the usage api', async () => {
     const router: RouterMock = mockRouter.create();
     const es = elasticsearchServiceMock.createSetup();
 
-    const alertingSecurityClient = elasticsearchServiceMock.createCustomClusterClient();
-    es.createClient.mockReturnValue(alertingSecurityClient);
-
-    const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
-    alertingSecurityClient.asScoped.mockReturnValue(scopedClient);
-
-    scopedClient.callAsCurrentUser.mockReturnValue(Promise.resolve({}));
+    es.adminClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
     healthRoute(router, es);
-
-    expect(es.createClient).toHaveBeenCalledWith('alertingSecurity', {
-      plugins: [elasticsearchClientPlugin],
-    });
-
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     await handler(context, req, res);
 
-    expect(alertingSecurityClient.asScoped).toHaveBeenCalledWith(req);
-    expect(
-      scopedClient.callAsCurrentUser
-    ).toHaveBeenCalledWith('alertingSecurity.canGenerateApiKeys', { owner: true });
+    expect(es.adminClient.callAsInternalUser.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "transport.request",
+        Object {
+          "method": "GET",
+          "path": "/_xpack/usage",
+        },
+      ]
+    `);
   });
 
-  it('evaluates truthy values from the security api_key api to mean that the user can generate Api Keys', async () => {
+  it('evaluates missing security info from the usage api to mean that the security plugin is disbled', async () => {
     const router: RouterMock = mockRouter.create();
     const es = elasticsearchServiceMock.createSetup();
 
-    const alertingSecurityClient = elasticsearchServiceMock.createCustomClusterClient();
-    es.createClient.mockReturnValue(alertingSecurityClient);
-
-    const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
-    alertingSecurityClient.asScoped.mockReturnValue(scopedClient);
-
-    scopedClient.callAsCurrentUser.mockReturnValue(Promise.resolve({}));
+    es.adminClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
     healthRoute(router, es);
     const [, handler] = router.get.mock.calls[0];
@@ -81,17 +69,11 @@ describe('healthRoute', () => {
     `);
   });
 
-  it('evaluates falsey values from the security api_key api to mean that the user can generate Api Keys', async () => {
+  it('evaluates missing security http info from the usage api to mean that the security plugin is disbled', async () => {
     const router: RouterMock = mockRouter.create();
     const es = elasticsearchServiceMock.createSetup();
 
-    const alertingSecurityClient = elasticsearchServiceMock.createCustomClusterClient();
-    es.createClient.mockReturnValue(alertingSecurityClient);
-
-    const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
-    alertingSecurityClient.asScoped.mockReturnValue(scopedClient);
-
-    scopedClient.callAsCurrentUser.mockReturnValue(Promise.resolve(undefined));
+    es.adminClient.callAsInternalUser.mockReturnValue(Promise.resolve({ security: {} }));
 
     healthRoute(router, es);
     const [, handler] = router.get.mock.calls[0];
@@ -101,26 +83,18 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "canGenerateApiKeys": false,
+          "canGenerateApiKeys": true,
         },
       }
     `);
-
-    expect(res.ok).toHaveBeenCalled();
   });
 
-  it('evaluates disabled api_keys in the security api as meaning the user cannot create Api Keys', async () => {
+  it('evaluates security enabled, and missing ssl info from the usage api to mean that the user cannot generate keys', async () => {
     const router: RouterMock = mockRouter.create();
     const es = elasticsearchServiceMock.createSetup();
 
-    const alertingSecurityClient = elasticsearchServiceMock.createCustomClusterClient();
-    es.createClient.mockReturnValue(alertingSecurityClient);
-
-    const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
-    alertingSecurityClient.asScoped.mockReturnValue(scopedClient);
-
-    scopedClient.callAsCurrentUser.mockReturnValue(
-      Promise.reject(new Error('Error: api keys are not enabled'))
+    es.adminClient.callAsInternalUser.mockReturnValue(
+      Promise.resolve({ security: { enabled: true } })
     );
 
     healthRoute(router, es);
@@ -135,26 +109,36 @@ describe('healthRoute', () => {
         },
       }
     `);
-
-    expect(res.ok).toHaveBeenCalled();
   });
 
-  it('evaluates errors from the api_keys security api complaining about no handler as meaning security is disabled', async () => {
+  it('evaluates security enabled, SSL info present but missing http info from the usage api to mean that the user cannot generate keys', async () => {
     const router: RouterMock = mockRouter.create();
     const es = elasticsearchServiceMock.createSetup();
 
-    const alertingSecurityClient = elasticsearchServiceMock.createCustomClusterClient();
-    es.createClient.mockReturnValue(alertingSecurityClient);
+    es.adminClient.callAsInternalUser.mockReturnValue(
+      Promise.resolve({ security: { enabled: true, ssl: {} } })
+    );
 
-    const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
-    alertingSecurityClient.asScoped.mockReturnValue(scopedClient);
+    healthRoute(router, es);
+    const [, handler] = router.get.mock.calls[0];
 
-    scopedClient.callAsCurrentUser.mockReturnValue(
-      Promise.reject(
-        new Error(
-          'Error: no handler found for uri [/_security/api_key?owner=true] and method [GET]'
-        )
-      )
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
+
+    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "canGenerateApiKeys": false,
+        },
+      }
+    `);
+  });
+
+  it('evaluates security and tls enabled to mean that the user can generate keys', async () => {
+    const router: RouterMock = mockRouter.create();
+    const es = elasticsearchServiceMock.createSetup();
+
+    es.adminClient.callAsInternalUser.mockReturnValue(
+      Promise.resolve({ security: { enabled: true, ssl: { http: { enabled: true } } } })
     );
 
     healthRoute(router, es);
@@ -169,35 +153,5 @@ describe('healthRoute', () => {
         },
       }
     `);
-
-    expect(res.ok).toHaveBeenCalled();
-  });
-
-  it('evaluates any other errors from the api_keys security api as an unhealthy alerting service state', async () => {
-    const router: RouterMock = mockRouter.create();
-    const es = elasticsearchServiceMock.createSetup();
-
-    const alertingSecurityClient = elasticsearchServiceMock.createCustomClusterClient();
-    es.createClient.mockReturnValue(alertingSecurityClient);
-
-    const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
-    alertingSecurityClient.asScoped.mockReturnValue(scopedClient);
-
-    scopedClient.callAsCurrentUser.mockReturnValue(
-      Promise.reject(new Error('Error: there are monkeys in the index, send HALP!'))
-    );
-
-    healthRoute(router, es);
-    const [, handler] = router.get.mock.calls[0];
-
-    const [context, req, res] = mockHandlerArguments({}, {}, ['badRequest']);
-
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": [Error: Error: there are monkeys in the index, send HALP!],
-      }
-    `);
-
-    expect(res.badRequest).toHaveBeenCalled();
   });
 });

@@ -12,14 +12,20 @@ import {
   KibanaResponseFactory,
   ElasticsearchServiceSetup,
 } from 'kibana/server';
-import { isApiKeyDisabledError, isSecurityPluginDisabledError } from './lib/error_handler';
 import { AlertingFrameworkHealth } from '../types';
 
-export function healthRoute(router: IRouter, elasticsearch: ElasticsearchServiceSetup) {
-  const clusterClient = elasticsearch.createClient('alertingSecurity', {
-    plugins: [elasticsearchClientPlugin],
-  });
+interface XPackUsageSecurity {
+  security?: {
+    enabled?: boolean;
+    ssl?: {
+      http?: {
+        enabled?: boolean;
+      };
+    };
+  };
+}
 
+export function healthRoute(router: IRouter, elasticsearch: ElasticsearchServiceSetup) {
   router.get(
     {
       path: '/api/alert/_health',
@@ -31,60 +37,29 @@ export function healthRoute(router: IRouter, elasticsearch: ElasticsearchService
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       try {
-        const scopedClusterClient = clusterClient.asScoped(req);
-
         const {
-          canGenerateApiKeys,
-        }: AlertingFrameworkHealth = await scopedClusterClient
-          .callAsCurrentUser('alertingSecurity.canGenerateApiKeys', { owner: true })
-          .then(
-            //  If the API returns a truthy result that means it's enabled.
-            (result: unknown) => ({ canGenerateApiKeys: !!result }),
-            // This is a brittle dependency upon message. Tracked by https://github.com/elastic/elasticsearch/issues/47759.
-            (e: Error) =>
-              isApiKeyDisabledError(e)
-                ? Promise.resolve({ canGenerateApiKeys: false })
-                : isSecurityPluginDisabledError(e)
-                ? // If no handler is available, this means security is disabled, in which
-                  // case generating keys should work fine
-                  Promise.resolve({ canGenerateApiKeys: true })
-                : Promise.reject(e)
-          );
+          security: {
+            enabled: isSecurityEnabled = false,
+            ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
+          } = {},
+        } = await elasticsearch.adminClient
+          // `transport.request` is potentially unsafe when combined with untrusted user input.
+          // Do not augment with such input.
+          .callAsInternalUser<XPackUsageSecurity>('transport.request', {
+            method: 'GET',
+            path: '/_xpack/usage',
+          });
+
+        const frameworkHealth: AlertingFrameworkHealth = {
+          canGenerateApiKeys: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
+        };
 
         return res.ok({
-          body: { canGenerateApiKeys },
+          body: frameworkHealth,
         });
       } catch (error) {
         return res.badRequest({ body: error });
       }
     })
   );
-}
-
-export function elasticsearchClientPlugin(Client: any, config: unknown, components: any) {
-  const ca = components.clientAction.factory;
-
-  Client.prototype.alertingSecurity = components.clientAction.namespaceFactory();
-  const alertingSecurity = Client.prototype.alertingSecurity.prototype;
-
-  /**
-   * Gets API keys in Elasticsearch
-   * @param {boolean} owner A boolean flag that can be used to query API keys owned by the currently authenticated user.
-   * Defaults to false. The realm_name or username parameters cannot be specified when this parameter is set to true as
-   * they are assumed to be the currently authenticated ones.
-   */
-  alertingSecurity.canGenerateApiKeys = ca({
-    method: 'GET',
-    urls: [
-      {
-        fmt: `/_security/api_key?owner=<%=owner%>`,
-        req: {
-          owner: {
-            type: 'boolean',
-            required: true,
-          },
-        },
-      },
-    ],
-  });
 }
