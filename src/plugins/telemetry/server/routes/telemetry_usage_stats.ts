@@ -70,12 +70,12 @@ export function registerTelemetryUsageStatsRoutes(
         if (isDev) {
           // don't ignore errors when running in dev mode
           throw err;
-        } else if (unencrypted && err.status === 403) {
-          return res.forbidden();
-        } else {
-          // ignore errors and return empty set
-          return res.ok({ body: [] });
         }
+        if (unencrypted && err.status === 403) {
+          return res.forbidden();
+        }
+        // ignore errors and return empty set
+        return res.ok({ body: [] });
       }
     }
   );
