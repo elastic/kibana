@@ -22,8 +22,9 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const comments = await caseService.getAllCaseComments({
-          client: context.core.savedObjects.client,
+          client,
           caseId: request.params.case_id,
         });
         return response.ok({

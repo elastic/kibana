@@ -31,6 +31,7 @@ export const RedirectToConfigureCasesPage = () => (
 const baseCaseUrl = `#/link-to/${SiemPageName.case}`;
 
 export const getCaseUrl = () => baseCaseUrl;
-export const getCaseDetailsUrl = (detailName: string) => `${baseCaseUrl}/${detailName}`;
-export const getCreateCaseUrl = () => `${baseCaseUrl}/create`;
-export const getConfigureCasesUrl = () => `${baseCaseUrl}/configure`;
+export const getCaseDetailsUrl = (detailName: string, search: string) =>
+  `${baseCaseUrl}/${detailName}${search}`;
+export const getCreateCaseUrl = (search: string) => `${baseCaseUrl}/create${search}`;
+export const getConfigureCasesUrl = (search: string) => `${baseCaseUrl}/configure${search}`;
