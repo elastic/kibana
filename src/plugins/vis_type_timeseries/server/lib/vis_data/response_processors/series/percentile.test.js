@@ -93,7 +93,7 @@ describe('percentile(resp, panel, series)', () => {
 
     expect(results[0]).toHaveProperty('id', 'test:10-90');
     expect(results[0]).toHaveProperty('color', 'rgb(255, 0, 0)');
-    expect(results[0]).toHaveProperty('label', 'Percentile of cpu (10)');
+    expect(results[0]).toHaveProperty('label', 'Percentile of cpu');
     expect(results[0]).toHaveProperty('lines');
     expect(results[0].lines).toEqual({
       fill: 0.2,
