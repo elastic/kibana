@@ -22,6 +22,7 @@ import { ExportedTimelines } from '../types';
 import { getTupleDuplicateErrorsAndUniqueRules } from '../../detection_engine/routes/rules/utils';
 
 import {
+  createTimelines,
   savePinnedEvents,
   getCollectErrorMessages,
   getTupleDuplicateErrorsAndUniqueTimeline,
@@ -167,68 +168,33 @@ export const importTimelinesRoute = (
                       let timeline = null;
                       try {
                         timeline = await timelineLib.getTimeline(frameworkRequest, savedObjectId);
+                        // eslint-disable-next-line no-empty
                       } catch (e) {}
 
                       if (timeline == null) {
-                        // create timeline
-
-                        const newSavedObjectId = await saveTimelines(
+                        await createTimelines(
                           frameworkRequest,
-                          null,
-                          null,
+                          null, // timelineSavedObjectId
+                          null, // timelineVersion
                           parsedTimelineObject,
-                          resolve
-                        );
-
-                        await savePinnedEvents(
-                          frameworkRequest,
-                          null,
-                          newSavedObjectId,
                           pinnedEventIds,
-                          resolve
-                        );
-
-                        await saveNotes(
-                          frameworkRequest,
-                          newSavedObjectId,
-                          null,
-                          [],
                           [...globalNotes, ...eventNotes],
+                          [], // existing note ids
                           resolve
                         );
-
-                        resolve({ timeline_id: newSavedObjectId, status_code: 200 });
                       } else if (timeline != null && frameworkRequest.query.overwrite) {
                         // update timeline
 
-                        const updatedSavedObjectId = await saveTimelines(
+                        await createTimelines(
                           frameworkRequest,
                           timeline.savedObjectId,
                           timeline.version,
                           parsedTimelineObject,
-                          resolve
-                        );
-
-                        await savePinnedEvents(
-                          frameworkRequest,
-                          null,
-                          timeline.savedObjectId,
                           pinnedEventIds,
-                          resolve
-                        );
-
-                        console.log('------5------');
-
-                        await saveNotes(
-                          frameworkRequest,
-                          timeline.savedObjectId,
-                          timeline.version,
-                          timeline.noteIds,
                           [...globalNotes, ...eventNotes],
+                          timeline.noteIds,
                           resolve
                         );
-
-                        resolve({ timeline_id: timeline.savedObjectId, status_code: 200 });
                       } else if (timeline != null) {
                         resolve(
                           createBulkErrorObject({

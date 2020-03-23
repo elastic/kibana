@@ -62,20 +62,20 @@ export const getCollectErrorMessages = (savedObject: []) => {
 
 export const saveTimelines = async (
   frameworkRequest,
-  timelindSavedObjectId = null,
-  version = null,
-  parsedTimelineObject,
+  timelineSavedObjectId = null,
+  timelineVersion = null,
+  timeline,
   resolve
 ) => {
-  const newTimeline = await timelineLib.persistTimeline(
+  const newTimelineRes = await timelineLib.persistTimeline(
     frameworkRequest,
-    timelindSavedObjectId,
-    version,
-    parsedTimelineObject
+    timelineSavedObjectId,
+    timelineVersion,
+    timeline
   );
-  const newSavedObjectId = newTimeline?.timeline?.savedObjectId ?? null;
+  const newSavedObjectId = newTimelineRes?.timeline?.savedObjectId ?? null;
 
-  if (timelindSavedObjectId != null && newSavedObjectId == null) {
+  if (timelineSavedObjectId != null && newSavedObjectId == null) {
     resolve(
       createBulkErrorObject({
         id: newSavedObjectId,
@@ -90,7 +90,6 @@ export const saveTimelines = async (
 
 export const savePinnedEvents = async (
   frameworkRequest,
-  noteId = null,
   timelineSavedObjectId,
   pinnedEventIds,
   resolve
@@ -100,9 +99,10 @@ export const savePinnedEvents = async (
       pinnedEventIds.map(eventId => {
         return pinnedEventLib.persistPinnedEventOnTimeline(
           frameworkRequest,
-          noteId,
+          null, // pinnedEventSavedObjectId
           eventId,
-          timelineSavedObjectId
+          timelineSavedObjectId,
+          pinnedEventIds
         );
       })
     );
@@ -155,4 +155,36 @@ export const saveNotes = async (
       );
     }
   }
+};
+
+export const createTimelines = async (
+  frameworkRequest,
+  timelineSavedObjectId = null,
+  timelineVersion = null,
+  timeline,
+  pinnedEventIds = [],
+  notes = [],
+  existingNoteIds = [],
+  resolve
+) => {
+  const newSavedObjectId = await saveTimelines(
+    frameworkRequest,
+    timelineSavedObjectId, // timeline SavedObjectId
+    timelineVersion, // timeline version
+    timeline,
+    resolve
+  );
+
+  await savePinnedEvents(frameworkRequest, newSavedObjectId, pinnedEventIds, resolve);
+
+  await saveNotes(
+    frameworkRequest,
+    newSavedObjectId,
+    timelineVersion, // timelineVersion
+    existingNoteIds, // existingNoteIds
+    notes,
+    resolve
+  );
+
+  resolve({ timeline_id: newSavedObjectId, status_code: 200 });
 };
