@@ -23,3 +23,5 @@ import { TimelionVisPlugin as Plugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
+
+export { getTimezone } from './helpers/get_timezone';

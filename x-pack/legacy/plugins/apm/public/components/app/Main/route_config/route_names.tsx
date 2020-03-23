@@ -20,6 +20,8 @@ export enum RouteName {
   TRANSACTION_NAME = 'transaction_name',
   SETTINGS = 'settings',
   AGENT_CONFIGURATION = 'agent_configuration',
+  AGENT_CONFIGURATION_CREATE = 'agent_configuration_create',
+  AGENT_CONFIGURATION_EDIT = 'agent_configuration_edit',
   INDICES = 'indices',
   SERVICE_NODES = 'nodes',
   LINK_TO_TRACE = 'link_to_trace',
