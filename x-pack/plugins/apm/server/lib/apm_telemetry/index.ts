@@ -109,19 +109,21 @@ export async function createApmTelemetry({
   });
 
   usageCollector.registerCollector(collector);
-}
 
-export function scheduleApmTelemetryTasks(
-  taskManager: TaskManagerStartContract
-) {
-  taskManager.ensureScheduled({
-    id: APM_TELEMETRY_TASK_NAME,
-    taskType: APM_TELEMETRY_TASK_NAME,
-    schedule: {
-      interval: '720m'
-    },
-    scope: ['apm'],
-    params: {},
-    state: {}
+  core.getStartServices().then(([coreStart, pluginsStart]) => {
+    const { taskManager: taskManagerStart } = pluginsStart as {
+      taskManager: TaskManagerStartContract;
+    };
+
+    taskManagerStart.ensureScheduled({
+      id: APM_TELEMETRY_TASK_NAME,
+      taskType: APM_TELEMETRY_TASK_NAME,
+      schedule: {
+        interval: '720m'
+      },
+      scope: ['apm'],
+      params: {},
+      state: {}
+    });
   });
 }

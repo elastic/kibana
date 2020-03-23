@@ -3,21 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  CoreStart
-} from 'src/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
 import { Observable, combineLatest, AsyncSubject } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { Server } from 'hapi';
 import { once } from 'lodash';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract
-} from '../../task_manager/server';
+import { TaskManagerSetupContract } from '../../task_manager/server';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
@@ -29,10 +21,7 @@ import { tutorialProvider } from './tutorial';
 import { CloudSetup } from '../../cloud/server';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { LicensingPluginSetup } from '../../licensing/public';
-import {
-  createApmTelemetry,
-  scheduleApmTelemetryTasks
-} from './lib/apm_telemetry';
+import { createApmTelemetry } from './lib/apm_telemetry';
 
 export interface LegacySetup {
   server: Server;
@@ -68,7 +57,17 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
     );
 
-    if (plugins.taskManager && plugins.usageCollection) {
+    this.legacySetup$.subscribe(__LEGACY => {
+      createApmApi().init(core, { config$: mergedConfig$, logger, __LEGACY });
+    });
+
+    const currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
+
+    if (
+      plugins.taskManager &&
+      plugins.usageCollection &&
+      currentConfig['xpack.apm.telemetryCollectionEnabled']
+    ) {
       createApmTelemetry({
         core,
         config$: mergedConfig$,
@@ -77,12 +76,6 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         logger
       });
     }
-
-    this.legacySetup$.subscribe(__LEGACY => {
-      createApmApi().init(core, { config$: mergedConfig$, logger, __LEGACY });
-    });
-
-    const currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
 
     // create agent configuration index without blocking setup lifecycle
     createApmAgentConfigurationIndex({
@@ -126,16 +119,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     };
   }
 
-  public async start(
-    core: CoreStart,
-    plugins: {
-      taskManager?: TaskManagerStartContract;
-    }
-  ) {
-    if (plugins.taskManager) {
-      scheduleApmTelemetryTasks(plugins.taskManager);
-    }
-  }
+  public async start() {}
 
   public stop() {}
 }

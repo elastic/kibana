@@ -77,7 +77,10 @@ export const apm: LegacyPluginInitializer = kibana => {
         autocreateApmIndexPattern: Joi.boolean().default(true),
 
         // service map
-        serviceMapEnabled: Joi.boolean().default(true)
+        serviceMapEnabled: Joi.boolean().default(true),
+
+        // telemetry
+        telemetryCollectionEnabled: Joi.boolean().default(true)
       }).default();
     },
 
