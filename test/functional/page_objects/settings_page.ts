@@ -47,6 +47,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickKibanaSavedObjects() {
       await testSubjects.click('objects');
+      await this.waitUntilSavedObjectsTableIsNotLoading();
     }
 
     async clickKibanaIndexPatterns() {
@@ -649,6 +650,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickImportDone() {
       await testSubjects.click('importSavedObjectsDoneBtn');
+      await this.waitUntilSavedObjectsTableIsNotLoading();
     }
 
     async clickConfirmChanges() {
@@ -682,9 +684,38 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       });
     }
 
+    async getSavedObjectElementsInTable() {
+      const rows = await testSubjects.findAll('~savedObjectsTableRow');
+      return mapAsync(rows, async row => {
+        const checkbox = await row.findByCssSelector('[data-test-subj*="checkboxSelectRow"]');
+        // return the object type aria-label="index patterns"
+        const objectType = await row.findByTestSubject('objectType');
+        const titleElement = await row.findByTestSubject('savedObjectsTableRowTitle');
+        // not all rows have inspect button - Advanced Settings objects don't
+        let inspectElement;
+        const innerHtml = await row.getAttribute('innerHTML');
+        if (innerHtml.includes('Inspect')) {
+          inspectElement = await row.findByTestSubject('savedObjectsTableAction-inspect');
+        } else {
+          inspectElement = null;
+        }
+        const relationshipsElement = await row.findByTestSubject(
+          'savedObjectsTableAction-relationships'
+        );
+        return {
+          checkbox,
+          objectType: await objectType.getAttribute('aria-label'),
+          titleElement,
+          title: await titleElement.getVisibleText(),
+          inspectElement,
+          relationshipsElement,
+        };
+      });
+    }
+
     async getSavedObjectsInTable() {
       const table = await testSubjects.find('savedObjectsTable');
-      const cells = await table.findAllByCssSelector('td:nth-child(3)');
+      const cells = await table.findAllByTestSubject('savedObjectsTableRowTitle');
 
       const objects = [];
       for (const cell of cells) {
@@ -692,6 +723,23 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       }
 
       return objects;
+    }
+
+    async getRelationshipFlyout() {
+      const rows = await testSubjects.findAll('relationshipsTableRow');
+      return mapAsync(rows, async row => {
+        const objectType = await row.findByTestSubject('relationshipsObjectType');
+        const relationship = await row.findByTestSubject('directRelationship');
+        const titleElement = await row.findByTestSubject('relationshipsTitle');
+        const inspectElement = await row.findByTestSubject('relationshipsTableAction-inspect');
+        return {
+          objectType: await objectType.getAttribute('aria-label'),
+          relationship: await relationship.getVisibleText(),
+          titleElement,
+          title: await titleElement.getVisibleText(),
+          inspectElement,
+        };
+      });
     }
 
     async getSavedObjectsTableSummary() {
@@ -724,17 +772,10 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await deleteButton.isEnabled();
     }
 
-    async canSavedObjectBeDeleted(id: string) {
-      const allCheckBoxes = await testSubjects.findAll('checkboxSelectRow*');
-      for (const checkBox of allCheckBoxes) {
-        if (await checkBox.isSelected()) {
-          await checkBox.click();
-        }
-      }
-
-      const checkBox = await testSubjects.find(`checkboxSelectRow-${id}`);
-      await checkBox.click();
-      return await this.canSavedObjectsBeDeleted();
+    async clickSavedObjectsDelete() {
+      await testSubjects.click('savedObjectsManagementDelete');
+      await testSubjects.click('confirmModalConfirmButton');
+      await this.waitUntilSavedObjectsTableIsNotLoading();
     }
   }
 
