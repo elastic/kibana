@@ -57,7 +57,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       usageCollection?: UsageCollectionSetup;
     }
   ) {
-    const logger = (this.logger = this.initContext.logger.get('apm'));
+    this.logger = this.initContext.logger.get('apm');
     const config$ = this.initContext.config.create<APMXPackConfig>();
     const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
@@ -66,26 +66,24 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     this.legacySetup$.subscribe(__LEGACY => {
       createApmApi().init(core, {
         config$: mergedConfig$,
-        logger,
+        logger: this.logger!,
         __LEGACY
       });
     });
 
-    const currentConfig = (this.currentConfig = await mergedConfig$
-      .pipe(take(1))
-      .toPromise());
+    this.currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
 
     plugins.home.tutorials.registerTutorial(
       tutorialProvider({
-        isEnabled: currentConfig['xpack.apm.ui.enabled'],
-        indexPatternTitle: currentConfig['apm_oss.indexPattern'],
+        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
+        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
         cloud: plugins.cloud,
         indices: {
-          errorIndices: currentConfig['apm_oss.errorIndices'],
-          metricsIndices: currentConfig['apm_oss.metricsIndices'],
-          onboardingIndices: currentConfig['apm_oss.onboardingIndices'],
-          sourcemapIndices: currentConfig['apm_oss.sourcemapIndices'],
-          transactionIndices: currentConfig['apm_oss.transactionIndices']
+          errorIndices: this.currentConfig['apm_oss.errorIndices'],
+          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
+          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
+          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
+          transactionIndices: this.currentConfig['apm_oss.transactionIndices']
         }
       })
     );
@@ -97,8 +95,8 @@ export class APMPlugin implements Plugin<APMPluginContract> {
           makeApmUsageCollector(usageCollection, savedObjectsClient);
         })
         .catch(error => {
-          logger.error('Unable to initialize use collection');
-          logger.error(error.message);
+          this.logger!.error('Unable to initialize use collection');
+          this.logger!.error(error.message);
         });
     }
 
@@ -111,7 +109,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       getApmIndices: async () =>
         getApmIndices({
           savedObjectsClient: await getInternalSavedObjectsClient(core),
-          config: currentConfig
+          config: this.currentConfig!
         })
     };
   }
