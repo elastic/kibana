@@ -165,7 +165,6 @@
     "core-js": "^3.2.1",
     "css-loader": "^3.4.2",
     "d3": "3.5.17",
-    "d3-array": "1.2.4",
     "d3-cloud": "1.2.5",
     "deep-freeze-strict": "^1.1.1",
     "deepmerge": "^4.2.2",
