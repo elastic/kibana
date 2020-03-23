@@ -22,7 +22,6 @@ import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks'
 const dataStartMock = dataPluginMock.createStartContract();
 
 import { TopNavMenuData } from '../../../../../../src/plugins/navigation/public';
-import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { coreMock } from 'src/core/public/mocks';
 
 jest.mock('ui/new_platform');
@@ -87,7 +86,6 @@ describe('Lens App', () => {
     editorFrame: EditorFrameInstance;
     data: typeof dataStartMock;
     core: typeof core;
-    dataShim: DataStart;
     storage: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
@@ -134,7 +132,6 @@ describe('Lens App', () => {
       editorFrame: EditorFrameInstance;
       data: typeof dataStartMock;
       core: typeof core;
-      dataShim: DataStart;
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
@@ -332,7 +329,6 @@ describe('Lens App', () => {
         editorFrame: EditorFrameInstance;
         data: typeof dataStartMock;
         core: typeof core;
-        dataShim: DataStart;
         storage: Storage;
         docId?: string;
         docStorage: SavedObjectStore;
@@ -648,7 +644,6 @@ describe('Lens App', () => {
       editorFrame: EditorFrameInstance;
       data: typeof dataStartMock;
       core: typeof core;
-      dataShim: DataStart;
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
