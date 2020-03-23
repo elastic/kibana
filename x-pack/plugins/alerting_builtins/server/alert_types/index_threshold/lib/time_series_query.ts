@@ -94,6 +94,7 @@ export async function timeSeriesQuery(
     dateAgg: {
       date_range: {
         field: timeField,
+        format: 'strict_date_time',
         ranges: dateRangeInfo.dateRanges,
       },
     },
@@ -134,8 +135,8 @@ export async function timeSeriesQuery(
     esResult = await callCluster('search', esQuery);
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
-    logger.warn(`${logPrefix} error: ${JSON.stringify(err.message)}`);
-    throw new Error('error running search');
+    logger.warn(`${logPrefix} error: ${err.message}`);
+    return { results: [] };
   }
 
   // console.log('time_series_query.ts response\n', JSON.stringify(esResult, null, 4));

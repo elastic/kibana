@@ -217,4 +217,44 @@ describe('create_rules_bulk_schema', () => {
       '"value" at position 0 fails because [child "note" fails because ["note" must be a string]]'
     );
   });
+
+  test('The default for "actions" will be an empty array', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          version: 1,
+        },
+      ]).value[0].actions
+    ).toEqual([]);
+  });
+
+  test('The default for "throttle" will be null', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          version: 1,
+        },
+      ]).value[0].throttle
+    ).toEqual(null);
+  });
 });

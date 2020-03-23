@@ -99,6 +99,7 @@ def withGcsArtifactUpload(workerName, closure) {
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
     'target/test-metrics/*',
+    'target/kibana-siem/**/*.png',
     'target/junit/**/*',
     'test/**/screenshots/**/*.png',
     'test/functional/failure_debug/html/*.html',
