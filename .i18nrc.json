@@ -4,10 +4,7 @@
     "console": "src/plugins/console",
     "core": "src/core",
     "dashboard": "src/plugins/dashboard",
-    "data": [
-      "src/legacy/core_plugins/data",
-      "src/plugins/data"
-    ],
+    "data": "src/plugins/data",
     "embeddableApi": "src/plugins/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
     "share": "src/plugins/share",
