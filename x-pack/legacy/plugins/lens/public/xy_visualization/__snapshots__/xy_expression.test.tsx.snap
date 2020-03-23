@@ -27,7 +27,6 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     title=""
   />
   <Connect(spec)
-    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
@@ -47,6 +46,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     enableHistogramMode={false}
     id="a,b"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -94,7 +94,6 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     title=""
   />
   <Connect(spec)
-    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
@@ -114,6 +113,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     enableHistogramMode={false}
     id="a,b"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -161,7 +161,6 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     title=""
   />
   <Connect(spec)
-    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
@@ -181,6 +180,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     enableHistogramMode={false}
     id="a,b"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -228,7 +228,6 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     title=""
   />
   <Connect(spec)
-    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
@@ -248,6 +247,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     enableHistogramMode={false}
     id="a,b"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -295,7 +295,6 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     title=""
   />
   <Connect(spec)
-    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
@@ -315,6 +314,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     enableHistogramMode={false}
     id="a,b"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -366,7 +366,6 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     title=""
   />
   <Connect(spec)
-    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
@@ -386,6 +385,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     enableHistogramMode={false}
     id="a,b"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -437,7 +437,6 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     title=""
   />
   <Connect(spec)
-    customSeriesLabel={[Function]}
     data={
       Array [
         Object {
@@ -457,6 +456,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     enableHistogramMode={false}
     id="a,b"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
