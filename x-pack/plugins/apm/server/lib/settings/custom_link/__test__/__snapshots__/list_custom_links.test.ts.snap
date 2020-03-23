@@ -8,6 +8,13 @@ Object {
         "filter": Array [],
       },
     },
+    "sort": Array [
+      Object {
+        "label.keyword": Object {
+          "order": "asc",
+        },
+      },
+    ],
   },
   "index": "myIndex",
   "size": 500,
@@ -69,6 +76,13 @@ Object {
         ],
       },
     },
+    "sort": Array [
+      Object {
+        "label.keyword": Object {
+          "order": "asc",
+        },
+      },
+    ],
   },
   "index": "myIndex",
   "size": 500,
