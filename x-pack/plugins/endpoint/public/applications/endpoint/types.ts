@@ -12,6 +12,7 @@ import {
   AlertResultList,
   Immutable,
   ImmutableArray,
+  AlertDetails,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
@@ -136,7 +137,7 @@ export interface AlertListState {
   readonly location?: Immutable<EndpointAppLocation>;
 
   /** Specific Alert data to be shown in the details view */
-  readonly alertDetails?: Immutable<AlertData>;
+  readonly alertDetails?: Immutable<AlertDetails>;
 
   /** Search bar state including indexPatterns */
   readonly searchBar: AlertsSearchBarState;

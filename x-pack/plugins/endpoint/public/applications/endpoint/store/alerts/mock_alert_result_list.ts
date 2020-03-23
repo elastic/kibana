@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertResultList } from '../../../../../common/types';
+import { AlertResultList, AlertDetails } from '../../../../../common/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
 export const mockAlertResultList: (options?: {
@@ -46,4 +46,19 @@ export const mockAlertResultList: (options?: {
     result_from_index: 0,
   };
   return mock;
+};
+
+export const mockAlertDetailsResult = (): AlertDetails => {
+  const generator = new EndpointDocGenerator();
+  return {
+    ...generator.generateAlert(new Date().getTime()),
+    ...{
+      id: 'xDUYMHABAKk0XnHd8rrd',
+      prev: null,
+      next: null,
+      state: {
+        host: generator.generateHostMetadata(),
+      },
+    },
+  };
 };
