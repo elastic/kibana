@@ -130,11 +130,14 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   renderSourceSettingsEditor({ onChange }) {
+    const getGeoField = () => {
+      return this._getGeoField();
+    };
     return (
       <UpdateSourceEditor
         source={this}
         indexPatternId={this.getIndexPatternId()}
-        getGeoField={this._getGeoField}
+        getGeoField={getGeoField}
         onChange={onChange}
         tooltipFields={this._tooltipFields}
         sortField={this._descriptor.sortField}

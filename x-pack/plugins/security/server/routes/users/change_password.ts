@@ -8,6 +8,10 @@ import { schema } from '@kbn/config-schema';
 import { canUserChangePassword } from '../../../common/model';
 import { getErrorStatusCode, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
+import {
+  HTTPAuthorizationHeader,
+  BasicHTTPAuthorizationHeaderCredentials,
+} from '../../authentication';
 import { RouteDefinitionParams } from '..';
 
 export function defineChangeUserPasswordRoutes({
@@ -43,9 +47,13 @@ export function defineChangeUserPasswordRoutes({
           ? {
               headers: {
                 ...request.headers,
-                authorization: `Basic ${Buffer.from(`${username}:${currentPassword}`).toString(
-                  'base64'
-                )}`,
+                authorization: new HTTPAuthorizationHeader(
+                  'Basic',
+                  new BasicHTTPAuthorizationHeaderCredentials(
+                    username,
+                    currentPassword || ''
+                  ).toString()
+                ).toString(),
               },
             }
           : request

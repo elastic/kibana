@@ -12,7 +12,7 @@ import {
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
+import { HTTPAuthorizationHeader } from '../http_authentication';
 import { Tokens, TokenPair } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 
@@ -44,13 +44,13 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    const authenticationScheme = getHTTPAuthenticationScheme(request);
-    if (authenticationScheme && authenticationScheme !== 'negotiate') {
-      this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader && authorizationHeader.scheme.toLowerCase() !== 'negotiate') {
+      this.logger.debug(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
       return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = authenticationScheme
+    let authenticationResult = authorizationHeader
       ? await this.authenticateWithNegotiateScheme(request)
       : AuthenticationResult.notHandled();
 
@@ -175,7 +175,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     try {
       // Then attempt to query for the user details using the new token
-      const authHeaders = { authorization: `Bearer ${tokens.access_token}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', tokens.access_token).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('User has been authenticated with new access token');
@@ -205,7 +207,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -242,7 +246,12 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${refreshedTokenPair.accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader(
+          'Bearer',
+          refreshedTokenPair.accessToken
+        ).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via refreshed token.');
