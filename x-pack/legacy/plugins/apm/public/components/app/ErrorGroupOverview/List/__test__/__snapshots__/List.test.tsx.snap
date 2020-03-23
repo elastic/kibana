@@ -161,7 +161,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                 </span>
               </div>
             </th>
-            <th
+            <td
               className="euiTableHeaderCell"
               data-test-subj="tableHeaderCell_handled_2"
               role="columnheader"
@@ -179,7 +179,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   className="euiTableCellContent__text"
                 />
               </div>
-            </th>
+            </td>
             <th
               aria-live="polite"
               aria-sort="descending"
@@ -505,7 +505,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 </span>
               </div>
             </th>
-            <th
+            <td
               className="euiTableHeaderCell"
               data-test-subj="tableHeaderCell_handled_2"
               role="columnheader"
@@ -523,7 +523,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   className="euiTableCellContent__text"
                 />
               </div>
-            </th>
+            </td>
             <th
               aria-live="polite"
               aria-sort="descending"
