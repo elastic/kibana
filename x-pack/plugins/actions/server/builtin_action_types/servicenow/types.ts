@@ -11,11 +11,12 @@ import {
   SecretsSchema,
   ParamsSchema,
   CasesConfigurationSchema,
-  MapsSchema,
+  MapEntrySchema,
   CommentSchema,
 } from './schema';
 
 import { ServiceNow } from './lib';
+import { Incident, IncidentResponse } from './lib/types';
 
 // config definition
 export type ConfigType = TypeOf<typeof ConfigSchema>;
@@ -23,34 +24,80 @@ export type ConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type SecretsType = TypeOf<typeof SecretsSchema>;
 
-export type ParamsType = TypeOf<typeof ParamsSchema>;
+export type ExecutorParams = TypeOf<typeof ParamsSchema>;
 
 export type CasesConfigurationType = TypeOf<typeof CasesConfigurationSchema>;
-export type MapsType = TypeOf<typeof MapsSchema>;
-export type CommentType = TypeOf<typeof CommentSchema>;
+export type MapEntry = TypeOf<typeof MapEntrySchema>;
+export type Comment = TypeOf<typeof CommentSchema>;
 
-export type FinalMapping = Map<string, any>;
+export type Mapping = Map<string, any>;
 
-export interface ActionHandlerArguments {
+export interface Params extends ExecutorParams {
+  incident: Record<string, any>;
+}
+export interface CreateHandlerArguments {
   serviceNow: ServiceNow;
-  params: any;
-  comments: CommentType[];
-  mapping: FinalMapping;
+  params: Params;
+  comments: Comment[];
+  mapping: Mapping;
 }
 
-export type UpdateParamsType = Partial<ParamsType>;
-export type UpdateActionHandlerArguments = ActionHandlerArguments & {
+export type UpdateHandlerArguments = CreateHandlerArguments & {
   incidentId: string;
 };
 
-export interface IncidentCreationResponse {
-  incidentId: string;
-  number: string;
-  comments?: CommentsZipped[];
+export type IncidentHandlerArguments = CreateHandlerArguments & {
+  incidentId: string | null;
+};
+
+export interface HandlerResponse extends IncidentResponse {
+  comments?: SimpleComment[];
+}
+
+export interface SimpleComment {
+  commentId: string;
   pushedDate: string;
 }
 
-export interface CommentsZipped {
-  commentId: string;
-  pushedDate: string;
+export interface AppendFieldArgs {
+  value: string;
+  prefix?: string;
+  suffix?: string;
+}
+
+export interface KeyAny {
+  [index: string]: string;
+}
+
+export interface AppendInformationFieldArgs {
+  value: string;
+  user: string;
+  date: string;
+  mode: string;
+}
+
+export interface TransformerArgs {
+  value: string;
+  date?: string;
+  user?: string;
+  previousValue?: string;
+}
+
+export interface PrepareFieldsForTransformArgs {
+  params: Params;
+  mapping: Mapping;
+  defaultPipes?: string[];
+}
+
+export interface PipedField {
+  key: string;
+  value: string;
+  actionType: string;
+  pipes: string[];
+}
+
+export interface TransformFieldsArgs {
+  params: Params;
+  fields: PipedField[];
+  currentIncident?: Incident;
 }

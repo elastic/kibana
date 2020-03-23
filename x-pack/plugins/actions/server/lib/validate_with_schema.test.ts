@@ -14,7 +14,12 @@ const executor: ExecutorType = async options => {
 };
 
 test('should validate when there are no validators', () => {
-  const actionType: ActionType = { id: 'foo', name: 'bar', executor };
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    executor,
+  };
   const testValue = { any: ['old', 'thing'] };
 
   const result = validateConfig(actionType, testValue);
@@ -22,7 +27,13 @@ test('should validate when there are no validators', () => {
 });
 
 test('should validate when there are no individual validators', () => {
-  const actionType: ActionType = { id: 'foo', name: 'bar', executor, validate: {} };
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    executor,
+    validate: {},
+  };
 
   let result;
   const testValue = { any: ['old', 'thing'] };
@@ -42,6 +53,7 @@ test('should validate when validators return incoming value', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: 'basic',
     executor,
     validate: {
       params: selfValidator,
@@ -69,6 +81,7 @@ test('should validate when validators return different values', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: 'basic',
     executor,
     validate: {
       params: selfValidator,
@@ -99,6 +112,7 @@ test('should throw with expected error when validators fail', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: 'basic',
     executor,
     validate: {
       params: erroringValidator,
@@ -127,6 +141,7 @@ test('should work with @kbn/config-schema', () => {
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
+    minimumLicenseRequired: 'basic',
     executor,
     validate: {
       params: testSchema,

@@ -248,7 +248,7 @@ export class EndpointDocGenerator {
   public generateEvent(options: EventOptions = {}): EndpointEvent {
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
-      agent: { ...this.commonInfo.agent, type: 'endgame' },
+      agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
         version: '1.4.0',
       },
@@ -325,7 +325,7 @@ export class EndpointDocGenerator {
     for (let i = 0; i < generations; i++) {
       const newParents: EndpointEvent[] = [];
       parents.forEach(element => {
-        const numChildren = this.randomN(maxChildrenPerNode);
+        const numChildren = this.randomN(maxChildrenPerNode + 1);
         for (let j = 0; j < numChildren; j++) {
           timestamp = timestamp + 1000;
           const child = this.generateEvent({
