@@ -34,7 +34,7 @@ import {
 } from '../../../../../../../../plugins/data/public';
 import { AppState } from '../../angular/discover_state';
 import { getDetails } from './lib/get_details';
-import { getFieldFilter } from './lib/get_field_filter';
+import { getDefaultFieldFilter, setFieldFilterProp, filterFieldList } from './lib/field_filter';
 import { getServices } from '../../../kibana_services';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 
@@ -94,11 +94,10 @@ export function DiscoverSidebar({
   setIndexPattern,
   state,
 }: DiscoverSidebarProps) {
-  const filter = getFieldFilter();
   const [openFieldMap, setOpenFieldMap] = useState(new Map());
   const [showFields, setShowFields] = useState(false);
   const [fields, setFields] = useState<IndexPatternFieldList | null>(null);
-  const [fieldFilterValues, setFieldFilterValues] = useState(filter.getValues());
+  const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
@@ -111,8 +110,8 @@ export function DiscoverSidebar({
   const popularLimit = getServices().uiSettings.get('fields:popularLimit');
   const useShortDots = getServices().uiSettings.get('shortDots:enable');
   const onChangeFieldSearch = (field: string, value: string | boolean | undefined) => {
-    filter.setValue(field, value);
-    setFieldFilterValues({ ...filter.getValues() });
+    const newState = setFieldFilterProp(fieldFilterState, field, value);
+    setFieldFilterState(newState);
   };
 
   const groupedFields = groupFields(fields, columns, popularLimit, fieldCounts);
@@ -133,22 +132,12 @@ export function DiscoverSidebar({
     }
   };
 
-  const isFieldFiltered = (field: IndexPatternField) => {
-    const vals = fieldFilterValues;
-    const matchFilter = vals.type === 'any' || field.type === vals.type;
-    const isAggregatable = vals.aggregatable === null || field.aggregatable === vals.aggregatable;
-    const isSearchable = vals.searchable === null || field.searchable === vals.searchable;
-    const scriptedOrMissing =
-      !vals.missing || field.type === '_source' || field.scripted || fieldCounts[field.name] > 0;
-    const matchName = !vals.name || field.name.indexOf(vals.name) !== -1;
-
-    return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
-  };
-
   const getDetailsByField = (ipField: IndexPatternField) =>
     getDetails(ipField, selectedIndexPattern, state, columns, hits);
 
-  const popularFields = groupedFields.popular.filter(isFieldFiltered);
+  const selectedFields = filterFieldList(groupedFields.selected, fieldFilterState, fieldCounts);
+  const popularFields = filterFieldList(groupedFields.popular, fieldFilterState, fieldCounts);
+  const unpopularFields = filterFieldList(groupedFields.unpopular, fieldFilterState, fieldCounts);
   return (
     <section
       className="sidebar-list"
@@ -168,7 +157,7 @@ export function DiscoverSidebar({
         <form>
           <DiscoverFieldSearch
             onChange={onChangeFieldSearch}
-            value={fieldFilterValues.name}
+            value={fieldFilterState.name}
             types={fieldTypes}
           />
         </form>
@@ -191,26 +180,24 @@ export function DiscoverSidebar({
               aria-labelledby="selected_fields"
               data-test-subj={`fieldList-selected`}
             >
-              {groupedFields.selected
-                .filter(isFieldFiltered)
-                .map((field: IndexPatternField, idx: number) => {
-                  return (
-                    <li key={`field${idx}`}>
-                      <DiscoverField
-                        field={field}
-                        indexPattern={selectedIndexPattern}
-                        onAddField={onAddField}
-                        onRemoveField={onRemoveField}
-                        onAddFilter={onAddFilter}
-                        onShowDetails={onShowDetails}
-                        getDetails={getDetailsByField}
-                        showDetails={openFieldMap.get(field.name) || false}
-                        selected={true}
-                        useShortDots={useShortDots}
-                      />
-                    </li>
-                  );
-                })}
+              {selectedFields.map((field: IndexPatternField, idx: number) => {
+                return (
+                  <li key={`field${idx}`}>
+                    <DiscoverField
+                      field={field}
+                      indexPattern={selectedIndexPattern}
+                      onAddField={onAddField}
+                      onRemoveField={onRemoveField}
+                      onAddFilter={onAddFilter}
+                      onShowDetails={onShowDetails}
+                      getDetails={getDetailsByField}
+                      showDetails={openFieldMap.get(field.name) || false}
+                      selected={true}
+                      useShortDots={useShortDots}
+                    />
+                  </li>
+                );
+              })}
             </ul>
             <div className="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium">
               <EuiTitle size="xxxs" id="available_fields" className="euiFlexItem">
@@ -289,25 +276,23 @@ export function DiscoverSidebar({
           aria-labelledby="available_fields"
           data-test-subj={`fieldList-unpopular`}
         >
-          {groupedFields.unpopular
-            .filter(isFieldFiltered)
-            .map((field: IndexPatternField, idx: number) => {
-              return (
-                <li key={`field${idx}`}>
-                  <DiscoverField
-                    field={field}
-                    indexPattern={selectedIndexPattern}
-                    onAddField={onAddField}
-                    onRemoveField={onRemoveField}
-                    onAddFilter={onAddFilter}
-                    onShowDetails={onShowDetails}
-                    getDetails={getDetailsByField}
-                    showDetails={openFieldMap.get(field.name) || false}
-                    useShortDots={useShortDots}
-                  />
-                </li>
-              );
-            })}
+          {unpopularFields.map((field: IndexPatternField, idx: number) => {
+            return (
+              <li key={`field${idx}`}>
+                <DiscoverField
+                  field={field}
+                  indexPattern={selectedIndexPattern}
+                  onAddField={onAddField}
+                  onRemoveField={onRemoveField}
+                  onAddFilter={onAddFilter}
+                  onShowDetails={onShowDetails}
+                  getDetails={getDetailsByField}
+                  showDetails={openFieldMap.get(field.name) || false}
+                  useShortDots={useShortDots}
+                />
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>
