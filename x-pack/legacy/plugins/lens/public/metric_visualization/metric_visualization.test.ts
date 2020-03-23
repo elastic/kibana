@@ -80,11 +80,32 @@ describe('metric_visualization', () => {
             accessor: undefined,
             layerId: 'l1',
           },
+          layerId: 'l1',
+          frame: mockFrame(),
         })
       ).toEqual({
         groups: [
           expect.objectContaining({
             supportsMoreColumns: true,
+          }),
+        ],
+      });
+    });
+
+    it('is not allowed to add a metric once one accessor is set', () => {
+      expect(
+        metricVisualization.getConfiguration({
+          state: {
+            accessor: 'a',
+            layerId: 'l1',
+          },
+          layerId: 'l1',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        groups: [
+          expect.objectContaining({
+            supportsMoreColumns: false,
           }),
         ],
       });
