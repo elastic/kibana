@@ -688,22 +688,18 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return mapAsync(rows, async row => {
         const checkbox = await row.findByCssSelector('[data-test-subj*="checkboxSelectRow"]');
         // return the object type aria-label="index patterns"
-        const objectType = await row.findByCssSelector('[data-test-subj="objectType"]');
-        const titleElement = await row.findByCssSelector(
-          '[data-test-subj="savedObjectsTableRowTitle"]'
-        );
+        const objectType = await row.findByTestSubject('objectType');
+        const titleElement = await row.findByTestSubject('savedObjectsTableRowTitle');
         // not all rows have inspect button - Advanced Settings objects don't
         let inspectElement;
         const innerHtml = await row.getAttribute('innerHTML');
         if (innerHtml.includes('Inspect')) {
-          inspectElement = await row.findByCssSelector(
-            '[data-test-subj="savedObjectsTableAction-inspect"]'
-          );
+          inspectElement = await row.findByTestSubject('savedObjectsTableAction-inspect');
         } else {
           inspectElement = null;
         }
-        const relationshipsElement = await row.findByCssSelector(
-          '[data-test-subj="savedObjectsTableAction-relationships"]'
+        const relationshipsElement = await row.findByTestSubject(
+          'savedObjectsTableAction-relationships'
         );
         return {
           checkbox,
@@ -718,9 +714,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getSavedObjectsInTable() {
       const table = await testSubjects.find('savedObjectsTable');
-      const cells = await table.findAllByCssSelector(
-        '[data-test-subj="savedObjectsTableRowTitle"]'
-      );
+      const cells = await table.findAllByTestSubject('savedObjectsTableRowTitle');
 
       const objects = [];
       for (const cell of cells) {
@@ -731,16 +725,12 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async getRelationshipFlyout() {
-      const rows = await find.allByCssSelector('[data-test-subj="relationshipsTableRow"]');
+      const rows = await testSubjects.findAll('relationshipsTableRow');
       return mapAsync(rows, async row => {
-        const objectType = await row.findByCssSelector(
-          '[data-test-subj="relationshipsObjectType"]'
-        );
-        const relationship = await row.findByCssSelector('[data-test-subj="directRelationship"]');
-        const titleElement = await row.findByCssSelector('[data-test-subj="relationshipsTitle"]');
-        const inspectElement = await row.findByCssSelector(
-          '[data-test-subj="relationshipsTableAction-inspect"]'
-        );
+        const objectType = await row.findByTestSubject('relationshipsObjectType');
+        const relationship = await row.findByTestSubject('directRelationship');
+        const titleElement = await row.findByTestSubject('relationshipsTitle');
+        const inspectElement = await row.findByTestSubject('relationshipsTableAction-inspect');
         return {
           objectType: await objectType.getAttribute('aria-label'),
           relationship: await relationship.getVisibleText(),
