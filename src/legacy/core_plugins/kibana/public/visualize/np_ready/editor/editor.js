@@ -30,7 +30,8 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
+import { unhashUrl, removeQueryParam } from '../../../../../../../plugins/kibana_utils/public';
+import { MarkdownSimple, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
 import { addFatalError, kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import {
   SavedObjectSaveModal,
@@ -68,17 +69,7 @@ export function initEditorDirective(app, deps) {
   initVisualizationDirective(app, deps);
 }
 
-function VisualizeAppController(
-  $scope,
-  $route,
-  $window,
-  $injector,
-  $timeout,
-  kbnUrl,
-  redirectWhenMissing,
-  kbnUrlStateStorage,
-  history
-) {
+function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlStateStorage, history) {
   const {
     indexPatterns,
     localStorage,
@@ -313,16 +304,33 @@ function VisualizeAppController(
     }
   );
 
+  const stopAllSyncing = () => {
+    stopStateSync();
+    stopSyncingQueryServiceStateWithUrl();
+    stopSyncingAppFilters();
+  };
+
   // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
   // defaults applied. If the url was from a previous session which included modifications to the
   // appState then they won't be equal.
   if (!_.isEqual(stateContainer.getState().vis, stateDefaults.vis)) {
     try {
       vis.setState(stateContainer.getState().vis);
-    } catch {
-      redirectWhenMissing({
-        'index-pattern-field': '/visualize',
+    } catch (error) {
+      // stop syncing url updtes with the state to prevent extra syncing
+      stopAllSyncing();
+
+      toastNotifications.addWarning({
+        title: i18n.translate('kbn.visualize.visualizationTypeInvalidNotificationMessage', {
+          defaultMessage: 'Invalid visualization type',
+        }),
+        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
+
+      history.replace(`${VisualizeConstants.LANDING_PAGE_PATH}?notFound=visualization`);
+
+      // prevent further controller execution
+      return;
     }
   }
 
@@ -404,7 +412,7 @@ function VisualizeAppController(
 
     const addToDashMode =
       $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
-    kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+    removeQueryParam(history, DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
     $scope.isAddToDashMode = () => addToDashMode;
 
@@ -529,9 +537,8 @@ function VisualizeAppController(
 
       unsubscribePersisted();
       unsubscribeStateUpdates();
-      stopStateSync();
-      stopSyncingQueryServiceStateWithUrl();
-      stopSyncingAppFilters();
+
+      stopAllSyncing();
     });
 
     $timeout(() => {
@@ -623,10 +630,10 @@ function VisualizeAppController(
               const savedVisualizationParsedUrl = new KibanaParsedUrl({
                 basePath: getBasePath(),
                 appId: kbnBaseUrl.slice('/app/'.length),
-                appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
+                appPath: `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(savedVis.id)}`,
               });
               // Manually insert a new url so the back button will open the saved visualization.
-              $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
+              history.replace(savedVisualizationParsedUrl.appPath);
               setActiveUrl(savedVisualizationParsedUrl.appPath);
 
               const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
@@ -642,7 +649,7 @@ function VisualizeAppController(
                 DashboardConstants.ADD_EMBEDDABLE_ID,
                 savedVis.id
               );
-              kbnUrl.change(dashboardParsedUrl.appPath);
+              history.push(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));

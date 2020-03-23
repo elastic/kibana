@@ -9,6 +9,8 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { SimpleSavedObject } from 'kibana/public';
+import { isErrorResponse } from '../../../../../../../common/types/errors';
+import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
@@ -17,6 +19,10 @@ import {
   DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
+import {
+  extractCloningConfig,
+  isAdvancedConfig,
+} from '../../components/analytics_list/action_clone';
 
 import { ActionDispatchers, ACTION } from './actions';
 import { reducer } from './reducer';
@@ -27,6 +33,7 @@ import {
   FormMessage,
   State,
   SourceIndexMap,
+  getCloneFormStateFromJobConfig,
 } from './state';
 
 export interface CreateAnalyticsFormProps {
@@ -35,6 +42,10 @@ export interface CreateAnalyticsFormProps {
 }
 
 export function getErrorMessage(error: any) {
+  if (isErrorResponse(error)) {
+    return `${error.body.error}: ${error.body.message}`;
+  }
+
   if (typeof error === 'object' && typeof error.message === 'string') {
     return error.message;
   }
@@ -187,9 +198,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     }
   };
 
-  const openModal = async () => {
-    resetForm();
-
+  const prepareFormValidation = async () => {
     // re-fetch existing analytics job IDs and indices for form validation
     try {
       setJobIds(
@@ -248,7 +257,11 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
     }
+  };
 
+  const openModal = async () => {
+    resetForm();
+    await prepareFormValidation();
     dispatch({ type: ACTION.OPEN_MODAL });
   };
 
@@ -301,6 +314,23 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT, value });
   };
 
+  const setJobClone = async (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => {
+    resetForm();
+    await prepareFormValidation();
+
+    const config = extractCloningConfig(cloneJob);
+    if (isAdvancedConfig(config)) {
+      setJobConfig(config);
+      switchToAdvancedEditor();
+    } else {
+      setFormState(getCloneFormStateFromJobConfig(config));
+      setEstimatedModelMemoryLimit(config.model_memory_limit);
+    }
+
+    dispatch({ type: ACTION.SET_JOB_CLONE, cloneJob });
+    dispatch({ type: ACTION.OPEN_MODAL });
+  };
+
   const actions: ActionDispatchers = {
     closeModal,
     createAnalyticsJob,
@@ -313,6 +343,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     startAnalyticsJob,
     switchToAdvancedEditor,
     setEstimatedModelMemoryLimit,
+    setJobClone,
   };
 
   return { state, actions };

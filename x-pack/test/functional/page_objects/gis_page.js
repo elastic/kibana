@@ -451,7 +451,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async getCodeBlockParsedJson(dataTestSubjName) {
       log.debug(`Get parsed code block for ${dataTestSubjName}`);
-      const indexRespCodeBlock = await find.byCssSelector(`[data-test-subj="${dataTestSubjName}"]`);
+      const indexRespCodeBlock = await testSubjects.find(`${dataTestSubjName}`);
       const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
       return JSON.parse(indexRespJson);
     }
@@ -515,9 +515,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async uploadJsonFileForIndexing(path) {
-      log.debug(`Setting the path on the file input`);
-      const input = await find.byCssSelector('.euiFilePicker__input');
-      await input.type(path);
+      await PageObjects.common.setFileInputPath(path);
       log.debug(`File selected`);
 
       await PageObjects.header.waitUntilLoadingHasFinished();

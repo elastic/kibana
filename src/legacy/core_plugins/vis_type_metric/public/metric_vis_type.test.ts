@@ -43,21 +43,8 @@ jest.mock('./services', () => ({
   }),
 }));
 
-jest.mock('../../vis_default_editor/public/legacy_imports', () => ({
-  propFilter: jest.fn(),
-  AggGroupNames: {
-    Buckets: 'buckets',
-    Metrics: 'metrics',
-  },
-  aggTypeFilters: {
-    addFilter: jest.fn(),
-  },
-  BUCKET_TYPES: {
-    DATE_HISTOGRAM: 'date_histogram',
-  },
-  METRIC_TYPES: {
-    TOP_HITS: 'top_hits',
-  },
+jest.mock('../../vis_default_editor/public', () => ({
+  Schemas: class {},
 }));
 
 describe('metric_vis - createMetricVisTypeDefinition', () => {

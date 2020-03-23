@@ -16,45 +16,78 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { EmbeddableFactoryRegistry } from './types';
-import { createApi, EmbeddableApi } from './api';
 import { bootstrap } from './bootstrap';
+import { EmbeddableFactory, EmbeddableInput, EmbeddableOutput } from './lib';
 
-export interface IEmbeddableSetupDependencies {
+export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
 }
 
-export interface IEmbeddableSetup {
-  registerEmbeddableFactory: EmbeddableApi['registerEmbeddableFactory'];
+export interface EmbeddableSetup {
+  registerEmbeddableFactory: <I extends EmbeddableInput, O extends EmbeddableOutput>(
+    id: string,
+    factory: EmbeddableFactory<I, O>
+  ) => void;
+}
+export interface EmbeddableStart {
+  getEmbeddableFactory: <
+    I extends EmbeddableInput = EmbeddableInput,
+    O extends EmbeddableOutput = EmbeddableOutput
+  >(
+    embeddableFactoryId: string
+  ) => EmbeddableFactory<I, O> | undefined;
+  getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
 }
 
-export type IEmbeddableStart = EmbeddableApi;
-
-export class EmbeddablePublicPlugin implements Plugin<IEmbeddableSetup, IEmbeddableStart> {
+export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private api!: EmbeddableApi;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: IEmbeddableSetupDependencies) {
-    ({ api: this.api } = createApi({
-      embeddableFactories: this.embeddableFactories,
-    }));
+  public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
     bootstrap(uiActions);
 
-    const { registerEmbeddableFactory } = this.api;
-
     return {
-      registerEmbeddableFactory,
+      registerEmbeddableFactory: this.registerEmbeddableFactory,
     };
   }
 
   public start(core: CoreStart) {
-    return this.api;
+    return {
+      getEmbeddableFactory: this.getEmbeddableFactory,
+      getEmbeddableFactories: () => this.embeddableFactories.values(),
+    };
   }
 
   public stop() {}
+
+  private registerEmbeddableFactory = (embeddableFactoryId: string, factory: EmbeddableFactory) => {
+    if (this.embeddableFactories.has(embeddableFactoryId)) {
+      throw new Error(
+        `Embeddable factory [embeddableFactoryId = ${embeddableFactoryId}] already registered in Embeddables API.`
+      );
+    }
+
+    this.embeddableFactories.set(embeddableFactoryId, factory);
+  };
+
+  private getEmbeddableFactory = <
+    I extends EmbeddableInput = EmbeddableInput,
+    O extends EmbeddableOutput = EmbeddableOutput
+  >(
+    embeddableFactoryId: string
+  ) => {
+    const factory = this.embeddableFactories.get(embeddableFactoryId);
+
+    if (!factory) {
+      throw new Error(
+        `Embeddable factory [embeddableFactoryId = ${embeddableFactoryId}] does not exist.`
+      );
+    }
+
+    return factory as EmbeddableFactory<I, O>;
+  };
 }

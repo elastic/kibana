@@ -8,9 +8,9 @@ import React, { useContext, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { AppState } from '../../../state';
-import { selectMonitorLocations, selectMonitorStatus } from '../../../state/selectors';
+import { monitorLocationsSelector, selectMonitorStatus } from '../../../state/selectors';
 import { MonitorStatusBarComponent } from '../../functional/monitor_status_details/monitor_status_bar';
-import { getMonitorStatus, getSelectedMonitor } from '../../../state/actions';
+import { getMonitorStatusAction, getSelectedMonitorAction } from '../../../state/actions';
 import { useUrlParams } from '../../../hooks';
 import { Ping } from '../../../../common/graphql/types';
 import { MonitorLocations } from '../../../../common/runtime_types/monitor';
@@ -57,20 +57,20 @@ const Container: React.FC<Props> = ({
 
 const mapStateToProps = (state: AppState, ownProps: OwnProps) => ({
   monitorStatus: selectMonitorStatus(state),
-  monitorLocations: selectMonitorLocations(state, ownProps.monitorId),
+  monitorLocations: monitorLocationsSelector(state, ownProps.monitorId),
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<any>): DispatchProps => ({
   loadMonitorStatus: (dateStart: string, dateEnd: string, monitorId: string) => {
     dispatch(
-      getMonitorStatus({
+      getMonitorStatusAction({
         monitorId,
         dateStart,
         dateEnd,
       })
     );
     dispatch(
-      getSelectedMonitor({
+      getSelectedMonitorAction({
         monitorId,
       })
     );

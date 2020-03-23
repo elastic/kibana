@@ -35,7 +35,7 @@ import {
   getUrlVars,
   getLensUrlFromDashboardAbsoluteUrl,
 } from '../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/url_helper';
-import { IEmbeddableSetup, IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { VisualizationsSetup } from './legacy_imports';
@@ -44,7 +44,7 @@ export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   __LEGACY: {
     visualizations: VisualizationsSetup;
   };
@@ -52,7 +52,7 @@ export interface LensPluginSetupDependencies {
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
 }
 
@@ -114,7 +114,7 @@ export class LensPlugin {
         const savedObjectsClient = coreStart.savedObjects.client;
         addHelpMenuToAppChrome(coreStart.chrome);
 
-        const instance = await this.createEditorFrame!({});
+        const instance = await this.createEditorFrame!();
 
         setReportManager(
           new LensReportManager({

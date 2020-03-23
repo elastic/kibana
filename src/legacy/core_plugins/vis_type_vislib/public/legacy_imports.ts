@@ -19,7 +19,6 @@
 
 import { npStart } from 'ui/new_platform';
 export const { createFiltersFromEvent } = npStart.plugins.data.actions;
-export { AggType, AggGroupNames, IAggConfig, IAggType, Schemas } from 'ui/agg_types';
 import { search } from '../../../../plugins/data/public';
 export const { tabifyAggResponse, tabifyGetColumns } = search;
 // @ts-ignore

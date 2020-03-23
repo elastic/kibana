@@ -74,6 +74,7 @@ describe('Security Plugin', () => {
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
                   "getSessionInfo": [Function],
+                  "grantAPIKeyAsInternalUser": [Function],
                   "invalidateAPIKey": [Function],
                   "isAuthenticated": [Function],
                   "isProviderEnabled": [Function],

@@ -18,16 +18,3 @@
  */
 
 export { npSetup, npStart } from 'ui/new_platform';
-export { IAggConfig, AggGroupNames, Schemas } from 'ui/agg_types';
-// @ts-ignore
-export { PaginateDirectiveProvider } from 'ui/directives/paginate';
-// @ts-ignore
-export { PaginateControlsDirectiveProvider } from 'ui/directives/paginate';
-import { search } from '../../../../plugins/data/public';
-export const { tabifyAggResponse, tabifyGetColumns } = search;
-export {
-  configureAppAngularModule,
-  KbnAccessibleClickProvider,
-  PrivateProvider,
-  watchMultiDecorator,
-} from '../../../../plugins/kibana_legacy/public';

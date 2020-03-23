@@ -9,7 +9,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from 'src/core/server';
 import { PLUGIN_ID, AGENT_API_ROUTES } from '../../constants';
 import {
   GetAgentsRequestSchema,
@@ -22,6 +22,7 @@ import {
   PostAgentAcksRequestSchema,
   PostAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
+  PostNewAgentActionRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -31,10 +32,13 @@ import {
   getAgentEventsHandler,
   postAgentCheckinHandler,
   postAgentEnrollHandler,
-  postAgentAcksHandler,
   postAgentsUnenrollHandler,
   getAgentStatusForConfigHandler,
+  getInternalUserSOClient,
 } from './handlers';
+import { postAgentAcksHandlerBuilder } from './acks_handlers';
+import * as AgentService from '../../services/agents';
+import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 
 export const registerRoutes = (router: IRouter) => {
   // Get one
@@ -101,7 +105,25 @@ export const registerRoutes = (router: IRouter) => {
       validate: PostAgentAcksRequestSchema,
       options: { tags: [] },
     },
-    postAgentAcksHandler
+    postAgentAcksHandlerBuilder({
+      acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
+      getAgentByAccessAPIKeyId: AgentService.getAgentByAccessAPIKeyId,
+      getSavedObjectsClientContract: getInternalUserSOClient,
+      saveAgentEvents: AgentService.saveAgentEvents,
+    })
+  );
+
+  // Agent actions
+  router.post(
+    {
+      path: AGENT_API_ROUTES.ACTIONS_PATTERN,
+      validate: PostNewAgentActionRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postNewAgentActionHandlerBuilder({
+      getAgent: AgentService.getAgent,
+      updateAgentActions: AgentService.updateAgentActions,
+    })
   );
 
   router.post(
