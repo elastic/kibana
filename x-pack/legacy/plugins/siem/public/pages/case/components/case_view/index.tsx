@@ -105,7 +105,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             title: i18n.CASE_OPENED,
             buttonLabel: i18n.CLOSE_CASE,
             status: caseData.status,
-            icon: 'checkInCircleFilled',
+            icon: 'folderCheck',
             badgeColor: 'secondary',
             isSelected: false,
           }
@@ -115,7 +115,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             title: i18n.CASE_CLOSED,
             buttonLabel: i18n.REOPEN_CASE,
             status: caseData.status,
-            icon: 'magnet',
+            icon: 'folderExclamation',
             badgeColor: 'danger',
             isSelected: true,
           },
