@@ -45,6 +45,10 @@ export function isMapsAppRegistered() {
 }
 
 export function isFieldVisualizable(field: IFieldType) {
+  if (field.name === '_id') {
+    // Else you'd get a 'Fielddata access on the _id field is disallowed' error on ES side.
+    return false;
+  }
   if (
     (field.type === KBN_FIELD_TYPES.GEO_POINT || field.type === KBN_FIELD_TYPES.GEO_SHAPE) &&
     isMapsAppRegistered()
