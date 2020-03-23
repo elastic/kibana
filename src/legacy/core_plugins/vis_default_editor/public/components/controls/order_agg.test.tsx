@@ -21,8 +21,6 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { OrderByParamEditor } from './order_by';
 
-jest.mock('ui/new_platform');
-
 describe('OrderAggParamEditor component', () => {
   let setValue: jest.Mock;
   let setValidity: jest.Mock;

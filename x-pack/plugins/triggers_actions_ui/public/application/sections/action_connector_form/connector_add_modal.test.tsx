@@ -8,7 +8,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ConnectorAddModal } from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult } from '../../../types';
+import { ValidationResult, ActionType } from '../../../types';
 import { ActionsConnectorsContextValue } from '../../context/actions_connectors_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
@@ -54,10 +54,13 @@ describe('connector_add_modal', () => {
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
 
-    const actionType = {
+    const actionType: ActionType = {
       id: 'my-action-type',
       name: 'test',
       enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
     };
 
     const wrapper = deps
