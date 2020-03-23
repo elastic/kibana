@@ -29,6 +29,7 @@ import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from 
 import { mlMessageBarService } from '../../../../components/messagebar';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 
 class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
@@ -39,6 +40,7 @@ class EditJobFlyoutUI extends Component {
     this.state = {
       job: {},
       hasDatafeed: false,
+      datafeedRunning: false,
       isFlyoutVisible: false,
       isConfirmationModalVisible: false,
       jobDescription: '',
@@ -155,10 +157,12 @@ class EditJobFlyoutUI extends Component {
 
   extractJob(job, hasDatafeed) {
     this.extractInitialJobFormState(job, hasDatafeed);
+    const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
 
     this.setState({
       job,
       hasDatafeed,
+      datafeedRunning,
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
       ...cloneDeep(this._initialJobFormState),
@@ -284,6 +288,7 @@ class EditJobFlyoutUI extends Component {
         jobModelMemoryLimitValidationError,
         isValidJobDetails,
         isValidJobCustomUrls,
+        datafeedRunning,
       } = this.state;
 
       const { intl } = this.props;
@@ -297,6 +302,7 @@ class EditJobFlyoutUI extends Component {
           }),
           content: (
             <JobDetails
+              datafeedRunning={datafeedRunning}
               jobDescription={jobDescription}
               jobGroups={jobGroups}
               jobModelMemoryLimit={jobModelMemoryLimit}
@@ -334,6 +340,7 @@ class EditJobFlyoutUI extends Component {
               datafeedScrollSize={datafeedScrollSize}
               jobBucketSpan={jobBucketSpan}
               setDatafeed={this.setDatafeed}
+              datafeedRunning={datafeedRunning}
             />
           ),
         },
