@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { NewOutput, Output } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { appContextService } from './app_context';
@@ -60,13 +60,13 @@ class OutputService {
       .getEncryptedSavedObjects()
       ?.getDecryptedAsInternalUser<Output>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
 
-    if (!so || !so.attributes.admin_username || !so.attributes.admin_password) {
+    if (!so || !so.attributes.fleet_enroll_username || !so.attributes.fleet_enroll_password) {
       return null;
     }
 
     return {
-      username: so!.attributes.admin_username,
-      password: so!.attributes.admin_password,
+      username: so!.attributes.fleet_enroll_username,
+      password: so!.attributes.fleet_enroll_password,
     };
   }
 

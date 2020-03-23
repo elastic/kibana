@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { IndexPatternField } from 'src/plugins/data/public';
+import { IAggConfig, AggParam, IndexPatternField } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, AggParam } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
 import { Schema } from '../schemas';

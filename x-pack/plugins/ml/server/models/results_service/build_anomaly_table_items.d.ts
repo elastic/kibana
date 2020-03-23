@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnomalyRecordDoc } from '../../../../../legacy/plugins/ml/common/types/anomalies';
+import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 
 export interface AnomaliesTableRecord {
   time: number;

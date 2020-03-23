@@ -4,48 +4,67 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSuperSelect, EuiIcon } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSuperSelect,
+  EuiIcon,
+  EuiSuperSelectOption,
+} from '@elastic/eui';
 
+import { capitalize } from 'lodash/fp';
 import * as i18n from './translations';
+import {
+  CaseField,
+  ActionType,
+  ThirdPartyField,
+} from '../../../../containers/case/configure/types';
 
-interface ThirdPartyField {
-  value: string;
-  inputDisplay: JSX.Element;
-}
 interface RowProps {
-  siemField: string;
-  thirdPartyOptions: ThirdPartyField[];
+  disabled: boolean;
+  siemField: CaseField;
+  thirdPartyOptions: Array<EuiSuperSelectOption<ThirdPartyField>>;
+  onChangeActionType: (caseField: CaseField, newActionType: ActionType) => void;
+  onChangeThirdParty: (caseField: CaseField, newThirdPartyField: ThirdPartyField) => void;
+  selectedActionType: ActionType;
+  selectedThirdParty: ThirdPartyField;
 }
 
-const editUpdateOptions = [
+const actionTypeOptions: Array<EuiSuperSelectOption<ActionType>> = [
   {
     value: 'nothing',
-    inputDisplay: <span>{i18n.FIELD_MAPPING_EDIT_NOTHING}</span>,
+    inputDisplay: <>{i18n.FIELD_MAPPING_EDIT_NOTHING}</>,
     'data-test-subj': 'edit-update-option-nothing',
   },
   {
     value: 'overwrite',
-    inputDisplay: <span>{i18n.FIELD_MAPPING_EDIT_OVERWRITE}</span>,
+    inputDisplay: <>{i18n.FIELD_MAPPING_EDIT_OVERWRITE}</>,
     'data-test-subj': 'edit-update-option-overwrite',
   },
   {
     value: 'append',
-    inputDisplay: <span>{i18n.FIELD_MAPPING_EDIT_APPEND}</span>,
+    inputDisplay: <>{i18n.FIELD_MAPPING_EDIT_APPEND}</>,
     'data-test-subj': 'edit-update-option-append',
   },
 ];
 
-const FieldMappingRowComponent: React.FC<RowProps> = ({ siemField, thirdPartyOptions }) => {
-  const [selectedEditUpdate, setSelectedEditUpdate] = useState(editUpdateOptions[0].value);
-  const [selectedThirdParty, setSelectedThirdParty] = useState(thirdPartyOptions[0].value);
-
+const FieldMappingRowComponent: React.FC<RowProps> = ({
+  disabled,
+  siemField,
+  thirdPartyOptions,
+  onChangeActionType,
+  onChangeThirdParty,
+  selectedActionType,
+  selectedThirdParty,
+}) => {
+  const siemFieldCapitalized = useMemo(() => capitalize(siemField), [siemField]);
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiFlexGroup component="span" justifyContent="spaceBetween">
           <EuiFlexItem component="span" grow={false}>
-            {siemField}
+            {siemFieldCapitalized}
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiIcon type="sortRight" />
@@ -54,16 +73,18 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({ siemField, thirdPartyOpt
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSuperSelect
+          disabled={disabled}
           options={thirdPartyOptions}
           valueOfSelected={selectedThirdParty}
-          onChange={setSelectedThirdParty}
+          onChange={onChangeThirdParty.bind(null, siemField)}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSuperSelect
-          options={editUpdateOptions}
-          valueOfSelected={selectedEditUpdate}
-          onChange={setSelectedEditUpdate}
+          disabled={disabled}
+          options={actionTypeOptions}
+          valueOfSelected={selectedActionType}
+          onChange={onChangeActionType.bind(null, siemField)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

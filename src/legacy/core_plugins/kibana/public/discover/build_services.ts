@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createHashHistory, History } from 'history';
+
 import {
   Capabilities,
   ChromeStart,
@@ -49,6 +51,7 @@ export interface DiscoverServices {
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
   DocViewer: DocViewerComponent;
+  history: History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract;
@@ -81,6 +84,7 @@ export async function buildServices(
     data: plugins.data,
     docLinks: core.docLinks,
     DocViewer: plugins.discover.docViews.DocViewer,
+    history: createHashHistory(),
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),

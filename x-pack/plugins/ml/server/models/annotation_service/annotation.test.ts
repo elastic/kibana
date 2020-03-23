@@ -8,12 +8,9 @@ import getAnnotationsRequestMock from './__mocks__/get_annotations_request.json'
 import getAnnotationsResponseMock from './__mocks__/get_annotations_response.json';
 import { APICaller } from 'kibana/server';
 
-import { ANNOTATION_TYPE } from '../../../../../legacy/plugins/ml/common/constants/annotations';
-import { ML_ANNOTATIONS_INDEX_ALIAS_WRITE } from '../../../../../legacy/plugins/ml/common/constants/index_patterns';
-import {
-  Annotation,
-  isAnnotations,
-} from '../../../../../legacy/plugins/ml/common/types/annotations';
+import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import { ML_ANNOTATIONS_INDEX_ALIAS_WRITE } from '../../../common/constants/index_patterns';
+import { Annotation, isAnnotations } from '../../../common/types/annotations';
 
 import { DeleteParams, GetResponse, IndexAnnotationArgs } from './annotation';
 import { annotationServiceProvider } from './index';

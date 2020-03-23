@@ -17,9 +17,9 @@
  * under the License.
  */
 import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { wrapInI18nContext } from '../../../kibana_services';
+import { getServices, wrapInI18nContext } from '../../../kibana_services';
 
-export function FieldNameDirectiveProvider(config, reactDirective) {
+export function FieldNameDirectiveProvider(reactDirective) {
   return reactDirective(
     wrapInI18nContext(FieldName),
     [
@@ -29,7 +29,7 @@ export function FieldNameDirectiveProvider(config, reactDirective) {
     ],
     { restrict: 'AE' },
     {
-      useShortDots: config.get('shortDots:enable'),
+      useShortDots: getServices().uiSettings.get('shortDots:enable'),
     }
   );
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React from 'react';
 
 import styled, { css } from 'styled-components';
@@ -16,7 +16,7 @@ interface UserActionItemProps {
   id: string;
   isEditable: boolean;
   isLoading: boolean;
-  labelAction?: string;
+  labelEditAction?: string;
   labelTitle?: string;
   fullName: string;
   markdown: React.ReactNode;
@@ -48,6 +48,12 @@ const UserActionItemContainer = styled(EuiFlexGroup)`
       margin-right: ${theme.eui.euiSize};
       vertical-align: top;
     }
+    .userAction_loadingAvatar {
+      position: relative;
+      margin-right: ${theme.eui.euiSizeXL};
+      top: ${theme.eui.euiSizeM};
+      left: ${theme.eui.euiSizeS};
+    }
     .userAction__title {
       padding: ${theme.eui.euiSizeS} ${theme.eui.euiSizeL};
       background: ${theme.eui.euiColorLightestShade};
@@ -65,7 +71,7 @@ export const UserActionItem = ({
   id,
   isEditable,
   isLoading,
-  labelAction,
+  labelEditAction,
   labelTitle,
   fullName,
   markdown,
@@ -74,7 +80,11 @@ export const UserActionItem = ({
 }: UserActionItemProps) => (
   <UserActionItemContainer gutterSize={'none'}>
     <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
-      <UserActionAvatar name={fullName ?? userName} />
+      {fullName.length > 0 || userName.length > 0 ? (
+        <UserActionAvatar name={fullName ?? userName} />
+      ) : (
+        <EuiLoadingSpinner className="userAction_loadingAvatar" />
+      )}
     </EuiFlexItem>
     <EuiFlexItem data-test-subj={`user-action-${id}`}>
       {isEditable && markdown}
@@ -84,7 +94,7 @@ export const UserActionItem = ({
             createdAt={createdAt}
             id={id}
             isLoading={isLoading}
-            labelAction={labelAction ?? ''}
+            labelEditAction={labelEditAction ?? ''}
             labelTitle={labelTitle ?? ''}
             userName={userName}
             onEdit={onEdit}

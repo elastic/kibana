@@ -7,6 +7,11 @@
 import * as rt from 'io-ts';
 
 export const UserRT = rt.type({
-  full_name: rt.union([rt.undefined, rt.string, rt.null]),
-  username: rt.union([rt.string, rt.null]),
+  email: rt.union([rt.undefined, rt.string]),
+  full_name: rt.union([rt.undefined, rt.string]),
+  username: rt.string,
 });
+
+export const UsersRt = rt.array(UserRT);
+
+export type User = rt.TypeOf<typeof UserRT>;

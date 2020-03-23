@@ -148,6 +148,55 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('View In App', function() {
+      const testRunUuid = uuid.v4();
+
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+      });
+
+      it('renders the alert details view in app button', async () => {
+        const alert = await alerting.alerts.createNoOp(`test-alert-${testRunUuid}`);
+
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        expect(await pageObjects.alertDetailsUI.isViewInAppEnabled()).to.be(true);
+
+        await pageObjects.alertDetailsUI.clickViewInApp();
+
+        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);
+      });
+
+      it('renders a disabled alert details view in app button', async () => {
+        const alert = await alerting.alerts.createAlwaysFiringWithActions(
+          `test-alert-disabled-nav`,
+          []
+        );
+
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        expect(await pageObjects.alertDetailsUI.isViewInAppDisabled()).to.be(true);
+      });
+    });
+
     describe('Alert Instances', function() {
       const testRunUuid = uuid.v4();
       let alert: any;

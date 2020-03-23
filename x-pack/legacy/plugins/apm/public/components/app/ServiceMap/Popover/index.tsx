@@ -14,6 +14,7 @@ import React, {
   useRef,
   useState
 } from 'react';
+import { SERVICE_NAME } from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
 import { Contents } from './Contents';
 
@@ -36,7 +37,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const renderedWidth = selectedNode?.renderedWidth() ?? 0;
   const { x, y } = selectedNode?.renderedPosition() ?? { x: -10000, y: -10000 };
   const isOpen = !!selectedNode;
-  const isService = selectedNode?.data('type') === 'service';
+  const isService = selectedNode?.data(SERVICE_NAME) !== undefined;
   const triggerStyle: CSSProperties = {
     background: 'transparent',
     height: renderedHeight,
@@ -85,6 +86,14 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     }
   }, [popoverRef, x, y]);
 
+  const centerSelectedNode = useCallback(() => {
+    if (cy) {
+      cy.center(cy.getElementById(selectedNodeServiceName));
+    }
+  }, [cy, selectedNodeServiceName]);
+
+  const isAlreadyFocused = focusedServiceName === selectedNodeServiceName;
+
   return (
     <EuiPopover
       anchorPosition={'upCenter'}
@@ -97,10 +106,9 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       <Contents
         isService={isService}
         label={label}
-        onFocusClick={deselect}
+        onFocusClick={isAlreadyFocused ? centerSelectedNode : deselect}
         selectedNodeData={selectedNodeData}
         selectedNodeServiceName={selectedNodeServiceName}
-        focusedServiceName={focusedServiceName}
       />
     </EuiPopover>
   );

@@ -34,21 +34,21 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.configureDimension({
         dimension:
-          '[data-test-subj="lnsXY_xDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
+          '[data-test-subj="lnsXY_xDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
       await PageObjects.lens.configureDimension({
         dimension:
-          '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
+          '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
         operation: 'avg',
         field: 'bytes',
       });
 
       await PageObjects.lens.configureDimension({
         dimension:
-          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
+          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
         operation: 'terms',
         field: 'ip',
       });
