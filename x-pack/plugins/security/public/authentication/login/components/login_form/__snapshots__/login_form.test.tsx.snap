@@ -3,7 +3,6 @@
 exports[`LoginForm login selector renders as expected with login form 1`] = `
 <Fragment>
   <EuiButton
-    className="loginWelcome__selectorButton"
     fullWidth={true}
     iconType="user"
     isDisabled={false}
@@ -13,8 +12,10 @@ exports[`LoginForm login selector renders as expected with login form 1`] = `
   >
     Login w/SAML
   </EuiButton>
+  <EuiSpacer
+    size="m"
+  />
   <EuiButton
-    className="loginWelcome__selectorButton"
     fullWidth={true}
     iconType="user"
     isDisabled={false}
@@ -24,6 +25,9 @@ exports[`LoginForm login selector renders as expected with login form 1`] = `
   >
     Login w/PKI
   </EuiButton>
+  <EuiSpacer
+    size="m"
+  />
   <EuiText
     color="subdued"
     textAlign="center"
@@ -121,7 +125,6 @@ exports[`LoginForm login selector renders as expected with login form 1`] = `
 exports[`LoginForm login selector renders as expected without login form for providers with and without description 1`] = `
 <Fragment>
   <EuiButton
-    className="loginWelcome__selectorButton"
     fullWidth={true}
     iconType="user"
     isDisabled={false}
@@ -131,8 +134,10 @@ exports[`LoginForm login selector renders as expected without login form for pro
   >
     Login w/SAML
   </EuiButton>
+  <EuiSpacer
+    size="m"
+  />
   <EuiButton
-    className="loginWelcome__selectorButton"
     fullWidth={true}
     iconType="user"
     isDisabled={false}
@@ -151,6 +156,9 @@ exports[`LoginForm login selector renders as expected without login form for pro
       }
     />
   </EuiButton>
+  <EuiSpacer
+    size="m"
+  />
 </Fragment>
 `;
 

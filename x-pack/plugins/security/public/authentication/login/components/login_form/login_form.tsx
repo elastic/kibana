@@ -214,27 +214,29 @@ export class LoginForm extends Component<Props, State> {
 
     return (
       <>
-        {this.props.selector.providers.map(provider => (
-          <EuiButton
-            key={provider.name}
-            className="loginWelcome__selectorButton"
-            iconType="user"
-            fullWidth={true}
-            isDisabled={!this.isLoadingState(LoadingStateType.None)}
-            isLoading={this.isLoadingState(LoadingStateType.Selector, provider.name)}
-            onClick={() => this.loginWithSelector(provider.type, provider.name)}
-          >
-            {provider.description ?? (
-              <FormattedMessage
-                id="xpack.security.loginPage.loginProviderDescription"
-                defaultMessage="Login with {providerType}/{providerName}"
-                values={{
-                  providerType: provider.type,
-                  providerName: provider.name,
-                }}
-              />
-            )}
-          </EuiButton>
+        {this.props.selector.providers.map((provider, index) => (
+          <Fragment key={index}>
+            <EuiButton
+              key={provider.name}
+              iconType="user"
+              fullWidth={true}
+              isDisabled={!this.isLoadingState(LoadingStateType.None)}
+              isLoading={this.isLoadingState(LoadingStateType.Selector, provider.name)}
+              onClick={() => this.loginWithSelector(provider.type, provider.name)}
+            >
+              {provider.description ?? (
+                <FormattedMessage
+                  id="xpack.security.loginPage.loginProviderDescription"
+                  defaultMessage="Login with {providerType}/{providerName}"
+                  values={{
+                    providerType: provider.type,
+                    providerName: provider.name,
+                  }}
+                />
+              )}
+            </EuiButton>
+            <EuiSpacer size="m" />
+          </Fragment>
         ))}
         {loginSelectorAndLoginFormSeparator}
       </>
