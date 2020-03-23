@@ -6,6 +6,7 @@
 import React from 'react';
 import { EuiOverlayMask, EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import * as labels from './translations';
 
 interface Props {
   loading: boolean;
@@ -17,7 +18,7 @@ export const ConfirmJobDeletion: React.FC<Props> = ({ loading, onConfirm, onCanc
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
-        title="Delete Anomaly detection job?"
+        title={labels.JOB_DELETION_CONFIRMATION}
         onCancel={onCancel}
         onConfirm={onConfirm}
         cancelButtonText="Cancel"

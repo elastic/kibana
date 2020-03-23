@@ -50,6 +50,13 @@ export const JOB_DELETION_SUCCESS = i18n.translate(
   }
 );
 
+export const JOB_DELETION_CONFIRMATION = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.jobDeletionConfirmLabel',
+  {
+    defaultMessage: 'Delete Anomaly detection job?',
+  }
+);
+
 export const VIEW_JOB = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
   {
