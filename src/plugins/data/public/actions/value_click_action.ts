@@ -90,11 +90,9 @@ export const valueClickActionGetFilters = async (
     throw new IncompatibleActionError();
   }
 
-  //
   const filters: Filter[] = (await createFiltersFromEvent(data.data || [data], data.negate)) || [];
 
   let selectedFilters: Filter[] = esFilters.mapAndFlattenFilters(filters);
-  // filters
 
   if (selectedFilters.length > 1) {
     selectedFilters = await filterSelection(filters);
