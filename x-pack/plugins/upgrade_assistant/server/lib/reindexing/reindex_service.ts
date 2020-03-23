@@ -590,18 +590,16 @@ export const reindexServiceFactory = (
       return findResponse.saved_objects[0];
     },
 
-    async cleanupReindexOperations(indexNames: Array<string | undefined>) {
-      const performCleanup = async (indexName: string | undefined) => {
-        if (indexName) {
-          const existingReindexOps = await actions.findReindexOperations(indexName);
+    async cleanupReindexOperations(indexNames: string[]) {
+      const performCleanup = async (indexName: string) => {
+        const existingReindexOps = await actions.findReindexOperations(indexName);
 
-          if (existingReindexOps && existingReindexOps.total !== 0) {
-            const existingOp = existingReindexOps.saved_objects[0];
-            if (existingOp.attributes.status === ReindexStatus.completed) {
-              // Delete the existing one if its status is completed, but still contains deprecation warnings
-              // example scenario: index was upgraded, but then deleted and restored with an old snapshot
-              await actions.deleteReindexOp(existingOp);
-            }
+        if (existingReindexOps && existingReindexOps.total !== 0) {
+          const existingOp = existingReindexOps.saved_objects[0];
+          if (existingOp.attributes.status === ReindexStatus.completed) {
+            // Delete the existing one if its status is completed, but still contains deprecation warnings
+            // example scenario: index was upgraded, but then deleted and restored with an old snapshot
+            await actions.deleteReindexOp(existingOp);
           }
         }
       };
