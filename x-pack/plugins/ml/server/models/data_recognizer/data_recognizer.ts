@@ -423,6 +423,8 @@ export class DataRecognizer {
       savedObjects: [] as KibanaObjectResponse[],
     };
 
+    this.jobsForModelMemoryEstimation = moduleConfig.jobs;
+
     this.applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix);
     this.applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix);
     this.updateDatafeedIndices(moduleConfig);
