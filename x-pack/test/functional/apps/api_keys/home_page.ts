@@ -11,7 +11,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'apiKeys']);
   const log = getService('log');
   const security = getService('security');
-  const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   describe('Home page', function() {
     this.tags('smoke');
@@ -27,12 +27,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // https://www.elastic.co/guide/en/kibana/7.6/api-keys.html#api-keys-security-privileges
     it('Shows required privileges ', async () => {
       log.debug('Checking for section header');
-      const messageElement = await find.byCssSelector('h2.euiTitle');
+      const messageElement = await testSubjects.find('apiKeysPermissionDeniedMessage');
       const message = await messageElement.getVisibleText();
       expect(message).to.be('You need permission to manage API keys');
     });
 
-    // https://www.elastic.co/guide/en/kibana/7.6/api-keys.html#api-keys-security-privileges
     it('Loads the app', async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
       log.debug('Checking for section header');
