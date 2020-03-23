@@ -29,6 +29,7 @@ export const isType = (...types: string[]) => {
   };
 };
 
+export const isNumberType = isType('number');
 export const isStringType = isType('string');
 export const isStringOrNumberType = isType('string', 'number');
 
@@ -49,6 +50,11 @@ export const migrateIncludeExcludeFormat = {
       output.params[this.name] = value.pattern;
     } else if (value && isStringType(aggConfig)) {
       output.params[this.name] = value;
+    } else if (value && value.length > 0 && isNumberType(aggConfig)) {
+      output.params[this.name] = value
+        .split(',')
+        .map((val: string) => Number(val.trim()))
+        .filter((val: number) => !Number.isNaN(val));
     }
   },
 } as Partial<BucketAggParam<IBucketAggConfig>>;
