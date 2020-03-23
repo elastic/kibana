@@ -5,7 +5,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Observable } from 'rxjs';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatRequestPayload, formatJson } from '../lib/format';
@@ -18,15 +17,19 @@ import { Editor } from './editor';
 import { RequestFlyout } from './request_flyout';
 import { useAppContext } from '../context';
 
-export interface Props {
-  getIsNavDrawerLocked$: () => Observable<boolean>;
-}
-
-export const Main = ({ getIsNavDrawerLocked$ }: Props) => {
-  const { state, updateState, services, links } = useAppContext();
+export const Main = () => {
+  const {
+    state,
+    updateState,
+    services: {
+      http,
+      chrome: { getIsNavDrawerLocked$ },
+    },
+    links,
+  } = useAppContext();
 
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
-  const { inProgress, response, submit } = useSubmitCode(services.http);
+  const { inProgress, response, submit } = useSubmitCode(http);
 
   // Live-update the output and persist state as the user changes it.
   useEffect(() => {

@@ -12,32 +12,31 @@ import { createKibanaReactContext } from '../../../../../src/plugins/kibana_reac
 import { Links } from '../links';
 
 import { AppContextProvider } from './context';
-import { Main, Props as MainProps } from './components/main';
+import { Main } from './components/main';
 
 interface AppDependencies {
   http: CoreSetup['http'];
   I18nContext: CoreStart['i18n']['Context'];
   uiSettings: CoreSetup['uiSettings'];
   links: Links;
+  chrome: CoreSetup['chrome'];
 }
 
 export function renderApp(
   element: HTMLElement | null,
-  { http, I18nContext, uiSettings, links }: AppDependencies,
-  props: MainProps
+  { http, I18nContext, uiSettings, links, chrome }: AppDependencies
 ) {
   if (!element) {
     return () => undefined;
   }
-
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
   });
   render(
     <I18nContext>
       <KibanaReactContextProvider>
-        <AppContextProvider value={{ http, links }}>
-          <Main {...props} />
+        <AppContextProvider value={{ http, links, chrome }}>
+          <Main />
         </AppContextProvider>
       </KibanaReactContextProvider>
     </I18nContext>,

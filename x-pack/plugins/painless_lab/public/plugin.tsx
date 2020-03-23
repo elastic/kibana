@@ -72,7 +72,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           i18n: { Context: I18nContext },
           notifications,
           docLinks,
-          chrome: { getIsNavDrawerLocked$ },
+          chrome,
         } = core;
 
         this.languageService.setup();
@@ -91,11 +91,13 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         }
 
         const { renderApp } = await import('./application');
-        const tearDownApp = renderApp(
-          element,
-          { I18nContext, http, uiSettings, links: getLinks(docLinks) },
-          { getIsNavDrawerLocked$ }
-        );
+        const tearDownApp = renderApp(element, {
+          I18nContext,
+          http,
+          uiSettings,
+          links: getLinks(docLinks),
+          chrome,
+        });
 
         return () => {
           tearDownApp();
