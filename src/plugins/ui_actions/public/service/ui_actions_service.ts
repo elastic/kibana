@@ -33,6 +33,7 @@ import {
   ActionFactory,
   ActionDefinition,
   ActionFactoryDefinition,
+  ActionContext,
 } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
@@ -156,7 +157,9 @@ export class UiActionsService {
     this.attachAction(triggerId, action.id);
   };
 
-  public readonly getAction = <T extends ActionDefinition>(id: string): ActionInternal<T> => {
+  public readonly getAction = <T extends ActionDefinition>(
+    id: string
+  ): Action<ActionContext<T>> => {
     if (!this.actions.has(id)) {
       throw new Error(`Action [action.id = ${id}] not registered.`);
     }
