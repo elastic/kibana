@@ -1,17 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#start() load order useLegacyTestHarness = false loads ui/modules before ui/chrome, and both before legacy files 1`] = `
+exports[`#start() load order loads ui/modules before ui/chrome, and both before legacy files 1`] = `
 Array [
-  "ui/new_platform",
   "ui/chrome",
-  "legacy files",
-]
-`;
-
-exports[`#start() load order useLegacyTestHarness = true loads ui/modules before ui/test_harness, and both before legacy files 1`] = `
-Array [
-  "ui/new_platform",
-  "ui/test_harness",
   "legacy files",
 ]
 `;

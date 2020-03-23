@@ -135,7 +135,8 @@ const coreSystem = new CoreSystem({
     },
   },
   rootDomElement,
-  useLegacyTestHarness: true,
+  requireLegacyBootstrapModule: () => require('ui/test_harness'),
+  requireNewPlatformShimModule: () => require('ui/new_platform'),
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
   }

@@ -45,7 +45,9 @@ i18n.load(injectedMetadata.i18n.translationsUrl)
       browserSupportsCsp: !window.__kbnCspNotEnforced__,
       requireLegacyFiles: () => {
         ${bundle.getRequires().join('\n  ')}
-      }
+      },
+      requireLegacyBootstrapModule: () => require('ui/chrome'),
+      requireNewPlatformShimModule: () => require('ui/new_platform'),
     });
 
     coreSystem

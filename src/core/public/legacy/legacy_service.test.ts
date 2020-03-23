@@ -19,34 +19,6 @@
 
 import angular from 'angular';
 
-const mockLoadOrder: string[] = [];
-
-const mockUiNewPlatformSetup = jest.fn();
-const mockUiNewPlatformStart = jest.fn();
-jest.mock('ui/new_platform', () => {
-  mockLoadOrder.push('ui/new_platform');
-  return {
-    __setup__: mockUiNewPlatformSetup,
-    __start__: mockUiNewPlatformStart,
-  };
-});
-
-const mockUiChromeBootstrap = jest.fn();
-jest.mock('ui/chrome', () => {
-  mockLoadOrder.push('ui/chrome');
-  return {
-    bootstrap: mockUiChromeBootstrap,
-  };
-});
-
-const mockUiTestHarnessBootstrap = jest.fn();
-jest.mock('ui/test_harness', () => {
-  mockLoadOrder.push('ui/test_harness');
-  return {
-    bootstrap: mockUiTestHarnessBootstrap,
-  };
-});
-
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -69,10 +41,24 @@ const injectedMetadataSetup = injectedMetadataServiceMock.createSetupContract();
 const notificationsSetup = notificationServiceMock.createSetupContract();
 const uiSettingsSetup = uiSettingsServiceMock.createSetupContract();
 
+const mockLoadOrder: string[] = [];
+const mockUiNewPlatformSetup = jest.fn();
+const mockUiNewPlatformStart = jest.fn();
+const mockUiChromeBootstrap = jest.fn();
 const defaultParams = {
   requireLegacyFiles: jest.fn(() => {
     mockLoadOrder.push('legacy files');
   }),
+  requireLegacyBootstrapModule: jest.fn(() => {
+    mockLoadOrder.push('ui/chrome');
+    return {
+      bootstrap: mockUiChromeBootstrap,
+    };
+  }),
+  requireNewPlatformShimModule: jest.fn(() => ({
+    __setup__: mockUiNewPlatformSetup,
+    __start__: mockUiNewPlatformStart,
+  })),
 };
 
 const defaultSetupDeps = {
@@ -128,7 +114,7 @@ afterEach(() => {
 
 describe('#setup()', () => {
   describe('default', () => {
-    it('initializes ui/new_platform with core APIs', () => {
+    it('initializes new platform shim module with core APIs', () => {
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
       });
@@ -185,67 +171,30 @@ describe('#start()', () => {
     expect(pluginsStart).toBe(defaultStartDeps.plugins);
   });
 
-  describe('useLegacyTestHarness = false', () => {
-    it('passes the targetDomElement to ui/chrome', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-      });
-
-      legacyPlatform.setup(defaultSetupDeps);
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockUiTestHarnessBootstrap).not.toHaveBeenCalled();
-      expect(mockUiChromeBootstrap).toHaveBeenCalledTimes(1);
-      expect(mockUiChromeBootstrap).toHaveBeenCalledWith(defaultStartDeps.targetDomElement);
+  it('passes the targetDomElement to legacy bootstrap module', () => {
+    const legacyPlatform = new LegacyPlatformService({
+      ...defaultParams,
     });
-  });
 
-  describe('useLegacyTestHarness = true', () => {
-    it('passes the targetDomElement to ui/test_harness', () => {
-      const legacyPlatform = new LegacyPlatformService({
-        ...defaultParams,
-        useLegacyTestHarness: true,
-      });
+    legacyPlatform.setup(defaultSetupDeps);
+    legacyPlatform.start(defaultStartDeps);
 
-      legacyPlatform.setup(defaultSetupDeps);
-      legacyPlatform.start(defaultStartDeps);
-
-      expect(mockUiChromeBootstrap).not.toHaveBeenCalled();
-      expect(mockUiTestHarnessBootstrap).toHaveBeenCalledTimes(1);
-      expect(mockUiTestHarnessBootstrap).toHaveBeenCalledWith(defaultStartDeps.targetDomElement);
-    });
+    expect(mockUiChromeBootstrap).toHaveBeenCalledTimes(1);
+    expect(mockUiChromeBootstrap).toHaveBeenCalledWith(defaultStartDeps.targetDomElement);
   });
 
   describe('load order', () => {
-    describe('useLegacyTestHarness = false', () => {
-      it('loads ui/modules before ui/chrome, and both before legacy files', () => {
-        const legacyPlatform = new LegacyPlatformService({
-          ...defaultParams,
-        });
-
-        expect(mockLoadOrder).toEqual([]);
-
-        legacyPlatform.setup(defaultSetupDeps);
-        legacyPlatform.start(defaultStartDeps);
-
-        expect(mockLoadOrder).toMatchSnapshot();
+    it('loads ui/modules before ui/chrome, and both before legacy files', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
       });
-    });
 
-    describe('useLegacyTestHarness = true', () => {
-      it('loads ui/modules before ui/test_harness, and both before legacy files', () => {
-        const legacyPlatform = new LegacyPlatformService({
-          ...defaultParams,
-          useLegacyTestHarness: true,
-        });
+      expect(mockLoadOrder).toEqual([]);
 
-        expect(mockLoadOrder).toEqual([]);
+      legacyPlatform.setup(defaultSetupDeps);
+      legacyPlatform.start(defaultStartDeps);
 
-        legacyPlatform.setup(defaultSetupDeps);
-        legacyPlatform.start(defaultStartDeps);
-
-        expect(mockLoadOrder).toMatchSnapshot();
-      });
+      expect(mockLoadOrder).toMatchSnapshot();
     });
   });
 });

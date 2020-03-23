@@ -25,8 +25,12 @@ import { LegacyCoreSetup, LegacyCoreStart, MountPoint } from '../';
 
 /** @internal */
 export interface LegacyPlatformParams {
-  requireLegacyFiles: () => void;
-  useLegacyTestHarness?: boolean;
+  requireLegacyFiles?: () => void;
+  requireLegacyBootstrapModule?: () => BootstrapModule;
+  requireNewPlatformShimModule?: () => {
+    __setup__: (legacyCore: LegacyCoreSetup, plugins: Record<string, unknown>) => void;
+    __start__: (legacyCore: LegacyCoreStart, plugins: Record<string, unknown>) => void;
+  };
 }
 
 interface SetupDeps {
@@ -92,7 +96,13 @@ export class LegacyPlatformService {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     if (core.injectedMetadata.getLegacyMode()) {
-      require('ui/new_platform').__setup__(legacyCore, plugins);
+      if (!this.params.requireNewPlatformShimModule) {
+        throw new Error(
+          `requireNewPlatformShimModule must be specified when rendering a legacy application`
+        );
+      }
+
+      this.params.requireNewPlatformShimModule().__setup__(legacyCore, plugins);
     }
   }
 
@@ -131,16 +141,29 @@ export class LegacyPlatformService {
 
     this.startDependencies$.next([legacyCore, plugins, {}]);
 
+    if (!this.params.requireNewPlatformShimModule) {
+      throw new Error(
+        `requireNewPlatformShimModule must be specified when rendering a legacy application`
+      );
+    }
+    if (!this.params.requireLegacyBootstrapModule) {
+      throw new Error(
+        `requireLegacyBootstrapModule must be specified when rendering a legacy application`
+      );
+    }
+
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
-    require('ui/new_platform').__start__(legacyCore, plugins);
+    this.params.requireNewPlatformShimModule().__start__(legacyCore, plugins);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
-    this.bootstrapModule = this.loadBootstrapModule();
+    this.bootstrapModule = this.params.requireLegacyBootstrapModule();
 
     // require the files that will tie into the legacy platform
-    this.params.requireLegacyFiles();
+    if (this.params.requireLegacyFiles) {
+      this.params.requireLegacyFiles();
+    }
 
     if (!this.bootstrapModule) {
       throw new Error('Bootstrap module must be loaded before `start`');
@@ -171,20 +194,6 @@ export class LegacyPlatformService {
 
     // clear the inner html of the root angular element
     this.targetDomElement.textContent = '';
-  }
-
-  private loadBootstrapModule(): BootstrapModule {
-    if (this.params.useLegacyTestHarness) {
-      // wrapped in NODE_ENV check so the `ui/test_harness` module
-      // is not included in the distributable
-      if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true') {
-        return require('ui/test_harness');
-      }
-
-      throw new Error('tests bundle is not available in the distributable');
-    }
-
-    return require('ui/chrome');
   }
 }
 
