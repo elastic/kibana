@@ -975,12 +975,6 @@ export class DataRecognizer {
     start?: number,
     end?: number
   ) {
-    const { limits } = await this.callAsCurrentUser('ml.info');
-
-    const maxMml = limits.max_model_memory_limit;
-    // @ts-ignore
-    const maxBytes: number = numeral(maxMml.toUpperCase()).value();
-
     if (!Array.isArray(moduleConfig.jobs)) {
       return;
     }
@@ -1037,6 +1031,16 @@ export class DataRecognizer {
         job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
       }
     }
+
+    const { limits } = await this.callAsCurrentUser('ml.info');
+    const maxMml = limits.max_model_memory_limit;
+
+    if (!maxMml) {
+      return;
+    }
+
+    // @ts-ignore
+    const maxBytes: number = numeral(maxMml.toUpperCase()).value();
 
     for (const job of moduleConfig.jobs) {
       const mml = job.config?.analysis_limits?.model_memory_limit;
