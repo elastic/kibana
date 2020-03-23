@@ -20,6 +20,7 @@
 import { encryptTelemetry } from './collectors';
 import { CallCluster } from '../../elasticsearch';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/server';
+import { Cluster } from '../../elasticsearch';
 import { ESLicense } from './telemetry_collection/get_local_license';
 
 export type EncryptedStatsGetterConfig = { unencrypted: false } & {
@@ -70,7 +71,7 @@ export type LicenseGetter = (
 interface CollectionConfig<T extends BasicStatsPayload> {
   title: string;
   priority: number;
-  esCluster: string;
+  esCluster: string | Cluster;
   statsGetter: StatsGetter<T>;
   clusterDetailsGetter: ClusterDetailsGetter;
   licenseGetter: LicenseGetter;
@@ -79,7 +80,7 @@ interface Collection {
   statsGetter: StatsGetter;
   licenseGetter: LicenseGetter;
   clusterDetailsGetter: ClusterDetailsGetter;
-  esCluster: string;
+  esCluster: string | Cluster;
   title: string;
 }
 
@@ -135,9 +136,10 @@ export class TelemetryCollectionManager {
   ): Promise<StatsCollectionConfig> => {
     const { start, end } = config;
     const server = config.unencrypted ? config.req.server : config.server;
-    const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
-      collection.esCluster
-    );
+    const { callWithRequest, callWithInternalUser } =
+      typeof collection.esCluster === 'string'
+        ? server.plugins.elasticsearch.getCluster(collection.esCluster)
+        : collection.esCluster;
     const callCluster = config.unencrypted
       ? (...args: any[]) => callWithRequest(config.req, ...args)
       : callWithInternalUser;
