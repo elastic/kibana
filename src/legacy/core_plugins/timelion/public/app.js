@@ -38,7 +38,6 @@ import 'ui/directives/input_focus';
 import './directives/saved_object_finder';
 import 'ui/directives/listen';
 import './directives/saved_object_save_as_checkbox';
-import '../../data/public/legacy';
 import './services/saved_sheet_register';
 
 import rootTemplate from 'plugins/timelion/index.html';
