@@ -138,7 +138,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
           />
 
           <BarSeries
-            customSeriesColors={[danger, gray]}
+            color={[danger, gray]}
             data={barData}
             id={downSpecId}
             name={i18n.translate('xpack.uptime.snapshotHistogram.series.pings', {
