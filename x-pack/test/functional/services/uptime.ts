@@ -21,9 +21,16 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       await input.type(text);
     },
     loadFields: async () => {
-      const heartbeatIndices = await (
-        await testSubjects.find('heartbeat-indices-input', 5000)
-      ).getAttribute('value');
+      let heartbeatIndices;
+      await retry.tryForTime(5000, async () => {
+        const input = await testSubjects.find('heartbeat-indices-input', 5000);
+        const klass = await input.getAttribute('class');
+        if (klass.match(/euiFieldText-isLoading/)) {
+          throw new Error('Input in loading state, no value');
+        }
+        heartbeatIndices = await input.getAttribute('value');
+      });
+
       return { heartbeatIndices };
     },
     applyButtonIsDisabled: async () => {

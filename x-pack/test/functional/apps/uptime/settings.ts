@@ -15,9 +15,10 @@ import { makeChecks } from '../../../api_integration/apis/uptime/graphql/helpers
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
   const es = getService('es');
+  const retry = getService('retry');
 
   // Flaky https://github.com/elastic/kibana/issues/60866
-  describe.skip('uptime settings page', () => {
+  describe('uptime settings page', () => {
     const settingsPage = () => pageObjects.uptime.settings;
     beforeEach('navigate to clean app root', async () => {
       // make 10 checks
@@ -48,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     // Failing: https://github.com/elastic/kibana/issues/60863
-    it.skip('changing index pattern setting is reflected elsewhere in UI', async () => {
+    it('changing index pattern setting is reflected elsewhere in UI', async () => {
       const originalCount = await pageObjects.uptime.getSnapshotCount();
       // We should find 1 monitor up with the default index pattern
       expect(originalCount.up).to.eql(1);
