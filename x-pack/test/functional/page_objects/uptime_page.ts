@@ -13,6 +13,14 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
   const retry = getService('retry');
 
   return new (class UptimePage {
+    public get settings() {
+      return uptimeService.settings;
+    }
+
+    public async goToRoot() {
+      await pageObjects.common.navigateToApp('uptime');
+    }
+
     public async goToUptimePageAndSetDateRange(
       datePickerStartValue: string,
       datePickerEndValue: string
@@ -52,6 +60,10 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
 
     public async inputFilterQuery(filterQuery: string) {
       await uptimeService.setFilterText(filterQuery);
+    }
+
+    public async pageHasDataMissing() {
+      return await uptimeService.pageHasDataMissing();
     }
 
     public async pageHasExpectedIds(monitorIdsToCheck: string[]) {
