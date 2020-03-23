@@ -4,29 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPageBody,
   EuiPageContent,
   EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiFieldPassword,
   EuiText,
   EuiButton,
-  EuiCallOut,
   EuiTitle,
   EuiSpacer,
+  EuiIcon,
 } from '@elastic/eui';
-import { sendRequest, useInput, useCore } from '../../../hooks';
+import { sendRequest, useCore } from '../../../hooks';
 import { fleetSetupRouteService } from '../../../services';
+import { WithoutHeaderLayout } from '../../../layouts';
 
 export const SetupPage: React.FunctionComponent<{
   refresh: () => Promise<void>;
 }> = ({ refresh }) => {
   const [isFormLoading, setIsFormLoading] = useState<boolean>(false);
   const core = useCore();
-  const usernameInput = useInput();
-  const passwordInput = useInput();
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,10 +32,6 @@ export const SetupPage: React.FunctionComponent<{
       await sendRequest({
         method: 'post',
         path: fleetSetupRouteService.postFleetSetupPath(),
-        body: JSON.stringify({
-          admin_username: usernameInput.value,
-          admin_password: passwordInput.value,
-        }),
       });
       await refresh();
     } catch (error) {
@@ -48,33 +41,47 @@ export const SetupPage: React.FunctionComponent<{
   };
 
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle>
-          <h1>Setup</h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        <EuiCallOut title="Warning!" color="warning" iconType="help">
-          <EuiText>
-            To setup fleet and ingest you need to a enable a user that can create API Keys and write
-            to logs-* and metrics-*
+    <WithoutHeaderLayout>
+      <EuiPageBody restrictWidth={528}>
+        <EuiPageContent
+          verticalPosition="center"
+          horizontalPosition="center"
+          className="eui-textCenter"
+          paddingSize="l"
+        >
+          <EuiSpacer size="m" />
+          <EuiIcon type="lock" color="subdued" size="xl" />
+          <EuiSpacer size="m" />
+          <EuiTitle size="l">
+            <h2>
+              <FormattedMessage
+                id="xpack.ingestManager.setupPage.title"
+                defaultMessage="Enable Fleet"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="xl" />
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.ingestManager.setupPage.description"
+              defaultMessage="In order to use Fleet, you must create an Elastic user. This user can create API keys
+                and write to logs-* and metrics-*."
+            />
           </EuiText>
-        </EuiCallOut>
-        <EuiSpacer size="l" />
-        <EuiForm>
-          <form onSubmit={onSubmit}>
-            <EuiFormRow label="Username">
-              <EuiFieldText name="username" {...usernameInput.props} />
-            </EuiFormRow>
-            <EuiFormRow label="Password">
-              <EuiFieldPassword name="password" {...passwordInput.props} />
-            </EuiFormRow>
-            <EuiButton isLoading={isFormLoading} type="submit">
-              Submit
-            </EuiButton>
-          </form>
-        </EuiForm>
-      </EuiPageContent>
-    </EuiPageBody>
+          <EuiSpacer size="l" />
+          <EuiForm>
+            <form onSubmit={onSubmit}>
+              <EuiButton fill isLoading={isFormLoading} type="submit">
+                <FormattedMessage
+                  id="xpack.ingestManager.setupPage.enableFleet"
+                  defaultMessage="Create user and enable Fleet"
+                />
+              </EuiButton>
+            </form>
+          </EuiForm>
+          <EuiSpacer size="m" />
+        </EuiPageContent>
+      </EuiPageBody>
+    </WithoutHeaderLayout>
   );
 };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertParams, OutputRuleAlertRest } from '../types';
+import { RuleAlertParams, OutputRuleAlertRest, RuleAlertAction } from '../types';
 import { SearchResponse } from '../../types';
 import {
   AlertType,
@@ -147,6 +147,7 @@ export interface SignalHit {
 }
 
 export interface AlertAttributes {
+  actions: RuleAlertAction[];
   enabled: boolean;
   name: string;
   tags: string[];
@@ -156,4 +157,5 @@ export interface AlertAttributes {
   schedule: {
     interval: string;
   };
+  throttle: string | null;
 }

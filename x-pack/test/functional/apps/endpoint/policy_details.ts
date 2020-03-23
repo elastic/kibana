@@ -10,7 +10,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
 
-  describe('Endpoint Policy Details', function() {
+  // Skipped until we can figure out how to load data for Ingest
+  describe.skip('Endpoint Policy Details', function() {
     this.tags(['ciGroup7']);
 
     it('loads the Policy Details Page', async () => {
