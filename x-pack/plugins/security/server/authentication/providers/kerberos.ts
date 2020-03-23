@@ -52,7 +52,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   public async login(request: KibanaRequest) {
     this.logger.debug('Trying to perform a login.');
 
-    if (getHTTPAuthenticationScheme(request) === 'negotiate') {
+    if (HTTPAuthorizationHeader.parseFromRequest(request)?.scheme.toLowerCase() === 'negotiate') {
       return await this.authenticateWithNegotiateScheme(request);
     }
 

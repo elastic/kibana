@@ -34,7 +34,7 @@ import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
 import { SessionInfo } from '../../public';
 import { canRedirectRequest } from './can_redirect_request';
-import { getHTTPAuthenticationScheme } from './get_http_authentication_scheme';
+import { HTTPAuthorizationHeader } from './http_authentication';
 
 /**
  * The shape of the session that is actually stored in the cookie.
@@ -347,7 +347,7 @@ export class Authenticator {
       !existingSession &&
       this.options.config.authc.selector.enabled &&
       canRedirectRequest(request) &&
-      getHTTPAuthenticationScheme(request) == null;
+      HTTPAuthorizationHeader.parseFromRequest(request) == null;
     if (useLoginSelector) {
       this.logger.debug('Redirecting request to Login Selector.');
       return AuthenticationResult.redirectTo(
