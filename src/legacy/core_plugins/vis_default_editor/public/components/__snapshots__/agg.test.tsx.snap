@@ -3,6 +3,7 @@
 exports[`DefaultEditorAgg component should init with the default set of props 1`] = `
 <EuiAccordion
   aria-label="Toggle metric editor"
+  arrowDisplay="left"
   buttonClassName="eui-textTruncate"
   buttonContent={
     <React.Fragment>

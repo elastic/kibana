@@ -9,6 +9,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { IRouter, CallAPIOptions, SavedObjectsClientContract } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
+import { DynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 type APICaller = (
   endpoint: string,
@@ -17,12 +18,12 @@ type APICaller = (
 ) => Promise<any>;
 
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: { callES: APICaller } & P
+  params: { callES: APICaller; dynamicSettings: DynamicSettings } & P
 ) => Promise<R> | R;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
   client: SavedObjectsClientContract,
-  params: P
+  params?: P
 ) => Promise<T> | T;
 
 export interface UptimeCoreSetup {
