@@ -6,14 +6,13 @@
 
 import { APICaller, SavedObjectsClientContract } from 'kibana/server';
 import { LicenseCheck } from '../license_checks';
-import { DataRecognizer } from '../../models/data_recognizer';
+import { DataRecognizer, RecognizeResult } from '../../models/data_recognizer';
 import {
   Module,
   DatafeedOverride,
   JobOverride,
   DataRecognizerConfigResponse,
 } from '../../../common/types/modules';
-import { RecognizeResult } from '../../models/data_recognizer/data_recognizer';
 
 export interface ModulesProvider {
   modulesProvider(
