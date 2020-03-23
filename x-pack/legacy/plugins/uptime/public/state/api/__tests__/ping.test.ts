@@ -6,16 +6,24 @@
 
 import { mergeParams } from '../ping';
 
-describe('mergeParams', () => {
+describe('ping', () => {
   describe('mergeParams', () => {
     it('returns the guaranteed params if there are no falsy params', () => {
-      expect(mergeParams({ foo: 'bar' }, {})).toMatchInlineSnapshot();
+      expect(mergeParams({ foo: 'bar' }, {})).toMatchInlineSnapshot(`
+        Object {
+          "foo": "bar",
+        }
+      `);
     });
 
     it('adds truthy params while ignoring falsy params', () => {
-      expect(
-        mergeParams({ young: 'star' }, { h: 1, he: 2, li: undefined })
-      ).toMatchInlineSnapshot();
+      expect(mergeParams({ young: 'star' }, { h: 1, he: 2, li: undefined })).toMatchInlineSnapshot(`
+        Object {
+          "h": 1,
+          "he": 2,
+          "young": "star",
+        }
+      `);
     });
   });
 });
