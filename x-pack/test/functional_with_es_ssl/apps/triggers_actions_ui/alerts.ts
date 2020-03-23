@@ -339,13 +339,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('deleteAlert');
-      
+
       await testSubjects.existOrFail('deleteIdsConfirmation');
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql('Deleted 1 alert');
-      
+
       expect(await pageObjects.triggersActionsUI.isAnEmptyAlertsListDisplayed()).to.be(true);
     });
 
