@@ -37,11 +37,13 @@ export const ShellEnrollmentInstructions: React.FunctionComponent<Props> = ({
   const [isPlatformOptionsOpen, setIsPlatformOptionsOpen] = useState<boolean>(false);
 
   // Build quick installation command
-  const quickInstallInstructions = `${
-    kibanaCASha256 ? `CA_SHA256=${kibanaCASha256} ` : ''
-  }API_KEY=${
-    apiKey.api_key
-  } sh -c "$(curl ${kibanaUrl}/api/ingest_manager/fleet/install/${currentPlatform})"`;
+  // const quickInstallInstructions = `${
+  //   kibanaCASha256 ? `CA_SHA256=${kibanaCASha256} ` : ''
+  // }API_KEY=${
+  //   apiKey.api_key
+  // } sh -c "$(curl ${kibanaUrl}/api/ingest_manager/fleet/install/${currentPlatform})"`;
+
+  const quickInstallInstructions = `./agent enroll ${kibanaUrl} ${apiKey.api_key}`;
 
   return (
     <>
