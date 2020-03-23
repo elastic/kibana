@@ -8,10 +8,11 @@ Uptime allows you to monitor the status of network endpoints via HTTP/S, TCP, an
 You can explore endpoint status over time, drill down into specific monitors,
 and easily view a high-level snapshot of your environment at any point in time.
 
-[float]
-== Get Started
+To get started with Elastic Uptime, refer to {uptime-guide}/install-uptime.html[Install Uptime].
 
-See {uptime-guide}/install-uptime.html[Install Uptime] for instructions on getting started with Elastic Uptime.
+* <<uptime-overview>>
+* <<uptime-monitor>>
+
 --
 
 include::overview.asciidoc[]

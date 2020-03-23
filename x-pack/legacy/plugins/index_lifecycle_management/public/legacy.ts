@@ -74,11 +74,13 @@ if (chrome.getInjected('ilmUiEnabled')) {
             ...core,
             application: {
               ...core.application,
-              async register(app: App) {
+              async register(app: App<any>) {
                 const unmountApp = await app.mount({ ...npStart } as any, {
                   element,
                   appBasePath: '',
                   onAppLeave: () => undefined,
+                  // TODO: adapt to use Core's ScopedHistory
+                  history: {} as any,
                 });
                 manageAngularLifecycle($scope, $route, unmountApp as any);
               },

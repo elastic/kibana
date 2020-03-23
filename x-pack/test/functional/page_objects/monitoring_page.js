@@ -5,7 +5,7 @@
  */
 
 export function MonitoringPageProvider({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'header', 'shield', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'header', 'security', 'shield', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const security = getService('security');
   const retry = getService('retry');
@@ -21,7 +21,7 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
       });
 
       if (!useSuperUser) {
-        await PageObjects.common.navigateToApp('login');
+        await PageObjects.security.forceLogout();
         await PageObjects.shield.login('basic_monitoring_user', 'monitoring_user_password');
       }
     }

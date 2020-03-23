@@ -30,6 +30,10 @@ export interface PluginSetupContract {
   registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
 }
 
+export interface PluginStartContract {
+  getFeatures(): Feature[];
+}
+
 /**
  * Describes a set of APIs that are available in the legacy platform only and required by this plugin
  * to function properly.
@@ -44,6 +48,8 @@ export interface LegacyAPI {
  */
 export class Plugin {
   private readonly logger: Logger;
+
+  private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -61,18 +67,16 @@ export class Plugin {
     core: CoreSetup,
     { timelion }: { timelion?: TimelionSetupContract }
   ): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const featureRegistry = new FeatureRegistry();
-
     defineRoutes({
       router: core.http.createRouter(),
-      featureRegistry,
+      featureRegistry: this.featureRegistry,
       getLegacyAPI: this.getLegacyAPI,
     });
 
     return deepFreeze({
-      registerFeature: featureRegistry.register.bind(featureRegistry),
-      getFeatures: featureRegistry.getAll.bind(featureRegistry),
-      getFeaturesUICapabilities: () => uiCapabilitiesForFeatures(featureRegistry.getAll()),
+      registerFeature: this.featureRegistry.register.bind(this.featureRegistry),
+      getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
+      getFeaturesUICapabilities: () => uiCapabilitiesForFeatures(this.featureRegistry.getAll()),
 
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {
         this.legacyAPI = legacyAPI;
@@ -82,14 +86,17 @@ export class Plugin {
           savedObjectTypes: this.legacyAPI.savedObjectTypes,
           includeTimelion: timelion !== undefined && timelion.uiEnabled,
         })) {
-          featureRegistry.register(feature);
+          this.featureRegistry.register(feature);
         }
       },
     });
   }
 
-  public start() {
+  public start(): RecursiveReadonly<PluginStartContract> {
     this.logger.debug('Starting plugin');
+    return deepFreeze({
+      getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
+    });
   }
 
   public stop() {

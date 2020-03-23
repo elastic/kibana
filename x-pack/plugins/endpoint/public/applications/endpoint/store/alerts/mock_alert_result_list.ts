@@ -5,6 +5,7 @@
  */
 
 import { AlertResultList } from '../../../../../common/types';
+import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
 export const mockAlertResultList: (options?: {
   total?: number;
@@ -24,29 +25,15 @@ export const mockAlertResultList: (options?: {
   const actualCountToReturn = Math.max(Math.min(total - numberToSkip, requestPageSize), 0);
 
   const alerts = [];
+  const generator = new EndpointDocGenerator();
   for (let index = 0; index < actualCountToReturn; index++) {
     alerts.push({
-      '@timestamp': new Date(1542341895000).toString(),
-      agent: {
-        id: 'ced9c68e-b94a-4d66-bb4c-6106514f0a2f',
-        version: '3.0.0',
+      ...generator.generateAlert(new Date().getTime() + index * 1000),
+      ...{
+        id: 'xDUYMHABAJk0XnHd8rrd' + index,
+        prev: null,
+        next: null,
       },
-      event: {
-        action: 'open',
-      },
-      file_classification: {
-        malware_classification: {
-          score: 3,
-        },
-      },
-      host: {
-        hostname: 'HD-c15-bc09190a',
-        ip: '10.179.244.14',
-        os: {
-          name: 'Windows',
-        },
-      },
-      thread: {},
     });
   }
   const mock: AlertResultList = {
@@ -54,6 +41,8 @@ export const mockAlertResultList: (options?: {
     total,
     request_page_size: requestPageSize,
     request_page_index: requestPageIndex,
+    next: '/api/endpoint/alerts?after=1542341895000&after=2f1c0928-3876-4e11-acbb-9199257c7b1c',
+    prev: '/api/endpoint/alerts?before=1542341895000&before=2f1c0928-3876-4e11-acbb-9199257c7b1c',
     result_from_index: 0,
   };
   return mock;

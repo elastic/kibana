@@ -62,6 +62,7 @@ function PercentileRanksEditor({
         unitName={i18n.translate('visDefaultEditor.controls.percentileRanks.valueUnitNameText', {
           defaultMessage: 'value',
         })}
+        validateAscendingOrder={true}
         showValidation={showValidation}
         onChange={setValue}
         setTouched={setTouched}

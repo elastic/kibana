@@ -108,6 +108,7 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
+  ScopedHistory,
 } from './application';
 
 export {
@@ -167,10 +168,11 @@ export {
   ToastInputFields,
   ToastsSetup,
   ToastsStart,
+  ToastOptions,
   ErrorToastOptions,
 } from './notifications';
 
-export { MountPoint, UnmountCallback } from './types';
+export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle

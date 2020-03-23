@@ -90,7 +90,6 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
-        linksMessage: 'Access is denied because Security is disabled in Elasticsearch.',
       };
     }
 

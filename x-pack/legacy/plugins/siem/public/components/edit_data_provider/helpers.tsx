@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { findIndex } from 'lodash/fp';
-import { EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { BrowserField, BrowserFields, getAllFieldsByName } from '../../containers/source';
 import {
@@ -16,7 +16,7 @@ import {
 import * as i18n from './translations';
 
 /** The list of operators to display in the `Operator` select  */
-export const operatorLabels: EuiComboBoxOptionProps[] = [
+export const operatorLabels: EuiComboBoxOptionOption[] = [
   {
     label: i18n.IS,
   },
@@ -38,7 +38,7 @@ export const getFieldNames = (category: Partial<BrowserField>): string[] =>
     : [];
 
 /** Returns all field names by category, for display in an `EuiComboBox`  */
-export const getCategorizedFieldNames = (browserFields: BrowserFields): EuiComboBoxOptionProps[] =>
+export const getCategorizedFieldNames = (browserFields: BrowserFields): EuiComboBoxOptionOption[] =>
   Object.keys(browserFields)
     .sort()
     .map(categoryId => ({
@@ -55,8 +55,8 @@ export const selectionsAreValid = ({
   selectedOperator,
 }: {
   browserFields: BrowserFields;
-  selectedField: EuiComboBoxOptionProps[];
-  selectedOperator: EuiComboBoxOptionProps[];
+  selectedField: EuiComboBoxOptionOption[];
+  selectedOperator: EuiComboBoxOptionOption[];
 }): boolean => {
   const fieldId = selectedField.length > 0 ? selectedField[0].label : '';
   const operator = selectedOperator.length > 0 ? selectedOperator[0].label : '';
@@ -69,7 +69,7 @@ export const selectionsAreValid = ({
 
 /** Returns a `QueryOperator` based on the user's Operator selection */
 export const getQueryOperatorFromSelection = (
-  selectedOperator: EuiComboBoxOptionProps[]
+  selectedOperator: EuiComboBoxOptionOption[]
 ): QueryOperator => {
   const selection = selectedOperator.length > 0 ? selectedOperator[0].label : '';
 
@@ -88,7 +88,7 @@ export const getQueryOperatorFromSelection = (
 /**
  * Returns `true` when the search excludes results that match the specified data provider
  */
-export const getExcludedFromSelection = (selectedOperator: EuiComboBoxOptionProps[]): boolean => {
+export const getExcludedFromSelection = (selectedOperator: EuiComboBoxOptionOption[]): boolean => {
   const selection = selectedOperator.length > 0 ? selectedOperator[0].label : '';
 
   switch (selection) {

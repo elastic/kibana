@@ -7,10 +7,11 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
 
 export const createGetAllRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/pings',
+  path: API_URLS.PINGS,
   validate: {
     query: schema.object({
       dateRangeStart: schema.string(),
@@ -23,13 +24,14 @@ export const createGetAllRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => 
     }),
   },
   options: {
-    tags: ['access:uptime'],
+    tags: ['access:uptime-read'],
   },
-  handler: async ({ callES }, _context, request, response): Promise<any> => {
+  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, location, monitorId, size, sort, status } = request.query;
 
     const result = await libs.requests.getPings({
       callES,
+      dynamicSettings,
       dateRangeStart,
       dateRangeEnd,
       monitorId,

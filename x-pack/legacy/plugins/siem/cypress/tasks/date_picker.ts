@@ -46,7 +46,14 @@ export const setTimelineEndDate = (date: string) => {
     .first()
     .click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`{selectall}{backspace}${date}{enter}`);
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click({ force: true });
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).then($el => {
+    // @ts-ignore
+    if (Cypress.dom.isAttached($el)) {
+      cy.wrap($el).click({ force: true });
+    }
+    cy.wrap($el).type(`{selectall}{backspace}${date}{enter}`);
+  });
 };
 
 export const setTimelineStartDate = (date: string) => {
@@ -58,7 +65,14 @@ export const setTimelineStartDate = (date: string) => {
     .first()
     .click({ force: true });
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`{selectall}{backspace}${date}{enter}`);
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click({ force: true });
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).then($el => {
+    // @ts-ignore
+    if (Cypress.dom.isAttached($el)) {
+      cy.wrap($el).click({ force: true });
+    }
+    cy.wrap($el).type(`{selectall}{backspace}${date}{enter}`);
+  });
 };
 
 export const updateDates = () => {
@@ -69,5 +83,8 @@ export const updateDates = () => {
 };
 
 export const updateTimelineDates = () => {
-  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).click({ force: true });
+  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE)
+    .click({ force: true })
+    .invoke('text')
+    .should('not.equal', 'Updating');
 };

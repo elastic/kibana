@@ -32,6 +32,7 @@ import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { EsSearchTest } from './es_strategy';
 import { Page } from './page';
 import { DemoStrategy } from './demo_strategy';
+import { AsyncDemoStrategy } from './async_demo_strategy';
 import { DocumentationPage } from './documentation';
 import { SearchApiPage } from './search_api';
 import { AppPluginStartDependencies, SearchBarComponentParams } from './types';
@@ -93,6 +94,11 @@ const SearchApp = ({ basename, data, application }: SearchBarComponentParams) =>
       title: 'Demo search strategy',
       id: 'demoSearch',
       component: <DemoStrategy search={data.search.search} />,
+    },
+    {
+      title: 'Async demo search strategy',
+      id: 'asyncDemoSearch',
+      component: <AsyncDemoStrategy search={data.search.search} />,
     },
   ];
 

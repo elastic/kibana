@@ -5,25 +5,22 @@
   <kbn-top-nav
     app-name="'discover'"
     config="topNavMenu"
-    screen-title="screenTitle"
-    show-search-bar="true"
-    show-date-picker="enableTimeRangeSelector"
     index-patterns="[indexPattern]"
-
-    query="state.query"
     on-query-submit="updateQuery"
-	
-    show-save-query="showSaveQuery"
-    saved-query-id="state.savedQuery"
     on-saved-query-id-change="updateSavedQueryId"
-
+    query="state.query"
+    saved-query-id="state.savedQuery"
+    screen-title="screenTitle"
+    show-date-picker="enableTimeRangeSelector"
+    show-save-query="showSaveQuery"
+    show-search-bar="true"
     use-default-behaviors="true"
   >
   </kbn-top-nav>
 
   <main class="container-fluid">
     <div class="row">
-      <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
+      <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar" data-test-subj="discover-sidebar">
         <div class="dscFieldChooser">
           <disc-field-chooser
             columns="state.columns"
@@ -41,11 +38,6 @@
       </div>
 
       <div class="dscWrapper col-md-10">
-        <discover-unsupported-index-pattern
-          ng-if="isUnsupportedIndexPattern"
-          unsupported-type="unsupportedIndexPatternType"
-        ></discover-unsupported-index-pattern>
-
         <discover-no-results
           ng-show="resultState === 'none'"
           shard-failures="failures"
@@ -186,7 +178,6 @@
                 columns="state.columns"
                 infinite-scroll="true"
                 filter="filterQuery"
-                filters="state.filters"
                 data-shared-item
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"

@@ -19,7 +19,6 @@
 
 import { Legacy } from 'kibana';
 import { Request } from 'hapi';
-import { CoreSetup } from 'src/core/server';
 import {
   TelemetrySavedObject,
   TelemetrySavedObjectAttributes,
@@ -34,9 +33,7 @@ const getInternalRepository = (server: Legacy.Server) => {
   return internalRepository;
 };
 
-export function registerTelemetryUserHasSeenNotice(core: CoreSetup) {
-  const { server }: { server: Legacy.Server } = core.http as any;
-
+export function registerTelemetryUserHasSeenNotice(server: Legacy.Server) {
   server.route({
     method: 'PUT',
     path: '/api/telemetry/v2/userHasSeenNotice',

@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import { sendRequest as sendRequestUnbound, useRequest as useRequestUnbound } from './request';
+// import { sendRequest as sendRequestUnbound, useRequest as useRequestUnbound } from './request';
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -52,6 +52,11 @@ describe.skip('request lib', () => {
   let sendRequest;
   let useRequest;
 
+  /**
+   *
+   * commented out due to hooks being called regardless of skip
+   * https://github.com/facebook/jest/issues/8379
+
   beforeEach(() => {
     sendPost = sinon.stub();
     sendPost.withArgs(successRequest.path, successRequest.body).returns(successResponse);
@@ -66,6 +71,8 @@ describe.skip('request lib', () => {
     sendRequest = sendRequestUnbound.bind(null, httpClient);
     useRequest = useRequestUnbound.bind(null, httpClient);
   });
+
+  */
 
   describe('sendRequest function', () => {
     it('uses the provided path, method, and body to send the request', async () => {

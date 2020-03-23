@@ -64,6 +64,7 @@ module.exports = function(grunt) {
         ? `http://localhost:5610/bundles/tests.bundle.js`
         : `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${shardNum}`,
 
+      `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
       // this causes tilemap tests to fail, probably because the eui styles haven't been
       // included in the karma harness a long some time, if ever
       // `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,

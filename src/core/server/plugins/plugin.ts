@@ -95,7 +95,7 @@ export class PluginWrapper<
   public async setup(setupContext: CoreSetup<TPluginsStart>, plugins: TPluginsSetup) {
     this.instance = this.createPluginInstance();
 
-    this.log.info('Setting up plugin');
+    this.log.debug('Setting up plugin');
 
     return this.instance.setup(setupContext, plugins);
   }
@@ -111,6 +111,8 @@ export class PluginWrapper<
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
+
+    this.log.debug('Starting plugin');
 
     const startContract = await this.instance.start(startContext, plugins);
     this.startDependencies$.next([startContext, plugins]);

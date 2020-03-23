@@ -19,6 +19,7 @@
 
 const { resolve } = require('path');
 const webpack = require('webpack');
+const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { REPO_ROOT, DLL_DIST_DIR } = require('../lib/constants');
 // eslint-disable-next-line import/no-unresolved
@@ -72,6 +73,38 @@ module.exports = async ({ config }) => {
     ],
   });
 
+  // Enable SASS
+  config.module.rules.push({
+    test: /\.scss$/,
+    exclude: /\.module.(s(a|c)ss)$/,
+    use: [
+      { loader: 'style-loader' },
+      { loader: 'css-loader', options: { importLoaders: 2 } },
+      {
+        loader: 'postcss-loader',
+        options: {
+          config: {
+            path: resolve(REPO_ROOT, 'src/optimize/'),
+          },
+        },
+      },
+      {
+        loader: 'sass-loader',
+        options: {
+          prependData(loaderContext) {
+            return `@import ${stringifyRequest(
+              loaderContext,
+              resolve(REPO_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss')
+            )};\n`;
+          },
+          sassOptions: {
+            includePaths: [resolve(REPO_ROOT, 'node_modules')],
+          },
+        },
+      },
+    ],
+  });
+
   // Reference the built DLL file of static(ish) dependencies, which are removed
   // during kbn:bootstrap and rebuilt if missing.
   config.plugins.push(
@@ -96,7 +129,7 @@ module.exports = async ({ config }) => {
   );
 
   // Tell Webpack about the ts/x extensions
-  config.resolve.extensions.push('.ts', '.tsx');
+  config.resolve.extensions.push('.ts', '.tsx', '.scss');
 
   // Load custom Webpack config specified by a plugin.
   if (currentConfig.webpackHook) {

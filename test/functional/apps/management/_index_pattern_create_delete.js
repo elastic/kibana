@@ -93,7 +93,6 @@ export default function({ getService, getPageObjects }) {
             'Searchable',
             'Aggregatable',
             'Excluded',
-            '',
           ];
 
           expect(headers.length).to.be(expectedHeaders.length);

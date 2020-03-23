@@ -113,9 +113,7 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
-        'Cu0n232QMyvNtzb75jfilessha1: fa5195a...md5: f7653f1...fa5195a5dfacc9d1c68d43600f0e0262cad14dde'
-      );
+      expect(wrapper.text()).toEqual('Cu0n232QMyvNtzb75jfilessha1: fa5195a...md5: f7653f1...');
     });
 
     test('it returns null for text if the data contains no zeek data', () => {

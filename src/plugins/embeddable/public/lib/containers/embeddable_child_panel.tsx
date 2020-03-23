@@ -23,21 +23,21 @@ import React from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
-import { GetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
+import { UiActionsService } from 'src/plugins/ui_actions/public';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from '../panel';
 import { IContainer } from './i_container';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
+import { EmbeddableStart } from '../../plugin';
 
 export interface EmbeddableChildPanelProps {
   embeddableId: string;
   className?: string;
   container: IContainer;
-  getActions: GetActionsCompatibleWithTrigger;
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getActions: UiActionsService['getTriggerCompatibleActions'];
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;

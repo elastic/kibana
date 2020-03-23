@@ -20,6 +20,7 @@
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../../src/plugins/data/public';
 
 export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
+export const ASYNC_DEMO_SEARCH_STRATEGY = 'ASYNC_DEMO_SEARCH_STRATEGY';
 
 export interface IDemoRequest extends IKibanaSearchRequest {
   mood: string | 'sad' | 'happy';
@@ -28,4 +29,12 @@ export interface IDemoRequest extends IKibanaSearchRequest {
 
 export interface IDemoResponse extends IKibanaSearchResponse {
   greeting: string;
+}
+
+export interface IAsyncDemoRequest extends IKibanaSearchRequest {
+  fibonacciNumbers: number;
+}
+
+export interface IAsyncDemoResponse extends IKibanaSearchResponse {
+  fibonacciSequence: number[];
 }
