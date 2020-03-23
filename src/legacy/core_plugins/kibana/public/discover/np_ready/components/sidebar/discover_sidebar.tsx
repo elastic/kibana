@@ -191,24 +191,26 @@ export function DiscoverSidebar({
               aria-labelledby="selected_fields"
               data-test-subj={`fieldList-selected`}
             >
-              {groupedFields.selected.map((field: IndexPatternField, idx: number) => {
-                return (
-                  <li key={`field${idx}`}>
-                    <DiscoverField
-                      field={field}
-                      indexPattern={selectedIndexPattern}
-                      onAddField={onAddField}
-                      onRemoveField={onRemoveField}
-                      onAddFilter={onAddFilter}
-                      onShowDetails={onShowDetails}
-                      getDetails={getDetailsByField}
-                      showDetails={openFieldMap.get(field.name) || false}
-                      selected={true}
-                      useShortDots={useShortDots}
-                    />
-                  </li>
-                );
-              })}
+              {groupedFields.selected
+                .filter(isFieldFiltered)
+                .map((field: IndexPatternField, idx: number) => {
+                  return (
+                    <li key={`field${idx}`}>
+                      <DiscoverField
+                        field={field}
+                        indexPattern={selectedIndexPattern}
+                        onAddField={onAddField}
+                        onRemoveField={onRemoveField}
+                        onAddFilter={onAddFilter}
+                        onShowDetails={onShowDetails}
+                        getDetails={getDetailsByField}
+                        showDetails={openFieldMap.get(field.name) || false}
+                        selected={true}
+                        useShortDots={useShortDots}
+                      />
+                    </li>
+                  );
+                })}
             </ul>
             <div className="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium">
               <EuiTitle size="xxxs" id="available_fields" className="euiFlexItem">
