@@ -9,8 +9,12 @@
 import * as runtimeTypes from 'io-ts';
 
 import { unionWithNullType } from '../framework';
-import { NoteSavedObjectToReturnRuntimeType } from '../note/types';
-import { PinnedEventToReturnSavedObjectRuntimeType } from '../pinned_event/types';
+import { NoteSavedObjectToReturnRuntimeType, NoteSavedObject } from '../note/types';
+import {
+  PinnedEventToReturnSavedObjectRuntimeType,
+  PinnedEventSavedObject,
+} from '../pinned_event/types';
+import { SavedObjectsClient, KibanaRequest } from '../../../../../../../src/core/server';
 
 /*
  *  ColumnHeader Types
@@ -199,3 +203,54 @@ export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
 
 export interface AllTimelineSavedObject
   extends runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType> {}
+
+export interface ExportTimelineRequestParams {
+  body: { ids: string[] };
+  query: {
+    file_name: string;
+    exclude_export_details: boolean;
+  };
+}
+
+export type ExportTimelineRequest = KibanaRequest<
+  unknown,
+  ExportTimelineRequestParams['query'],
+  ExportTimelineRequestParams['body'],
+  'post'
+>;
+
+export type ExportTimelineSavedObjectsClient = Pick<
+  SavedObjectsClient,
+  | 'get'
+  | 'errors'
+  | 'create'
+  | 'bulkCreate'
+  | 'delete'
+  | 'find'
+  | 'bulkGet'
+  | 'update'
+  | 'bulkUpdate'
+>;
+
+export type ExportedGlobalNotes = Array<Exclude<NoteSavedObject, 'eventId'>>;
+export type ExportedEventNotes = NoteSavedObject[];
+
+export interface ExportedNotes {
+  eventNotes: ExportedEventNotes;
+  globalNotes: ExportedGlobalNotes;
+}
+
+export type ExportedTimelines = TimelineSavedObject &
+  ExportedNotes & {
+    pinnedEventIds: string[];
+  };
+
+export interface BulkGetInput {
+  type: string;
+  id: string;
+}
+
+export type NotesAndPinnedEventsByTimelineId = Record<
+  string,
+  { notes: NoteSavedObject[]; pinnedEvents: PinnedEventSavedObject[] }
+>;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parseDuration } from './parse_duration';
+import { parseDuration, getDurationNumberInItsUnit, getDurationUnitValue } from './parse_duration';
 
 test('parses seconds', () => {
   const result = parseDuration('10s');
@@ -51,4 +51,34 @@ test('throws error when 0 based', () => {
   expect(() => parseDuration('0d')).toThrowErrorMatchingInlineSnapshot(
     `"Invalid duration \\"0d\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
   );
+});
+
+test('getDurationNumberInItsUnit days', () => {
+  const result = getDurationNumberInItsUnit('10d');
+  expect(result).toEqual(10);
+});
+
+test('getDurationNumberInItsUnit minutes', () => {
+  const result = getDurationNumberInItsUnit('1m');
+  expect(result).toEqual(1);
+});
+
+test('getDurationNumberInItsUnit seconds', () => {
+  const result = getDurationNumberInItsUnit('123s');
+  expect(result).toEqual(123);
+});
+
+test('getDurationUnitValue minutes', () => {
+  const result = getDurationUnitValue('1m');
+  expect(result).toEqual('m');
+});
+
+test('getDurationUnitValue days', () => {
+  const result = getDurationUnitValue('23d');
+  expect(result).toEqual('d');
+});
+
+test('getDurationUnitValue hours', () => {
+  const result = getDurationUnitValue('100h');
+  expect(result).toEqual('h');
 });
