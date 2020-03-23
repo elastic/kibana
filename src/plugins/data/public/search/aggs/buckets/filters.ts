@@ -95,7 +95,7 @@ export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
                 (typeof filter.input.query === 'string'
                   ? filter.input.query
                   : toAngularJSON(filter.input.query));
-              filters[label] = { query };
+              filters[label] = query;
             },
             {}
           );
