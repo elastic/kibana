@@ -23,9 +23,8 @@ import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { isValidInterval, AggParamOption } from '../../legacy_imports';
+import { search, AggParamOption } from '../../../../../../plugins/data/public';
 import { AggParamEditorProps } from '../agg_param_props';
-import { search } from '../../../../../../plugins/data/public';
 const { parseEsInterval, InvalidEsCalendarIntervalError } = search.aggs;
 
 function getInvalidEsMessage(interval: string) {
@@ -68,7 +67,7 @@ function validate(value?: string, definedOption?: ComboBoxOption, timeBase?: str
     return { isValidValue: false, errorMessage: getInvalidEsMessage(value) };
   }
 
-  return { isValidValue: isValidInterval(value, timeBase) };
+  return { isValidValue: search.aggs.isValidInterval(value, timeBase) };
 }
 
 interface ComboBoxOption extends EuiComboBoxOptionOption {

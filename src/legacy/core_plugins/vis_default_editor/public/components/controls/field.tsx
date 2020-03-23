@@ -23,8 +23,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPatternField } from 'src/plugins/data/public';
-import { AggParam, IAggConfig, IFieldParamType } from '../../legacy_imports';
+import { AggParam, IAggConfig, IFieldParamType, IndexPatternField } from 'src/plugins/data/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { ComboBoxGroupedOptions } from '../../utils';
