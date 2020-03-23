@@ -273,7 +273,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         log.debug(
           `API RESULT: ${Object.entries(dateOnAllInstancesFromApiResponse)
-            .map(([id, date]: [string, number]) => `${id}: ${moment(date).utc()}`)
+            .map(([id, date]) => `${id}: ${moment(date).utc()}`)
             .join(', ')}`
         );
 
@@ -315,7 +315,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const durationFromApiResuiltToEpoch = moment.duration(
               durationEpoch.diff(moment(date).utc())
             );
-            // The UI removes milliseconds, so lets d othe same in the test so we can compare
+            // The UI removes milliseconds, so lets do the same in the test so we can compare
             return moment.duration({
               hours: durationFromApiResuiltToEpoch.hours(),
               minutes: durationFromApiResuiltToEpoch.minutes(),
