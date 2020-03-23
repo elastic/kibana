@@ -23,6 +23,7 @@ import { getTypedPayload } from '../../../../containers/case/utils';
 import { WhitePageWrapper } from '../wrappers';
 import { useBasePath } from '../../../../lib/kibana';
 import { CaseStatus } from '../case_status';
+import { SpyRoute } from '../../../../utils/route/spy_routes';
 
 interface Props {
   caseId: string;
@@ -93,6 +94,8 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
   const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
   const toggleStatusCase = useCallback(status => onUpdateField('status', status), [onUpdateField]);
 
+  const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
+
   const caseStatusData = useMemo(
     () =>
       caseData.status === 'open'
@@ -102,7 +105,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             title: i18n.CASE_OPENED,
             buttonLabel: i18n.CLOSE_CASE,
             status: caseData.status,
-            icon: 'checkInCircleFilled',
+            icon: 'folderCheck',
             badgeColor: 'secondary',
             isSelected: false,
           }
@@ -112,7 +115,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             title: i18n.CASE_CLOSED,
             buttonLabel: i18n.REOPEN_CASE,
             status: caseData.status,
-            icon: 'magnet',
+            icon: 'folderExclamation',
             badgeColor: 'danger',
             isSelected: true,
           },
@@ -179,6 +182,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           </EuiFlexGroup>
         </MyWrapper>
       </WhitePageWrapper>
+      <SpyRoute state={spyState} />
     </>
   );
 });

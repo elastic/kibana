@@ -102,8 +102,8 @@ export const savedObjectMappings = {
       ca_sha256: { type: 'keyword' },
       // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       api_key: { type: 'keyword' },
-      admin_username: { type: 'binary' },
-      admin_password: { type: 'binary' },
+      fleet_enroll_username: { type: 'binary' },
+      fleet_enroll_password: { type: 'binary' },
       config: { type: 'flattened' },
     },
   },
@@ -128,6 +128,7 @@ export const savedObjectMappings = {
           type: { type: 'keyword' },
           enabled: { type: 'boolean' },
           processors: { type: 'keyword' },
+          config: { type: 'flattened' },
           streams: {
             type: 'nested',
             properties: {
