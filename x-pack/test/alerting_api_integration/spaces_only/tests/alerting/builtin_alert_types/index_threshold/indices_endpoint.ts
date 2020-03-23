@@ -105,6 +105,12 @@ export default function indicesEndpointTests({ getService }: FtrProviderContext)
       expect(result.indices).to.be.an('array');
       expect(result.indices.includes('.kibana')).to.be(true);
     });
+
+    // TODO: the pattern '*a:b,c:d*' throws an exception in dev, but not ci!
+    it('should handle no_such_remote_cluster', async () => {
+      const result = await runQueryExpect({ pattern: '*a:b,c:d*' }, 200);
+      expect(result.indices.length).to.be(0);
+    });
   });
 
   async function runQueryExpect(requestBody: any, status: number): Promise<any> {
