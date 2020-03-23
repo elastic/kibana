@@ -40,7 +40,7 @@ export const medianMetricAgg = new MetricAggType({
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE],
+      filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.HISTOGRAM],
       write(agg, output) {
         output.params.field = agg.getParam('field').name;
         output.params.percents = [50];

@@ -67,6 +67,12 @@ export const getElasticsearchMetricQuery = (
   groupBy?: string,
   filterQuery?: string
 ) => {
+  if (aggType === 'count' && metric) {
+    throw new Error('Cannot aggregate document count with a metric');
+  }
+  if (aggType !== 'count' && !metric) {
+    throw new Error('Can only aggregate without a metric if using the document count aggregator');
+  }
   const interval = `${timeSize}${timeUnit}`;
   const to = Date.now();
   const intervalAsSeconds = getIntervalInSeconds(interval);
@@ -123,27 +129,34 @@ export const getElasticsearchMetricQuery = (
       }
     : baseAggs;
 
+  const rangeFilters = [
+    {
+      range: {
+        '@timestamp': {
+          gte: from,
+          lte: to,
+          format: 'epoch_millis',
+        },
+      },
+    },
+  ];
+
+  const metricFieldFilters = metric
+    ? [
+        {
+          exists: {
+            field: metric,
+          },
+        },
+      ]
+    : [];
+
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
 
   return {
     query: {
       bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: from,
-                lte: to,
-                format: 'epoch_millis',
-              },
-            },
-          },
-          {
-            exists: {
-              field: metric,
-            },
-          },
-        ],
+        filter: [...rangeFilters, ...metricFieldFilters],
         ...parsedFilterQuery,
       },
     },
