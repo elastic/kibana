@@ -6,13 +6,13 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import {
   ApmPluginContext,
   ApmPluginContextValue
 } from '../../../context/ApmPluginContext';
+import { LicensePrompt } from '.';
 
-storiesOf('app/ServiceMap/PlatinumLicensePrompt', module).add(
+storiesOf('app/LicensePrompt', module).add(
   'example',
   () => {
     const contextMock = ({
@@ -21,7 +21,7 @@ storiesOf('app/ServiceMap/PlatinumLicensePrompt', module).add(
 
     return (
       <ApmPluginContext.Provider value={contextMock}>
-        <PlatinumLicensePrompt />
+        <LicensePrompt text="To create Feature name, you must be subscribed to an Elastic X license or above." />
       </ApmPluginContext.Provider>
     );
   },
