@@ -31,7 +31,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
         },
       });
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
-      const { policyId } = action.payload;
+      const { policyId, policyData } = action.payload;
 
       let apiResponse: UpdateDatasourceResponse;
 
@@ -44,7 +44,13 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
             config_id: '53f9e1a0-6aed-11ea-9523-4d4b019fef9b',
             enabled: true,
             output_id: '',
-            inputs: [],
+            inputs: [
+              {
+                type: 'endpoint',
+                enabled: true,
+                config: policyData,
+              },
+            ],
             namespace: 'default',
             package: {
               name: 'endpoint',
