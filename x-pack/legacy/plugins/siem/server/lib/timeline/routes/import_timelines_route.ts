@@ -15,26 +15,35 @@ import {
   isImportRegular,
   transformError,
 } from '../../detection_engine/routes/utils';
+
+import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
+import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
+import { ExportedTimelines } from '../types';
+import { getTupleDuplicateErrorsAndUniqueRules } from '../../detection_engine/routes/rules/utils';
+
+import {
+  savePinnedEvents,
+  getCollectErrorMessages,
+  getTupleDuplicateErrorsAndUniqueTimeline,
+  saveTimelines,
+  saveNotes,
+} from './utils/import_timelines';
+
 import { HapiReadableStream } from '../../detection_engine/rules/types';
 import { IRouter } from '../../../../../../../../src/core/server';
-
-import { ImportRuleAlertRest } from '../../detection_engine/types';
-import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
-import { getTupleDuplicateErrorsAndUniqueRules } from '../../detection_engine/routes/rules/utils';
-import { validate } from '../../detection_engine/routes/rules/validate';
-import { getTupleDuplicateErrorsAndUniqueTimeline } from './utils';
-import { LegacyServices } from '../../../types';
 import { IMPORT_TIMELINES_URL } from '../../../../common/constants';
 import {
   importTimelinesQuerySchema,
   importTimelinesPayloadSchema,
 } from './schemas/import_timelines_schema';
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
-import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
-import { Timeline } from '../saved_object';
-import { PinnedEvent } from '../../pinned_event/saved_object';
+import { LegacyServices } from '../../../types';
+import { ImportRuleAlertRest } from '../../detection_engine/types';
 import { Note } from '../../note/saved_object';
-import { ExportedTimelines } from '../types';
+import { PinnedEvent } from '../../pinned_event/saved_object';
+import { Timeline } from '../saved_object';
+import { validate } from '../../detection_engine/routes/rules/validate';
+
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
@@ -127,7 +136,6 @@ export const importTimelinesRoute = (
                       );
                       return null;
                     }
-                    console.log('-----0------');
                     const {
                       savedObjectId,
                       pinnedEventIds,
@@ -161,109 +169,67 @@ export const importTimelinesRoute = (
                         timeline = await timelineLib.getTimeline(frameworkRequest, savedObjectId);
                       } catch (e) {}
 
-                      console.log('------1------', timeline);
-                      console.log(timeline);
-
                       if (timeline == null) {
                         // create timeline
-                        const {
-                          timeline: { savedObjectId: newSavedObjectId },
-                        } = await timelineLib.persistTimeline(
+
+                        const newSavedObjectId = await saveTimelines(
                           frameworkRequest,
                           null,
                           null,
-                          parsedTimelineObject
+                          parsedTimelineObject,
+                          resolve
                         );
-                        if (pinnedEventIds.length !== 0) {
-                          console.log('------2------', pinnedEventIds);
 
-                          const createdPinnedEvents = await Promise.all(
-                            pinnedEventIds.map(eventId => {
-                              return pinnedEventLib.persistPinnedEventOnTimeline(
-                                frameworkRequest,
-                                null,
-                                eventId,
-                                newSavedObjectId
-                              );
-                            })
-                          );
+                        await savePinnedEvents(
+                          frameworkRequest,
+                          null,
+                          newSavedObjectId,
+                          pinnedEventIds,
+                          resolve
+                        );
 
-                          const errorMsg = createdPinnedEvents
-                            .reduce((acc, e) => {
-                              console.log('-----2.5-----', e instanceof Error, e);
-                              return e != null && e instanceof Error
-                                ? [...acc, e.message]
-                                : [...acc];
-                            }, [])
-                            .join(',');
-                          if (errorMsg.length !== 0) {
-                            resolve(
-                              createBulkErrorObject({
-                                id: newSavedObjectId,
-                                statusCode: 500,
-                                message: errorMsg,
-                              })
-                            );
-                          }
-                        }
-                        if (eventNotes.length !== 0 || globalNotes.length !== 0) {
-                          console.log('------3------', eventNotes, globalNotes);
+                        await saveNotes(
+                          frameworkRequest,
+                          newSavedObjectId,
+                          null,
+                          [],
+                          [...globalNotes, ...eventNotes],
+                          resolve
+                        );
 
-                          await Promise.all(
-                            [...eventNotes, ...globalNotes].map(note => {
-                              const newNote = {
-                                eventId: note.eventId,
-                                note: note.note,
-                                timelineId: newSavedObjectId,
-                              };
-                              return noteLib.persistNote(frameworkRequest, null, null, newNote);
-                            })
-                          );
-                        }
-                        console.log('---test3--');
                         resolve({ timeline_id: newSavedObjectId, status_code: 200 });
                       } else if (timeline != null && frameworkRequest.query.overwrite) {
                         // update timeline
 
-                        await timelineLib.persistTimeline(
+                        const updatedSavedObjectId = await saveTimelines(
                           frameworkRequest,
                           timeline.savedObjectId,
                           timeline.version,
-                          parsedTimelineObject
+                          parsedTimelineObject,
+                          resolve
                         );
 
-                        await Promise.all(
-                          pinnedEventIds.map(eventId => {
-                            return pinnedEventLib.persistPinnedEventOnTimeline(
-                              frameworkRequest,
-                              null,
-                              eventId,
-                              timeline.savedObjectId
-                            );
-                          })
+                        await savePinnedEvents(
+                          frameworkRequest,
+                          null,
+                          timeline.savedObjectId,
+                          pinnedEventIds,
+                          resolve
                         );
 
                         console.log('------5------');
-                        await Promise.all(
-                          [...eventNotes, ...globalNotes].map(note => {
-                            const newNote = {
-                              eventId: note.eventId,
-                              note: note.note,
-                              timelineId: timeline.savedObjectId,
-                            };
-                            return noteLib.persistNote(
-                              frameworkRequest,
-                              timeline.noteIds?.find(nId => nId === note.noteId) ?? null,
-                              timeline.version,
-                              newNote
-                            );
-                          })
+
+                        await saveNotes(
+                          frameworkRequest,
+                          timeline.savedObjectId,
+                          timeline.version,
+                          timeline.noteIds,
+                          [...globalNotes, ...eventNotes],
+                          resolve
                         );
-                        console.log('------6------');
 
                         resolve({ timeline_id: timeline.savedObjectId, status_code: 200 });
                       } else if (timeline != null) {
-                        console.log('------7------');
                         resolve(
                           createBulkErrorObject({
                             id: savedObjectId,
@@ -273,8 +239,6 @@ export const importTimelinesRoute = (
                         );
                       }
                     } catch (err) {
-                      console.log('------8------');
-
                       resolve(
                         createBulkErrorObject({
                           id: savedObjectId,
@@ -310,20 +274,15 @@ export const importTimelinesRoute = (
           success_count: successes.length,
           errors: errorsResp,
         };
-        console.log('---collected response--', importTimelines);
         const [validated, errors] = validate(importTimelines, importRulesSchema);
-        console.log('----collected error---', validated.errors, errors);
 
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {
-          console.log('----before response----', validated.errors);
           return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
         const error = transformError(err);
-
-        // console.log(error);
 
         return siemResponse.error({
           body: error.message,

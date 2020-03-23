@@ -25,7 +25,7 @@ import {
   buildHapiStream,
   ruleIdsToNdJsonString,
 } from '../../detection_engine/routes/__mocks__/utils';
-import { getTupleDuplicateErrorsAndUniqueTimeline } from './utils';
+import { getTupleDuplicateErrorsAndUniqueTimeline } from './utils/import_timelines';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
 import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
 import {
@@ -83,8 +83,10 @@ describe('import timelines', () => {
       };
     });
 
-    jest.doMock('./utils', () => {
+    jest.doMock('./utils/import_timelines', () => {
+      const originalModule = jest.requireActual('./utils/import_timelines');
       return {
+        ...originalModule,
         getTupleDuplicateErrorsAndUniqueTimeline: jest
           .fn()
           .mockReturnValue([mockDuplicateIdErrors, mockUniqueParsedObjects]),

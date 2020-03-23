@@ -10,25 +10,25 @@ import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
-} from '../../../saved_objects';
-import { NoteSavedObject, SavedNote } from '../../note/types';
-import { PinnedEventSavedObject, SavedPinnedEvent } from '../../pinned_event/types';
-import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';
-import { UNAUTHENTICATED_USER } from '../../../../common/constants';
-import { timelineWithReduxProperties } from '../saved_object';
+} from '../../../../saved_objects';
+import { NoteSavedObject, SavedNote } from '../../../note/types';
+import { PinnedEventSavedObject, SavedPinnedEvent } from '../../../pinned_event/types';
+import { convertSavedObjectToSavedTimeline } from '../../convert_saved_object_to_savedtimeline';
+import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
+import { timelineWithReduxProperties } from '../../saved_object';
 import {
   convertSavedObjectToSavedPinnedEvent,
   pickSavedPinnedEvent,
-} from '../../pinned_event/saved_object';
-import { convertSavedObjectToSavedNote } from '../../note/saved_object';
-import { ResponseTimeline, ResponseNote, NoteResult } from '../../../graphql/types';
-import { pickSavedTimeline } from '../pick_saved_timeline';
+} from '../../../pinned_event/saved_object';
+import { convertSavedObjectToSavedNote } from '../../../note/saved_object';
+import { ResponseTimeline, ResponseNote, NoteResult } from '../../../../graphql/types';
+import { pickSavedTimeline } from '../../pick_saved_timeline';
 import {
   SavedObjectsClient,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
-} from '../../../../../../../../src/core/server';
-import { BulkError, createBulkErrorObject } from '../../detection_engine/routes/utils';
+} from '../../../../../../../../../src/core/server';
+import { BulkError, createBulkErrorObject } from '../../../detection_engine/routes/utils';
 
 import {
   ExportedTimelines,
@@ -39,7 +39,7 @@ import {
   TimelineSavedObject,
 } from '../types';
 
-import { transformDataToNdjson } from '../../detection_engine/routes/rules/utils';
+import { transformDataToNdjson } from '../../../detection_engine/routes/rules/utils';
 export type TimelineSavedObjectsClient = Pick<
   SavedObjectsClient,
   | 'get'
@@ -52,44 +52,6 @@ export type TimelineSavedObjectsClient = Pick<
   | 'update'
   | 'bulkUpdate'
 >;
-
-export const getTupleDuplicateErrorsAndUniqueTimeline = (
-  timelines: PromiseFromStreams[],
-  isOverwrite: boolean
-): [BulkError[], PromiseFromStreams[]] => {
-  const { errors, timelinesAcc } = timelines.reduce(
-    (acc, parsedTimeline) => {
-      if (parsedTimeline instanceof Error) {
-        acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
-      } else {
-        const { savedObjectId } = parsedTimeline;
-        if (savedObjectId != null) {
-          if (acc.timelinesAcc.has(savedObjectId) && !isOverwrite) {
-            acc.errors.set(
-              uuid.v4(),
-              createBulkErrorObject({
-                savedObjectId,
-                statusCode: 400,
-                message: `More than one timeline with savedObjectId: "${savedObjectId}" found`,
-              })
-            );
-          }
-          acc.timelinesAcc.set(savedObjectId, parsedTimeline);
-        } else {
-          acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
-        }
-      }
-
-      return acc;
-    }, // using map (preserves ordering)
-    {
-      errors: new Map<string, BulkError>(),
-      timelinesAcc: new Map<string, PromiseFromStreams>(),
-    }
-  );
-
-  return [Array.from(errors.values()), Array.from(timelinesAcc.values())];
-};
 
 const getAllSavedPinnedEvents = (
   pinnedEventsSavedObjects: SavedObjectsFindResponse<PinnedEventSavedObject>
