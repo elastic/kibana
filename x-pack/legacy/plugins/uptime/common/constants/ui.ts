@@ -8,6 +8,8 @@ export const MONITOR_ROUTE = '/monitor/:monitorId?';
 
 export const OVERVIEW_ROUTE = '/';
 
+export const SETTINGS_ROUTE = '/settings';
+
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',
