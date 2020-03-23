@@ -47,7 +47,7 @@ export function registerSearchRoute(router: IRouter): void {
           body: {
             message: err.message,
             attributes: {
-              error: err.body?.error || err.message,
+              error: JSON.stringify(err), // err.body?.error || err.message,
             },
           },
         });

@@ -16,11 +16,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    * @param application The `core.application` service
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
-  constructor(
-    private readonly toasts: ToastsStart,
-    private readonly application: ApplicationStart,
-    private readonly requestTimeout?: number
-  ) {
+  constructor(toasts: ToastsStart, application: ApplicationStart, requestTimeout?: number) {
     super(toasts, application, requestTimeout);
   }
 

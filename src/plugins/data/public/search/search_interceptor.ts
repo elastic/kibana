@@ -30,7 +30,7 @@ export class SearchInterceptor {
   /**
    * `abortController` used to signal all searches to abort.
    */
-  private abortController = new AbortController();
+  protected abortController = new AbortController();
 
   /**
    * The number of pending search requests.
@@ -45,12 +45,12 @@ export class SearchInterceptor {
   /**
    * The subscriptions from scheduling the automatic timeout for each request.
    */
-  private timeoutSubscriptions: Set<Subscription> = new Set();
+  protected timeoutSubscriptions: Set<Subscription> = new Set();
 
   /**
    * The current long-running toast (if there is one).
    */
-  private longRunningToast?: Toast;
+  protected longRunningToast?: Toast;
 
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
@@ -60,9 +60,9 @@ export class SearchInterceptor {
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
   constructor(
-    private readonly toasts: ToastsStart,
-    private readonly application: ApplicationStart,
-    private readonly requestTimeout?: number
+    protected readonly toasts: ToastsStart,
+    protected readonly application: ApplicationStart,
+    protected readonly requestTimeout?: number
   ) {
     // When search requests go out, a notification is scheduled allowing users to continue the
     // request past the timeout. When all search requests complete, we remove the notification.
@@ -145,7 +145,7 @@ export class SearchInterceptor {
     );
   };
 
-  private hideToast = () => {
+  protected hideToast = () => {
     if (this.longRunningToast) {
       this.toasts.remove(this.longRunningToast);
       delete this.longRunningToast;

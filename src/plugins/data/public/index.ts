@@ -374,6 +374,7 @@ export {
   TabbedAggRow,
   TabbedTable,
   SearchInterceptor,
+  RequestTimeoutError,
 } from './search';
 
 // Search namespace
