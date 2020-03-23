@@ -17,7 +17,6 @@
  * under the License.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
@@ -34,20 +33,11 @@ import { createVegaTypeDefinition } from './vega_type';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 
 /** @internal */
-export interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
-  core: CoreSetup;
-  plugins: {
-    data: ReturnType<DataPublicPlugin['setup']>;
-  };
-}
-
-/** @internal */
 export interface VegaPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   data: ReturnType<DataPublicPlugin['setup']>;
   visTypeVega: VisTypeVegaSetup;
-  __LEGACY: LegacyDependenciesPlugin;
 }
 
 /** @internal */
@@ -65,7 +55,14 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, expressions, visualizations, visTypeVega, __LEGACY }: VegaPluginSetupDependencies
+    {
+      data,
+      expressions,
+      visualizations,
+      visTypeVega,
+      maps_legacy,
+      __LEGACY,
+    }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: visTypeVega.config.enableExternalUrls,
@@ -79,7 +76,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       plugins: {
         data,
       },
-      ...(await __LEGACY.setup()),
+      serviceSettings: maps_legacy.serviceSettings,
     };
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));

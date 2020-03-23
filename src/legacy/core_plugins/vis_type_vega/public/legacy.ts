@@ -22,16 +22,11 @@ import { npSetup, npStart } from 'ui/new_platform';
 
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 import { VegaPluginSetupDependencies, VegaPluginStartDependencies } from './plugin';
-import { LegacyDependenciesPlugin } from './shim';
 import { plugin } from '.';
 
 const setupPlugins: Readonly<VegaPluginSetupDependencies> = {
   ...npSetup.plugins,
   visualizations: visualizationsSetup,
-
-  // Temporary solution
-  // It will be removed when all dependent services are migrated to the new platform.
-  __LEGACY: new LegacyDependenciesPlugin(),
 };
 
 const startPlugins: Readonly<VegaPluginStartDependencies> = {
