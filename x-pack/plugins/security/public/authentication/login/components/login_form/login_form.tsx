@@ -218,7 +218,6 @@ export class LoginForm extends Component<Props, State> {
           <Fragment key={index}>
             <EuiButton
               key={provider.name}
-              iconType="user"
               fullWidth={true}
               isDisabled={!this.isLoadingState(LoadingStateType.None)}
               isLoading={this.isLoadingState(LoadingStateType.Selector, provider.name)}

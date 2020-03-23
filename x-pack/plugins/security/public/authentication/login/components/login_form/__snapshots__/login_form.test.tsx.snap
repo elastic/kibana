@@ -4,7 +4,6 @@ exports[`LoginForm login selector renders as expected with login form 1`] = `
 <Fragment>
   <EuiButton
     fullWidth={true}
-    iconType="user"
     isDisabled={false}
     isLoading={false}
     key="saml1"
@@ -17,7 +16,6 @@ exports[`LoginForm login selector renders as expected with login form 1`] = `
   />
   <EuiButton
     fullWidth={true}
-    iconType="user"
     isDisabled={false}
     isLoading={false}
     key="pki1"
@@ -126,7 +124,6 @@ exports[`LoginForm login selector renders as expected without login form for pro
 <Fragment>
   <EuiButton
     fullWidth={true}
-    iconType="user"
     isDisabled={false}
     isLoading={false}
     key="saml1"
@@ -139,7 +136,6 @@ exports[`LoginForm login selector renders as expected without login form for pro
   />
   <EuiButton
     fullWidth={true}
-    iconType="user"
     isDisabled={false}
     isLoading={false}
     key="pki1"
