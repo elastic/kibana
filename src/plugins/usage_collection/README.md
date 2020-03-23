@@ -27,12 +27,14 @@ All you need to provide is a `type` for organizing your fields, and a `fetch` me
     ```ts
     // server/plugin.ts
     import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-    import { CoreSetup } from 'kibana/server';
+    import { CoreSetup, CoreStart } from 'kibana/server';
 
     class Plugin {
       public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
         registerMyPluginUsageCollector(plugins.usageCollection);
       }
+
+      public start(core: CoreStart) {}
     }
     ```
 
