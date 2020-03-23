@@ -29,7 +29,7 @@ import {
 } from './utils/import_timelines';
 
 import { IRouter } from '../../../../../../../../src/core/server';
-import { IMPORT_TIMELINES_URL } from '../../../../common/constants';
+import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
 import {
   importTimelinesQuerySchema,
   importTimelinesPayloadSchema,
@@ -53,7 +53,7 @@ export const importTimelinesRoute = (
 ) => {
   router.post(
     {
-      path: `${IMPORT_TIMELINES_URL}`,
+      path: `${TIMELINE_IMPORT_URL}`,
       validate: {
         query: buildRouteValidation<ImportTimelinesRequestParams['query']>(
           importTimelinesQuerySchema

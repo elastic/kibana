@@ -6,7 +6,7 @@
 
 import { ImportRulesProps, ImportRulesResponse } from '../../detection_engine/rules';
 import { KibanaServices } from '../../../lib/kibana';
-import { IMPORT_TIMELINES_URL, TIMELINE_EXPORT_URL } from '../../../../common/constants';
+import { TIMELINE_IMPORT_URL, TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { ExportSelectedData } from '../../../components/generic_downloader';
 
 export const importTimelines = async ({
@@ -17,7 +17,7 @@ export const importTimelines = async ({
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  return KibanaServices.get().http.fetch<ImportRulesResponse>(`${IMPORT_TIMELINES_URL}`, {
+  return KibanaServices.get().http.fetch<ImportRulesResponse>(`${TIMELINE_IMPORT_URL}`, {
     method: 'POST',
     headers: { 'Content-Type': undefined },
     query: { overwrite },
