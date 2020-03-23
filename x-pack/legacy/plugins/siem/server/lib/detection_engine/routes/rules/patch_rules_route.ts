@@ -59,6 +59,8 @@ export const patchRulesRoute = (router: IRouter) => {
         references,
         note,
         version,
+        anomaly_threshold: anomalyThreshold,
+        machine_learning_job_id: machineLearningJobId,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
@@ -108,6 +110,8 @@ export const patchRulesRoute = (router: IRouter) => {
           references,
           note,
           version,
+          anomalyThreshold,
+          machineLearningJobId,
         });
         if (rule != null) {
           const ruleStatuses = await savedObjectsClient.find<
