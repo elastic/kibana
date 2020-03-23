@@ -88,12 +88,13 @@ describe('API Keys', () => {
       mockLicense.isEnabled.mockReturnValue(false);
       const result = await apiKeys.grantAsInternalUser(httpServerMock.createKibanaRequest());
       expect(result).toBeNull();
-      expect(mockScopedClusterClient.callAsInternalUser).not.toHaveBeenCalled();
+
+      expect(mockClusterClient.callAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('calls callAsInternalUser with proper parameters for the Basic scheme', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockScopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
+      mockClusterClient.callAsInternalUser.mockResolvedValueOnce({
         id: '123',
         name: 'key-name',
         api_key: 'abc123',
@@ -110,21 +111,18 @@ describe('API Keys', () => {
         id: '123',
         name: 'key-name',
       });
-      expect(mockScopedClusterClient.callAsInternalUser).toHaveBeenCalledWith(
-        'shield.grantAPIKey',
-        {
-          body: {
-            grant_type: 'password',
-            username: 'foo',
-            password: 'bar',
-          },
-        }
-      );
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.grantAPIKey', {
+        body: {
+          grant_type: 'password',
+          username: 'foo',
+          password: 'bar',
+        },
+      });
     });
 
     it('calls callAsInternalUser with proper parameters for the Bearer scheme', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
-      mockScopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
+      mockClusterClient.callAsInternalUser.mockResolvedValueOnce({
         id: '123',
         name: 'key-name',
         api_key: 'abc123',
@@ -141,15 +139,12 @@ describe('API Keys', () => {
         id: '123',
         name: 'key-name',
       });
-      expect(mockScopedClusterClient.callAsInternalUser).toHaveBeenCalledWith(
-        'shield.grantAPIKey',
-        {
-          body: {
-            grant_type: 'access_token',
-            access_token: 'foo-access-token',
-          },
-        }
-      );
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.grantAPIKey', {
+        body: {
+          grant_type: 'access_token',
+          access_token: 'foo-access-token',
+        },
+      });
     });
 
     it('throw error for other schemes', async () => {
@@ -165,7 +160,7 @@ describe('API Keys', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unsupported scheme \\"Digest\\" for granting API Key"`
       );
-      expect(mockScopedClusterClient.callAsInternalUser).not.toHaveBeenCalled();
+      expect(mockClusterClient.callAsInternalUser).not.toHaveBeenCalled();
     });
   });
 

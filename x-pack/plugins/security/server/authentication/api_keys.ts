@@ -176,9 +176,9 @@ export class APIKeys {
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
-      result = (await this.clusterClient
-        .asScoped(request)
-        .callAsInternalUser('shield.grantAPIKey', { body: params })) as GrantAPIKeyResult;
+      result = (await this.clusterClient.callAsInternalUser('shield.grantAPIKey', {
+        body: params,
+      })) as GrantAPIKeyResult;
       this.logger.debug('API key was granted successfully');
     } catch (e) {
       this.logger.error(`Failed to grant API key: ${e.message}`);
