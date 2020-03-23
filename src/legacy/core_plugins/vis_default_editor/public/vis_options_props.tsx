@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IAggConfigs } from './legacy_imports';
+import { IAggConfigs } from 'src/plugins/data/public';
 import { Vis } from '../../visualizations/public';
 
 export interface VisOptionsProps<VisParamType = unknown> {

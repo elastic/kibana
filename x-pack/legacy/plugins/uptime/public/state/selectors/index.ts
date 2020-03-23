@@ -29,6 +29,10 @@ export const selectMonitorStatus = (state: AppState) => {
   return state.monitorStatus.status;
 };
 
+export const selectDynamicSettings = (state: AppState) => {
+  return state.dynamicSettings;
+};
+
 export const selectIndexPattern = ({ indexPattern }: AppState) => {
   return { indexPattern: indexPattern.index_pattern, loading: indexPattern.loading };
 };
@@ -45,6 +49,15 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
 export const selectDurationLines = ({ monitorDuration }: AppState) => {
   return monitorDuration;
 };
+
+export const selectAlertFlyoutVisibility = ({ ui: { alertFlyoutVisible } }: AppState) =>
+  alertFlyoutVisible;
+
+export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: AppState) => ({
+  filters: ui.esKuery,
+  indexPattern: indexPattern.index_pattern,
+  locations: overviewFilters.filters.locations,
+});
 
 export const indexStatusSelector = ({ indexStatus }: AppState) => {
   return indexStatus;

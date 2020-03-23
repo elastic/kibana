@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfig, aggGroupNamesMap, AggGroupNames } from '../legacy_imports';
+import { AggGroupNames, search, IAggConfig } from '../../../../../plugins/data/public';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
@@ -68,7 +68,7 @@ function DefaultEditorAggGroup({
   setTouched,
   setValidity,
 }: DefaultEditorAggGroupProps) {
-  const groupNameLabel = (aggGroupNamesMap() as any)[groupName];
+  const groupNameLabel = (search.aggs.aggGroupNamesMap() as any)[groupName];
   // e.g. buckets can have no aggs
   const schemaNames = getSchemasByGroup(schemas, groupName).map(s => s.name);
   const group: IAggConfig[] = useMemo(

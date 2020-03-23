@@ -21,15 +21,14 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { IndexPattern } from 'src/plugins/data/public';
-import { IAggType, AggGroupNames } from '../legacy_imports';
+import { IndexPattern, IAggType, AggGroupNames } from 'src/plugins/data/public';
+import { VisState } from 'src/legacy/core_plugins/visualizations/public';
+
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { DefaultEditorAggParams } from './agg_params';
 import { AGGS_ACTION_KEYS } from './agg_group_state';
 import { Schema } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
-
-jest.mock('ui/new_platform');
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,

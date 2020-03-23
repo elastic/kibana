@@ -22,10 +22,9 @@ import { act } from 'react-dom/test-utils';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
 
-import { IndexPatternField } from 'src/plugins/data/public';
+import { IAggConfig, IndexPatternField } from 'src/plugins/data/public';
 import { ComboBoxGroupedOptions } from '../../utils';
 import { FieldParamEditor, FieldParamEditorProps } from './field';
-import { IAggConfig } from '../../legacy_imports';
 import { EditorVisState } from '../sidebar/state/reducers';
 
 function callComboBoxOnChange(comp: ReactWrapper, value: any = []) {

@@ -22,11 +22,11 @@ import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import {
-  IAggConfig,
   AggGroupNames,
-  parentPipelineType,
+  IAggConfig,
   IMetricAggType,
-} from '../../legacy_imports';
+  search,
+} from '../../../../../../plugins/data/public';
 import { DefaultEditorAggGroup } from '../agg_group';
 import {
   EditorAction,
@@ -67,7 +67,7 @@ function DefaultEditorDataTab({
     () =>
       findLast(
         metricAggs,
-        ({ type }: { type: IMetricAggType }) => type.subtype === parentPipelineType
+        ({ type }: { type: IMetricAggType }) => type.subtype === search.aggs.parentPipelineType
       ),
     [metricAggs]
   );

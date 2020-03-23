@@ -56,6 +56,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
           .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
           .map(async payloadRule => {
             const {
+              actions,
               anomaly_threshold: anomalyThreshold,
               description,
               enabled,
@@ -77,6 +78,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               severity,
               tags,
               threat,
+              throttle,
               to,
               type,
               references,
@@ -84,6 +86,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               timeline_id: timelineId,
               timeline_title: timelineTitle,
               version,
+              lists,
             } = payloadRule;
             const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
@@ -109,6 +112,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               const createdRule = await createRules({
                 alertsClient,
                 actionsClient,
+                actions,
                 anomalyThreshold,
                 description,
                 enabled,
@@ -132,12 +136,14 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 name,
                 severity,
                 tags,
+                throttle,
                 to,
                 type,
                 threat,
                 references,
                 note,
                 version,
+                lists,
               });
               return transformValidateBulkError(ruleIdOrUuid, createdRule);
             } catch (err) {

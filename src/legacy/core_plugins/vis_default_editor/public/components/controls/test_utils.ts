@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IAggConfig, AggParam } from '../../legacy_imports';
+import { IAggConfig, AggParam } from 'src/plugins/data/public';
 import { EditorConfig } from '../utils';
 import { EditorVisState } from '../sidebar/state/reducers';
 

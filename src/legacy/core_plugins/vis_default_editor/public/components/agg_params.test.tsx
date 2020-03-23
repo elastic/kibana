@@ -18,11 +18,15 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
-import { IndexPattern } from 'src/plugins/data/public';
-import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
-import { IAggConfig, AggGroupNames } from '../legacy_imports';
+import { IndexPattern, IAggConfig, AggGroupNames } from 'src/plugins/data/public';
+import {
+  DefaultEditorAggParams as PureDefaultEditorAggParams,
+  DefaultEditorAggParamsProps,
+} from './agg_params';
+import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
+import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
 import { EditorVisState } from './sidebar/state/reducers';
 
 const mockEditorConfig = {
@@ -34,8 +38,12 @@ const mockEditorConfig = {
     timeBase: '1m',
   },
 };
+const DefaultEditorAggParams = (props: DefaultEditorAggParamsProps) => (
+  <KibanaContextProvider services={{ data: dataPluginMock.createStartContract() }}>
+    <PureDefaultEditorAggParams {...props} />
+  </KibanaContextProvider>
+);
 
-jest.mock('ui/new_platform');
 jest.mock('./utils', () => ({
   getEditorConfig: jest.fn(() => mockEditorConfig),
 }));
@@ -107,12 +115,6 @@ describe('DefaultEditorAggParams component', () => {
       setValidity,
       schemas: [],
     };
-  });
-
-  it('should init with the default set of params', () => {
-    const comp = shallow(<DefaultEditorAggParams {...defaultProps} />);
-
-    expect(comp).toMatchSnapshot();
   });
 
   it('should reset the validity to true when destroyed', () => {

@@ -24,14 +24,14 @@ import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui
 import { EventEmitter } from 'events';
 
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { AggGroupNames } from '../../legacy_imports';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
-import { getSchemasByGroup } from '../../schemas';
 import { SavedSearch } from '../../../../../../plugins/discover/public';
+import { AggGroupNames } from '../../../../../../plugins/data/public';
+import { getSchemasByGroup } from '../../schemas';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;

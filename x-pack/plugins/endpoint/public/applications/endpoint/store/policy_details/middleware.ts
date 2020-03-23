@@ -6,8 +6,11 @@
 
 import { MiddlewareFactory, PolicyDetailsState } from '../../types';
 import { selectPolicyIdFromParams, isOnPolicyDetailsPage } from './selectors';
+import { sendGetDatasource } from '../../services/ingest';
 
 export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
+  const http = coreStart.http;
+
   return ({ getState, dispatch }) => next => async action => {
     next(action);
     const state = getState();
@@ -15,8 +18,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
     if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
       const id = selectPolicyIdFromParams(state);
 
-      const { getFakeDatasourceDetailsApiResponse } = await import('../policy_list/fake_data');
-      const policyItem = await getFakeDatasourceDetailsApiResponse(id);
+      const { item: policyItem } = await sendGetDatasource(http, id);
 
       dispatch({
         type: 'serverReturnedPolicyDetailsData',

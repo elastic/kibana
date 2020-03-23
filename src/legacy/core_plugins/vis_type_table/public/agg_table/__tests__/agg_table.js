@@ -27,7 +27,8 @@ import {
   oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
 } from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
-import { tabifyAggResponse, npStart } from '../../legacy_imports';
+import { npStart } from '../../legacy_imports';
+import { search } from '../../../../../../plugins/data/public';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { round } from 'lodash';
 import { tableVisTypeDefinition } from '../../table_vis_type';
@@ -38,6 +39,8 @@ import {
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tableVisResponseHandler } from '../../table_vis_response_handler';
+
+const { tabifyAggResponse } = search;
 
 describe('Table Vis - AggTable Directive', function() {
   let $rootScope;

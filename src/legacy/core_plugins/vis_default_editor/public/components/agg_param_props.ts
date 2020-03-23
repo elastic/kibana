@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { IndexPatternField } from 'src/plugins/data/public';
-import { IAggConfig, AggParam } from '../legacy_imports';
+import { IAggConfig, AggParam, IndexPatternField } from 'src/plugins/data/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
 import { Schema } from '../schemas';

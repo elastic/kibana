@@ -50,6 +50,7 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
       technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
+  throttle: null,
   enabled: true,
   filters: [],
   immutable: false,
@@ -412,6 +413,32 @@ export const getResult = (): RuleAlertType => ({
     references: ['http://www.example.com', 'https://ww.example.com'],
     note: '# Investigative notes',
     version: 1,
+    lists: [
+      {
+        field: 'source.ip',
+        boolean_operator: 'and',
+        values: [
+          {
+            name: '127.0.0.1',
+            type: 'value',
+          },
+        ],
+      },
+      {
+        field: 'host.name',
+        boolean_operator: 'and not',
+        values: [
+          {
+            name: 'rock01',
+            type: 'value',
+          },
+          {
+            name: 'mothra',
+            type: 'value',
+          },
+        ],
+      },
+    ],
   },
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
   updatedAt: new Date('2019-12-13T16:40:33.400Z'),
@@ -427,6 +454,24 @@ export const getResult = (): RuleAlertType => ({
   mutedInstanceIds: [],
   scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
 });
+
+export const getMlResult = (): RuleAlertType => {
+  const result = getResult();
+
+  return {
+    ...result,
+    params: {
+      ...result.params,
+      query: undefined,
+      language: undefined,
+      filters: undefined,
+      index: undefined,
+      type: 'machine_learning',
+      anomalyThreshold: 44,
+      machineLearningJobId: 'some_job_id',
+    },
+  };
+};
 
 export const updateActionResult = (): ActionResult => ({
   id: 'result-1',

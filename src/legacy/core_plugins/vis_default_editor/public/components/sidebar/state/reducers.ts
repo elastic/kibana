@@ -20,7 +20,7 @@
 import { cloneDeep } from 'lodash';
 
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { createAggConfigs, AggGroupNames } from '../../../legacy_imports';
+import { AggGroupNames, DataPublicPluginStart } from '../../../../../../../plugins/data/public';
 import { EditorStateActionTypes } from './constants';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';
 import { EditorAction } from './actions';
@@ -33,7 +33,9 @@ function initEditorState(vis: Vis) {
 
 export type EditorVisState = Pick<Vis, 'title' | 'description' | 'type' | 'params' | 'data'>;
 
-function editorStateReducer(state: EditorVisState, action: EditorAction): EditorVisState {
+const createEditorStateReducer = ({
+  aggs: { createAggConfigs },
+}: DataPublicPluginStart['search']) => (state: EditorVisState, action: EditorAction): VisState => {
   switch (action.type) {
     case EditorStateActionTypes.ADD_NEW_AGG: {
       const { schema } = action.payload;
@@ -207,6 +209,6 @@ function editorStateReducer(state: EditorVisState, action: EditorAction): Editor
       };
     }
   }
-}
+};
 
-export { editorStateReducer, initEditorState };
+export { createEditorStateReducer, initEditorState };

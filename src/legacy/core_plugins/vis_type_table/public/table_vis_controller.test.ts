@@ -34,8 +34,13 @@ import { stubFields } from '../../../../plugins/data/public/stubs';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 import { coreMock } from '../../../../core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createAggConfigs } from 'ui/agg_types';
-import { tabifyAggResponse, IAggConfig } from './legacy_imports';
+import { npStart } from './legacy_imports';
+import { IAggConfig, search } from '../../../../plugins/data/public';
+
+// should be mocked once get rid of 'ui/new_platform' legacy imports
+const { createAggConfigs } = npStart.plugins.data.search.aggs;
+
+const { tabifyAggResponse } = search;
 
 jest.mock('ui/new_platform');
 jest.mock('../../../../plugins/kibana_legacy/public/angular/angular_config', () => ({
