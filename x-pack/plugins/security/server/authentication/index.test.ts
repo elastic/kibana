@@ -33,7 +33,7 @@ import {
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType, createConfig$ } from '../config';
 import { AuthenticationResult } from './authentication_result';
-import { setupAuthentication } from '.';
+import { Authentication, setupAuthentication } from '.';
 import {
   CreateAPIKeyResult,
   CreateAPIKeyParams,
@@ -394,9 +394,7 @@ describe('setupAuthentication()', () => {
   });
 
   describe('invalidateAPIKeyAsInternalUser()', () => {
-    let invalidateAPIKeyAsInternalUser: (
-      params: InvalidateAPIKeyParams
-    ) => Promise<InvalidateAPIKeyResult | null>;
+    let invalidateAPIKeyAsInternalUser: Authentication['invalidateAPIKeyAsInternalUser'];
 
     beforeEach(async () => {
       invalidateAPIKeyAsInternalUser = (await setupAuthentication(mockSetupAuthenticationParams))
