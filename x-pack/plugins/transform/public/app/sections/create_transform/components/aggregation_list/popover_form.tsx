@@ -69,20 +69,6 @@ function parsePercentsInput(inputValue: string | undefined) {
   return [];
 }
 
-function isPercentsInputValid(inputValue: string | undefined) {
-  if (inputValue === undefined) {
-    return false;
-  }
-  const numberListRegex = /^(\s*\d+(\.\d+)?)(\s*,\s*\d+(\.\d+)?)*$/;
-  let isValid = numberListRegex.test(inputValue);
-  if (isValid === true) {
-    // Check each percent is no greater 100 (negative values checked by regex).
-    const values: number[] = inputValue.split(',').map(Number);
-    isValid = values.find(value => value > 100) === undefined;
-  }
-  return isValid;
-}
-
 export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
   const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
 
