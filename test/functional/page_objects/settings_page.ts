@@ -789,22 +789,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.click('confirmModalConfirmButton');
       await this.waitUntilSavedObjectsTableIsNotLoading();
     }
-
-    // is this used anywhere?
-    // change it to use getSavedObjectElementsInTable() and take (title) instead of (id)
-    //   async canSavedObjectBeDeleted(id: string) {
-    //     const allCheckBoxes = await testSubjects.findAll('checkboxSelectRow*');
-    //     for (const checkBox of allCheckBoxes) {
-    //       if (await checkBox.isSelected()) {
-    //         await checkBox.click();
-    //       }
-    //     }
-
-    //     const checkBox = await testSubjects.find(`checkboxSelectRow-${id}`);
-    //     await checkBox.click();
-    //     return await this.canSavedObjectsBeDeleted();
-    //   }
-    // }
   }
 
   return new SettingsPage();
