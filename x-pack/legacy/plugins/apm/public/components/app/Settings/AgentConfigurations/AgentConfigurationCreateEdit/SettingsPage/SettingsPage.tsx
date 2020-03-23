@@ -34,7 +34,6 @@ import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext
 import { useUiTracker } from '../../../../../../../../../../plugins/observability/public';
 import { SettingFormRow } from './SettingFormRow';
 import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
-import { APMLink } from '../../../../../shared/Links/apm/APMLink';
 
 function removeEmpty<T>(obj: T): T {
   return Object.fromEntries(
