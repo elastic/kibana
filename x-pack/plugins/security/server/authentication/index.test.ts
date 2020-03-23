@@ -33,7 +33,7 @@ import {
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType, createConfig$ } from '../config';
 import { AuthenticationResult } from './authentication_result';
-import { setupAuthentication } from '.';
+import { Authentication, setupAuthentication } from '.';
 import {
   CreateAPIKeyResult,
   CreateAPIKeyParams,
@@ -369,6 +369,24 @@ describe('setupAuthentication()', () => {
     });
   });
 
+  describe('grantAPIKeyAsInternalUser()', () => {
+    let grantAPIKeyAsInternalUser: (request: KibanaRequest) => Promise<CreateAPIKeyResult | null>;
+    beforeEach(async () => {
+      grantAPIKeyAsInternalUser = (await setupAuthentication(mockSetupAuthenticationParams))
+        .grantAPIKeyAsInternalUser;
+    });
+
+    it('calls grantAsInternalUser', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const apiKeysInstance = jest.requireMock('./api_keys').APIKeys.mock.instances[0];
+      apiKeysInstance.grantAsInternalUser.mockResolvedValueOnce({ api_key: 'foo' });
+      await expect(grantAPIKeyAsInternalUser(request)).resolves.toEqual({
+        api_key: 'foo',
+      });
+      expect(apiKeysInstance.grantAsInternalUser).toHaveBeenCalledWith(request);
+    });
+  });
+
   describe('invalidateAPIKey()', () => {
     let invalidateAPIKey: (
       request: KibanaRequest,
@@ -390,6 +408,27 @@ describe('setupAuthentication()', () => {
         success: true,
       });
       expect(apiKeysInstance.invalidate).toHaveBeenCalledWith(request, params);
+    });
+  });
+
+  describe('invalidateAPIKeyAsInternalUser()', () => {
+    let invalidateAPIKeyAsInternalUser: Authentication['invalidateAPIKeyAsInternalUser'];
+
+    beforeEach(async () => {
+      invalidateAPIKeyAsInternalUser = (await setupAuthentication(mockSetupAuthenticationParams))
+        .invalidateAPIKeyAsInternalUser;
+    });
+
+    it('calls invalidateAPIKeyAsInternalUser with given arguments', async () => {
+      const apiKeysInstance = jest.requireMock('./api_keys').APIKeys.mock.instances[0];
+      const params = {
+        id: '123',
+      };
+      apiKeysInstance.invalidateAsInternalUser.mockResolvedValueOnce({ success: true });
+      await expect(invalidateAPIKeyAsInternalUser(params)).resolves.toEqual({
+        success: true,
+      });
+      expect(apiKeysInstance.invalidateAsInternalUser).toHaveBeenCalledWith(params);
     });
   });
 });
