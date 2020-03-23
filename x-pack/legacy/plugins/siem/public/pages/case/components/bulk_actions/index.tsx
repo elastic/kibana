@@ -27,8 +27,9 @@ export const getBulkItems = ({
     caseStatus === 'open' ? (
       <EuiContextMenuItem
         data-test-subj="cases-bulk-close-button"
+        disabled={selectedCaseIds.length === 0}
         key={i18n.BULK_ACTION_CLOSE_SELECTED}
-        icon="magnet"
+        icon="folderCheck"
         onClick={() => {
           closePopover();
           updateCaseStatus('closed');
@@ -39,8 +40,9 @@ export const getBulkItems = ({
     ) : (
       <EuiContextMenuItem
         data-test-subj="cases-bulk-open-button"
+        disabled={selectedCaseIds.length === 0}
         key={i18n.BULK_ACTION_OPEN_SELECTED}
-        icon="magnet"
+        icon="folderExclamation"
         onClick={() => {
           closePopover();
           updateCaseStatus('open');

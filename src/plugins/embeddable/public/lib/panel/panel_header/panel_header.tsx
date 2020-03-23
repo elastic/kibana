@@ -41,7 +41,7 @@ export interface PanelHeaderProps {
   badges: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
-  drilldownCount?: number;
+  eventCount?: number;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -92,7 +92,7 @@ export function PanelHeader({
   badges,
   embeddable,
   headerId,
-  drilldownCount,
+  eventCount,
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
   const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
@@ -150,12 +150,12 @@ export function PanelHeader({
         )}
         {renderBadges(badges, embeddable)}
       </h2>
-      {!isViewMode && !!drilldownCount && (
+      {!isViewMode && !!eventCount && (
         <EuiNotificationBadge
           style={{ marginTop: '4px', marginRight: '4px' }}
           data-test-subj={'embeddablePanelDrilldownCount'}
         >
-          {drilldownCount}
+          {eventCount}
         </EuiNotificationBadge>
       )}
       <PanelOptionsMenu
