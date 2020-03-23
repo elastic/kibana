@@ -38,7 +38,7 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const { startDate, endDate, sourceId, query, size, highlightTerms } = payload;
+        const { startTimestamp, endTimestamp, sourceId, query, size, highlightTerms } = payload;
 
         let entriesPerHighlightTerm;
 
@@ -46,8 +46,8 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
           entriesPerHighlightTerm = await Promise.all(
             highlightTerms.map(highlightTerm =>
               logEntries.getLogEntriesAround__new(requestContext, sourceId, {
-                startDate,
-                endDate,
+                startTimestamp,
+                endTimestamp,
                 query: parseFilterQuery(query),
                 center: payload.center,
                 size,
@@ -66,8 +66,8 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
           entriesPerHighlightTerm = await Promise.all(
             highlightTerms.map(highlightTerm =>
               logEntries.getLogEntries(requestContext, sourceId, {
-                startDate,
-                endDate,
+                startTimestamp,
+                endTimestamp,
                 query: parseFilterQuery(query),
                 cursor,
                 size,

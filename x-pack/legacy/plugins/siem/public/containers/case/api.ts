@@ -15,7 +15,15 @@ import {
   User,
 } from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
-import { AllCases, Case, CasesStatus, Comment, FetchCasesProps, SortFieldCase } from './types';
+import {
+  AllCases,
+  BulkUpdateStatus,
+  Case,
+  CasesStatus,
+  Comment,
+  FetchCasesProps,
+  SortFieldCase,
+} from './types';
 import { CASES_URL } from './constants';
 import {
   convertToCamelCase,
@@ -92,7 +100,7 @@ export const getCases = async ({
 };
 
 export const postCase = async (newCase: CaseRequest): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(CASES_URL, {
     method: 'POST',
     body: JSON.stringify(newCase),
   });
@@ -104,9 +112,17 @@ export const patchCase = async (
   updatedCase: Partial<CaseRequest>,
   version: string
 ): Promise<Case[]> => {
-  const response = await KibanaServices.get().http.fetch<CasesResponse>(`${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases: [{ ...updatedCase, id: caseId, version }] }),
+  });
+  return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
+};
+
+export const patchCasesStatus = async (cases: BulkUpdateStatus[]): Promise<Case[]> => {
+  const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
+    method: 'PATCH',
+    body: JSON.stringify({ cases }),
   });
   return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
 };
@@ -139,7 +155,7 @@ export const patchComment = async (
 };
 
 export const deleteCases = async (caseIds: string[]): Promise<boolean> => {
-  const response = await KibanaServices.get().http.fetch<string>(`${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch<string>(CASES_URL, {
     method: 'DELETE',
     query: { ids: JSON.stringify(caseIds) },
   });
