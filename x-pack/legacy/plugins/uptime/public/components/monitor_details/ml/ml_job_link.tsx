@@ -30,19 +30,6 @@ export const getMLJobLinkHref = ({ basePath, monitorId, dateRange }: Props) => {
     mlExplorerFilter: {
       filterActive: true,
       filteredFields: ['monitor.id', monitorId],
-      // influencersFilterQuery: {
-      //   bool: {
-      //     minimum_should_match: 1,
-      //     should: [
-      //       {
-      //         match_phrase: {
-      //           'monitor.id': monitorId,
-      //         },
-      //       },
-      //     ],
-      //   },
-      // },
-      // queryString: `monitor.id:${monitorId}`,
     },
     mlExplorerSwimlane: {
       viewByFieldName: 'observer.geo.name',

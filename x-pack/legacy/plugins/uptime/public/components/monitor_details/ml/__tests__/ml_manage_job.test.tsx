@@ -5,12 +5,26 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ManageMLJobComponent } from '../manage_ml_job';
+import * as redux from 'react-redux';
+import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 
 describe('Manage ML Job', () => {
+  it('shallow renders without errors', () => {
+    const spy = jest.spyOn(redux, 'useSelector');
+    spy.mockReturnValue(true);
+
+    const wrapper = shallowWithRouter(
+      <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />
+    );
+    expect(wrapper).toMatchSnapshot();
+  });
+
   it('renders without errors', () => {
-    const wrapper = shallowWithIntl(
+    const spy = jest.spyOn(redux, 'useSelector');
+    spy.mockReturnValue(true);
+
+    const wrapper = renderWithRouter(
       <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />
     );
     expect(wrapper).toMatchSnapshot();

@@ -97,14 +97,15 @@ export const MLIntegrationComponent = () => {
         onJobDelete={confirmDeleteMLJob}
       />
       {isMlFlyoutOpen && <MachineLearningFlyout onClose={closeFlyout} />}
-      <ConfirmJobDeletion
-        open={isConfirmDeleteJobOpen}
-        onConfirm={deleteMLJob}
-        loading={isMLJobDeleting}
-        onCancel={() => {
-          setIsConfirmDeleteJobOpen(false);
-        }}
-      />
+      {isConfirmDeleteJobOpen && (
+        <ConfirmJobDeletion
+          onConfirm={deleteMLJob}
+          loading={isMLJobDeleting}
+          onCancel={() => {
+            setIsConfirmDeleteJobOpen(false);
+          }}
+        />
+      )}
     </>
   );
 };
