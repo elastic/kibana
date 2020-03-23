@@ -45,10 +45,11 @@ $bottomBarHeight:  calc(#{$euiSize} * 3);
 }
 
 /**
- * 1. Hack EUI so the bottom bar doesn't obscure the nav drawer flyout.
+ * 1. Hack EUI so the bottom bar doesn't obscure the nav drawer flyout, but is also not obscured
+ *    by the main content area.
  */
 .painlessLab__bottomBar {
-  z-index: 0; /* 1 */
+  z-index: 5; /* 1 */
   left: $euiNavDrawerWidthCollapsed;
 }
 
