@@ -9,17 +9,6 @@ import { getLicenses, handleLicenses, fetchLicenses } from './get_licenses';
 
 describe('get_licenses', () => {
   const callWith = sinon.stub();
-  const size = 123;
-  const server = {
-    config: sinon.stub().returns({
-      get: sinon
-        .stub()
-        .withArgs('xpack.monitoring.elasticsearch.index_pattern')
-        .returns('.monitoring-es-N-*')
-        .withArgs('xpack.monitoring.max_bucket_size')
-        .returns(size),
-    }),
-  };
   const response = {
     hits: {
       hits: [
@@ -42,7 +31,11 @@ describe('get_licenses', () => {
       callWith.withArgs('search').returns(Promise.resolve(response));
 
       expect(
-        await getLicenses(clusterUuids, { server, callCluster: callWith } as any)
+        await getLicenses(
+          clusterUuids,
+          { callCluster: callWith } as any,
+          { maxBucketSize: 1 } as any
+        )
       ).toStrictEqual(expectedLicenses);
     });
   });
@@ -53,9 +46,9 @@ describe('get_licenses', () => {
 
       expect(
         await fetchLicenses(
-          server,
           callWith,
-          clusterUuids.map(({ clusterUuid }) => clusterUuid)
+          clusterUuids.map(({ clusterUuid }) => clusterUuid),
+          { maxBucketSize: 1 } as any
         )
       ).toStrictEqual(response);
     });
