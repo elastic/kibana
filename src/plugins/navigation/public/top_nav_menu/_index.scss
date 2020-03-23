@@ -2,10 +2,10 @@
   z-index: 5;
 
   .kbnTopNavMenu {
-    padding: $euiSizeS 0px $euiSizeXS;
+    padding: $euiSizeS 0px $euiSizeS;
 
     .kbnTopNavItemEmphasized {
-      padding-left: $euiSizeS;
+      padding: 0 $euiSizeS;
     }
   }
 }
