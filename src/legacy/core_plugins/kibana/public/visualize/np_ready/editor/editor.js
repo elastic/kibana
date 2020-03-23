@@ -155,8 +155,9 @@ function VisualizeAppController(
     if (!isDirty) {
       stateContainer.transitions.updateVisState(visStateToEditorState().vis);
     }
-    $scope.dirty = isDirty;
-    $scope.$digest();
+    $timeout(() => {
+      $scope.dirty = isDirty;
+    });
   });
 
   $scope.eventEmitter.on('updateVis', () => {
@@ -345,16 +346,8 @@ function VisualizeAppController(
   // appState then they won't be equal.
   if (!_.isEqual(stateContainer.getState().vis, stateDefaults.vis)) {
     try {
-      const visState = stateContainer.getState().vis;
-      const state = {
-        type: visState.type,
-        title: visState.title,
-        params: visState.params,
-        data: {
-          aggs: visState.aggs,
-        },
-      };
-      vis.setState(state);
+      const { aggs, ...visState } = stateContainer.getState().vis;
+      vis.setState({ ...visState, data: { aggs } });
     } catch (error) {
       // stop syncing url updtes with the state to prevent extra syncing
       stopAllSyncing();
@@ -482,12 +475,11 @@ function VisualizeAppController(
           state.vis
         )
       ) {
+        const { aggs, ...visState } = state.vis;
         vis.setState({
-          type: state.vis.type,
-          title: state.vis.title,
-          params: state.vis.params,
+          ...visState,
           data: {
-            aggs: state.vis.aggs,
+            aggs: aggs,
             indexPattern: vis.data.indexPattern.id,
             searchSource: vis.data.searchSource,
           },

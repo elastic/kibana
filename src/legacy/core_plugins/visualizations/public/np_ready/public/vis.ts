@@ -127,6 +127,8 @@ export class Vis {
     if (state.data && state.data.searchSource) {
       this.data.searchSource = state.data.searchSource!;
       this.data.indexPattern = this.data.searchSource.getField('index');
+    }
+    if (state.data && state.data.savedSearchId) {
       this.data.savedSearchId = state.data.savedSearchId;
     }
     if (state.data && state.data.aggs) {
