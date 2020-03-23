@@ -111,7 +111,7 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
       const { providerType, providerName, currentURL } = request.body;
       logger.info(`Logging in with provider "${providerName}" (${providerType})`);
 
-      const redirectURL = parseNext(currentURL ?? '', basePath.serverBasePath);
+      const redirectURL = parseNext(currentURL, basePath.serverBasePath);
       try {
         const authenticationResult = await authc.login(request, {
           provider: { name: providerName },

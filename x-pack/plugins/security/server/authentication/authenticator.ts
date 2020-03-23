@@ -144,6 +144,15 @@ function isLoginAttemptWithProviderType(
 }
 
 /**
+ * Determines if session value was created by the previous Kibana versions which had a different
+ * session value format.
+ * @param sessionValue The session value to check.
+ */
+function isLegacyProviderSession(sessionValue: any) {
+  return typeof sessionValue?.provider === 'string';
+}
+
+/**
  * Instantiates authentication provider based on the provider key from config.
  * @param providerType Provider type key.
  * @param options Options to pass to provider's constructor.
@@ -503,18 +512,19 @@ export class Authenticator {
    * @param sessionStorage Session storage instance.
    */
   private async getSessionValue(sessionStorage: SessionStorage<ProviderSession>) {
-    let sessionValue = await sessionStorage.get();
+    const sessionValue = await sessionStorage.get();
 
-    // If for some reason we have a session stored for the provider that is not available
-    // (e.g. when user was logged in with one provider, but then configuration has changed
-    // and that provider is no longer available), then we should clear session entirely.
-    const sessionProvider = sessionValue && this.providers.get(sessionValue.provider?.name);
+    // If we detect that session is in incompatible format or for some reason we have a session
+    // stored for the provider that is not available anymore (e.g. when user was logged in with one
+    // provider, but then configuration has changed and that provider is no longer available), then
+    // we should clear session entirely.
     if (
       sessionValue &&
-      (!sessionProvider || sessionProvider.type !== sessionValue?.provider.type)
+      (isLegacyProviderSession(sessionValue) ||
+        this.providers.get(sessionValue.provider.name)?.type !== sessionValue.provider.type)
     ) {
       sessionStorage.clear();
-      sessionValue = null;
+      return null;
     }
 
     return sessionValue;

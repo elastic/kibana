@@ -118,7 +118,7 @@ exports[`LoginForm login selector renders as expected with login form 1`] = `
 </Fragment>
 `;
 
-exports[`LoginForm login selector renders as expected without login form 1`] = `
+exports[`LoginForm login selector renders as expected without login form for providers with and without description 1`] = `
 <Fragment>
   <EuiButton
     className="loginWelcome__selectorButton"
@@ -140,7 +140,16 @@ exports[`LoginForm login selector renders as expected without login form 1`] = `
     key="pki1"
     onClick={[Function]}
   >
-    Login w/PKI
+    <FormattedMessage
+      defaultMessage="Login with {providerType}/{providerName}"
+      id="xpack.security.loginPage.loginProviderDescription"
+      values={
+        Object {
+          "providerName": "pki1",
+          "providerType": "pki",
+        }
+      }
+    />
   </EuiButton>
 </Fragment>
 `;

@@ -166,7 +166,7 @@ describe('LoginForm', () => {
       ).toMatchSnapshot();
     });
 
-    it('renders as expected without login form', async () => {
+    it('renders as expected without login form for providers with and without description', async () => {
       const coreStartMock = coreMock.createStart();
       expect(
         shallowWithIntl(
@@ -179,7 +179,7 @@ describe('LoginForm', () => {
               enabled: true,
               providers: [
                 { type: 'saml', name: 'saml1', description: 'Login w/SAML' },
-                { type: 'pki', name: 'pki1', description: 'Login w/PKI' },
+                { type: 'pki', name: 'pki1' },
               ],
             }}
           />
@@ -229,6 +229,44 @@ describe('LoginForm', () => {
       expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
       expect(wrapper.find(EuiCallOut).exists()).toBe(false);
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
+    });
+
+    it('shows error toast if login fails', async () => {
+      const currentURL = `https://some-host/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+
+      const failureReason = new Error('Oh no!');
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStartMock.http.post.mockRejectedValue(failureReason);
+
+      window.location.href = currentURL;
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginAssistanceMessage=""
+          showLoginForm={true}
+          selector={{ enabled: true, providers: [{ type: 'saml', name: 'saml1' }] }}
+        />
+      );
+
+      wrapper.findWhere(node => node.key() === 'saml1').simulate('click');
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login_with', {
+        body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
+      });
+
+      expect(window.location.href).toBe(currentURL);
+      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
+        title: 'Could not perform login.',
+      });
     });
   });
 });

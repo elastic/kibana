@@ -275,10 +275,6 @@ export default function({ getService }: FtrProviderContext) {
         }
       });
 
-      // Ideally we should be able to abandon intermediate session and let user log in, but for the
-      // time being we cannot distinguish errors coming from Elasticsearch for the case when SAML
-      // response just doesn't correspond to request ID we have in intermediate cookie and the case
-      // when something else has happened.
       it('should be able to log in via SP initiated login even if intermediate session with other SAML provider exists', async () => {
         // First start authentication flow with `saml1`.
         const saml1HandshakeResponse = await supertest
@@ -360,6 +356,50 @@ export default function({ getService }: FtrProviderContext) {
         const authenticationResponse = await supertest
           .post('/internal/security/login_with')
           .ca(CA_CERT)
+          .set('kbn-xsrf', 'xxx')
+          .set('Authorization', `Negotiate ${getSPNEGOToken()}`)
+          .send({
+            providerType: 'kerberos',
+            providerName: 'kerberos1',
+            currentURL: 'https://kibana.com/login?next=/abc/xyz/handshake?one=two%20three#/workpad',
+          })
+          .expect(200);
+
+        // Verify that mutual authentication works.
+        expect(authenticationResponse.headers['www-authenticate']).to.be(
+          `Negotiate ${getMutualAuthenticationResponseToken()}`
+        );
+
+        const cookies = authenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        await checkSessionCookie(
+          request.cookie(cookies[0])!,
+          'tester@TEST.ELASTIC.CO',
+          'kerberos1'
+        );
+      });
+
+      it('should be able to log in from Login Selector even if client provides certificate and PKI is enabled', async () => {
+        const spnegoResponse = await supertest
+          .post('/internal/security/login_with')
+          .ca(CA_CERT)
+          .pfx(CLIENT_CERT)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'kerberos',
+            providerName: 'kerberos1',
+            currentURL: 'https://kibana.com/login?next=/abc/xyz/handshake?one=two%20three#/workpad',
+          })
+          .expect(401);
+
+        expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
+        expect(spnegoResponse.headers['www-authenticate']).to.be('Negotiate');
+
+        const authenticationResponse = await supertest
+          .post('/internal/security/login_with')
+          .ca(CA_CERT)
+          .pfx(CLIENT_CERT)
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', `Negotiate ${getSPNEGOToken()}`)
           .send({
