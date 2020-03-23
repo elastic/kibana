@@ -154,7 +154,7 @@ exports[`MonitorPage shallow renders expected elements for valid props 1`] = `
             "type": "string",
           },
         ],
-        "title": "heartbeat-8*",
+        "title": "heartbeat-7*",
       }
     }
     setEsKueryFilters={[MockFunction]}
