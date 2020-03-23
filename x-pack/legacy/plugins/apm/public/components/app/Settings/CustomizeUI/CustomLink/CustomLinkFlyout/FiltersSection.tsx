@@ -16,12 +16,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FilterOptions } from '../../../../../../../../../../plugins/apm/server/routes/settings/custom_link';
+import { FilterOptions } from '../../../../../../../../../../plugins/apm/common/custom_link_filter_options';
 import {
   DEFAULT_OPTION,
-  Filters,
-  filterSelectOptions,
+  FilterKeyValue,
+  FILTER_SELECT_OPTIONS,
   getSelectOptions
 } from './helper';
 
@@ -29,10 +28,10 @@ export const FiltersSection = ({
   filters,
   onChangeFilters
 }: {
-  filters: Filters;
-  onChangeFilters: (filters: Filters) => void;
+  filters: FilterKeyValue[];
+  onChangeFilters: (filters: FilterKeyValue[]) => void;
 }) => {
-  const onChangeFilter = (filter: Filters[0], idx: number) => {
+  const onChangeFilter = (filter: FilterKeyValue, idx: number) => {
     const newFilters = [...filters];
     newFilters[idx] = filter;
     onChangeFilters(newFilters);
@@ -40,7 +39,8 @@ export const FiltersSection = ({
 
   const onRemoveFilter = (idx: number) => {
     // remove without mutating original array
-    const newFilters = [...filters].splice(idx, 1);
+    const newFilters = [...filters];
+    newFilters.splice(idx, 1);
 
     // if there is only one item left it should not be removed
     // but reset to empty
@@ -68,12 +68,12 @@ export const FiltersSection = ({
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiText size="xs">
+      <EuiText size="s">
         {i18n.translate(
           'xpack.apm.settings.customizeUI.customLink.flyout.filters.subtitle',
           {
             defaultMessage:
-              'Add additional values within the same field by comma separating values.'
+              'Use the filter options to scope them to only appear for specific services.'
           }
         )}
       </EuiText>
@@ -83,12 +83,12 @@ export const FiltersSection = ({
       {filters.map((filter, idx) => {
         const [key, value] = filter;
         const filterId = `filter-${idx}`;
-        const selectOptions = getSelectOptions(filters, idx);
+        const selectOptions = getSelectOptions(filters, key);
         return (
           <EuiFlexGroup key={filterId} gutterSize="s" alignItems="center">
             <EuiFlexItem>
               <EuiSelect
-                aria-label={filterId}
+                data-test-subj={filterId}
                 id={filterId}
                 fullWidth
                 options={selectOptions}
@@ -113,6 +113,7 @@ export const FiltersSection = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldText
+                data-test-subj={`value-${idx}`}
                 fullWidth
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption.value',
@@ -127,7 +128,7 @@ export const FiltersSection = ({
               <EuiButtonEmpty
                 iconType="trash"
                 onClick={() => onRemoveFilter(idx)}
-                disabled={!key && filters.length === 1}
+                disabled={!value && !key && filters.length === 1}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -139,7 +140,7 @@ export const FiltersSection = ({
       <AddFilterButton
         onClick={handleAddFilter}
         // Disable button when user has already added all items available
-        isDisabled={filters.length === filterSelectOptions.length - 1}
+        isDisabled={filters.length === FILTER_SELECT_OPTIONS.length - 1}
       />
     </>
   );
