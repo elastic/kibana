@@ -12,13 +12,9 @@ import {
   getDatasourceSuggestionsFromCurrentState,
 } from './indexpattern_suggestions';
 
+jest.mock('ui/new_platform');
 jest.mock('./loader');
 jest.mock('../id_generator');
-// chrome, notify, storage are used by ./plugin
-jest.mock('ui/chrome');
-// Contains old and new platform data plugins, used for interpreter and filter ratio
-jest.mock('ui/new_platform');
-jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
 
 const expectedIndexPatterns = {
   1: {
