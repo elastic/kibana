@@ -79,7 +79,7 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
   /**
    * Scan adjacency maps from the top down and assign levels
    */
-  function traverseLevels(currentProcessMap: AdjacentProcessMap, level: number = 1): unknown {
+  function traverseLevels(currentProcessMap: AdjacentProcessMap, level: number = 1): void {
     const nextLevel = level + 1;
     if (currentProcessMap.nextSibling) {
       traverseLevels(idToAdjacent.get(currentProcessMap.nextSibling)!, level);
@@ -88,7 +88,6 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
       traverseLevels(idToAdjacent.get(currentProcessMap.firstChild)!, nextLevel);
     }
     currentProcessMap.level = level;
-    return void 0;
   }
 
   for (const treeRoot of roots) {
