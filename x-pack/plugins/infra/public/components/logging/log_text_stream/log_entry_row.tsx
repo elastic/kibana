@@ -195,7 +195,7 @@ export const LogEntryRow = memo(
 
 interface LogEntryRowWrapperProps {
   scale: TextScale;
-  isHighlighted: boolean;
+  isHighlighted?: boolean;
 }
 
 export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
