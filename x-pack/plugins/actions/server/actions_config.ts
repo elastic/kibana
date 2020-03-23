@@ -11,6 +11,7 @@ import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { ActionsConfigType } from './types';
+import { ActionTypeDisabledError } from './lib';
 
 export enum WhitelistedHosts {
   Any = '*',
@@ -103,7 +104,7 @@ export function getActionsConfigurationUtilities(
     },
     ensureActionTypeEnabled(actionType: string) {
       if (!isActionTypeEnabled(actionType)) {
-        throw new Error(disabledActionTypeErrorMessage(actionType));
+        throw new ActionTypeDisabledError(disabledActionTypeErrorMessage(actionType), 'config');
       }
     },
   };

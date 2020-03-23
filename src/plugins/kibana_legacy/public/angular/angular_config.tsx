@@ -226,7 +226,7 @@ const $setupUICapabilityRedirect = (newPlatform: CoreStart) => (
       }
 
       if (!get(newPlatform.application.capabilities, route.requireUICapability)) {
-        $injector.get('kbnUrl').change('/home');
+        $injector.get('$location').url('/home');
         event.preventDefault();
       }
     }

@@ -24,17 +24,21 @@ export function fetchEffectFactory<T, R, S, F>(
   fail: (error: Error) => Action<F>
 ) {
   return function*(action: Action<T>) {
-    const {
-      payload: { ...params },
-    } = action;
-    const response = yield call(fetch, params);
-    if (response instanceof Error) {
-      // eslint-disable-next-line no-console
-      console.error(response);
+    try {
+      const response = yield call(fetch, action.payload);
 
-      yield put(fail(response));
-    } else {
-      yield put(success(response));
+      if (response instanceof Error) {
+        // eslint-disable-next-line no-console
+        console.error(response);
+
+        yield put(fail(response));
+      } else {
+        yield put(success(response));
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      yield put(fail(error));
     }
   };
 }

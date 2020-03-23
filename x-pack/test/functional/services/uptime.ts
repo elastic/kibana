@@ -11,7 +11,38 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
+  const settings = {
+    go: async () => {
+      await testSubjects.click('settings-page-link', 5000);
+    },
+    changeHeartbeatIndicesInput: async (text: string) => {
+      const input = await testSubjects.find('heartbeat-indices-input', 5000);
+      await input.clearValueWithKeyboard();
+      await input.type(text);
+    },
+    loadFields: async () => {
+      const heartbeatIndices = await (
+        await testSubjects.find('heartbeat-indices-input', 5000)
+      ).getAttribute('value');
+      return { heartbeatIndices };
+    },
+    applyButtonIsDisabled: async () => {
+      return !!(await (await testSubjects.find('apply-settings-button')).getAttribute('disabled'));
+    },
+    apply: async () => {
+      await (await testSubjects.find('apply-settings-button')).click();
+      await retry.waitFor('submit to succeed', async () => {
+        // When the form submit is complete the form will no longer be disabled
+        const disabled = await (
+          await testSubjects.find('heartbeat-indices-input', 5000)
+        ).getAttribute('disabled');
+        return disabled === null;
+      });
+    },
+  };
+
   return {
+    settings,
     alerts: {
       async openFlyout() {
         await testSubjects.click('xpack.uptime.alertsPopover.toggleButton', 5000);
@@ -119,6 +150,9 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
     },
     async getMonitorNameDisplayedOnPageTitle() {
       return await testSubjects.getVisibleText('monitor-page-title');
+    },
+    async pageHasDataMissing() {
+      return await testSubjects.find('data-missing', 5000);
     },
     async setKueryBarText(attribute: string, value: string) {
       await testSubjects.click(attribute);
