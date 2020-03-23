@@ -70,6 +70,9 @@ export class AlertsClientFactory {
         if (!securityPluginSetup) {
           return { apiKeysEnabled: false };
         }
+        // Create an API key using the new grant API - in this case the Kibana system user is creating the
+        // API key for the user, instead of having the user create it themselves, which requires api_key
+        // privileges 
         const createAPIKeyResult = await securityPluginSetup.authc.grantAPIKeyAsInternalUser(
           request
         );
