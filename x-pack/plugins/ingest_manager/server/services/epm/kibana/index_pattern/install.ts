@@ -155,17 +155,29 @@ export const createIndexPattern = (indexPatternType: string, fields: Fields) => 
 export const createIndexPatternFields = (
   fields: Fields
 ): { indexPatternFields: IndexPatternField[]; fieldFormatMap: FieldFormatMap } => {
-  const dedupedFields = dedupeFields(fields);
-  const flattenedFields = flattenFields(dedupedFields);
+  const flattenedFields = flattenFields(fields);
   const fieldFormatMap = createFieldFormatMap(flattenedFields);
   const transformedFields = flattenedFields.map(transformField);
-  return { indexPatternFields: transformedFields, fieldFormatMap };
+  const dedupedFields = dedupeFields(transformedFields);
+  return { indexPatternFields: dedupedFields, fieldFormatMap };
 };
 
-export const dedupeFields = (fields: Fields) => {
-  const uniqueObj = fields.reduce<{ [name: string]: Field }>((acc, field) => {
+// merges fields that are duplicates with the existing taking precedence
+export const dedupeFields = (fields: IndexPatternField[]) => {
+  const uniqueObj = fields.reduce<{ [name: string]: IndexPatternField }>((acc, field) => {
+    // if field doesn't exist yet
     if (!acc[field.name]) {
       acc[field.name] = field;
+      // if field exists already
+    } else {
+      const existingField = acc[field.name];
+      // if the existing field and this field have the same type, merge
+      if (existingField.type === field.type) {
+        const mergedField = { ...field, ...existingField };
+        acc[field.name] = mergedField;
+      } else {
+        // log when there is a dup with different types
+      }
     }
     return acc;
   }, {});
