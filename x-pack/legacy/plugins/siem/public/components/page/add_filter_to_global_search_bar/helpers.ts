@@ -6,13 +6,17 @@
 
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 
-export const createFilter = (key: string, value: string[] | string | null | undefined): Filter => {
+export const createFilter = (
+  key: string,
+  value: string[] | string | null | undefined,
+  negate: boolean = false
+): Filter => {
   const queryValue = value != null ? (Array.isArray(value) ? value[0] : value) : null;
   return queryValue != null
     ? {
         meta: {
           alias: null,
-          negate: false,
+          negate,
           disabled: false,
           type: 'phrase',
           key,
