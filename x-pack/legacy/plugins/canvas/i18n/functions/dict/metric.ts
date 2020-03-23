@@ -36,14 +36,13 @@ export const help: FunctionHelp<FunctionFactory<typeof metric>> = {
         FONT_WEIGHT,
       },
     }),
+    // TODO: Find a way to generate the docs URL here
     metricFormat: i18n.translate('xpack.canvas.functions.metric.args.metricFormatHelpText', {
-      defaultMessage:
-        'A {NUMERALJS} format string. For example, {example1} or {example2}. See {url}.',
+      defaultMessage: 'A {NUMERALJS} format string. For example, {example1} or {example2}.',
       values: {
         example1: `"0.0a"`,
         example2: `"0%"`,
         NUMERALJS,
-        url: 'http://numeraljs.com/#format',
       },
     }),
   },

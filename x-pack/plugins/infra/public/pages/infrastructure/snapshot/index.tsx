@@ -6,7 +6,6 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { identity } from 'fp-ts/lib/function';
 import React, { useContext } from 'react';
 
 import { SnapshotPageContent } from './page_content';
@@ -18,16 +17,14 @@ import { ColumnarPage } from '../../../components/page';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import {
-  ViewSourceConfigurationButton,
-  ViewSourceConfigurationButtonHrefBase,
-} from '../../../components/source_configuration';
+import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
 import { Source } from '../../../containers/source';
 import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_time';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useLinkProps } from '../../../hooks/use_link_props';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -42,7 +39,10 @@ export const SnapshotPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
-  const prependBasePath = useKibana().services.http?.basePath.prepend ?? identity;
+  const tutorialLinkProps = useLinkProps({
+    app: 'kibana',
+    hash: '/home/tutorial_directory/metrics',
+  });
 
   return (
     <ColumnarPage>
@@ -80,7 +80,7 @@ export const SnapshotPage = () => {
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiButton
-                  href={prependBasePath('/app/kibana#/home/tutorial_directory/metrics')}
+                  {...tutorialLinkProps}
                   color="primary"
                   fill
                   data-test-subj="infrastructureViewSetupInstructionsButton"
@@ -93,8 +93,8 @@ export const SnapshotPage = () => {
               {uiCapabilities?.infrastructure?.configureSource ? (
                 <EuiFlexItem>
                   <ViewSourceConfigurationButton
+                    app="metrics"
                     data-test-subj="configureSourceButton"
-                    hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
                   >
                     {i18n.translate('xpack.infra.configureSourceActionLabel', {
                       defaultMessage: 'Change source configuration',

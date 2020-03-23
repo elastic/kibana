@@ -28,7 +28,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45348
+  // FLAKY: https://github.com/elastic/kibana/issues/60535
   describe.skip('security', () => {
     before(async () => {
       await esArchiver.load('discover/feature_controls/security');

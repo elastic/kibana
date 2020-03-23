@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { networkActions } from '../../../../store/actions';
@@ -99,10 +99,12 @@ const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
 
   const sorting = { field: `node.${NetworkHttpFields.requestCount}`, direction: sort.direction };
 
+  const columns = useMemo(() => getNetworkHttpColumns(tableType), [tableType]);
+
   return (
     <PaginatedTable
       activePage={activePage}
-      columns={getNetworkHttpColumns(tableType)}
+      columns={columns}
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
       headerTitle={i18n.HTTP_REQUESTS}

@@ -1,7 +1,7 @@
 <section class="sidebar-list" aria-label="{{::'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel' | i18n: {defaultMessage: 'Index and fields'} }}">
   <discover-index-pattern-select
-    selected-index-pattern="selectedIndexPattern"
-    set-index-pattern="setIndexPattern"
+    selected-index-pattern="$parent.indexPattern"
+    set-index-pattern="$parent.setIndexPattern"
     index-pattern-list="indexPatternList"
   >
   </discover-index-pattern-select>

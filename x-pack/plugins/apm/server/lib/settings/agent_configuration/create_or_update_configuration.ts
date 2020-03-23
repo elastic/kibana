@@ -6,19 +6,19 @@
 
 import hash from 'object-hash';
 import { Setup } from '../../helpers/setup_request';
-import { AgentConfiguration } from './configuration_types';
+import {
+  AgentConfiguration,
+  AgentConfigurationIntake
+} from './configuration_types';
 import { APMIndexDocumentParams } from '../../helpers/es_client';
 
 export async function createOrUpdateConfiguration({
   configurationId,
-  configuration,
+  configurationIntake,
   setup
 }: {
   configurationId?: string;
-  configuration: Omit<
-    AgentConfiguration,
-    '@timestamp' | 'applied_by_agent' | 'etag'
-  >;
+  configurationIntake: AgentConfigurationIntake;
   setup: Setup;
 }) {
   const { internalClient, indices } = setup;
@@ -27,15 +27,15 @@ export async function createOrUpdateConfiguration({
     refresh: true,
     index: indices.apmAgentConfigurationIndex,
     body: {
-      agent_name: configuration.agent_name,
+      agent_name: configurationIntake.agent_name,
       service: {
-        name: configuration.service.name,
-        environment: configuration.service.environment
+        name: configurationIntake.service.name,
+        environment: configurationIntake.service.environment
       },
-      settings: configuration.settings,
+      settings: configurationIntake.settings,
       '@timestamp': Date.now(),
       applied_by_agent: false,
-      etag: hash(configuration)
+      etag: hash(configurationIntake)
     }
   };
 

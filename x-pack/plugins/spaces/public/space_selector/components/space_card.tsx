@@ -6,15 +6,16 @@
 
 import { EuiCard } from '@elastic/eui';
 import React from 'react';
-import { Space } from '../../../common/model/space';
+import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
 import { SpaceAvatar } from '../../space_avatar';
+import { Space } from '../..';
 
 interface Props {
   space: Space;
-  onClick: () => void;
+  serverBasePath: string;
 }
 export const SpaceCard = (props: Props) => {
-  const { space, onClick } = props;
+  const { serverBasePath, space } = props;
 
   return (
     <EuiCard
@@ -23,7 +24,7 @@ export const SpaceCard = (props: Props) => {
       icon={renderSpaceAvatar(space)}
       title={space.name}
       description={renderSpaceDescription(space)}
-      onClick={onClick}
+      href={addSpaceIdToPath(serverBasePath, space.id, ENTER_SPACE_PATH)}
     />
   );
 };

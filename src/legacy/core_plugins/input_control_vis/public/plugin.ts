@@ -59,7 +59,7 @@ export class InputControlVisPlugin implements Plugin<Promise<void>, void> {
     };
 
     expressions.registerFunction(createInputControlVisFn);
-    visualizations.types.createBaseVisualization(
+    visualizations.createBaseVisualization(
       createInputControlVisTypeDefinition(visualizationDependencies)
     );
   }

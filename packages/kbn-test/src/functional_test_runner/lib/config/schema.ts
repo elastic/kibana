@@ -61,17 +61,19 @@ const defaultRelativeToConfigPath = (path: string) => {
 
 export const schema = Joi.object()
   .keys({
-    testFiles: Joi.array()
-      .items(Joi.string())
-      .when('$primary', {
-        is: true,
-        then: Joi.required(),
-        otherwise: Joi.any().default([]),
-      }),
+    testFiles: Joi.array().items(Joi.string()),
+    testRunner: Joi.func(),
 
-    excludeTestFiles: Joi.array()
-      .items(Joi.string())
-      .default([]),
+    suiteFiles: Joi.object()
+      .keys({
+        include: Joi.array()
+          .items(Joi.string())
+          .default([]),
+        exclude: Joi.array()
+          .items(Joi.string())
+          .default([]),
+      })
+      .default(),
 
     suiteTags: Joi.object()
       .keys({
@@ -251,6 +253,21 @@ export const schema = Joi.object()
     layout: Joi.object()
       .keys({
         fixedHeaderHeight: Joi.number().default(50),
+      })
+      .default(),
+
+    // settings for the security service if there is no defaultRole defined, then default to superuser role.
+    security: Joi.object()
+      .keys({
+        roles: Joi.object().default(),
+        defaultRoles: Joi.array()
+          .items(Joi.string())
+          .when('$primary', {
+            is: true,
+            then: Joi.array().min(1),
+          })
+          .default(['superuser']),
+        disableTestUser: Joi.boolean(),
       })
       .default(),
   })

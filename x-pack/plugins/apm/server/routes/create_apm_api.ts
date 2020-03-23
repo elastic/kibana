@@ -23,11 +23,10 @@ import {
 import {
   agentConfigurationRoute,
   agentConfigurationSearchRoute,
-  createAgentConfigurationRoute,
   deleteAgentConfigurationRoute,
   listAgentConfigurationEnvironmentsRoute,
   listAgentConfigurationServicesRoute,
-  updateAgentConfigurationRoute,
+  createOrUpdateAgentConfigurationRoute,
   agentConfigurationAgentNameRoute
 } from './settings/agent_configuration';
 import {
@@ -60,6 +59,13 @@ import {
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import { indicesPrivilegesRoute } from './security';
+import {
+  createCustomLinkRoute,
+  updateCustomLinkRoute,
+  deleteCustomLinkRoute,
+  listCustomLinksRoute,
+  customLinkTransactionRoute
+} from './settings/custom_link';
 
 const createApmApi = () => {
   const api = createApi()
@@ -83,11 +89,10 @@ const createApmApi = () => {
     .add(agentConfigurationAgentNameRoute)
     .add(agentConfigurationRoute)
     .add(agentConfigurationSearchRoute)
-    .add(createAgentConfigurationRoute)
     .add(deleteAgentConfigurationRoute)
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
-    .add(updateAgentConfigurationRoute)
+    .add(createOrUpdateAgentConfigurationRoute)
 
     // APM indices
     .add(apmIndexSettingsRoute)
@@ -128,7 +133,14 @@ const createApmApi = () => {
     .add(serviceMapServiceNodeRoute)
 
     // security
-    .add(indicesPrivilegesRoute);
+    .add(indicesPrivilegesRoute)
+
+    // Custom links
+    .add(createCustomLinkRoute)
+    .add(updateCustomLinkRoute)
+    .add(deleteCustomLinkRoute)
+    .add(listCustomLinksRoute)
+    .add(customLinkTransactionRoute);
 
   return api;
 };

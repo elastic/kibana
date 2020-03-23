@@ -30,6 +30,8 @@ import {
   histogramConfigs,
 } from '../../../components/alerts_viewer/histogram_configs';
 import { MatrixHisrogramConfigs } from '../../../components/matrix_histogram/types';
+import { useGetUrlSearch } from '../../../components/navigation/use_get_url_search';
+import { navTabs } from '../../home/home_navigations';
 
 const ID = 'alertsByCategoryOverview';
 
@@ -73,10 +75,11 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
 
   const kibana = useKibana();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+  const urlSearch = useGetUrlSearch(navTabs.detections);
 
   const alertsCountViewAlertsButton = useMemo(
-    () => <EuiButton href={getDetectionEngineAlertUrl()}>{i18n.VIEW_ALERTS}</EuiButton>,
-    []
+    () => <EuiButton href={getDetectionEngineAlertUrl(urlSearch)}>{i18n.VIEW_ALERTS}</EuiButton>,
+    [urlSearch]
   );
 
   const alertsByCategoryHistogramConfigs: MatrixHisrogramConfigs = useMemo(

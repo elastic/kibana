@@ -5,7 +5,4 @@
  */
 
 export { SourceConfigurationSettings } from './source_configuration_settings';
-export {
-  ViewSourceConfigurationButton,
-  ViewSourceConfigurationButtonHrefBase,
-} from './view_source_configuration_button';
+export { ViewSourceConfigurationButton } from './view_source_configuration_button';

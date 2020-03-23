@@ -7,8 +7,7 @@
 import { useEffect, useState } from 'react';
 
 import { useKibana } from '../lib/kibana';
-import { useStateToaster } from '../components/toasters';
-import { errorToToaster } from '../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../components/toasters';
 
 import * as i18n from './translations';
 import { IndexPatternSavedObject } from './types';

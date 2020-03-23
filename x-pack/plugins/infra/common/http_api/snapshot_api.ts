@@ -54,16 +54,41 @@ export const SnapshotGroupByRT = rt.array(
   })
 );
 
-export const SnapshotMetricInputRT = rt.type({
+export const SnapshotNamedMetricInputRT = rt.type({
   type: SnapshotMetricTypeRT,
 });
+
+export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
+
+export type SnapshotCustomAggregation = typeof SNAPSHOT_CUSTOM_AGGREGATIONS[number];
+
+const snapshotCustomAggregationKeys = SNAPSHOT_CUSTOM_AGGREGATIONS.reduce<
+  Record<SnapshotCustomAggregation, null>
+>((acc, agg) => ({ ...acc, [agg]: null }), {} as Record<SnapshotCustomAggregation, null>);
+
+export const SnapshotCustomAggregationRT = rt.keyof(snapshotCustomAggregationKeys);
+
+export const SnapshotCustomMetricInputRT = rt.intersection([
+  rt.type({
+    type: rt.literal('custom'),
+    field: rt.string,
+    aggregation: SnapshotCustomAggregationRT,
+    id: rt.string,
+  }),
+  rt.partial({
+    label: rt.string,
+  }),
+]);
+
+export const SnapshotMetricInputRT = rt.union([
+  SnapshotNamedMetricInputRT,
+  SnapshotCustomMetricInputRT,
+]);
 
 export const SnapshotRequestRT = rt.intersection([
   rt.type({
     timerange: InfraTimerangeInputRT,
-    metric: rt.type({
-      type: SnapshotMetricTypeRT,
-    }),
+    metric: SnapshotMetricInputRT,
     groupBy: SnapshotGroupByRT,
     nodeType: ItemTypeRT,
     sourceId: rt.string,
@@ -77,6 +102,7 @@ export const SnapshotRequestRT = rt.intersection([
 
 export type SnapshotNodePath = rt.TypeOf<typeof SnapshotNodePathRT>;
 export type SnapshotMetricInput = rt.TypeOf<typeof SnapshotMetricInputRT>;
+export type SnapshotCustomMetricInput = rt.TypeOf<typeof SnapshotCustomMetricInputRT>;
 export type InfraTimerangeInput = rt.TypeOf<typeof InfraTimerangeInputRT>;
 export type SnapshotNodeMetric = rt.TypeOf<typeof SnapshotNodeMetricRT>;
 export type SnapshotGroupBy = rt.TypeOf<typeof SnapshotGroupByRT>;

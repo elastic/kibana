@@ -81,6 +81,7 @@ exports[`Table should render normally 1`] = `
       Object {
         "actions": Array [
           Object {
+            "data-test-subj": "editFieldFormat",
             "description": "Edit",
             "icon": "pencil",
             "name": "Edit",
@@ -135,13 +136,10 @@ exports[`Table should render normally 1`] = `
 exports[`Table should render the boolean template (false) 1`] = `<span />`;
 
 exports[`Table should render the boolean template (true) 1`] = `
-<EuiIconEmpty
-  aria-hidden={true}
+<div
   aria-label="Is searchable"
-  className="euiIcon euiIcon--medium euiIcon--secondary euiIcon-isLoading"
-  focusable="false"
-  role="img"
-  style={null}
+  color="secondary"
+  data-euiicon-type="dot"
 />
 `;
 

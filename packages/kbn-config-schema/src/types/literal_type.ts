@@ -29,7 +29,7 @@ export class LiteralType<T> extends Type<T> {
     switch (type) {
       case 'any.required':
       case 'any.allowOnly':
-        return `expected value to equal [${expectedValue}] but got [${value}]`;
+        return `expected value to equal [${expectedValue}]`;
     }
   }
 }

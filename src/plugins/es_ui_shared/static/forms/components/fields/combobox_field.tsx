@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { FieldHook, VALIDATION_TYPES, FieldValidateResponse } from '../../hook_form_lib';
 
@@ -69,7 +69,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
     field.setValue(newValue);
   };
 
-  const onComboChange = (options: EuiComboBoxOptionProps[]) => {
+  const onComboChange = (options: EuiComboBoxOptionOption[]) => {
     field.setValue(options.map(option => option.label));
   };
 

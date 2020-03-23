@@ -19,7 +19,7 @@ export const lens: LegacyPluginInitializer = kibana => {
     id: PLUGIN_ID,
     configPrefix: `xpack.${PLUGIN_ID}`,
     // task_manager could be required, but is only used for telemetry
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter', 'data'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter'],
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
@@ -33,7 +33,6 @@ export const lens: LegacyPluginInitializer = kibana => {
       embeddableFactories: [`plugins/${PLUGIN_ID}/legacy`],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
-      visTypes: ['plugins/lens/register_vis_type_alias'],
       savedObjectsManagement: {
         lens: {
           defaultSearchField: 'title',

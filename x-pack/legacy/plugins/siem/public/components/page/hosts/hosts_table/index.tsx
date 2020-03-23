@@ -7,6 +7,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { IIndexPattern } from 'src/plugins/data/public';
+
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,

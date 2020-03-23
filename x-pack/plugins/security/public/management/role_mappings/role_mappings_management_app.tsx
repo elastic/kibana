@@ -48,6 +48,7 @@ export const roleMappingsManagementApp = Object.freeze({
           return (
             <RoleMappingsGridPage
               notifications={notifications}
+              rolesAPIClient={new RolesAPIClient(http)}
               roleMappingsAPI={roleMappingsAPIClient}
               docLinks={dockLinksService}
             />

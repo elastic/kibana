@@ -331,7 +331,7 @@ describe('AreaChart', () => {
     });
 
     it(`should render area chart`, () => {
-      expect(shallowWrapper.find('WrappedByAutoSizer')).toHaveLength(1);
+      expect(shallowWrapper.find('AreaChartBase')).toHaveLength(1);
       expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
     });
   });
@@ -344,7 +344,7 @@ describe('AreaChart', () => {
       });
 
       it(`should render a chart place holder`, () => {
-        expect(shallowWrapper.find('WrappedByAutoSizer')).toHaveLength(0);
+        expect(shallowWrapper.find('AreaChartBase')).toHaveLength(0);
         expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
       });
     }

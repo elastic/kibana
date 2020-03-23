@@ -15,27 +15,7 @@ import {
 import { authorizationMock } from './index.mock';
 
 describe('initAPIAuthorization', () => {
-  test(`route that doesn't start with "/api/" continues`, async () => {
-    const mockHTTPSetup = coreMock.createSetup().http;
-    initAPIAuthorization(
-      mockHTTPSetup,
-      authorizationMock.create(),
-      loggingServiceMock.create().get()
-    );
-
-    const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
-
-    const mockRequest = httpServerMock.createKibanaRequest({ method: 'get', path: '/app/foo' });
-    const mockResponse = httpServerMock.createResponseFactory();
-    const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
-
-    await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
-
-    expect(mockResponse.notFound).not.toHaveBeenCalled();
-    expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
-  });
-
-  test(`protected route that starts with "/api/", but "mode.useRbacForRequest()" returns false continues`, async () => {
+  test(`protected route when "mode.useRbacForRequest()" returns false continues`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = authorizationMock.create();
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
@@ -44,7 +24,7 @@ describe('initAPIAuthorization', () => {
 
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'get',
-      path: '/api/foo',
+      path: '/foo/bar',
       routeTags: ['access:foo'],
     });
     const mockResponse = httpServerMock.createResponseFactory();
@@ -59,7 +39,7 @@ describe('initAPIAuthorization', () => {
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 
-  test(`unprotected route that starts with "/api/", but "mode.useRbacForRequest()" returns true continues`, async () => {
+  test(`unprotected route when "mode.useRbacForRequest()" returns true continues`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = authorizationMock.create();
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
@@ -68,7 +48,7 @@ describe('initAPIAuthorization', () => {
 
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'get',
-      path: '/api/foo',
+      path: '/foo/bar',
       routeTags: ['not-access:foo'],
     });
     const mockResponse = httpServerMock.createResponseFactory();
@@ -83,7 +63,7 @@ describe('initAPIAuthorization', () => {
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 
-  test(`protected route that starts with "/api/", "mode.useRbacForRequest()" returns true and user is authorized continues`, async () => {
+  test(`protected route when "mode.useRbacForRequest()" returns true and user is authorized continues`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = authorizationMock.create({ version: '1.0.0-zeta1' });
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
@@ -93,7 +73,7 @@ describe('initAPIAuthorization', () => {
     const headers = { authorization: 'foo' };
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'get',
-      path: '/api/foo',
+      path: '/foo/bar',
       headers,
       routeTags: ['access:foo'],
     });
@@ -118,7 +98,7 @@ describe('initAPIAuthorization', () => {
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 
-  test(`protected route that starts with "/api/", "mode.useRbacForRequest()" returns true and user isn't authorized responds with a 404`, async () => {
+  test(`protected route when "mode.useRbacForRequest()" returns true and user isn't authorized responds with a 404`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = authorizationMock.create({ version: '1.0.0-zeta1' });
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingServiceMock.create().get());
@@ -128,7 +108,7 @@ describe('initAPIAuthorization', () => {
     const headers = { authorization: 'foo' };
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'get',
-      path: '/api/foo',
+      path: '/foo/bar',
       headers,
       routeTags: ['access:foo'],
     });

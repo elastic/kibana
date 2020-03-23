@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
 import { networkActions } from '../../../../store/network';
 import {
@@ -97,7 +97,7 @@ const UsersTableComponent = React.memo<UsersTableProps>(
             field: getSortFromString(splitField[splitField.length - 1]),
             direction: criteria.sort.direction as Direction,
           };
-          if (!isEqual(newUsersSort, sort)) {
+          if (!deepEqual(newUsersSort, sort)) {
             updateNetworkTable({
               networkType: type,
               tableType,
@@ -109,10 +109,15 @@ const UsersTableComponent = React.memo<UsersTableProps>(
       [sort, type, updateNetworkTable]
     );
 
+    const columns = useMemo(() => getUsersColumns(flowTarget, usersTableId), [
+      flowTarget,
+      usersTableId,
+    ]);
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getUsersColumns(flowTarget, usersTableId)}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}

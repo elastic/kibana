@@ -43,8 +43,6 @@ function buildRestrictedPaths(shimmedPlugins) {
           'ui/**/*',
           'src/legacy/ui/**/*',
           'src/legacy/core_plugins/kibana/public/**/*',
-          'src/legacy/core_plugins/data/public/**/*',
-          '!src/legacy/core_plugins/data/public/index.ts',
           `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
         ],
         allowSameFolder: false,
@@ -77,7 +75,7 @@ module.exports = {
       {
         basePath: path.resolve(__dirname, '../../../../../'),
         zones: topLevelRestricedZones.concat(
-          buildRestrictedPaths(['visualize', 'discover', 'dashboard', 'devTools', 'home'])
+          buildRestrictedPaths(['visualize', 'discover', 'dashboard', 'devTools'])
         ),
       },
     ],

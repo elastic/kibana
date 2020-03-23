@@ -14,7 +14,7 @@ import {
   EuiFieldText,
   EuiToolTip,
 } from '@elastic/eui';
-import { VectorStyle } from '../vector_style';
+import { STYLE_TYPE } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
 export class StylePropEditor extends Component {
@@ -52,7 +52,7 @@ export class StylePropEditor extends Component {
   renderStaticDynamicSelect() {
     const options = [
       {
-        value: VectorStyle.STYLE_TYPE.STATIC,
+        value: STYLE_TYPE.STATIC,
         text: this.props.customStaticOptionLabel
           ? this.props.customStaticOptionLabel
           : i18n.translate('xpack.maps.styles.staticDynamicSelect.staticLabel', {
@@ -60,7 +60,7 @@ export class StylePropEditor extends Component {
             }),
       },
       {
-        value: VectorStyle.STYLE_TYPE.DYNAMIC,
+        value: STYLE_TYPE.DYNAMIC,
         text: i18n.translate('xpack.maps.styles.staticDynamicSelect.dynamicLabel', {
           defaultMessage: 'By value',
         }),
@@ -70,11 +70,7 @@ export class StylePropEditor extends Component {
     return (
       <EuiSelect
         options={options}
-        value={
-          this.props.styleProperty.isDynamic()
-            ? VectorStyle.STYLE_TYPE.DYNAMIC
-            : VectorStyle.STYLE_TYPE.STATIC
-        }
+        value={this.props.styleProperty.isDynamic() ? STYLE_TYPE.DYNAMIC : STYLE_TYPE.STATIC}
         onChange={this._onTypeToggle}
         disabled={this.props.disabled || this.props.fields.length === 0}
         aria-label={i18n.translate('xpack.maps.styles.staticDynamicSelect.ariaLabel', {
@@ -97,8 +93,10 @@ export class StylePropEditor extends Component {
         anchorClassName="mapStyleFormDisabledTooltip"
         content={getDisabledByMessage(this.props.disabledBy)}
       >
-        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+            {staticDynamicSelect}
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldText compressed disabled />
           </EuiFlexItem>

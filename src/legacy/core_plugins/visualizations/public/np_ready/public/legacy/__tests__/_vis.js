@@ -43,12 +43,12 @@ describe('Vis Class', function() {
   beforeEach(
     ngMock.inject(function(Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      visTypes = visualizations.types;
+      visTypes = visualizations;
     })
   );
 
   beforeEach(function() {
-    vis = new visualizations.Vis(indexPattern, stateFixture);
+    vis = visualizations.createVis(indexPattern, stateFixture);
   });
 
   const verifyVis = function(vis) {
@@ -84,7 +84,7 @@ describe('Vis Class', function() {
 
   describe('setState()', function() {
     it('should set the state to defaults', function() {
-      const vis = new visualizations.Vis(indexPattern);
+      const vis = visualizations.createVis(indexPattern);
       expect(vis).to.have.property('type');
       expect(vis.type).to.eql(visTypes.get('histogram'));
       expect(vis).to.have.property('aggs');
@@ -100,7 +100,7 @@ describe('Vis Class', function() {
       expect(vis.isHierarchical()).to.be(true);
     });
     it('should return false for non-hierarchical vis (like histogram)', function() {
-      const vis = new visualizations.Vis(indexPattern);
+      const vis = visualizations.createVis(indexPattern);
       expect(vis.isHierarchical()).to.be(false);
     });
   });

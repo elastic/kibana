@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { Container, EmbeddableFactory } from '../../..';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
 
 interface SlowContactCardEmbeddableFactoryOptions {
-  execAction: ExecuteTriggerActions;
+  execAction: UiActionsStart['executeTriggerActions'];
   loadTickCount?: number;
 }
 
@@ -40,7 +40,7 @@ export class SlowContactCardEmbeddableFactory extends EmbeddableFactory<
     }
   }
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 

@@ -97,14 +97,14 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
       // Register legacy vislib types that have been converted
       convertedFns.forEach(expressions.registerFunction);
       convertedTypes.forEach(vis =>
-        visualizations.types.createBaseVisualization(vis(visualizationDependencies))
+        visualizations.createBaseVisualization(vis(visualizationDependencies))
       );
     }
 
     // Register non-converted types
     vislibFns.forEach(expressions.registerFunction);
     vislibTypes.forEach(vis =>
-      visualizations.types.createBaseVisualization(vis(visualizationDependencies))
+      visualizations.createBaseVisualization(vis(visualizationDependencies))
     );
   }
 

@@ -14,7 +14,7 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { Capabilities, ApplicationStart } from 'src/core/public';
-import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common/constants';
+import { addSpaceIdToPath, SPACE_SEARCH_COUNT_THRESHOLD, ENTER_SPACE_PATH } from '../../../common';
 import { Space } from '../../../common/model/space';
 import { ManageSpacesButton } from './manage_spaces_button';
 import { SpaceAvatar } from '../../space_avatar';
@@ -23,7 +23,7 @@ interface Props {
   id: string;
   spaces: Space[];
   isLoading: boolean;
-  onSelectSpace: (space: Space) => void;
+  serverBasePath: string;
   onManageSpacesClick: () => void;
   intl: InjectedIntl;
   capabilities: Capabilities;
@@ -184,7 +184,7 @@ class SpacesMenuUI extends Component<Props, State> {
       <EuiContextMenuItem
         key={space.id}
         icon={icon}
-        onClick={this.props.onSelectSpace.bind(this, space)}
+        href={addSpaceIdToPath(this.props.serverBasePath, space.id, ENTER_SPACE_PATH)}
         toolTipTitle={space.description && space.name}
         toolTipContent={space.description}
       >

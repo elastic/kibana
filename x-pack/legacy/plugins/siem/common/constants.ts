@@ -38,6 +38,15 @@ export const NEWS_FEED_URL_SETTING = 'siem:newsFeedUrl';
 /** The default value for News feed widget */
 export const NEWS_FEED_URL_SETTING_DEFAULT = 'https://feeds.elastic.co/security-solution';
 
+/** This Kibana Advanced Setting specifies the URLs of `IP Reputation Links`*/
+export const IP_REPUTATION_LINKS_SETTING = 'siem:ipReputationLinks';
+
+/** The default value for `IP Reputation Links` */
+export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
+  { "name": "virustotal.com", "url_template": "https://www.virustotal.com/gui/search/{{ip}}" },
+  { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
+]`;
+
 /**
  * Id for the signals alerting type
  */
@@ -62,6 +71,9 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
+
+export const TIMELINE_URL = '/api/timeline';
+export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 
 /**
  * Default signals index key for kibana.dev.yml

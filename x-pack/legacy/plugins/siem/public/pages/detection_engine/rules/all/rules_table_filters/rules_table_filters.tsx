@@ -41,7 +41,11 @@ const RulesTableFiltersComponent = ({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showCustomRules, setShowCustomRules] = useState<boolean>(false);
   const [showElasticRules, setShowElasticRules] = useState<boolean>(false);
-  const [isLoadingTags, tags] = useTags();
+  const [isLoadingTags, tags, reFetchTags] = useTags();
+
+  useEffect(() => {
+    reFetchTags();
+  }, [rulesCustomInstalled, rulesInstalled]);
 
   // Propagate filter changes to parent
   useEffect(() => {

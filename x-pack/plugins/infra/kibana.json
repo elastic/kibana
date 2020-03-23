@@ -2,7 +2,18 @@
   "id": "infra",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["features", "apm", "usageCollection", "spaces", "home", "data", "data_enhanced", "metrics"],
+  "requiredPlugins": [
+    "features",
+    "apm",
+    "usageCollection",
+    "spaces",
+    "home",
+    "data",
+    "dataEnhanced",
+    "metrics",
+    "alerting",
+    "triggers_actions_ui"
+  ],
   "server": true,
   "ui": true,
   "configPath": ["xpack", "infra"]

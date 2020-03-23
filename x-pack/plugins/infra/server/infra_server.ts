@@ -7,13 +7,13 @@
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { initIpToHostName } from './routes/ip_to_hostname';
 import { schemas } from './graphql';
-import { createLogEntriesResolvers } from './graphql/log_entries';
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
 import {
   initGetLogEntryCategoriesRoute,
   initGetLogEntryCategoryDatasetsRoute,
+  initGetLogEntryCategoryExamplesRoute,
   initGetLogEntryRateRoute,
   initValidateLogAnalysisIndicesRoute,
 } from './routes/log_analysis';
@@ -33,7 +33,6 @@ import { initInventoryMetaRoute } from './routes/inventory_metadata';
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
-      createLogEntriesResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,
     ],
@@ -45,6 +44,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
   initGetLogEntryCategoriesRoute(libs);
   initGetLogEntryCategoryDatasetsRoute(libs);
+  initGetLogEntryCategoryExamplesRoute(libs);
   initGetLogEntryRateRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);

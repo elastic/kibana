@@ -61,7 +61,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
-        .send();
+        .send()
+        .expect(200);
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
       expect(body).to.eql({
@@ -84,7 +85,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
-        .send();
+        .send()
+        .expect(200);
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
       expect(body).to.eql({

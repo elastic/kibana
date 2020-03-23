@@ -5,7 +5,7 @@
  */
 jest.mock('ui/new_platform');
 import { savedMap } from './saved_map';
-import { getQueryFilters } from '../../../server/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
 
 const filterContext = {
   and: [

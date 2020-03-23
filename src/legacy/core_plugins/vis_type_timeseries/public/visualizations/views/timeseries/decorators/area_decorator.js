@@ -21,7 +21,7 @@ import React from 'react';
 import { ScaleType, AreaSeries } from '@elastic/charts';
 import { getAreaStyles } from '../utils/series_styles';
 import { ChartsEntities } from '../model/charts';
-import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
+import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES, Y0_ACCESSOR_INDEXES } from '../../../constants';
 
 export function AreaSeriesDecorator({
   seriesId,
@@ -40,10 +40,11 @@ export function AreaSeriesDecorator({
   enableHistogramMode,
   useDefaultGroupDomain,
   sortIndex,
+  y1AccessorFormat,
+  y0AccessorFormat,
 }) {
   const id = seriesId;
   const groupId = seriesGroupId;
-  const customSeriesColors = [color];
   const areaSeriesStyle = getAreaStyles({ points, lines, color });
 
   const seriesSettings = {
@@ -51,10 +52,13 @@ export function AreaSeriesDecorator({
     name,
     groupId,
     data,
-    customSeriesColors,
+    color,
     hideInLegend,
     xAccessor: X_ACCESSOR_INDEX,
     yAccessors: Y_ACCESSOR_INDEXES,
+    y0Accessors: lines.mode === 'band' ? Y0_ACCESSOR_INDEXES : undefined,
+    y1AccessorFormat,
+    y0AccessorFormat,
     stackAccessors,
     stackAsPercentage,
     xScaleType,

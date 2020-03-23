@@ -17,28 +17,50 @@
  * under the License.
  */
 
+import { ISavedObjectsRepository, SavedObject } from 'kibana/server';
 import { ReportSchemaType } from './schema';
 
-export async function storeReport(internalRepository: any, report: ReportSchemaType) {
+export async function storeReport(
+  internalRepository: ISavedObjectsRepository,
+  report: ReportSchemaType
+) {
   const uiStatsMetrics = report.uiStatsMetrics ? Object.entries(report.uiStatsMetrics) : [];
   const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
-  return Promise.all([
+  const appUsage = report.application_usage ? Object.entries(report.application_usage) : [];
+  const timestamp = new Date();
+  return Promise.all<{ saved_objects: Array<SavedObject<any>> }>([
     ...userAgents.map(async ([key, metric]) => {
       const { userAgent } = metric;
       const savedObjectId = `${key}:${userAgent}`;
-      return await internalRepository.create(
-        'ui-metric',
-        { count: 1 },
-        {
-          id: savedObjectId,
-          overwrite: true,
-        }
-      );
+      return {
+        saved_objects: [
+          await internalRepository.create(
+            'ui-metric',
+            { count: 1 },
+            {
+              id: savedObjectId,
+              overwrite: true,
+            }
+          ),
+        ],
+      };
     }),
     ...uiStatsMetrics.map(async ([key, metric]) => {
       const { appName, eventName } = metric;
       const savedObjectId = `${appName}:${eventName}`;
-      return await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
+      return {
+        saved_objects: [
+          await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count'),
+        ],
+      };
     }),
+    appUsage.length
+      ? internalRepository.bulkCreate(
+          appUsage.map(([appId, metric]) => ({
+            type: 'application_usage_transactional',
+            attributes: { ...metric, appId, timestamp },
+          }))
+        )
+      : { saved_objects: [] },
   ]);
 }

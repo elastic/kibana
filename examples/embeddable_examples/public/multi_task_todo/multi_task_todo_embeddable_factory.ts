@@ -32,7 +32,7 @@ export class MultiTaskTodoEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 

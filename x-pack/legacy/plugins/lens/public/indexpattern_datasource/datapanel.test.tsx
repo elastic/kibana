@@ -206,6 +206,9 @@ const initialState: IndexPatternPrivateState = {
     },
   },
 };
+
+const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
+
 describe('IndexPattern Data Panel', () => {
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0];
   let core: ReturnType<typeof coreMock['createSetup']>;
@@ -269,17 +272,10 @@ describe('IndexPattern Data Panel', () => {
   });
 
   describe('loading existence data', () => {
-    function waitForPromises() {
-      return Promise.resolve()
-        .catch(() => {})
-        .then(() => {})
-        .then(() => {});
-    }
-
     function testProps() {
       const setState = jest.fn();
-      core.http.get.mockImplementation(async ({ path }) => {
-        const parts = path.split('/');
+      core.http.post.mockImplementation(async path => {
+        const parts = ((path as unknown) as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
           indexPatternTitle: `${indexPatternTitle}_testtitle`,
@@ -318,14 +314,12 @@ describe('IndexPattern Data Panel', () => {
       const props = testProps();
       const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
 
-      act(() => {
+      await act(async () => {
         inst.update();
       });
 
-      await waitForPromises();
-
       if (stateChanges || propChanges) {
-        act(() => {
+        await act(async () => {
           ((inst.setProps as unknown) as (props: unknown) => {})({
             ...props,
             ...((propChanges as object) || {}),
@@ -336,7 +330,6 @@ describe('IndexPattern Data Panel', () => {
           });
           inst.update();
         });
-        await waitForPromises();
       }
 
       return props.setState;
@@ -395,24 +388,24 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(setState).toHaveBeenCalledTimes(2);
-      expect(core.http.get).toHaveBeenCalledTimes(2);
+      expect(core.http.post).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith({
-        path: '/api/lens/existing_fields/a',
-        query: {
+      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+        body: JSON.stringify({
+          dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
           timeFieldName: 'atime',
-        },
+        }),
       });
 
-      expect(core.http.get).toHaveBeenCalledWith({
-        path: '/api/lens/existing_fields/a',
-        query: {
+      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+        body: JSON.stringify({
+          dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-02',
           timeFieldName: 'atime',
-        },
+        }),
       });
 
       const nextState = setState.mock.calls[1][0]({
@@ -438,22 +431,22 @@ describe('IndexPattern Data Panel', () => {
 
       expect(setState).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith({
-        path: '/api/lens/existing_fields/a',
-        query: {
+      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+        body: JSON.stringify({
+          dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
           timeFieldName: 'atime',
-        },
+        }),
       });
 
-      expect(core.http.get).toHaveBeenCalledWith({
-        path: '/api/lens/existing_fields/b',
-        query: {
+      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/b', {
+        body: JSON.stringify({
+          dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
           timeFieldName: 'btime',
-        },
+        }),
       });
 
       const nextState = setState.mock.calls[1][0]({
@@ -473,13 +466,11 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('shows a loading indicator when loading', async () => {
+      const load = async () => {};
       const inst = mountWithIntl(<IndexPatternDataPanel {...testProps()} />);
-
       expect(inst.find(EuiProgress).length).toEqual(1);
-
-      await waitForPromises();
+      await act(load);
       inst.update();
-
       expect(inst.find(EuiProgress).length).toEqual(0);
     });
 
@@ -488,13 +479,13 @@ describe('IndexPattern Data Panel', () => {
       let overlapCount = 0;
       const props = testProps();
 
-      core.http.get.mockImplementation(({ path }) => {
+      core.http.post.mockImplementation(path => {
         if (queryCount) {
           ++overlapCount;
         }
         ++queryCount;
 
-        const parts = path.split('/');
+        const parts = ((path as unknown) as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
         const result = Promise.resolve({
           indexPatternTitle,
@@ -520,7 +511,7 @@ describe('IndexPattern Data Panel', () => {
         inst.update();
       });
 
-      act(() => {
+      await act(async () => {
         ((inst.setProps as unknown) as (props: unknown) => {})({
           ...props,
           dateRange: { fromDate: '2019-01-01', toDate: '2020-01-03' },
@@ -528,38 +519,8 @@ describe('IndexPattern Data Panel', () => {
         inst.update();
       });
 
-      await waitForPromises();
-
-      expect(core.http.get).toHaveBeenCalledTimes(2);
+      expect(core.http.post).toHaveBeenCalledTimes(2);
       expect(overlapCount).toEqual(0);
-    });
-
-    it('shows all fields if empty state button is clicked', async () => {
-      const props = testProps();
-
-      core.http.get.mockResolvedValue({
-        indexPatternTitle: props.currentIndexPatternId,
-        existingFieldNames: [],
-      });
-
-      const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
-
-      inst.update();
-      await waitForPromises();
-
-      expect(inst.find('[data-test-subj="lnsFieldListPanelField"]').length).toEqual(0);
-
-      act(() => {
-        inst
-          .find('[data-test-subj="lnsDataPanelShowAllFields"]')
-          .first()
-          .simulate('click');
-        inst.update();
-      });
-
-      expect(
-        props.setState.mock.calls.map(([fn]) => fn(props.state)).filter(s => s.showEmptyFields)
-      ).toHaveLength(1);
     });
   });
 

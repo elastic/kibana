@@ -15,7 +15,8 @@ import { CoreStart, AppMountParameters } from 'kibana/public';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
-import { EuiThemeProvider } from '../../../observability/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { EuiThemeProvider } from '../../../observability/public/typings/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
 import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
@@ -26,6 +27,9 @@ import {
   KibanaContextProvider,
 } from '../../../../../src/plugins/kibana_react/public';
 import { AppRouter } from '../routers';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
+import { TriggersActionsProvider } from '../utils/triggers_actions_context';
+import '../index.scss';
 
 export const CONTAINER_CLASSNAME = 'infra-container-element';
 
@@ -34,7 +38,8 @@ export async function startApp(
   core: CoreStart,
   plugins: object,
   params: AppMountParameters,
-  Router: AppRouter
+  Router: AppRouter,
+  triggersActionsUI: TriggersAndActionsUIPublicPluginSetup
 ) {
   const { element, appBasePath } = params;
   const history = createBrowserHistory({ basename: appBasePath });
@@ -50,19 +55,21 @@ export async function startApp(
     return (
       <core.i18n.Context>
         <EuiErrorBoundary>
-          <ReduxStoreProvider store={store}>
-            <ReduxStateContextProvider>
-              <ApolloProvider client={libs.apolloClient}>
-                <ApolloClientContext.Provider value={libs.apolloClient}>
-                  <EuiThemeProvider darkMode={darkMode}>
-                    <HistoryContext.Provider value={history}>
-                      <Router history={history} />
-                    </HistoryContext.Provider>
-                  </EuiThemeProvider>
-                </ApolloClientContext.Provider>
-              </ApolloProvider>
-            </ReduxStateContextProvider>
-          </ReduxStoreProvider>
+          <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
+            <ReduxStoreProvider store={store}>
+              <ReduxStateContextProvider>
+                <ApolloProvider client={libs.apolloClient}>
+                  <ApolloClientContext.Provider value={libs.apolloClient}>
+                    <EuiThemeProvider darkMode={darkMode}>
+                      <HistoryContext.Provider value={history}>
+                        <Router history={history} />
+                      </HistoryContext.Provider>
+                    </EuiThemeProvider>
+                  </ApolloClientContext.Provider>
+                </ApolloProvider>
+              </ReduxStateContextProvider>
+            </ReduxStoreProvider>
+          </TriggersActionsProvider>
         </EuiErrorBoundary>
       </core.i18n.Context>
     );
@@ -74,12 +81,8 @@ export async function startApp(
     </KibanaContextProvider>
   );
 
-  // Ensure the element we're handed from application mounting takes up
-  // the full size it can, so that our inner application styles work as
-  // expected.
-  element.style.height = '100%';
-  element.style.display = 'flex';
-  element.style.overflowY = 'hidden'; // Prevent having scroll within a container having scroll. It messes up with drag-n-drop elements
+  // Ensure the element we're handed from application mounting is assigned a class
+  // for our index.scss styles to apply to.
   element.className += ` ${CONTAINER_CLASSNAME}`;
 
   ReactDOM.render(<App />, element);

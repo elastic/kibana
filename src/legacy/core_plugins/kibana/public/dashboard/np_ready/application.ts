@@ -29,23 +29,18 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
-import {
-  configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
-  IPrivate,
-  KbnUrlProvider,
-  PrivateProvider,
-  PromiseServiceCreator,
-  RedirectWhenMissingProvider,
-} from '../legacy_imports';
+import { configureAppAngularModule } from '../legacy_imports';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
-import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
-import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
+import {
+  KibanaLegacyStart,
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../../plugins/kibana_legacy/public';
 import { SavedObjectLoader } from '../../../../../../plugins/saved_objects/public';
 
 export interface RenderDeps {
@@ -57,11 +52,15 @@ export interface RenderDeps {
   savedDashboards: SavedObjectLoader;
   dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
+  embeddableCapabilities: {
+    visualizeCapabilities: any;
+    mapsCapabilities: any;
+  };
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
   config: KibanaLegacyStart['config'];
@@ -111,10 +110,7 @@ function mountDashboardApp(appBasePath: string, element: HTMLElement) {
 
 function createLocalAngularModule(core: AppMountContext['core'], navigation: NavigationStart) {
   createLocalI18nModule();
-  createLocalPrivateModule();
-  createLocalPromiseModule();
   createLocalConfigModule(core);
-  createLocalKbnUrlModule();
   createLocalTopNavModule(navigation);
   createLocalIconModule();
 
@@ -122,10 +118,7 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     ...thirdPartyAngularDependencies,
     'app/dashboard/Config',
     'app/dashboard/I18n',
-    'app/dashboard/Private',
     'app/dashboard/TopNav',
-    'app/dashboard/KbnUrl',
-    'app/dashboard/Promise',
     'app/dashboard/icon',
   ]);
   return dashboardAngularModule;
@@ -137,29 +130,14 @@ function createLocalIconModule() {
     .directive('icon', reactDirective => reactDirective(EuiIcon));
 }
 
-function createLocalKbnUrlModule() {
-  angular
-    .module('app/dashboard/KbnUrl', ['app/dashboard/Private', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
-}
-
 function createLocalConfigModule(core: AppMountContext['core']) {
-  angular.module('app/dashboard/Config', ['app/dashboard/Private']).provider('config', () => {
+  angular.module('app/dashboard/Config', []).provider('config', () => {
     return {
       $get: () => ({
         get: core.uiSettings.get.bind(core.uiSettings),
       }),
     };
   });
-}
-
-function createLocalPromiseModule() {
-  angular.module('app/dashboard/Promise', []).service('Promise', PromiseServiceCreator);
-}
-
-function createLocalPrivateModule() {
-  angular.module('app/dashboard/Private', []).provider('Private', PrivateProvider);
 }
 
 function createLocalTopNavModule(navigation: NavigationStart) {

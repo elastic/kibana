@@ -27,3 +27,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { VisualizationsPublicPlugin as Plugin };
 export * from './plugin';
 export * from './types';
+
+export { PersistedState } from './persisted_state';

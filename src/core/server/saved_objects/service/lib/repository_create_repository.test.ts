@@ -102,7 +102,6 @@ describe('SavedObjectsRepository#createRepository', () => {
     expect(repository).toBeDefined();
     expect(RepositoryConstructor.mock.calls[0][0].allowedTypes).toMatchInlineSnapshot(`
       Array [
-        "config",
         "nsAgnosticType",
         "nsType",
       ]
@@ -121,7 +120,6 @@ describe('SavedObjectsRepository#createRepository', () => {
     expect(repository).toBeDefined();
     expect(RepositoryConstructor.mock.calls[0][0].allowedTypes).toMatchInlineSnapshot(`
       Array [
-        "config",
         "nsAgnosticType",
         "nsType",
         "hiddenType",

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { IAggConfigs, PersistedState } from './legacy_imports';
+import { IAggConfigs } from 'src/plugins/data/public';
+import { PersistedState } from '../../../../plugins/visualizations/public';
 import { Vis } from '../../visualizations/public';
 
 export interface VisOptionsProps<VisParamType = unknown> {

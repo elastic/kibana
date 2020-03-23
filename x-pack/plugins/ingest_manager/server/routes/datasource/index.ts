@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IRouter } from 'kibana/server';
+import { IRouter } from 'src/core/server';
 import { PLUGIN_ID, DATASOURCE_API_ROUTES } from '../../constants';
 import {
   GetDatasourcesRequestSchema,
@@ -17,7 +17,7 @@ import {
   getOneDatasourceHandler,
   createDatasourceHandler,
   updateDatasourceHandler,
-  deleteDatasourcesHandler,
+  deleteDatasourceHandler,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
@@ -26,7 +26,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: DATASOURCE_API_ROUTES.LIST_PATTERN,
       validate: GetDatasourcesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getDatasourcesHandler
   );
@@ -36,7 +36,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: DATASOURCE_API_ROUTES.INFO_PATTERN,
       validate: GetOneDatasourceRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getOneDatasourceHandler
   );
@@ -46,7 +46,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: DATASOURCE_API_ROUTES.CREATE_PATTERN,
       validate: CreateDatasourceRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     createDatasourceHandler
   );
@@ -56,7 +56,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: DATASOURCE_API_ROUTES.UPDATE_PATTERN,
       validate: UpdateDatasourceRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     updateDatasourceHandler
   );
@@ -68,6 +68,6 @@ export const registerRoutes = (router: IRouter) => {
       validate: DeleteDatasourcesRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
-    deleteDatasourcesHandler
+    deleteDatasourceHandler
   );
 };

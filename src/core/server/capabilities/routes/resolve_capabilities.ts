@@ -22,30 +22,24 @@ import { IRouter } from '../../http';
 import { CapabilitiesResolver } from '../resolve_capabilities';
 
 export function registerCapabilitiesRoutes(router: IRouter, resolver: CapabilitiesResolver) {
-  // Capabilities are fetched on both authenticated and anonymous routes.
-  // However when `authRequired` is false, authentication is not performed
-  // and only default capabilities are returned (all disabled), even for authenticated users.
-  // So we need two endpoints to handle both scenarios.
-  [true, false].forEach(authRequired => {
-    router.post(
-      {
-        path: authRequired ? '' : '/defaults',
-        options: {
-          authRequired,
-        },
-        validate: {
-          body: schema.object({
-            applications: schema.arrayOf(schema.string()),
-          }),
-        },
+  router.post(
+    {
+      path: '/api/core/capabilities',
+      options: {
+        authRequired: 'optional',
       },
-      async (ctx, req, res) => {
-        const { applications } = req.body;
-        const capabilities = await resolver(req, applications);
-        return res.ok({
-          body: capabilities,
-        });
-      }
-    );
-  });
+      validate: {
+        body: schema.object({
+          applications: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    async (ctx, req, res) => {
+      const { applications } = req.body;
+      const capabilities = await resolver(req, applications);
+      return res.ok({
+        body: capabilities,
+      });
+    }
+  );
 }

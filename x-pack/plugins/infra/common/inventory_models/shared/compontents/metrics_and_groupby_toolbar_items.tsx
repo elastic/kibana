@@ -9,7 +9,7 @@ import { EuiFlexItem } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ToolbarProps } from '../../../../public/components/inventory/toolbars/toolbar';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { WaffleMetricControls } from '../../../../public/components/waffle/waffle_metric_controls';
+import { WaffleMetricControls } from '../../../../public/components/waffle/metric_control';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleGroupByControls } from '../../../../public/components/waffle/waffle_group_by_controls';
 import {
@@ -25,7 +25,11 @@ interface Props extends ToolbarProps {
 }
 
 export const MetricsAndGroupByToolbarItems = (props: Props) => {
-  const metricOptions = useMemo(() => props.metricTypes.map(toMetricOpt), [props.metricTypes]);
+  const metricOptions = useMemo(
+    () =>
+      props.metricTypes.map(toMetricOpt).filter(v => v) as Array<{ text: string; value: string }>,
+    [props.metricTypes]
+  );
 
   const groupByOptions = useMemo(() => props.groupByFields.map(toGroupByOpt), [
     props.groupByFields,
@@ -35,9 +39,12 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
     <>
       <EuiFlexItem grow={false}>
         <WaffleMetricControls
+          fields={props.createDerivedIndexPattern('metrics').fields}
           options={metricOptions}
           metric={props.metric}
           onChange={props.changeMetric}
+          onChangeCustomMetrics={props.changeCustomMetrics}
+          customMetrics={props.customMetrics}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
