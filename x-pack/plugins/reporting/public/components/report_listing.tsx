@@ -196,7 +196,7 @@ class ReportListingUi extends Component<Props, State> {
 
   private renderDeleteButton = () => {
     const { selectedJobs } = this.state;
-    if (selectedJobs.length === 0) return null;
+    if (selectedJobs.length === 0) return undefined;
 
     const performDelete = async () => {
       for (const record of selectedJobs) {
