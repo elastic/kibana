@@ -44,7 +44,7 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
         <BasicOptions {...props} />
 
-        {vis.data.aggs!.aggs.filter(
+        {vis.data.aggs!.aggs.some(
           agg => agg.schema === 'segment' && agg.type.name === 'date_histogram'
         ) ? (
           <SwitchOption

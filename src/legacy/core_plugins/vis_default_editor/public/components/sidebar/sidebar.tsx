@@ -29,6 +29,7 @@ import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
+import { PersistedState } from '../../../../../../plugins/visualizations/public';
 import { SavedSearch } from '../../../../../../plugins/discover/public';
 import { AggGroupNames } from '../../../../../../plugins/data/public';
 import { getSchemasByGroup } from '../../schemas';
@@ -37,6 +38,7 @@ interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
   onClickCollapse: () => void;
   optionTabs: OptionTab[];
+  uiState: PersistedState;
   vis: Vis;
   isLinkedSearch: boolean;
   eventEmitter: EventEmitter;
@@ -47,6 +49,7 @@ function DefaultEditorSideBar({
   isCollapsed,
   onClickCollapse,
   optionTabs,
+  uiState,
   vis,
   isLinkedSearch,
   eventEmitter,
@@ -160,6 +163,7 @@ function DefaultEditorSideBar({
     hasHistogramAgg,
     stateParams: state.params,
     vis,
+    uiState,
     setValue: setStateValue,
     setValidity: setStateValidity,
     setTouched,

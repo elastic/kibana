@@ -29,6 +29,7 @@ import { getInitialWidth } from './editor_size';
 
 function DefaultEditor({
   vis,
+  uiState,
   timeRange,
   filters,
   optionTabs,
@@ -88,6 +89,7 @@ function DefaultEditor({
           onClickCollapse={onClickCollapse}
           optionTabs={optionTabs}
           vis={vis}
+          uiState={uiState}
           isLinkedSearch={linked}
           savedSearch={savedSearch}
           eventEmitter={eventEmitter}

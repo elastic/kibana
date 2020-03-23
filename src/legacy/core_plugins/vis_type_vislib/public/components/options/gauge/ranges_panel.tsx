@@ -35,6 +35,7 @@ function RangesPanel({
   setValidity,
   setValue,
   stateParams,
+  uiState,
   vis,
 }: GaugeOptionsInternalProps) {
   const setColorSchemaOptions = useCallback(
@@ -101,7 +102,7 @@ function RangesPanel({
         colorSchema={stateParams.gauge.colorSchema}
         colorSchemas={vis.type.editorConfig.collections.colorSchemas}
         invertColors={stateParams.gauge.invertColors}
-        vis={vis}
+        uiState={uiState}
         setValue={setColorSchemaOptions}
       />
 

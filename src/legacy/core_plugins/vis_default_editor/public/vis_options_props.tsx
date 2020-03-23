@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { PersistedState } from 'src/plugins/visualizations/public';
 import { IAggConfigs } from 'src/plugins/data/public';
 import { Vis } from '../../visualizations/public';
 
@@ -26,6 +27,7 @@ export interface VisOptionsProps<VisParamType = unknown> {
   isTabSelected: boolean;
   stateParams: VisParamType;
   vis: Vis;
+  uiState: PersistedState;
   setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
   setValidity(isValid: boolean): void;
   setTouched(isTouched: boolean): void;

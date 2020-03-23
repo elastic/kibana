@@ -67,6 +67,7 @@ export interface EditorRenderProps {
   timeRange: TimeRange;
   query?: Query;
   savedSearch?: SavedSearch;
+  uiState: PersistedState;
   /**
    * Flag to determine if visualiztion is linked to the saved search
    */
