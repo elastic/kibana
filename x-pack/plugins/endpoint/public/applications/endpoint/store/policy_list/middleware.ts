@@ -5,8 +5,11 @@
  */
 
 import { MiddlewareFactory, PolicyListState } from '../../types';
+import { GetDatasourcesResponse, sendGetEndpointSpecificDatasources } from '../../services/ingest';
 
 export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
+  const http = coreStart.http;
+
   return ({ getState, dispatch }) => next => async action => {
     next(action);
 
@@ -26,10 +29,24 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
         pageIndex = state.pageIndex;
       }
 
-      // Need load data from API and remove fake data below
-      // Refactor tracked via: https://github.com/elastic/endpoint-app-team/issues/150
-      const { getFakeDatasourceApiResponse } = await import('./fake_data');
-      const { items: policyItems, total } = await getFakeDatasourceApiResponse(pageIndex, pageSize);
+      let response: GetDatasourcesResponse;
+
+      try {
+        response = await sendGetEndpointSpecificDatasources(http, {
+          query: {
+            perPage: pageSize,
+            page: pageIndex + 1,
+          },
+        });
+      } catch (err) {
+        dispatch({
+          type: 'serverFailedToReturnPolicyListData',
+          payload: err.body ?? err,
+        });
+        return;
+      }
+
+      const { items: policyItems, total } = response;
 
       dispatch({
         type: 'serverReturnedPolicyListData',

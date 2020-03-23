@@ -6,6 +6,7 @@
 
 import { getPings } from '../get_pings';
 import { set } from 'lodash';
+import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;
@@ -43,7 +44,7 @@ describe('getAll', () => {
       },
     };
     expectedGetAllParams = {
-      index: 'heartbeat-8*',
+      index: defaultDynamicSettings.heartbeatIndices,
       body: {
         query: {
           bool: {
@@ -70,6 +71,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     const result = await getPings({
       callES: mockEsClient,
+      dynamicSettings: defaultDynamicSettings,
       dateRangeStart: 'now-1h',
       dateRangeEnd: 'now',
       sort: 'asc',
@@ -92,6 +94,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
+      dynamicSettings: defaultDynamicSettings,
       dateRangeStart: 'now-1h',
       dateRangeEnd: 'now',
       sort: 'asc',
@@ -108,6 +111,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
+      dynamicSettings: defaultDynamicSettings,
       dateRangeStart: 'now-1h',
       dateRangeEnd: 'now',
       size: 12,
@@ -121,6 +125,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
+      dynamicSettings: defaultDynamicSettings,
       dateRangeStart: 'now-1h',
       dateRangeEnd: 'now',
       sort: 'desc',
@@ -136,6 +141,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
+      dynamicSettings: defaultDynamicSettings,
       dateRangeStart: 'now-1h',
       dateRangeEnd: 'now',
       monitorId: 'testmonitorid',
@@ -151,6 +157,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
+      dynamicSettings: defaultDynamicSettings,
       dateRangeStart: 'now-1h',
       dateRangeEnd: 'now',
       status: 'down',
