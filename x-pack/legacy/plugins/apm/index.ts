@@ -71,7 +71,12 @@ export const apm: LegacyPluginInitializer = kibana => {
         autocreateApmIndexPattern: Joi.boolean().default(true),
 
         // service map
-        serviceMapEnabled: Joi.boolean().default(true)
+        serviceMapEnabled: Joi.boolean().default(true),
+        serviceMapFingerprintBucketSize: Joi.number().default(100),
+        serviceMapTraceIdBucketSize: Joi.number().default(65),
+        serviceMapFingerprintGlobalBucketSize: Joi.number().default(1000),
+        serviceMapTraceIdGlobalBucketSize: Joi.number().default(6),
+        serviceMapMaxTracesPerRequest: Joi.number().default(50)
       }).default();
     },
 
