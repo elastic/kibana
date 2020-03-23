@@ -15,6 +15,8 @@ import {
 } from '../../../../../src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 
+const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
+
 describe('API Keys', () => {
   let apiKeys: APIKeys;
   let mockClusterClient: jest.Mocked<IClusterClient>;
@@ -78,6 +80,87 @@ describe('API Keys', () => {
           },
         }
       );
+    });
+  });
+
+  describe('grantAsInternalUser()', () => {
+    it('returns null when security feature is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const result = await apiKeys.grantAsInternalUser(httpServerMock.createKibanaRequest());
+      expect(result).toBeNull();
+
+      expect(mockClusterClient.callAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('calls callAsInternalUser with proper parameters for the Basic scheme', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.callAsInternalUser.mockResolvedValueOnce({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+      });
+      const result = await apiKeys.grantAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `Basic ${encodeToBase64('foo:bar')}`,
+          },
+        })
+      );
+      expect(result).toEqual({
+        api_key: 'abc123',
+        id: '123',
+        name: 'key-name',
+      });
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.grantAPIKey', {
+        body: {
+          grant_type: 'password',
+          username: 'foo',
+          password: 'bar',
+        },
+      });
+    });
+
+    it('calls callAsInternalUser with proper parameters for the Bearer scheme', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.callAsInternalUser.mockResolvedValueOnce({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+      });
+      const result = await apiKeys.grantAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `Bearer foo-access-token`,
+          },
+        })
+      );
+      expect(result).toEqual({
+        api_key: 'abc123',
+        id: '123',
+        name: 'key-name',
+      });
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.grantAPIKey', {
+        body: {
+          grant_type: 'access_token',
+          access_token: 'foo-access-token',
+        },
+      });
+    });
+
+    it('throw error for other schemes', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      await expect(
+        apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: `Digest username="foo"`,
+            },
+          })
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unsupported scheme \\"Digest\\" for granting API Key"`
+      );
+      expect(mockClusterClient.callAsInternalUser).not.toHaveBeenCalled();
     });
   });
 
