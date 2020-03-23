@@ -97,6 +97,26 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
+      if (action.secrets.user && !action.secrets.password) {
+        errors.password.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPasswordText',
+            {
+              defaultMessage: 'Password is required when username is used.',
+            }
+          )
+        );
+      }
+      if (!action.secrets.user && action.secrets.password) {
+        errors.user.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredUserText',
+            {
+              defaultMessage: 'Username is required when password is used.',
+            }
+          )
+        );
+      }
       return validationResult;
     },
     validateParams: (actionParams: EmailActionParams): ValidationResult => {
