@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, ReactNode, useState, useContext } from 'react';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup, ChromeStart } from 'src/core/public';
 
 import { Links } from '../../links';
 import { Store, Payload, Validation } from '../types';
@@ -16,6 +16,7 @@ interface AppContextProviderArgs {
   value: {
     http: HttpSetup;
     links: Links;
+    chrome: ChromeStart;
   };
 }
 
@@ -24,6 +25,7 @@ interface ContextValue {
   updatePayload: (changes: Partial<Payload>) => void;
   services: {
     http: HttpSetup;
+    chrome: ChromeStart;
   };
   links: Links;
 }
