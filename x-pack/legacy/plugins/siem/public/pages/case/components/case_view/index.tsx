@@ -23,6 +23,7 @@ import { getTypedPayload } from '../../../../containers/case/utils';
 import { WhitePageWrapper } from '../wrappers';
 import { useBasePath } from '../../../../lib/kibana';
 import { CaseStatus } from '../case_status';
+import { SpyRoute } from '../../../../utils/route/spy_routes';
 
 interface Props {
   caseId: string;
@@ -92,6 +93,8 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
   const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
   const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
   const toggleStatusCase = useCallback(status => onUpdateField('status', status), [onUpdateField]);
+
+  const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
 
   const caseStatusData = useMemo(
     () =>
@@ -179,6 +182,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           </EuiFlexGroup>
         </MyWrapper>
       </WhitePageWrapper>
+      <SpyRoute state={spyState} />
     </>
   );
 });

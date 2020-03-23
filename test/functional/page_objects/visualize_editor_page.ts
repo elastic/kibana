@@ -110,7 +110,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
      */
     public async clickBucket(bucketName: string, type = 'buckets') {
       await testSubjects.click(`visEditorAdd_${type}`);
-      await find.clickByCssSelector(`[data-test-subj="visEditorAdd_${type}_${bucketName}"`);
+      await testSubjects.click(`visEditorAdd_${type}_${bucketName}`);
     }
 
     public async clickEnableCustomRanges() {

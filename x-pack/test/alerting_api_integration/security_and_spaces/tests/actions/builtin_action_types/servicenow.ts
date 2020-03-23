@@ -294,7 +294,12 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       expect(result).to.eql({
         status: 'ok',
         actionId: simulatedActionId,
-        data: { incidentId: '123', number: 'INC01', pushedDate: '2020-03-10T12:24:20.000Z' },
+        data: {
+          incidentId: '123',
+          number: 'INC01',
+          pushedDate: '2020-03-10T12:24:20.000Z',
+          url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
+        },
       });
     });
 
