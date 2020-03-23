@@ -1,3 +1,0 @@
-[role="xpack"]
-[[alert-examples]]
-== Alert examples

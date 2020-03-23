@@ -189,7 +189,6 @@ For security reasons you may wish to limit the extent to which {kib} can connect
 --
 
 include::defining-alerts.asciidoc[]
-include::alert-examples.asciidoc[]
 include::action-types.asciidoc[]
 include::alert-types.asciidoc[]
 include::alerting-scale-performance.asciidoc[]

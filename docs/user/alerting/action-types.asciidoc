@@ -1,6 +1,6 @@
 [role="xpack"]
 [[action-types]]
-== Action types and connectors
+== Action and connector types
 
 {kib} provides the following types of actions:
 
