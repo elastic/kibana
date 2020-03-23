@@ -10,13 +10,13 @@ export const initialPayload = {
   context: painlessContextOptions[0].value,
   code: exampleScript,
   parameters: `{
-  "string-parameter": "yay",
-  "number-parameter": 1.5,
-  "boolean-parameter": true
+  "string_parameter": "string value",
+  "number_parameter": 1.5,
+  "boolean_parameter": true
 }`,
-  index: 'default-index',
+  index: 'my-index',
   document: `{
-  "my-field": "field-value"
+  "my_field": "field_value"
 }`,
   query: '',
 };
