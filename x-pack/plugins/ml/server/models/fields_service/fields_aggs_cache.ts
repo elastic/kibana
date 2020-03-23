@@ -7,7 +7,7 @@
 import { pick } from 'lodash';
 
 /**
- * Aggregations types that cached.
+ * Cached aggregation types
  */
 type AggType = 'overallCardinality' | 'maxBucketCardinality';
 
@@ -25,14 +25,14 @@ export const initCardinalityFieldsCache = () => {
      * Gets requested values from cache
      */
     getValues(
-      indexPattern: string | string[],
+      indexPatternName: string | string[],
       timeField: string,
       earliestMs: number,
       latestMs: number,
       aggType: AggType,
       fieldNames: string[]
     ): CacheStorage[AggType] | null {
-      const cacheKey = indexPattern + timeField + earliestMs + latestMs;
+      const cacheKey = indexPatternName + timeField + earliestMs + latestMs;
       const cached = cardinalityCache.get(cacheKey);
       if (!cached) {
         return null;
@@ -43,13 +43,13 @@ export const initCardinalityFieldsCache = () => {
      * Extends cache with provided values
      */
     updateValues(
-      indexPattern: string | string[],
+      indexPatternName: string | string[],
       timeField: string,
       earliestMs: number,
       latestMs: number,
       update: Partial<CacheStorage>
     ): void {
-      const cacheKey = indexPattern + timeField + earliestMs + latestMs;
+      const cacheKey = indexPatternName + timeField + earliestMs + latestMs;
       const cachedValues = cardinalityCache.get(cacheKey);
       if (cachedValues === undefined) {
         cardinalityCache.set(cacheKey, {

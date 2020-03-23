@@ -370,16 +370,16 @@ export class DataRecognizer {
   // if any of the savedObjects already exist, they will not be overwritten.
   async setupModuleItems(
     moduleId: string,
-    jobPrefix: string | undefined,
-    groups: string[] | undefined,
-    indexPatternName: string | undefined,
-    query: any,
-    useDedicatedIndex: boolean | undefined,
-    startDatafeed: boolean | undefined,
-    start: number | undefined,
-    end: number | undefined,
-    jobOverrides: JobOverride[],
-    datafeedOverrides: DatafeedOverride[],
+    jobPrefix?: string,
+    groups?: string[],
+    indexPatternName?: string,
+    query?: any,
+    useDedicatedIndex?: boolean,
+    startDatafeed?: boolean,
+    start?: number,
+    end?: number,
+    jobOverrides?: JobOverride[],
+    datafeedOverrides?: DatafeedOverride[],
     estimateModelMemory?: boolean
   ) {
     // load the config from disk
@@ -982,6 +982,7 @@ export class DataRecognizer {
       const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this.callAsCurrentUser);
       const query = moduleConfig.query ?? null;
 
+      // Checks if all jobs in the module have the same time field configured
       const isSameTimeFields = moduleConfig.jobs.every(
         job =>
           job.config.data_description.time_field ===
@@ -989,6 +990,8 @@ export class DataRecognizer {
       );
 
       if (isSameTimeFields && (start === undefined || end === undefined)) {
+        // In case of time range is not provided and the time field is the same
+        // set the fallback range for all jobs
         const { start: fallbackStart, end: fallbackEnd } = await this.getFallbackTimeRange(
           moduleConfig.jobs[0].config.data_description.time_field,
           query
@@ -1063,7 +1066,7 @@ export class DataRecognizer {
     return false;
   }
 
-  applyJobConfigOverrides(moduleConfig: Module, jobOverrides: JobOverride[], jobPrefix = '') {
+  applyJobConfigOverrides(moduleConfig: Module, jobOverrides?: JobOverride[], jobPrefix = '') {
     if (jobOverrides === undefined || jobOverrides === null) {
       return;
     }
@@ -1140,7 +1143,7 @@ export class DataRecognizer {
 
   applyDatafeedConfigOverrides(
     moduleConfig: Module,
-    datafeedOverrides: DatafeedOverride | DatafeedOverride[],
+    datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
     jobPrefix = ''
   ) {
     if (datafeedOverrides !== undefined && datafeedOverrides !== null) {
