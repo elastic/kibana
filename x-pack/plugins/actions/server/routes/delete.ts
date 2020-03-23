@@ -18,6 +18,7 @@ import {
   KibanaResponseFactory,
 } from 'kibana/server';
 import { ILicenseState, verifyApiAccess } from '../lib';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -26,7 +27,7 @@ const paramSchema = schema.object({
 export const deleteActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.delete(
     {
-      path: `/api/action/{id}`,
+      path: `${BASE_ACTION_API_PATH}/{id}`,
       validate: {
         params: paramSchema,
       },

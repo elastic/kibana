@@ -1,0 +1,10 @@
+{
+  "name": "Query with a machine learning job",
+  "description": "Query with a machine learning job",
+  "rule_id": "machine-learning",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "machine_learning",
+  "machine_learning_job_id": "linux_anomalous_network_activity_ecs",
+  "anomaly_threshold": 100
+}
