@@ -31,7 +31,7 @@ export const Line: FC<Props> = ({ chartData }) => {
       yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}
       lineSeriesStyle={lineSeriesStyle}
-      customSeriesColors={[LINE_COLOR]}
+      color={LINE_COLOR}
     />
   );
 };

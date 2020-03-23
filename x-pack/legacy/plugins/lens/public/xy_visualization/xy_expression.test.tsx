@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Axis } from '@elastic/charts';
 import {
   AreaSeries,
+  Axis,
   BarSeries,
   Position,
   LineSeries,

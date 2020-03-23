@@ -9,7 +9,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     onElementClick={[Function]}
     rotation={0}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -76,7 +76,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     onElementClick={[Function]}
     rotation={0}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -143,7 +143,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     onElementClick={[Function]}
     rotation={90}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -210,7 +210,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     onElementClick={[Function]}
     rotation={0}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -277,7 +277,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     onElementClick={[Function]}
     rotation={0}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -348,7 +348,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     onElementClick={[Function]}
     rotation={0}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -419,7 +419,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     onElementClick={[Function]}
     rotation={90}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
