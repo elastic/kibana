@@ -115,7 +115,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
     async forceLogout(isSaml) {
       log.debug('SecurityPage.forceLogout');
-      log.debug('### Redirecting to /logout to force the logout');
       const url = PageObjects.common.getHostPort() + '/logout';
       await browser.get(url);
       log.debug('Waiting on the login form to appear');

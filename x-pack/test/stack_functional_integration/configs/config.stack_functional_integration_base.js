@@ -48,6 +48,7 @@ export default async ({ readConfigFile }) => {
   };
 };
 
+// Returns index 1 from the resulting array-like.
 const splitRight = re => testPath => re.exec(testPath)[1];
 
 function truncate(testPath) {
