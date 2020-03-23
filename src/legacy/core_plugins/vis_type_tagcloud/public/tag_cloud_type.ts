@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Schemas } from './legacy_imports';
+import { Schemas } from '../../vis_default_editor/public';
 import { Status } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';

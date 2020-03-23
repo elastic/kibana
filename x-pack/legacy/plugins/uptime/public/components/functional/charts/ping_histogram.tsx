@@ -122,7 +122,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
           />
 
           <BarSeries
-            customSeriesColors={[danger]}
+            color={danger}
             data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
             id={downSpecId}
             name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
@@ -136,7 +136,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             yScaleType="linear"
           />
           <BarSeries
-            customSeriesColors={[gray]}
+            color={gray}
             data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
             id={upMonitorsId}
             name={upMonitorsId}
