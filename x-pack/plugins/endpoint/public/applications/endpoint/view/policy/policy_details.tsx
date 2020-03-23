@@ -4,14 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiTitle } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiButton, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useDispatch } from 'react-redux';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { selectPolicyDetails } from '../../store/policy_details/selectors';
+import { AppAction } from '../../types';
 
 export const PolicyDetails = React.memo(() => {
+  const dispatch = useDispatch<(action: AppAction) => void>();
   const policyItem = usePolicyDetailsSelector(selectPolicyDetails);
+
+  const handleSaveOnClick = useCallback(() => {
+    dispatch({
+      type: 'userClickedPolicyDetailsSaveButton',
+      payload: {
+        policyId: policyItem!.id,
+        policyData: {
+          type: 'endpoint policy',
+          test: true,
+        },
+      },
+    });
+  }, [dispatch, policyItem]);
 
   function policyName() {
     if (policyItem) {
@@ -29,8 +45,12 @@ export const PolicyDetails = React.memo(() => {
   }
 
   return (
-    <EuiTitle size="l">
-      <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
-    </EuiTitle>
+    <>
+      <EuiTitle size="l">
+        <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
+      </EuiTitle>
+
+      <EuiButton onClick={handleSaveOnClick}>Save</EuiButton>
+    </>
   );
 });

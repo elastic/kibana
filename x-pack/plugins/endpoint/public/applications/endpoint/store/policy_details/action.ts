@@ -13,4 +13,14 @@ interface ServerReturnedPolicyDetailsData {
   };
 }
 
-export type PolicyDetailsAction = ServerReturnedPolicyDetailsData;
+interface UserClickedPolicyDetailsSaveButton {
+  type: 'userClickedPolicyDetailsSaveButton';
+  payload: {
+    policyId: string;
+    policyData: { [key: string]: any }; // FIXME: define payload type
+  };
+}
+
+export type PolicyDetailsAction =
+  | ServerReturnedPolicyDetailsData
+  | UserClickedPolicyDetailsSaveButton;

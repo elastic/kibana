@@ -5,7 +5,10 @@
  */
 
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
-import { GetDatasourcesRequest } from '../../../../../ingest_manager/common/types/rest_spec';
+import {
+  CreateDatasourceResponse,
+  GetDatasourcesRequest,
+} from '../../../../../ingest_manager/common/types/rest_spec';
 import { PolicyData } from '../types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
@@ -25,6 +28,9 @@ export interface GetDatasourceResponse {
   item: PolicyData;
   success: boolean;
 }
+
+// FIXME: Import from Ingest after - https://github.com/elastic/kibana/issues/60677
+export type UpdateDatasourceResponse = CreateDatasourceResponse;
 
 /**
  * Retrieves a list of endpoint specific datasources (those created with a `package.name` of
@@ -57,6 +63,14 @@ export const sendGetDatasource = (
   http: HttpStart,
   datasourceId: string,
   options?: HttpFetchOptions
-) => {
+): Promise<UpdateDatasourceResponse> => {
   return http.get<GetDatasourceResponse>(`${INGEST_API_DATASOURCES}/${datasourceId}`, options);
+};
+
+export const sendPutDatasource = (
+  http: HttpStart,
+  datasourceId: string,
+  options: HttpFetchOptions
+) => {
+  return http.put(`${INGEST_API_DATASOURCES}/${datasourceId}`, options);
 };

@@ -6,7 +6,11 @@
 
 import { MiddlewareFactory, PolicyDetailsState } from '../../types';
 import { selectPolicyIdFromParams, isOnPolicyDetailsPage } from './selectors';
-import { sendGetDatasource } from '../../services/ingest';
+import {
+  sendGetDatasource,
+  sendPutDatasource,
+  UpdateDatasourceResponse,
+} from '../../services/ingest';
 
 export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
   const http = coreStart.http;
@@ -26,6 +30,33 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
           policyItem,
         },
       });
+    } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
+      const { policyId } = action.payload;
+
+      let apiResponse: UpdateDatasourceResponse;
+
+      try {
+        apiResponse = await sendPutDatasource(http, policyId, {
+          body: JSON.stringify({
+            // "id": "8cbe3310-6aed-11ea-9523-4d4b019fef9b",
+            name: 'endpoint-1',
+            description: '',
+            config_id: '53f9e1a0-6aed-11ea-9523-4d4b019fef9b',
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            namespace: 'default',
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.0.1',
+            },
+            // revision: 1,
+          }),
+        });
+      } catch (error) {
+        // FIXME: handle errors
+      }
     }
   };
 };
