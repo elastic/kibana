@@ -16,7 +16,7 @@ Array [
       "mb",
     ],
     "validationError": "Please specify an integer and a unit",
-    "validationName": "bytes",
+    "validationName": "bytesRt",
   },
   Object {
     "key": "api_request_time",
@@ -27,7 +27,7 @@ Array [
       "h",
     ],
     "validationError": "Please specify an integer and a unit",
-    "validationName": "duration",
+    "validationName": "durationRt",
   },
   Object {
     "key": "capture_body",
@@ -92,7 +92,7 @@ Array [
       "h",
     ],
     "validationError": "Please specify an integer and a unit",
-    "validationName": "duration",
+    "validationName": "durationRt",
   },
   Object {
     "key": "profiling_inferred_spans_sampling_interval",
@@ -103,7 +103,7 @@ Array [
       "h",
     ],
     "validationError": "Please specify an integer and a unit",
-    "validationName": "duration",
+    "validationName": "durationRt",
   },
   Object {
     "key": "server_timeout",
@@ -114,7 +114,7 @@ Array [
       "h",
     ],
     "validationError": "Please specify an integer and a unit",
-    "validationName": "duration",
+    "validationName": "durationRt",
   },
   Object {
     "key": "span_frames_min_duration",
@@ -125,7 +125,7 @@ Array [
       "h",
     ],
     "validationError": "Please specify an integer and a unit",
-    "validationName": "duration",
+    "validationName": "durationRt",
   },
   Object {
     "key": "stack_trace_limit",
@@ -142,7 +142,7 @@ Array [
       "h",
     ],
     "validationError": "Please specify an integer and a unit",
-    "validationName": "duration",
+    "validationName": "durationRt",
   },
   Object {
     "key": "stress_monitor_gc_relief_threshold",

@@ -23,7 +23,7 @@ import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
 import { AgentConfigurationListAPIResponse } from '../../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { px, units } from '../../../../../style/variables';
-import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration/constants';
 import {
   createAgentConfigurationHref,
   editAgentConfigurationHref

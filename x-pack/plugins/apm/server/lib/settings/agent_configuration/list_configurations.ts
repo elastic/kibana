@@ -6,7 +6,7 @@
 
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
-import { AgentConfiguration } from '../../../../common/runtime_types/agent_configuration/configuration_types';
+import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 
 export type AgentConfigurationListAPIResponse = PromiseReturnType<

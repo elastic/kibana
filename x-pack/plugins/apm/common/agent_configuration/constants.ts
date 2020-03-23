@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 export const ALL_OPTION_VALUE = 'ALL_OPTION_VALUE';
 
-// human-readable label for the option. The "All" option should be translated.
+// human-readable label for service and environment. The "All" option should be translated.
 // Everything else should be returned verbatim
 export function getOptionLabel(value: string | undefined) {
   if (value === undefined || value === ALL_OPTION_VALUE) {

@@ -5,7 +5,7 @@
  */
 
 import t from 'io-ts';
-import { agentConfigurationIntakeRt } from './agent_configuration_intake_rt';
+import { agentConfigurationIntakeRt } from './runtime_types/agent_configuration_intake_rt';
 
 export type AgentConfigurationIntake = t.TypeOf<
   typeof agentConfigurationIntakeRt

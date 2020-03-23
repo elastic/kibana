@@ -23,17 +23,17 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { AgentName } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/fields/agent';
 import { history } from '../../../../../../utils/history';
-import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
+import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/agent_configuration/configuration_types';
 import {
   filterByAgent,
   settingDefinitions,
   isValid
-} from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/setting_definitions';
+} from '../../../../../../../../../../plugins/apm/common/agent_configuration/setting_definitions';
 import { saveConfig } from './saveConfig';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useUiTracker } from '../../../../../../../../../../plugins/observability/public';
 import { SettingFormRow } from './SettingFormRow';
-import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration/constants';
 
 function removeEmpty<T>(obj: T): T {
   return Object.fromEntries(

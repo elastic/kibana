@@ -6,12 +6,12 @@
 
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
-import { amountAndUnitToObject } from './amount_and_unit';
+import { amountAndUnitToObject } from '../amount_and_unit';
 
 export const DURATION_UNITS = ['s', 'm', 'h'];
 
 export const durationRt = new t.Type<string, string, unknown>(
-  'duration',
+  'durationRt',
   t.string.is,
   (input, context) => {
     return either.chain(t.string.validate(input, context), inputAsString => {

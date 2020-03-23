@@ -9,7 +9,7 @@ import {
   SERVICE_ENVIRONMENT
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
-import { AgentConfiguration } from '../../../../common/runtime_types/agent_configuration/configuration_types';
+import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { ESSearchHit } from '../../../../typings/elasticsearch';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 

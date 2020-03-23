@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getIntegerRt } from '../integer_rt';
-import { captureBodyRt } from '../capture_body_rt';
+import { getIntegerRt } from '../runtime_types/integer_rt';
+import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { RawSettingDefinition } from './types';
 
 /*

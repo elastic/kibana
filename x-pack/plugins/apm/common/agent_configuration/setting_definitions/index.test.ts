@@ -5,8 +5,8 @@
  */
 
 import { omit } from 'lodash';
-import { filterByAgent, settingDefinitions } from '.';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { filterByAgent, settingDefinitions } from '../setting_definitions';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { SettingDefinition } from './types';
 
 describe('filterByAgent', () => {

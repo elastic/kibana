@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { numberFloatRt } from './number_float';
+import { numberFloatRt } from './number_float_rt';
 import { isRight } from 'fp-ts/lib/Either';
 
 describe('numberFloatRt', () => {

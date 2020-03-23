@@ -17,12 +17,12 @@ import {
   EuiIconTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SettingDefinition } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/setting_definitions/types';
-import { isValid } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/setting_definitions';
+import { SettingDefinition } from '../../../../../../../../../../plugins/apm/common/agent_configuration/setting_definitions/types';
+import { isValid } from '../../../../../../../../../../plugins/apm/common/agent_configuration/setting_definitions';
 import {
   amountAndUnitToString,
   amountAndUnitToObject
-} from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/amount_and_unit';
+} from '../../../../../../../../../../plugins/apm/common/agent_configuration/amount_and_unit';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
 function FormRow({
