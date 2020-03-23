@@ -14,6 +14,7 @@ import {
 } from 'kibana/server';
 import { FindOptions } from '../../../alerting/server';
 import { ILicenseState, verifyApiAccess } from '../lib';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 // config definition
 const querySchema = schema.object({
@@ -43,7 +44,7 @@ const querySchema = schema.object({
 export const findActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
-      path: `/api/action/_find`,
+      path: `${BASE_ACTION_API_PATH}/_find`,
       validate: {
         query: querySchema,
       },
