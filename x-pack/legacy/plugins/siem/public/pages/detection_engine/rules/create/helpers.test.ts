@@ -9,7 +9,7 @@ import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
-  // ActionsStepRuleJson,
+  ActionsStepRuleJson,
   AboutStepRule,
   ActionsStepRule,
   ScheduleStepRule,
@@ -20,7 +20,7 @@ import {
   formatDefineStepData,
   formatScheduleStepData,
   formatAboutStepData,
-  // formatActionsStepData,
+  formatActionsStepData,
   formatRule,
 } from './helpers';
 import {
@@ -540,6 +540,114 @@ describe('helpers', () => {
         ],
         timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         timeline_title: 'Titled timeline',
+      };
+
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe('formatActionsStepData', () => {
+    let mockData: ActionsStepRule;
+
+    beforeEach(() => {
+      mockData = mockActionsStepRule();
+    });
+
+    test('returns formatted object as ActionsStepRuleJson', () => {
+      const result: ActionsStepRuleJson = formatActionsStepData(mockData);
+      const expected = {
+        actions: [],
+        enabled: false,
+        meta: {
+          throttle: null,
+        },
+        throttle: null,
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns proper throttle value for no_actions', () => {
+      const mockStepData = {
+        ...mockData,
+        throttle: 'no_actions',
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [],
+        enabled: false,
+        meta: {
+          throttle: mockStepData.throttle,
+        },
+        throttle: null,
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns proper throttle value for rule', () => {
+      const mockStepData = {
+        ...mockData,
+        throttle: 'rule',
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [],
+        enabled: false,
+        meta: {
+          throttle: mockStepData.throttle,
+        },
+        throttle: null,
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns proper throttle value for interval', () => {
+      const mockStepData = {
+        ...mockData,
+        throttle: '1d',
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [],
+        enabled: false,
+        meta: {
+          throttle: mockStepData.throttle,
+        },
+        throttle: mockStepData.throttle,
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns actions with action_type_id', () => {
+      const mockAction = {
+        group: 'default',
+        id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        params: { message: 'ML Rule generated {{state.signalsCount}} singals' },
+        actionTypeId: '.slack',
+      };
+
+      const mockStepData = {
+        ...mockData,
+        actions: [mockAction],
+      };
+      const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
+      const expected = {
+        actions: [
+          {
+            group: mockAction.group,
+            id: mockAction.id,
+            params: mockAction.params,
+            action_type_id: mockAction.actionTypeId,
+          },
+        ],
+        enabled: false,
+        meta: {
+          throttle: null,
+        },
+        throttle: null,
       };
 
       expect(result).toEqual(expected);

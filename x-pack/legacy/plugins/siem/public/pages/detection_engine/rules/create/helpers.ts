@@ -7,6 +7,10 @@
 import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
+import {
+  NOTIFICATION_THROTTLE_RULE,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../../common/constants';
 import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
 import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 
@@ -147,7 +151,9 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
 };
 
 export const getAlertThrottle = (throttle: string | null) =>
-  throttle && !['no_actions', 'rule'].includes(throttle) ? throttle : null;
+  throttle && ![NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].includes(throttle)
+    ? throttle
+    : null;
 
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
   const { actions = [], enabled, throttle = null } = actionsStepData;

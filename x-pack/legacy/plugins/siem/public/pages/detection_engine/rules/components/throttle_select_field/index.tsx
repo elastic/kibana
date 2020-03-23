@@ -6,12 +6,16 @@
 
 import React, { useCallback } from 'react';
 
+import {
+  NOTIFICATION_THROTTLE_RULE,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../../../common/constants';
 import { SelectField } from '../../../../../shared_imports';
 
 export const THROTTLE_OPTIONS = [
-  { value: 'no_actions', text: 'Perform no actions' },
-  { value: 'rule', text: 'On each rule execution' },
-  { value: '5m', text: '5 minutes' },
+  { value: NOTIFICATION_THROTTLE_NO_ACTIONS, text: 'Perform no actions' },
+  { value: NOTIFICATION_THROTTLE_RULE, text: 'On each rule execution' },
+  { value: '5m', text: '5 minutes' }, // just for testing
   { value: '1h', text: 'Hourly' },
   { value: '1d', text: 'Daily' },
   { value: '7d', text: 'Weekly' },

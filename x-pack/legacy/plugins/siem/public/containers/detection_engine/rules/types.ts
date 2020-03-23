@@ -14,7 +14,7 @@ export const RuleTypeSchema = t.keyof({
 export type RuleType = t.TypeOf<typeof RuleTypeSchema>;
 
 /**
- * Params is an "object", since it is a type of AlertActionParams which is action templates.
+ * Params is an "record", since it is a type of AlertActionParams which is action templates.
  * @see x-pack/plugins/alerting/common/alert.ts
  */
 export const action = t.exact(
@@ -22,7 +22,7 @@ export const action = t.exact(
     group: t.string,
     id: t.string,
     action_type_id: t.string,
-    params: t.object,
+    params: t.record(t.string, t.any),
   })
 );
 

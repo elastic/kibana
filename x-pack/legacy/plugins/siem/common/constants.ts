@@ -96,13 +96,8 @@ export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_UR
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated';
 
-/* 
-
+/*
+  Rule actions frequency options
 */
-
-export type NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
-export type NOTIFICATION_THROTTLE_RULE = 'rule';
-export type NOTIFICATION_THROTTLE =
-  | NOTIFICATION_THROTTLE_NO_ACTIONS
-  | NOTIFICATION_THROTTLE_RULE
-  | string;
+export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
+export const NOTIFICATION_THROTTLE_RULE = 'rule';

@@ -279,10 +279,6 @@ const EditRulePageComponent: FC = () => {
     }
   }, [rule]);
 
-  useEffect(() => {
-    setSelectedTab(tabs[0]);
-  }, []);
-
   const onTabClick = useCallback(
     async (tab: EuiTabbedContentTab) => {
       if (selectedTab != null) {
@@ -330,6 +326,10 @@ const EditRulePageComponent: FC = () => {
       setMyActionsRuleForm({ data: ruleActionsData, isValid: true });
     }
   }, [rule]);
+
+  useEffect(() => {
+    setSelectedTab(tabs[0]);
+  }, []);
 
   if (isSaved || (rule != null && rule.immutable)) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
