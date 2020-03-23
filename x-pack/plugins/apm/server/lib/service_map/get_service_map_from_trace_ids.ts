@@ -3,18 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { uniq, find } from 'lodash';
-import { Setup } from '../helpers/setup_request';
+import { find, uniq } from 'lodash';
 import {
-  TRACE_ID,
-  PROCESSOR_EVENT
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRACE_ID
 } from '../../../common/elasticsearch_fieldnames';
 import {
   Connection,
-  ServiceConnectionNode,
   ConnectionNode,
-  ExternalConnectionNode
+  ExternalConnectionNode,
+  ServiceConnectionNode
 } from '../../../common/service_map';
+import { Setup } from '../helpers/setup_request';
 
 export async function getServiceMapFromTraceIds({
   setup,
@@ -242,14 +244,15 @@ export async function getServiceMapFromTraceIds({
         if (serviceName) {
           matches =
             matches &&
-            'service.name' in node &&
-            node['service.name'] === serviceName;
+            SERVICE_NAME in node &&
+            (node as ServiceConnectionNode)[SERVICE_NAME] === serviceName;
         }
         if (environment) {
           matches =
             matches &&
-            'service.environment' in node &&
-            node['service.environment'] === environment;
+            SERVICE_ENVIRONMENT in node &&
+            (node as ServiceConnectionNode)[SERVICE_ENVIRONMENT] ===
+              environment;
         }
         return matches;
       });

@@ -234,6 +234,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         references,
                         note,
                         version,
+                        lists,
                         anomalyThreshold,
                         machineLearningJobId,
                       });
