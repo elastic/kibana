@@ -40,10 +40,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const executePingsRequest = async (username: string, password: string, spaceId?: string) => {
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
+    const url = `${basePath}${API_URLS.PINGS}?sort=desc&dateRangeStart=${PINGS_DATE_RANGE_START}&dateRangeEnd=${PINGS_DATE_RANGE_END}`;
     return await supertest
-      .get(
-        `${basePath}/api/uptime/pings?sort=desc&dateRangeStart=${PINGS_DATE_RANGE_START}&dateRangeEnd=${PINGS_DATE_RANGE_END}`
-      )
+      .get(url)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
       .then((response: any) => ({ error: undefined, response }))
@@ -51,9 +50,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   };
 
   describe('feature controls', () => {
-    it(`APIs can't be accessed by heartbeat-* read privileges role`, async () => {
-      const username = 'logstash_read';
-      const roleName = 'logstash_read';
+    it(`APIs can be accessed by heartbeat-* read privileges role`, async () => {
+      const username = 'heartbeat_read';
+      const roleName = 'heartbeat_read';
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {

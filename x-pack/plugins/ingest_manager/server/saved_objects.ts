@@ -128,6 +128,7 @@ export const savedObjectMappings = {
           type: { type: 'keyword' },
           enabled: { type: 'boolean' },
           processors: { type: 'keyword' },
+          config: { type: 'flattened' },
           streams: {
             type: 'nested',
             properties: {
