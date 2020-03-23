@@ -10,7 +10,6 @@ import numeral from '@elastic/numeral';
 import { CallAPIOptions, APICaller, SavedObjectsClientContract } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
-import { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import {
   KibanaObjects,
   ModuleDataFeed,
@@ -24,10 +23,12 @@ import {
   KibanaObjectResponse,
   DataRecognizerConfigResponse,
 } from '../../../common/types/modules';
+import { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
+import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -71,18 +72,6 @@ export interface RecognizeResult {
   query: any;
   description: string;
   logo: { icon: string } | null;
-}
-
-interface JobStat {
-  id: string;
-  earliestTimestampMs: number;
-  latestTimestampMs: number;
-  latestResultsTimestampMs: number;
-}
-
-interface JobExistResult {
-  jobsExist: boolean;
-  jobs: JobStat[];
 }
 
 interface ObjectExistResult {
