@@ -39,6 +39,8 @@ export function BarSeriesDecorator({
   enableHistogramMode,
   useDefaultGroupDomain,
   sortIndex,
+  y1AccessorFormat,
+  y0AccessorFormat,
 }) {
   const id = seriesId;
   const groupId = seriesGroupId;
@@ -54,6 +56,8 @@ export function BarSeriesDecorator({
     xAccessor: X_ACCESSOR_INDEX,
     yAccessors: Y_ACCESSOR_INDEXES,
     y0Accessors: bars.mode === 'band' ? Y0_ACCESSOR_INDEXES : undefined,
+    y1AccessorFormat,
+    y0AccessorFormat,
     stackAccessors,
     stackAsPercentage,
     xScaleType,

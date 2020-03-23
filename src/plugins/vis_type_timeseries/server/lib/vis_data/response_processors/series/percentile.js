@@ -34,7 +34,7 @@ export function percentile(resp, panel, series, meta) {
     getSplits(resp, panel, series, meta).forEach(split => {
       metric.percentiles.forEach(percentile => {
         const percentileValue = percentile.value ? percentile.value : 0;
-        const label = `${split.label} (${percentileValue})`;
+        const id = `${split.id}:${percentile.id}`;
         const data = split.timeseries.buckets.map(bucket => {
           const higherMetric = { ...metric, percent: percentileValue };
           const serieData = [bucket.key, getAggValue(bucket, higherMetric)];
@@ -48,9 +48,9 @@ export function percentile(resp, panel, series, meta) {
         });
         if (percentile.mode === 'band') {
           results.push({
-            id: `${split.id}:${percentile.id}`,
+            id,
             color: split.color,
-            label,
+            label: split.label,
             data,
             lines: {
               show: series.chart_type === 'line',
@@ -64,13 +64,15 @@ export function percentile(resp, panel, series, meta) {
               mode: 'band',
             },
             points: { show: false },
+            y1AccessorFormat: ` (${percentileValue})`,
+            y0AccessorFormat: ` (${percentile.percentile})`,
           });
         } else {
           const decoration = getDefaultDecoration(series);
           results.push({
-            id: `${split.id}:${percentile.id}`,
+            id,
             color: split.color,
-            label,
+            label: `${split.label} (${percentileValue})`,
             data,
             ...decoration,
           });
