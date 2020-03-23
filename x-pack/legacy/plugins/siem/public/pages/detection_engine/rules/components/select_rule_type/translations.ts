@@ -33,10 +33,3 @@ export const ML_TYPE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Select ML job to detect anomalous activity.',
   }
 );
-
-export const ML_TYPE_DISABLED_DESCRIPTION = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDisabledDescription',
-  {
-    defaultMessage: 'Access to ML requires a Platinum subscription.',
-  }
-);
