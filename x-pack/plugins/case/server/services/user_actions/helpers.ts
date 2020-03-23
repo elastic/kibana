@@ -146,30 +146,33 @@ export const buildCaseUserActions = ({
           const origValue = get(originalItem, ['attributes', field]);
           const updatedValue = get(updatedItem, ['attributes', field]);
           const compareValues = isTwoArraysDifference(origValue, updatedValue);
-          if (compareValues != null && compareValues.addedItems.length > 0) {
-            userActions = [
-              ...userActions,
-              buildCaseUserActionItem({
-                action: 'add',
-                actionAt: actionDate,
-                actionBy,
-                caseId: updatedItem.id,
-                fields: [field],
-                newValue: compareValues.addedItems.join(', '),
-              }),
-            ];
-          } else if (compareValues != null && compareValues.deletedItems.length > 0) {
-            userActions = [
-              ...userActions,
-              buildCaseUserActionItem({
-                action: 'delete',
-                actionAt: actionDate,
-                actionBy,
-                caseId: updatedItem.id,
-                fields: [field],
-                newValue: compareValues.deletedItems.join(', '),
-              }),
-            ];
+          if (compareValues != null) {
+            if (compareValues.addedItems.length > 0) {
+              userActions = [
+                ...userActions,
+                buildCaseUserActionItem({
+                  action: 'add',
+                  actionAt: actionDate,
+                  actionBy,
+                  caseId: updatedItem.id,
+                  fields: [field],
+                  newValue: compareValues.addedItems.join(', '),
+                }),
+              ];
+            }
+            if (compareValues.deletedItems.length > 0) {
+              userActions = [
+                ...userActions,
+                buildCaseUserActionItem({
+                  action: 'delete',
+                  actionAt: actionDate,
+                  actionBy,
+                  caseId: updatedItem.id,
+                  fields: [field],
+                  newValue: compareValues.deletedItems.join(', '),
+                }),
+              ];
+            }
           } else if (origValue !== updatedValue) {
             userActions = [
               ...userActions,

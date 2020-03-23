@@ -15,9 +15,9 @@ import { useParams } from 'react-router-dom';
 import { LocalizedDateTooltip } from '../../../../components/localized_date_tooltip';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { navTabs } from '../../../home/home_navigations';
-import * as i18n from '../case_view/translations';
 import { PropertyActions } from '../property_actions';
 import { SiemPageName } from '../../../home/types';
+import * as i18n from './translations';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   .euiLoadingSpinner {
@@ -124,8 +124,7 @@ export const UserActionTitle = ({
             {!isEmpty(linkId) && (
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  aria-label=""
-                  aria-labelledby=""
+                  aria-label={i18n.MOVE_TO_ORIGINAL_COMMENT}
                   onClick={handleMoveToLink}
                   iconType="arrowUp"
                 />
@@ -133,8 +132,7 @@ export const UserActionTitle = ({
             )}
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                aria-label=""
-                aria-labelledby=""
+                aria-label={i18n.COPY_LINK_COMMENT}
                 onClick={handleAnchorLink}
                 iconType="link"
                 id={`${id}-permLink`}
