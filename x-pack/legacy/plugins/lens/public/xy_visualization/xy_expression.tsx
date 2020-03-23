@@ -15,6 +15,7 @@ import {
   BarSeries,
   Position,
   PartialTheme,
+  GeometryValue,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -40,7 +41,7 @@ type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof BarSeries> &
   InferPropType<typeof AreaSeries>;
 
-interface XYChartSeriesIdentifier {
+export interface XYChartSeriesIdentifier {
   yAccessor: string | number;
   splitAccessors: Map<string | number, string | number>; // does the map have a size vs making it optional
   seriesKeys: Array<string | number>;
@@ -223,8 +224,11 @@ export function XYChart({
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onElementClick={([[geometry, series]]) => {
+          const xySeries = series as XYChartSeriesIdentifier;
+          const xyGeometry = geometry as GeometryValue;
+
           const layer = layers.find(l =>
-            series.seriesKeys.some(key => l.accessors.includes(key as string))
+            xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
           );
           if (!layer) {
             return;
@@ -235,15 +239,15 @@ export function XYChart({
           const points = [
             {
               row: table.rows.findIndex(
-                row => layer.xAccessor && row[layer.xAccessor] === geometry.x
+                row => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
               ),
               column: table.columns.findIndex(col => col.id === layer.xAccessor),
-              value: geometry.x,
+              value: (xyGeometry as GeometryValue).x,
             },
           ];
 
-          if (series.seriesKeys.length > 1) {
-            const pointValue = series.seriesKeys[0];
+          if (xySeries.seriesKeys.length > 1) {
+            const pointValue = xySeries.seriesKeys[0];
 
             points.push({
               row: table.rows.findIndex(
@@ -339,7 +343,7 @@ export function XYChart({
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
-            customSeriesLabel: (d: XYChartSeriesIdentifier): string => {
+            name: (d: XYChartSeriesIdentifier): string => {
               if (accessors.length > 1) {
                 return d.seriesKeys
                   .map((key: string | number) => columnToLabelMap[key] || key)

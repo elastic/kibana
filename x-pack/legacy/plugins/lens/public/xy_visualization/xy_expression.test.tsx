@@ -13,7 +13,7 @@ import {
   Settings,
   ScaleType,
   GeometryValue,
-  SeriesIdentifier,
+  XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
@@ -296,7 +296,7 @@ describe('xy_expression', () => {
       wrapper
         .find(Settings)
         .first()
-        .prop('onElementClick')!([[geometry, series as SeriesIdentifier]]);
+        .prop('onElementClick')!([[geometry, series as XYChartSeriesIdentifier]]);
 
       expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
         data: {
