@@ -148,7 +148,7 @@ export const Expressions: React.FC<Props> = props => {
   }, []);
 
   const updateTimeSize = useCallback(
-    (ts: number | '') => {
+    (ts: number | undefined) => {
       const criteria = alertParams.criteria.map(c => ({
         ...c,
         timeSize: ts,
@@ -370,6 +370,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
             {aggType !== 'count' && (
               <StyledExpression>
                 <OfExpression
+                  customAggTypesOptions={aggregationType}
                   aggField={metric}
                   fields={fields.map(f => ({
                     normalizedType: f.type,
