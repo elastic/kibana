@@ -41,7 +41,7 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
         );
 
         const myCase = await caseService.getCase({
-          client: context.core.savedObjects.client,
+          client,
           caseId: request.params.case_id,
         });
 

@@ -23,8 +23,9 @@ export function initGetAllUserActionsApi({ userActionService, router }: RouteDep
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const userActions = await userActionService.getUserActions({
-          client: context.core.savedObjects.client,
+          client,
           caseId: request.params.case_id,
         });
         return response.ok({

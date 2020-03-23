@@ -45,7 +45,7 @@ export function initPushCaseUserActionApi({
 
         const [myCase, myCaseConfigure, totalCommentsFindByCases] = await Promise.all([
           caseService.getCase({
-            client: context.core.savedObjects.client,
+            client,
             caseId: request.params.case_id,
           }),
           caseConfigureService.find({ client }),

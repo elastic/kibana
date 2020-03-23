@@ -30,7 +30,7 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
         const deleteDate = new Date().toISOString();
 
         const myComment = await caseService.getComment({
-          client: context.core.savedObjects.client,
+          client,
           commentId: request.params.comment_id,
         });
 

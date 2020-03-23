@@ -27,7 +27,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
         const deleteDate = new Date().toISOString();
 
         const comments = await caseService.getAllCaseComments({
-          client: context.core.savedObjects.client,
+          client,
           caseId: request.params.case_id,
         });
         await Promise.all(
