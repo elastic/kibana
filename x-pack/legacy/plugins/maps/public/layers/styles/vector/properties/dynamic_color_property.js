@@ -252,6 +252,16 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     const numberOfLegendColors = 5;
     const colors = getHexColorRangeStrings(this._options.color, numberOfLegendColors);
 
+    if (rangeFieldMeta.delta === 0) {
+      //map to last color.
+      return [
+        {
+          color: colors[colors.length - 1],
+          stop: dynamicRound(rangeFieldMeta.max),
+        },
+      ];
+    }
+
     return colors.map((color, index) => {
       const rawStopValue =
         rangeFieldMeta.min + rangeFieldMeta.delta * (index / numberOfLegendColors);

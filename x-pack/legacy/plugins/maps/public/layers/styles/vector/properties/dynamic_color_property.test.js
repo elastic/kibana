@@ -37,6 +37,10 @@ const mockField = {
 };
 
 class MockStyle {
+  constructor({ min = 0, max = 100 } = {}) {
+    this._min = min;
+    this._max = max;
+  }
   getStyleMeta() {
     return new StyleMeta({
       geometryTypes: {
@@ -46,7 +50,7 @@ class MockStyle {
       },
       fieldMeta: {
         foobar: {
-          range: { min: 0, max: 100, delta: 100 },
+          range: { min: this._min, max: this._max, delta: this._max - this._min },
           categories: {
             categories: [
               {
@@ -66,8 +70,11 @@ class MockStyle {
 }
 
 class MockLayer {
+  constructor(style = new MockStyle()) {
+    this._style = style;
+  }
   getStyle() {
-    return new MockStyle();
+    return this._style;
   }
 
   getDataRequest() {
@@ -75,12 +82,12 @@ class MockLayer {
   }
 }
 
-const makeProperty = options => {
+const makeProperty = (options, mockStyle) => {
   return new DynamicColorProperty(
     options,
     VECTOR_STYLES.LINE_COLOR,
     mockField,
-    new MockLayer(),
+    new MockLayer(mockStyle),
     () => {
       return x => x + '_format';
     }
@@ -92,96 +99,121 @@ const defaultLegendParams = {
   isLinesOnly: false,
 };
 
-test('Should render ordinal legend', async () => {
-  const colorStyle = makeProperty({
-    color: 'Blues',
-    type: undefined,
+describe('ordinal', () => {
+  test('Should render ordinal legend as bands', async () => {
+    const colorStyle = makeProperty({
+      color: 'Blues',
+      type: undefined,
+    });
+
+    const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+
+    const component = shallow(legendRow);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
   });
 
-  const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+  test('Should render only single band of last color when delta is 0', async () => {
+    const colorStyle = makeProperty(
+      {
+        color: 'Blues',
+        type: undefined,
+      },
+      new MockStyle({ min: 100, max: 100 })
+    );
 
-  const component = shallow(legendRow);
+    const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
+    const component = shallow(legendRow);
 
-  expect(component).toMatchSnapshot();
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('Should render custom ordinal legend with breaks', async () => {
+    const colorStyle = makeProperty({
+      type: COLOR_MAP_TYPE.ORDINAL,
+      useCustomColorRamp: true,
+      customColorRamp: [
+        {
+          stop: 0,
+          color: '#FF0000',
+        },
+        {
+          stop: 10,
+          color: '#00FF00',
+        },
+      ],
+    });
+
+    const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+
+    const component = shallow(legendRow);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
 });
 
-test('Should render ordinal legend with breaks', async () => {
-  const colorStyle = makeProperty({
-    type: COLOR_MAP_TYPE.ORDINAL,
-    useCustomColorRamp: true,
-    customColorRamp: [
-      {
-        stop: 0,
-        color: '#FF0000',
-      },
-      {
-        stop: 10,
-        color: '#00FF00',
-      },
-    ],
+describe('categorical', () => {
+  test('Should render categorical legend with breaks from default', async () => {
+    const colorStyle = makeProperty({
+      type: COLOR_MAP_TYPE.CATEGORICAL,
+      useCustomColorPalette: false,
+      colorCategory: 'palette_0',
+    });
+
+    const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+
+    const component = shallow(legendRow);
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
   });
 
-  const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+  test('Should render categorical legend with breaks from custom', async () => {
+    const colorStyle = makeProperty({
+      type: COLOR_MAP_TYPE.CATEGORICAL,
+      useCustomColorPalette: true,
+      customColorPalette: [
+        {
+          stop: null, //should include the default stop
+          color: '#FFFF00',
+        },
+        {
+          stop: 'US_STOP',
+          color: '#FF0000',
+        },
+        {
+          stop: 'CN_STOP',
+          color: '#00FF00',
+        },
+      ],
+    });
 
-  const component = shallow(legendRow);
+    const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
+    const component = shallow(legendRow);
 
-  expect(component).toMatchSnapshot();
-});
-
-test('Should render categorical legend with breaks from default', async () => {
-  const colorStyle = makeProperty({
-    type: COLOR_MAP_TYPE.CATEGORICAL,
-    useCustomColorPalette: false,
-    colorCategory: 'palette_0',
+    expect(component).toMatchSnapshot();
   });
-
-  const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
-
-  const component = shallow(legendRow);
-
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
-
-  expect(component).toMatchSnapshot();
-});
-
-test('Should render categorical legend with breaks from custom', async () => {
-  const colorStyle = makeProperty({
-    type: COLOR_MAP_TYPE.CATEGORICAL,
-    useCustomColorPalette: true,
-    customColorPalette: [
-      {
-        stop: null, //should include the default stop
-        color: '#FFFF00',
-      },
-      {
-        stop: 'US_STOP',
-        color: '#FF0000',
-      },
-      {
-        stop: 'CN_STOP',
-        color: '#00FF00',
-      },
-    ],
-  });
-
-  const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
-
-  const component = shallow(legendRow);
-
-  expect(component).toMatchSnapshot();
 });
 
 function makeFeatures(foobarPropValues) {

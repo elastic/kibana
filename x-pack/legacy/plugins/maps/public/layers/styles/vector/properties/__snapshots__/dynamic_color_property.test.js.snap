@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Should render categorical legend with breaks from custom 1`] = `""`;
+exports[`categorical Should render categorical legend with breaks from custom 1`] = `""`;
 
-exports[`Should render categorical legend with breaks from default 1`] = `
+exports[`categorical Should render categorical legend with breaks from default 1`] = `
 <div>
   <EuiSpacer
     size="s"
@@ -76,7 +76,119 @@ exports[`Should render categorical legend with breaks from default 1`] = `
 </div>
 `;
 
-exports[`Should render ordinal legend 1`] = `
+exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
+<div>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <Category
+      color="#FF0000"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="0"
+      label="0_format"
+      styleName="lineColor"
+    />
+    <Category
+      color="#00FF00"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="10"
+      label="10_format"
+      styleName="lineColor"
+    />
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceAround"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`ordinal Should render only single band of last color when delta is 0 1`] = `
+<div>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <Category
+      color="#072f6b"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="100"
+      label="100_format"
+      styleName="lineColor"
+    />
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceAround"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`ordinal Should render ordinal legend as bands 1`] = `
 <div>
   <EuiSpacer
     size="s"
@@ -123,66 +235,6 @@ exports[`Should render ordinal legend 1`] = `
       isPointsOnly={true}
       key="80"
       label="80_format"
-      styleName="lineColor"
-    />
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="xs"
-    justifyContent="spaceAround"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiToolTip
-        content="foobar_label"
-        delay="regular"
-        position="top"
-        title="Border color"
-      >
-        <EuiText
-          className="eui-textTruncate"
-          size="xs"
-          style={
-            Object {
-              "maxWidth": "180px",
-            }
-          }
-        >
-          <small>
-            <strong>
-              foobar_label
-            </strong>
-          </small>
-        </EuiText>
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
-
-exports[`Should render ordinal legend with breaks 1`] = `
-<div>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
-  >
-    <Category
-      color="#FF0000"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="0"
-      label="0_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#00FF00"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="10"
-      label="10_format"
       styleName="lineColor"
     />
   </EuiFlexGroup>
