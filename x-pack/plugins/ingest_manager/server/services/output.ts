@@ -60,13 +60,13 @@ class OutputService {
       .getEncryptedSavedObjects()
       ?.getDecryptedAsInternalUser<Output>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
 
-    if (!so || !so.attributes.admin_username || !so.attributes.admin_password) {
+    if (!so || !so.attributes.fleet_enroll_username || !so.attributes.fleet_enroll_password) {
       return null;
     }
 
     return {
-      username: so!.attributes.admin_username,
-      password: so!.attributes.admin_password,
+      username: so!.attributes.fleet_enroll_username,
+      password: so!.attributes.fleet_enroll_password,
     };
   }
 
