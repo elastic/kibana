@@ -22,6 +22,7 @@ import {
   FilterOptions,
   Rule,
   PaginationOptions,
+  exportRules,
 } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../components/header_section';
 import {
@@ -35,7 +36,7 @@ import { useStateToaster } from '../../../../components/toasters';
 import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
 import { PrePackagedRulesPrompt } from '../components/pre_packaged_rules/load_empty_prompt';
-import { RuleDownloader } from '../components/rule_downloader';
+import { GenericDownloader } from '../../../../components/generic_downloader';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
@@ -244,10 +245,10 @@ export const AllRules = React.memo<AllRulesProps>(
 
     return (
       <>
-        <RuleDownloader
+        <GenericDownloader
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-          ruleIds={exportRuleIds}
-          onExportComplete={exportCount => {
+          ids={exportRuleIds}
+          onExportSuccess={exportCount => {
             dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
             dispatchToaster({
               type: 'addToaster',
@@ -259,6 +260,7 @@ export const AllRules = React.memo<AllRulesProps>(
               },
             });
           }}
+          exportSelectedData={exportRules}
         />
         <EuiSpacer />
 

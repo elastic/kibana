@@ -12,6 +12,7 @@ import {
 import { UMServerLibs } from '../../lib/lib';
 import { UMContext } from '../types';
 import { CreateUMGraphQLResolvers } from '../types';
+import { savedObjectsAdapter } from '../../lib/saved_objects';
 
 export type UMAllPingsResolver = UMResolver<
   PingResults | Promise<PingResults>,
@@ -35,10 +36,15 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
     async allPings(
       _resolver,
       { monitorId, sort, size, status, dateRangeStart, dateRangeEnd, location },
-      { APICaller }
+      { APICaller, savedObjectsClient }
     ): Promise<PingResults> {
+      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+        savedObjectsClient
+      );
+
       return await libs.requests.getPings({
         callES: APICaller,
+        dynamicSettings,
         dateRangeStart,
         dateRangeEnd,
         monitorId,

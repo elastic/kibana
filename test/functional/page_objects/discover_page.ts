@@ -260,14 +260,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         await this.clickFieldListItem(field);
       }
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await find.clickByCssSelector(`[data-test-subj="${plusFilterTestSubj}"]`);
+      await testSubjects.click(plusFilterTestSubj);
       await header.waitUntilLoadingHasFinished();
     }
 
     public async clickFieldListMinusFilter(field: string, value: string) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await find.clickByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]');
+      await testSubjects.click(`minus-${field}-${value}`);
       await header.waitUntilLoadingHasFinished();
     }
 
