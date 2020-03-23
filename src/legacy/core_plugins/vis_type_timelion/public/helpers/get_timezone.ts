@@ -17,5 +17,15 @@
  * under the License.
  */
 
-// @ts-ignore
-export { timezoneProvider } from 'ui/vis/lib/timezone';
+import moment from 'moment-timezone';
+import { IUiSettingsClient } from 'kibana/public';
+
+export function getTimezone(config: IUiSettingsClient) {
+  if (config.isDefault('dateFormat:tz')) {
+    const detectedTimezone = moment.tz.guess();
+    if (detectedTimezone) return detectedTimezone;
+    else return moment().format('Z');
+  } else {
+    return config.get('dateFormat:tz', 'Browser');
+  }
+}
