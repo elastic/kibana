@@ -23,10 +23,6 @@ import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapper';
 import { LogAnalysisJobProblemIndicator } from '../../../components/logging/log_analysis_job_status';
-import {
-  useLogAnalysisModuleConfiguration,
-  useLogAnalysisModuleDefinition,
-} from '../../../containers/logs/log_analysis';
 import { useInterval } from '../../../hooks/use_interval';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { AnomaliesResults } from './sections/anomalies';
@@ -48,16 +44,16 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
 
   const {
     fetchJobStatus,
-    jobStatus,
-    jobSummaries,
+    fetchModuleDefinition,
     setupStatus,
     viewSetupForReconfiguration,
     viewSetupForUpdate,
+    hasOutdatedJobConfigurations,
+    hasOutdatedJobDefinitions,
+    hasStoppedJobs,
     jobIds,
-    moduleDescriptor,
-    sourceConfiguration,
+    sourceConfiguration: { sourceId },
   } = useLogEntryRateModuleContext();
-  const { sourceId } = sourceConfiguration;
 
   const {
     timeRange: selectedTimeRange,
@@ -65,16 +61,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     autoRefresh,
     setAutoRefresh,
   } = useLogAnalysisResultsUrlState();
-
-  const { getIsJobConfigurationOutdated } = useLogAnalysisModuleConfiguration({
-    sourceConfiguration,
-    moduleDescriptor,
-  });
-
-  const { fetchModuleDefinition, getIsJobDefinitionOutdated } = useLogAnalysisModuleDefinition({
-    sourceConfiguration,
-    moduleDescriptor,
-  });
 
   const [queryTimeRange, setQueryTimeRange] = useState<{
     value: TimeRange;
@@ -148,21 +134,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   const isFirstUse = useMemo(
     () => setupStatus.type === 'skipped' && !!setupStatus.newlyCreated && !hasResults,
     [hasResults, setupStatus]
-  );
-
-  const hasOutdatedJobConfigurations = useMemo(
-    () => jobSummaries.some(getIsJobConfigurationOutdated),
-    [getIsJobConfigurationOutdated, jobSummaries]
-  );
-
-  const hasOutdatedJobDefinitions = useMemo(() => jobSummaries.some(getIsJobDefinitionOutdated), [
-    getIsJobDefinitionOutdated,
-    jobSummaries,
-  ]);
-
-  const hasStoppedJobs = useMemo(
-    () => Object.values(jobStatus).some(currentJobStatus => currentJobStatus === 'stopped'),
-    [jobStatus]
   );
 
   useEffect(() => {

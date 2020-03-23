@@ -6,10 +6,11 @@
 
 import createContainer from 'constate';
 import { useMemo } from 'react';
-
 import {
-  useLogAnalysisModule,
   ModuleSourceConfiguration,
+  useLogAnalysisModule,
+  useLogAnalysisModuleConfiguration,
+  useLogAnalysisModuleDefinition,
 } from '../../../containers/logs/log_analysis';
 import { logEntryCategoriesModule } from './module_descriptor';
 
@@ -34,10 +35,46 @@ export const useLogEntryCategoriesModule = ({
     [indexPattern, sourceId, spaceId, timestampField]
   );
 
-  return useLogAnalysisModule({
+  const logAnalysisModule = useLogAnalysisModule({
     moduleDescriptor: logEntryCategoriesModule,
     sourceConfiguration,
   });
+
+  const { getIsJobConfigurationOutdated } = useLogAnalysisModuleConfiguration({
+    sourceConfiguration,
+    moduleDescriptor: logEntryCategoriesModule,
+  });
+
+  const { fetchModuleDefinition, getIsJobDefinitionOutdated } = useLogAnalysisModuleDefinition({
+    sourceConfiguration,
+    moduleDescriptor: logEntryCategoriesModule,
+  });
+
+  const hasOutdatedJobConfigurations = useMemo(
+    () => logAnalysisModule.jobSummaries.some(getIsJobConfigurationOutdated),
+    [getIsJobConfigurationOutdated, logAnalysisModule.jobSummaries]
+  );
+
+  const hasOutdatedJobDefinitions = useMemo(
+    () => logAnalysisModule.jobSummaries.some(getIsJobDefinitionOutdated),
+    [getIsJobDefinitionOutdated, logAnalysisModule.jobSummaries]
+  );
+
+  const hasStoppedJobs = useMemo(
+    () =>
+      Object.values(logAnalysisModule.jobStatus).some(
+        currentJobStatus => currentJobStatus === 'stopped'
+      ),
+    [logAnalysisModule.jobStatus]
+  );
+
+  return {
+    ...logAnalysisModule,
+    fetchModuleDefinition,
+    hasOutdatedJobConfigurations,
+    hasOutdatedJobDefinitions,
+    hasStoppedJobs,
+  };
 };
 
 export const [

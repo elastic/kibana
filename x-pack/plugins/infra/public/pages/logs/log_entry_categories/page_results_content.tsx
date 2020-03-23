@@ -23,10 +23,6 @@ import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
-import {
-  useLogAnalysisModuleConfiguration,
-  useLogAnalysisModuleDefinition,
-} from '../../../containers/logs/log_analysis';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -36,16 +32,16 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
 
   const {
     fetchJobStatus,
+    fetchModuleDefinition,
     setupStatus,
     viewSetupForReconfiguration,
     viewSetupForUpdate,
+    hasOutdatedJobConfigurations,
+    hasOutdatedJobDefinitions,
+    hasStoppedJobs,
     jobIds,
-    jobStatus,
-    jobSummaries,
-    moduleDescriptor,
-    sourceConfiguration,
+    sourceConfiguration: { sourceId },
   } = useLogEntryCategoriesModuleContext();
-  const { sourceId } = sourceConfiguration;
 
   const {
     timeRange: selectedTimeRange,
@@ -53,16 +49,6 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
     autoRefresh,
     setAutoRefresh,
   } = useLogEntryCategoriesResultsUrlState();
-
-  const { getIsJobConfigurationOutdated } = useLogAnalysisModuleConfiguration({
-    sourceConfiguration,
-    moduleDescriptor,
-  });
-
-  const { fetchModuleDefinition, getIsJobDefinitionOutdated } = useLogAnalysisModuleDefinition({
-    sourceConfiguration,
-    moduleDescriptor,
-  });
 
   const [categoryQueryTimeRange, setCategoryQueryTimeRange] = useState<{
     lastChangedTime: number;
@@ -144,21 +130,6 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   const isFirstUse = useMemo(
     () => setupStatus.type === 'skipped' && !!setupStatus.newlyCreated && !hasResults,
     [hasResults, setupStatus]
-  );
-
-  const hasOutdatedJobConfigurations = useMemo(
-    () => jobSummaries.some(getIsJobConfigurationOutdated),
-    [getIsJobConfigurationOutdated, jobSummaries]
-  );
-
-  const hasOutdatedJobDefinitions = useMemo(() => jobSummaries.some(getIsJobDefinitionOutdated), [
-    getIsJobDefinitionOutdated,
-    jobSummaries,
-  ]);
-
-  const hasStoppedJobs = useMemo(
-    () => Object.values(jobStatus).some(currentJobStatus => currentJobStatus === 'stopped'),
-    [jobStatus]
   );
 
   useEffect(() => {
