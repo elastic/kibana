@@ -50,6 +50,15 @@ export const LogEntryRow = memo(
     wrap,
   }: LogEntryRowProps) => {
     const [isHovered, setIsHovered] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const openMenu = useCallback(() => {
+      setIsMenuOpen(true);
+    }, []);
+
+    const closeMenu = useCallback(() => {
+      setIsMenuOpen(false);
+    }, []);
 
     const setItemIsHovered = useCallback(() => {
       setIsHovered(true);
@@ -57,7 +66,8 @@ export const LogEntryRow = memo(
 
     const setItemIsNotHovered = useCallback(() => {
       setIsHovered(false);
-    }, []);
+      closeMenu();
+    }, [closeMenu]);
 
     const openFlyout = useCallback(() => openFlyoutWithItem?.(logEntry.id), [
       openFlyoutWithItem,
@@ -170,7 +180,13 @@ export const LogEntryRow = memo(
           key="logColumn iconLogColumn iconLogColumn:details"
           {...columnWidths[iconColumnId]}
         >
-          <LogEntryActionsColumn isHovered={isHovered} openFlyout={openFlyout} />
+          <LogEntryActionsColumn
+            isHovered={isHovered}
+            isMenuOpen={isMenuOpen}
+            openMenu={openMenu}
+            closeMenu={closeMenu}
+            onViewDetails={openFlyout}
+          />
         </LogEntryColumn>
       </LogEntryRowWrapper>
     );
