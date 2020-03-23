@@ -78,6 +78,14 @@ storiesOf('app/ServiceMap/Cytoscape', module)
         { data: { id: 'cache', label: 'cache', 'span.type': 'cache' } },
         { data: { id: 'database', label: 'database', 'span.type': 'db' } },
         {
+          data: {
+            id: 'elasticsearch',
+            label: 'elasticsearch',
+            'span.type': 'db',
+            'span.subtype': 'elasticsearch'
+          }
+        },
+        {
           data: { id: 'external', label: 'external', 'span.type': 'external' }
         },
         {
