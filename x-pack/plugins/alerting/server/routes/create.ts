@@ -15,8 +15,8 @@ import {
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
-import { Alert } from '../types';
 import { handleDisabledApiKeysError } from './lib/error_handler';
+import { Alert, BASE_ALERT_API_PATH } from '../types';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -43,7 +43,7 @@ export const bodySchema = schema.object({
 export const createAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: '/api/alert',
+      path: BASE_ALERT_API_PATH,
       validate: {
         body: bodySchema,
       },

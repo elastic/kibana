@@ -8,7 +8,6 @@ import { Alert, AlertType } from '../../types';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import {
   createAlert,
-  deleteAlert,
   deleteAlerts,
   disableAlerts,
   enableAlerts,
@@ -348,24 +347,11 @@ describe('loadAlerts', () => {
   });
 });
 
-describe('deleteAlert', () => {
-  test('should call delete API for alert', async () => {
-    const id = '1';
-    const result = await deleteAlert({ http, id });
-    expect(result).toEqual(undefined);
-    expect(http.delete.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "/api/alert/1",
-      ]
-    `);
-  });
-});
-
 describe('deleteAlerts', () => {
   test('should call delete API for each alert', async () => {
     const ids = ['1', '2', '3'];
     const result = await deleteAlerts({ http, ids });
-    expect(result).toEqual(undefined);
+    expect(result).toEqual({ errors: [], successes: [undefined, undefined, undefined] });
     expect(http.delete.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [

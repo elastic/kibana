@@ -86,25 +86,18 @@ export const AlertAdd = ({
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  const actionsErrors = alert.actions.reduce(
-    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
-      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
-      if (!actionType) {
-        return { ...acc };
-      }
-      const actionValidationErrors = actionType.validateParams(alertAction.params);
-      return { ...acc, [alertAction.id]: actionValidationErrors };
-    },
-    {}
-  ) as Record<string, { errors: IErrorObject }>;
+  const actionsErrors: Array<{
+    errors: IErrorObject;
+  }> = alert.actions.map((alertAction: AlertAction) =>
+    actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+  );
 
-  const hasActionErrors = !!Object.entries(actionsErrors)
-    .map(([, actionErrors]) => actionErrors)
-    .find((actionErrors: { errors: IErrorObject }) => {
-      return !!Object.keys(actionErrors.errors).find(
-        errorKey => actionErrors.errors[errorKey].length >= 1
-      );
-    });
+  const hasActionErrors =
+    actionsErrors.find(
+      (errorObj: { errors: IErrorObject }) =>
+        errorObj &&
+        !!Object.keys(errorObj.errors).find(errorKey => errorObj.errors[errorKey].length >= 1)
+    ) !== undefined;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
