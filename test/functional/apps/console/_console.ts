@@ -50,16 +50,14 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
       // on IE11, the dialog that says 'Your browser does not meet the security requirements for Kibana.'
       // blocks the close help button for several seconds so just retry until we can click it.
-      // TRE' SKIPPING SOMEONE ELSE'S TESTS
-      // await retry.try(async () => {
-      //   await PageObjects.console.collapseHelp();
-      // });
-      // await retry.try(async () => {
-      //   const actualRequest = await PageObjects.console.getRequest();
-      //   log.debug(actualRequest);
-      //   expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
-      // });
-      expect(true).to.be(true);
+      await retry.try(async () => {
+        await PageObjects.console.collapseHelp();
+      });
+      await retry.try(async () => {
+        const actualRequest = await PageObjects.console.getRequest();
+        log.debug(actualRequest);
+        expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
+      });
     });
 
     it('default request response should include `"timed_out" : false`', async () => {
