@@ -28,7 +28,7 @@
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps", "legacy/plugins/maps"],
     "xpack.ml": ["plugins/ml", "legacy/plugins/ml"],
-    "xpack.monitoring": "legacy/plugins/monitoring",
+    "xpack.monitoring": ["plugins/monitoring", "legacy/plugins/monitoring"],
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": ["plugins/reporting", "legacy/plugins/reporting"],
     "xpack.rollupJobs": "legacy/plugins/rollup",
@@ -42,7 +42,7 @@
     "xpack.transform": "plugins/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
-    "xpack.uptime": "legacy/plugins/uptime",
+    "xpack.uptime": ["plugins/uptime", "legacy/plugins/uptime"],
     "xpack.watcher": "plugins/watcher"
   },
   "translations": [

@@ -6,7 +6,6 @@
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
-  sampleRuleAlertParams,
   sampleDocSearchResultsNoSortId,
   mockLogger,
   sampleDocSearchResultsWithSortId,
@@ -26,12 +25,13 @@ describe('singleSearchAfter', () => {
 
   test('if singleSearchAfter works without a given sort id', async () => {
     let searchAfterSortId;
-    const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockReturnValue(sampleDocSearchResultsNoSortId);
     await expect(
       singleSearchAfter({
         searchAfterSortId,
-        ruleParams: sampleParams,
+        index: [],
+        from: 'now-360s',
+        to: 'now',
         services: mockService,
         logger: mockLogger,
         pageSize: 1,
@@ -41,11 +41,12 @@ describe('singleSearchAfter', () => {
   });
   test('if singleSearchAfter works with a given sort id', async () => {
     const searchAfterSortId = '1234567891111';
-    const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockReturnValue(sampleDocSearchResultsWithSortId);
     const searchAfterResult = await singleSearchAfter({
       searchAfterSortId,
-      ruleParams: sampleParams,
+      index: [],
+      from: 'now-360s',
+      to: 'now',
       services: mockService,
       logger: mockLogger,
       pageSize: 1,
@@ -55,14 +56,15 @@ describe('singleSearchAfter', () => {
   });
   test('if singleSearchAfter throws error', async () => {
     const searchAfterSortId = '1234567891111';
-    const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockImplementation(async () => {
       throw Error('Fake Error');
     });
     await expect(
       singleSearchAfter({
         searchAfterSortId,
-        ruleParams: sampleParams,
+        index: [],
+        from: 'now-360s',
+        to: 'now',
         services: mockService,
         logger: mockLogger,
         pageSize: 1,

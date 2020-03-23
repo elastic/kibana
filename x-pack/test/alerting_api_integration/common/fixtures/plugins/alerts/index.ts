@@ -44,6 +44,7 @@ export default function(kibana: any) {
       const noopActionType: ActionType = {
         id: 'test.noop',
         name: 'Test: Noop',
+        minimumLicenseRequired: 'gold',
         async executor() {
           return { status: 'ok', actionId: '' };
         },
@@ -51,6 +52,7 @@ export default function(kibana: any) {
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -82,6 +84,7 @@ export default function(kibana: any) {
       const failingActionType: ActionType = {
         id: 'test.failing',
         name: 'Test: Failing',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -106,6 +109,7 @@ export default function(kibana: any) {
       const rateLimitedActionType: ActionType = {
         id: 'test.rate-limit',
         name: 'Test: Rate Limit',
+        minimumLicenseRequired: 'gold',
         maxAttempts: 2,
         validate: {
           params: schema.object({
@@ -135,6 +139,7 @@ export default function(kibana: any) {
       const authorizationActionType: ActionType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),

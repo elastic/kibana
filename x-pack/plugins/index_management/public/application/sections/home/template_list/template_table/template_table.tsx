@@ -200,21 +200,24 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     box: {
       incremental: true,
     },
-    toolsLeft: selection.length && (
-      <EuiButton
-        data-test-subj="deleteTemplatesButton"
-        onClick={() =>
-          setTemplatesToDelete(selection.map((selected: TemplateListItem) => selected.name))
-        }
-        color="danger"
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.templateList.table.deleteTemplatesButtonLabel"
-          defaultMessage="Delete {count, plural, one {template} other {templates} }"
-          values={{ count: selection.length }}
-        />
-      </EuiButton>
-    ),
+    toolsLeft:
+      selection.length > 0 ? (
+        <EuiButton
+          data-test-subj="deleteTemplatesButton"
+          onClick={() =>
+            setTemplatesToDelete(selection.map((selected: TemplateListItem) => selected.name))
+          }
+          color="danger"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.templateList.table.deleteTemplatesButtonLabel"
+            defaultMessage="Delete {count, plural, one {template} other {templates} }"
+            values={{ count: selection.length }}
+          />
+        </EuiButton>
+      ) : (
+        undefined
+      ),
     toolsRight: [
       <EuiButton
         color="secondary"
