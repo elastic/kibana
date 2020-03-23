@@ -18,7 +18,6 @@
  */
 
 import {
-  ApplicationStart,
   Capabilities,
   ChromeStart,
   HttpStart,
