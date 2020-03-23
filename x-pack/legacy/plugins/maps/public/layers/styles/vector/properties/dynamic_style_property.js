@@ -15,7 +15,6 @@ import {
 } from '../../../../../common/constants';
 import { scaleValue, getComputedFieldName } from '../style_util';
 import React from 'react';
-import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
 import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
@@ -126,14 +125,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   isCategorical() {
     return false;
-  }
-
-  hasOrdinalBreaks() {
-    return false;
-  }
-
-  isOrdinalRanged() {
-    return true;
   }
 
   isComplete() {
@@ -315,7 +306,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return null;
   }
 
-  _renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId }) {
+  _renderBreakedLegend({ isPointsOnly, isLinesOnly, symbolId }) {
     return (
       <CategoricalLegend
         style={this}
@@ -326,22 +317,8 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     );
   }
 
-  _renderRangeLegend() {
-    return <OrdinalLegend style={this} />;
-  }
-
   renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
-    if (this.isOrdinal()) {
-      if (this.isOrdinalRanged() || this.hasOrdinalBreaks()) {
-        return this._renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId });
-      } else {
-        return null;
-      }
-    } else if (this.isCategorical()) {
-      return this._renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId });
-    } else {
-      return null;
-    }
+    return this._renderBreakedLegend({ isPointsOnly, isLinesOnly, symbolId });
   }
 
   renderFieldMetaPopover(onFieldMetaOptionsChange) {

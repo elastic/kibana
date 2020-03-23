@@ -46,7 +46,7 @@ class MockStyle {
       },
       fieldMeta: {
         foobar: {
-          range: { min: 0, max: 100 },
+          range: { min: 0, max: 100, delta: 100 },
           categories: {
             categories: [
               {
@@ -101,6 +101,11 @@ test('Should render ordinal legend', async () => {
   const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
   const component = shallow(legendRow);
+
+  // Ensure all promises resolve
+  await new Promise(resolve => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
 
   expect(component).toMatchSnapshot();
 });

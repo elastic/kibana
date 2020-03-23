@@ -77,17 +77,87 @@ exports[`Should render categorical legend with breaks from default 1`] = `
 `;
 
 exports[`Should render ordinal legend 1`] = `
-<RangedStyleLegendRow
-  fieldLabel=""
-  header={
-    <ColorGradient
-      colorRampName="Blues"
+<div>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <Category
+      color="#f7faff"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="0"
+      label="0_format"
+      styleName="lineColor"
     />
-  }
-  maxLabel="100_format"
-  minLabel="0_format"
-  propertyLabel="Border color"
-/>
+    <Category
+      color="#cfe1f2"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="20"
+      label="20_format"
+      styleName="lineColor"
+    />
+    <Category
+      color="#93c4de"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="40"
+      label="40_format"
+      styleName="lineColor"
+    />
+    <Category
+      color="#4a97c9"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="60"
+      label="60_format"
+      styleName="lineColor"
+    />
+    <Category
+      color="#072f6b"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="80"
+      label="80_format"
+      styleName="lineColor"
+    />
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceAround"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
 `;
 
 exports[`Should render ordinal legend with breaks 1`] = `
