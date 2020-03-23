@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { managementListReducer } from './reducer';
-export { ManagementAction } from './action';
-export { managementMiddlewareFactory } from './middleware';
+export { BasicHTTPAuthorizationHeaderCredentials } from './basic_http_authorization_header_credentials';
+export { HTTPAuthorizationHeader } from './http_authorization_header';
