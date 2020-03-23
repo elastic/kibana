@@ -8,6 +8,7 @@ import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
+import { waitForSignalsPanelToBeLoaded } from '../tasks/detections';
 
 describe('Detections timeline', () => {
   beforeEach(() => {
@@ -16,10 +17,25 @@ describe('Detections timeline', () => {
   });
 
   afterEach(() => {
-    esArchiverUnload('timeline_signals');
+    // esArchiverUnload('timeline_signals');
   });
 
   it('View a signal in timeline', () => {
+    waitForSignalsPanelToBeLoaded();
+    cy.get('[data-test-subj="expand-event"]')
+      .first()
+      .click({ force: true });
+    cy.get('[data-test-subj="draggable-content-_id"]')
+      .first()
+      .invoke('text')
+      .then(eventId => {
+        cy.get('[data-test-subj="send-signal-to-timeline-button"]')
+          .first()
+          .click({ force: true });
+        cy.get('[data-test-subj="providerBadge"]')
+          .invoke('text')
+          .should('eql', `_id: "${eventId}"`);
+      });
     cy.pause();
   });
 });
