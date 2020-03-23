@@ -227,4 +227,5 @@ export interface AlertingIndexUIQueryParams {
   query?: string;
   date_range?: string;
   filters?: string;
+  closed_alerts?: string;
 }

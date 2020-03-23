@@ -34,6 +34,7 @@ import { AlertDetailsOverview } from './details';
 import { FormattedDate } from './formatted_date';
 import { AlertIndexSearchBar } from './index_search_bar';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { AlertListTabs } from './alert_list_tabs';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -287,6 +288,7 @@ export const AlertIndex = memo(() => {
                 </EuiTitle>
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
+            <AlertListTabs />
             <EuiPageContentBody>
               <AlertIndexSearchBar />
               <EuiDataGrid

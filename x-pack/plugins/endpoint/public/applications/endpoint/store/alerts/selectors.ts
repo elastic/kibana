@@ -68,6 +68,7 @@ export const uiQueryParams: (
         'query',
         'date_range',
         'filters',
+        'closed_alerts',
       ];
       for (const key of keys) {
         const value = query[key];
@@ -168,4 +169,9 @@ export const apiQueryParams: (
 export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
   uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
+);
+
+export const isOnClosedAlertTab: (state: AlertListState) => boolean = createSelector(
+  uiQueryParams,
+  ({ closed_alerts: isOnClosedAlertsList }) => isOnClosedAlertsList !== undefined
 );
