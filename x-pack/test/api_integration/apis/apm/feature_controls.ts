@@ -149,12 +149,27 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         log.error(JSON.stringify(res, null, 2));
       },
     },
+    {
+      req: {
+        url: `/api/apm/settings/custom_links`,
+      },
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      req: {
+        url: `/api/apm/settings/custom_links/transaction`,
+      },
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
   ];
 
   const elasticsearchPrivileges = {
     indices: [
       { names: ['apm-*'], privileges: ['read', 'view_index_metadata'] },
       { names: ['.apm-agent-configuration'], privileges: ['read', 'write', 'view_index_metadata'] },
+      { names: ['.apm-custom-link'], privileges: ['read', 'write', 'view_index_metadata'] },
     ],
   };
 
