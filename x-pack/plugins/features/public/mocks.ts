@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
-
-const createSetup = (): jest.Mocked<FeaturesPluginSetup> => {
-  return {
-    getFeatures: jest.fn(),
-  };
-};
+import { FeaturesPluginStart } from './plugin';
 
 const createStart = (): jest.Mocked<FeaturesPluginStart> => {
   return {
@@ -19,6 +13,5 @@ const createStart = (): jest.Mocked<FeaturesPluginStart> => {
 };
 
 export const featuresPluginMock = {
-  createSetup,
   createStart,
 };

@@ -17,6 +17,17 @@ export interface SubFeatureConfig {
   /** Collection of privilege groups */
   privilegeGroups: SubFeaturePrivilegeGroupConfig[];
 }
+
+/**
+ * The type of privilege group.
+ * - `mutually_exclusive`::
+ *     Users will be able to select at most one privilege within this group.
+ *     Privileges must be specified in descending order of permissiveness (e.g. `All`, `Read`, not `Read`, `All)
+ * - `independent`::
+ *     Users will be able to select any combination of privileges within this group.
+ */
+export type SubFeaturePrivilegeGroupType = 'mutually_exclusive' | 'independent';
+
 /**
  * Configuration for a sub-feature privilege group.
  */
@@ -29,7 +40,7 @@ export interface SubFeaturePrivilegeGroupConfig {
    * - `independent`::
    *     Users will be able to select any combination of privileges within this group.
    */
-  groupType: 'mutually_exclusive' | 'independent';
+  groupType: SubFeaturePrivilegeGroupType;
 
   /**
    * The privileges which belong to this group.

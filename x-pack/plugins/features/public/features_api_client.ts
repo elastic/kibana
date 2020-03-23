@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'src/core/public';
+import { HttpSetup } from 'src/core/public';
 import { FeatureConfig, Feature } from '.';
 
 export class FeaturesAPIClient {
-  constructor(private readonly http: CoreSetup['http']) {}
+  constructor(private readonly http: HttpSetup) {}
 
   public async getFeatures() {
     const features = await this.http.get<FeatureConfig[]>('/api/features');

@@ -8,18 +8,15 @@ import { Plugin, CoreSetup } from 'src/core/public';
 import { FeaturesAPIClient } from './features_api_client';
 
 export class FeaturesPlugin implements Plugin<FeaturesPluginSetup, FeaturesPluginStart> {
-  private apiClient!: FeaturesAPIClient;
+  private apiClient?: FeaturesAPIClient;
 
   public setup(core: CoreSetup) {
     this.apiClient = new FeaturesAPIClient(core.http);
-    return {
-      getFeatures: () => this.apiClient.getFeatures(),
-    };
   }
 
   public start() {
     return {
-      getFeatures: () => this.apiClient.getFeatures(),
+      getFeatures: () => this.apiClient!.getFeatures(),
     };
   }
 

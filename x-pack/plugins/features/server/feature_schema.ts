@@ -71,12 +71,15 @@ const subFeaturePrivilegeSchema = Joi.object({
 });
 
 const subFeatureSchema = Joi.object({
-  name: Joi.string(),
+  name: Joi.string().required(),
   privilegeGroups: Joi.array().items(
     Joi.object({
-      name: Joi.string(),
-      groupType: Joi.string(),
-      privileges: Joi.array().items(subFeaturePrivilegeSchema),
+      groupType: Joi.string()
+        .valid('mutually_exclusive', 'independent')
+        .required(),
+      privileges: Joi.array()
+        .items(subFeaturePrivilegeSchema)
+        .min(1),
     })
   ),
 });

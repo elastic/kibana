@@ -5,19 +5,17 @@
  */
 
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
-import { Feature, FeatureConfig } from '.';
+import { Feature } from '.';
 import { SubFeaturePrivilegeGroupConfig } from '../common';
 
-function createFeaturePrivilege(key: string, capabilities: string[] = []) {
+function createFeaturePrivilege(capabilities: string[] = []) {
   return {
-    [key]: {
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      app: [],
-      ui: [...capabilities],
+    savedObject: {
+      all: [],
+      read: [],
     },
+    app: [],
+    ui: [...capabilities],
   };
 }
 
@@ -47,9 +45,10 @@ describe('populateUICapabilities', () => {
           id: 'newFeature',
           name: 'my new feature',
           app: ['bar-app'],
-          privileges: ({
-            ...createFeaturePrivilege('all'),
-          } as unknown) as FeatureConfig['privileges'],
+          privileges: {
+            all: createFeaturePrivilege(),
+            read: createFeaturePrivilege(),
+          },
         }),
       ])
     ).toEqual({
@@ -66,9 +65,10 @@ describe('populateUICapabilities', () => {
           name: 'my new feature',
           navLinkId: 'newFeatureNavLink',
           app: ['bar-app'],
-          privileges: ({
-            ...createFeaturePrivilege('all', ['capability1', 'capability2']),
-          } as unknown) as FeatureConfig['privileges'],
+          privileges: {
+            all: createFeaturePrivilege(['capability1', 'capability2']),
+            read: createFeaturePrivilege(),
+          },
         }),
       ])
     ).toEqual({
@@ -89,11 +89,10 @@ describe('populateUICapabilities', () => {
           navLinkId: 'newFeatureNavLink',
           app: ['bar-app'],
           catalogue: ['anotherFooEntry', 'anotherBarEntry'],
-          privileges: ({
-            ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
-            ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
-            ...createFeaturePrivilege('baz'),
-          } as unknown) as FeatureConfig['privileges'],
+          privileges: {
+            all: createFeaturePrivilege(['capability1', 'capability2']),
+            read: createFeaturePrivilege(['capability3', 'capability4']),
+          },
         }),
       ])
     ).toEqual({
@@ -118,11 +117,10 @@ describe('populateUICapabilities', () => {
           name: 'my new feature',
           navLinkId: 'newFeatureNavLink',
           app: ['bar-app'],
-          privileges: ({
-            ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
-            ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
-            ...createFeaturePrivilege('baz', ['capability1', 'capability5']),
-          } as unknown) as FeatureConfig['privileges'],
+          privileges: {
+            all: createFeaturePrivilege(['capability1', 'capability2']),
+            read: createFeaturePrivilege(['capability3', 'capability4', 'capability5']),
+          },
         }),
       ])
     ).toEqual({
@@ -145,10 +143,10 @@ describe('populateUICapabilities', () => {
           name: 'my new feature',
           navLinkId: 'newFeatureNavLink',
           app: ['bar-app'],
-          privileges: ({
-            ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
-            ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
-          } as unknown) as FeatureConfig['privileges'],
+          privileges: {
+            all: createFeaturePrivilege(['capability1', 'capability2']),
+            read: createFeaturePrivilege(['capability3', 'capability4']),
+          },
           subFeatures: [
             {
               name: 'sub-feature-1',
@@ -209,35 +207,29 @@ describe('populateUICapabilities', () => {
           name: 'my new feature',
           navLinkId: 'newFeatureNavLink',
           app: ['bar-app'],
-          privileges: ({
-            ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
-            ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
-            ...createFeaturePrivilege('baz', ['capability1', 'capability5']),
-          } as unknown) as FeatureConfig['privileges'],
+          privileges: {
+            all: createFeaturePrivilege(['capability1', 'capability2']),
+            read: createFeaturePrivilege(['capability3', 'capability4']),
+          },
         }),
         new Feature({
           id: 'anotherNewFeature',
           name: 'another new feature',
           app: ['bar-app'],
-          privileges: ({
-            ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
-            ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
-          } as unknown) as FeatureConfig['privileges'],
+          privileges: {
+            all: createFeaturePrivilege(['capability1', 'capability2']),
+            read: createFeaturePrivilege(['capability3', 'capability4']),
+          },
         }),
         new Feature({
           id: 'yetAnotherNewFeature',
           name: 'yet another new feature',
           navLinkId: 'yetAnotherNavLink',
           app: ['bar-app'],
-          privileges: ({
-            ...createFeaturePrivilege('all', ['capability1', 'capability2']),
-            ...createFeaturePrivilege('read', []),
-            ...createFeaturePrivilege('somethingInBetween', [
-              'something1',
-              'something2',
-              'something3',
-            ]),
-          } as unknown) as FeatureConfig['privileges'],
+          privileges: {
+            all: createFeaturePrivilege(['capability1', 'capability2']),
+            read: createFeaturePrivilege(['something1', 'something2', 'something3']),
+          },
           subFeatures: [
             {
               name: 'sub-feature-1',
@@ -267,7 +259,6 @@ describe('populateUICapabilities', () => {
         capability2: true,
         capability3: true,
         capability4: true,
-        capability5: true,
       },
       yetAnotherNewFeature: {
         capability1: true,

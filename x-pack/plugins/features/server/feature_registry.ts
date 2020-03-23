@@ -25,9 +25,9 @@ export class FeatureRegistry {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
     }
 
-    const featureCopy: FeatureConfig = cloneDeep(feature as FeatureConfig);
+    const featureCopy = cloneDeep(feature);
 
-    this.features[feature.id] = applyAutomaticPrivilegeGrants(featureCopy as FeatureConfig);
+    this.features[feature.id] = applyAutomaticPrivilegeGrants(featureCopy);
   }
 
   public getAll(): Feature[] {
