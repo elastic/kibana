@@ -92,8 +92,7 @@ export function getFiltersBucketAgg(deps: {
                 (typeof filter.input.query === 'string'
                   ? filter.input.query
                   : toAngularJSON(filter.input.query));
-              // Adjacency matrix fails if the query is wrapped by the key "query"
-              filters[label] = deps.name === BUCKET_TYPES.ADJACENCY_MATRIX ? query : { query };
+              filters[label] = query;
             },
             {}
           );
