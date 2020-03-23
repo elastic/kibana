@@ -737,9 +737,6 @@ function VisualizeAppController(
     searchSource.setField('index', currentIndex);
     searchSource.setParent(searchSourceGrandparent);
 
-    delete savedVis.savedSearchId;
-    delete vis.data.savedSearchId;
-
     stateContainer.transitions.unlinkSavedSearch({
       query: searchSourceParent.getField('query'),
       parentFilters: searchSourceParent.getOwnField('filter'),

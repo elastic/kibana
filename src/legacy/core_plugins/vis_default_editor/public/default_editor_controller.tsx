@@ -29,13 +29,14 @@ import { Storage } from '../../../../plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../plugins/kibana_react/public';
 import { DefaultEditor } from './default_editor';
 import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
+import { VisualizeEmbeddable } from '../../visualizations/public/np_ready/public/embeddable';
 
 const localStorage = new Storage(window.localStorage);
 
 export interface DefaultEditorControllerState {
   vis: Vis;
   eventEmitter: EventEmitter;
-  embeddableHandler: any;
+  embeddableHandler: VisualizeEmbeddable;
   optionTabs: OptionTab[];
 }
 

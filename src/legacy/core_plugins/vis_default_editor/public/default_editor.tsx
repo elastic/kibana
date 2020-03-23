@@ -28,9 +28,7 @@ import { DefaultEditorControllerState } from './default_editor_controller';
 import { getInitialWidth } from './editor_size';
 
 function DefaultEditor({
-  embeddable,
   vis,
-  uiState,
   timeRange,
   filters,
   optionTabs,
@@ -66,8 +64,6 @@ function DefaultEditor({
       filters,
       query,
     });
-
-    return () => {};
   }, [embeddableHandler, timeRange, filters, query]);
 
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);

@@ -40,7 +40,6 @@ import { SavedSearch } from '../../../../../../plugins/discover/public';
 
 interface LinkedSearchProps {
   savedSearch: SavedSearch;
-  vis: Vis;
   eventEmitter: EventEmitter;
 }
 
@@ -51,7 +50,7 @@ interface SidebarTitleProps {
   eventEmitter: EventEmitter;
 }
 
-export function LinkedSearch({ vis, savedSearch, eventEmitter }: LinkedSearchProps) {
+export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
   const closePopover = useCallback(() => setShowPopover(false), []);
   const onClickButtonLink = useCallback(() => setShowPopover(v => !v), []);
@@ -156,7 +155,7 @@ export function LinkedSearch({ vis, savedSearch, eventEmitter }: LinkedSearchPro
 
 function SidebarTitle({ savedSearch, vis, isLinkedSearch, eventEmitter }: SidebarTitleProps) {
   return isLinkedSearch && savedSearch ? (
-    <LinkedSearch savedSearch={savedSearch} vis={vis} eventEmitter={eventEmitter} />
+    <LinkedSearch savedSearch={savedSearch} eventEmitter={eventEmitter} />
   ) : vis.type.options.showIndexSelection ? (
     <EuiTitle size="xs" className="visEditorSidebar__titleContainer eui-textTruncate">
       <h2

@@ -526,14 +526,14 @@ export const buildPipeline = async (
   if (buildPipelineVisFunction[vis.type.name]) {
     pipeline += buildPipelineVisFunction[vis.type.name](vis.params, schemas, uiState);
   } else if (vislibCharts.includes(vis.type.name)) {
-    const visConfig = vis.params;
+    const visConfig = { ...vis.params };
     visConfig.dimensions = await buildVislibDimensions(vis, params);
 
-    pipeline += `vislib type='${vis.type.name}' ${prepareJson('visConfig', vis.params)}`;
+    pipeline += `vislib type='${vis.type.name}' ${prepareJson('visConfig', visConfig)}`;
   } else if (vis.type.toExpression) {
     pipeline += await vis.type.toExpression(vis, params);
   } else {
-    const visConfig = vis.params;
+    const visConfig = { ...vis.params };
     visConfig.dimensions = schemas;
     pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visConfig)}

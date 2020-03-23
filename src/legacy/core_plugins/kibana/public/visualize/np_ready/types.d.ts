@@ -61,12 +61,9 @@ export interface VisualizeAppStateTransitions {
 }
 
 export interface EditorRenderProps {
-  appState: { save(): void };
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
   filters: Filter[];
-  uiState: PersistedState;
   timeRange: TimeRange;
   query?: Query;
   savedSearch?: SavedSearch;
