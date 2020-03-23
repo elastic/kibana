@@ -6,20 +6,20 @@
 
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
-import { REST_API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
+import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export const createGetIndexStatusRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: REST_API_URLS.INDEX_STATUS,
+  path: API_URLS.INDEX_STATUS,
   validate: false,
   options: {
-    tags: ['access:uptime'],
+    tags: ['access:uptime-read'],
   },
-  handler: async ({ callES }, _context, _request, response): Promise<any> => {
+  handler: async ({ callES, dynamicSettings }, _context, _request, response): Promise<any> => {
     try {
       return response.ok({
         body: {
-          ...(await libs.requests.getIndexStatus({ callES })),
+          ...(await libs.requests.getIndexStatus({ callES, dynamicSettings })),
         },
       });
     } catch (e) {

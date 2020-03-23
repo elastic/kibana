@@ -18,6 +18,7 @@ export type Mappings =
       scaling_factor?: number;
       ignore_malformed?: boolean;
       coerce?: boolean;
+      fields?: Record<string, Mappings>;
     };
 
 export async function createOrUpdateIndex({

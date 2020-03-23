@@ -5,6 +5,11 @@
  */
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import cytoscape from 'cytoscape';
+import { CSSProperties } from 'react';
+import {
+  DESTINATION_ADDRESS,
+  SERVICE_NAME
+} from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { defaultIcon, iconForNode } from './icons';
 
 export const animationOptions: cytoscape.AnimationOptions = {
@@ -20,7 +25,7 @@ const zIndexEdgeHover = 120;
 export const nodeHeight = parseInt(theme.avatarSizing.l.size, 10);
 
 function isService(el: cytoscape.NodeSingular) {
-  return el.data('type') === 'service';
+  return el.data(SERVICE_NAME) !== undefined;
 }
 
 const style: cytoscape.Stylesheet[] = [
@@ -53,7 +58,8 @@ const style: cytoscape.Stylesheet[] = [
       'ghost-offset-y': 2,
       'ghost-opacity': 0.15,
       height: nodeHeight,
-      label: 'data(label)',
+      label: (el: cytoscape.NodeSingular) =>
+        isService(el) ? el.data(SERVICE_NAME) : el.data(DESTINATION_ADDRESS),
       'min-zoomed-font-size': theme.euiSizeL,
       'overlay-opacity': 0,
       shape: (el: cytoscape.NodeSingular) =>
@@ -101,6 +107,12 @@ const style: cytoscape.Stylesheet[] = [
       'target-distance-from-node': theme.paddingSizes.xs
     }
   },
+  // @ts-ignore DefinitelyTyped says visibility is "none" but it's
+  // actually "hidden"
+  {
+    selector: 'edge[isInverseEdge]',
+    style: { visibility: 'hidden' }
+  },
   // @ts-ignore
   {
     selector: '.invisible',
@@ -135,6 +147,28 @@ const style: cytoscape.Stylesheet[] = [
     }
   }
 ];
+
+// The CSS styles for the div containing the cytoscape element. Makes a
+// background grid of dots.
+export const cytoscapeDivStyle: CSSProperties = {
+  background: `linear-gradient(
+  90deg,
+  ${theme.euiPageBackgroundColor}
+    calc(${theme.euiSizeL} - calc(${theme.euiSizeXS} / 2)),
+  transparent 1%
+)
+center,
+linear-gradient(
+  ${theme.euiPageBackgroundColor}
+    calc(${theme.euiSizeL} - calc(${theme.euiSizeXS} / 2)),
+  transparent 1%
+)
+center,
+${theme.euiColorLightShade}`,
+  backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
+  margin: `-${theme.gutterTypes.gutterLarge}`,
+  marginTop: 0
+};
 
 export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
   autoungrabify: true,

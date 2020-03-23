@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  CSSProperties,
-  useState,
-  useRef,
-  useEffect,
-  ReactNode,
-  createContext,
-  useCallback
-} from 'react';
 import cytoscape from 'cytoscape';
+import React, {
+  createContext,
+  CSSProperties,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
+import { AGENT_NAME } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import {
+  animationOptions,
   cytoscapeOptions,
-  nodeHeight,
-  animationOptions
+  nodeHeight
 } from './cytoscapeOptions';
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
@@ -96,7 +97,7 @@ function getLayoutOptions(
 function selectRoots(cy: cytoscape.Core): string[] {
   const nodes = cy.nodes();
   const roots = nodes.roots();
-  const rumNodes = nodes.filter(node => isRumAgentName(node.data('agentName')));
+  const rumNodes = nodes.filter(node => isRumAgentName(node.data(AGENT_NAME)));
   return rumNodes.union(roots).map(node => node.id());
 }
 
