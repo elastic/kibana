@@ -16,7 +16,7 @@ interface UserActionItemProps {
   id: string;
   isEditable: boolean;
   isLoading: boolean;
-  labelAction?: string;
+  labelEditAction?: string;
   labelTitle?: string;
   fullName: string;
   markdown: React.ReactNode;
@@ -71,7 +71,7 @@ export const UserActionItem = ({
   id,
   isEditable,
   isLoading,
-  labelAction,
+  labelEditAction,
   labelTitle,
   fullName,
   markdown,
@@ -94,7 +94,7 @@ export const UserActionItem = ({
             createdAt={createdAt}
             id={id}
             isLoading={isLoading}
-            labelAction={labelAction ?? ''}
+            labelEditAction={labelEditAction ?? ''}
             labelTitle={labelTitle ?? ''}
             userName={userName}
             onEdit={onEdit}
