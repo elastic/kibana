@@ -6,10 +6,7 @@
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Snapshot } from '../../../../../legacy/plugins/uptime/common/runtime_types';
-import {
-  CONTEXT_DEFAULTS,
-  INDEX_NAMES,
-} from '../../../../../legacy/plugins/uptime/common/constants';
+import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants';
 import { QueryContext } from './search';
 
 export interface GetSnapshotCountParams {
@@ -21,6 +18,7 @@ export interface GetSnapshotCountParams {
 
 export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot> = async ({
   callES,
+  dynamicSettings: { heartbeatIndices },
   dateRangeStart,
   dateRangeEnd,
   filters,
@@ -32,6 +30,7 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
 
   const context = new QueryContext(
     callES,
+    heartbeatIndices,
     dateRangeStart,
     dateRangeEnd,
     CONTEXT_DEFAULTS.CURSOR_PAGINATION,
@@ -52,7 +51,7 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {
   const res = await context.search({
-    index: INDEX_NAMES.HEARTBEAT,
+    index: context.heartbeatIndices,
     body: statusCountBody(await context.dateAndCustomFilters()),
   });
 

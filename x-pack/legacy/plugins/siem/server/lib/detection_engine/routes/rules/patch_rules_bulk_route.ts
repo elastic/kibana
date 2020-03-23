@@ -75,6 +75,8 @@ export const patchRulesBulkRoute = (router: IRouter) => {
             references,
             note,
             version,
+            anomaly_threshold: anomalyThreshold,
+            machine_learning_job_id: machineLearningJobId,
           } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
@@ -111,6 +113,8 @@ export const patchRulesBulkRoute = (router: IRouter) => {
               references,
               note,
               version,
+              anomalyThreshold,
+              machineLearningJobId,
             });
             if (rule != null) {
               const ruleStatuses = await savedObjectsClient.find<
