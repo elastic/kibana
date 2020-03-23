@@ -21,12 +21,12 @@ import { HostList } from './view/hosts';
 import { PolicyList } from './view/policy';
 import { PolicyDetails } from './view/policy';
 import { HeaderNavigation } from './components/header_nav';
-import { setupRouteService } from '../../../../ingest_manager/common';
+import { setupIngestManager } from '../../../../ingest_manager/common';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
 
 export async function setupDeps(coreStart: CoreStart) {
   // TODO handle a 500 from the ingest manager
-  await coreStart.http.post(setupRouteService.getSetupPath());
+  await setupIngestManager(coreStart.http);
 }
 
 /**

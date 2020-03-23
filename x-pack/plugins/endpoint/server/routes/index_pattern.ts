@@ -28,10 +28,14 @@ function handleIndexPattern(
         req.query.version
       );
 
-      return res.ok({ body: await indexPattern.get() });
+      return res.ok({
+        body: {
+          indexPattern: await indexPattern.get(),
+        },
+      });
     } catch (error) {
       log.warn(error);
-      return res.internalError({ body: error });
+      return res.notFound({ body: error });
     }
   };
 }

@@ -28,6 +28,7 @@ export default function endpointAPIIntegrationTests(context: FtrProviderContext)
     });
 
     this.tags(['endpoint']);
+    loadTestFile(require.resolve('./index_pattern'));
     loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./alerts'));

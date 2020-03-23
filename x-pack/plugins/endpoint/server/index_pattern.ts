@@ -34,7 +34,9 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
       this.log.warn(
         `Failed to retrieve index pattern from ingest manager dataset: ${this.datasetPath} version: ${version}`
       );
-      throw new Error('Unable to retrieve the index pattern from the ingest manager');
+      throw new Error(
+        `Unable to retrieve the index pattern for dataset: ${this.datasetPath} version: ${version}`
+      );
     }
 
     return pattern;
