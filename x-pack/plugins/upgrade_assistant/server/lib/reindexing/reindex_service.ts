@@ -78,7 +78,7 @@ export interface ReindexService {
    * Delete reindex operations for completed indices with deprecations.
    * @param indexNames
    */
-  cleanupReindexOperations(indexNames: Array<string | undefined>): Promise<void> | null;
+  cleanupReindexOperations(indexNames: string[]): Promise<void> | null;
 
   /**
    * Process the reindex operation through one step of the state machine and resolves
