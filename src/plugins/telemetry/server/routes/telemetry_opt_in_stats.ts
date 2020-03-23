@@ -76,8 +76,6 @@ export function registerTelemetryOptInStatsRoutes(
           end: moment().toISOString(),
           unencrypted,
           request: req,
-          callAsCurrentUser: context.core.elasticsearch.adminClient.callAsCurrentUser,
-          callAsInternalUser: context.core.elasticsearch.adminClient.callAsInternalUser,
         };
 
         const optInStatus = await telemetryCollectionManager.getOptInStats(

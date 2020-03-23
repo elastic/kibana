@@ -178,7 +178,6 @@ export class FetcherTask {
   private async fetchTelemetry() {
     return await this.telemetryCollectionManager!.getStats({
       unencrypted: false,
-      callAsInternalUser: this.elasticsearchClient!.callAsInternalUser,
       start: moment()
         .subtract(20, 'minutes')
         .toISOString(),

@@ -130,13 +130,9 @@ export class TelemetryCollectionManagerPlugin
   ): StatsCollectionConfig {
     const { start, end, request } = config;
 
-    let callCluster = config.unencrypted ? config.callAsCurrentUser : config.callAsInternalUser;
-
-    if (collection.esCluster) {
-      callCluster = config.unencrypted
-        ? collection.esCluster.asScoped(request).callAsCurrentUser
-        : collection.esCluster.callAsInternalUser;
-    }
+    const callCluster = config.unencrypted
+      ? collection.esCluster.asScoped(request).callAsCurrentUser
+      : collection.esCluster.callAsInternalUser;
 
     return { callCluster, start, end, usageCollection };
   }

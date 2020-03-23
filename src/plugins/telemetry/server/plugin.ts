@@ -85,7 +85,7 @@ export class TelemetryPlugin implements Plugin {
     const config$ = this.config$;
     const isDev = this.isDev;
 
-    registerCollection(telemetryCollectionManager);
+    registerCollection(telemetryCollectionManager, core.elasticsearch.dataClient);
     const router = core.http.createRouter();
 
     registerRoutes({

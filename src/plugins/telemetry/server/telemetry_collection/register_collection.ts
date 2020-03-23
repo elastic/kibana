@@ -36,15 +36,18 @@
  * under the License.
  */
 
+import { IClusterClient } from 'kibana/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import { getLocalStats } from './get_local_stats';
 import { getClusterUuids } from './get_cluster_stats';
 import { getLocalLicense } from './get_local_license';
 
 export function registerCollection(
-  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup
+  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
+  esCluster: IClusterClient
 ) {
   telemetryCollectionManager.setCollection({
+    esCluster,
     title: 'local',
     priority: 0,
     statsGetter: getLocalStats,

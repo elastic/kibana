@@ -63,8 +63,6 @@ export function registerTelemetryUsageStatsRoutes(
           start,
           end,
           request: req,
-          callAsCurrentUser: context.core.elasticsearch.adminClient.callAsCurrentUser,
-          callAsInternalUser: context.core.elasticsearch.adminClient.callAsInternalUser,
         };
         const stats = await telemetryCollectionManager.getStats(statsConfig);
         return res.ok({ body: stats });

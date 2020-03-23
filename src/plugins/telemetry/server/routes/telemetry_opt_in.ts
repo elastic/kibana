@@ -89,7 +89,6 @@ export function registerTelemetryOptInRoutes({
               .subtract(20, 'minutes')
               .toISOString(),
             end: moment().toISOString(),
-            callAsInternalUser: context.core.elasticsearch.adminClient.callAsInternalUser,
             unencrypted: false,
           }
         );

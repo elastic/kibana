@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { APICaller, Logger, ICustomClusterClient, KibanaRequest } from 'kibana/server';
+import { APICaller, Logger, KibanaRequest, IClusterClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 
@@ -47,19 +47,15 @@ export interface BaseStatsGetterConfig {
   start: string;
   end: string;
   request?: KibanaRequest;
-  callAsInternalUser?: APICaller;
-  callAsCurrentUser?: APICaller;
 }
 
 export interface EncryptedStatsGetterConfig extends BaseStatsGetterConfig {
   unencrypted: false;
-  callAsInternalUser: APICaller;
 }
 
 export interface UnencryptedStatsGetterConfig extends BaseStatsGetterConfig {
   unencrypted: true;
   request: KibanaRequest;
-  callAsCurrentUser: APICaller;
 }
 
 export interface ClusterDetails {
@@ -134,7 +130,7 @@ export interface CollectionConfig<
 > {
   title: string;
   priority: number;
-  esCluster?: ICustomClusterClient;
+  esCluster: IClusterClient;
   statsGetter: StatsGetter<CustomContext, T>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   licenseGetter: LicenseGetter<CustomContext>;
@@ -149,6 +145,6 @@ export interface Collection<
   statsGetter: StatsGetter<CustomContext, T>;
   licenseGetter: LicenseGetter<CustomContext>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
-  esCluster?: ICustomClusterClient;
+  esCluster: IClusterClient;
   title: string;
 }
