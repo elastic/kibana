@@ -23,11 +23,7 @@
 import angular from 'angular';
 import { EuiIcon } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
-// @ts-ignore
-import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
-import { KbnUrlProvider } from 'ui/url';
+import { CoreStart, LegacyCoreStart } from 'kibana/public';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -61,7 +57,6 @@ import { createRenderCompleteDirective } from './np_ready/angular/directives/ren
 import {
   initAngularBootstrap,
   configureAppAngularModule,
-  IPrivate,
   KbnAccessibleClickProvider,
   PrivateProvider,
   PromiseServiceCreator,
@@ -108,8 +103,6 @@ export function initializeInnerAngularModule(
     createLocalI18nModule();
     createLocalPrivateModule();
     createLocalPromiseModule();
-    createLocalConfigModule(core.uiSettings);
-    createLocalKbnUrlModule();
     createLocalTopNavModule(navigation);
     createLocalStorageModule();
     createElasticSearchModule(data);
@@ -143,7 +136,6 @@ export function initializeInnerAngularModule(
       'ngRoute',
       'react',
       'ui.bootstrap',
-      'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
       'discoverPromise',
@@ -168,27 +160,6 @@ export function initializeInnerAngularModule(
     .directive('discoverField', createDiscoverFieldDirective)
     .directive('discFieldChooser', createFieldChooserDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
-}
-
-function createLocalKbnUrlModule() {
-  angular
-    .module('discoverKbnUrl', ['discoverPrivate', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
-}
-
-function createLocalConfigModule(uiSettings: IUiSettingsClient) {
-  angular
-    .module('discoverConfig', ['discoverPrivate'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', () => {
-      return {
-        $get: () => ({
-          get: (value: string) => {
-            return uiSettings ? uiSettings.get(value) : undefined;
-          },
-        }),
-      };
-    });
 }
 
 function createLocalPromiseModule() {
@@ -229,7 +200,7 @@ const createLocalStorageService = function(type: string) {
 
 function createElasticSearchModule(data: DataPublicPluginStart) {
   angular
-    .module('discoverEs', ['discoverConfig'])
+    .module('discoverEs', [])
     // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
     .service('es', () => {
       return data.search.__LEGACY.esClient;
@@ -242,12 +213,7 @@ function createPagerFactoryModule() {
 
 function createDocTableModule() {
   angular
-    .module('discoverDocTable', [
-      'discoverKbnUrl',
-      'discoverConfig',
-      'discoverPagerFactory',
-      'react',
-    ])
+    .module('discoverDocTable', ['discoverPagerFactory', 'react'])
     .directive('docTable', createDocTableDirective)
     .directive('kbnTableHeader', createTableHeaderDirective)
     .directive('toolBarPagerText', createToolBarPagerTextDirective)

@@ -29,10 +29,10 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
           actionTypeId: DISABLED_ACTION_TYPE,
         });
 
-      expect(response.statusCode).to.eql(400);
+      expect(response.statusCode).to.eql(403);
       expect(response.body).to.eql({
-        statusCode: 400,
-        error: 'Bad Request',
+        statusCode: 403,
+        error: 'Forbidden',
         message:
           'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
       });
@@ -46,11 +46,10 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
           params: {},
         });
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.statusCode).to.eql(403);
       expect(response.body).to.eql({
-        status: 'error',
-        retry: false,
-        actionId: PREWRITTEN_ACTION_ID,
+        statusCode: 403,
+        error: 'Forbidden',
         message:
           'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
       });
@@ -76,12 +75,12 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
           name: 'an action created before test.not-enabled was disabled (updated)',
         });
 
-      expect(responseUpdate.statusCode).to.eql(200);
+      expect(responseUpdate.statusCode).to.eql(403);
       expect(responseUpdate.body).to.eql({
-        actionTypeId: 'test.not-enabled',
-        config: {},
-        id: 'uuid-actionId',
-        name: 'an action created before test.not-enabled was disabled (updated)',
+        statusCode: 403,
+        error: 'Forbidden',
+        message:
+          'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
       });
 
       const response = await supertest.get(`/api/action/${PREWRITTEN_ACTION_ID}`);
@@ -90,7 +89,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         actionTypeId: 'test.not-enabled',
         config: {},
         id: 'uuid-actionId',
-        name: 'an action created before test.not-enabled was disabled (updated)',
+        name: 'an action created before test.not-enabled was disabled',
       });
     });
 
