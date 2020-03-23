@@ -20,7 +20,6 @@ import {
   LogFlyout as LogFlyoutState,
   WithFlyoutOptionsUrlState,
 } from '../../../containers/logs/log_flyout';
-import { WithLogMinimapUrlState } from '../../../containers/logs/with_log_minimap';
 import { LogPositionState } from '../../../containers/logs/log_position';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { WithStreamItems } from '../../../containers/logs/with_stream_items';
@@ -31,7 +30,7 @@ import { LogHighlightsState } from '../../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { source, sourceId, version } = useContext(Source.Context);
-  const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
+  const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
     flyoutVisible,
@@ -44,17 +43,20 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const { applyLogFilterQuery } = useContext(LogFilterState.Context);
   const {
-    isAutoReloading,
+    isStreaming,
     targetPosition,
     visibleMidpointTime,
     visibleTimeInterval,
     reportVisiblePositions,
     jumpToTargetPosition,
+    startLiveStreaming,
     stopLiveStreaming,
+    startDateExpression,
+    endDateExpression,
+    updateDateRange,
   } = useContext(LogPositionState.Context);
   return (
     <>
-      <WithLogMinimapUrlState />
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
@@ -90,7 +92,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               hasMoreBeforeStart={hasMoreBeforeStart}
               isLoadingMore={isLoadingMore}
               isReloading={isReloading}
-              isStreaming={isAutoReloading}
+              isStreaming={isStreaming}
               items={items}
               jumpToTarget={jumpToTargetPosition}
               lastLoadedTime={lastLoadedTime}
@@ -104,6 +106,10 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               setFlyoutVisibility={setFlyoutVisibility}
               highlightedItem={surroundingLogsId ? surroundingLogsId : null}
               currentHighlightKey={currentHighlightKey}
+              startDateExpression={startDateExpression}
+              endDateExpression={endDateExpression}
+              updateDateRange={updateDateRange}
+              startLiveStreaming={startLiveStreaming}
             />
           )}
         </WithStreamItems>
@@ -113,14 +119,15 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             return (
               <LogPageMinimapColumn ref={measureRef}>
                 <WithSummary>
-                  {({ buckets }) => (
+                  {({ buckets, start, end }) => (
                     <WithStreamItems>
                       {({ isReloading }) => (
                         <LogMinimap
+                          start={start}
+                          end={end}
                           height={height}
                           width={width}
                           highlightedInterval={isReloading ? null : visibleTimeInterval}
-                          intervalSize={intervalSize}
                           jumpToTarget={jumpToTargetPosition}
                           summaryBuckets={buckets}
                           summaryHighlightBuckets={

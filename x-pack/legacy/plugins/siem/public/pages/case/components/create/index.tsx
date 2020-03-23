@@ -47,7 +47,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 
 const initialCaseValue: CaseRequest = {
   description: '',
-  state: 'open',
+  status: 'open',
   tags: [],
   title: '',
 };
@@ -71,6 +71,10 @@ export const Create = React.memo(() => {
       await postCase(data);
     }
   }, [form]);
+
+  const handleSetIsCancel = useCallback(() => {
+    setIsCancel(true);
+  }, [isCancel]);
 
   if (caseData != null && caseData.id) {
     return <Redirect to={`/${SiemPageName.case}/${caseData.id}`} />;
@@ -137,7 +141,12 @@ export const Create = React.memo(() => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={() => setIsCancel(true)} iconType="cross">
+            <EuiButtonEmpty
+              data-test-subj="create-case-cancel"
+              size="s"
+              onClick={handleSetIsCancel}
+              iconType="cross"
+            >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>

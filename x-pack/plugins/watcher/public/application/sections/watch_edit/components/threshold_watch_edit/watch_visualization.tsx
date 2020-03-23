@@ -215,6 +215,7 @@ export const WatchVisualization = () => {
               theme={[customTheme(), chartsTheme]}
               xDomain={domain}
               showLegend={!!watch.termField}
+              showLegendExtra
               legendPosition={Position.Bottom}
             />
             <Axis

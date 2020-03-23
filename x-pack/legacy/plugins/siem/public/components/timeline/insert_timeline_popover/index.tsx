@@ -5,11 +5,14 @@
  */
 
 import { EuiButtonIcon, EuiPopover, EuiSelectableOption } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
+import { timelineActions } from '../../../store/timeline';
 
 interface InsertTimelinePopoverProps {
   isDisabled: boolean;
@@ -17,12 +20,37 @@ interface InsertTimelinePopoverProps {
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
 }
 
-const InsertTimelinePopoverComponent: React.FC<InsertTimelinePopoverProps> = ({
+interface RouterState {
+  insertTimeline: {
+    timelineId: string;
+    timelineTitle: string;
+  };
+}
+
+type Props = InsertTimelinePopoverProps;
+
+export const InsertTimelinePopoverComponent: React.FC<Props> = ({
   isDisabled,
   hideUntitled = false,
   onTimelineChange,
 }) => {
+  const dispatch = useDispatch();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { state } = useLocation();
+  const [routerState, setRouterState] = useState<RouterState | null>(state ?? null);
+
+  useEffect(() => {
+    if (routerState && routerState.insertTimeline) {
+      dispatch(
+        timelineActions.showTimeline({ id: routerState.insertTimeline.timelineId, show: false })
+      );
+      onTimelineChange(
+        routerState.insertTimeline.timelineTitle,
+        routerState.insertTimeline.timelineId
+      );
+      setRouterState(null);
+    }
+  }, [routerState]);
 
   const handleClosePopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -47,26 +75,25 @@ const InsertTimelinePopoverComponent: React.FC<InsertTimelinePopoverProps> = ({
 
   const handleGetSelectableOptions = useCallback(
     ({ timelines }) => [
-      ...timelines
-        .filter((t: OpenTimelineResult) => !hideUntitled || t.title !== '')
-        .map(
-          (t: OpenTimelineResult, index: number) =>
-            ({
-              description: t.description,
-              favorite: t.favorite,
-              label: t.title,
-              id: t.savedObjectId,
-              key: `${t.title}-${index}`,
-              title: t.title,
-              checked: undefined,
-            } as EuiSelectableOption)
-        ),
+      ...timelines.map(
+        (t: OpenTimelineResult, index: number) =>
+          ({
+            description: t.description,
+            favorite: t.favorite,
+            label: t.title,
+            id: t.savedObjectId,
+            key: `${t.title}-${index}`,
+            title: t.title,
+            checked: undefined,
+          } as EuiSelectableOption)
+      ),
     ],
-    [hideUntitled]
+    []
   );
 
   return (
     <EuiPopover
+      data-test-subj="insert-timeline-popover"
       id="searchTimelinePopover"
       button={insertTimelineButton}
       isOpen={isPopoverOpen}

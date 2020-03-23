@@ -24,7 +24,12 @@ import {
   EuiButtonIcon,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import {
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+} from '../../../../../alerting/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
+import { actionVariablesFromAlertType } from '../../lib/action_variables';
 import { AlertReducerAction } from './alert_reducer';
 import { AlertTypeModel, Alert, IErrorObject, AlertAction, AlertTypeIndex } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
@@ -47,7 +52,7 @@ export function validateBaseProperties(alertObject: Alert) {
       })
     );
   }
-  if (!alertObject.schedule.interval) {
+  if (alertObject.schedule.interval.length < 2) {
     errors.interval.push(
       i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredIntervalText', {
         defaultMessage: 'Check interval is required.',
@@ -69,9 +74,16 @@ interface AlertFormProps {
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
   canChangeTrigger?: boolean; // to hide Change trigger button
+  setHasActionsDisabled?: (value: boolean) => void;
 }
 
-export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: AlertFormProps) => {
+export const AlertForm = ({
+  alert,
+  canChangeTrigger = true,
+  dispatch,
+  errors,
+  setHasActionsDisabled,
+}: AlertFormProps) => {
   const alertsContext = useAlertsContext();
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
 
@@ -80,17 +92,17 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
   );
 
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
-  const [alertInterval, setAlertInterval] = useState<number>(
-    alert.schedule.interval ? parseInt(alert.schedule.interval.replace(/^[A-Za-z]+$/, ''), 0) : 1
+  const [alertInterval, setAlertInterval] = useState<number | undefined>(
+    alert.schedule.interval ? getDurationNumberInItsUnit(alert.schedule.interval) : undefined
   );
   const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>(
-    alert.schedule.interval ? alert.schedule.interval.replace(alertInterval.toString(), '') : 'm'
+    alert.schedule.interval ? getDurationUnitValue(alert.schedule.interval) : 'm'
   );
   const [alertThrottle, setAlertThrottle] = useState<number | null>(
-    alert.throttle ? parseInt(alert.throttle.replace(/^[A-Za-z]+$/, ''), 0) : null
+    alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null
   );
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>(
-    alert.throttle ? alert.throttle.replace((alertThrottle ?? '').toString(), '') : 'm'
+    alert.throttle ? getDurationUnitValue(alert.throttle) : 'm'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 
@@ -154,6 +166,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
           setAlertTypeModel(item);
+          setAlertProperty('params', {});
           if (alertTypesIndex && alertTypesIndex[item.id]) {
             setDefaultActionGroupId(alertTypesIndex[item.id].defaultActionGroupId);
           }
@@ -193,6 +206,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
               onClick={() => {
                 setAlertProperty('alertTypeId', null);
                 setAlertTypeModel(null);
+                setAlertProperty('params', {});
               }}
             />
           </EuiFlexItem>
@@ -211,9 +225,10 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
       {defaultActionGroupId ? (
         <ActionForm
           actions={alert.actions}
+          setHasActionsDisabled={setHasActionsDisabled}
           messageVariables={
             alertTypesIndex && alertTypesIndex[alert.alertTypeId]
-              ? alertTypesIndex[alert.alertTypeId].actionVariables
+              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(av => av.name)
               : undefined
           }
           defaultActionGroupId={defaultActionGroupId}
@@ -341,19 +356,27 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
       <EuiSpacer size="m" />
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
-          <EuiFormRow fullWidth compressed label={labelForAlertChecked}>
+          <EuiFormRow
+            fullWidth
+            compressed
+            label={labelForAlertChecked}
+            isInvalid={errors.interval.length > 0}
+            error={errors.interval}
+          >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <EuiFieldNumber
                   fullWidth
                   min={1}
+                  isInvalid={errors.interval.length > 0}
                   compressed
-                  value={alertInterval}
+                  value={alertInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"
                   onChange={e => {
-                    const interval = e.target.value !== '' ? parseInt(e.target.value, 10) : null;
-                    setAlertInterval(interval ?? 1);
+                    const interval =
+                      e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
+                    setAlertInterval(interval);
                     setScheduleProperty('interval', `${e.target.value}${alertIntervalUnit}`);
                   }}
                 />
@@ -363,7 +386,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
                   fullWidth
                   compressed
                   value={alertIntervalUnit}
-                  options={getTimeOptions(alertInterval)}
+                  options={getTimeOptions(alertInterval ?? 1)}
                   onChange={e => {
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);

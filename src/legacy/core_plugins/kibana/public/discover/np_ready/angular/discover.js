@@ -44,12 +44,12 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  intervalOptions,
   unhashUrl,
   subscribeWithScope,
   tabifyAggResponse,
   getAngularModule,
   ensureDefaultIndexPattern,
+  redirectWhenMissing,
 } from '../../kibana_services';
 
 const {
@@ -57,12 +57,13 @@ const {
   chrome,
   data,
   docTitle,
+  history,
   indexPatterns,
   filterManager,
   share,
   timefilter,
   toastNotifications,
-  uiSettings,
+  uiSettings: config,
   visualizations,
 } = getServices();
 
@@ -74,8 +75,10 @@ import {
   connectToQueryState,
   syncQueryStateWithUrl,
   getDefaultQuery,
+  search,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
+import { addFatalError } from '../../../../../../../plugins/kibana_legacy/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -112,10 +115,10 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function(redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
+      savedObjects: function($route, Promise) {
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
-          const { appStateContainer } = getState({});
+        return ensureDefaultIndexPattern(core, data, history).then(() => {
+          const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
             ip: indexPatterns.getCache().then(indexPatternList => {
@@ -128,7 +131,7 @@ app.config($routeProvider => {
                *
                *  @type {State}
                */
-              const id = getIndexPatternId(index, indexPatternList, uiSettings.get('defaultIndex'));
+              const id = getIndexPatternId(index, indexPatternList, config.get('defaultIndex'));
               return Promise.props({
                 list: indexPatternList,
                 loaded: indexPatterns.get(id),
@@ -150,9 +153,13 @@ app.config($routeProvider => {
               })
               .catch(
                 redirectWhenMissing({
-                  search: '/discover',
-                  'index-pattern':
-                    '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                  history,
+                  mapping: {
+                    search: '/discover',
+                    'index-pattern':
+                      '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                  },
+                  toastNotifications,
                 })
               ),
           });
@@ -177,8 +184,6 @@ function discoverController(
   $timeout,
   $window,
   Promise,
-  config,
-  kbnUrl,
   localStorage,
   uiCapabilities
 ) {
@@ -206,6 +211,7 @@ function discoverController(
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
+    history,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -237,28 +243,9 @@ function discoverController(
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
-        const changes = ['interval', 'sort', 'index', 'query'].filter(
+        const changes = ['interval', 'sort', 'query'].filter(
           prop => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
-        if (changes.indexOf('index') !== -1) {
-          try {
-            $scope.indexPattern = await indexPatterns.get(newStatePartial.index);
-            $scope.opts.timefield = getTimeField();
-            $scope.enableTimeRangeSelector = !!$scope.opts.timefield;
-            // is needed to rerender the histogram
-            $scope.vis = undefined;
-
-            // Taking care of sort when switching index pattern:
-            // Old indexPattern: sort by A
-            // If A is not available in the new index pattern, sort has to be adapted and propagated to URL
-            const sort = getSortArray(newStatePartial.sort, $scope.indexPattern);
-            if (newStatePartial.sort && !_.isEqual(sort, newStatePartial.sort)) {
-              return await replaceUrlAppState({ sort });
-            }
-          } catch (e) {
-            toastNotifications.addWarning({ text: getIndexPatternWarning(newStatePartial.index) });
-          }
-        }
 
         if (changes.length) {
           $fetchObservable.next();
@@ -267,17 +254,32 @@ function discoverController(
     }
   });
 
-  $scope.setIndexPattern = id => {
-    setAppState({ index: id });
+  // this listener is waiting for such a path http://localhost:5601/app/kibana#/discover
+  // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
+  // to reload the page in a right way
+  const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
+    if (!search && !hash && pathname === '/discover') {
+      $route.reload();
+    }
+  });
+
+  $scope.setIndexPattern = async id => {
+    await replaceUrlAppState({ index: id });
+    $route.reload();
   };
 
   // update data source when filters update
   subscriptions.add(
-    subscribeWithScope($scope, filterManager.getUpdates$(), {
-      next: () => {
-        $scope.updateDataSource();
+    subscribeWithScope(
+      $scope,
+      filterManager.getUpdates$(),
+      {
+        next: () => {
+          $scope.updateDataSource();
+        },
       },
-    })
+      error => addFatalError(core.fatalErrors, error)
+    )
   );
 
   const inspectorAdapters = {
@@ -291,7 +293,7 @@ function discoverController(
       mode: 'absolute',
     });
   };
-  $scope.intervalOptions = intervalOptions;
+  $scope.intervalOptions = search.aggs.intervalOptions;
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
@@ -316,6 +318,7 @@ function discoverController(
     stopStateSync();
     stopSyncingGlobalStateWithUrl();
     stopSyncingQueryAppStateWithStateContainer();
+    unlistenHistoryBasePath();
   });
 
   const getTopNavLinks = () => {
@@ -329,7 +332,7 @@ function discoverController(
       }),
       run: function() {
         $scope.$evalAsync(() => {
-          kbnUrl.change('/discover');
+          history.push('/discover');
         });
       },
       testId: 'discoverNewButton',
@@ -397,9 +400,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: searchId => {
-            return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
-          },
+          makeUrl: searchId => `#/discover/${encodeURIComponent(searchId)}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -639,16 +640,26 @@ function discoverController(
       ).pipe(debounceTime(100));
 
       subscriptions.add(
-        subscribeWithScope($scope, searchBarChanges, {
-          next: $scope.fetch,
-        })
+        subscribeWithScope(
+          $scope,
+          searchBarChanges,
+          {
+            next: $scope.fetch,
+          },
+          error => addFatalError(core.fatalErrors, error)
+        )
       );
       subscriptions.add(
-        subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-          next: () => {
-            $scope.updateTime();
+        subscribeWithScope(
+          $scope,
+          timefilter.getTimeUpdate$(),
+          {
+            next: () => {
+              $scope.updateTime();
+            },
           },
-        })
+          error => addFatalError(core.fatalErrors, error)
+        )
       );
       //Handling change oft the histogram interval
       $scope.$watch('state.interval', function(newInterval, oldInterval) {
@@ -661,7 +672,7 @@ function discoverController(
         // no timefield, no vis, nothing to update
         if (!getTimeField() || !$scope.vis) return;
 
-        const buckets = $scope.vis.getAggConfig().byTypeName('buckets');
+        const buckets = $scope.vis.data.aggs.byTypeName('buckets');
 
         if (buckets && buckets.length === 1) {
           $scope.bucketInterval = buckets[0].buckets.getInterval();
@@ -747,7 +758,7 @@ function discoverController(
           });
 
           if (savedSearch.id !== $route.current.params.id) {
-            kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+            history.push(`/discover/${encodeURIComponent(savedSearch.id)}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
@@ -865,11 +876,11 @@ function discoverController(
     inspectorRequest.stats(getResponseInspectorStats($scope.searchSource, resp)).ok({ json: resp });
 
     if (getTimeField()) {
-      const tabifiedData = tabifyAggResponse($scope.vis.aggs, resp);
+      const tabifiedData = tabifyAggResponse($scope.vis.data.aggs, resp);
       $scope.searchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
         tabifiedData,
-        getDimensions($scope.vis.aggs.aggs, $scope.timeRange)
+        getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
       );
     }
 
@@ -917,11 +928,11 @@ function discoverController(
   };
 
   $scope.resetQuery = function() {
-    kbnUrl.change('/discover/{{id}}', { id: $route.current.params.id });
+    history.push(`/discover/${encodeURIComponent($route.current.params.id)}`);
   };
 
   $scope.newQuery = function() {
-    kbnUrl.change('/discover');
+    history.push('/discover');
   };
 
   $scope.updateDataSource = () => {
@@ -1012,41 +1023,27 @@ function discoverController(
       },
     ];
 
-    if ($scope.vis) {
-      const visState = $scope.vis.getEnabledState();
-      visState.aggs = visStateAggs;
-
-      $scope.vis.setState(visState);
-      return;
-    }
-
-    const visSavedObject = {
-      indexPattern: $scope.indexPattern.id,
-      visState: {
-        type: 'histogram',
-        title: savedSearch.title,
-        params: {
-          addLegend: false,
-          addTimeMarker: true,
-        },
-        aggs: visStateAggs,
+    $scope.vis = visualizations.createVis('histogram', {
+      title: savedSearch.title,
+      params: {
+        addLegend: false,
+        addTimeMarker: true,
       },
-    };
-
-    $scope.vis = visualizations.createVis(
-      $scope.searchSource.getField('index'),
-      visSavedObject.visState
-    );
-    visSavedObject.vis = $scope.vis;
+      data: {
+        aggs: visStateAggs,
+        indexPattern: $scope.searchSource.getField('index').id,
+        searchSource: $scope.searchSource,
+      },
+    });
 
     $scope.searchSource.onRequestStart((searchSource, options) => {
       if (!$scope.vis) return;
-      return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, options);
+      return $scope.vis.data.aggs.onSearchRequestStart(searchSource, options);
     });
 
     $scope.searchSource.setField('aggs', function() {
       if (!$scope.vis) return;
-      return $scope.vis.getAggConfig().toDsl();
+      return $scope.vis.data.aggs.toDsl();
     });
   }
 

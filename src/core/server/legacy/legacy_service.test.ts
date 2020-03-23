@@ -47,6 +47,7 @@ import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyVars, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './types';
 import { LegacyService } from './legacy_service';
+import { coreMock } from '../mocks';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -102,9 +103,8 @@ beforeEach(() => {
 
   startDeps = {
     core: {
-      capabilities: capabilitiesServiceMock.createStartContract(),
+      ...coreMock.createStart(),
       savedObjects: savedObjectsServiceMock.createInternalStartContract(),
-      uiSettings: uiSettingsServiceMock.createStartContract(),
       plugins: { contracts: new Map() },
     },
     plugins: {},

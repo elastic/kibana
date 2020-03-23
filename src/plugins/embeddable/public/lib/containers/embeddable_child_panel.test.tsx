@@ -20,7 +20,6 @@
 import React from 'react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
-import { GetEmbeddableFactory } from '../types';
 import { EmbeddableFactory } from '../embeddables';
 import { CONTACT_CARD_EMBEDDABLE } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
@@ -42,7 +41,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
     CONTACT_CARD_EMBEDDABLE,
     new SlowContactCardEmbeddableFactory({ execAction: (() => null) as any })
   );
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+  const getEmbeddableFactory = (id: string) => embeddableFactories.get(id);
 
   const container = new HelloWorldContainer({ id: 'hello', panels: {} }, {
     getEmbeddableFactory,
@@ -88,7 +87,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
 
 test(`EmbeddableChildPanel renders an error message if the factory doesn't exist`, async () => {
   const inspector = inspectorPluginMock.createStartContract();
-  const getEmbeddableFactory: GetEmbeddableFactory = () => undefined;
+  const getEmbeddableFactory = () => undefined;
   const container = new HelloWorldContainer(
     {
       id: 'hello',

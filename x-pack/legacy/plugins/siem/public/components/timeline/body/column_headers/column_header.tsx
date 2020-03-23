@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
+import deepEqual from 'fast-deep-equal';
 
 import { ColumnHeaderOptions } from '../../../../store/timeline/model';
-import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
-import { getDraggableFieldId, DRAG_TYPE_FIELD } from '../../../drag_and_drop/helpers';
-import { DraggableFieldBadge } from '../../../draggables/field_badge';
+import { getDraggableFieldId } from '../../../drag_and_drop/helpers';
 import { OnColumnRemoved, OnColumnSorted, OnFilterChange, OnColumnResized } from '../../events';
 import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import { Sort } from '../sort';
-import { DraggingContainer } from './common/dragging_container';
 
 import { Header } from './header';
+
+const RESIZABLE_ENABLE = { right: true };
 
 interface ColumneHeaderProps {
   draggableIndex: number;
@@ -25,6 +25,7 @@ interface ColumneHeaderProps {
   onColumnRemoved: OnColumnRemoved;
   onColumnSorted: OnColumnSorted;
   onColumnResized: OnColumnResized;
+  isDragging: boolean;
   onFilterChange?: OnFilterChange;
   sort: Sort;
   timelineId: string;
@@ -34,69 +35,82 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   draggableIndex,
   header,
   timelineId,
+  isDragging,
   onColumnRemoved,
   onColumnResized,
   onColumnSorted,
   onFilterChange,
   sort,
 }) => {
-  const [isDragging, setIsDragging] = React.useState(false);
-  const handleResizeStop: ResizeCallback = (e, direction, ref, delta) => {
-    onColumnResized({ columnId: header.id, delta: delta.width });
-  };
+  const resizableSize = useMemo(
+    () => ({
+      width: header.width,
+      height: 'auto',
+    }),
+    [header.width]
+  );
+  const resizableStyle: {
+    position: 'absolute' | 'relative';
+  } = useMemo(
+    () => ({
+      position: isDragging ? 'absolute' : 'relative',
+    }),
+    [isDragging]
+  );
+  const resizableHandleComponent = useMemo(
+    () => ({
+      right: <EventsHeadingHandle />,
+    }),
+    []
+  );
+  const handleResizeStop: ResizeCallback = useCallback(
+    (e, direction, ref, delta) => {
+      onColumnResized({ columnId: header.id, delta: delta.width });
+    },
+    [header.id, onColumnResized]
+  );
+  const draggableId = useMemo(
+    () =>
+      getDraggableFieldId({
+        contextId: `timeline-column-headers-${timelineId}`,
+        fieldId: header.id,
+      }),
+    [timelineId, header.id]
+  );
 
   return (
     <Resizable
-      enable={{ right: true }}
-      size={{
-        width: header.width,
-        height: 'auto',
-      }}
-      style={{
-        position: isDragging ? 'absolute' : 'relative',
-      }}
-      handleComponent={{
-        right: <EventsHeadingHandle />,
-      }}
+      enable={RESIZABLE_ENABLE}
+      size={resizableSize}
+      style={resizableStyle}
+      handleComponent={resizableHandleComponent}
       onResizeStop={handleResizeStop}
     >
       <Draggable
         data-test-subj="draggable"
         // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
         disableInteractiveElementBlocking
-        draggableId={getDraggableFieldId({
-          contextId: `timeline-column-headers-${timelineId}`,
-          fieldId: header.id,
-        })}
+        draggableId={draggableId}
         index={draggableIndex}
         key={header.id}
-        type={DRAG_TYPE_FIELD}
       >
-        {(dragProvided, dragSnapshot) => (
+        {dragProvided => (
           <EventsTh
             data-test-subj="draggable-header"
             {...dragProvided.draggableProps}
             {...dragProvided.dragHandleProps}
             ref={dragProvided.innerRef}
           >
-            {!dragSnapshot.isDragging ? (
-              <EventsThContent>
-                <Header
-                  timelineId={timelineId}
-                  header={header}
-                  onColumnRemoved={onColumnRemoved}
-                  onColumnSorted={onColumnSorted}
-                  onFilterChange={onFilterChange}
-                  sort={sort}
-                />
-              </EventsThContent>
-            ) : (
-              <DraggingContainer onDragging={setIsDragging}>
-                <DragEffects>
-                  <DraggableFieldBadge fieldId={header.id} fieldWidth={`${header.width}px`} />
-                </DragEffects>
-              </DraggingContainer>
-            )}
+            <EventsThContent>
+              <Header
+                timelineId={timelineId}
+                header={header}
+                onColumnRemoved={onColumnRemoved}
+                onColumnSorted={onColumnSorted}
+                onFilterChange={onFilterChange}
+                sort={sort}
+              />
+            </EventsThContent>
           </EventsTh>
         )}
       </Draggable>
@@ -104,4 +118,16 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   );
 };
 
-export const ColumnHeader = React.memo(ColumnHeaderComponent);
+export const ColumnHeader = React.memo(
+  ColumnHeaderComponent,
+  (prevProps, nextProps) =>
+    prevProps.draggableIndex === nextProps.draggableIndex &&
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.isDragging === nextProps.isDragging &&
+    prevProps.onColumnRemoved === nextProps.onColumnRemoved &&
+    prevProps.onColumnResized === nextProps.onColumnResized &&
+    prevProps.onColumnSorted === nextProps.onColumnSorted &&
+    prevProps.onFilterChange === nextProps.onFilterChange &&
+    prevProps.sort === nextProps.sort &&
+    deepEqual(prevProps.header, nextProps.header)
+);

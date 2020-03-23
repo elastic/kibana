@@ -20,6 +20,7 @@
 import { ResponseObject, Server } from 'hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
+import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
   ConfigService,
   CoreSetup,
@@ -92,7 +93,6 @@ declare module 'hapi' {
   interface Request {
     getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     getBasePath(): string;
-    getDefaultRoute(): Promise<string>;
     getUiSettingsService(): IUiSettingsClient;
   }
 
@@ -105,6 +105,7 @@ type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promi
 
 export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
+  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
   home: HomeServerPluginSetup;
   [key: string]: object;
 }
