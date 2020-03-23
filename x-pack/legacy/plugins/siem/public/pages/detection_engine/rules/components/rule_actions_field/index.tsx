@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import deepMerge from 'deepmerge';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { loadActionTypes } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/lib/action_connector_api';
 import { SelectField } from '../../../../../shared_imports';
 import {
   ActionForm,
@@ -15,49 +17,15 @@ import {
 } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertAction } from '../../../../../../../../../plugins/alerting/common';
 import { useKibana } from '../../../../../lib/kibana';
+import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../../common/constants';
 
 type ThrottleSelectField = typeof SelectField;
-
-const SUPPORTED_ACTION_TYPES = [
-  {
-    id: '.email',
-    name: 'Email',
-    minimumLicenseRequired: 'gold' as ActionType['minimumLicenseRequired'],
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-  },
-  {
-    id: '.pagerduty',
-    name: 'PagerDuty',
-    minimumLicenseRequired: 'gold' as ActionType['minimumLicenseRequired'],
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-  },
-  {
-    id: '.slack',
-    name: 'Slack',
-    minimumLicenseRequired: 'gold' as ActionType['minimumLicenseRequired'],
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-  },
-  {
-    id: '.webhook',
-    name: 'Webhook',
-    minimumLicenseRequired: 'gold' as ActionType['minimumLicenseRequired'],
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-  },
-];
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
 const DEFAULT_ACTION_MESSAGE = 'Rule generated {{state.signalsCount}} singals';
 
 const MESSAGE_STATE_VARIABLES = ['signalsCount'];
-const MESSAGE_CONTEXT_VARIABLES = ['inputIndexes', 'outputIndex', 'name', 'alertId', 'ruleId'];
+const MESSAGE_CONTEXT_VARIABLES = ['rule.id', 'rule.name', '{context.resultsLink}'];
 
 const getMessageVariables = memoizeOne(() => {
   const stateVariables = MESSAGE_STATE_VARIABLES.map(variableName => `state.${variableName}`);
@@ -67,8 +35,12 @@ const getMessageVariables = memoizeOne(() => {
 });
 
 export const RuleActionsField: ThrottleSelectField = ({ field }) => {
-  const { http, triggers_actions_ui, notifications } = useKibana().services;
-  const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
+  const [supportedActionTypes, setSupportedActionTypes] = useState<ActionType[] | undefined>();
+  const {
+    http,
+    triggers_actions_ui: { actionTypeRegistry },
+    notifications,
+  } = useKibana().services;
   const messageVariables = getMessageVariables();
 
   const setActionIdByIndex = useCallback(
@@ -95,6 +67,18 @@ export const RuleActionsField: ThrottleSelectField = ({ field }) => {
     [field]
   );
 
+  useEffect(() => {
+    (async function() {
+      const actionTypes = await loadActionTypes({ http });
+      const supportedTypes = actionTypes.filter(actionType =>
+        NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.includes(actionType.id)
+      );
+      setSupportedActionTypes(supportedTypes);
+    })();
+  }, []);
+
+  if (!supportedActionTypes) return <></>;
+
   return (
     <ActionForm
       actions={field.value as AlertAction[]}
@@ -105,7 +89,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field }) => {
       setActionParamsProperty={setActionParamsProperty}
       http={http}
       actionTypeRegistry={actionTypeRegistry}
-      actionTypes={SUPPORTED_ACTION_TYPES}
+      actionTypes={supportedActionTypes}
       defaultActionMessage={DEFAULT_ACTION_MESSAGE}
       toastNotifications={notifications.toasts}
     />

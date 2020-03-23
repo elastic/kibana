@@ -156,14 +156,14 @@ export const getAlertThrottle = (throttle: string | null) =>
     : null;
 
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
-  const { actions = [], enabled, throttle = null } = actionsStepData;
+  const { actions = [], enabled, throttle = NOTIFICATION_THROTTLE_NO_ACTIONS } = actionsStepData;
 
   return {
     actions: actions.map(transformAlertToRuleAction),
     enabled,
-    throttle: getAlertThrottle(throttle),
+    throttle: actions.length ? getAlertThrottle(throttle) : null,
     meta: {
-      throttle,
+      throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     },
   };
 };

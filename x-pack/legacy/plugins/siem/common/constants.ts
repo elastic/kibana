@@ -97,7 +97,14 @@ export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_UR
 export const UNAUTHENTICATED_USER = 'Unauthenticated';
 
 /*
-  Rule actions frequency options
+  Rule notifications options
 */
+
+export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
+  '.email',
+  '.slack',
+  '.pagerduty',
+  '.webhook',
+];
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
