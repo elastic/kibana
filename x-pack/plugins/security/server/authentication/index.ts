@@ -183,6 +183,8 @@ export async function setupAuthentication({
       apiKeys.create(request, params),
     invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
       apiKeys.invalidate(request, params),
+    invalidateAPIKeyAsInternalUser: (params: InvalidateAPIKeyParams) =>
+      apiKeys.invalidateAsInternalUser(params),
     isAuthenticated: (request: KibanaRequest) => http.auth.isAuthenticated(request),
   };
 }
