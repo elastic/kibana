@@ -27,7 +27,7 @@ import { fatalError, toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
 import { npStart } from 'ui/new_platform';
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
-import { getTimezone } from './lib/get_timezone';
+import { getTimezone } from '../../vis_type_timelion/public';
 
 import 'uiExports/savedObjectTypes';
 
