@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IAggConfig } from '../legacy_imports';
+import { IAggConfig } from 'src/plugins/data/public';
 import {
   isAggRemovable,
   calcAggIsTooLow,

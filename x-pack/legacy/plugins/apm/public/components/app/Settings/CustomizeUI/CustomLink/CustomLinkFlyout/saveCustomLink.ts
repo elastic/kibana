@@ -18,7 +18,7 @@ export async function saveCustomLink({
   id?: string;
   label: string;
   url: string;
-  filters?: { [key: string]: string };
+  filters?: { [key: string]: string[] };
   toasts: NotificationsStart['toasts'];
 }) {
   try {

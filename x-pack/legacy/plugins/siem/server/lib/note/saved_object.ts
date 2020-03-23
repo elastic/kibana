@@ -194,7 +194,7 @@ export class Note {
   }
 }
 
-const convertSavedObjectToSavedNote = (
+export const convertSavedObjectToSavedNote = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): NoteSavedObject =>

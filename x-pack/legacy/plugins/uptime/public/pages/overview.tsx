@@ -21,6 +21,7 @@ import { UptimeThemeContext } from '../contexts';
 import { EmptyState, FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
 import { PageHeader } from './page_header';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -94,9 +95,10 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
     description: `The text that will be displayed in the app's heading when the Overview page loads.`,
   });
 
+  useBreadcrumbs([]); // No extra breadcrumbs on overview
   return (
     <>
-      <PageHeader headingText={heading} breadcrumbs={[]} datePicker={true} />
+      <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
       <EmptyState>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>

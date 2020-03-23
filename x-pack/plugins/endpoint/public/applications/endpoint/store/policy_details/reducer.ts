@@ -10,17 +10,7 @@ import { AppAction } from '../action';
 
 const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {
-    policyItem: {
-      name: '',
-      total: 0,
-      pending: 0,
-      failed: 0,
-      id: '',
-      created_by: '',
-      created: '',
-      updated_by: '',
-      updated: '',
-    },
+    policyItem: undefined,
     isLoading: false,
   };
 };
