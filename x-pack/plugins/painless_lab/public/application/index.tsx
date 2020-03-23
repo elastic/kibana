@@ -10,7 +10,6 @@ import { CoreSetup, CoreStart } from 'kibana/public';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 
 import { Links } from '../links';
-
 import { AppContextProvider } from './context';
 import { Main } from './components/main';
 

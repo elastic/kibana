@@ -7,9 +7,9 @@
 import React, { createContext, ReactNode, useState, useContext } from 'react';
 import { HttpSetup } from 'src/core/public';
 
-import { Links } from '../links';
-import { exampleScript, painlessContextOptions } from './constants';
-import { Store, Payload, Validation } from './types';
+import { Links } from '../../links';
+import { Store, Payload, Validation } from '../types';
+import { initialPayload } from './initial_payload';
 
 interface AppContextProviderArgs {
   children: ReactNode;
@@ -27,21 +27,6 @@ interface ContextValue {
   };
   links: Links;
 }
-
-const initialPayload = {
-  context: painlessContextOptions[0].value,
-  code: exampleScript,
-  parameters: `{
-  "string-parameter": "yay",
-  "number-parameter": 1.5,
-  "boolean-parameter": true
-}`,
-  index: 'default-index',
-  document: `{
-  "my-field": "field-value"
-}`,
-  query: '',
-};
 
 const AppContext = createContext<ContextValue>(undefined as any);
 
