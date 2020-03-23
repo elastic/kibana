@@ -1,9 +1,9 @@
-# telemetry_collection_xpack
+# Telemetry collection with X-Pack
 
-> Add the telemetry collector with the xpack information
+Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 ---
 
 ## Development
 
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions setting up your development environment.
+See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions on how to set up your development environment.
