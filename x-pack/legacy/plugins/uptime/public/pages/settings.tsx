@@ -75,7 +75,8 @@ export const SettingsPageComponent = ({
     }
   };
 
-  const onApply = () => {
+  const onApply = (event: Event) => {
+    event.preventDefault();
     if (formFields) {
       dispatchSetDynamicSettings(formFields);
     }
