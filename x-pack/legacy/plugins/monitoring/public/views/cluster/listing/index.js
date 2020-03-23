@@ -56,6 +56,7 @@ uiRoutes
         const globalState = $injector.get('globalState');
         const storage = $injector.get('localStorage');
         const showLicenseExpiration = $injector.get('showLicenseExpiration');
+
         this.data = $route.current.locals.clusters;
 
         $scope.$watch(

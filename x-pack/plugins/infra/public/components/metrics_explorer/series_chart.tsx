@@ -66,7 +66,7 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
       data={series.rows}
       stackAccessors={stack ? ['timestamp'] : void 0}
       areaSeriesStyle={seriesAreaStyle}
-      customSeriesColors={[color]}
+      color={color}
     />
   );
 };
@@ -101,7 +101,7 @@ export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) =>
       data={series.rows}
       stackAccessors={stack ? ['timestamp'] : void 0}
       barSeriesStyle={seriesBarStyle}
-      customSeriesColors={[color]}
+      color={color}
     />
   );
 };
