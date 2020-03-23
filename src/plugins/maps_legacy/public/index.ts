@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { FileUploadPlugin } from './plugin';
+import { PluginInitializerContext } from 'src/core/public';
+import { MapsLegacyPlugin } from './plugin';
 
-export function plugin() {
-  return new FileUploadPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new MapsLegacyPlugin(initializerContext);
 }

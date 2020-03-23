@@ -18,9 +18,10 @@
  */
 
 // @ts-ignore
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 // @ts-ignore
-import { setToasts, setUiSettings } from './kibana_services';
+import { setToasts, setUiSettings, setInjectedVarFunc } from './kibana_services';
+import { ServiceSettings } from './map/service_settings';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -37,9 +38,16 @@ export type MapsLegacyPluginSetup = ReturnType<MapsLegacyPlugin['setup']>;
 export type MapsLegacyPluginStart = ReturnType<MapsLegacyPlugin['start']>;
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
     setToasts(core.notifications.toasts);
     setUiSettings(core.uiSettings);
+    setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+
+    return {
+      serviceSettings: new ServiceSettings(),
+    };
   }
 
   public start(core: CoreStart, plugins: MapsLegacyStartDependencies) {}

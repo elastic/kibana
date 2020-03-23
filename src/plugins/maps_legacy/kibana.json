@@ -2,7 +2,7 @@
   "id": "maps_legacy",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["maps_legacy"],
   "ui": true,
-  "requiredPlugins": []
+  "configPath": ["map"],
+  "requiredPlugins": ["kibanaLegacy"]
 }

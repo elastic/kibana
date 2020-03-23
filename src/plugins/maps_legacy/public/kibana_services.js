@@ -24,3 +24,7 @@ export const getToasts = () => toast;
 let uiSettings;
 export const setUiSettings = coreUiSettings => (uiSettings = coreUiSettings);
 export const getUiSettings = () => uiSettings;
+
+let getInjectedVar;
+export const setInjectedVarFunc = getInjectedVarFunc => (getInjectedVar = getInjectedVarFunc);
+export const getInjectedVarFunc = () => getInjectedVar;
