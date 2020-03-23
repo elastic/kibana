@@ -2,7 +2,7 @@
   "monitorStates": {
     "prevPagePagination": "{\"cursorKey\":{\"monitor_id\":\"0090-intermittent\"},\"sortOrder\":\"ASC\",\"cursorDirection\":\"BEFORE\"}",
     "nextPagePagination": null,
-    "totalSummaryCount": { "count": 2000 },
+    "totalSummaryCount": 2000,
     "summaries": [
       {
         "monitor_id": "0090-intermittent",

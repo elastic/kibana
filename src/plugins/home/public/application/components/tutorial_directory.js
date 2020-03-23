@@ -233,10 +233,7 @@ class TutorialDirectoryUi extends React.Component {
         <EuiPageBody>
           <EuiTitle size="l">
             <h1>
-              <FormattedMessage
-                id="home.tutorial.addDataToKibanaTitle"
-                defaultMessage="Add Data to Kibana"
-              />
+              <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
             </h1>
           </EuiTitle>
 

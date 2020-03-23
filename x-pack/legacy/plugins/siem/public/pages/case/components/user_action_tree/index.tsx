@@ -12,6 +12,7 @@ import { useUpdateComment } from '../../../../containers/case/use_update_comment
 import { UserActionItem } from './user_action_item';
 import { UserActionMarkdown } from './user_action_markdown';
 import { AddComment } from '../add_comment';
+import { useCurrentUser } from '../../../../lib/kibana';
 
 export interface UserActionTreeProps {
   data: Case;
@@ -20,12 +21,14 @@ export interface UserActionTreeProps {
 }
 
 const DescriptionId = 'description';
-const NewId = 'newComent';
+const NewId = 'newComment';
 
 export const UserActionTree = React.memo(
   ({ data: caseData, onUpdateField, isLoadingDescription }: UserActionTreeProps) => {
-    const { comments, isLoadingIds, updateComment } = useUpdateComment(caseData.comments);
-
+    const { comments, isLoadingIds, updateComment, addPostedComment } = useUpdateComment(
+      caseData.comments
+    );
+    const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
 
     const handleManageMarkdownEditId = useCallback(
@@ -42,7 +45,7 @@ export const UserActionTree = React.memo(
     const handleSaveComment = useCallback(
       (id: string, content: string) => {
         handleManageMarkdownEditId(id);
-        updateComment(id, content);
+        updateComment(caseData.id, id, content);
       },
       [handleManageMarkdownEditId, updateComment]
     );
@@ -63,7 +66,10 @@ export const UserActionTree = React.memo(
       [caseData.description, handleManageMarkdownEditId, manageMarkdownEditIds, onUpdateField]
     );
 
-    const MarkdownNewComment = useMemo(() => <AddComment caseId={caseData.id} />, [caseData.id]);
+    const MarkdownNewComment = useMemo(
+      () => <AddComment caseId={caseData.id} onCommentPosted={addPostedComment} />,
+      [caseData.id]
+    );
 
     return (
       <>
@@ -107,10 +113,10 @@ export const UserActionTree = React.memo(
           id={NewId}
           isEditable={true}
           isLoading={isLoadingIds.includes(NewId)}
-          fullName="to be determined"
+          fullName={currentUser != null ? currentUser.fullName : ''}
           markdown={MarkdownNewComment}
           onEdit={handleManageMarkdownEditId.bind(null, NewId)}
-          userName="to be determined"
+          userName={currentUser != null ? currentUser.username : ''}
         />
       </>
     );

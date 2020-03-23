@@ -98,6 +98,7 @@ def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
+    'target/kibana-siem/**/*.png',
     'target/junit/**/*',
     'test/**/screenshots/**/*.png',
     'test/functional/failure_debug/html/*.html',
@@ -202,17 +203,26 @@ def runErrorReporter() {
 }
 
 def call(Map params = [:], Closure closure) {
-  def config = [timeoutMinutes: 135] + params
+  def config = [timeoutMinutes: 135, checkPrChanges: false] + params
 
   stage("Kibana Pipeline") {
     timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
       timestamps {
         ansiColor('xterm') {
+          if (config.checkPrChanges && githubPr.isPr()) {
+            print "Checking PR for changes to determine if CI needs to be run..."
+
+            if (prChanges.areChangesSkippable()) {
+              print "No changes requiring CI found in PR, skipping."
+              return
+            }
+          }
           closure()
         }
       }
     }
   }
 }
+
 
 return this

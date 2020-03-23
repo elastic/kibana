@@ -156,15 +156,7 @@ export const monitorStatesSchema = gql`
     "The objects representing the state of a series of heartbeat monitors."
     summaries: [MonitorSummary!]
     "The number of summaries."
-    totalSummaryCount: DocCount!
-  }
-
-  "Represents the current status of the uptime index."
-  type StatesIndexStatus {
-    "Flag denoting whether the index exists."
-    indexExists: Boolean!
-    "The number of documents in the index."
-    docCount: DocCount
+    totalSummaryCount: Int!
   }
 
   enum CursorDirection {
@@ -186,8 +178,5 @@ export const monitorStatesSchema = gql`
       filters: String
       statusFilter: String
     ): MonitorSummaryResult
-
-    "Fetches details about the uptime index."
-    getStatesIndexStatus: StatesIndexStatus!
   }
 `;

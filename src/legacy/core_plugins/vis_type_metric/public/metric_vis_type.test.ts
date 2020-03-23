@@ -36,6 +36,10 @@ import { createMetricVisTypeDefinition } from './metric_vis_type';
 
 jest.mock('ui/new_platform');
 
+jest.mock('../../vis_default_editor/public', () => ({
+  Schemas: class {},
+}));
+
 describe('metric_vis - createMetricVisTypeDefinition', () => {
   let vis: Vis;
 

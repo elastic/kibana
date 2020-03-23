@@ -2,7 +2,7 @@
   "monitorStates": {
     "prevPagePagination": "{\"cursorKey\":{\"monitor_id\":\"0010-down\"},\"sortOrder\":\"ASC\",\"cursorDirection\":\"BEFORE\"}",
     "nextPagePagination": "{\"cursorKey\":{\"monitor_id\":\"0019-up\"},\"sortOrder\":\"ASC\",\"cursorDirection\":\"AFTER\"}",
-    "totalSummaryCount": { "count": 2000 },
+    "totalSummaryCount": 2000,
     "summaries": [
       {
         "monitor_id": "0010-down",

@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertAction } from '../../../../../../plugins/alerting/common';
 import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
+import { ListsDefaultArraySchema } from './routes/schemas/types/lists_default_array';
 
 export type PartialFilter = Partial<Filter>;
 
@@ -22,18 +24,32 @@ export interface ThreatParams {
   technique: IMitreAttack[];
 }
 
+export type RuleAlertAction = Omit<AlertAction, 'actionTypeId'> & {
+  action_type_id: string;
+};
+
+// Notice below we are using lists: ListsDefaultArraySchema[]; which is coming directly from the response output section.
+// TODO: Eventually this whole RuleAlertParams will be replaced with io-ts. For now we can slowly strangle it out and reduce duplicate types
+// We don't have the input types defined through io-ts just yet but as we being introducing types from there we will more and more remove
+// types and share them between input and output schema but have an input Rule Schema and an output Rule Schema.
+export type RuleType = 'query' | 'saved_query' | 'machine_learning';
+
 export interface RuleAlertParams {
+  actions: RuleAlertAction[];
+  anomalyThreshold: number | undefined;
   description: string;
+  note: string | undefined | null;
   enabled: boolean;
   falsePositives: string[];
   filters: PartialFilter[] | undefined | null;
   from: string;
   immutable: boolean;
-  index: string[];
+  index: string[] | undefined | null;
   interval: string;
   ruleId: string | undefined | null;
   language: string | undefined | null;
   maxSignals: number;
+  machineLearningJobId: string | undefined;
   riskScore: number;
   outputIndex: string;
   name: string;
@@ -47,19 +63,25 @@ export interface RuleAlertParams {
   timelineId: string | undefined | null;
   timelineTitle: string | undefined | null;
   threat: ThreatParams[] | undefined | null;
-  type: 'query' | 'saved_query';
+  type: RuleType;
   version: number;
-  throttle?: string;
+  throttle: string | null;
+  lists: ListsDefaultArraySchema | null | undefined;
 }
 
-export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
+export type RuleTypeParams = Omit<
+  RuleAlertParams,
+  'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
+>;
 
 export type RuleAlertParamsRest = Omit<
   RuleAlertParams,
+  | 'anomalyThreshold'
   | 'ruleId'
   | 'falsePositives'
   | 'immutable'
   | 'maxSignals'
+  | 'machineLearningJobId'
   | 'savedId'
   | 'riskScore'
   | 'timelineId'
@@ -76,12 +98,14 @@ export type RuleAlertParamsRest = Omit<
     | 'lastSuccessMessage'
     | 'lastFailureMessage'
   > & {
+    anomaly_threshold: RuleAlertParams['anomalyThreshold'];
     rule_id: RuleAlertParams['ruleId'];
     false_positives: RuleAlertParams['falsePositives'];
     saved_id?: RuleAlertParams['savedId'];
     timeline_id: RuleAlertParams['timelineId'];
     timeline_title: RuleAlertParams['timelineTitle'];
     max_signals: RuleAlertParams['maxSignals'];
+    machine_learning_job_id: RuleAlertParams['machineLearningJobId'];
     risk_score: RuleAlertParams['riskScore'];
     output_index: RuleAlertParams['outputIndex'];
     created_at: string;

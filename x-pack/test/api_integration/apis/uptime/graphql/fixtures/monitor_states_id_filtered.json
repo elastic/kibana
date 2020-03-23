@@ -2,7 +2,7 @@
   "monitorStates": {
     "prevPagePagination": null,
     "nextPagePagination": null,
-    "totalSummaryCount": { "count": 2000 },
+    "totalSummaryCount": 2000,
     "summaries": [
       {
         "monitor_id": "0002-up",

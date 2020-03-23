@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiCodeEditor } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
 
 import 'brace/theme/textmate';
 
@@ -25,17 +25,6 @@ export class ShowJson extends React.PureComponent {
       return null;
     }
     const json = JSON.stringify(data, null, 2);
-    return (
-      <EuiCodeEditor
-        mode="json"
-        theme="textmate"
-        isReadOnly
-        setOptions={{ maxLines: Infinity }}
-        value={json}
-        editorProps={{
-          $blockScrolling: Infinity,
-        }}
-      />
-    );
+    return <EuiCodeBlock lang="json">{json}</EuiCodeBlock>;
   }
 }

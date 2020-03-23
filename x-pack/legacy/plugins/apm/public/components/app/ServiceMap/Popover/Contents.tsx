@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React from 'react';
+import { SERVICE_FRAMEWORK_NAME } from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceMetricFetcher } from './ServiceMetricFetcher';
@@ -19,7 +20,6 @@ import { ServiceMetricFetcher } from './ServiceMetricFetcher';
 const popoverMinWidth = 280;
 
 interface ContentsProps {
-  focusedServiceName?: string;
   isService: boolean;
   label: string;
   onFocusClick: () => void;
@@ -29,13 +29,12 @@ interface ContentsProps {
 
 export function Contents({
   selectedNodeData,
-  focusedServiceName,
   isService,
   label,
   onFocusClick,
   selectedNodeServiceName
 }: ContentsProps) {
-  const frameworkName = selectedNodeData.frameworkName;
+  const frameworkName = selectedNodeData[SERVICE_FRAMEWORK_NAME];
   return (
     <EuiFlexGroup
       direction="column"
@@ -60,7 +59,6 @@ export function Contents({
       </EuiFlexItem>
       {isService && (
         <Buttons
-          focusedServiceName={focusedServiceName}
           onFocusClick={onFocusClick}
           selectedNodeServiceName={selectedNodeServiceName}
         />

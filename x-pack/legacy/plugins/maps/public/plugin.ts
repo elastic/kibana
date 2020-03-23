@@ -8,12 +8,33 @@ import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
-import { MapListing } from './components/map_listing';
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 // @ts-ignore
-import { setLicenseId, setInspector, setFileUpload } from './kibana_services';
+import { MapListing } from './components/map_listing';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import {
+  setLicenseId,
+  setInspector,
+  setFileUpload,
+  setIndexPatternSelect,
+  setHttp,
+  setTimeFilter,
+  setUiSettings,
+  setInjectedVarFunc,
+  setToasts,
+  setIndexPatternService,
+  setAutocompleteService,
+  // @ts-ignore
+} from './kibana_services';
+// @ts-ignore
+import { setInjectedVarFunc as npSetInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../src/plugins/data/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -28,14 +49,38 @@ interface MapsPluginSetupDependencies {
   np: {
     licensing?: LicensingPluginSetup;
     home: HomePublicPluginSetup;
+    data: DataPublicPluginSetup;
   };
+}
+
+interface MapsPluginStartDependencies {
+  data: DataPublicPluginStart;
+  inspector: InspectorStartContract;
+  // file_upload TODO: Export type from file upload and use here
 }
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
   const { licensing } = plugins;
+  const { injectedMetadata, http } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
   }
+  setInjectedVarFunc(injectedMetadata.getInjectedVar);
+  setHttp(http);
+  setUiSettings(core.uiSettings);
+  setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+  npSetInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+  setToasts(core.notifications.toasts);
+};
+
+export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
+  const { file_upload, data, inspector } = plugins;
+  setInspector(inspector);
+  setFileUpload(file_upload);
+  setIndexPatternSelect(data.ui.IndexPatternSelect);
+  setTimeFilter(data.query.timefilter.timefilter);
+  setIndexPatternService(data.indexPatterns);
+  setAutocompleteService(data.autocompleteService);
 };
 
 /** @internal */
@@ -52,8 +97,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
     np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
-  public start(core: CoreStart, plugins: any) {
-    setInspector(plugins.np.inspector);
-    setFileUpload(plugins.np.file_upload);
+  public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
+    bindStartCoreAndPlugins(core, plugins);
   }
 }

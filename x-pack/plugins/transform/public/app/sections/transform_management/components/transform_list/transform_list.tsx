@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, MouseEventHandler, FC, useContext, useState } from 'react';
+import React, { MouseEventHandler, FC, useContext, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import {
+  Direction,
   EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -16,14 +17,13 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
+  EuiSearchBarProps,
   EuiPopover,
   EuiTitle,
-  Direction,
 } from '@elastic/eui';
 
 import { TransformId, TRANSFORM_STATE } from '../../../../../../common';
-
-import { OnTableChangeArg, SortDirection, SORT_DIRECTION } from '../../../../../shared_imports';
 
 import {
   useRefreshTransformList,
@@ -40,10 +40,9 @@ import { DeleteAction } from './action_delete';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
 
-import { ItemIdToExpandedRowMap, Query, Clause } from './common';
+import { ItemIdToExpandedRowMap, Clause, TermClause, FieldClause, Value } from './common';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
-import { ProgressBar, transformTableFactory } from './transform_table';
 
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
@@ -58,7 +57,7 @@ function getItemIdToExpandedRowMap(
   }, {} as ItemIdToExpandedRowMap);
 }
 
-function stringMatch(str: string | undefined, substr: string) {
+function stringMatch(str: string | undefined, substr: any) {
   return (
     typeof str === 'string' &&
     typeof substr === 'string' &&
@@ -73,8 +72,6 @@ interface Props {
   transforms: TransformListRow[];
   transformsLoading: boolean;
 }
-
-const TransformTable = transformTableFactory<TransformListRow>();
 
 export const TransformList: FC<Props> = ({
   errorMessage,
@@ -100,7 +97,7 @@ export const TransformList: FC<Props> = ({
   const [pageSize, setPageSize] = useState(10);
 
   const [sortField, setSortField] = useState<string>(TRANSFORM_LIST_COLUMN.ID);
-  const [sortDirection, setSortDirection] = useState<SortDirection | Direction>(SORT_DIRECTION.ASC);
+  const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const { capabilities } = useContext(AuthorizationContext);
   const disabled =
@@ -108,7 +105,10 @@ export const TransformList: FC<Props> = ({
     !capabilities.canPreviewTransform ||
     !capabilities.canStartStopTransform;
 
-  const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
+  const onQueryChange = ({
+    query,
+    error,
+  }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => {
     if (error) {
       setSearchError(error.message);
     } else {
@@ -118,7 +118,7 @@ export const TransformList: FC<Props> = ({
       }
       if (clauses.length > 0) {
         setFilterActive(true);
-        filterTransforms(clauses);
+        filterTransforms(clauses as Array<TermClause | FieldClause>);
       } else {
         setFilterActive(false);
       }
@@ -126,7 +126,7 @@ export const TransformList: FC<Props> = ({
     }
   };
 
-  const filterTransforms = (clauses: Clause[]) => {
+  const filterTransforms = (clauses: Array<TermClause | FieldClause>) => {
     setIsLoading(true);
     // keep count of the number of matches we make as we're looping over the clauses
     // we only want to return transforms which match all clauses, i.e. each search term is ANDed
@@ -165,7 +165,7 @@ export const TransformList: FC<Props> = ({
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = transforms.filter(transform => c.value.includes(transform.stats.state));
+          ts = transforms.filter(transform => (c.value as Value[]).includes(transform.stats.state));
         } else {
           ts = transforms.filter(transform => transform.mode === c.value);
         }
@@ -186,52 +186,46 @@ export const TransformList: FC<Props> = ({
   // Before the transforms have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No transforms found' during the initial loading.
   if (!isInitialized) {
-    return <ProgressBar isLoading={isLoading || transformsLoading} />;
+    return null;
   }
 
   if (typeof errorMessage !== 'undefined') {
     return (
-      <Fragment>
-        <ProgressBar isLoading={isLoading || transformsLoading} />
-        <EuiCallOut
-          title={i18n.translate('xpack.transform.list.errorPromptTitle', {
-            defaultMessage: 'An error occurred getting the transform list.',
-          })}
-          color="danger"
-          iconType="alert"
-        >
-          <pre>{JSON.stringify(errorMessage)}</pre>
-        </EuiCallOut>
-      </Fragment>
+      <EuiCallOut
+        title={i18n.translate('xpack.transform.list.errorPromptTitle', {
+          defaultMessage: 'An error occurred getting the transform list.',
+        })}
+        color="danger"
+        iconType="alert"
+      >
+        <pre>{JSON.stringify(errorMessage)}</pre>
+      </EuiCallOut>
     );
   }
 
   if (transforms.length === 0) {
     return (
-      <Fragment>
-        <ProgressBar isLoading={isLoading || transformsLoading} />
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              {i18n.translate('xpack.transform.list.emptyPromptTitle', {
-                defaultMessage: 'No transforms found',
-              })}
-            </h2>
-          }
-          actions={[
-            <EuiButtonEmpty
-              onClick={onCreateTransform}
-              isDisabled={disabled}
-              data-test-subj="transformCreateFirstButton"
-            >
-              {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
-                defaultMessage: 'Create your first transform',
-              })}
-            </EuiButtonEmpty>,
-          ]}
-          data-test-subj="transformNoTransformsFound"
-        />
-      </Fragment>
+      <EuiEmptyPrompt
+        title={
+          <h2>
+            {i18n.translate('xpack.transform.list.emptyPromptTitle', {
+              defaultMessage: 'No transforms found',
+            })}
+          </h2>
+        }
+        actions={[
+          <EuiButtonEmpty
+            onClick={onCreateTransform}
+            isDisabled={disabled}
+            data-test-subj="transformCreateFirstButton"
+          >
+            {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
+              defaultMessage: 'Create your first transform',
+            })}
+          </EuiButtonEmpty>,
+        ]}
+        data-test-subj="transformNoTransformsFound"
+      />
     );
   }
 
@@ -362,15 +356,15 @@ export const TransformList: FC<Props> = ({
 
   const onTableChange = ({
     page = { index: 0, size: 10 },
-    sort = { field: TRANSFORM_LIST_COLUMN.ID, direction: SORT_DIRECTION.ASC },
-  }: OnTableChangeArg) => {
+    sort = { field: TRANSFORM_LIST_COLUMN.ID as string, direction: 'asc' },
+  }) => {
     const { index, size } = page;
     setPageIndex(index);
     setPageSize(size);
 
     const { field, direction } = sort;
-    setSortField(field);
-    setSortDirection(direction);
+    setSortField(field as string);
+    setSortDirection(direction as Direction);
   };
 
   const selection = {
@@ -379,8 +373,7 @@ export const TransformList: FC<Props> = ({
 
   return (
     <div data-test-subj="transformListTableContainer">
-      <ProgressBar isLoading={isLoading || transformsLoading} />
-      <TransformTable
+      <EuiInMemoryTable
         allowNeutralSort={false}
         className="transform__TransformTable"
         columns={columns}
@@ -391,6 +384,7 @@ export const TransformList: FC<Props> = ({
         items={filterActive ? filteredTransforms : transforms}
         itemId={TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        loading={isLoading || transformsLoading}
         onTableChange={onTableChange}
         pagination={pagination}
         rowProps={item => ({
@@ -399,11 +393,9 @@ export const TransformList: FC<Props> = ({
         selection={selection}
         sorting={sorting}
         search={search}
-        data-test-subj={
-          isLoading || transformsLoading
-            ? 'transformListTable loading'
-            : 'transformListTable loaded'
-        }
+        data-test-subj={`transformListTable ${
+          isLoading || transformsLoading ? 'loading' : 'loaded'
+        }`}
       />
     </div>
   );
