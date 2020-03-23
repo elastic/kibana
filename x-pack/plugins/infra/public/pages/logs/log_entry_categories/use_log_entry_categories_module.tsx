@@ -13,6 +13,7 @@ import {
   useLogAnalysisModuleDefinition,
 } from '../../../containers/logs/log_analysis';
 import { logEntryCategoriesModule } from './module_descriptor';
+import { useLogEntryCategoriesQuality } from './use_log_entry_categories_quality';
 
 export const useLogEntryCategoriesModule = ({
   indexPattern,
@@ -50,6 +51,10 @@ export const useLogEntryCategoriesModule = ({
     moduleDescriptor: logEntryCategoriesModule,
   });
 
+  const { categoryQualityWarnings } = useLogEntryCategoriesQuality({
+    jobSummaries: logAnalysisModule.jobSummaries,
+  });
+
   const hasOutdatedJobConfigurations = useMemo(
     () => logAnalysisModule.jobSummaries.some(getIsJobConfigurationOutdated),
     [getIsJobConfigurationOutdated, logAnalysisModule.jobSummaries]
@@ -70,6 +75,7 @@ export const useLogEntryCategoriesModule = ({
 
   return {
     ...logAnalysisModule,
+    categoryQualityWarnings,
     fetchModuleDefinition,
     hasOutdatedJobConfigurations,
     hasOutdatedJobDefinitions,
