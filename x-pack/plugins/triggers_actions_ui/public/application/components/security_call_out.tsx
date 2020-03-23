@@ -60,7 +60,7 @@ export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ getHeal
             <p>
               <FormattedMessage
                 id="xpack.triggersActionsUI.components.securityCallOut.tlsDisabledDescription"
-                defaultMessage="Alerting relies upon API keys, which requires TLS between Elasticsearch and Kibana when security is enabled. Creating alerts is currently disabled."
+                defaultMessage="Alerting relies on API keys, which require TLS between Elasticsearch and Kibana."
               />
             </p>
             <EuiButton
