@@ -21,6 +21,7 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const log = getService('log');
+  const find = getService('find');
   const inspector = getService('inspector');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -463,6 +464,64 @@ export default function({ getService, getPageObjects }) {
         const paths = await PageObjects.visChart.getAreaChartPaths('Count');
         log.debug('actual chart data =     ' + paths);
         expect(paths.length).to.eql(numberOfSegments);
+      });
+    });
+
+    describe('date histogram when no date field', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('AreaChart [no date field]');
+        await PageObjects.visChart.waitForVisualization();
+
+        log.debug('Click X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+      });
+
+      it('should show error message for field', async () => {
+        const fieldErrorMessage = await find.byCssSelector(
+          '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
+        );
+        const errorMessage = await fieldErrorMessage.getVisibleText();
+        await PageObjects.common.sleep(30000);
+        expect(errorMessage).to.be(
+          'The index pattern test_index* does not contain any of the following compatible field types: date'
+        );
+      });
+    });
+
+    describe('date histogram when no time filter', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('AreaChart [no time filter]');
+        await PageObjects.visChart.waitForVisualization();
+
+        log.debug('Click X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+      });
+
+      it('should not show error message on init when the field is not selected', async () => {
+        const fieldValues = await PageObjects.visEditor.getField();
+        expect(fieldValues[0]).to.be(undefined);
+        const isFieldErrorMessageExists = await find.existsByCssSelector(
+          '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
+        );
+        expect(isFieldErrorMessageExists).to.be(false);
+      });
+
+      it('should not fail during changing interval when the field is not selected', async () => {
+        await PageObjects.visEditor.setInterval('m');
+        const intervalValues = await PageObjects.visEditor.getInterval();
+        expect(intervalValues[0]).to.be('Millisecond');
+      });
+
+      it.skip('should show error when interval invalid', async () => {
+        await PageObjects.visEditor.setInterval('xx');
+        const isIntervalErrorMessageExists = await find.existsByCssSelector(
+          '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+        );
+        expect(isIntervalErrorMessageExists).to.be(true);
       });
     });
   });
