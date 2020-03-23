@@ -33,7 +33,7 @@ interface AppContextProviderArgs {
 
 export const AppContextProvider = ({
   children,
-  value: { http, links },
+  value: { http, links, chrome },
 }: AppContextProviderArgs) => {
   const [state, setState] = useState<Store>(() => ({
     ...initialState,
@@ -51,7 +51,7 @@ export const AppContextProvider = ({
   };
 
   return (
-    <AppContext.Provider value={{ updateState, state, services: { http }, links }}>
+    <AppContext.Provider value={{ updateState, state, services: { http, chrome }, links }}>
       {children}
     </AppContext.Provider>
   );

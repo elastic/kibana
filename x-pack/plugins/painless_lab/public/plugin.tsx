@@ -72,6 +72,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           i18n: { Context: I18nContext },
           notifications,
           docLinks,
+          chrome,
         } = core;
 
         this.languageService.setup();
@@ -90,7 +91,17 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         }
 
         const { renderApp } = await import('./application');
-        return renderApp(element, { I18nContext, http, uiSettings, links: getLinks(docLinks) });
+        const tearDownApp = renderApp(element, {
+          I18nContext,
+          http,
+          uiSettings,
+          links: getLinks(docLinks),
+          chrome,
+        });
+
+        return () => {
+          tearDownApp();
+        };
       },
     });
   }

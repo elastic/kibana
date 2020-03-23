@@ -19,23 +19,23 @@ interface AppDependencies {
   I18nContext: CoreStart['i18n']['Context'];
   uiSettings: CoreSetup['uiSettings'];
   links: Links;
+  chrome: CoreSetup['chrome'];
 }
 
 export function renderApp(
   element: HTMLElement | null,
-  { http, I18nContext, uiSettings, links }: AppDependencies
+  { http, I18nContext, uiSettings, links, chrome }: AppDependencies
 ) {
   if (!element) {
     return () => undefined;
   }
-
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
   });
   render(
     <I18nContext>
       <KibanaReactContextProvider>
-        <AppContextProvider value={{ http, links }}>
+        <AppContextProvider value={{ http, links, chrome }}>
           <Main />
         </AppContextProvider>
       </KibanaReactContextProvider>
