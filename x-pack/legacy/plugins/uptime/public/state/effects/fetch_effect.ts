@@ -26,10 +26,7 @@ export function fetchEffectFactory<T, R, S, F>(
 ) {
   return function*(action: Action<T>) {
     try {
-      const {
-        payload: { ...params },
-      } = action;
-      const response = yield call(fetch, params);
+      const response = yield call(fetch, action.payload);
       if (response instanceof Error) {
         // eslint-disable-next-line no-console
         console.error(response);
