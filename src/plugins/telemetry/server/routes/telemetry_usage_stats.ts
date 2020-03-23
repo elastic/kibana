@@ -62,6 +62,7 @@ export function registerTelemetryUsageStatsRoutes(
           unencrypted,
           start,
           end,
+          request: req,
           callAsCurrentUser: context.core.elasticsearch.adminClient.callAsCurrentUser,
           callAsInternalUser: context.core.elasticsearch.adminClient.callAsInternalUser,
         };

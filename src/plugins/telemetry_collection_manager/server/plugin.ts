@@ -125,10 +125,18 @@ export class TelemetryCollectionManagerPlugin
 
   private getStatsCollectionConfig(
     config: StatsGetterConfig,
+    collection: Collection,
     usageCollection: UsageCollectionSetup
   ): StatsCollectionConfig {
-    const { start, end } = config;
-    const callCluster = config.unencrypted ? config.callAsCurrentUser : config.callAsInternalUser;
+    const { start, end, request } = config;
+
+    let callCluster = config.unencrypted ? config.callAsCurrentUser : config.callAsInternalUser;
+
+    if (collection.esCluster) {
+      callCluster = config.unencrypted
+        ? collection.esCluster.asScoped(request).callAsCurrentUser
+        : collection.esCluster.callAsInternalUser;
+    }
 
     return { callCluster, start, end, usageCollection };
   }
@@ -137,8 +145,12 @@ export class TelemetryCollectionManagerPlugin
     if (!this.usageCollection) {
       return [];
     }
-    const statsCollectionConfig = this.getStatsCollectionConfig(config, this.usageCollection);
     for (const collection of this.collections) {
+      const statsCollectionConfig = this.getStatsCollectionConfig(
+        config,
+        collection,
+        this.usageCollection
+      );
       try {
         const optInStats = await this.getOptInStatsForCollection(
           collection,
@@ -184,8 +196,12 @@ export class TelemetryCollectionManagerPlugin
     if (!this.usageCollection) {
       return [];
     }
-    const statsCollectionConfig = this.getStatsCollectionConfig(config, this.usageCollection);
     for (const collection of this.collections) {
+      const statsCollectionConfig = this.getStatsCollectionConfig(
+        config,
+        collection,
+        this.usageCollection
+      );
       try {
         const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
         if (usageData.length) {

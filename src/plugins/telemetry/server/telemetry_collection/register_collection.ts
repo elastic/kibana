@@ -45,7 +45,6 @@ export function registerCollection(
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup
 ) {
   telemetryCollectionManager.setCollection({
-    esCluster: 'data',
     title: 'local',
     priority: 0,
     statsGetter: getLocalStats,

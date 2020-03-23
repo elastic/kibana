@@ -18,7 +18,6 @@ export class TelemetryCollectionXpackPlugin implements Plugin {
 
   public setup(core: CoreSetup, { telemetryCollectionManager }: TelemetryCollectionXpackDepsSetup) {
     telemetryCollectionManager.setCollection({
-      esCluster: 'data',
       title: 'local_xpack',
       priority: 1,
       statsGetter: getStatsWithXpack,

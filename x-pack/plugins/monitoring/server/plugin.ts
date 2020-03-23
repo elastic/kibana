@@ -159,7 +159,7 @@ export class Plugin {
 
     // Initialize telemetry
     if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection(plugins.telemetryCollectionManager, {
+      registerMonitoringCollection(plugins.telemetryCollectionManager, this.cluster, {
         maxBucketSize: config.ui.max_bucket_size,
       });
     }
