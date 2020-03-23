@@ -115,7 +115,7 @@ export class DataRecognizer {
   indexPatternName: string = '';
   indexPatternId: string | undefined = undefined;
   /**
-   * List of job ids that require model memory estimation
+   * List of the module jobs that require model memory estimation
    */
   jobsForModelMemoryEstimation: ModuleJob[] = [];
 

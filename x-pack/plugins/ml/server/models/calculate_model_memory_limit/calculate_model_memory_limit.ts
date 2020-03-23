@@ -6,6 +6,7 @@
 
 import numeral from '@elastic/numeral';
 import { APICaller } from 'kibana/server';
+import { MLCATEGORY } from '../../../common/constants/field_types';
 import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
 
@@ -56,7 +57,7 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
        * The keyword which is used to mean the output of categorization,
        * so it will have cardinality zero in the actual input data.
        */
-      'mlcategory'
+      MLCATEGORY
     );
 
     const { detectors, influencers, bucket_span: bucketSpan } = analysisConfig;

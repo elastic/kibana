@@ -36,17 +36,17 @@ function getModule(context: RequestHandlerContext, moduleId: string) {
 function saveModuleItems(
   context: RequestHandlerContext,
   moduleId: string,
-  prefix: string | undefined,
-  groups: string[] | undefined,
-  indexPatternName: string | undefined,
-  query: any,
-  useDedicatedIndex: boolean | undefined,
-  startDatafeed: boolean | undefined,
-  start: number | undefined,
-  end: number | undefined,
-  jobOverrides: JobOverride[],
-  datafeedOverrides: DatafeedOverride[],
-  estimateModelMemory: boolean | undefined
+  prefix?: string,
+  groups?: string[],
+  indexPatternName?: string,
+  query?: any,
+  useDedicatedIndex?: boolean,
+  startDatafeed?: boolean,
+  start?: number,
+  end?: number,
+  jobOverrides?: JobOverride | JobOverride[],
+  datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
+  estimateModelMemory?: boolean
 ) {
   const dr = new DataRecognizer(
     context.ml!.mlClient.callAsCurrentUser,
