@@ -53,19 +53,19 @@ export const ConfigYamlView = memo<{ config: AgentConfig }>(({ config }) => {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.ingestManager.yamlConfig.instructionTittle  "
+              id="xpack.ingestManager.yamlConfig.instructionTittle"
               defaultMessage="Enroll with fleet"
             />
           </h3>
         </EuiTitle>
-        <EuiSpacer size={'m'} />
+        <EuiSpacer size="m" />
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.ingestManager.yamlConfig.instructionDescription  "
+            id="xpack.ingestManager.yamlConfig.instructionDescription"
             defaultMessage="To enroll an agent with this configuration, copy and run the following command on your host."
           />
         </EuiText>
-        <EuiSpacer size={'m'} />
+        <EuiSpacer size="m" />
         {apiKeyRequest.data && (
           <ShellEnrollmentInstructions
             apiKey={apiKeyRequest.data.item}

@@ -12,7 +12,7 @@ import {
   EuiFieldText,
   EuiPopover,
 } from '@elastic/eui';
-import { EnrollmentAPIKey } from '../../../../../../types';
+import { EnrollmentAPIKey } from '../../../types';
 
 // No need for i18n as these are platform names
 const PLATFORMS = {
