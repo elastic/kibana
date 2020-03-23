@@ -9,8 +9,8 @@ export interface GetFleetSetupRequest {}
 
 export interface CreateFleetSetupRequest {
   body: {
-    admin_username: string;
-    admin_password: string;
+    fleet_enroll_username: string;
+    fleet_enroll_password: string;
   };
 }
 

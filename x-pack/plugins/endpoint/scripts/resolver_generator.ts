@@ -131,8 +131,13 @@ async function main() {
       process.exit(1);
     }
   }
-
-  const generator = new EndpointDocGenerator(argv.seed);
+  let seed = argv.seed;
+  if (!seed) {
+    seed = Math.random().toString();
+    // eslint-disable-next-line no-console
+    console.log('No seed supplied, using random seed: ' + seed);
+  }
+  const generator = new EndpointDocGenerator(seed);
   for (let i = 0; i < argv.numHosts; i++) {
     await client.index({
       index: argv.metadataIndex,
