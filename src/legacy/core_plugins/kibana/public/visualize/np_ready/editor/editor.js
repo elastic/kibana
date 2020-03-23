@@ -474,9 +474,7 @@ function VisualizeAppController(
         vis.setState({
           ...visState,
           data: {
-            aggs: aggs,
-            indexPattern: vis.data.indexPattern.id,
-            searchSource: vis.data.searchSource,
+            aggs,
           },
         });
         embeddableHandler.reload();
