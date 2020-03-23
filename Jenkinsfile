@@ -40,7 +40,12 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
           'xpack-ciGroup9': kibanaPipeline.xpackCiGroupProcess(9),
           'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
           'xpack-accessibility': kibanaPipeline.functionalTestProcess('xpack-accessibility', './test/scripts/jenkins_xpack_accessibility.sh'),
-          'xpack-siemCypress': kibanaPipeline.functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'),
+          'xpack-siemCypress': { processNumber ->
+            whenChanged(['x-pack/legacy/plugins/siem/', 'x-pack/test/siem_cypress/']) {
+              kibanaPipeline.functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh')(processNumber)
+            }
+          },
+
           // 'xpack-visualRegression': kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh'),
         ]),
       ])
