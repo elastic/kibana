@@ -72,6 +72,25 @@ describe('metric_visualization', () => {
     });
   });
 
+  describe('#getConfiguration', () => {
+    it('can add a metric when there is no accessor', () => {
+      expect(
+        metricVisualization.getConfiguration({
+          state: {
+            accessor: undefined,
+            layerId: 'l1',
+          },
+        })
+      ).toEqual({
+        groups: [
+          expect.objectContaining({
+            supportsMoreColumns: true,
+          }),
+        ],
+      });
+    });
+  });
+
   describe('#setDimension', () => {
     it('sets the accessor', () => {
       expect(
