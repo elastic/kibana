@@ -14,8 +14,9 @@ import {
   EuiCallOut,
   EuiBottomBar,
   EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, difference } from 'lodash/fp';
 import { useKibana } from '../../../../lib/kibana';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
@@ -40,7 +41,7 @@ import { ClosureOptions } from '../configure_cases/closure_options';
 import { Mapping } from '../configure_cases/mapping';
 import { SectionWrapper } from '../wrappers';
 import { navTabs } from '../../../../pages/home/home_navigations';
-import { configureCasesReducer, State } from './reducer';
+import { configureCasesReducer, State, CurrentConfiguration } from './reducer';
 import * as i18n from './translations';
 
 const FormWrapper = styled.div`
@@ -58,6 +59,7 @@ const initialState: State = {
   connectorId: 'none',
   closureType: 'close-by-user',
   mapping: null,
+  currentConfiguration: { connectorId: 'none', closureType: 'close-by-user' },
 };
 
 const actionTypes: ActionType[] = [
@@ -83,11 +85,19 @@ const ConfigureCasesComponent: React.FC = () => {
   );
 
   const [actionBarVisible, setActionBarVisible] = useState(false);
+  const [totalConfigurationChanges, setTotalConfigurationChanges] = useState(0);
 
-  const [{ connectorId, closureType, mapping }, dispatch] = useReducer(
+  const [{ connectorId, closureType, mapping, currentConfiguration }, dispatch] = useReducer(
     configureCasesReducer(),
     initialState
   );
+
+  const setCurrentConfiguration = useCallback((configuration: CurrentConfiguration) => {
+    dispatch({
+      type: 'setCurrentConfiguration',
+      currentConfiguration: { ...configuration },
+    });
+  }, []);
 
   const setConnectorId = useCallback((newConnectorId: string) => {
     dispatch({
@@ -113,6 +123,7 @@ const ConfigureCasesComponent: React.FC = () => {
   const { loading: loadingCaseConfigure, persistLoading, persistCaseConfigure } = useCaseConfigure({
     setConnector: setConnectorId,
     setClosureType,
+    setCurrentConfiguration,
   });
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
 
@@ -196,6 +207,19 @@ const ConfigureCasesComponent: React.FC = () => {
     }
   }, [connectors, connectorId]);
 
+  useEffect(() => {
+    const unsavedChanges = difference(Object.values(currentConfiguration), [
+      connectorId,
+      closureType,
+    ]).length;
+
+    if (unsavedChanges === 0) {
+      setActionBarVisible(false);
+    }
+
+    setTotalConfigurationChanges(unsavedChanges);
+  }, [connectors, connectorId, closureType, currentConfiguration]);
+
   return (
     <FormWrapper>
       {!connectorIsValid && (
@@ -233,7 +257,12 @@ const ConfigureCasesComponent: React.FC = () => {
       </SectionWrapper>
       {actionBarVisible && (
         <EuiBottomBar>
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
+                <EuiText>{i18n.UNSAVED_CHANGES(totalConfigurationChanges)}</EuiText>
+              </EuiFlexGroup>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
