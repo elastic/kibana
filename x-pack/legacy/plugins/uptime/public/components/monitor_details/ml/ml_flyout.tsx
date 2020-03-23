@@ -59,6 +59,8 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
                 ),
               }}
             />
+          </p>
+          <p>
             <em>{labels.TAKE_SOME_TIME_TEXT}</em>
           </p>
         </EuiText>

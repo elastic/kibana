@@ -9,7 +9,7 @@ exports[`ML Confirm Job Delete shallow renders without errors 1`] = `
     defaultFocusedButton="confirm"
     onCancel={[MockFunction]}
     onConfirm={[MockFunction]}
-    title="Delete Anomaly detection job?"
+    title="Delete anomaly detection job?"
   >
     <p>
       <FormattedMessage
@@ -38,7 +38,7 @@ exports[`ML Confirm Job Delete shallow renders without errors while loading 1`] 
     defaultFocusedButton="confirm"
     onCancel={[MockFunction]}
     onConfirm={[MockFunction]}
-    title="Delete Anomaly detection job?"
+    title="Delete anomaly detection job?"
   >
     <p>
       <FormattedMessage

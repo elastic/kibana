@@ -24,7 +24,7 @@ exports[`ML Flyout component renders without errors 1`] = `
     <EuiText>
       <p>
         Here you can create a machine learning job to calculate anomaly scores on
-    response durations for Uptime Monitor. Once enabled, The monitor duration chart on details page
+    response durations for Uptime Monitor. Once enabled, the monitor duration chart on the details page
     will show the expected bounds and annotate the graph with anomalies. You can also potentially
      identify periods of increased latency across geographical regions.
       </p>
@@ -42,6 +42,8 @@ exports[`ML Flyout component renders without errors 1`] = `
             }
           }
         />
+      </p>
+      <p>
         <em>
           Note: It might take a few minutes for the job to begin calculating results.
         </em>
@@ -173,7 +175,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
             >
               <p>
                 Here you can create a machine learning job to calculate anomaly scores on
-    response durations for Uptime Monitor. Once enabled, The monitor duration chart on details page
+    response durations for Uptime Monitor. Once enabled, the monitor duration chart on the details page
     will show the expected bounds and annotate the graph with anomalies. You can also potentially
      identify periods of increased latency across geographical regions.
               </p>
@@ -187,6 +189,8 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
                   Machine Learning jobs management page
                 </a>
                 .
+              </p>
+              <p>
                 <em>
                   Note: It might take a few minutes for the job to begin calculating results.
                 </em>

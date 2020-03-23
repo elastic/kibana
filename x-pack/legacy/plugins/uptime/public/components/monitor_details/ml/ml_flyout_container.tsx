@@ -144,13 +144,11 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <>
-      <MLFlyoutView
-        canCreateMLJob={!!canCreateMLJob}
-        isCreatingJob={isMLJobCreating}
-        onClickCreate={createAnomalyJob}
-        onClose={onClose}
-      />
-    </>
+    <MLFlyoutView
+      canCreateMLJob={!!canCreateMLJob}
+      isCreatingJob={isMLJobCreating}
+      onClickCreate={createAnomalyJob}
+      onClose={onClose}
+    />
   );
 };

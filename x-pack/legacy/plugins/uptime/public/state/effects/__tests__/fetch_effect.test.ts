@@ -28,7 +28,7 @@ describe('fetch saga effect factory', () => {
     )(calledAction);
     let next = fetchEffect.next();
 
-    // @ts-ignore TODO, dig dipper for TS issues here
+    // @ts-ignore TODO, dig deeper for TS issues here
     expect(next.value).toEqual(call(fetchStatus, calledAction.payload));
 
     const successResult = put(asyncAction.success(indexStatusResult));
@@ -52,7 +52,7 @@ describe('fetch saga effect factory', () => {
     )(calledAction);
     let next = fetchEffect.next();
 
-    // @ts-ignore TODO, dig dipper for TS issues here
+    // @ts-ignore TODO, dig deeper for TS issues here
     expect(next.value).toEqual(call(fetchIndexStatus, calledAction.payload));
 
     const errorResult = put(asyncAction.fail(indexStatusResultError));
@@ -76,7 +76,7 @@ describe('fetch saga effect factory', () => {
     )(calledAction);
     let next = fetchEffect.next();
 
-    // @ts-ignore TODO, dig dipper for TS issues here
+    // @ts-ignore TODO, dig deeper for TS issues here
     expect(next.value).toEqual(call(fetchIndexStatus, calledAction.payload));
 
     const unexpectedErrorResult = put(asyncAction.fail(unExpectedError));
