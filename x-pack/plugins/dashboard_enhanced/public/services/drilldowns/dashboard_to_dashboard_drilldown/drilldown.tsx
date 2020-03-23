@@ -82,7 +82,6 @@ export class DashboardToDashboardDrilldown
     // for brush event this time range would be overwritten
     let timeRange = config.useCurrentDateRange ? currentTimeRange : undefined;
 
-    // @ts-ignore TODO
     if (context.data.range) {
       // look up by range
       const { restOfFilters, timeRangeFilter } =

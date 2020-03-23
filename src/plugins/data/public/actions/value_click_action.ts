@@ -38,13 +38,14 @@ export interface ValueClickActionContext {
 }
 
 async function isCompatible(context: ValueClickActionContext) {
-  // try {
-  const filters: Filter[] =
-    (await createFiltersFromEvent(context.data.data || [context.data], context.data.negate)) || [];
-  return filters.length > 0;
-  // } catch {
-  // return false;
-  // }
+  try {
+    const filters: Filter[] =
+      (await createFiltersFromEvent(context.data.data || [context.data], context.data.negate)) ||
+      [];
+    return filters.length > 0;
+  } catch {
+    return false;
+  }
 }
 
 // this allows the user to select which filter to use

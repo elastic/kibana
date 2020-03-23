@@ -43,6 +43,7 @@ export class CollectConfigContainer extends React.Component<
   CollectConfigProps,
   CollectConfigContainerState
 > {
+  private isMounted = true;
   state = {
     dashboards: [],
     isLoading: false,
@@ -51,9 +52,18 @@ export class CollectConfigContainer extends React.Component<
     delay: false,
   };
 
+  constructor(props: CollectConfigProps) {
+    super(props);
+    this.debouncedLoadDashboards = debounce(this.loadDashboards.bind(this), 500);
+  }
+
   componentDidMount() {
     this.loadSelectedDashboard();
     this.loadDashboards();
+  }
+
+  componentWillUnmount() {
+    this.isMounted = false;
   }
 
   loadSelectedDashboard() {
@@ -63,15 +73,16 @@ export class CollectConfigContainer extends React.Component<
         savedObjectsClient
           .get<{ title: string }>('dashboard', config.dashboardId)
           .then(dashboard => {
+            if (!this.isMounted) return;
             this.setState({ selectedDashboard: dashboardSavedObjectToMenuItem(dashboard) });
           });
       }
     });
   }
 
+  private readonly debouncedLoadDashboards: (searchString?: string) => void;
   loadDashboards(searchString?: string) {
-    // const currentDashboard = this.props.context.placeContext.embeddable.parent;
-    // const currentDashboardId = currentDashboard && currentDashboard.id;
+    const currentDashboardId = this.props.context.placeContext.embeddable?.parent?.id;
     this.setState({ searchString, isLoading: true });
     this.props.deps.getSavedObjectsClient().then(savedObjectsClient => {
       savedObjectsClient
@@ -83,12 +94,12 @@ export class CollectConfigContainer extends React.Component<
           perPage: 100,
         })
         .then(({ savedObjects }) => {
-          if (searchString === this.state.searchString) {
-            const dashboardList = savedObjects.map(dashboardSavedObjectToMenuItem);
-            // temporarily disable for dev purposes
-            // .filter(({ value }) => value !== currentDashboardId);
-            this.setState({ dashboards: dashboardList, isLoading: false });
-          }
+          if (!this.isMounted) return;
+          if (searchString !== this.state.searchString) return;
+          const dashboardList = savedObjects
+            .map(dashboardSavedObjectToMenuItem)
+            .filter(({ value }) => !currentDashboardId || value !== currentDashboardId);
+          this.setState({ dashboards: dashboardList, isLoading: false });
         });
     });
   }
@@ -107,7 +118,7 @@ export class CollectConfigContainer extends React.Component<
         onDashboardSelect={dashboardId => {
           onConfig({ ...config, dashboardId });
         }}
-        onSearchChange={debounce(() => this.loadDashboards(), 500)}
+        onSearchChange={this.debouncedLoadDashboards}
         onCurrentFiltersToggle={() =>
           onConfig({
             ...config,
