@@ -447,41 +447,6 @@ describe('xy_expression', () => {
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
     });
 
-    test.skip('it rewrites the rows based on provided labels', () => {
-      const { data, args } = sampleArgs();
-
-      const component = shallow(
-        <XYChart
-          data={data}
-          args={args}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartTheme={{}}
-          executeTriggerActions={executeTriggerActions}
-        />
-      );
-      expect(component.find(LineSeries).prop('data')).toEqual([
-        { 'Label A': 1, 'Label B': 2, c: 'I', 'Label D': 'Foo', d: 'Foo' },
-        { 'Label A': 1, 'Label B': 5, c: 'J', 'Label D': 'Bar', d: 'Bar' },
-      ]);
-    });
-
-    test.skip('it uses labels as Y accessors', () => {
-      const { data, args } = sampleArgs();
-
-      const component = shallow(
-        <XYChart
-          data={data}
-          args={args}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartTheme={{}}
-          executeTriggerActions={executeTriggerActions}
-        />
-      );
-      expect(component.find(LineSeries).prop('yAccessors')).toEqual(['Label A', 'Label B']);
-    });
-
     test('it set the scale of the x axis according to the args prop', () => {
       const { data, args } = sampleArgs();
 

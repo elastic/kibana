@@ -33,6 +33,7 @@ import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -59,7 +60,7 @@ type XYChartRenderProps = XYChartProps & {
   chartTheme: PartialTheme;
   formatFactory: FormatFactory;
   timeZone: string;
-  executeTriggerActions: Function;
+  executeTriggerActions: UiActionsStart['executeTriggerActions'];
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -112,7 +113,7 @@ export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartTheme: PartialTheme;
   timeZone: string;
-  executeTriggerActions: Function;
+  executeTriggerActions: UiActionsStart['executeTriggerActions'];
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -125,7 +126,7 @@ export const getXyChartRenderer = (dependencies: {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     ReactDOM.render(
       <I18nProvider>
-        <XYChartReportable {...config} {...dependencies} handlers={handlers} />
+        <XYChartReportable {...config} {...dependencies} />
       </I18nProvider>,
       domNode,
       () => handlers.done()
@@ -139,9 +140,7 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 
 const MemoizedChart = React.memo(XYChart);
 
-export function XYChartReportable(
-  props: XYChartRenderProps & { handlers: IInterpreterRenderHandlers }
-) {
+export function XYChartReportable(props: XYChartRenderProps) {
   const [state, setState] = useState({
     isReady: false,
   });
@@ -166,9 +165,7 @@ export function XYChart({
   timeZone,
   chartTheme,
   executeTriggerActions,
-}: XYChartRenderProps & {
-  handlers?: IInterpreterRenderHandlers;
-}) {
+}: XYChartRenderProps) {
   const { legend, layers } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
@@ -326,16 +323,10 @@ export function XYChart({
           const idForLegend = accessors;
           const table = data.tables[layerId];
 
-          const rows = table.rows.filter(row => {
-            if (
-              splitAccessor &&
-              !row[splitAccessor] &&
-              accessors.every(accessor => !row[accessor])
-            ) {
-              return false;
-            }
-            return true;
-          });
+          const rows = table.rows.filter(
+            row =>
+              !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
+          );
 
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],

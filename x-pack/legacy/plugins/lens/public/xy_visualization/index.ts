@@ -13,12 +13,12 @@ import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
 import { EditorFrameSetup } from '../types';
-
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
-  executeTriggerActions: Function;
+  executeTriggerActions: UiActionsStart['executeTriggerActions'];
 }
 
 function getTimeZone(uiSettings: IUiSettingsClient) {
