@@ -158,14 +158,14 @@ export class LogRotator {
     if (this.usePolling && !this.shouldUsePolling) {
       this.log(
         ['warning', 'logging:rotate'],
-        'Looks like your current environment support `fs.watch` but you are using polling which uses `fs.watchFile`'
+        'Looks like your current environment support a faster algorithm then polling. You can try to disable `usePolling`'
       );
     }
 
     if (!this.usePolling && this.shouldUsePolling) {
       this.log(
-        ['warning', 'logging:rotate'],
-        'The current environment does not support `fs.watch`. Please enable `usePolling` in order to use `fs.watchFile`'
+        ['error', 'logging:rotate'],
+        'Looks like within your current environment you need to use polling in order to enable log rotator. Please enable `usePolling`'
       );
     }
 
