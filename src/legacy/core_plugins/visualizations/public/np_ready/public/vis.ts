@@ -156,7 +156,7 @@ export class Vis {
       title: this.title,
       type: this.type.name,
       params: cloneDeep(this.params) as any,
-      uiState: this.uiState.getChanges(),
+      uiState: this.uiState.toJSON(),
       data: {
         aggs: aggs as any,
         indexPattern: indexPattern ? indexPattern.id : undefined,

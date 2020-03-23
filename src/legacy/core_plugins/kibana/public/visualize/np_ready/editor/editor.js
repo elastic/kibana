@@ -136,7 +136,7 @@ function VisualizeAppController(
   const visStateToEditorState = () => {
     const savedVisState = visualizations.convertFromSerializedVis(vis.serialize());
     return {
-      uiState: vis.uiState.getChanges(),
+      uiState: vis.uiState.toJSON(),
       query: vis.data.searchSource.getOwnField('query') || defaultQuery,
       filters: vis.data.searchSource.getOwnField('filter') || [],
       vis: { ...savedVisState.visState, title: vis.title },
@@ -641,7 +641,7 @@ function VisualizeAppController(
     savedVis.searchSource.setField('query', stateContainer.getState().query);
     savedVis.searchSource.setField('filter', stateContainer.getState().filters);
     savedVis.visState = stateContainer.getState().vis;
-    savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
+    savedVis.uiStateJSON = angular.toJson($scope.uiState.toJSON());
     $appStatus.dirty = false;
 
     return savedVis.save(saveOptions).then(
