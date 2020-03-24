@@ -62,3 +62,13 @@ export const CLOSED = i18n.translate('xpack.siem.case.caseTable.closed', {
 export const DELETE = i18n.translate('xpack.siem.case.caseTable.delete', {
   defaultMessage: 'Delete',
 });
+export const REQUIRES_UPDATE = i18n.translate('xpack.siem.case.caseTable.requiresUpdate', {
+  defaultMessage: 'Requires update',
+});
+
+export const UP_TO_DATE = i18n.translate('xpack.siem.case.caseTable.upToDate', {
+  defaultMessage: 'Up to date',
+});
+export const NOT_PUSHED = i18n.translate('xpack.siem.case.caseTable.notPushed', {
+  defaultMessage: 'Not pushed',
+});

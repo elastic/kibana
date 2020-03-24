@@ -171,12 +171,12 @@ const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
   const handleRenderDataToPush = useCallback(
     () =>
       hasDataToPush
-        ? renderStringField('Requires update', `case-table-column-external-requiresUpdate`)
-        : renderStringField('Up to date', `case-table-column-external-upToDate`),
+        ? renderStringField(i18n.REQUIRES_UPDATE, `case-table-column-external-requiresUpdate`)
+        : renderStringField(i18n.UP_TO_DATE, `case-table-column-external-upToDate`),
     [hasDataToPush]
   );
   if (theCase.externalService !== null) {
     return handleRenderDataToPush();
   }
-  return renderStringField('Not pushed', `case-table-column-external-notPushed`);
+  return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
 };
