@@ -91,9 +91,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
 
   const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 
-  const pings: Ping[] = hits.map(({ _id, _source }: any) => {
-    const timestamp = _source['@timestamp'];
-
+  const pings: Ping[] = hits.map(({ _source }: any) => {
     // Calculate here the length of the content string in bytes, this is easier than in client JS, where
     // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
     // client but this is cleaner.
@@ -102,7 +100,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
 
-    return { id: _id, timestamp, ..._source };
+    return _source;
   });
 
   const decoded = PingsResponseType.decode({

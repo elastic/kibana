@@ -39,8 +39,8 @@ export default function({ getService }) {
 
       expect(apiResponse.total).to.be(2);
       expect(apiResponse.pings.length).to.be(2);
-      expect(apiResponse.pings[0].timestamp).to.be('2018-10-30T14:49:23.889Z');
-      expect(apiResponse.pings[1].timestamp).to.be('2018-10-30T18:51:56.792Z');
+      expect(apiResponse.pings[0]['@timestamp']).to.be('2018-10-30T14:49:23.889Z');
+      expect(apiResponse.pings[1]['@timestamp']).to.be('2018-10-30T18:51:56.792Z');
     });
 
     it('should return results of n length', async () => {
