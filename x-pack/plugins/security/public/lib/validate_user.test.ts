@@ -170,11 +170,13 @@ describe('UserValidator', () => {
       expectInvalid(new UserValidator({ shouldValidate: true }).validateForLogin('', password));
     });
 
-    it(`returns 'invalid' if email is invalid`, () => {
-      expectInvalid(new UserValidator({ shouldValidate: true }).validateForLogin(username, ''));
+    it(`returns 'invalid' if password is invalid`, () => {
+      expectInvalid(
+        new UserValidator({ shouldValidate: true }).validateForLogin(username, 'short')
+      );
     });
 
-    it(`returns 'valid' if username and email are valid`, () => {
+    it(`returns 'valid' if username and password are valid`, () => {
       expectValid(new UserValidator({ shouldValidate: true }).validateForLogin(username, password));
     });
   });
