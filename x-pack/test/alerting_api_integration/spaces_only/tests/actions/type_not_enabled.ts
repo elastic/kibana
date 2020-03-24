@@ -75,7 +75,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
           name: 'an action created before test.not-enabled was disabled (updated)',
         });
 
-      expect(responseUpdate.statusCode).to.eql(403);
+      expect(responseUpdate.status).to.eql(403);
       expect(responseUpdate.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
