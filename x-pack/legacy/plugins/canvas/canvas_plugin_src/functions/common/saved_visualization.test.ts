@@ -5,10 +5,7 @@
  */
 jest.mock('ui/new_platform');
 import { savedVisualization } from './saved_visualization';
-import {
-  buildEmbeddableFilters,
-  getQueryFilters,
-} from '../../../public/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
 
 const filterContext = {
   and: [
