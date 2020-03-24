@@ -15,7 +15,6 @@ import { makeChecks } from '../../../api_integration/apis/uptime/graphql/helpers
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
   const es = getService('es');
-  const retry = getService('retry');
 
   // Flaky https://github.com/elastic/kibana/issues/60866
   describe('uptime settings page', () => {
