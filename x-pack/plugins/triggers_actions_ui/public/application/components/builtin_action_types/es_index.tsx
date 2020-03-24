@@ -73,7 +73,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 >> = ({ action, editActionConfig, errors, http }) => {
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
-    executionTimeField !== undefined
+    executionTimeField != null
   );
 
   const [indexPatterns, setIndexPatterns] = useState([]);
@@ -200,6 +200,11 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         checked={hasTimeFieldCheckbox || false}
         onChange={() => {
           setTimeFieldCheckboxState(!hasTimeFieldCheckbox);
+          // if changing from checked to not checked (hasTimeField === true),
+          // set time field to null
+          if (hasTimeFieldCheckbox) {
+            editActionConfig('executionTimeField', null);
+          }
         }}
         label={
           <>
