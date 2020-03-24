@@ -49,10 +49,10 @@ declare module 'kibana/server' {
   }
 }
 
-export type MlSetupContract = SharedServices;
-export type MlStartContract = void;
+export type MlPluginSetup = SharedServices;
+export type MlPluginStart = void;
 
-export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, PluginsSetup> {
+export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup> {
   private log: Logger;
   private version: string;
   private mlLicense: MlServerLicense;
@@ -63,7 +63,7 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
     this.mlLicense = new MlServerLicense();
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlSetupContract {
+  public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
     plugins.features.registerFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
@@ -138,7 +138,7 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
     return createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud);
   }
 
-  public start(): MlStartContract {}
+  public start(): MlPluginStart {}
 
   public stop() {
     this.mlLicense.unsubscribe();
