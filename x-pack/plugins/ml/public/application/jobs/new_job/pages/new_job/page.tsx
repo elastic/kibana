@@ -188,7 +188,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   useEffect(() => {
     return () => {
       jobCreator.forceStopRefreshPolls();
-      jobCreator.unsubscribeAll();
     };
   });
 

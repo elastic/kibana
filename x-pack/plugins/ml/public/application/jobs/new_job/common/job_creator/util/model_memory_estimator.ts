@@ -8,8 +8,8 @@ import { Observable, of, Subject } from 'rxjs';
 import {
   catchError,
   debounceTime,
-  distinctUntilChanged,
   pluck,
+  startWith,
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
@@ -17,12 +17,12 @@ import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constant
 import { ml } from '../../../../../services/ml_api_service';
 import { JobValidationResult, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
 
-type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
+export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
 
-export type ModelMemoryEstimator = ReturnType<typeof estimatorProvider>;
-
-export const estimatorProvider = (validationResults$: Observable<JobValidationResult>) => {
-  const modelMemoryCheck$ = new Subject<CalculatePayload>();
+export const estimatorProvider = (
+  modelMemoryCheck$: Observable<CalculatePayload>,
+  validationResults$: Observable<JobValidationResult>
+) => {
   const error$ = new Subject<Error>();
 
   return {
@@ -49,12 +49,8 @@ export const estimatorProvider = (validationResults$: Observable<JobValidationRe
               )
             : of(DEFAULT_MODEL_MEMORY_LIMIT);
         }),
-        // no need to emit if the estimation has not been changed
-        distinctUntilChanged()
+        startWith(DEFAULT_MODEL_MEMORY_LIMIT)
       );
-    },
-    runEstimation(payload: CalculatePayload) {
-      modelMemoryCheck$.next(payload);
     },
   };
 };

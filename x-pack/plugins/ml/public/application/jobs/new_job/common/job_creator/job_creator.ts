@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, Subject } from 'rxjs';
-import { pairwise, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -21,7 +20,6 @@ import {
   CustomSettings,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { Aggregation, Field } from '../../../../../../common/types/fields';
-import { JobValidationResult } from '../job_validator/job_validator';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -35,7 +33,7 @@ import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import { estimatorProvider, ModelMemoryEstimator } from './util/model_memory_estimator';
+import { CalculatePayload } from './util/model_memory_estimator';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -61,9 +59,8 @@ export class JobCreator {
     stop: boolean;
   } = { stop: false };
 
-  private _unsubscribeAll = new Subject();
-  public modelMemoryEstimator: ModelMemoryEstimator | null = null;
-  public errors$ = new Subject<Error>();
+  private _modelMemoryEstimationPayload$ = new Subject<CalculatePayload>();
+  public modelMemoryEstimationPayload$ = this._modelMemoryEstimationPayload$.asObservable();
 
   constructor(
     indexPattern: IndexPattern,
@@ -87,36 +84,15 @@ export class JobCreator {
     this._datafeed_config.query = query;
   }
 
-  public initModelMemoryEstimator(
-    validationResults$: Observable<JobValidationResult>,
-    jobCreatorUpdate: Function
-  ) {
-    this.modelMemoryEstimator = estimatorProvider(validationResults$);
-    this.modelMemoryEstimator.updates$
-      .pipe(takeUntil(this._unsubscribeAll), pairwise())
-      .subscribe(([previousEstimation, currentEstimation]) => {
-        // to make sure we don't overwrite a manual input
-        if (this.modelMemoryLimit === null || this.modelMemoryLimit === previousEstimation) {
-          this.modelMemoryLimit = currentEstimation;
-          jobCreatorUpdate();
-        }
-      });
-    this.modelMemoryEstimator.error$.subscribe(e => {
-      this.errors$.next(e);
-    });
-  }
-
   protected updateModelMemoryEstimation() {
-    if (this.modelMemoryEstimator !== null) {
-      this.modelMemoryEstimator.runEstimation({
-        analysisConfig: this.jobConfig.analysis_config,
-        indexPattern: this._indexPatternTitle,
-        query: this._datafeed_config.query,
-        timeFieldName: this._job_config.data_description.time_field,
-        earliestMs: this._start,
-        latestMs: this._end,
-      });
-    }
+    this._modelMemoryEstimationPayload$.next({
+      analysisConfig: this.jobConfig.analysis_config,
+      indexPattern: this._indexPatternTitle,
+      query: this._datafeed_config.query,
+      timeFieldName: this._job_config.data_description.time_field,
+      earliestMs: this._start,
+      latestMs: this._end,
+    });
   }
 
   public get type(): JOB_TYPE {
@@ -644,11 +620,6 @@ export class JobCreator {
 
   public get formattedDatafeedJson() {
     return JSON.stringify(this._datafeed_config, null, 2);
-  }
-
-  public unsubscribeAll() {
-    this._unsubscribeAll.next();
-    this._unsubscribeAll.complete();
   }
 
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {

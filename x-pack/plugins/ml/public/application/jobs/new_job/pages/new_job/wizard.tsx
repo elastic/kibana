@@ -6,7 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FC, useReducer, useState, useEffect } from 'react';
+import { Subscription } from 'rxjs';
+import { pairwise } from 'rxjs/operators';
 import { useMlKibana } from '../../../../contexts/kibana';
+import { estimatorProvider } from '../../common/job_creator/util/model_memory_estimator';
 
 import { WIZARD_STEPS } from '../components/step_types';
 
@@ -84,16 +87,39 @@ export const Wizard: FC<Props> = ({
   );
 
   useEffect(() => {
-    jobCreator.initModelMemoryEstimator(jobValidator.validationResult$, jobCreatorUpdate);
-    jobCreator.errors$.subscribe(jobCreatorError => {
-      notifications.toasts.addError(jobCreatorError, {
-        title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
-          defaultMessage: 'Model memory limit could not be calculated',
-        }),
-      });
-    });
+    const estimator = estimatorProvider(
+      jobCreator.modelMemoryEstimationPayload$,
+      jobValidator.validationResult$
+    );
+
+    const subscription = new Subscription();
+
+    subscription.add(
+      estimator.updates$.pipe(pairwise()).subscribe(([previousEstimation, currentEstimation]) => {
+        // to make sure we don't overwrite a manual input
+        if (
+          jobCreator.modelMemoryLimit === null ||
+          jobCreator.modelMemoryLimit === previousEstimation
+        ) {
+          jobCreator.modelMemoryLimit = currentEstimation;
+          // required in order to trigger changes on the input
+          jobCreatorUpdate();
+        }
+      })
+    );
+
+    subscription.add(
+      estimator.error$.subscribe(error => {
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
+            defaultMessage: 'Model memory limit could not be calculated',
+          }),
+        });
+      })
+    );
+
     return () => {
-      jobCreator.unsubscribeAll();
+      subscription.unsubscribe();
     };
   }, []);
 
