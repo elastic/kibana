@@ -138,8 +138,8 @@ export class KibanaTelemetryAdapter {
     const result = await callCluster('search', params);
     const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
     const numberOfUniqueLocations: number = result?.aggregations?.unique_locations?.value ?? 0;
-    const monitorName: any = result?.aggregations?.monitor_name;
-    const locationName: any = result?.aggregations?.observer_loc_name;
+    const monitorNameStats: any = result?.aggregations?.monitor_name;
+    const locationNameStats: any = result?.aggregations?.observer_loc_name;
     const uniqueMonitors: any = result?.aggregations?.monitors.buckets;
     const bucket = this.getBucketToIncrement();
 
@@ -147,15 +147,15 @@ export class KibanaTelemetryAdapter {
     this.collector[bucket].no_of_unique_observer_locations = numberOfUniqueLocations;
     this.collector[bucket].no_of_unique_observer_locations = numberOfUniqueLocations;
     this.collector[bucket].monitor_name_stats = {
-      min_length: monitorName.min_length,
-      max_length: monitorName.max_length,
-      avg_length: +monitorName.avg_length.toFixed(2),
+      min_length: monitorNameStats?.min_length ?? 0,
+      max_length: monitorNameStats?.max_length ?? 0,
+      avg_length: +monitorNameStats?.avg_length.toFixed(2),
     };
 
     this.collector[bucket].observer_location_name_stats = {
-      min_length: locationName.min_length,
-      max_length: locationName.max_length,
-      avg_length: +locationName.avg_length.toFixed(2),
+      min_length: locationNameStats?.min_length ?? 0,
+      max_length: locationNameStats?.max_length ?? 0,
+      avg_length: +locationNameStats?.avg_length.toFixed(2),
     };
 
     this.collector[bucket].monitor_frequency = this.getMonitorsFrequency(uniqueMonitors);
