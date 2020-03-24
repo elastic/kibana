@@ -18,3 +18,4 @@ export { muteAlertInstanceRoute } from './mute_instance';
 export { unmuteAlertInstanceRoute } from './unmute_instance';
 export { muteAllAlertRoute } from './mute_all';
 export { unmuteAllAlertRoute } from './unmute_all';
+export { healthRoute } from './health';

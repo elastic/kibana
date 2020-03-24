@@ -83,7 +83,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('slackAddVariableButton');
       const variableMenuButton = await testSubjects.find('variableMenuButton-0');
       await variableMenuButton.click();
-      await find.clickByCssSelector('[data-test-subj="saveAlertButton"]');
+      await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Saved '${alertName}'`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -183,6 +183,108 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           interval: '1m',
         },
       ]);
+    });
+
+    it('should set an alert throttle', async () => {
+      const alertName = `edit throttle ${generateUniqueKey()}`;
+      const createdAlert = await createAlert({
+        alertTypeId: '.index-threshold',
+        name: alertName,
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        },
+      });
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.eql([
+        {
+          name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Index Threshold',
+          interval: '1m',
+        },
+      ]);
+
+      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLink[0].click();
+
+      const throttleInputToSetInitialValue = await testSubjects.find('throttleInput');
+      await throttleInputToSetInitialValue.click();
+      await throttleInputToSetInitialValue.clearValue();
+      await throttleInputToSetInitialValue.type('1');
+
+      await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+
+      expect(await pageObjects.common.closeToast()).to.eql(`Updated '${createdAlert.name}'`);
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      await (await testSubjects.findAll('alertsTableCell-editLink'))[0].click();
+      const throttleInput = await testSubjects.find('throttleInput');
+      expect(await throttleInput.getAttribute('value')).to.eql('1');
+    });
+
+    it('should unset an alert throttle', async () => {
+      const alertName = `edit throttle ${generateUniqueKey()}`;
+      const createdAlert = await createAlert({
+        alertTypeId: '.index-threshold',
+        name: alertName,
+        throttle: '10m',
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        },
+      });
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.eql([
+        {
+          name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Index Threshold',
+          interval: '1m',
+        },
+      ]);
+
+      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLink[0].click();
+
+      const throttleInputToUnsetValue = await testSubjects.find('throttleInput');
+
+      expect(await throttleInputToUnsetValue.getAttribute('value')).to.eql('10');
+      await throttleInputToUnsetValue.click();
+      await throttleInputToUnsetValue.clearValueWithKeyboard();
+
+      expect(await throttleInputToUnsetValue.getAttribute('value')).to.eql('');
+
+      await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+
+      expect(await pageObjects.common.closeToast()).to.eql(`Updated '${createdAlert.name}'`);
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      await (await testSubjects.findAll('alertsTableCell-editLink'))[0].click();
+      const throttleInput = await testSubjects.find('throttleInput');
+      expect(await throttleInput.getAttribute('value')).to.eql('');
     });
 
     it('should reset alert when canceling an edit', async () => {

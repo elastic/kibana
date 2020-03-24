@@ -24,6 +24,7 @@ import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../pages/link_to/redirect_to_node_detail';
 import { SourceConfiguration } from '../../utils/source_configuration';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import { AlertFlyout } from '../alerting/metrics/alert_flyout';
 import { useLinkProps } from '../../hooks/use_link_props';
 
 export interface Props {
@@ -81,6 +82,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   chartOptions,
 }: Props) => {
   const [isPopoverOpen, setPopoverState] = useState(false);
+  const [flyoutVisible, setFlyoutVisible] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
   const handleFilter = useCallback(() => {
     // onFilter needs check for Typescript even though it's
@@ -141,7 +143,20 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       ]
     : [];
 
-  const itemPanels = [...filterByItem, ...openInVisualize, ...viewNodeDetail];
+  const itemPanels = [
+    ...filterByItem,
+    ...openInVisualize,
+    ...viewNodeDetail,
+    {
+      name: i18n.translate('xpack.infra.metricsExplorer.alerts.createAlertButton', {
+        defaultMessage: 'Create alert',
+      }),
+      icon: 'bell',
+      onClick() {
+        setFlyoutVisible(true);
+      },
+    },
+  ];
 
   // If there are no itemPanels then there is no reason to show the actions button.
   if (itemPanels.length === 0) return null;
@@ -174,15 +189,24 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       {actionLabel}
     </EuiButtonEmpty>
   );
+
   return (
-    <EuiPopover
-      closePopover={handleClose}
-      id={`${series.id}-popover`}
-      button={button}
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        closePopover={handleClose}
+        id={`${series.id}-popover`}
+        button={button}
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <AlertFlyout
+          series={series}
+          options={options}
+          setVisible={setFlyoutVisible}
+          visible={flyoutVisible}
+        />
+      </EuiPopover>
+    </>
   );
 };
