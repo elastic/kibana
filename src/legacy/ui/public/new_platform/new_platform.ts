@@ -22,6 +22,7 @@ import { IScope } from 'angular';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
+import { DashboardStart } from '../../../../plugins/dashboard/public';
 import {
   LegacyCoreSetup,
   LegacyCoreStart,
@@ -104,6 +105,7 @@ export interface PluginsStart {
   advancedSettings: AdvancedSettingsStart;
   discover: DiscoverStart;
   telemetry?: TelemetryPluginStart;
+  dashboard: DashboardStart;
 }
 
 export const npSetup = {

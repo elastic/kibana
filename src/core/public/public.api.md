@@ -378,7 +378,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
-    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+    // (undocumented)
+    getStartServices: StartServicesAccessor<TPluginsStart>;
     // (undocumented)
     http: HttpSetup;
     // @deprecated
@@ -1234,6 +1235,9 @@ export class SimpleSavedObject<T = unknown> {
     // (undocumented)
     _version?: SavedObject<T>['version'];
 }
+
+// @public
+export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<[CoreStart, TPluginsStart]>;
 
 // @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
