@@ -98,11 +98,9 @@ export function DiscoverField({
   };
 
   return (
-    <div className={`${showDetails ? 'dscSidebarItemExpanded' : ''}`}>
+    <>
       <div
-        className={`dscSidebarField sidebar-item-title dscSidebarItem ${
-          showDetails ? 'dscSidebarItem--active' : ''
-        }`}
+        className={`dscSidebarField dscSidebarItem ${showDetails ? 'dscSidebarItem--active' : ''}`}
         tabIndex={0}
         onClick={() => onShowDetails(!showDetails, field)}
         onKeyPress={() => onShowDetails(!showDetails, field)}
@@ -163,6 +161,6 @@ export function DiscoverField({
           onAddFilter={onAddFilter}
         />
       )}
-    </div>
+    </>
   );
 }

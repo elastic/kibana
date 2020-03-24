@@ -153,7 +153,7 @@ export function DiscoverSidebar({
         setIndexPattern={setIndexPattern}
         indexPatternList={sortBy(indexPatternList, o => o.attributes.title)}
       />
-      <div className="sidebar-item">
+      <div className="dscSidebar__item">
         <form>
           <DiscoverFieldSearch
             onChange={onChangeFieldSearch}
@@ -165,24 +165,22 @@ export function DiscoverSidebar({
       <div className="sidebar-list">
         {fields.length > 0 && (
           <>
-            <div className="dscSidebar__listHeader sidebar-list-header">
-              <EuiTitle size="xxxs" id="selected_fields">
-                <h3>
-                  <FormattedMessage
-                    id="kbn.discover.fieldChooser.filter.selectedFieldsTitle"
-                    defaultMessage="Selected fields"
-                  />
-                </h3>
-              </EuiTitle>
-            </div>
+            <EuiTitle size="xxxs" id="selected_fields">
+              <h3>
+                <FormattedMessage
+                  id="kbn.discover.fieldChooser.filter.selectedFieldsTitle"
+                  defaultMessage="Selected fields"
+                />
+              </h3>
+            </EuiTitle>
             <ul
-              className="list-unstyled dscFieldList--selected"
+              className="dscSidebarList dscFieldList--selected"
               aria-labelledby="selected_fields"
               data-test-subj={`fieldList-selected`}
             >
               {selectedFields.map((field: IndexPatternField, idx: number) => {
                 return (
-                  <li key={`field${idx}`}>
+                  <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
                     <DiscoverField
                       field={field}
                       indexPattern={selectedIndexPattern}
@@ -199,7 +197,7 @@ export function DiscoverSidebar({
                 );
               })}
             </ul>
-            <div className="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium">
+            <div className="euiFlexGroup euiFlexGroup--gutterMedium">
               <EuiTitle size="xxxs" id="available_fields" className="euiFlexItem">
                 <h3>
                   <FormattedMessage
@@ -235,23 +233,25 @@ export function DiscoverSidebar({
         )}
         {popularFields.length > 0 && (
           <ul
-            className={`list-unstyled sidebar-well dscFieldList--popular ${
+            className={`dscFieldList dscFieldList--popular ${
               !showFields ? 'hidden-sm hidden-xs' : ''
             }`}
             aria-labelledby="available_fields"
             data-test-subj={`fieldList-popular`}
           >
-            <li className="sidebar-item sidebar-list-header">
-              <h6>
-                <FormattedMessage
-                  id="kbn.discover.fieldChooser.filter.popularTitle"
-                  defaultMessage="Popular"
-                />
-              </h6>
+            <li className="dscSidebar__item">
+              <EuiTitle size="xxxs" id="available_fields">
+                <h4 style={{ fontWeight: 'normal' }}>
+                  <FormattedMessage
+                    id="kbn.discover.fieldChooser.filter.popularTitle"
+                    defaultMessage="Popular"
+                  />
+                </h4>
+              </EuiTitle>
             </li>
             {popularFields.map((field: IndexPatternField, idx: number) => {
               return (
-                <li key={`field${idx}`}>
+                <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
                   <DiscoverField
                     field={field}
                     indexPattern={selectedIndexPattern}
@@ -270,7 +270,7 @@ export function DiscoverSidebar({
         )}
 
         <ul
-          className={`list-unstyled dscFieldList--unpopular ${
+          className={`dscFieldList dscFieldList--unpopular ${
             !showFields ? 'hidden-sm hidden-xs' : ''
           }`}
           aria-labelledby="available_fields"
@@ -278,7 +278,7 @@ export function DiscoverSidebar({
         >
           {unpopularFields.map((field: IndexPatternField, idx: number) => {
             return (
-              <li key={`field${idx}`}>
+              <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
                 <DiscoverField
                   field={field}
                   indexPattern={selectedIndexPattern}

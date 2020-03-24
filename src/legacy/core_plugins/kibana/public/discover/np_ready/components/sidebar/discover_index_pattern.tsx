@@ -65,14 +65,14 @@ export function DiscoverIndexPattern({
   }
 
   return (
-    <div className="indexPattern__container">
+    <div className="dscIndexPattern__container">
       <I18nProvider>
         <ChangeIndexPattern
           trigger={{
             label: selected.title,
             title: selected.title,
             'data-test-subj': 'indexPattern-switch-link',
-            className: 'indexPattern__triggerButton',
+            className: 'dscIndexPattern__triggerButton',
           }}
           indexPatternId={selected.id}
           indexPatternRefs={options}

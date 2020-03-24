@@ -208,7 +208,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getAllFieldNames() {
       const sidebar = await testSubjects.find('discover-sidebar');
       const $ = await sidebar.parseDomContent();
-      return $('.sidebar-item[attr-field]')
+      return $('.dscSidebar__item[attr-field]')
         .toArray()
         .map(field =>
           $(field)

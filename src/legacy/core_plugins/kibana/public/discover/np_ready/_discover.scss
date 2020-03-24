@@ -1,31 +1,11 @@
 discover-app {
   flex-grow: 1;
-
-  .sidebar-container {
-    background-color: transparent;
-  }
 }
 
 .dscHistogram {
   display: flex;
   height: 200px;
   padding: $euiSizeS;
-}
-
-// SASSTODO: replace the margin-top value with a variable
-.dscSidebar__listHeader {
-  margin-top: 5px;
-}
-
-.dscFieldList--popular {
-  padding-top: $euiSizeS;
-}
-
-.dscFieldList--selected,
-.dscFieldList--unpopular,
-.dscFieldList--popular {
-  padding-left: $euiSizeS;
-  padding-right: $euiSizeS;
 }
 
 // SASSTODO: replace the z-index value with a variable
