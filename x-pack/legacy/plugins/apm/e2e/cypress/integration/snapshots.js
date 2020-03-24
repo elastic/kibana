@@ -1,19 +1,10 @@
 module.exports = {
-  "When clicking opbeans-go service": {
-    "transaction duration charts": {
-      "should have correct y-axis ticks": {
-        "1": "3.7 min",
-        "2": "1.8 min",
-        "3": "0.0 min"
-      }
-    }
-  },
-  "__version": "3.8.3",
   "APM": {
     "Transaction duration charts": {
-      "1": "3.7 min",
-      "2": "1.8 min",
-      "3": "0.0 min"
+      "1": "500 ms",
+      "2": "250 ms",
+      "3": "0 ms"
     }
-  }
+  },
+  "__version": "4.2.0"
 }
