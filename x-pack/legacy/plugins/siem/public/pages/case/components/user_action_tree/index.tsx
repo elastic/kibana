@@ -70,12 +70,6 @@ export const UserActionTree = React.memo(
       [manageMarkdownEditIds]
     );
 
-    const handleManageQuote = useCallback((quote: string) => {
-      const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '  \n> ');
-      setInsertQuote(`> ${addCarrots}`);
-      handleOutlineComment('add-comment');
-    }, []);
-
     const handleSaveComment = useCallback(
       (id: string, content: string) => {
         handleManageMarkdownEditId(id);
@@ -99,6 +93,9 @@ export const UserActionTree = React.memo(
             top: y,
             behavior: 'smooth',
           });
+          if (id === 'add-comment') {
+            moveToTarget.getElementsByTagName('textarea')[0].focus();
+          }
         }
         window.clearTimeout(handlerTimeoutId.current);
         setSelectedOutlineCommentId(id);
@@ -108,6 +105,15 @@ export const UserActionTree = React.memo(
         }, 2400);
       },
       [handlerTimeoutId.current]
+    );
+
+    const handleManageQuote = useCallback(
+      (quote: string) => {
+        const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '  \n> ');
+        setInsertQuote(`> ${addCarrots} \n`);
+        handleOutlineComment('add-comment');
+      },
+      [handleOutlineComment]
     );
 
     const handleUpdate = useCallback(

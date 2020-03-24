@@ -9,10 +9,18 @@
 import { EuiLink, EuiTableRow, EuiTableRowCell, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const TableHeader = styled.thead`
   font-weight: bold;
+`;
+
+const MyBlockquote = styled.div`
+  ${({ theme }) => css`
+    padding: 0 ${theme.eui.euiSize};
+    color: ${theme.eui.euiColorMediumShade};
+    border-left: ${theme.eui.euiSizeXS} solid ${theme.eui.euiColorLightShade};
+  `}
 `;
 
 TableHeader.displayName = 'TableHeader';
@@ -62,6 +70,9 @@ export const Markdown = React.memo<{
           {children}
         </EuiLink>
       </EuiToolTip>
+    ),
+    blockquote: ({ children }: { children: React.ReactNode[] }) => (
+      <MyBlockquote>{children}</MyBlockquote>
     ),
   };
 
