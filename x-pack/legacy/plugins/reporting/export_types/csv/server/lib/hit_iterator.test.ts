@@ -7,7 +7,8 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { CancellationToken } from '../../../../common/cancellation_token';
-import { Logger, ScrollConfig } from '../../../../types';
+import { ScrollConfig } from '../../../../server/types';
+import { Logger } from '../../../../types';
 import { createHitIterator } from './hit_iterator';
 
 const mockLogger = {

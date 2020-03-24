@@ -9,7 +9,7 @@ import { DetailedPeerCertificate } from 'tls';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
+import { HTTPAuthorizationHeader } from '../http_authentication';
 import { Tokens } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 
@@ -29,6 +29,15 @@ interface ProviderState {
 }
 
 /**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication.
+  return request.route.options.authRequired === true;
+}
+
+/**
  * Provider that supports PKI request authentication.
  */
 export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
@@ -38,6 +47,15 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   static readonly type = 'pki';
 
   /**
+   * Performs initial login request.
+   * @param request Request instance.
+   */
+  public async login(request: KibanaRequest) {
+    this.logger.debug('Trying to perform a login.');
+    return await this.authenticateViaPeerCertificate(request);
+  }
+
+  /**
    * Performs PKI request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
@@ -45,7 +63,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    if (getHTTPAuthenticationScheme(request) != null) {
+    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
@@ -55,12 +73,12 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       authenticationResult = await this.authenticateViaState(request, state);
 
       // If access token expired or doesn't match to the certificate fingerprint we should try to get
-      // a new one in exchange to peer certificate chain.
-      if (
+      // a new one in exchange to peer certificate chain assuming request can initiate new session.
+      const invalidAccessToken =
         authenticationResult.notHandled() ||
         (authenticationResult.failed() &&
-          Tokens.isAccessTokenExpiredError(authenticationResult.error))
-      ) {
+          Tokens.isAccessTokenExpiredError(authenticationResult.error));
+      if (invalidAccessToken && canStartNewSession(request)) {
         authenticationResult = await this.authenticateViaPeerCertificate(request);
         // If we have an active session that we couldn't use to authenticate user and at the same time
         // we couldn't use peer's certificate to establish a new one, then we should respond with 401
@@ -68,12 +86,15 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
         if (authenticationResult.notHandled()) {
           return AuthenticationResult.failed(Boom.unauthorized());
         }
+      } else if (invalidAccessToken) {
+        return AuthenticationResult.notHandled();
       }
     }
 
     // If we couldn't authenticate by means of all methods above, let's try to check if we can authenticate
     // request using its peer certificate chain, otherwise just return authentication result we have.
-    return authenticationResult.notHandled()
+    // We shouldn't establish new session if authentication isn't required for this particular request.
+    return authenticationResult.notHandled() && canStartNewSession(request)
       ? await this.authenticateViaPeerCertificate(request)
       : authenticationResult;
   }
@@ -156,7 +177,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -207,7 +230,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
 
     try {
       // Then attempt to query for the user details using the new token
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('User has been authenticated with new access token');

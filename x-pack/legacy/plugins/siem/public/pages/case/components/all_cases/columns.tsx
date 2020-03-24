@@ -35,6 +35,7 @@ const Spacer = styled.span`
 
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
+
 export const getCasesColumns = (
   actions: Array<DefaultItemIconButtonAction<Case>>,
   filterStatus: string
@@ -108,11 +109,11 @@ export const getCasesColumns = (
   },
   {
     align: 'right',
-    field: 'commentIds',
+    field: 'totalComment',
     name: i18n.COMMENTS,
     sortable: true,
-    render: (comments: Case['commentIds']) =>
-      renderStringField(`${comments.length}`, `case-table-column-commentCount`),
+    render: (totalComment: Case['totalComment']) =>
+      renderStringField(`${totalComment}`, `case-table-column-commentCount`),
   },
   filterStatus === 'open'
     ? {

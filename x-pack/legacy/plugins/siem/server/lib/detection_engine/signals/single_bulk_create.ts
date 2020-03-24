@@ -8,7 +8,7 @@ import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { SignalSearchResponse, BulkResponse } from './types';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RuleAlertAction } from '../types';
 import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
@@ -20,6 +20,7 @@ interface SingleBulkCreateParams {
   logger: Logger;
   id: string;
   signalsIndex: string;
+  actions: RuleAlertAction[];
   name: string;
   createdAt: string;
   createdBy: string;
@@ -28,6 +29,7 @@ interface SingleBulkCreateParams {
   interval: string;
   enabled: boolean;
   tags: string[];
+  throttle: string | null;
 }
 
 /**
@@ -60,6 +62,7 @@ export const singleBulkCreate = async ({
   logger,
   id,
   signalsIndex,
+  actions,
   name,
   createdAt,
   createdBy,
@@ -68,6 +71,7 @@ export const singleBulkCreate = async ({
   interval,
   enabled,
   tags,
+  throttle,
 }: SingleBulkCreateParams): Promise<boolean> => {
   someResult.hits.hits = filterDuplicateRules(id, someResult);
 
@@ -99,6 +103,7 @@ export const singleBulkCreate = async ({
       doc,
       ruleParams,
       id,
+      actions,
       name,
       createdAt,
       createdBy,
@@ -107,6 +112,7 @@ export const singleBulkCreate = async ({
       interval,
       enabled,
       tags,
+      throttle,
     }),
   ]);
   const start = performance.now();
