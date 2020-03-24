@@ -34,14 +34,14 @@ const POINT_MB_FILTER = [
 
 const VISIBLE_POINT_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, POINT_MB_FILTER];
 
-export function getFillFilterExpression(hasJoins) {
+export function getFillFilterExpression(hasJoins: boolean): unknown[] {
   return hasJoins ? VISIBLE_CLOSED_SHAPE_MB_FILTER : CLOSED_SHAPE_MB_FILTER;
 }
 
-export function getLineFilterExpression(hasJoins) {
+export function getLineFilterExpression(hasJoins: boolean): unknown[] {
   return hasJoins ? VISIBLE_ALL_SHAPE_MB_FILTER : ALL_SHAPE_MB_FILTER;
 }
 
-export function getPointFilterExpression(hasJoins) {
+export function getPointFilterExpression(hasJoins: boolean): unknown[] {
   return hasJoins ? VISIBLE_POINT_MB_FILTER : POINT_MB_FILTER;
 }
