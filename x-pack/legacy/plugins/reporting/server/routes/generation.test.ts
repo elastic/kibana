@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { createMockReportingCore } from '../../test_helpers';
 import { Logger, ServerFacade } from '../../types';
-import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../types';
+import { ReportingCore, ReportingSetupDeps } from '../../server/types';
 
 jest.mock('./lib/authorized_user_pre_routing', () => ({
   authorizedUserPreRoutingFactory: () => () => ({}),
@@ -22,8 +22,6 @@ import { registerJobGenerationRoutes } from './generation';
 
 let mockServer: Hapi.Server;
 let mockReportingPlugin: ReportingCore;
-let mockReportingConfig: ReportingConfig;
-
 const mockLogger = ({
   error: jest.fn(),
   debug: jest.fn(),
@@ -35,12 +33,10 @@ beforeEach(async () => {
     port: 8080,
     routes: { log: { collect: true } },
   });
-
+  mockServer.config = () => ({ get: jest.fn(), has: jest.fn() });
   mockReportingPlugin = await createMockReportingCore();
   mockReportingPlugin.getEnqueueJob = async () =>
     jest.fn().mockImplementation(() => ({ toJSON: () => '{ "job": "data" }' }));
-
-  mockReportingConfig = { get: jest.fn(), kbnConfig: { get: jest.fn() } };
 });
 
 const mockPlugins = {
@@ -58,7 +54,6 @@ const getErrorsFromRequest = (request: Hapi.Request) => {
 test(`returns 400 if there are no job params`, async () => {
   registerJobGenerationRoutes(
     mockReportingPlugin,
-    (mockReportingConfig as unknown) as ReportingConfig,
     (mockServer as unknown) as ServerFacade,
     (mockPlugins as unknown) as ReportingSetupDeps,
     mockLogger
@@ -85,7 +80,6 @@ test(`returns 400 if there are no job params`, async () => {
 test(`returns 400 if job params is invalid`, async () => {
   registerJobGenerationRoutes(
     mockReportingPlugin,
-    (mockReportingConfig as unknown) as ReportingConfig,
     (mockServer as unknown) as ServerFacade,
     (mockPlugins as unknown) as ReportingSetupDeps,
     mockLogger
@@ -120,7 +114,6 @@ test(`returns 500 if job handler throws an error`, async () => {
 
   registerJobGenerationRoutes(
     mockReportingPlugin,
-    (mockReportingConfig as unknown) as ReportingConfig,
     (mockServer as unknown) as ServerFacade,
     (mockPlugins as unknown) as ReportingSetupDeps,
     mockLogger
