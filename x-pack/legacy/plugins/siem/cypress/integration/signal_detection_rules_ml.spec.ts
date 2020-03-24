@@ -14,8 +14,6 @@ import {
   ABOUT_STEP,
   ABOUT_TAGS,
   ABOUT_URLS,
-  DEFINITION_CUSTOM_QUERY,
-  DEFINITION_INDEX_PATTERNS,
   DEFINITION_TIMELINE,
   DEFINITION_STEP,
   RULE_NAME_HEADER,
@@ -33,11 +31,7 @@ import {
   SEVERITY,
 } from '../screens/signal_detection_rules';
 
-import {
-  createAndActivateRule,
-  fillAboutRuleAndContinue,
-  fillDefineCustomRuleAndContinue,
-} from '../tasks/create_new_rule';
+import { createAndActivateRule, fillAboutRuleAndContinue } from '../tasks/create_new_rule';
 import {
   goToManageSignalDetectionRules,
   waitForSignalsIndexToBeCreated,
@@ -56,7 +50,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
-describe('Signal detection rules, custom', () => {
+describe('Signal detection rules, machine learning', () => {
   before(() => {
     esArchiverLoad('prebuilt_rules_loaded');
   });
@@ -65,15 +59,27 @@ describe('Signal detection rules, custom', () => {
     esArchiverUnload('prebuilt_rules_loaded');
   });
 
-  it('Creates and activates a new custom rule', () => {
+  it('Creates and activates a new ml rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     waitForSignalsPanelToBeLoaded();
     waitForSignalsIndexToBeCreated();
     goToManageSignalDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     goToCreateNewRule();
-    fillDefineCustomRuleAndContinue(newRule);
+
+    cy.get('[data-test-subj="machineLearning"]').click({ force: true });
+
+    cy.get('[data-test-subj="mlJobSelect"] button').click({ force: true });
+    cy.contains('.euiContextMenuItem__text', 'linux_anomalous_network_service').click();
+
+    cy.get('[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber').type('{selectall}20', {
+      force: true,
+    });
+
+    cy.get('[data-test-subj="continue"]').click({ force: true });
+
     fillAboutRuleAndContinue(newRule);
+
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN)
@@ -125,14 +131,6 @@ describe('Signal detection rules, custom', () => {
         expectedMitre = expectedMitre + technique;
       });
     });
-    const expectedIndexPatterns = [
-      'apm-*-transaction*',
-      'auditbeat-*',
-      'endgame-*',
-      'filebeat-*',
-      'packetbeat-*',
-      'winlogbeat-*',
-    ];
 
     cy.get(RULE_NAME_HEADER)
       .invoke('text')
@@ -166,17 +164,19 @@ describe('Signal detection rules, custom', () => {
       .invoke('text')
       .should('eql', expectedTags);
 
-    cy.get(DEFINITION_INDEX_PATTERNS).then(patterns => {
-      cy.wrap(patterns).each((pattern, index) => {
-        cy.wrap(pattern)
-          .invoke('text')
-          .should('eql', expectedIndexPatterns[index]);
-      });
-    });
     cy.get(DEFINITION_STEP)
-      .eq(DEFINITION_CUSTOM_QUERY)
+      .eq(0)
       .invoke('text')
-      .should('eql', `${newRule.customQuery} `);
+      .should('eql', 'machine_learning');
+    cy.get(DEFINITION_STEP)
+      .eq(1)
+      .invoke('text')
+      .should('eql', '20');
+    cy.get(DEFINITION_STEP)
+      .eq(2)
+      .invoke('text')
+      .should('eql', 'linux_anomalous_network_service');
+
     cy.get(DEFINITION_STEP)
       .eq(DEFINITION_TIMELINE)
       .invoke('text')

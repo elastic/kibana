@@ -81,7 +81,7 @@ export const fillAboutRuleAndContinue = (rule: Rule) => {
     .click({ force: true });
 };
 
-export const fillDefineRuleAndContinue = (rule: Rule) => {
+export const fillDefineCustomRuleAndContinue = (rule: Rule) => {
   cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery);
   cy.get(CUSTOM_QUERY_INPUT).should('have.attr', 'value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON)
