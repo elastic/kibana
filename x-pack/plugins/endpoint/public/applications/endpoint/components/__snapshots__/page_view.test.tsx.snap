@@ -14,77 +14,71 @@ exports[`PageView component should display body header custom element 1`] = `
   border-right: none;
 }
 
-<EuiThemeProvider>
-  <ThemeProvider
-    theme={[Function]}
-  >
-    <Memo()
-      bodyHeader={
-        <p>
-          body header
-        </p>
-      }
+<Memo()
+  bodyHeader={
+    <p>
+      body header
+    </p>
+  }
+>
+  <Styled(EuiPage)>
+    <EuiPage
+      className="c0"
     >
-      <Styled(EuiPage)>
-        <EuiPage
-          className="c0"
-        >
-          <div
-            className="euiPage c0"
+      <div
+        className="euiPage c0"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
           >
-            <EuiPageBody>
-              <main
-                className="euiPageBody"
+            <EuiPageContent
+              className="endpoint-page-content"
+            >
+              <EuiPanel
+                className="euiPageContent endpoint-page-content"
+                paddingSize="l"
               >
-                <EuiPageContent
-                  className="endpoint-page-content"
+                <div
+                  className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
                 >
-                  <EuiPanel
-                    className="euiPageContent endpoint-page-content"
-                    paddingSize="l"
-                  >
+                  <EuiPageContentHeader>
                     <div
-                      className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
+                      className="euiPageContentHeader euiPageContentHeader--responsive"
                     >
-                      <EuiPageContentHeader>
-                        <div
-                          className="euiPageContentHeader euiPageContentHeader--responsive"
-                        >
-                          <EuiPageContentHeaderSection
-                            data-test-subj="pageViewBodyTitle"
-                          >
-                            <div
-                              className="euiPageContentHeaderSection"
-                              data-test-subj="pageViewBodyTitle"
-                            >
-                              <p>
-                                body header
-                              </p>
-                            </div>
-                          </EuiPageContentHeaderSection>
-                        </div>
-                      </EuiPageContentHeader>
-                      <EuiPageContentBody
-                        data-test-subj="pageViewBodyContent"
+                      <EuiPageContentHeaderSection
+                        data-test-subj="pageViewBodyTitle"
                       >
                         <div
-                          className="euiPageContentBody"
-                          data-test-subj="pageViewBodyContent"
+                          className="euiPageContentHeaderSection"
+                          data-test-subj="pageViewBodyTitle"
                         >
-                          body content
+                          <p>
+                            body header
+                          </p>
                         </div>
-                      </EuiPageContentBody>
+                      </EuiPageContentHeaderSection>
                     </div>
-                  </EuiPanel>
-                </EuiPageContent>
-              </main>
-            </EuiPageBody>
-          </div>
-        </EuiPage>
-      </Styled(EuiPage)>
-    </Memo()>
-  </ThemeProvider>
-</EuiThemeProvider>
+                  </EuiPageContentHeader>
+                  <EuiPageContentBody
+                    data-test-subj="pageViewBodyContent"
+                  >
+                    <div
+                      className="euiPageContentBody"
+                      data-test-subj="pageViewBodyContent"
+                    >
+                      body content
+                    </div>
+                  </EuiPageContentBody>
+                </div>
+              </EuiPanel>
+            </EuiPageContent>
+          </main>
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </Styled(EuiPage)>
+</Memo()>
 `;
 
 exports[`PageView component should display body header wrapped in EuiTitle 1`] = `
@@ -101,79 +95,73 @@ exports[`PageView component should display body header wrapped in EuiTitle 1`] =
   border-right: none;
 }
 
-<EuiThemeProvider>
-  <ThemeProvider
-    theme={[Function]}
-  >
-    <Memo()
-      bodyHeader="body header"
+<Memo()
+  bodyHeader="body header"
+>
+  <Styled(EuiPage)>
+    <EuiPage
+      className="c0"
     >
-      <Styled(EuiPage)>
-        <EuiPage
-          className="c0"
-        >
-          <div
-            className="euiPage c0"
+      <div
+        className="euiPage c0"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
           >
-            <EuiPageBody>
-              <main
-                className="euiPageBody"
+            <EuiPageContent
+              className="endpoint-page-content"
+            >
+              <EuiPanel
+                className="euiPageContent endpoint-page-content"
+                paddingSize="l"
               >
-                <EuiPageContent
-                  className="endpoint-page-content"
+                <div
+                  className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
                 >
-                  <EuiPanel
-                    className="euiPageContent endpoint-page-content"
-                    paddingSize="l"
-                  >
+                  <EuiPageContentHeader>
                     <div
-                      className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
+                      className="euiPageContentHeader euiPageContentHeader--responsive"
                     >
-                      <EuiPageContentHeader>
-                        <div
-                          className="euiPageContentHeader euiPageContentHeader--responsive"
-                        >
-                          <EuiPageContentHeaderSection
-                            data-test-subj="pageViewBodyTitle"
-                          >
-                            <div
-                              className="euiPageContentHeaderSection"
-                              data-test-subj="pageViewBodyTitle"
-                            >
-                              <EuiTitle
-                                size="l"
-                              >
-                                <h2
-                                  className="euiTitle euiTitle--large"
-                                >
-                                  body header
-                                </h2>
-                              </EuiTitle>
-                            </div>
-                          </EuiPageContentHeaderSection>
-                        </div>
-                      </EuiPageContentHeader>
-                      <EuiPageContentBody
-                        data-test-subj="pageViewBodyContent"
+                      <EuiPageContentHeaderSection
+                        data-test-subj="pageViewBodyTitle"
                       >
                         <div
-                          className="euiPageContentBody"
-                          data-test-subj="pageViewBodyContent"
+                          className="euiPageContentHeaderSection"
+                          data-test-subj="pageViewBodyTitle"
                         >
-                          body content
+                          <EuiTitle
+                            size="l"
+                          >
+                            <h2
+                              className="euiTitle euiTitle--large"
+                            >
+                              body header
+                            </h2>
+                          </EuiTitle>
                         </div>
-                      </EuiPageContentBody>
+                      </EuiPageContentHeaderSection>
                     </div>
-                  </EuiPanel>
-                </EuiPageContent>
-              </main>
-            </EuiPageBody>
-          </div>
-        </EuiPage>
-      </Styled(EuiPage)>
-    </Memo()>
-  </ThemeProvider>
-</EuiThemeProvider>
+                  </EuiPageContentHeader>
+                  <EuiPageContentBody
+                    data-test-subj="pageViewBodyContent"
+                  >
+                    <div
+                      className="euiPageContentBody"
+                      data-test-subj="pageViewBodyContent"
+                    >
+                      body content
+                    </div>
+                  </EuiPageContentBody>
+                </div>
+              </EuiPanel>
+            </EuiPageContent>
+          </main>
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </Styled(EuiPage)>
+</Memo()>
 `;
 
 exports[`PageView component should display header left and right 1`] = `
@@ -190,155 +178,86 @@ exports[`PageView component should display header left and right 1`] = `
   border-right: none;
 }
 
-<EuiThemeProvider>
-  <ThemeProvider
-    theme={[Function]}
-  >
-    <Memo()
-      headerLeft="page title"
-      headerRight="right side actions"
+<Memo()
+  headerLeft="page title"
+  headerRight="right side actions"
+>
+  <Styled(EuiPage)>
+    <EuiPage
+      className="c0"
     >
-      <Styled(EuiPage)>
-        <EuiPage
-          className="c0"
-        >
-          <div
-            className="euiPage c0"
+      <div
+        className="euiPage c0"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
           >
-            <EuiPageBody>
-              <main
-                className="euiPageBody"
+            <EuiPageHeader
+              className="endpoint-header"
+            >
+              <div
+                className="euiPageHeader euiPageHeader--responsive endpoint-header"
               >
-                <EuiPageHeader
-                  className="endpoint-header"
+                <EuiPageHeaderSection
+                  data-test-subj="pageViewHeaderLeft"
                 >
                   <div
-                    className="euiPageHeader euiPageHeader--responsive endpoint-header"
+                    className="euiPageHeaderSection"
+                    data-test-subj="pageViewHeaderLeft"
                   >
-                    <EuiPageHeaderSection
-                      data-test-subj="pageViewHeaderLeft"
+                    <EuiTitle
+                      size="l"
                     >
-                      <div
-                        className="euiPageHeaderSection"
-                        data-test-subj="pageViewHeaderLeft"
+                      <h1
+                        className="euiTitle euiTitle--large"
                       >
-                        <EuiTitle
-                          size="l"
-                        >
-                          <h1
-                            className="euiTitle euiTitle--large"
-                          >
-                            page title
-                          </h1>
-                        </EuiTitle>
-                      </div>
-                    </EuiPageHeaderSection>
-                    <EuiPageHeaderSection
-                      data-test-subj="pageViewHeaderRight"
-                    >
-                      <div
-                        className="euiPageHeaderSection"
-                        data-test-subj="pageViewHeaderRight"
-                      >
-                        right side actions
-                      </div>
-                    </EuiPageHeaderSection>
+                        page title
+                      </h1>
+                    </EuiTitle>
                   </div>
-                </EuiPageHeader>
-                <EuiPageContent
-                  className="endpoint-page-content"
+                </EuiPageHeaderSection>
+                <EuiPageHeaderSection
+                  data-test-subj="pageViewHeaderRight"
                 >
-                  <EuiPanel
-                    className="euiPageContent endpoint-page-content"
-                    paddingSize="l"
+                  <div
+                    className="euiPageHeaderSection"
+                    data-test-subj="pageViewHeaderRight"
                   >
-                    <div
-                      className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
-                    >
-                      <EuiPageContentBody
-                        data-test-subj="pageViewBodyContent"
-                      >
-                        <div
-                          className="euiPageContentBody"
-                          data-test-subj="pageViewBodyContent"
-                        >
-                          body content
-                        </div>
-                      </EuiPageContentBody>
-                    </div>
-                  </EuiPanel>
-                </EuiPageContent>
-              </main>
-            </EuiPageBody>
-          </div>
-        </EuiPage>
-      </Styled(EuiPage)>
-    </Memo()>
-  </ThemeProvider>
-</EuiThemeProvider>
-`;
-
-exports[`PageView component should display only body 1`] = `
-.c0 {
-  padding: 0;
-}
-
-.c0 .endpoint-header {
-  padding: 24px;
-}
-
-.c0 .endpoint-page-content {
-  border-left: none;
-  border-right: none;
-}
-
-<EuiThemeProvider>
-  <ThemeProvider
-    theme={[Function]}
-  >
-    <Memo()>
-      <Styled(EuiPage)>
-        <EuiPage
-          className="c0"
-        >
-          <div
-            className="euiPage c0"
-          >
-            <EuiPageBody>
-              <main
-                className="euiPageBody"
+                    right side actions
+                  </div>
+                </EuiPageHeaderSection>
+              </div>
+            </EuiPageHeader>
+            <EuiPageContent
+              className="endpoint-page-content"
+            >
+              <EuiPanel
+                className="euiPageContent endpoint-page-content"
+                paddingSize="l"
               >
-                <EuiPageContent
-                  className="endpoint-page-content"
+                <div
+                  className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
                 >
-                  <EuiPanel
-                    className="euiPageContent endpoint-page-content"
-                    paddingSize="l"
+                  <EuiPageContentBody
+                    data-test-subj="pageViewBodyContent"
                   >
                     <div
-                      className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
+                      className="euiPageContentBody"
+                      data-test-subj="pageViewBodyContent"
                     >
-                      <EuiPageContentBody
-                        data-test-subj="pageViewBodyContent"
-                      >
-                        <div
-                          className="euiPageContentBody"
-                          data-test-subj="pageViewBodyContent"
-                        >
-                          body content
-                        </div>
-                      </EuiPageContentBody>
+                      body content
                     </div>
-                  </EuiPanel>
-                </EuiPageContent>
-              </main>
-            </EuiPageBody>
-          </div>
-        </EuiPage>
-      </Styled(EuiPage)>
-    </Memo()>
-  </ThemeProvider>
-</EuiThemeProvider>
+                  </EuiPageContentBody>
+                </div>
+              </EuiPanel>
+            </EuiPageContent>
+          </main>
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </Styled(EuiPage)>
+</Memo()>
 `;
 
 exports[`PageView component should display only body if not header props used 1`] = `
@@ -355,53 +274,47 @@ exports[`PageView component should display only body if not header props used 1`
   border-right: none;
 }
 
-<EuiThemeProvider>
-  <ThemeProvider
-    theme={[Function]}
-  >
-    <Memo()>
-      <Styled(EuiPage)>
-        <EuiPage
-          className="c0"
-        >
-          <div
-            className="euiPage c0"
+<Memo()>
+  <Styled(EuiPage)>
+    <EuiPage
+      className="c0"
+    >
+      <div
+        className="euiPage c0"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
           >
-            <EuiPageBody>
-              <main
-                className="euiPageBody"
+            <EuiPageContent
+              className="endpoint-page-content"
+            >
+              <EuiPanel
+                className="euiPageContent endpoint-page-content"
+                paddingSize="l"
               >
-                <EuiPageContent
-                  className="endpoint-page-content"
+                <div
+                  className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
                 >
-                  <EuiPanel
-                    className="euiPageContent endpoint-page-content"
-                    paddingSize="l"
+                  <EuiPageContentBody
+                    data-test-subj="pageViewBodyContent"
                   >
                     <div
-                      className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
+                      className="euiPageContentBody"
+                      data-test-subj="pageViewBodyContent"
                     >
-                      <EuiPageContentBody
-                        data-test-subj="pageViewBodyContent"
-                      >
-                        <div
-                          className="euiPageContentBody"
-                          data-test-subj="pageViewBodyContent"
-                        >
-                          body content
-                        </div>
-                      </EuiPageContentBody>
+                      body content
                     </div>
-                  </EuiPanel>
-                </EuiPageContent>
-              </main>
-            </EuiPageBody>
-          </div>
-        </EuiPage>
-      </Styled(EuiPage)>
-    </Memo()>
-  </ThemeProvider>
-</EuiThemeProvider>
+                  </EuiPageContentBody>
+                </div>
+              </EuiPanel>
+            </EuiPageContent>
+          </main>
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </Styled(EuiPage)>
+</Memo()>
 `;
 
 exports[`PageView component should display only header left 1`] = `
@@ -418,81 +331,75 @@ exports[`PageView component should display only header left 1`] = `
   border-right: none;
 }
 
-<EuiThemeProvider>
-  <ThemeProvider
-    theme={[Function]}
-  >
-    <Memo()
-      headerLeft="page title"
+<Memo()
+  headerLeft="page title"
+>
+  <Styled(EuiPage)>
+    <EuiPage
+      className="c0"
     >
-      <Styled(EuiPage)>
-        <EuiPage
-          className="c0"
-        >
-          <div
-            className="euiPage c0"
+      <div
+        className="euiPage c0"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
           >
-            <EuiPageBody>
-              <main
-                className="euiPageBody"
+            <EuiPageHeader
+              className="endpoint-header"
+            >
+              <div
+                className="euiPageHeader euiPageHeader--responsive endpoint-header"
               >
-                <EuiPageHeader
-                  className="endpoint-header"
+                <EuiPageHeaderSection
+                  data-test-subj="pageViewHeaderLeft"
                 >
                   <div
-                    className="euiPageHeader euiPageHeader--responsive endpoint-header"
+                    className="euiPageHeaderSection"
+                    data-test-subj="pageViewHeaderLeft"
                   >
-                    <EuiPageHeaderSection
-                      data-test-subj="pageViewHeaderLeft"
+                    <EuiTitle
+                      size="l"
                     >
-                      <div
-                        className="euiPageHeaderSection"
-                        data-test-subj="pageViewHeaderLeft"
+                      <h1
+                        className="euiTitle euiTitle--large"
                       >
-                        <EuiTitle
-                          size="l"
-                        >
-                          <h1
-                            className="euiTitle euiTitle--large"
-                          >
-                            page title
-                          </h1>
-                        </EuiTitle>
-                      </div>
-                    </EuiPageHeaderSection>
+                        page title
+                      </h1>
+                    </EuiTitle>
                   </div>
-                </EuiPageHeader>
-                <EuiPageContent
-                  className="endpoint-page-content"
+                </EuiPageHeaderSection>
+              </div>
+            </EuiPageHeader>
+            <EuiPageContent
+              className="endpoint-page-content"
+            >
+              <EuiPanel
+                className="euiPageContent endpoint-page-content"
+                paddingSize="l"
+              >
+                <div
+                  className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
                 >
-                  <EuiPanel
-                    className="euiPageContent endpoint-page-content"
-                    paddingSize="l"
+                  <EuiPageContentBody
+                    data-test-subj="pageViewBodyContent"
                   >
                     <div
-                      className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
+                      className="euiPageContentBody"
+                      data-test-subj="pageViewBodyContent"
                     >
-                      <EuiPageContentBody
-                        data-test-subj="pageViewBodyContent"
-                      >
-                        <div
-                          className="euiPageContentBody"
-                          data-test-subj="pageViewBodyContent"
-                        >
-                          body content
-                        </div>
-                      </EuiPageContentBody>
+                      body content
                     </div>
-                  </EuiPanel>
-                </EuiPageContent>
-              </main>
-            </EuiPageBody>
-          </div>
-        </EuiPage>
-      </Styled(EuiPage)>
-    </Memo()>
-  </ThemeProvider>
-</EuiThemeProvider>
+                  </EuiPageContentBody>
+                </div>
+              </EuiPanel>
+            </EuiPageContent>
+          </main>
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </Styled(EuiPage)>
+</Memo()>
 `;
 
 exports[`PageView component should display only header right but include an empty left side 1`] = `
@@ -509,81 +416,75 @@ exports[`PageView component should display only header right but include an empt
   border-right: none;
 }
 
-<EuiThemeProvider>
-  <ThemeProvider
-    theme={[Function]}
-  >
-    <Memo()
-      headerRight="right side actions"
+<Memo()
+  headerRight="right side actions"
+>
+  <Styled(EuiPage)>
+    <EuiPage
+      className="c0"
     >
-      <Styled(EuiPage)>
-        <EuiPage
-          className="c0"
-        >
-          <div
-            className="euiPage c0"
+      <div
+        className="euiPage c0"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
           >
-            <EuiPageBody>
-              <main
-                className="euiPageBody"
+            <EuiPageHeader
+              className="endpoint-header"
+            >
+              <div
+                className="euiPageHeader euiPageHeader--responsive endpoint-header"
               >
-                <EuiPageHeader
-                  className="endpoint-header"
+                <EuiPageHeaderSection
+                  data-test-subj="pageViewHeaderLeft"
                 >
                   <div
-                    className="euiPageHeader euiPageHeader--responsive endpoint-header"
-                  >
-                    <EuiPageHeaderSection
-                      data-test-subj="pageViewHeaderLeft"
-                    >
-                      <div
-                        className="euiPageHeaderSection"
-                        data-test-subj="pageViewHeaderLeft"
-                      />
-                    </EuiPageHeaderSection>
-                    <EuiPageHeaderSection
-                      data-test-subj="pageViewHeaderRight"
-                    >
-                      <div
-                        className="euiPageHeaderSection"
-                        data-test-subj="pageViewHeaderRight"
-                      >
-                        right side actions
-                      </div>
-                    </EuiPageHeaderSection>
-                  </div>
-                </EuiPageHeader>
-                <EuiPageContent
-                  className="endpoint-page-content"
+                    className="euiPageHeaderSection"
+                    data-test-subj="pageViewHeaderLeft"
+                  />
+                </EuiPageHeaderSection>
+                <EuiPageHeaderSection
+                  data-test-subj="pageViewHeaderRight"
                 >
-                  <EuiPanel
-                    className="euiPageContent endpoint-page-content"
-                    paddingSize="l"
+                  <div
+                    className="euiPageHeaderSection"
+                    data-test-subj="pageViewHeaderRight"
+                  >
+                    right side actions
+                  </div>
+                </EuiPageHeaderSection>
+              </div>
+            </EuiPageHeader>
+            <EuiPageContent
+              className="endpoint-page-content"
+            >
+              <EuiPanel
+                className="euiPageContent endpoint-page-content"
+                paddingSize="l"
+              >
+                <div
+                  className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
+                >
+                  <EuiPageContentBody
+                    data-test-subj="pageViewBodyContent"
                   >
                     <div
-                      className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
+                      className="euiPageContentBody"
+                      data-test-subj="pageViewBodyContent"
                     >
-                      <EuiPageContentBody
-                        data-test-subj="pageViewBodyContent"
-                      >
-                        <div
-                          className="euiPageContentBody"
-                          data-test-subj="pageViewBodyContent"
-                        >
-                          body content
-                        </div>
-                      </EuiPageContentBody>
+                      body content
                     </div>
-                  </EuiPanel>
-                </EuiPageContent>
-              </main>
-            </EuiPageBody>
-          </div>
-        </EuiPage>
-      </Styled(EuiPage)>
-    </Memo()>
-  </ThemeProvider>
-</EuiThemeProvider>
+                  </EuiPageContentBody>
+                </div>
+              </EuiPanel>
+            </EuiPageContent>
+          </main>
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </Styled(EuiPage)>
+</Memo()>
 `;
 
 exports[`PageView component should pass through EuiPage props 1`] = `
@@ -600,73 +501,67 @@ exports[`PageView component should pass through EuiPage props 1`] = `
   border-right: none;
 }
 
-<EuiThemeProvider>
-  <ThemeProvider
-    theme={[Function]}
+<Memo()
+  aria-label="test-aria-label-here"
+  className="test-class-name-here"
+  data-test-subj="test-data-test-subj-here"
+  restrictWidth="1000"
+>
+  <Styled(EuiPage)
+    aria-label="test-aria-label-here"
+    className="test-class-name-here"
+    data-test-subj="test-data-test-subj-here"
+    restrictWidth="1000"
   >
-    <Memo()
+    <EuiPage
       aria-label="test-aria-label-here"
-      className="test-class-name-here"
+      className="c0 test-class-name-here"
       data-test-subj="test-data-test-subj-here"
       restrictWidth="1000"
     >
-      <Styled(EuiPage)
+      <div
         aria-label="test-aria-label-here"
-        className="test-class-name-here"
+        className="euiPage euiPage--restrictWidth-custom c0 test-class-name-here"
         data-test-subj="test-data-test-subj-here"
-        restrictWidth="1000"
+        style={
+          Object {
+            "maxWidth": "1000",
+          }
+        }
       >
-        <EuiPage
-          aria-label="test-aria-label-here"
-          className="c0 test-class-name-here"
-          data-test-subj="test-data-test-subj-here"
-          restrictWidth="1000"
-        >
-          <div
-            aria-label="test-aria-label-here"
-            className="euiPage euiPage--restrictWidth-custom c0 test-class-name-here"
-            data-test-subj="test-data-test-subj-here"
-            style={
-              Object {
-                "maxWidth": "1000",
-              }
-            }
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
           >
-            <EuiPageBody>
-              <main
-                className="euiPageBody"
+            <EuiPageContent
+              className="endpoint-page-content"
+            >
+              <EuiPanel
+                className="euiPageContent endpoint-page-content"
+                paddingSize="l"
               >
-                <EuiPageContent
-                  className="endpoint-page-content"
+                <div
+                  className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
                 >
-                  <EuiPanel
-                    className="euiPageContent endpoint-page-content"
-                    paddingSize="l"
+                  <EuiPageContentBody
+                    data-test-subj="pageViewBodyContent"
                   >
                     <div
-                      className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
+                      className="euiPageContentBody"
+                      data-test-subj="pageViewBodyContent"
                     >
-                      <EuiPageContentBody
-                        data-test-subj="pageViewBodyContent"
-                      >
-                        <div
-                          className="euiPageContentBody"
-                          data-test-subj="pageViewBodyContent"
-                        >
-                          body content
-                        </div>
-                      </EuiPageContentBody>
+                      body content
                     </div>
-                  </EuiPanel>
-                </EuiPageContent>
-              </main>
-            </EuiPageBody>
-          </div>
-        </EuiPage>
-      </Styled(EuiPage)>
-    </Memo()>
-  </ThemeProvider>
-</EuiThemeProvider>
+                  </EuiPageContentBody>
+                </div>
+              </EuiPanel>
+            </EuiPageContent>
+          </main>
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </Styled(EuiPage)>
+</Memo()>
 `;
 
 exports[`PageView component should use custom element for header left and not wrap in EuiTitle 1`] = `
@@ -683,77 +578,71 @@ exports[`PageView component should use custom element for header left and not wr
   border-right: none;
 }
 
-<EuiThemeProvider>
-  <ThemeProvider
-    theme={[Function]}
-  >
-    <Memo()
-      headerLeft={
-        <p>
-          title here
-        </p>
-      }
+<Memo()
+  headerLeft={
+    <p>
+      title here
+    </p>
+  }
+>
+  <Styled(EuiPage)>
+    <EuiPage
+      className="c0"
     >
-      <Styled(EuiPage)>
-        <EuiPage
-          className="c0"
-        >
-          <div
-            className="euiPage c0"
+      <div
+        className="euiPage c0"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
           >
-            <EuiPageBody>
-              <main
-                className="euiPageBody"
+            <EuiPageHeader
+              className="endpoint-header"
+            >
+              <div
+                className="euiPageHeader euiPageHeader--responsive endpoint-header"
               >
-                <EuiPageHeader
-                  className="endpoint-header"
+                <EuiPageHeaderSection
+                  data-test-subj="pageViewHeaderLeft"
                 >
                   <div
-                    className="euiPageHeader euiPageHeader--responsive endpoint-header"
+                    className="euiPageHeaderSection"
+                    data-test-subj="pageViewHeaderLeft"
                   >
-                    <EuiPageHeaderSection
-                      data-test-subj="pageViewHeaderLeft"
-                    >
-                      <div
-                        className="euiPageHeaderSection"
-                        data-test-subj="pageViewHeaderLeft"
-                      >
-                        <p>
-                          title here
-                        </p>
-                      </div>
-                    </EuiPageHeaderSection>
+                    <p>
+                      title here
+                    </p>
                   </div>
-                </EuiPageHeader>
-                <EuiPageContent
-                  className="endpoint-page-content"
+                </EuiPageHeaderSection>
+              </div>
+            </EuiPageHeader>
+            <EuiPageContent
+              className="endpoint-page-content"
+            >
+              <EuiPanel
+                className="euiPageContent endpoint-page-content"
+                paddingSize="l"
+              >
+                <div
+                  className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
                 >
-                  <EuiPanel
-                    className="euiPageContent endpoint-page-content"
-                    paddingSize="l"
+                  <EuiPageContentBody
+                    data-test-subj="pageViewBodyContent"
                   >
                     <div
-                      className="euiPanel euiPanel--paddingLarge euiPageContent endpoint-page-content"
+                      className="euiPageContentBody"
+                      data-test-subj="pageViewBodyContent"
                     >
-                      <EuiPageContentBody
-                        data-test-subj="pageViewBodyContent"
-                      >
-                        <div
-                          className="euiPageContentBody"
-                          data-test-subj="pageViewBodyContent"
-                        >
-                          body content
-                        </div>
-                      </EuiPageContentBody>
+                      body content
                     </div>
-                  </EuiPanel>
-                </EuiPageContent>
-              </main>
-            </EuiPageBody>
-          </div>
-        </EuiPage>
-      </Styled(EuiPage)>
-    </Memo()>
-  </ThemeProvider>
-</EuiThemeProvider>
+                  </EuiPageContentBody>
+                </div>
+              </EuiPanel>
+            </EuiPageContent>
+          </main>
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </Styled(EuiPage)>
+</Memo()>
 `;
