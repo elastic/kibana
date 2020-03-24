@@ -6,6 +6,8 @@
 
 import React, { Dispatch, FC, SetStateAction, useState } from 'react';
 
+import { EuiCode, EuiInputPopover } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
@@ -20,7 +22,10 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/sea
 
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import { ErrorBoundary } from './error_boundary';
+interface ErrorMessage {
+  query: string;
+  message: string;
+}
 
 interface ExplorationQueryBarProps {
   indexPattern: IIndexPattern;
@@ -37,46 +42,65 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     language: SEARCH_QUERY_LANGUAGE.KUERY,
   });
 
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
+
   const searchChangeHandler = (query: Query) => setSearchInput(query);
   const searchSubmitHandler = (query: Query) => {
-    switch (query.language) {
-      case SEARCH_QUERY_LANGUAGE.KUERY:
-        setSearchQuery(
-          esKuery.toElasticsearchQuery(
-            esKuery.fromKueryExpression(query.query as string),
-            indexPattern
-          )
-        );
-        return;
-      case SEARCH_QUERY_LANGUAGE.LUCENE:
-        setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
-        return;
+    try {
+      switch (query.language) {
+        case SEARCH_QUERY_LANGUAGE.KUERY:
+          setSearchQuery(
+            esKuery.toElasticsearchQuery(
+              esKuery.fromKueryExpression(query.query as string),
+              indexPattern
+            )
+          );
+          return;
+        case SEARCH_QUERY_LANGUAGE.LUCENE:
+          setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
+          return;
+      }
+    } catch (e) {
+      setErrorMessage({ query: query.query as string, message: e.message });
     }
   };
 
   return (
-    <ErrorBoundary>
-      <QueryStringInput
-        bubbleSubmitEvent={true}
-        query={searchInput}
-        indexPatterns={[indexPattern]}
-        onChange={searchChangeHandler}
-        onSubmit={searchSubmitHandler}
-        placeholder={
-          searchInput.language === SEARCH_QUERY_LANGUAGE.KUERY
-            ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
-                defaultMessage: 'e.g. {example}',
-                values: { example: 'method : "GET" or status : "404"' },
-              })
-            : i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderLucene', {
-                defaultMessage: 'e.g. {example}',
-                values: { example: 'method:GET OR status:404' },
-              })
-        }
-        disableAutoFocus={true}
-        dataTestSubj="transformQueryInput"
-        languageSwitcherPopoverAnchorPosition="rightDown"
-      />
-    </ErrorBoundary>
+    <EuiInputPopover
+      style={{ maxWidth: '100%' }}
+      closePopover={() => setErrorMessage(undefined)}
+      input={
+        <QueryStringInput
+          bubbleSubmitEvent={true}
+          query={searchInput}
+          indexPatterns={[indexPattern]}
+          onChange={searchChangeHandler}
+          onSubmit={searchSubmitHandler}
+          placeholder={
+            searchInput.language === SEARCH_QUERY_LANGUAGE.KUERY
+              ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
+                  defaultMessage: 'e.g. {example}',
+                  values: { example: 'method : "GET" or status : "404"' },
+                })
+              : i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderLucene', {
+                  defaultMessage: 'e.g. {example}',
+                  values: { example: 'method:GET OR status:404' },
+                })
+          }
+          disableAutoFocus={true}
+          dataTestSubj="transformQueryInput"
+          languageSwitcherPopoverAnchorPosition="rightDown"
+        />
+      }
+      isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+    >
+      <EuiCode>
+        {i18n.translate('xpack.ml.stepDefineForm.invalidQuery', {
+          defaultMessage: 'Invalid Query',
+        })}
+        {': '}
+        {errorMessage?.message.split('\n')[0]}
+      </EuiCode>
+    </EuiInputPopover>
   );
 };
