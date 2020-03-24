@@ -9,7 +9,7 @@ import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 // union type constisting of valid guide sections that we link to
-type DocsSection = '/apm/get-started' | '/x-pack' | '/apm/server';
+type DocsSection = '/apm/get-started' | '/x-pack' | '/apm/server' | '/kibana';
 
 interface Props extends EuiLinkAnchorProps {
   section: DocsSection;

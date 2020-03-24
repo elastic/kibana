@@ -37,7 +37,7 @@ beforeEach(() => {
     id: 'trigger' as TriggerId,
     title: 'trigger',
   });
-  uiActions.setup.attachAction('trigger' as TriggerId, action);
+  uiActions.setup.addTriggerAction('trigger' as TriggerId, action);
 });
 
 test('can register action', async () => {
@@ -58,7 +58,7 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
     title: 'My trigger',
   };
   setup.registerTrigger(testTrigger);
-  setup.attachAction('MY-TRIGGER' as TriggerId, helloWorldAction);
+  setup.addTriggerAction('MY-TRIGGER' as TriggerId, helloWorldAction);
 
   const start = doStart();
   const actions = await start.getTriggerCompatibleActions('MY-TRIGGER' as TriggerId, {});
@@ -84,7 +84,7 @@ test('filters out actions not applicable based on the context', async () => {
 
   setup.registerTrigger(testTrigger);
   setup.registerAction(action1);
-  setup.attachAction(testTrigger.id, action1);
+  setup.addTriggerAction(testTrigger.id, action1);
 
   const start = doStart();
   let actions = await start.getTriggerCompatibleActions(testTrigger.id, { accept: true });

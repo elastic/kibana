@@ -32,7 +32,8 @@ export interface ModulesProvider {
       start: number,
       end: number,
       jobOverrides: JobOverride[],
-      datafeedOverrides: DatafeedOverride[]
+      datafeedOverrides: DatafeedOverride[],
+      estimateModelMemory?: boolean
     ): Promise<DataRecognizerConfigResponse>;
   };
 }
@@ -65,7 +66,8 @@ export function getModulesProvider(isFullLicense: LicenseCheck): ModulesProvider
           start: number,
           end: number,
           jobOverrides: JobOverride[],
-          datafeedOverrides: DatafeedOverride[]
+          datafeedOverrides: DatafeedOverride[],
+          estimateModelMemory?: boolean
         ) {
           const dr = dataRecognizerFactory(callAsCurrentUser, savedObjectsClient);
           return dr.setupModuleItems(
@@ -79,7 +81,8 @@ export function getModulesProvider(isFullLicense: LicenseCheck): ModulesProvider
             start,
             end,
             jobOverrides,
-            datafeedOverrides
+            datafeedOverrides,
+            estimateModelMemory
           );
         },
       };

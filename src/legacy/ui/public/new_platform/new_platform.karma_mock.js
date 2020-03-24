@@ -271,6 +271,12 @@ export const npSetup = {
         }),
       },
     },
+    discover: {
+      docViews: {
+        addDocView: sinon.fake(),
+        setAngularInjectorGetter: sinon.fake(),
+      },
+    },
     visTypeVega: {
       config: sinon.fake(),
     },
@@ -323,6 +329,9 @@ export const npStart = {
         turnHideWriteControlsOn: sinon.fake(),
         getHideWriteControls: sinon.fake(),
       },
+    },
+    dashboard: {
+      getSavedDashboardLoader: sinon.fake(),
     },
     data: {
       actions: {
@@ -457,6 +466,11 @@ export const npStart = {
       theme: {
         chartsTheme$: mockObservable,
         useChartsTheme: sinon.fake(),
+      },
+    },
+    discover: {
+      docViews: {
+        DocViewer: () => null,
       },
     },
   },

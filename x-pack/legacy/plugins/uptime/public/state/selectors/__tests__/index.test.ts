@@ -19,6 +19,9 @@ describe('state selectors', () => {
       errors: [],
       loading: false,
     },
+    dynamicSettings: {
+      loading: false,
+    },
     monitor: {
       monitorDetailsList: [],
       monitorLocationsList: new Map(),
@@ -57,14 +60,28 @@ describe('state selectors', () => {
       errors: [],
     },
     monitorDuration: {
-      monitor_duration: null,
+      durationLines: null,
       loading: false,
       errors: [],
     },
+    ml: {
+      mlJob: {
+        data: null,
+        loading: false,
+      },
+      createJob: { data: null, loading: false },
+      deleteJob: { data: null, loading: false },
+      mlCapabilities: { data: null, loading: false },
+      anomalies: {
+        data: null,
+        loading: false,
+      },
+    },
     indexStatus: {
-      loading: false,
-      data: null,
-      errors: [],
+      indexStatus: {
+        data: null,
+        loading: false,
+      },
     },
   };
 

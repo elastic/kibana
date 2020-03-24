@@ -7,6 +7,7 @@
 import { createAction } from 'redux-actions';
 import { QueryParams } from './types';
 import { MonitorDurationResult } from '../../../common/types';
+import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 
 type MonitorQueryParams = QueryParams & { monitorId: string };
 
@@ -14,4 +15,6 @@ export const getMonitorDurationAction = createAction<MonitorQueryParams>('GET_MO
 export const getMonitorDurationActionSuccess = createAction<MonitorDurationResult>(
   'GET_MONITOR_DURATION_SUCCESS'
 );
-export const getMonitorDurationActionFail = createAction<Error>('GET_MONITOR_DURATION_FAIL');
+export const getMonitorDurationActionFail = createAction<IHttpFetchError>(
+  'GET_MONITOR_DURATION_FAIL'
+);
