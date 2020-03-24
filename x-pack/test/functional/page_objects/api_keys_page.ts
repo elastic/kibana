@@ -11,10 +11,19 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
 
   return {
     async noAPIKeysHeading() {
-      return await testSubjects.find('noApiKeysHeader');
+      const messageElement = await testSubjects.find('noApiKeysHeader');
+      const message = await messageElement.getVisibleText();
+      return message;
     },
+
     async getGoToConsoleButton() {
       return await testSubjects.find('goToConsoleButton');
+    },
+
+    async apiKeysPermissionDeniedMessage() {
+      const messageElement = await testSubjects.find('apiKeysPermissionDeniedMessage');
+      const message = await messageElement.getVisibleText();
+      return message;
     },
   };
 }
