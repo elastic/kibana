@@ -47,7 +47,6 @@ export interface LensPluginSetupDependencies {
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
-  uiActions: UiActionsStart;
   __LEGACY: {
     formatFactory: FormatFactory;
     visualizations: VisualizationsSetup;
@@ -58,6 +57,7 @@ export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
+  uiActions: UiActionsStart;
 }
 
 export const isRisonObject = (value: RisonValue): value is RisonObject => {
@@ -86,7 +86,6 @@ export class LensPlugin {
       expressions,
       data,
       embeddable,
-      uiActions,
       __LEGACY: { formatFactory, visualizations },
     }: LensPluginSetupDependencies
   ) {
@@ -100,7 +99,6 @@ export class LensPlugin {
       data,
       editorFrame: editorFrameSetupInterface,
       formatFactory,
-      executeTriggerActions: uiActions.executeTriggerActions,
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
@@ -221,6 +219,7 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    this.xyVisualization.start(core, startDependencies);
   }
 
   stop() {

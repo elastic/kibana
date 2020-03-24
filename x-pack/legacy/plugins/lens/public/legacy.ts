@@ -14,7 +14,6 @@ import { plugin } from './index';
 const pluginInstance = plugin();
 pluginInstance.setup(npSetup.core, {
   ...npSetup.plugins,
-  uiActions: npStart.plugins.uiActions,
   __LEGACY: { formatFactory: getFormat, visualizations },
 });
 pluginInstance.start(npStart.core, npStart.plugins);

@@ -36,6 +36,7 @@ import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { getExecuteTriggerActions } from './services';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -110,7 +111,6 @@ export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartTheme: PartialTheme;
   timeZone: string;
-  executeTriggerActions: UiActionsStart['executeTriggerActions'];
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -120,10 +120,15 @@ export const getXyChartRenderer = (dependencies: {
   validate: () => undefined,
   reuseDomNode: true,
   render: (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
+    const executeTriggerActions = getExecuteTriggerActions();
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     ReactDOM.render(
       <I18nProvider>
-        <XYChartReportable {...config} {...dependencies} />
+        <XYChartReportable
+          {...config}
+          {...dependencies}
+          executeTriggerActions={executeTriggerActions}
+        />
       </I18nProvider>,
       domNode,
       () => handlers.done()
