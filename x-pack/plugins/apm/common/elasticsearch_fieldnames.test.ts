@@ -14,7 +14,10 @@ describe('Transaction', () => {
   const transaction: Transaction = {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
-    observer: 'whatever',
+    observer: {
+      version: 'whatever',
+      version_major: 8
+    },
     agent: {
       name: 'java',
       version: 'agent version'
@@ -62,7 +65,10 @@ describe('Span', () => {
   const span: Span = {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
-    observer: 'whatever',
+    observer: {
+      version: 'whatever',
+      version_major: 8
+    },
     agent: {
       name: 'java',
       version: 'agent version'
@@ -106,7 +112,10 @@ describe('Span', () => {
 describe('Error', () => {
   const errorDoc: APMError = {
     '@metadata': 'whatever',
-    observer: 'whatever',
+    observer: {
+      version: 'whatever',
+      version_major: 8
+    },
     agent: {
       name: 'java',
       version: 'agent version'
