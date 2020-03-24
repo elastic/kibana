@@ -15,6 +15,7 @@ import { legendConfig, xConfig, layerConfig } from './types';
 import { EditorFrameSetup } from '../types';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { setExecuteTriggerActions } from './services';
+
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: FormatFactory;
