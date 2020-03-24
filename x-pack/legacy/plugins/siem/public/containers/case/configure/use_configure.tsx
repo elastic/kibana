@@ -28,7 +28,7 @@ export interface ReturnUseCaseConfigure {
 interface UseCaseConfigure {
   setConnector: (newConnectorId: string, newConnectorName?: string) => void;
   setClosureType?: (newClosureType: ClosureType) => void;
-  setCurrentConfiguration: (configuration: CurrentConfiguration) => void;
+  setCurrentConfiguration?: (configuration: CurrentConfiguration) => void;
 }
 
 export const useCaseConfigure = ({
@@ -61,10 +61,12 @@ export const useCaseConfigure = ({
 
             if (!firstLoad) {
               setFirstLoad(true);
-              setCurrentConfiguration({
-                connectorId: res.connectorId,
-                closureType: res.closureType,
-              });
+              if (setCurrentConfiguration != null) {
+                setCurrentConfiguration({
+                  connectorId: res.connectorId,
+                  closureType: res.closureType,
+                });
+              }
             }
           }
         }
@@ -116,10 +118,12 @@ export const useCaseConfigure = ({
               setClosureType(res.closureType);
             }
             setVersion(res.version);
-            setCurrentConfiguration({
-              connectorId: res.connectorId,
-              closureType: res.closureType,
-            });
+            if (setCurrentConfiguration != null) {
+              setCurrentConfiguration({
+                connectorId: res.connectorId,
+                closureType: res.closureType,
+              });
+            }
           }
         } catch (error) {
           if (!didCancel) {
