@@ -28,6 +28,7 @@ import { BreakedLegend } from './components/breaked_legend';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
+const NUMBER_OF_LEGEND_COLORS = 5; //this matches the number of symbolizations bands in the coordinate-map viz
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -273,8 +274,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return [];
     }
 
-    const numberOfLegendColors = 5;
-    const colors = getHexColorRangeStrings(this._options.color, numberOfLegendColors);
+    const colors = getHexColorRangeStrings(this._options.color, NUMBER_OF_LEGEND_COLORS);
 
     if (rangeFieldMeta.delta === 0) {
       //map to last color.
@@ -288,7 +288,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
     return colors.map((color, index) => {
       const rawStopValue =
-        rangeFieldMeta.min + rangeFieldMeta.delta * (index / numberOfLegendColors);
+        rangeFieldMeta.min + rangeFieldMeta.delta * (index / NUMBER_OF_LEGEND_COLORS);
       return {
         color,
         stop: dynamicRound(rawStopValue),
