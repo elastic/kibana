@@ -23,10 +23,7 @@ import { EmptyBanner } from './EmptyBanner';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
 import { BetaBadge } from './BetaBadge';
-import {
-  useTrackPageview,
-  useUiTracker
-} from '../../../../../../../plugins/observability/public';
+import { useTrackPageview } from '../../../../../../../plugins/observability/public';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -61,7 +58,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
 
   useTrackPageview({ app: 'apm', path: 'service_map' });
   useTrackPageview({ app: 'apm', path: 'service_map', delay: 15000 });
-  const trackApmEvent = useUiTracker({ app: 'apm' });
 
   if (!license) {
     return null;
@@ -71,9 +67,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     <div
       style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }}
       ref={ref}
-      onMouseDown={() => {
-        trackApmEvent({ metric: 'service_map_click_interaction' });
-      }}
     >
       <Cytoscape
         elements={data?.elements ?? []}
