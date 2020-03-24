@@ -6,6 +6,7 @@
 
 import { createSelector } from 'reselect';
 import { PolicyDetailsState } from '../../types';
+import { Immutable } from '../../../../../common/types';
 
 export const selectPolicyDetails = (state: PolicyDetailsState) => state.policyItem;
 
@@ -28,7 +29,8 @@ export const selectPolicyIdFromParams: (state: PolicyDetailsState) => string = c
   }
 );
 
-export const selectPolicyConfig = (state: PolicyDetailsState) => state.policyConfig;
+export const selectPolicyConfig = (state: Immutable<PolicyDetailsState>) =>
+  state.policyConfig as Immutable<PolicyDetailsState>;
 
 export const selectWindowsEventing = (state: PolicyDetailsState) => {
   return selectPolicyConfig(state).windows.eventing;

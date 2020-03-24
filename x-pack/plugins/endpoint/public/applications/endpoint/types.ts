@@ -79,9 +79,9 @@ export interface PolicyListState {
  */
 export interface PolicyDetailsState {
   /** A single policy item  */
-  policyItem: PolicyData | undefined;
+  policyItem?: PolicyData;
   /** data is being retrieved from server */
-  policyConfig: PolicyDetailsConfig;
+  policyConfig: PolicyDetailsConfig | undefined;
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<EndpointAppLocation>;

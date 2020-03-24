@@ -11,6 +11,7 @@ import { AppAction } from '../action';
 const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {
     policyItem: undefined,
+    policyConfig: undefined,
     isLoading: false,
   };
 };

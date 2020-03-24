@@ -14,6 +14,7 @@ import {
 } from '../../../../store/policy_details/selectors';
 import { PolicyDetailsAction } from '../../../../store/policy_details';
 import { OS, EventingFields } from '../../../../types';
+import { clone } from '../../../../models/policy_details_config';
 
 export const EventingCheckbox: React.FC<{
   id: string;
@@ -27,9 +28,7 @@ export const EventingCheckbox: React.FC<{
 
   const handleRadioChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newPayload = {
-        ...policyConfig,
-      };
+      const newPayload = clone(policyConfig);
       newPayload[os].eventing[protectionField] = event.target.checked;
 
       dispatch({

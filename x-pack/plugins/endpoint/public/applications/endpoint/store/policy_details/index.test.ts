@@ -13,6 +13,7 @@ import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { DepsStartMock, depsStartMock } from '../../mocks';
 import { selectPolicyConfig } from './selectors';
+import { clone } from '../../models/policy_details_config';
 
 describe('policy details store concerns', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
@@ -33,9 +34,7 @@ describe('policy details store concerns', () => {
   });
 
   test('it updates state on `userChangesPolicyConfig` action', async () => {
-    const newPayload1 = {
-      ...selectPolicyConfig(getState()),
-    };
+    const newPayload1 = clone(selectPolicyConfig);
     newPayload1.windows.eventing.process = true;
     newPayload1.windows.eventing.network = false;
 
@@ -46,9 +45,7 @@ describe('policy details store concerns', () => {
     expect(selectPolicyConfig(getState()).windows.eventing.process).toEqual(true);
     expect(selectPolicyConfig(getState()).windows.eventing.network).toEqual(false);
 
-    const newPayload2 = {
-      ...selectPolicyConfig(getState()),
-    };
+    const newPayload2 = clone(selectPolicyConfig);
     newPayload2.windows.eventing.process = false;
     newPayload2.windows.eventing.network = true;
 
