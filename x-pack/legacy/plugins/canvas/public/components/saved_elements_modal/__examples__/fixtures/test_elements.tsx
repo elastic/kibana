@@ -23,7 +23,7 @@ export const testElements = [
     name: 'image',
     displayName: 'Image',
     help: 'A static image',
-    tags: ['graphic'],
+    type: 'chart',
     image: elasticLogo,
     expression: `image dataurl=null mode="contain"
   | render`,
