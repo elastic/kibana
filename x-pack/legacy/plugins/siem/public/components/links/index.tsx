@@ -108,7 +108,6 @@ CaseDetailsLink.displayName = 'CaseDetailsLink';
 
 export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ children }) => {
   const search = useGetUrlSearch(navTabs.case);
-
   return <EuiLink href={getCreateCaseUrl(search)}>{children}</EuiLink>;
 });
 

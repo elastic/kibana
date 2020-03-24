@@ -33,9 +33,12 @@ const baseCaseUrl = `#/link-to/${SiemPageName.case}`;
 
 export const getCaseUrl = (search: string | null) =>
   `${baseCaseUrl}${appendSearch(search ?? undefined)}`;
+
 export const getCaseDetailsUrl = ({ id, search }: { id: string; search: string | null }) =>
   `${baseCaseUrl}/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
+
 export const getCreateCaseUrl = (search: string | null) =>
   `${baseCaseUrl}/create${appendSearch(search ?? undefined)}`;
-export const getConfigureCasesUrl = (search: string | null) =>
+
+export const getConfigureCasesUrl = (search: string) =>
   `${baseCaseUrl}/configure${appendSearch(search ?? undefined)}`;

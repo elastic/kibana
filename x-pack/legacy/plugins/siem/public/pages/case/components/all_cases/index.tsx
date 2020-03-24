@@ -76,9 +76,7 @@ const getSortField = (field: string): SortFieldCase => {
   return SortFieldCase.createdAt;
 };
 export const AllCases = React.memo(() => {
-  const search = useGetUrlSearch(navTabs.case);
-  const CONFIGURE_CASES_URL = useMemo(() => getConfigureCasesUrl(search), [search]);
-  const CREATE_CASE_URL = useMemo(() => getCreateCaseUrl(search), [search]);
+  const urlSearch = useGetUrlSearch(navTabs.case);
 
   const {
     countClosedCases,
@@ -278,12 +276,12 @@ export const AllCases = React.memo(() => {
             />
           </FlexItemDivider>
           <EuiFlexItem grow={false}>
-            <EuiButton href={CONFIGURE_CASES_URL} iconType="controlsHorizontal">
+            <EuiButton href={getConfigureCasesUrl(urlSearch)} iconType="controlsHorizontal">
               {i18n.CONFIGURE_CASES_BUTTON}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill href={CREATE_CASE_URL} iconType="plusInCircle">
+            <EuiButton fill href={getCreateCaseUrl(urlSearch)} iconType="plusInCircle">
               {i18n.CREATE_TITLE}
             </EuiButton>
           </EuiFlexItem>
@@ -344,7 +342,12 @@ export const AllCases = React.memo(() => {
                   titleSize="xs"
                   body={i18n.NO_CASES_BODY}
                   actions={
-                    <EuiButton fill size="s" href={CREATE_CASE_URL} iconType="plusInCircle">
+                    <EuiButton
+                      fill
+                      size="s"
+                      href={getCreateCaseUrl(urlSearch)}
+                      iconType="plusInCircle"
+                    >
                       {i18n.ADD_NEW_CASE}
                     </EuiButton>
                   }

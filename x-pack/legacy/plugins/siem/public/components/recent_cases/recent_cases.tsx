@@ -36,7 +36,7 @@ const RecentCasesComponent = ({ cases }: { cases: Case[] }) => {
             </EuiText>
 
             <IconWithCount
-              count={c.commentIds.length}
+              count={c.comments.length}
               icon={'editorComment'}
               tooltip={i18n.COMMENTS}
             />
