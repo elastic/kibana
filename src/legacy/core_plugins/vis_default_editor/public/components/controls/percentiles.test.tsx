@@ -19,10 +19,10 @@
 
 import React from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
-import { IAggConfig } from '../../legacy_imports';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
+import { IAggConfig } from 'src/plugins/data/public';
 import { mount } from 'enzyme';
 import { PercentilesEditor } from './percentiles';
+import { EditorVisState } from '../sidebar/state/reducers';
 
 describe('PercentilesEditor component', () => {
   let setValue: jest.Mock;
@@ -45,7 +45,7 @@ describe('PercentilesEditor component', () => {
       setValue,
       setValidity,
       setTouched,
-      state: {} as VisState,
+      state: {} as EditorVisState,
       metricAggs: [] as IAggConfig[],
       schemas: [],
     };

@@ -6,8 +6,6 @@
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../../../legacy/plugins/uptime/common/graphql/types';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
-
 export interface GetMonitorParams {
   /** @member monitorId optional limit to monitorId */
   monitorId?: string | null;
@@ -16,10 +14,11 @@ export interface GetMonitorParams {
 // Get the monitor meta info regardless of timestamp
 export const getMonitor: UMElasticsearchQueryFn<GetMonitorParams, Ping> = async ({
   callES,
+  dynamicSettings,
   monitorId,
 }) => {
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       size: 1,
       _source: ['url', 'monitor', 'observer'],

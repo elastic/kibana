@@ -6,32 +6,26 @@
 
 import { i18n } from '@kbn/i18n';
 import Hapi from 'hapi';
-import {
-  ElasticsearchServiceSetup,
-  IUiSettingsClient,
-  KibanaRequest,
-} from '../../../../../../../src/core/server';
+import { IUiSettingsClient, KibanaRequest } from '../../../../../../../src/core/server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../../server';
 import { cryptoFactory } from '../../../server/lib';
 import { getFieldFormats } from '../../../server/services';
-import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger, ServerFacade } from '../../../types';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger } from '../../../types';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = async function executeJobFactoryFn(
-  reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger
-) {
-  const crypto = cryptoFactory(server);
-  const config = server.config();
+>> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
+  const [config, elasticsearch] = await Promise.all([
+    reporting.getConfig(),
+    reporting.getElasticsearchService(),
+  ]);
+  const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
-  const serverBasePath = config.get('server.basePath');
+  const serverBasePath = config.kbnConfig.get('server', 'basePath');
 
   return async function executeJob(
     jobId: string,
@@ -131,9 +125,9 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       formatsMap,
       settings: {
         ...uiSettings,
-        checkForFormulas: config.get('xpack.reporting.csv.checkForFormulas'),
-        maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
-        scroll: config.get('xpack.reporting.csv.scroll'),
+        checkForFormulas: config.get('csv', 'checkForFormulas'),
+        maxSizeBytes: config.get('csv', 'maxSizeBytes'),
+        scroll: config.get('csv', 'scroll'),
       },
     });
 

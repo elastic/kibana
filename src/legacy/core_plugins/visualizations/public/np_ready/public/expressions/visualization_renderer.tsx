@@ -20,8 +20,9 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 // @ts-ignore
-import { Vis } from './vis';
+import { ExprVis } from './vis';
 import { Visualization } from '../components';
+import { VisParams } from '../types';
 
 export const visualization = () => ({
   name: 'visualization',
@@ -31,9 +32,9 @@ export const visualization = () => ({
     const { visData, visConfig, params } = config;
     const visType = config.visType || visConfig.type;
 
-    const vis = new Vis({
-      type: visType,
-      params: visConfig,
+    const vis = new ExprVis({
+      type: visType as string,
+      params: visConfig as VisParams,
     });
 
     vis.eventsSubject = { next: handlers.event };

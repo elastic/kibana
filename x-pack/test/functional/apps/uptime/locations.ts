@@ -10,12 +10,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
 
-  describe('location', () => {
+  describe.skip('location', () => {
     const start = new Date().toISOString();
     const end = new Date().toISOString();
 
     const MONITOR_ID = 'location-testing-id';
-    before(async () => {
+    beforeEach(async () => {
       /**
        * This mogrify function will strip the documents of their location
        * data (but preserve their location name), which is necessary for
