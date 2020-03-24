@@ -15,6 +15,7 @@ import { indexPatternReducer } from './index_pattern';
 import { pingReducer } from './ping';
 import { monitorDurationReducer } from './monitor_duration';
 import { indexStatusReducer } from './index_status';
+import { mlJobsReducer } from './ml_anomaly';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -25,6 +26,7 @@ export const rootReducer = combineReducers({
   dynamicSettings: dynamicSettingsReducer,
   indexPattern: indexPatternReducer,
   ping: pingReducer,
+  ml: mlJobsReducer,
   monitorDuration: monitorDurationReducer,
   indexStatus: indexStatusReducer,
 });
