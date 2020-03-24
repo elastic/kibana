@@ -5,79 +5,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
-import { isEmpty, pick, get } from 'lodash';
+import { isEmpty, get } from 'lodash';
+import { FILTER_OPTIONS } from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_filter_options';
+import { Filter } from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_types';
 import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
-import {
-  FilterOptions,
-  FILTER_OPTIONS
-} from '../../../../../../../../../../plugins/apm/common/custom_link_filter_options';
-import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
-
-type FilterKey = keyof FilterOptions | '';
-type FilterValue = string;
-export type FilterKeyValue = [FilterKey, FilterValue];
 
 interface FilterSelectOption {
-  value: 'DEFAULT' | keyof FilterOptions;
+  value: 'DEFAULT' | typeof FILTER_OPTIONS[number];
   text: string;
 }
-
-/**
- * Converts available filters from the Custom Link to Array of filters.
- * e.g.
- * customLink = {
- *  id: '1',
- *  label: 'foo',
- *  url: 'http://www.elastic.co',
- *  service.name: 'opbeans-java',
- *  transaction.type: 'request'
- * }
- *
- * results: [['service.name', 'opbeans-java'],['transaction.type', 'request']]
- * @param customLink
- */
-export const convertFiltersToArray = (
-  customLink?: CustomLink
-): FilterKeyValue[] => {
-  if (customLink) {
-    const filters = Object.entries(
-      pick(customLink, FILTER_OPTIONS)
-    ) as FilterKeyValue[];
-    if (!isEmpty(filters)) {
-      return filters;
-    }
-  }
-  return [['', '']];
-};
-
-/**
- * Converts array of filters into object.
- * e.g.
- * filters: [['service.name', 'opbeans-java'],['transaction.type', 'request']]
- *
- * results: {
- *  'service.name': 'opbeans-java',
- *  'transaction.type': 'request'
- * }
- * @param filters
- */
-export const convertFiltersToObject = (filters: FilterKeyValue[]) => {
-  const convertedFilters = Object.fromEntries(
-    filters
-      .filter(([key, value]) => !isEmpty(key) && !isEmpty(value))
-      .map(([key, value]) => [
-        key,
-        // Splits the value by comma, removes whitespace from both ends and filters out empty values
-        value
-          .split(',')
-          .map(v => v.trim())
-          .filter(v => v)
-      ])
-  );
-  if (!isEmpty(convertedFilters)) {
-    return convertedFilters;
-  }
-};
 
 export const DEFAULT_OPTION: FilterSelectOption = {
   value: 'DEFAULT',
@@ -90,7 +26,7 @@ export const DEFAULT_OPTION: FilterSelectOption = {
 export const FILTER_SELECT_OPTIONS: FilterSelectOption[] = [
   DEFAULT_OPTION,
   ...FILTER_OPTIONS.map(filter => ({
-    value: filter as keyof FilterOptions,
+    value: filter,
     text: filter
   }))
 ];
@@ -102,14 +38,12 @@ export const FILTER_SELECT_OPTIONS: FilterSelectOption[] = [
  * @param selectedKey
  */
 export const getSelectOptions = (
-  filters: FilterKeyValue[],
-  selectedKey: FilterKey
+  filters: Filter[],
+  selectedKey: Filter['key']
 ) => {
   return FILTER_SELECT_OPTIONS.filter(
     ({ value }) =>
-      !filters.some(
-        ([filterKey]) => filterKey === value && filterKey !== selectedKey
-      )
+      !filters.some(({ key }) => key === value && key !== selectedKey)
   );
 };
 

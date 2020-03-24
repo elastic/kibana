@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
+import {
+  CustomLink,
+  CustomLinkES
+} from '../../../../common/customLink/custom_link_types';
 import { Setup } from '../../helpers/setup_request';
-import { CustomLink, convertTo } from './custom_link_types';
-import { CustomLinkES } from './create_custom_link_index';
-import { FilterOptionsRt } from '../../../routes/settings/custom_link';
+import { fromESFormat } from './helper';
+import { FilterOptionsRt } from './custom_link_types';
 
 export async function listCustomLinks({
   setup,
@@ -48,11 +51,11 @@ export async function listCustomLinks({
     }
   };
   const resp = await internalClient.search<CustomLinkES>(params);
-  const customLinks = convertTo(
-    resp.hits.hits.map(item => ({
+  const customLinks = resp.hits.hits.map(item =>
+    fromESFormat({
       id: item._id,
       ...item._source
-    }))
+    })
   );
   return customLinks;
 }

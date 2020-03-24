@@ -8,7 +8,8 @@ import { PROCESSOR_EVENT } from '../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { FilterOptionsRt } from '../../../routes/settings/custom_link';
+import { FilterOptionsRt } from './custom_link_types';
+import { splitFilterValueByComma } from './helper';
 
 export async function getTransaction({
   setup,
@@ -23,14 +24,7 @@ export async function getTransaction({
     // loops through the filters splitting the value by comma and removing white spaces
     .map(([key, value]) => {
       if (value) {
-        return {
-          terms: {
-            [key]: value
-              .split(',')
-              .map(v => v.trim())
-              .filter(v => v)
-          }
-        };
+        return { terms: { [key]: splitFilterValueByComma(value) } };
       }
     })
     // removes filters without value

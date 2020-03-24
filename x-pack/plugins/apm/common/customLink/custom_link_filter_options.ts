@@ -6,9 +6,9 @@
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-  TRANSACTION_TYPE,
-  TRANSACTION_NAME
-} from './elasticsearch_fieldnames';
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE
+} from '../elasticsearch_fieldnames';
 
 export const FILTER_OPTIONS = [
   SERVICE_NAME,

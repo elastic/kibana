@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  CustomLink,
+  CustomLinkES
+} from '../../../../common/customLink/custom_link_types';
 import { APMIndexDocumentParams } from '../../helpers/es_client';
 import { Setup } from '../../helpers/setup_request';
-import { CustomLink } from './custom_link_types';
-import { convertTo, CustomLinkES } from './create_custom_link_index';
+import { toESFormat } from './helper';
 
 export async function createOrUpdateCustomLink({
   customLinkId,
@@ -25,7 +28,7 @@ export async function createOrUpdateCustomLink({
     index: indices.apmCustomLinkIndex,
     body: {
       '@timestamp': Date.now(),
-      ...convertTo(customLink)
+      ...toESFormat(customLink)
     }
   };
 

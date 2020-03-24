@@ -17,28 +17,31 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+import { Filter } from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_types';
 import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
-import {
-  FilterKeyValue,
-  convertFiltersToObject,
-  replaceTemplateVariables
-} from './helper';
+import { replaceTemplateVariables } from './helper';
 
 interface Props {
   label: string;
   url: string;
-  filters: FilterKeyValue[];
+  filters: Filter[];
 }
 
 const fetchTransaction = debounce(
-  async (
-    filters: FilterKeyValue[],
-    callback: (transaction: Transaction) => void
-  ) => {
+  async (filters: Filter[], callback: (transaction: Transaction) => void) => {
+    const query = filters.reduce(
+      (acc: Record<string, string>, { key, value }) => {
+        if (key && value) {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {}
+    );
     const transaction = await callApmApi({
       pathname: '/api/apm/settings/custom_links/transaction',
-      params: { query: convertFiltersToObject(filters) }
+      params: { query }
     });
     callback(transaction);
   },

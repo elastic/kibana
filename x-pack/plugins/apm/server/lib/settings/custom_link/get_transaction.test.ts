@@ -6,15 +6,15 @@
 import {
   inspectSearchParams,
   SearchParamsMock
-} from '../../../../../../../legacy/plugins/apm/public/utils/testHelpers';
-import { getTransaction } from '../get_transaction';
-import { Setup } from '../../../helpers/setup_request';
+} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+import { getTransaction } from './get_transaction';
+import { Setup } from '../../helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/elasticsearch_fieldnames';
 
 describe('custom link get transaction', () => {
   let mock: SearchParamsMock;

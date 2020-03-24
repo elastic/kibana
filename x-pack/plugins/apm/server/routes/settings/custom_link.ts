@@ -5,26 +5,17 @@
  */
 import * as t from 'io-ts';
 import { pick } from 'lodash';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE
-} from '../../../common/elasticsearch_fieldnames';
-import { createRoute } from '../create_route';
+import { FILTER_OPTIONS } from '../../../common/customLink/custom_link_filter_options';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_or_update_custom_link';
+import {
+  FilterOptionsRt,
+  PayloadRt
+} from '../../lib/settings/custom_link/custom_link_types';
 import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_link';
-import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
 import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
-import { FILTER_OPTIONS } from '../../../common/custom_link_filter_options';
-
-export const FilterOptionsRt = t.partial({
-  [SERVICE_NAME]: t.string,
-  [SERVICE_ENVIRONMENT]: t.string,
-  [TRANSACTION_NAME]: t.string,
-  [TRANSACTION_TYPE]: t.string
-});
+import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
+import { createRoute } from '../create_route';
 
 export const customLinkTransactionRoute = createRoute(core => ({
   path: '/api/apm/settings/custom_links/transaction',
@@ -54,30 +45,11 @@ export const listCustomLinksRoute = createRoute(core => ({
   }
 }));
 
-const Payload = t.intersection([
-  t.type({
-    label: t.string,
-    url: t.string,
-    filters: t.array(
-      t.type({
-        key: t.union([
-          t.literal(SERVICE_NAME),
-          t.literal(SERVICE_ENVIRONMENT),
-          t.literal(TRANSACTION_TYPE),
-          t.literal(TRANSACTION_NAME)
-        ]),
-        value: t.array(t.string)
-      })
-    )
-  }),
-  t.partial({ id: t.string })
-]);
-
 export const createCustomLinkRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/custom_links',
   params: {
-    body: Payload
+    body: PayloadRt
   },
   options: {
     tags: ['access:apm', 'access:apm_write']
@@ -97,7 +69,7 @@ export const updateCustomLinkRoute = createRoute(() => ({
     path: t.type({
       id: t.string
     }),
-    body: Payload
+    body: PayloadRt
   },
   options: {
     tags: ['access:apm', 'access:apm_write']

@@ -14,13 +14,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
+import { isEmpty } from 'lodash';
+import {
+  CustomLink,
+  Filter
+} from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
 import { LinkSection } from './LinkSection';
 import { saveCustomLink } from './saveCustomLink';
-import { convertFiltersToArray, convertFiltersToObject } from './helper';
 import { LinkPreview } from './LinkPreview';
 import { Documentation } from './Documentation';
 
@@ -42,8 +45,11 @@ export const CustomLinkFlyout = ({
 
   const [label, setLabel] = useState(customLinkSelected?.label || '');
   const [url, setUrl] = useState(customLinkSelected?.url || '');
+  const selectedFilters = customLinkSelected?.filters;
   const [filters, setFilters] = useState(
-    convertFiltersToArray(customLinkSelected)
+    selectedFilters?.length
+      ? selectedFilters
+      : ([{ key: '', value: '' }] as Filter[])
   );
 
   const isFormValid = !!label && !!url;
@@ -59,7 +65,7 @@ export const CustomLinkFlyout = ({
       id: customLinkSelected?.id,
       label,
       url,
-      filters: convertFiltersToObject(filters),
+      filters,
       toasts
     });
     setIsSaving(false);

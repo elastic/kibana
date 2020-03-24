@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as t from 'io-ts';
+
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
   TRANSACTION_TYPE
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../elasticsearch_fieldnames';
+import { FILTER_OPTIONS } from './custom_link_filter_options';
 
 export interface CustomLinkES {
   id?: string;
@@ -22,25 +23,15 @@ export interface CustomLinkES {
   [TRANSACTION_TYPE]?: string[];
 }
 
-export const FilterOptionsRt = t.partial({
-  [SERVICE_NAME]: t.string,
-  [SERVICE_ENVIRONMENT]: t.string,
-  [TRANSACTION_NAME]: t.string,
-  [TRANSACTION_TYPE]: t.string
-});
+export interface Filter {
+  key: typeof FILTER_OPTIONS[number] | '';
+  value: string;
+}
 
-export const PayloadRt = t.intersection([
-  t.type({
-    label: t.string,
-    url: t.string
-  }),
-  t.partial({
-    id: t.string,
-    filters: t.array(
-      t.type({
-        key: t.string,
-        value: t.string
-      })
-    )
-  })
-]);
+export interface CustomLink {
+  id?: string;
+  '@timestamp'?: number;
+  label: string;
+  url: string;
+  filters?: Filter[];
+}
