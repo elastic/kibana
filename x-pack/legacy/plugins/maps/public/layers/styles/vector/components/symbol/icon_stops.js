@@ -20,7 +20,7 @@ function isDuplicateStop(targetStop, iconStops) {
   return stops.length > 1;
 }
 
-function getFirstUnusedSymbol(symbolOptions, iconStops) {
+export function getFirstUnusedSymbol(symbolOptions, iconStops) {
   const firstUnusedPreferredIconId = PREFERRED_ICONS.find(iconId => {
     const isSymbolBeingUsed = iconStops.some(({ icon }) => {
       return icon === iconId;
