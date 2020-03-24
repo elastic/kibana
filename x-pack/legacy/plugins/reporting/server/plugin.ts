@@ -12,8 +12,6 @@ import { createQueueFactory, enqueueJobFactory, LevelLogger, runValidations } fr
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
 import { registerReportingUsageCollector } from './usage';
-// @ts-ignore no module definition
-import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
@@ -26,29 +24,29 @@ export class ReportingPlugin
   }
 
   public async setup(core: CoreSetup, plugins: ReportingSetupDeps) {
-    const { elasticsearch, usageCollection, __LEGACY } = plugins;
+    const { reporting: reportingNewPlatform, elasticsearch, __LEGACY } = plugins;
+    const { config } = reportingNewPlatform;
 
-    const browserDriverFactory = await createBrowserDriverFactory(__LEGACY, this.logger); // required for validations :(
-    runValidations(__LEGACY, elasticsearch, browserDriverFactory, this.logger); // this must run early, as it sets up config defaults
+    const browserDriverFactory = await createBrowserDriverFactory(config, this.logger); // required for validations :(
+    runValidations(config, elasticsearch, browserDriverFactory, this.logger); // this must run early, as it sets up config defaults
 
     const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
-    this.reportingCore.legacySetup(xpackMainLegacy, reportingLegacy, __LEGACY, plugins);
+    this.reportingCore.legacySetup(xpackMainLegacy, reportingLegacy, config, __LEGACY, plugins);
 
     // Register a function with server to manage the collection of usage stats
-    registerReportingUsageCollector(this.reportingCore, __LEGACY, usageCollection);
+    registerReportingUsageCollector(this.reportingCore, config, plugins);
 
     // regsister setup internals
-    this.reportingCore.pluginSetup({ browserDriverFactory });
+    this.reportingCore.pluginSetup({ browserDriverFactory, config, elasticsearch });
 
     return {};
   }
 
   public async start(core: CoreStart, plugins: ReportingStartDeps) {
     const { reportingCore, logger } = this;
-    const { elasticsearch, __LEGACY } = plugins;
 
-    const esqueue = await createQueueFactory(reportingCore, __LEGACY, elasticsearch, logger);
-    const enqueueJob = enqueueJobFactory(reportingCore, __LEGACY, elasticsearch, logger);
+    const esqueue = await createQueueFactory(reportingCore, logger);
+    const enqueueJob = await enqueueJobFactory(reportingCore, logger);
 
     this.reportingCore.pluginStart({
       savedObjects: core.savedObjects,
@@ -58,7 +56,9 @@ export class ReportingPlugin
     });
 
     setFieldFormats(plugins.data.fieldFormats);
-    logConfiguration(__LEGACY, this.logger);
+
+    const config = await reportingCore.getConfig();
+    logConfiguration(config.get('capture'), this.logger);
 
     return {};
   }

@@ -87,6 +87,8 @@ describe('MonitorList component', () => {
         data={{ monitorStates: result }}
         hasActiveFilters={false}
         loading={false}
+        pageSize={25}
+        setPageSize={jest.fn()}
         successColor="primary"
       />
     );
@@ -101,6 +103,8 @@ describe('MonitorList component', () => {
         data={{}}
         hasActiveFilters={false}
         loading={false}
+        pageSize={25}
+        setPageSize={jest.fn()}
         successColor="primary"
       />
     );
@@ -114,6 +118,8 @@ describe('MonitorList component', () => {
         data={{ monitorStates: result }}
         hasActiveFilters={false}
         loading={false}
+        pageSize={25}
+        setPageSize={jest.fn()}
         successColor="primary"
       />
     );
