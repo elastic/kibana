@@ -10,10 +10,10 @@ source src/dev/ci_setup/setup_env.sh true
 yarn kbn clean && yarn kbn bootstrap
 
 echo "2/3 Ingest test data ..."
-pushd ${CYPRESS_DIR}
+pushd ${E2E_DIR}
 yarn || true
-curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output ingest-data/events.json
-node ingest-data/replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json > ingest-data.log
+curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output ${CYPRESS_DIR}/ingest-data/events.json
+node ${CYPRESS_DIR}/ingest-data/replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json > ingest-data.log
 
 echo "3/3 Start Kibana ..."
 popd
