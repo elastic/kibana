@@ -12,6 +12,8 @@ export const ADD_FALSE_POSITIVE_BTN =
 export const ADD_REFERENCE_URL_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] .euiButtonEmpty__text';
 
+export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
+
 export const MITRE_BTN = '[data-test-subj="addMitre"]';
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
@@ -24,6 +26,12 @@ export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="continue"]';
 
 export const FALSE_POSITIVES_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input';
+
+export const MACHINE_LEARNING_DROPDOWN = '[data-test-subj="mlJobSelect"] button';
+
+export const MACHINE_LEARNING_LIST = '.euiContextMenuItem__text';
+
+export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearning"]';
 
 export const MITRE_TACTIC = '.euiContextMenuItem__text';
 

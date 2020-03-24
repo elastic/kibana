@@ -20,6 +20,8 @@ export const ABOUT_TAGS = 5;
 
 export const ABOUT_URLS = 2;
 
+export const ANOMALY_SCORE = 1;
+
 export const DEFINITION_CUSTOM_QUERY = 1;
 
 export const DEFINITION_TIMELINE = 3;
@@ -30,7 +32,11 @@ export const DEFINITION_INDEX_PATTERNS =
 export const DEFINITION_STEP =
   '[data-test-subj=definitionRule] [data-test-subj="listItemColumnStepRuleDescription"] .euiDescriptionList__description';
 
+export const MACHINE_LEARNING_JOB = 2;
+
 export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
+
+export const RULE_TYPE = 0;
 
 export const SCHEDULE_STEP = '[data-test-subj="schedule"]  .euiDescriptionList__description';
 

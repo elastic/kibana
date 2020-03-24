@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newRule } from '../objects/rule';
+import { machineLearningRule } from '../objects/rule';
 
 import {
   ABOUT_FALSE_POSITIVES,
@@ -21,17 +21,26 @@ import {
   SCHEDULE_RUNS,
   SCHEDULE_STEP,
   ABOUT_RULE_DESCRIPTION,
+  RULE_TYPE,
+  ANOMALY_SCORE,
+  MACHINE_LEARNING_JOB,
 } from '../screens/rule_details';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
+  RULE_SWITCH,
   RULES_ROW,
   RULES_TABLE,
   SEVERITY,
 } from '../screens/signal_detection_rules';
 
-import { createAndActivateRule, fillAboutRuleAndContinue } from '../tasks/create_new_rule';
+import {
+  createAndActivateRule,
+  fillAboutRuleAndContinue,
+  fillDefineMachineLearningRuleAndContinue,
+  selectMachineLearningRuleType,
+} from '../tasks/create_new_rule';
 import {
   goToManageSignalDetectionRules,
   waitForSignalsIndexToBeCreated,
@@ -66,20 +75,9 @@ describe('Signal detection rules, machine learning', () => {
     goToManageSignalDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     goToCreateNewRule();
-
-    cy.get('[data-test-subj="machineLearning"]').click({ force: true });
-
-    cy.get('[data-test-subj="mlJobSelect"] button').click({ force: true });
-    cy.contains('.euiContextMenuItem__text', 'linux_anomalous_network_service').click();
-
-    cy.get('[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber').type('{selectall}20', {
-      force: true,
-    });
-
-    cy.get('[data-test-subj="continue"]').click({ force: true });
-
-    fillAboutRuleAndContinue(newRule);
-
+    selectMachineLearningRuleType();
+    fillDefineMachineLearningRuleAndContinue(machineLearningRule);
+    fillAboutRuleAndContinue(machineLearningRule);
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN)
@@ -101,31 +99,31 @@ describe('Signal detection rules, machine learning', () => {
     });
     cy.get(RULE_NAME)
       .invoke('text')
-      .should('eql', newRule.name);
+      .should('eql', machineLearningRule.name);
     cy.get(RISK_SCORE)
       .invoke('text')
-      .should('eql', newRule.riskScore);
+      .should('eql', machineLearningRule.riskScore);
     cy.get(SEVERITY)
       .invoke('text')
-      .should('eql', newRule.severity);
-    cy.get('[data-test-subj="rule-switch"]').should('have.attr', 'aria-checked', 'true');
+      .should('eql', machineLearningRule.severity);
+    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
     let expectedUrls = '';
-    newRule.referenceUrls.forEach(url => {
+    machineLearningRule.referenceUrls.forEach(url => {
       expectedUrls = expectedUrls + url;
     });
     let expectedFalsePositives = '';
-    newRule.falsePositivesExamples.forEach(falsePositive => {
+    machineLearningRule.falsePositivesExamples.forEach(falsePositive => {
       expectedFalsePositives = expectedFalsePositives + falsePositive;
     });
     let expectedTags = '';
-    newRule.tags.forEach(tag => {
+    machineLearningRule.tags.forEach(tag => {
       expectedTags = expectedTags + tag;
     });
     let expectedMitre = '';
-    newRule.mitre.forEach(mitre => {
+    machineLearningRule.mitre.forEach(mitre => {
       expectedMitre = expectedMitre + mitre.tactic;
       mitre.techniques.forEach(technique => {
         expectedMitre = expectedMitre + technique;
@@ -134,19 +132,19 @@ describe('Signal detection rules, machine learning', () => {
 
     cy.get(RULE_NAME_HEADER)
       .invoke('text')
-      .should('eql', `${newRule.name} Beta`);
+      .should('eql', `${machineLearningRule.name} Beta`);
 
     cy.get(ABOUT_RULE_DESCRIPTION)
       .invoke('text')
-      .should('eql', newRule.description);
+      .should('eql', machineLearningRule.description);
     cy.get(ABOUT_STEP)
       .eq(ABOUT_SEVERITY)
       .invoke('text')
-      .should('eql', newRule.severity);
+      .should('eql', machineLearningRule.severity);
     cy.get(ABOUT_STEP)
       .eq(ABOUT_RISK)
       .invoke('text')
-      .should('eql', newRule.riskScore);
+      .should('eql', machineLearningRule.riskScore);
     cy.get(ABOUT_STEP)
       .eq(ABOUT_URLS)
       .invoke('text')
@@ -165,17 +163,17 @@ describe('Signal detection rules, machine learning', () => {
       .should('eql', expectedTags);
 
     cy.get(DEFINITION_STEP)
-      .eq(0)
+      .eq(RULE_TYPE)
       .invoke('text')
       .should('eql', 'machine_learning');
     cy.get(DEFINITION_STEP)
-      .eq(1)
+      .eq(ANOMALY_SCORE)
       .invoke('text')
-      .should('eql', '20');
+      .should('eql', machineLearningRule.anomalyScoreThreshold);
     cy.get(DEFINITION_STEP)
-      .eq(2)
+      .eq(MACHINE_LEARNING_JOB)
       .invoke('text')
-      .should('eql', 'linux_anomalous_network_service');
+      .should('eql', machineLearningRule.machineLearningJob);
 
     cy.get(DEFINITION_STEP)
       .eq(DEFINITION_TIMELINE)
