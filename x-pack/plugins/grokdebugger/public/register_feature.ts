@@ -5,9 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../src/plugins/home/public';
 
-export const registerFeature = homePlugin => {
+export const registerFeature = (homePlugin: HomePublicPluginSetup) => {
   homePlugin.featureCatalogue.register({
     id: 'grokdebugger',
     title: i18n.translate('xpack.grokDebugger.registryProviderTitle', {

@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
 import { registerFeature } from './register_feature';
+import { PLUGIN } from '../common/constants';
 
 const inactiveLicenseMessage = i18n.translate('xpack.grokDebugger.clientInactiveLicenseError', {
   defaultMessage: 'The Grok Debugger tool requires an active license.',
@@ -24,7 +25,7 @@ export class Plugin {
         title: i18n.translate('xpack.grokDebugger.displayName', {
           defaultMessage: 'Grok Debugger',
         }),
-        id: 'grokdebugger',
+        id: PLUGIN,
         enableRouting: false,
         disabled: !license.isActive,
         tooltipContent: !license.isActive ? inactiveLicenseMessage : null,
@@ -39,7 +40,7 @@ export class Plugin {
 
   start(coreStart) {
     this.licensing.license$.subscribe(license => {
-      coreStart.chrome.navLinks.update('grokdebugger', {
+      coreStart.chrome.navLinks.update(PLUGIN, {
         hidden: !license.isActive,
       });
     });
