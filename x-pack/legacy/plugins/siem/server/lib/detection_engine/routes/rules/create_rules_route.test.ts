@@ -15,10 +15,13 @@ import {
   getEmptyIndex,
   getFindResultWithSingleHit,
   createMlRuleRequest,
+  createRuleWithActionsRequest,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesRoute } from './create_rules_route';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { createNotifications } from '../../notifications/create_notifications';
+jest.mock('../../notifications/create_notifications');
 
 describe('create_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -62,6 +65,18 @@ describe('create_rules', () => {
     it('is successful', async () => {
       const response = await server.inject(createMlRuleRequest(), context);
       expect(response.status).toEqual(200);
+    });
+  });
+
+  describe('creating a Notification if throttle and actions were provided ', () => {
+    it('is successful', async () => {
+      const response = await server.inject(createRuleWithActionsRequest(), context);
+      expect(response.status).toEqual(200);
+      expect(createNotifications).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleAlertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        })
+      );
     });
   });
 

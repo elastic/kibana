@@ -5,5 +5,5 @@
   "optionalPlugins": ["timelion"],
   "configPath": ["xpack", "features"],
   "server": true,
-  "ui": false
+  "ui": true
 }

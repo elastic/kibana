@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { Breadcrumb } from 'ui/chrome';
+
 import { getCaseDetailsUrl, getCaseUrl, getCreateCaseUrl } from '../../components/link_to';
 import { RouteSpyState } from '../../utils/route/types';
 import * as i18n from './translations';
 
-export const getBreadcrumbs = (params: RouteSpyState): Breadcrumb[] => {
+export const getBreadcrumbs = (params: RouteSpyState, search: string[]): Breadcrumb[] => {
+  const queryParameters = !isEmpty(search[0]) ? search[0] : null;
+
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getCaseUrl(),
+      href: getCaseUrl(queryParameters),
     },
   ];
   if (params.detailName === 'create') {
@@ -21,7 +25,7 @@ export const getBreadcrumbs = (params: RouteSpyState): Breadcrumb[] => {
       ...breadcrumb,
       {
         text: i18n.CREATE_BC_TITLE,
-        href: getCreateCaseUrl(),
+        href: getCreateCaseUrl(queryParameters),
       },
     ];
   } else if (params.detailName != null) {
@@ -29,7 +33,7 @@ export const getBreadcrumbs = (params: RouteSpyState): Breadcrumb[] => {
       ...breadcrumb,
       {
         text: params.state?.caseTitle ?? '',
-        href: getCaseDetailsUrl(params.detailName),
+        href: getCaseDetailsUrl({ id: params.detailName, search: queryParameters }),
       },
     ];
   }
