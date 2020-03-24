@@ -31,10 +31,7 @@ export function getOpsStatsCollector(
       average: metrics.response_times.avg_in_millis,
       max: metrics.response_times.max_in_millis,
     });
-    set(metrics, 'requests', {
-      ...omit(metrics.requests, 'statusCodes'),
-      status_codes: metrics.requests.statusCodes,
-    });
+    metrics.requests = omit(metrics.requests, 'statusCodes');
     lastMetrics = {
       ...metrics,
       timestamp: moment.utc().toISOString(),

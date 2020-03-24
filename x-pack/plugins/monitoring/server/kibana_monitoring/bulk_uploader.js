@@ -6,7 +6,11 @@
 
 import { defaultsDeep, uniq, compact, get } from 'lodash';
 
-import { TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
+import {
+  TELEMETRY_COLLECTION_INTERVAL,
+  KIBANA_SETTINGS_TYPE,
+  KIBANA_STATS_TYPE_MONITORING,
+} from '../../common/constants';
 
 import { sendBulkPayload, monitoringBulk } from './lib';
 import { hasMonitoringCluster } from '../es_client/instantiate_client';
@@ -193,12 +197,21 @@ export class BulkUploader {
     );
   }
 
-  getKibanaStats() {
-    return {
+  getKibanaStats(type) {
+    const stats = {
       ...this.kibanaStats,
-      locale: this.kibanaLocaleGetter(),
       status: this.kibanaStatusGetter(),
     };
+
+    if (type === KIBANA_SETTINGS_TYPE) {
+      stats.locale = this.kibanaLocaleGetter();
+    }
+
+    if (type === KIBANA_STATS_TYPE_MONITORING) {
+      delete stats.port;
+    }
+
+    return stats;
   }
 
   /*
@@ -258,7 +271,7 @@ export class BulkUploader {
         ...accum,
         { index: { _type: type } },
         {
-          kibana: this.getKibanaStats(),
+          kibana: this.getKibanaStats(type),
           ...typesNested[type],
         },
       ];
