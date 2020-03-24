@@ -5,8 +5,8 @@
  */
 
 import { get } from 'lodash';
-import { StatsCollectionConfig } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
 import { SearchResponse } from 'elasticsearch';
+import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_KIBANA,
@@ -247,20 +247,20 @@ function getIndexPatternForStackProduct(product: string) {
  * Returns an object keyed by the cluster UUIDs to make grouping easier.
  */
 export async function getHighLevelStats(
-  server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
   end: StatsCollectionConfig['end'],
-  product: string
+  product: string,
+  maxBucketSize: number
 ) {
   const response = await fetchHighLevelStats(
-    server,
     callCluster,
     clusterUuids,
     start,
     end,
-    product
+    product,
+    maxBucketSize
   );
   return handleHighLevelStatsResponse(response, product);
 }
@@ -268,14 +268,13 @@ export async function getHighLevelStats(
 export async function fetchHighLevelStats<
   T extends { cluster_uuid?: string } = { cluster_uuid?: string }
 >(
-  server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'] | undefined,
   end: StatsCollectionConfig['end'] | undefined,
-  product: string
+  product: string,
+  maxBucketSize: number
 ): Promise<SearchResponse<T>> {
-  const config = server.config();
   const isKibanaIndex = product === KIBANA_SYSTEM_ID;
   const filters: object[] = [{ terms: { cluster_uuid: clusterUuids } }];
 
@@ -302,7 +301,7 @@ export async function fetchHighLevelStats<
 
   const params = {
     index: getIndexPatternForStackProduct(product),
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size: maxBucketSize,
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },

@@ -147,8 +147,6 @@ describe('alert_edit', () => {
         .first()
         .simulate('click');
     });
-    expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Failed to save alert: Fail message'
-    );
+    expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith('Fail message');
   });
 });

@@ -305,14 +305,14 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
             title={
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.alertAdd.thresholdPreviewChart.noDataTitle"
-                defaultMessage="No data matches that query"
+                defaultMessage="No data matches this query"
               />
             }
             color="warning"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertAdd.thresholdPreviewChart.dataDoesNotExistTextMessage"
-              defaultMessage="Check your time range and filters to make sure they are correct"
+              defaultMessage="Check that your time range and filters are correct."
             />
           </EuiCallOut>
         )}
