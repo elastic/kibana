@@ -20,7 +20,7 @@ import { SpyRoute } from '../../../utils/route/spy_routes';
 
 import { useUserInfo } from '../components/user_info';
 import { AllRules } from './all';
-import { ImportDataModal } from '../../../components/import_data_modala_modal';
+import { ImportDataModal } from '../../../components/import_data_modal';
 import { ReadOnlyCallOut } from './components/read_only_callout';
 import { UpdatePrePackagedRulesCallOut } from './components/pre_packaged_rules/update_callout';
 import { getPrePackagedRuleStatus, redirectToDetections } from './helpers';
