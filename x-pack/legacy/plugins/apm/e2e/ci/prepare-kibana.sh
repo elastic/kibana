@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -ex
 
 E2E_DIR="x-pack/legacy/plugins/apm/e2e"
 
