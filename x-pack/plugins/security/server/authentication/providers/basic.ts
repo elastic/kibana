@@ -8,7 +8,10 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
+import {
+  HTTPAuthorizationHeader,
+  BasicHTTPAuthorizationHeaderCredentials,
+} from '../http_authentication';
 import { BaseAuthenticationProvider } from './base';
 
 /**
@@ -29,6 +32,16 @@ interface ProviderState {
    * Elasticsearch on behalf of the authenticated user.
    */
   authorization?: string;
+}
+
+/**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication and client
+  // can be redirected to the login page where they can enter username and password.
+  return canRedirectRequest(request) && request.route.options.authRequired === true;
 }
 
 /**
@@ -54,7 +67,10 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to perform a login.');
 
     const authHeaders = {
-      authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+      authorization: new HTTPAuthorizationHeader(
+        'Basic',
+        new BasicHTTPAuthorizationHeaderCredentials(username, password).toString()
+      ).toString(),
     };
 
     try {
@@ -76,7 +92,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    if (getHTTPAuthenticationScheme(request) != null) {
+    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
@@ -86,7 +102,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     // If state isn't present let's redirect user to the login page.
-    if (canRedirectRequest(request)) {
+    if (canStartNewSession(request)) {
       this.logger.debug('Redirecting request to Login page.');
       const basePath = this.options.basePath.get(request);
       return AuthenticationResult.redirectTo(
@@ -100,8 +116,15 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Redirects user to the login page preserving query string parameters.
    * @param request Request instance.
+   * @param [state] Optional state object associated with the provider.
    */
-  public async logout(request: KibanaRequest) {
+  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
+
+    if (!state) {
+      return DeauthenticationResult.notHandled();
+    }
+
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
     const queryString = request.url.search || `?msg=LOGGED_OUT`;
@@ -128,7 +151,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate via state.');
 
     if (!authorization) {
-      this.logger.debug('Access token is not found in state.');
+      this.logger.debug('Authorization header is not found in state.');
       return AuthenticationResult.notHandled();
     }
 

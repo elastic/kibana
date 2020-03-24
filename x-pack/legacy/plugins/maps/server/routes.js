@@ -411,26 +411,6 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/indexCount`,
-    handler: async (request, h) => {
-      const { server, query } = request;
-
-      if (!query.index) {
-        return h.response().code(400);
-      }
-
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      try {
-        const { count } = await callWithRequest(request, 'count', { index: query.index });
-        return { count };
-      } catch (error) {
-        return h.response().code(400);
-      }
-    },
-  });
-
-  server.route({
-    method: 'GET',
     path: `/${INDEX_SETTINGS_API_PATH}`,
     handler: async (request, h) => {
       const { server, query } = request;
