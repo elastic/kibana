@@ -71,7 +71,12 @@ export const apm: LegacyPluginInitializer = kibana => {
         autocreateApmIndexPattern: Joi.boolean().default(true),
 
         // service map
-        serviceMapEnabled: Joi.boolean().default(true)
+        serviceMapEnabled: Joi.boolean().default(true),
+        serviceMapFingerprintBucketSize: Joi.number().default(100),
+        serviceMapTraceIdBucketSize: Joi.number().default(65),
+        serviceMapFingerprintGlobalBucketSize: Joi.number().default(1000),
+        serviceMapTraceIdGlobalBucketSize: Joi.number().default(6),
+        serviceMapMaxTracesPerRequest: Joi.number().default(50)
       }).default();
     },
 
@@ -86,24 +91,34 @@ export const apm: LegacyPluginInitializer = kibana => {
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
         catalogue: ['apm'],
+        // see x-pack/plugins/features/common/feature_kibana_privileges.ts
         privileges: {
           all: {
-            api: ['apm', 'apm_write'],
+            api: ['apm', 'apm_write', 'actions-read', 'alerting-read'],
             catalogue: ['apm'],
             savedObject: {
-              all: [],
+              all: ['action', 'action_task_params'],
               read: []
             },
-            ui: ['show', 'save']
+            ui: [
+              'show',
+              'save',
+              'alerting:show',
+              'actions:show',
+              'alerting:save',
+              'actions:save',
+              'alerting:delete',
+              'actions:delete'
+            ]
           },
           read: {
-            api: ['apm'],
+            api: ['apm', 'actions-read', 'alerting-read'],
             catalogue: ['apm'],
             savedObject: {
-              all: [],
+              all: ['action', 'action_task_params'],
               read: []
             },
-            ui: ['show']
+            ui: ['show', 'alerting:show', 'actions:show']
           }
         }
       });

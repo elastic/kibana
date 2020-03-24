@@ -8,6 +8,7 @@ import { get, set } from 'lodash';
 import mockChartsData from './monitor_charts_mock.json';
 import { assertCloseTo } from '../../helper';
 import { getMonitorDurationChart } from '../get_monitor_duration';
+import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will run expected parameters when no location is specified', async () => {
@@ -16,6 +17,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     const search = searchMock.bind({});
     await getMonitorDurationChart({
       callES: search,
+      dynamicSettings: defaultDynamicSettings,
       monitorId: 'fooID',
       dateStart: 'now-15m',
       dateEnd: 'now',
@@ -51,6 +53,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     const search = searchMock.bind({});
     await getMonitorDurationChart({
       callES: search,
+      dynamicSettings: defaultDynamicSettings,
       monitorId: 'fooID',
       dateStart: 'now-15m',
       dateEnd: 'now',
@@ -87,6 +90,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     expect(
       await getMonitorDurationChart({
         callES: search,
+        dynamicSettings: defaultDynamicSettings,
         monitorId: 'id',
         dateStart: 'now-15m',
         dateEnd: 'now',

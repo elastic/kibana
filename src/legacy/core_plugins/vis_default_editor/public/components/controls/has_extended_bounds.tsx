@@ -20,9 +20,11 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { search } from '../../../../../../plugins/data/public';
 import { SwitchParamEditor } from './switch';
-import { isType } from '../../legacy_imports';
 import { AggParamEditorProps } from '../agg_param_props';
+
+const { isType } = search.aggs;
 
 function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
   useEffect(() => {
