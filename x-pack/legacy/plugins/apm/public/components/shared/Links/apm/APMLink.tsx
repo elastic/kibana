@@ -31,7 +31,7 @@ export const PERSISTENT_APM_PARAMS = [
 
 export function getAPMHref(
   path: string,
-  currentSearch: string, // TODO: Replace with passing in URL PARAMS here
+  currentSearch: string,
   query: APMQueryParams = {}
 ) {
   const currentQuery = toQuery(currentSearch);
