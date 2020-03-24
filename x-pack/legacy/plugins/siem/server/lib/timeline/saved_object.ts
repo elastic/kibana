@@ -154,21 +154,19 @@ export class Timeline {
         };
       }
       // Update Timeline
-      const existingTimeline = await this.getSavedTimeline(request, timelineId);
-
       await savedObjectsClient.update(
         timelineSavedObjectType,
         timelineId,
         pickSavedTimeline(timelineId, timeline, request.user),
         {
-          version: existingTimeline.version || undefined,
+          version: version || undefined,
         }
       );
 
       return {
         code: 200,
         message: 'success',
-        timeline: { ...existingTimeline, ...timeline },
+        timeline: await this.getSavedTimeline(request, timelineId),
       };
     } catch (err) {
       if (timelineId != null && savedObjectsClient.errors.isConflictError(err)) {

@@ -135,6 +135,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           importComplete={handleComplete}
           importData={importTimelines}
           successMessage={i18n.SUCCESSFULLY_IMPORTED_TIMELINES}
+          showCheckBox={false}
           showModal={importCompleteToggle ?? false}
           submitBtnText={i18n.IMPORT_TIMELINE_BTN_TITLE}
           subtitle={i18n.INITIAL_PROMPT_TEXT}

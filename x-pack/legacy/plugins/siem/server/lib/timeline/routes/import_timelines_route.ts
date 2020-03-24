@@ -167,20 +167,7 @@ export const importTimelinesRoute = (
                         );
 
                         resolve({ timeline_id: newSavedObjectId, status_code: 200 });
-                      } else if (timeline != null && frameworkRequest.query.overwrite) {
-                        // update timeline
-                        const updatedSavedObjectId = await createTimelines(
-                          (frameworkRequest as unknown) as FrameworkRequest,
-                          parsedTimelineObject,
-                          timeline.savedObjectId,
-                          timeline.version,
-                          pinnedEventIds,
-                          [...globalNotes, ...eventNotes],
-                          timeline.notes?.map(n => n.noteId)
-                        );
-
-                        resolve({ timeline_id: updatedSavedObjectId, status_code: 200 });
-                      } else if (timeline != null) {
+                      } else {
                         resolve(
                           createBulkErrorObject({
                             id: savedObjectId,

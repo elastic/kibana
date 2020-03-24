@@ -41,6 +41,7 @@ interface ImportRuleModalProps {
   failedDetailed: (id: string, statusCode: number, message: string) => string;
   importComplete: () => void;
   importData: (arg: ImportRulesProps) => Promise<ImportRulesResponse>;
+  showCheckBox: boolean;
   showModal: boolean;
   submitBtnText: string;
   subtitle: string;
@@ -59,6 +60,7 @@ export const ImportDataModalComponent = ({
   failedDetailed,
   importComplete,
   importData,
+  showCheckBox = true,
   showModal,
   submitBtnText,
   subtitle,
@@ -140,12 +142,14 @@ export const ImportDataModalComponent = ({
                 isLoading={isImporting}
               />
               <EuiSpacer size="s" />
-              <EuiCheckbox
-                id="rule-overwrite-saved-object"
-                label={checkBoxLabel}
-                checked={overwrite}
-                onChange={() => setOverwrite(!overwrite)}
-              />
+              {showCheckBox && (
+                <EuiCheckbox
+                  id="rule-overwrite-saved-object"
+                  label={checkBoxLabel}
+                  checked={overwrite}
+                  onChange={() => setOverwrite(!overwrite)}
+                />
+              )}
             </EuiModalBody>
 
             <EuiModalFooter>
