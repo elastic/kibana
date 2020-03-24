@@ -51,7 +51,6 @@ import { InfraPluginSetup } from '../../infra/server';
 
 export interface LegacyAPI {
   getServerStatus: () => string;
-  infra: any;
 }
 
 interface PluginsSetup {
@@ -189,8 +188,9 @@ export class Plugin {
           name: serverInfo.name,
           index: get(legacyConfig, 'kibana.index'),
           host: serverInfo.host,
-          transport_address: `${serverInfo.host}:${serverInfo.port}`,
+          locale: i18n.getLocale(),
           port: serverInfo.port.toString(),
+          transport_address: `${serverInfo.host}:${serverInfo.port}`,
           version: this.initializerContext.env.packageInfo.version,
           snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
         },
@@ -267,9 +267,11 @@ export class Plugin {
       navLinkId: 'monitoring',
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
-      privileges: {},
+      privileges: null,
       reserved: {
         privilege: {
+          app: ['monitoring', 'kibana'],
+          catalogue: ['monitoring'],
           savedObject: {
             all: [],
             read: [],
