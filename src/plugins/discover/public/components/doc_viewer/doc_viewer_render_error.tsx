@@ -16,20 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { getServices, wrapInI18nContext } from '../../../kibana_services';
+import React from 'react';
+import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+import { formatMsg, formatStack } from '../../../../kibana_legacy/public';
 
-export function FieldNameDirectiveProvider(reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(FieldName),
-    [
-      ['field', { watchDepth: 'collection' }],
-      ['fieldName', { watchDepth: 'reference' }],
-      ['fieldType', { watchDepth: 'reference' }],
-    ],
-    { restrict: 'AE' },
-    {
-      useShortDots: getServices().uiSettings.get('shortDots:enable'),
-    }
+interface Props {
+  error: Error | string;
+}
+
+export function DocViewerError({ error }: Props) {
+  const errMsg = formatMsg(error);
+  const errStack = typeof error === 'object' ? formatStack(error) : '';
+
+  return (
+    <EuiCallOut title={errMsg} color="danger" iconType="cross" data-test-subj="docViewerError">
+      {errStack && <EuiCodeBlock>{errStack}</EuiCodeBlock>}
+    </EuiCallOut>
   );
 }

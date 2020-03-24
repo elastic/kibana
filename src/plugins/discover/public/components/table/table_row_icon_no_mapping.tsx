@@ -16,20 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { getServices, wrapInI18nContext } from '../../../kibana_services';
+import React from 'react';
+import { EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-export function FieldNameDirectiveProvider(reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(FieldName),
-    [
-      ['field', { watchDepth: 'collection' }],
-      ['fieldName', { watchDepth: 'reference' }],
-      ['fieldType', { watchDepth: 'reference' }],
-    ],
-    { restrict: 'AE' },
+export function DocViewTableRowIconNoMapping() {
+  const ariaLabel = i18n.translate('discover.docViews.table.noCachedMappingForThisFieldAriaLabel', {
+    defaultMessage: 'Warning',
+  });
+  const tooltipContent = i18n.translate(
+    'discover.docViews.table.noCachedMappingForThisFieldTooltip',
     {
-      useShortDots: getServices().uiSettings.get('shortDots:enable'),
+      defaultMessage:
+        'No cached mapping for this field. Refresh field list from the Management > Index Patterns page',
     }
+  );
+  return (
+    <EuiIconTip
+      aria-label={ariaLabel}
+      color="warning"
+      content={tooltipContent}
+      iconProps={{
+        className: 'kbnDocViewer__warning',
+        'data-test-subj': 'noMappingWarning',
+      }}
+      size="s"
+      type="alert"
+    />
   );
 }
