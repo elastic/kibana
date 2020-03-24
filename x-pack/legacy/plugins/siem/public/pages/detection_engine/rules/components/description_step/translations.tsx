@@ -31,3 +31,17 @@ export const QUERY_TYPE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Query',
   }
 );
+
+export const ML_JOB_STARTED = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDescription.mlJobStartedDescription',
+  {
+    defaultMessage: 'Started',
+  }
+);
+
+export const ML_JOB_STOPPED = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDescription.mlJobStoppedDescription',
+  {
+    defaultMessage: 'Stopped',
+  }
+);

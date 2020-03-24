@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { useKibana } from '../../../../../lib/kibana';
 import { SiemJob } from '../../../../../components/ml_popover/types';
 import { ListItems } from './types';
+import { isJobStarted } from '../../../../../components/ml/helpers';
+import { ML_JOB_STARTED, ML_JOB_STOPPED } from './translations';
 
 enum MessageLevels {
   info = 'info',
@@ -17,7 +19,7 @@ enum MessageLevels {
   error = 'error',
 }
 
-export const AuditIcon: React.FC<{
+const AuditIcon: React.FC<{
   message: SiemJob['auditMessage'];
 }> = ({ message }) => {
   if (!message) {
@@ -42,20 +44,33 @@ export const AuditIcon: React.FC<{
   );
 };
 
+export const JobStatusBadge: React.FC<{ job: SiemJob }> = ({ job }) => {
+  const isStarted = isJobStarted(job.jobState, job.datafeedState);
+
+  return isStarted ? (
+    <EuiBadge color="secondary">{ML_JOB_STARTED}</EuiBadge>
+  ) : (
+    <EuiBadge color="danger">{ML_JOB_STOPPED}</EuiBadge>
+  );
+};
+
 export const MlJobDescription: React.FC<{ job: SiemJob }> = ({ job }) => {
   const jobUrl = useKibana().services.application.getUrlForApp('ml#/jobs');
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiLink href={jobUrl} target="_blank">
-          {job.id}
-        </EuiLink>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <AuditIcon message={job.auditMessage} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiLink href={jobUrl} target="_blank">
+            {job.id}
+          </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AuditIcon message={job.auditMessage} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <JobStatusBadge job={job} />
+    </>
   );
 };
 
