@@ -11,5 +11,5 @@ export const plugin = (context: PluginInitializerContext) => {
   return new Plugin(context);
 };
 
+export { ReportingCore } from './core';
 export { ReportingPlugin } from './plugin';
-export { ReportingConfig, ReportingCore } from './core';

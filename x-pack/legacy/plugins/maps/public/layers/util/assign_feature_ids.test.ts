@@ -6,19 +6,25 @@
 
 import { assignFeatureIds } from './assign_feature_ids';
 import { FEATURE_ID_PROPERTY_NAME } from '../../../common/constants';
+import { FeatureCollection, Feature, Point } from 'geojson';
 
 const featureId = 'myFeature1';
 
+const geometry: Point = {
+  type: 'Point',
+  coordinates: [0, 0],
+};
+
+const defaultFeature: Feature = {
+  type: 'Feature',
+  geometry,
+  properties: {},
+};
+
 test('should provide unique id when feature.id is not provided', () => {
-  const featureCollection = {
-    features: [
-      {
-        properties: {},
-      },
-      {
-        properties: {},
-      },
-    ],
+  const featureCollection: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: [{ ...defaultFeature }, { ...defaultFeature }],
   };
 
   const updatedFeatureCollection = assignFeatureIds(featureCollection);
@@ -26,16 +32,18 @@ test('should provide unique id when feature.id is not provided', () => {
   const feature2 = updatedFeatureCollection.features[1];
   expect(typeof feature1.id).toBe('number');
   expect(typeof feature2.id).toBe('number');
+  // @ts-ignore
   expect(feature1.id).toBe(feature1.properties[FEATURE_ID_PROPERTY_NAME]);
   expect(feature1.id).not.toBe(feature2.id);
 });
 
 test('should preserve feature id when provided', () => {
-  const featureCollection = {
+  const featureCollection: FeatureCollection = {
+    type: 'FeatureCollection',
     features: [
       {
+        ...defaultFeature,
         id: featureId,
-        properties: {},
       },
     ],
   };
@@ -43,16 +51,19 @@ test('should preserve feature id when provided', () => {
   const updatedFeatureCollection = assignFeatureIds(featureCollection);
   const feature1 = updatedFeatureCollection.features[0];
   expect(typeof feature1.id).toBe('number');
+  // @ts-ignore
   expect(feature1.id).not.toBe(feature1.properties[FEATURE_ID_PROPERTY_NAME]);
+  // @ts-ignore
   expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(featureId);
 });
 
 test('should preserve feature id for falsy value', () => {
-  const featureCollection = {
+  const featureCollection: FeatureCollection = {
+    type: 'FeatureCollection',
     features: [
       {
+        ...defaultFeature,
         id: 0,
-        properties: {},
       },
     ],
   };
@@ -60,15 +71,19 @@ test('should preserve feature id for falsy value', () => {
   const updatedFeatureCollection = assignFeatureIds(featureCollection);
   const feature1 = updatedFeatureCollection.features[0];
   expect(typeof feature1.id).toBe('number');
+  // @ts-ignore
   expect(feature1.id).not.toBe(feature1.properties[FEATURE_ID_PROPERTY_NAME]);
+  // @ts-ignore
   expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(0);
 });
 
 test('should not modify original feature properties', () => {
   const featureProperties = {};
-  const featureCollection = {
+  const featureCollection: FeatureCollection = {
+    type: 'FeatureCollection',
     features: [
       {
+        ...defaultFeature,
         id: featureId,
         properties: featureProperties,
       },
@@ -77,6 +92,7 @@ test('should not modify original feature properties', () => {
 
   const updatedFeatureCollection = assignFeatureIds(featureCollection);
   const feature1 = updatedFeatureCollection.features[0];
+  // @ts-ignore
   expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(featureId);
   expect(featureProperties).not.toHaveProperty(FEATURE_ID_PROPERTY_NAME);
 });

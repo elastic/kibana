@@ -5,17 +5,18 @@
  */
 
 import _ from 'lodash';
+import { FeatureCollection, Feature } from 'geojson';
 import { FEATURE_ID_PROPERTY_NAME } from '../../../common/constants';
 
 let idCounter = 0;
 
-function generateNumericalId() {
+function generateNumericalId(): number {
   const newId = idCounter < Number.MAX_SAFE_INTEGER ? idCounter : 0;
   idCounter = newId + 1;
   return newId;
 }
 
-export function assignFeatureIds(featureCollection) {
+export function assignFeatureIds(featureCollection: FeatureCollection): FeatureCollection {
   // wrt https://github.com/elastic/kibana/issues/39317
   // In constrained resource environments, mapbox-gl may throw a stackoverflow error due to hitting the browser's recursion limit. This crashes Kibana.
   // This error is thrown in mapbox-gl's quicksort implementation, when it is sorting all the features by id.
@@ -32,7 +33,7 @@ export function assignFeatureIds(featureCollection) {
   }
 
   const randomizedIds = _.shuffle(ids);
-  const features = [];
+  const features: Feature[] = [];
   for (let i = 0; i < featureCollection.features.length; i++) {
     const numericId = randomizedIds[i];
     const feature = featureCollection.features[i];
