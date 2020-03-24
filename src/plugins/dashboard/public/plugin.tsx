@@ -146,7 +146,7 @@ export class DashboardEmbeddableContainerPublicPlugin
       plugins.embeddable.getEmbeddableFactories
     );
     uiActions.registerAction(changeViewAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, changeViewAction);
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,
