@@ -20,5 +20,14 @@ export const help: FunctionHelp<FunctionFactory<typeof savedVisualization>> = {
     timerange: i18n.translate('xpack.canvas.functions.savedVisualization.args.timerangeHelpText', {
       defaultMessage: `The timerange of data that should be included`,
     }),
+    colors: i18n.translate('xpack.canvas.functions.savedVisualization.args.colorsHelpText', {
+      defaultMessage: `Define the color to use for a specific series`,
+    }),
+    hideLegend: i18n.translate(
+      'xpack.canvas.functions.savedVisualization.args.hideLegendHelpText',
+      {
+        defaultMessage: `Should the legend be hidden`,
+      }
+    ),
   },
 };
