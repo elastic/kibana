@@ -12,6 +12,8 @@ import {
   LineSeries,
   Settings,
   ScaleType,
+  GeometryValue,
+  XYChartSeriesIdentifier,
   SeriesNameFn,
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
@@ -20,6 +22,9 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
 import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+
+const executeTriggerActions = jest.fn();
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -141,6 +146,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component).toMatchSnapshot();
@@ -166,6 +172,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
@@ -195,6 +202,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component.find(Settings).prop('xDomain')).toBeUndefined();
@@ -209,6 +217,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component).toMatchSnapshot();
@@ -224,6 +233,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component).toMatchSnapshot();
@@ -239,11 +249,75 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component).toMatchSnapshot();
       expect(component.find(BarSeries)).toHaveLength(1);
       expect(component.find(Settings).prop('rotation')).toEqual(90);
+    });
+
+    test('onElementClick returns correct context data', () => {
+      const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1' };
+      const series = {
+        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+        specId: 'd',
+        yAccessor: 'd',
+        splitAccessors: {},
+        seriesKeys: [2, 'd'],
+      };
+
+      const { args, data } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                layerId: 'first',
+                isHistogram: true,
+                seriesType: 'bar_stacked',
+                xAccessor: 'b',
+                yScaleType: 'linear',
+                xScaleType: 'time',
+                splitAccessor: 'b',
+                accessors: ['d'],
+                columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              },
+            ],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
+        />
+      );
+
+      wrapper
+        .find(Settings)
+        .first()
+        .prop('onElementClick')!([[geometry, series as XYChartSeriesIdentifier]]);
+
+      expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
+        data: {
+          data: [
+            {
+              column: 1,
+              row: 1,
+              table: data.tables.first,
+              value: 5,
+            },
+            {
+              column: 1,
+              row: 0,
+              table: data.tables.first,
+              value: 2,
+            },
+          ],
+        },
+      });
     });
 
     test('it renders stacked bar', () => {
@@ -255,6 +329,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component).toMatchSnapshot();
@@ -271,6 +346,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component).toMatchSnapshot();
@@ -290,6 +366,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component).toMatchSnapshot();
@@ -307,6 +384,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="CEST"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component.find(LineSeries).prop('timeZone')).toEqual('CEST');
@@ -323,6 +401,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
@@ -346,6 +425,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
@@ -363,6 +443,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
@@ -378,6 +459,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
@@ -414,6 +496,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
@@ -442,6 +525,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Ordinal);
@@ -457,6 +541,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(component.find(LineSeries).prop('yScaleType')).toEqual(ScaleType.Sqrt);
@@ -472,6 +557,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
 
@@ -488,6 +574,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
 
@@ -504,6 +591,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           chartTheme={{}}
           timeZone="UTC"
+          executeTriggerActions={executeTriggerActions}
         />
       );
       expect(getFormatSpy).toHaveBeenCalledWith({
@@ -522,6 +610,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          executeTriggerActions={executeTriggerActions}
         />
       );
 

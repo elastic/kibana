@@ -47,6 +47,12 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send a request to a web service.',
       }
     ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.actionTypeTitle',
+      {
+        defaultMessage: 'Webhook data',
+      }
+    ),
     validateConnector: (action: WebhookActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
@@ -142,7 +148,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       i18n.translate(
         'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderKeyText',
         {
-          defaultMessage: 'Header key is required.',
+          defaultMessage: 'Key is required.',
         }
       )
     );
@@ -152,7 +158,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       i18n.translate(
         'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderValueText',
         {
-          defaultMessage: 'Header value is required.',
+          defaultMessage: 'Value is required.',
         }
       )
     );
@@ -195,7 +201,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
-              defaultMessage="Add a new header"
+              defaultMessage="Add header"
               id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeader"
             />
           </h5>
@@ -496,6 +502,12 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
                 data-test-subj="webhookAddVariableButton"
                 onClick={() => setIsVariablesPopoverOpen(true)}
                 iconType="indexOpen"
+                title={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addVariableTitle',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
                 aria-label={i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addVariablePopoverButton',
                   {
