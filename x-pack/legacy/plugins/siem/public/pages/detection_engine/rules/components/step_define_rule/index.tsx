@@ -12,7 +12,7 @@ import {
   EuiFormRow,
   EuiButton,
 } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect, useContext } from 'react';
+import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -20,7 +20,7 @@ import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/pu
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
-import { MlCapabilitiesContext } from '../../../../../components/ml/permissions/ml_capabilities_provider';
+import { useMlCapabilities } from '../../../../../components/ml_popover/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { setFieldValue, isMlRule } from '../../helpers';
 import * as RuleI18n from '../../translations';
@@ -92,7 +92,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   setForm,
   setStepData,
 }) => {
-  const mlCapabilities = useContext(MlCapabilitiesContext);
+  const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [localIsMlRule, setIsMlRule] = useState(false);
