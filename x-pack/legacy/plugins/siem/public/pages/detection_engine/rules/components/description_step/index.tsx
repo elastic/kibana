@@ -15,6 +15,7 @@ import {
   esFilters,
   FilterManager,
 } from '../../../../../../../../../../src/plugins/data/public';
+import { RuleType } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import { useKibana } from '../../../../../lib/kibana';
 import { IMitreEnterpriseAttack } from '../../types';
@@ -29,6 +30,7 @@ import {
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
   buildNoteDescription,
+  buildRuleTypeDescription,
 } from './helpers';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
@@ -176,6 +178,9 @@ export const getDescriptionItem = (
   } else if (field === 'note') {
     const val: string = get(field, data);
     return buildNoteDescription(label, val);
+  } else if (field === 'ruleType') {
+    const ruleType: RuleType = get(field, data);
+    return buildRuleTypeDescription(label, ruleType);
   }
 
   const description: string = get(field, data);

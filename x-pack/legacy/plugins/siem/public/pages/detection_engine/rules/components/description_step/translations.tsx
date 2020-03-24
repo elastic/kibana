@@ -17,3 +17,17 @@ export const QUERY_LABEL = i18n.translate('xpack.siem.detectionEngine.createRule
 export const SAVED_ID_LABEL = i18n.translate('xpack.siem.detectionEngine.createRule.savedIdLabel', {
   defaultMessage: 'Saved query name',
 });
+
+export const ML_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.mlRuleTypeDescription',
+  {
+    defaultMessage: 'Machine Learning',
+  }
+);
+
+export const QUERY_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.queryRuleTypeDescription',
+  {
+    defaultMessage: 'Query',
+  }
+);
