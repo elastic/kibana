@@ -9,8 +9,7 @@ import Boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
-import { JobSource } from '../../types';
-import { ReportingConfig } from '../types';
+import { JobSource, ServerFacade } from '../../types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;
@@ -40,11 +39,8 @@ interface CountAggResult {
   count: number;
 }
 
-export function jobsQueryFactory(
-  config: ReportingConfig,
-  elasticsearch: ElasticsearchServiceSetup
-) {
-  const index = config.get('index');
+export function jobsQueryFactory(server: ServerFacade, elasticsearch: ElasticsearchServiceSetup) {
+  const index = server.config().get('xpack.reporting.index');
   const { callAsInternalUser } = elasticsearch.adminClient;
 
   function getUsername(user: any) {

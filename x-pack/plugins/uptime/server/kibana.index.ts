@@ -30,12 +30,15 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
   features.registerFeature({
     id: PLUGIN.ID,
     name: PLUGIN.NAME,
+    order: 1000,
     navLinkId: PLUGIN.ID,
     icon: 'uptimeApp',
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
     privileges: {
       all: {
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
         api: ['uptime-read', 'uptime-write'],
         savedObject: {
           all: [umDynamicSettings.name],
@@ -44,6 +47,8 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         ui: ['save', 'configureSettings', 'show'],
       },
       read: {
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
         api: ['uptime-read'],
         savedObject: {
           all: [],
