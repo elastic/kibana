@@ -147,14 +147,14 @@ export class DashboardEmbeddableContainerPublicPlugin
     );
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
+    const savedDashboardLoader = createSavedDashboardLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
     return {
-      getSavedDashboardLoader: () =>
-        createSavedDashboardLoader({
-          savedObjectsClient: core.savedObjects.client,
-          indexPatterns,
-          chrome: core.chrome,
-          overlays: core.overlays,
-        }),
+      getSavedDashboardLoader: () => savedDashboardLoader,
     };
   }
 
