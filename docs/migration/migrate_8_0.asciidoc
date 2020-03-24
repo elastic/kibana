@@ -119,6 +119,6 @@ POST URL snippets if you depend on these for automated PDF reports.
 The `xpack.` prefix has been removed for all telemetry configurations.
 
 *Impact:*
-For any configurations beginning with `xpack.telemetry.`, remove the `xpack.` prefix. For example, use <<telemetry.enabled, `telemetry.enabled`>> instead.
+For any configurations beginning with `xpack.telemetry.`, remove the `xpack.` prefix. For example, use <<telemetry-general-settings, `telemetry.enabled`>> instead.
 
 // end::notable-breaking-changes[]
