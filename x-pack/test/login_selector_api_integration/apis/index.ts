@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LoginLayout } from '../../../common/licensing';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export interface LoginState {
-  layout: LoginLayout;
-  allowLogin: boolean;
+export default function({ loadTestFile }: FtrProviderContext) {
+  describe('apis', function() {
+    this.tags('ciGroup6');
+    loadTestFile(require.resolve('./login_selector'));
+  });
 }

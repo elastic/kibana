@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LoginForm } from './login_form';
-export { DisabledLoginForm } from './disabled_login_form';
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
