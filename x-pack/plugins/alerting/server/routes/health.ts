@@ -10,8 +10,9 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-  ElasticsearchServiceSetup,
 } from 'kibana/server';
+import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../types';
 
 interface XPackUsageSecurity {
@@ -25,7 +26,7 @@ interface XPackUsageSecurity {
   };
 }
 
-export function healthRoute(router: IRouter, elasticsearch: ElasticsearchServiceSetup) {
+export function healthRoute(router: IRouter, licenseState: LicenseState) {
   router.get(
     {
       path: '/api/alert/_health',
@@ -36,16 +37,17 @@ export function healthRoute(router: IRouter, elasticsearch: ElasticsearchService
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
       try {
         const {
           security: {
             enabled: isSecurityEnabled = false,
             ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
           } = {},
-        } = await elasticsearch.adminClient
+        }: XPackUsageSecurity = await context.core.elasticsearch.adminClient
           // `transport.request` is potentially unsafe when combined with untrusted user input.
           // Do not augment with such input.
-          .callAsInternalUser<XPackUsageSecurity>('transport.request', {
+          .callAsInternalUser('transport.request', {
             method: 'GET',
             path: '/_xpack/usage',
           });

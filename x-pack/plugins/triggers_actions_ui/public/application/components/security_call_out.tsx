@@ -17,10 +17,7 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
 } from '../sections/common/components/with_bulk_alert_api_operations';
-
-interface Health {
-  canGenerateApiKeys: boolean;
-}
+import { AlertingFrameworkHealth } from '../../types';
 
 type Props = { docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'> } & Pick<
   BulkOperationsComponentOpts,
@@ -30,7 +27,7 @@ type Props = { docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_V
 export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ getHealth, docLinks }) => {
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
-  const [alertingHealth, setAlertingHealth] = React.useState<Option<Health>>(none);
+  const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
 
   React.useEffect(() => {
     async function fetchSecurityConfigured() {
@@ -51,7 +48,7 @@ export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ getHeal
             title={i18n.translate(
               'xpack.triggersActionsUI.components.securityCallOut.tlsDisabledTitle',
               {
-                defaultMessage: 'Transport Layer Security is not enabled',
+                defaultMessage: 'Enable Transport Layer Security',
               }
             )}
             color="primary"

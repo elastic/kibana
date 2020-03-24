@@ -28,7 +28,7 @@ export function handleDisabledApiKeysError<P, Q, B>(
         return response.badRequest({
           body: new Error(
             i18n.translate('xpack.alerting.api.error.disabledApiKeys', {
-              defaultMessage: 'Alerting relies upon API keys which appear to be are disabled',
+              defaultMessage: 'Alerting relies upon API keys which appear to be disabled',
             })
           ),
         });

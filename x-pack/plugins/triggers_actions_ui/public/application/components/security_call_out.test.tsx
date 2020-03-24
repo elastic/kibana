@@ -64,7 +64,7 @@ describe('security call out', () => {
     });
 
     expect(component?.find(EuiCallOut).prop('title')).toMatchInlineSnapshot(
-      `"Transport Layer Security is not enabled"`
+      `"Enable Transport Layer Security"`
     );
 
     expect(component?.find(EuiButton).prop('href')).toMatchInlineSnapshot(

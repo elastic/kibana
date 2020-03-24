@@ -17,10 +17,7 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
 } from '../sections/common/components/with_bulk_alert_api_operations';
-
-interface Health {
-  canGenerateApiKeys: boolean;
-}
+import { AlertingFrameworkHealth } from '../../types';
 
 type Props = {
   docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
@@ -34,7 +31,7 @@ export const AlertActionSecurityCallOut: React.FunctionComponent<Props> = ({
 }) => {
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
-  const [alertingHealth, setAlertingHealth] = React.useState<Option<Health>>(none);
+  const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
 
   React.useEffect(() => {
     async function fetchSecurityConfigured() {
@@ -71,7 +68,7 @@ export const AlertActionSecurityCallOut: React.FunctionComponent<Props> = ({
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.components.alertActionSecurityCallOut.enableTlsCta"
-                defaultMessage="Enabled TLS"
+                defaultMessage="Enable TLS"
               />
             </EuiButton>
           </EuiCallOut>

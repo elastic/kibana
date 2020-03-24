@@ -174,7 +174,7 @@ export class AlertingPlugin {
     unmuteAllAlertRoute(router, this.licenseState);
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
-    healthRoute(router, core.elasticsearch);
+    healthRoute(router, this.licenseState);
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
