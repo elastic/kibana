@@ -19,17 +19,23 @@
 
 import { MapsLegacyPlugin } from './plugin';
 // @ts-ignore
-import * as colorUtil from './map/color_util'
+import * as colorUtil from './map/color_util';
+// @ts-ignore
+import { KibanaMap } from './map/kibana_map';
 // @ts-ignore
 import { KibanaMapLayer } from './map/kibana_map_layer';
+// @ts-ignore
+import { convertToGeoJson } from './map/convert_to_geojson';
+// @ts-ignore
+import { scaleBounds, getPrecision, geoContains } from './map/decode_geo_hash';
 // @ts-ignore
 import {
   VectorLayer,
   FileLayerField,
   FileLayer,
-  ServiceSettingsSetupContract
+  ServiceSettingsSetupContract,
+  TmsLayer,
 } from './map/service_settings';
-
 
 export function plugin() {
   return new MapsLegacyPlugin();
@@ -37,10 +43,16 @@ export function plugin() {
 
 /** @public */
 export {
+  scaleBounds,
+  getPrecision,
+  geoContains,
   colorUtil,
+  convertToGeoJson,
+  KibanaMap,
   KibanaMapLayer,
   VectorLayer,
   FileLayerField,
   FileLayer,
-  ServiceSettingsSetupContract
-}
+  ServiceSettingsSetupContract,
+  TmsLayer,
+};

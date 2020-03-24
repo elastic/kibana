@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import { getUiSettings } from '../kibana_services';
 
 interface DecodedGeoHash {
   latitude: number[];
@@ -86,38 +85,6 @@ function geohashCells(precision: number, axis: number) {
     cells *= i % 2 === axis ? 4 : 8;
   }
   return cells;
-}
-
-/**
- * Get the number of geohash columns (world-wide) for a given precision
- * @param precision the geohash precision
- * @returns {number} the number of columns
- */
-export function geohashColumns(precision: number): number {
-  return geohashCells(precision, 0);
-}
-
-const config = getUiSettings();
-const defaultPrecision = 2;
-const maxPrecision = parseInt(config.get('visualization:tileMap:maxPrecision'), 10) || 12;
-/**
- * Map Leaflet zoom levels to geohash precision levels.
- * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
- */
-export const zoomPrecision: any = {};
-const minGeohashPixels = 16;
-
-for (let zoom = 0; zoom <= 21; zoom += 1) {
-  const worldPixels = 256 * Math.pow(2, zoom);
-  zoomPrecision[zoom] = 1;
-  for (let precision = 2; precision <= maxPrecision; precision += 1) {
-    const columns = geohashColumns(precision);
-    if (worldPixels / columns >= minGeohashPixels) {
-      zoomPrecision[zoom] = precision;
-    } else {
-      break;
-    }
-  }
 }
 
 export function getPrecision(val: string) {
