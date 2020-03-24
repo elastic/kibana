@@ -8,8 +8,16 @@ import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { extractIndexPatterns } from '../lib/apm/extract_index_patterns';
 import { RouteDependencies } from '../types';
+import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
+import { reindexServiceFactory } from '../lib/reindexing';
 
-export function registerClusterCheckupRoutes({ cloud, router, apmOSS }: RouteDependencies) {
+export function registerClusterCheckupRoutes({
+  cloud,
+  router,
+  apmOSS,
+  licensing,
+  log,
+}: RouteDependencies) {
   const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
   router.get(
@@ -21,6 +29,7 @@ export function registerClusterCheckupRoutes({ cloud, router, apmOSS }: RouteDep
       async (
         {
           core: {
+            savedObjects: { client: savedObjectsClient },
             elasticsearch: { dataClient },
           },
         },
@@ -30,8 +39,25 @@ export function registerClusterCheckupRoutes({ cloud, router, apmOSS }: RouteDep
         try {
           const apmConfig = await apmOSS.config$.pipe(first()).toPromise();
           const indexPatterns = extractIndexPatterns(apmConfig);
+
+          const status = await getUpgradeAssistantStatus(dataClient, isCloudEnabled, indexPatterns);
+
+          const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+          const reindexActions = reindexActionsFactory(savedObjectsClient, callAsCurrentUser);
+          const reindexService = reindexServiceFactory(
+            callAsCurrentUser,
+            reindexActions,
+            log,
+            licensing
+          );
+          const indexNames = status.indices
+            .filter(({ index }) => typeof index !== 'undefined')
+            .map(({ index }) => index as string);
+
+          await reindexService.cleanupReindexOperations(indexNames);
+
           return response.ok({
-            body: await getUpgradeAssistantStatus(dataClient, isCloudEnabled, indexPatterns),
+            body: status,
           });
         } catch (e) {
           if (e.status === 403) {
