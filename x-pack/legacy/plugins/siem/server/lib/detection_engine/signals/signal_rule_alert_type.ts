@@ -257,35 +257,16 @@ export const signalRulesAlertType = ({
           }
 
           logger.debug(
-            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", output_index: "${outputIndex}"`
-        // we have received a successful response from the pull/push mechanism
-        
-          logger.debug(
             `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
           await writeCurrentStatusSucceeded({
             services,
             currentStatusSavedObject,
-            bulkCreateTimes,
-            searchAfterTimes: [Number(end - start).toFixed(2), ...searchAfterTimes],
-            lastLookBackDate: lastLookBackDate?.toISOString(),
+            bulkCreateTimes: creationSucceeded.bulkCreateTimes,
+            searchAfterTimes: [...creationSucceeded.searchAfterTimes],
+            lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString(),
           });
         } else {
-            await writeSignalRuleExceptionToSavedObject({
-              name,
-              alertId,
-              currentStatusSavedObject,
-              logger,
-              message: `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
-              services,
-              ruleStatusSavedObjects,
-              ruleId: ruleId ?? '(unknown rule id)',
-              bulkCreateTimes,
-              searchAfterTimes: [Number(end - start).toFixed(2), ...searchAfterTimes],
-              lastLookBackDate: lastLookBackDate?.toISOString(),
-            });
-          }
-        } catch (err) {
           await writeSignalRuleExceptionToSavedObject({
             name,
             alertId,
@@ -300,16 +281,19 @@ export const signalRulesAlertType = ({
             lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString(),
           });
         }
-      } catch (error) {
+      } catch (err) {
         await writeSignalRuleExceptionToSavedObject({
           name,
           alertId,
           currentStatusSavedObject,
           logger,
-          message: error?.message ?? '(no error message given)',
+          message: `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
           services,
           ruleStatusSavedObjects,
           ruleId: ruleId ?? '(unknown rule id)',
+          bulkCreateTimes: creationSucceeded.bulkCreateTimes,
+          searchAfterTimes: [...creationSucceeded.searchAfterTimes],
+          lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString(),
         });
       }
     },
