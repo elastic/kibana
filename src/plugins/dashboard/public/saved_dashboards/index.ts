@@ -16,30 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { searchSourceMock } from '../../../../../../../plugins/data/public/mocks';
-import { SavedObjectDashboard } from '../../../../../../../plugins/dashboard/public/';
-
-export function getSavedDashboardMock(
-  config?: Partial<SavedObjectDashboard>
-): SavedObjectDashboard {
-  return {
-    id: '123',
-    title: 'my dashboard',
-    panelsJSON: '[]',
-    searchSource: searchSourceMock,
-    copyOnSave: false,
-    timeRestore: false,
-    timeTo: 'now',
-    timeFrom: 'now-15m',
-    optionsJSON: '',
-    lastSavedTitle: '',
-    destroy: () => {},
-    save: () => {
-      return Promise.resolve('123');
-    },
-    getQuery: () => ({ query: '', language: 'kuery' }),
-    getFilters: () => [],
-    ...config,
-  } as SavedObjectDashboard;
-}
+export * from './saved_dashboard_references';
+export * from './saved_dashboard';
+export * from './saved_dashboards';

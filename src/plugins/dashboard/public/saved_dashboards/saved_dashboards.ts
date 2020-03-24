@@ -17,29 +17,22 @@
  * under the License.
  */
 
-import { searchSourceMock } from '../../../../../../../plugins/data/public/mocks';
-import { SavedObjectDashboard } from '../../../../../../../plugins/dashboard/public/';
+import { SavedObjectsClientContract, ChromeStart, OverlayStart } from 'kibana/public';
+import { IndexPatternsContract } from '../../../../plugins/data/public';
+import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
+import { createSavedDashboardClass } from './saved_dashboard';
 
-export function getSavedDashboardMock(
-  config?: Partial<SavedObjectDashboard>
-): SavedObjectDashboard {
-  return {
-    id: '123',
-    title: 'my dashboard',
-    panelsJSON: '[]',
-    searchSource: searchSourceMock,
-    copyOnSave: false,
-    timeRestore: false,
-    timeTo: 'now',
-    timeFrom: 'now-15m',
-    optionsJSON: '',
-    lastSavedTitle: '',
-    destroy: () => {},
-    save: () => {
-      return Promise.resolve('123');
-    },
-    getQuery: () => ({ query: '', language: 'kuery' }),
-    getFilters: () => [],
-    ...config,
-  } as SavedObjectDashboard;
+interface Services {
+  savedObjectsClient: SavedObjectsClientContract;
+  indexPatterns: IndexPatternsContract;
+  chrome: ChromeStart;
+  overlays: OverlayStart;
+}
+
+/**
+ * @param services
+ */
+export function createSavedDashboardLoader(services: Services) {
+  const SavedDashboard = createSavedDashboardClass(services);
+  return new SavedObjectLoader(SavedDashboard, services.savedObjectsClient, services.chrome);
 }
