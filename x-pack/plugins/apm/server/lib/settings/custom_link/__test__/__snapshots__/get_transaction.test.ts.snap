@@ -8,6 +8,11 @@ Object {
         "filter": Array [
           Object {
             "term": Object {
+              "processor.event": "transaction",
+            },
+          },
+          Object {
+            "term": Object {
               "service.name": "foo",
             },
           },
@@ -41,7 +46,13 @@ Object {
   "body": Object {
     "query": Object {
       "bool": Object {
-        "filter": Array [],
+        "filter": Array [
+          Object {
+            "term": Object {
+              "processor.event": "transaction",
+            },
+          }
+        ],
       },
     },
   },
@@ -57,6 +68,11 @@ Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
+          Object {
+            "term": Object {
+              "processor.event": "transaction",
+            },
+          },
           Object {
             "term": Object {
               "service.name": "foo",

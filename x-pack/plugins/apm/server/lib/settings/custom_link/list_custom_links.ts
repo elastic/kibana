@@ -3,20 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { FilterOptions } from '../../../../common/custom_link_filter_options';
+import * as t from 'io-ts';
 import { Setup } from '../../helpers/setup_request';
-import { CustomLink } from './custom_link_types';
+import { CustomLink, convertTo } from './custom_link_types';
+import { CustomLinkES } from './create_custom_link_index';
+import { FilterOptionsRt } from '../../../routes/settings/custom_link';
 
 export async function listCustomLinks({
   setup,
   filters = {}
 }: {
   setup: Setup;
-  filters?: FilterOptions;
-}) {
+  filters?: t.TypeOf<typeof FilterOptionsRt>;
+}): Promise<CustomLink[]> {
   const { internalClient, indices } = setup;
-
   const esFilters = Object.entries(filters).map(([key, value]) => {
     return {
       bool: {
@@ -47,9 +47,12 @@ export async function listCustomLinks({
       ]
     }
   };
-  const resp = await internalClient.search<CustomLink>(params);
-  return resp.hits.hits.map(item => ({
-    id: item._id,
-    ...item._source
-  }));
+  const resp = await internalClient.search<CustomLinkES>(params);
+  const customLinks = convertTo(
+    resp.hits.hits.map(item => ({
+      id: item._id,
+      ...item._source
+    }))
+  );
+  return customLinks;
 }
