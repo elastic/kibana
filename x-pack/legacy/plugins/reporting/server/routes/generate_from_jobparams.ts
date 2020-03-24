@@ -10,7 +10,7 @@ import { Legacy } from 'kibana';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
 import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingConfig, ReportingSetupDeps } from '../types';
+import { ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import {
   GetRouteConfigFactoryFn,
@@ -22,7 +22,6 @@ import { HandlerErrorFunction, HandlerFunction } from './types';
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerGenerateFromJobParams(
-  config: ReportingConfig,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   handler: HandlerFunction,
@@ -31,7 +30,7 @@ export function registerGenerateFromJobParams(
 ) {
   const getRouteConfig = () => {
     const getOriginalRouteConfig: GetRouteConfigFactoryFn = getRouteConfigFactoryReportingPre(
-      config,
+      server,
       plugins,
       logger
     );

@@ -82,7 +82,6 @@ describe('Security Plugin', () => {
                 },
                 "authz": Object {
                   "actions": Actions {
-                    "allHack": "allHack:",
                     "api": ApiActions {
                       "prefix": "api:version:",
                     },

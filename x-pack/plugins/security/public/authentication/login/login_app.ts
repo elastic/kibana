@@ -5,13 +5,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, AppMountParameters, HttpSetup } from 'src/core/public';
+import {
+  StartServicesAccessor,
+  AppMountParameters,
+  ApplicationSetup,
+  HttpSetup,
+} from 'src/core/public';
 import { ConfigType } from '../../config';
 
 interface CreateDeps {
-  application: CoreSetup['application'];
+  application: ApplicationSetup;
   http: HttpSetup;
-  getStartServices: CoreSetup['getStartServices'];
+  getStartServices: StartServicesAccessor;
   config: Pick<ConfigType, 'loginAssistanceMessage'>;
 }
 
