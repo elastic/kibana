@@ -14,6 +14,7 @@ import { WhitelistRule, WhitelistSet } from '../../common/types';
 import { EndpointAppContext } from '../types';
 
 const whitelistIdx = 'whitelist'; // TODO: change this
+const allowlistBaseRoute = '/api/endpoint/allowlist';
 let whitelistArtifactCache: Buffer = Buffer.from([]);
 
 /**
@@ -27,7 +28,7 @@ export function registerWhitelistRoutes(
   hydrateWhitelistCache(cl);
   router.get(
     {
-      path: '/api/endpoint/whitelist',
+      path: allowlistBaseRoute,
       validate: {},
       options: { authRequired: true },
     },
@@ -45,7 +46,7 @@ export function registerWhitelistRoutes(
 
   router.get(
     {
-      path: '/api/endpoint/whitelist/download/{hash}',
+      path: `${allowlistBaseRoute}/download/{hash}`,
       validate: {
         params: schema.object({
           hash: schema.string(),
@@ -58,7 +59,7 @@ export function registerWhitelistRoutes(
 
   router.post(
     {
-      path: '/api/endpoint/whitelist',
+      path: allowlistBaseRoute,
       validate: {
         body: schema.object({
           comment: schema.maybe(schema.string()), // Optional comment explaining reason for whitelist
@@ -76,7 +77,7 @@ export function registerWhitelistRoutes(
 
   router.delete(
     {
-      path: '/api/endpoint/whitelist',
+      path: allowlistBaseRoute,
       validate: {
         body: schema.object({
           whitelist_id: schema.string(),
@@ -231,7 +232,7 @@ async function getWhitelistManifest(ctx) {
     manifestVersion: '1.0.0',
     artifacts: {
       'global-whitelist': {
-        url: `api/endpoint/whitelist/download/${hash}`,
+        url: `${allowlistBaseRoute}/download/${hash}`,
         sha256: hash,
         size: whitelistArtifactCache.byteLength,
         encoding: 'xz',

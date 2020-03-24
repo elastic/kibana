@@ -18,7 +18,7 @@ export default function({ getService }: FtrProviderContext) {
       afterEach(() => esArchiver.unload('endpoint/whitelist/api_feature'));
 
       it('should return whitelist rules when the GET method is called', async () => {
-        const resp = await supertest.get('/api/endpoint/whitelist').set('kbn-xsrf', 'xxx');
+        const resp = await supertest.get('/api/endpoint/allowlist').set('kbn-xsrf', 'xxx');
         expect(resp.statusCode).to.equal(200);
         const responseBody = JSON.parse(resp.text);
         expect(responseBody.entries.length).to.equal(sizeOfFixture);
@@ -36,7 +36,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should respond with a bad request if an invalid whitelist hash is given for download', async () => {
         const resp = await supertest
-          .get('/api/endpoint/whitelist/download/1a2b3c4d5e6') // A fake hash
+          .get('/api/endpoint/allowlist/download/1a2b3c4d5e6') // A fake hash
           .set('kbn-xsrf', 'xxx');
         expect(resp.statusCode).to.equal(400);
       });
@@ -45,7 +45,7 @@ export default function({ getService }: FtrProviderContext) {
         let whitelistManifestSize: number = 0;
         let whitelistHash: string = '';
         await supertest
-          .post('/api/endpoint/whitelist')
+          .post('/api/endpoint/allowlist')
           .set('kbn-xsrf', 'xxx')
           .send({ event_types: ['processEvent', 'malware'], file_path: 'you havent seen yet' })
           .then(function(res: { statusCode: any; text: string }) {
@@ -55,7 +55,7 @@ export default function({ getService }: FtrProviderContext) {
           })
           .then(async function() {
             await supertest
-              .get('/api/endpoint/whitelist')
+              .get('/api/endpoint/allowlist')
               .set('kbn-xsrf', 'xxx')
               .then(function(getResp: { text: string }) {
                 const getRespBody = JSON.parse(getResp.text);
@@ -78,7 +78,7 @@ export default function({ getService }: FtrProviderContext) {
           })
           .then(async function() {
             await supertest
-              .get(`/api/endpoint/whitelist/download/${whitelistHash}`)
+              .get(`/api/endpoint/allowlist/download/${whitelistHash}`)
               .set('kbn-xsrf', 'xxx')
               .then(function(downloadResp) {
                 const dl: Buffer = downloadResp.body;
@@ -95,7 +95,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should insert multiple whilelist rules into elasticsearch from a single request properly', async () => {
         await supertest
-          .post('/api/endpoint/whitelist')
+          .post('/api/endpoint/allowlist')
           .set('kbn-xsrf', 'xxx')
           .send({
             event_types: ['malware'],
@@ -110,7 +110,7 @@ export default function({ getService }: FtrProviderContext) {
           })
           .then(async function() {
             await supertest
-              .get('/api/endpoint/whitelist')
+              .get('/api/endpoint/allowlist')
               .set('kbn-xsrf', 'xxx')
               .then(function(getResp: { text: string }) {
                 const getRespBody = JSON.parse(getResp.text);
@@ -121,7 +121,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should insert a whilelist rule with unicode into elasticsearch properly', async () => {
         await supertest
-          .post('/api/endpoint/whitelist')
+          .post('/api/endpoint/allowlist')
           .set('kbn-xsrf', 'xxx')
           .send({
             event_types: ['processEvent', 'mȀlware'],
@@ -138,7 +138,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should delete a whitelist rule properly', async () => {
         let createdID: string = '';
         await supertest
-          .post('/api/endpoint/whitelist') // Creates a rule
+          .post('/api/endpoint/allowlist') // Creates a rule
           .set('kbn-xsrf', 'xxx')
           .send({
             event_types: ['malware'],
@@ -152,7 +152,7 @@ export default function({ getService }: FtrProviderContext) {
           })
           .then(async function() {
             await supertest
-              .delete('/api/endpoint/whitelist') // Deletes a rule
+              .delete('/api/endpoint/allowlist') // Deletes a rule
               .set('kbn-xsrf', 'xxx')
               .send({
                 whitelist_id: createdID,
@@ -163,7 +163,7 @@ export default function({ getService }: FtrProviderContext) {
           })
           .then(async function() {
             await supertest
-              .get('/api/endpoint/whitelist') // Checks that the rule was deleted
+              .get('/api/endpoint/allowlist') // Checks that the rule was deleted
               .set('kbn-xsrf', 'xxx')
               .then(function(getResp) {
                 const getRespBody = JSON.parse(getResp.text);
@@ -175,7 +175,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should handle a request to delete a whitelist rule that does not exist', async () => {
         await supertest
-          .delete('/api/endpoint/whitelist')
+          .delete('/api/endpoint/allowlist')
           .set('kbn-xsrf', 'xxx')
           .send({
             whitelist_id: 'xyz2345', // does not exist
