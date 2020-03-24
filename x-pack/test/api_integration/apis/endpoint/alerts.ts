@@ -320,7 +320,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.result_from_index).to.eql(0);
       });
 
-      it('should return alert details by id', async () => {
+      it('should return alert details by id, getting last alert', async () => {
         const documentID = 'zbNm0HABdD75WLjLYgcB';
         const prevDocumentID = '2rNm0HABdD75WLjLYgcU';
         const { body } = await supertest
@@ -330,6 +330,18 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.id).to.eql(documentID);
         expect(body.prev).to.eql(`/api/endpoint/alerts/${prevDocumentID}`);
         expect(body.next).to.eql(null); // last alert, no more beyond this
+      });
+
+      it('should return alert details by id, getting first alert', async () => {
+        const documentID = 'p7Nm0HABdD75WLjLYghv';
+        const nextDocumentID = 'mbNm0HABdD75WLjLYgho';
+        const { body } = await supertest
+          .get(`/api/endpoint/alerts/${documentID}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.id).to.eql(documentID);
+        expect(body.next).to.eql(`/api/endpoint/alerts/${nextDocumentID}`);
+        expect(body.prev).to.eql(null); // first alert, no more before this
       });
 
       it('should return 404 when alert is not found', async () => {

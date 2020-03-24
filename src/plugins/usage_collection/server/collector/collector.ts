@@ -17,15 +17,14 @@
  * under the License.
  */
 
-import { Logger } from 'kibana/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { Logger, APICaller } from 'kibana/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
 export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
-  fetch: (callCluster: CallCluster) => Promise<T> | T;
+  fetch: (callCluster: APICaller) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for

@@ -5,11 +5,12 @@
  */
 
 import Boom from 'boom';
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import { ResponseToolkit } from 'hapi';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
-import { ExportTypesRegistry, ServerFacade } from '../../../types';
+import { ExportTypesRegistry } from '../../../types';
 import { jobsQueryFactory } from '../../lib/jobs_query';
+import { ReportingConfig } from '../../types';
 import { getDocumentPayloadFactory } from './get_document_payload';
 
 interface JobResponseHandlerParams {
@@ -20,13 +21,13 @@ interface JobResponseHandlerOpts {
   excludeContent?: boolean;
 }
 
-export function jobResponseHandlerFactory(
-  server: ServerFacade,
+export function downloadJobResponseHandlerFactory(
+  config: ReportingConfig,
   elasticsearch: ElasticsearchServiceSetup,
   exportTypesRegistry: ExportTypesRegistry
 ) {
-  const jobsQuery = jobsQueryFactory(server, elasticsearch);
-  const getDocumentPayload = getDocumentPayloadFactory(server, exportTypesRegistry);
+  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+  const getDocumentPayload = getDocumentPayloadFactory(exportTypesRegistry);
 
   return function jobResponseHandler(
     validJobTypes: string[],
@@ -36,6 +37,7 @@ export function jobResponseHandlerFactory(
     opts: JobResponseHandlerOpts = {}
   ) {
     const { docId } = params;
+    // TODO: async/await
     return jobsQuery.get(user, docId, { includeContent: !opts.excludeContent }).then(doc => {
       if (!doc) return Boom.notFound();
 
@@ -65,5 +67,36 @@ export function jobResponseHandlerFactory(
 
       return response; // Hapi
     });
+  };
+}
+
+export function deleteJobResponseHandlerFactory(
+  config: ReportingConfig,
+  elasticsearch: ElasticsearchServiceSetup
+) {
+  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+
+  return async function deleteJobResponseHander(
+    validJobTypes: string[],
+    user: any,
+    h: ResponseToolkit,
+    params: JobResponseHandlerParams
+  ) {
+    const { docId } = params;
+    const doc = await jobsQuery.get(user, docId, { includeContent: false });
+    if (!doc) return Boom.notFound();
+
+    const { jobtype: jobType } = doc._source;
+    if (!validJobTypes.includes(jobType)) {
+      return Boom.unauthorized(`Sorry, you are not authorized to delete ${jobType} reports`);
+    }
+
+    try {
+      const docIndex = doc._index;
+      await jobsQuery.delete(docIndex, docId);
+      return h.response({ deleted: true });
+    } catch (error) {
+      return Boom.boomify(error, { statusCode: error.statusCode });
+    }
   };
 }

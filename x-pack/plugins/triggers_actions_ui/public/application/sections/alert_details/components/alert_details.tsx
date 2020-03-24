@@ -17,7 +17,6 @@ import {
   EuiBadge,
   EuiPage,
   EuiPageContentBody,
-  EuiButtonEmpty,
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
@@ -33,6 +32,7 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
+import { ViewInApp } from './view_in_app';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -87,28 +87,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="pencil">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-                      defaultMessage="Edit"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="popout">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-                      defaultMessage="View in app"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="menuLeft">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.activityLogButtonLabel"
-                      defaultMessage="Activity Log"
-                    />
-                  </EuiButtonEmpty>
+                  <ViewInApp alert={alert} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>

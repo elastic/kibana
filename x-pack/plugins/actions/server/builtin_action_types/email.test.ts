@@ -12,7 +12,7 @@ import { Logger } from '../../../../../src/core/server';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
-import { configUtilsMock } from '../actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { createActionTypeRegistry } from './index.test';
 import { sendEmail } from './lib/send_email';
@@ -37,13 +37,10 @@ const services = {
 let actionType: ActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
-beforeAll(() => {
-  const { actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
-});
-
 beforeEach(() => {
   jest.resetAllMocks();
+  const { actionTypeRegistry } = createActionTypeRegistry();
+  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -128,7 +125,7 @@ describe('config validation', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         isWhitelistedHostname: hostname => hostname === NODEMAILER_AOL_SERVICE_HOST,
       },
     });
@@ -187,12 +184,14 @@ describe('secrets validation', () => {
     expect(validateSecrets(actionType, secrets)).toEqual(secrets);
   });
 
-  test('secrets validation fails when secrets is not valid', () => {
-    expect(() => {
-      validateSecrets(actionType, {});
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [user]: expected value of type [string] but got [undefined]"`
-    );
+  test('secrets validation succeeds when secrets props are null/undefined', () => {
+    const secrets: Record<string, any> = {
+      user: null,
+      password: null,
+    };
+    expect(validateSecrets(actionType, {})).toEqual(secrets);
+    expect(validateSecrets(actionType, { user: null })).toEqual(secrets);
+    expect(validateSecrets(actionType, { password: null })).toEqual(secrets);
   });
 });
 

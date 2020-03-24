@@ -18,20 +18,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
 
-  async function createAlert(alertTypeId?: string, name?: string, params?: any) {
+  async function createAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
       .post(`/api/alert`)
       .set('kbn-xsrf', 'foo')
       .send({
         enabled: true,
-        name: name ?? generateUniqueKey(),
+        name: generateUniqueKey(),
         tags: ['foo', 'bar'],
-        alertTypeId: alertTypeId ?? 'test.noop',
+        alertTypeId: 'test.noop',
         consumer: 'test',
         schedule: { interval: '1m' },
         throttle: '1m',
         actions: [],
-        params: params ?? {},
+        params: {},
+        ...overwrites,
       })
       .expect(200);
     return createdAlert;
@@ -62,7 +63,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await fieldOptions[1].click();
       // need this two out of popup clicks to close them
       await nameInput.click();
-      await testSubjects.click('intervalInput');
 
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
@@ -83,7 +83,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('slackAddVariableButton');
       const variableMenuButton = await testSubjects.find('variableMenuButton-0');
       await variableMenuButton.click();
-      await find.clickByCssSelector('[data-test-subj="saveAlertButton"]');
+      await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Saved '${alertName}'`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -96,6 +96,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           interval: '1m',
         },
       ]);
+    });
+
+    it('should display alerts in alphabetical order', async () => {
+      const uniqueKey = generateUniqueKey();
+      await createAlert({ name: 'b', tags: [uniqueKey] });
+      await createAlert({ name: 'c', tags: [uniqueKey] });
+      await createAlert({ name: 'a', tags: [uniqueKey] });
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(uniqueKey);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.have.length(3);
+      expect(searchResults[0].name).to.eql('a');
+      expect(searchResults[1].name).to.eql('b');
+      expect(searchResults[2].name).to.eql('c');
     });
 
     it('should search for alert', async () => {
@@ -115,16 +131,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should edit an alert', async () => {
-      const createdAlert = await createAlert('.index-threshold', 'new alert', {
-        aggType: 'count',
-        termSize: 5,
-        thresholdComparator: '>',
-        timeWindowSize: 5,
-        timeWindowUnit: 'm',
-        groupBy: 'all',
-        threshold: [1000, 5000],
-        index: ['.kibana_1'],
-        timeField: 'alert',
+      const createdAlert = await createAlert({
+        alertTypeId: '.index-threshold',
+        name: 'new alert',
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        },
       });
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -165,6 +185,147 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
+    it('should set an alert throttle', async () => {
+      const alertName = `edit throttle ${generateUniqueKey()}`;
+      const createdAlert = await createAlert({
+        alertTypeId: '.index-threshold',
+        name: alertName,
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        },
+      });
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.eql([
+        {
+          name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Index Threshold',
+          interval: '1m',
+        },
+      ]);
+
+      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLink[0].click();
+
+      const throttleInputToSetInitialValue = await testSubjects.find('throttleInput');
+      await throttleInputToSetInitialValue.click();
+      await throttleInputToSetInitialValue.clearValue();
+      await throttleInputToSetInitialValue.type('1');
+
+      await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+
+      expect(await pageObjects.common.closeToast()).to.eql(`Updated '${createdAlert.name}'`);
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      await (await testSubjects.findAll('alertsTableCell-editLink'))[0].click();
+      const throttleInput = await testSubjects.find('throttleInput');
+      expect(await throttleInput.getAttribute('value')).to.eql('1');
+    });
+
+    it('should unset an alert throttle', async () => {
+      const alertName = `edit throttle ${generateUniqueKey()}`;
+      const createdAlert = await createAlert({
+        alertTypeId: '.index-threshold',
+        name: alertName,
+        throttle: '10m',
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        },
+      });
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.eql([
+        {
+          name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Index Threshold',
+          interval: '1m',
+        },
+      ]);
+
+      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLink[0].click();
+
+      const throttleInputToUnsetValue = await testSubjects.find('throttleInput');
+
+      expect(await throttleInputToUnsetValue.getAttribute('value')).to.eql('10');
+      await throttleInputToUnsetValue.click();
+      await throttleInputToUnsetValue.clearValueWithKeyboard();
+
+      expect(await throttleInputToUnsetValue.getAttribute('value')).to.eql('');
+
+      await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+
+      expect(await pageObjects.common.closeToast()).to.eql(`Updated '${createdAlert.name}'`);
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      await (await testSubjects.findAll('alertsTableCell-editLink'))[0].click();
+      const throttleInput = await testSubjects.find('throttleInput');
+      expect(await throttleInput.getAttribute('value')).to.eql('');
+    });
+
+    it('should reset alert when canceling an edit', async () => {
+      const createdAlert = await createAlert({
+        alertTypeId: '.index-threshold',
+        name: generateUniqueKey(),
+        params: {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        },
+      });
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLink[0].click();
+
+      const updatedAlertName = 'Changed Alert Name';
+      const nameInputToUpdate = await testSubjects.find('alertNameInput');
+      await nameInputToUpdate.click();
+      await nameInputToUpdate.clearValue();
+      await nameInputToUpdate.type(updatedAlertName);
+
+      await testSubjects.click('cancelSaveEditedAlertButton');
+      await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
+
+      const editLinkPostCancel = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLinkPostCancel[0].click();
+
+      const nameInputAfterCancel = await testSubjects.find('alertNameInput');
+      const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
+      expect(textAfterCancel).to.eql(createdAlert.name);
+    });
+
     it('should search for tags', async () => {
       const createdAlert = await createAlert();
       await pageObjects.common.navigateToApp('triggersActions');
@@ -179,6 +340,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           interval: '1m',
         },
       ]);
+    });
+
+    it('should display an empty list when search removes all alerts', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(`An Alert That For Sure Doesn't Exist!`);
+
+      expect(await pageObjects.triggersActionsUI.isAlertsListDisplayed()).to.eql(true);
     });
 
     it('should disable single alert', async () => {
@@ -266,6 +434,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should delete single alert', async () => {
+      await createAlert();
       const createdAlert = await createAlert();
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -273,10 +442,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('deleteAlert');
-      const emptyPrompt = await find.byCssSelector(
-        '[data-test-subj="createFirstAlertEmptyPrompt"]'
-      );
-      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
+      await testSubjects.existOrFail('deleteIdsConfirmation');
+      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql('Deleted 1 alert');
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterDelete.length).to.eql(0);
     });
 
     it('should mute all selection', async () => {
@@ -385,11 +560,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkAction');
 
       await testSubjects.click('deleteAll');
+      await testSubjects.existOrFail('deleteIdsConfirmation');
+      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      const emptyPrompt = await find.byCssSelector(
-        '[data-test-subj="createFirstAlertEmptyPrompt"]'
-      );
-      expect(await emptyPrompt.elementHasClass('euiEmptyPrompt')).to.be(true);
+      await pageObjects.common.closeToast();
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterDelete.length).to.eql(0);
     });
   });
 };

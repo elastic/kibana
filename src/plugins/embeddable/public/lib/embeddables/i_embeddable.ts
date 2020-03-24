@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { UiActionsDynamicActionManager } from '../../../../../plugins/ui_actions/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
@@ -29,12 +30,11 @@ export interface EmbeddableInput {
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
-  isEmptyState?: boolean;
 
   /**
    * Reserved key for `ui_actions` events.
    */
-  events?: unknown;
+  events?: Array<{ eventId: string }>;
 
   /**
    * List of action IDs that this embeddable should not render.
@@ -82,6 +82,19 @@ export interface IEmbeddable<
    * Panel States to a child embeddable instance.
    **/
   readonly id: string;
+
+  /**
+   * Unique ID an embeddable is assigned each time it is initialized. This ID
+   * is different for different instances of the same embeddable. For example,
+   * if the same dashboard is rendered twice on the screen, all embeddable
+   * instances will have a unique `runtimeId`.
+   */
+  readonly runtimeId?: number;
+
+  /**
+   * Default implementation of dynamic action API for embeddables.
+   */
+  dynamicActions?: UiActionsDynamicActionManager;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to
