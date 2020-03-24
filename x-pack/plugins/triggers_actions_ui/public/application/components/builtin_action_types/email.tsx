@@ -38,7 +38,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.selectMessageText',
       {
-        defaultMessage: 'Send email from your server.',
+        defaultMessage: 'Send email from your SMTP server.',
       }
     ),
     actionTypeTitle: i18n.translate(
