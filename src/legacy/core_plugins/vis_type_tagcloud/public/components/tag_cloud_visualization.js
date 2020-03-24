@@ -79,17 +79,10 @@ export function createTagCloudVisualization({ colors }) {
       render(<Label ref={this._label} />, this._labelNode);
     }
 
-    async render(data, visParams, status) {
-      if (!(status.resize || status.data || status.params)) return;
-
-      if (status.params || status.data) {
-        this._updateParams(visParams);
-        this._updateData(data);
-      }
-
-      if (status.resize) {
-        this._resize();
-      }
+    async render(data, visParams) {
+      this._updateParams(visParams);
+      this._updateData(data);
+      this._resize();
 
       await this._renderComplete$.pipe(take(1)).toPromise();
 
