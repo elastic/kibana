@@ -35,6 +35,7 @@ import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_lim
 import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
+import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -78,18 +79,6 @@ export interface RecognizeResult {
   query: any;
   description: string;
   logo: { icon: string } | null;
-}
-
-interface JobStat {
-  id: string;
-  earliestTimestampMs: number;
-  latestTimestampMs: number;
-  latestResultsTimestampMs: number;
-}
-
-interface JobExistResult {
-  jobsExist: boolean;
-  jobs: JobStat[];
 }
 
 interface ObjectExistResult {

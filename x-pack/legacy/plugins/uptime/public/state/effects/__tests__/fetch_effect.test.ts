@@ -7,6 +7,9 @@
 import { call, put } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../fetch_effect';
 import { indexStatusAction } from '../../actions';
+import { HttpFetchError } from '../../../../../../../../src/core/public/http/http_fetch_error';
+import { StatesIndexStatus } from '../../../../common/runtime_types';
+import { fetchIndexStatus } from '../../api';
 
 describe('fetch saga effect factory', () => {
   const asyncAction = indexStatusAction;
@@ -15,7 +18,7 @@ describe('fetch saga effect factory', () => {
 
   it('works with success workflow', () => {
     const indexStatusResult = { indexExists: true, docCount: 2712532 };
-    const fetchStatus = async () => {
+    const fetchStatus = async (): Promise<StatesIndexStatus> => {
       return { indexExists: true, docCount: 2712532 };
     };
     fetchEffect = fetchEffectFactory(
@@ -25,6 +28,7 @@ describe('fetch saga effect factory', () => {
     )(calledAction);
     let next = fetchEffect.next();
 
+    // @ts-ignore TODO, dig deeper for TS issues here
     expect(next.value).toEqual(call(fetchStatus, calledAction.payload));
 
     const successResult = put(asyncAction.success(indexStatusResult));
@@ -35,18 +39,21 @@ describe('fetch saga effect factory', () => {
   });
 
   it('works with error workflow', () => {
-    const indexStatusResultError = new Error('no heartbeat index found');
-    const fetchStatus = async () => {
-      return indexStatusResultError;
-    };
+    const indexStatusResultError = new HttpFetchError(
+      'No heartbeat index found.',
+      'error',
+      {} as any
+    );
+
     fetchEffect = fetchEffectFactory(
-      fetchStatus,
+      fetchIndexStatus,
       asyncAction.success,
       asyncAction.fail
     )(calledAction);
     let next = fetchEffect.next();
 
-    expect(next.value).toEqual(call(fetchStatus, calledAction.payload));
+    // @ts-ignore TODO, dig deeper for TS issues here
+    expect(next.value).toEqual(call(fetchIndexStatus, calledAction.payload));
 
     const errorResult = put(asyncAction.fail(indexStatusResultError));
 
@@ -56,18 +63,21 @@ describe('fetch saga effect factory', () => {
   });
 
   it('works with throw error workflow', () => {
-    const unExpectedError = new Error('no url found, so throw error');
-    const fetchStatus = async () => {
-      return await fetch('/some/url');
-    };
+    const unExpectedError = new HttpFetchError(
+      'No url found for the call, so throw error.',
+      'error',
+      {} as any
+    );
+
     fetchEffect = fetchEffectFactory(
-      fetchStatus,
+      fetchIndexStatus,
       asyncAction.success,
       asyncAction.fail
     )(calledAction);
     let next = fetchEffect.next();
 
-    expect(next.value).toEqual(call(fetchStatus, calledAction.payload));
+    // @ts-ignore TODO, dig deeper for TS issues here
+    expect(next.value).toEqual(call(fetchIndexStatus, calledAction.payload));
 
     const unexpectedErrorResult = put(asyncAction.fail(unExpectedError));
 
