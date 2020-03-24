@@ -336,61 +336,6 @@ export const ComponentStrings = {
         description: 'This tab contains the settings for how data is displayed in a Canvas element',
       }),
   },
-  SavedElementsModal: {
-    getSavedElementsModalCloseButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonLabel', {
-        defaultMessage: 'Close',
-      }),
-    getEditElementTitle: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.editElementTitle', {
-        defaultMessage: 'Edit element',
-      }),
-    getDeleteElementTitle: (elementName: string) =>
-      i18n.translate('xpack.canvas.savedElementsModal.deleteElementTitle', {
-        defaultMessage: `Delete element '{elementName}'?`,
-        values: {
-          elementName,
-        },
-      }),
-    getDeleteElementDescription: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.deleteElementDescription', {
-        defaultMessage: 'Are you sure you want to delete this element?',
-      }),
-    getCancelButtonLabel: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.cancelButtonLabel', {
-        defaultMessage: 'Cancel',
-      }),
-    getDeleteButtonLabel: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.deleteButtonLabel', {
-        defaultMessage: 'Delete',
-      }),
-    getAddNewElementTitle: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.addNewElementTitle', {
-        defaultMessage: 'Add new elements',
-      }),
-    getAddNewElementDescription: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.addNewElementDescription', {
-        defaultMessage: 'Group and save workpad elements to create new elements',
-      }),
-    getFindElementPlaceholder: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.findElementPlaceholder', {
-        defaultMessage: 'Find element',
-      }),
-    getElementsTitle: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.elementsTitle', {
-        defaultMessage: 'Elements',
-        description: 'Title for the "Elements" tab when adding a new element',
-      }),
-    getMyElementsTitle: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.myElementsTitle', {
-        defaultMessage: 'My elements',
-        description: 'Title for the "My elements" tab when adding a new element',
-      }),
-    getModalTitle: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.modalTitle', {
-        defaultMessage: 'My elements',
-      }),
-  },
   Error: {
     getDescription: () =>
       i18n.translate('xpack.canvas.errorComponent.description', {
@@ -639,6 +584,61 @@ export const ComponentStrings = {
     getDeletePageTooltip: () =>
       i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageTooltip', {
         defaultMessage: 'Delete',
+      }),
+  },
+  SavedElementsModal: {
+    getSavedElementsModalCloseButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonLabel', {
+        defaultMessage: 'Close',
+      }),
+    getEditElementTitle: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.editElementTitle', {
+        defaultMessage: 'Edit element',
+      }),
+    getDeleteElementTitle: (elementName: string) =>
+      i18n.translate('xpack.canvas.savedElementsModal.deleteElementTitle', {
+        defaultMessage: `Delete element '{elementName}'?`,
+        values: {
+          elementName,
+        },
+      }),
+    getDeleteElementDescription: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.deleteElementDescription', {
+        defaultMessage: 'Are you sure you want to delete this element?',
+      }),
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getDeleteButtonLabel: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.deleteButtonLabel', {
+        defaultMessage: 'Delete',
+      }),
+    getAddNewElementTitle: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.addNewElementTitle', {
+        defaultMessage: 'Add new elements',
+      }),
+    getAddNewElementDescription: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.addNewElementDescription', {
+        defaultMessage: 'Group and save workpad elements to create new elements',
+      }),
+    getFindElementPlaceholder: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.findElementPlaceholder', {
+        defaultMessage: 'Find element',
+      }),
+    getElementsTitle: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.elementsTitle', {
+        defaultMessage: 'Elements',
+        description: 'Title for the "Elements" tab when adding a new element',
+      }),
+    getMyElementsTitle: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.myElementsTitle', {
+        defaultMessage: 'My elements',
+        description: 'Title for the "My elements" tab when adding a new element',
+      }),
+    getModalTitle: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.modalTitle', {
+        defaultMessage: 'My elements',
       }),
   },
   ShareWebsiteFlyout: {
