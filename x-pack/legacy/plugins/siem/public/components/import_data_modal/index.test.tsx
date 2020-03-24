@@ -7,8 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { ImportDataModalComponent } from './index';
-
-jest.mock('../../../../../lib/kibana');
+jest.mock('../../lib/kibana');
 
 describe('ImportDataModal', () => {
   test('renders correctly against snapshot', () => {
