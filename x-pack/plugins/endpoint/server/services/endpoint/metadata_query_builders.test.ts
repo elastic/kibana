@@ -10,19 +10,24 @@ import {
   kibanaRequestToMetadataGetESQuery,
 } from './metadata_query_builders';
 import { IndexPatternService } from '../../../../ingest_manager/server';
-import { EndpointAppConstants } from '../../../common/types';
 import { SavedObjectsClientContract } from 'kibana/server';
 
 export const MetadataIndexPattern = 'metadata-endpoint-*';
 
 export class FakeIndexPatternService implements IndexPatternService {
+  constructor(private readonly indexPattern: string) {}
+
+  static buildMetadataService() {
+    return new FakeIndexPatternService(MetadataIndexPattern);
+  }
+
   async get(
     savedObjectsClient: SavedObjectsClientContract,
     pkgName: string,
     datasetPath: string,
     version?: string
   ): Promise<string | undefined> {
-    return MetadataIndexPattern;
+    return this.indexPattern;
   }
 }
 
@@ -35,7 +40,7 @@ describe('query builder', () => {
       const query = await kibanaRequestToMetadataListESQuery(
         mockRequest,
         {
-          ingestManager: { indexPatternService: new FakeIndexPatternService() },
+          ingestManager: { indexPatternService: FakeIndexPatternService.buildMetadataService() },
           logFactory: loggingServiceMock.create(),
           config: () => Promise.resolve(EndpointConfigSchema.validate({})),
         },
@@ -47,7 +52,7 @@ describe('query builder', () => {
             match_all: {},
           },
           collapse: {
-            field: 'host.id.keyword',
+            field: 'host.id',
             inner_hits: {
               name: 'most_recent',
               size: 1,
@@ -57,7 +62,7 @@ describe('query builder', () => {
           aggs: {
             total: {
               cardinality: {
-                field: 'host.id.keyword',
+                field: 'host.id',
               },
             },
           },
@@ -86,7 +91,7 @@ describe('query builder', () => {
       const query = await kibanaRequestToMetadataListESQuery(
         mockRequest,
         {
-          ingestManager: { indexPatternService: new FakeIndexPatternService() },
+          ingestManager: { indexPatternService: FakeIndexPatternService.buildMetadataService() },
           logFactory: loggingServiceMock.create(),
           config: () => Promise.resolve(EndpointConfigSchema.validate({})),
         },
@@ -111,7 +116,7 @@ describe('query builder', () => {
             },
           },
           collapse: {
-            field: 'host.id.keyword',
+            field: 'host.id',
             inner_hits: {
               name: 'most_recent',
               size: 1,
@@ -121,7 +126,7 @@ describe('query builder', () => {
           aggs: {
             total: {
               cardinality: {
-                field: 'host.id.keyword',
+                field: 'host.id',
               },
             },
           },
@@ -151,7 +156,7 @@ describe('query builder', () => {
       const query = kibanaRequestToMetadataGetESQuery(
         mockRequest,
         {
-          ingestManager: { indexPatternService: new FakeIndexPatternService() },
+          ingestManager: { indexPatternService: FakeIndexPatternService.buildMetadataService() },
           logFactory: loggingServiceMock.create(),
           config: () => Promise.resolve(EndpointConfigSchema.validate({})),
         },
@@ -159,7 +164,7 @@ describe('query builder', () => {
       );
       expect(query).toEqual({
         body: {
-          query: { match: { 'host.id.keyword': mockID } },
+          query: { match: { 'host.id': mockID } },
           sort: [{ 'event.created': { order: 'desc' } }],
           size: 1,
         },

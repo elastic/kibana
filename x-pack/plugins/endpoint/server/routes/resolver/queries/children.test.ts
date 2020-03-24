@@ -5,8 +5,9 @@
  */
 import { ChildrenQuery } from './children';
 import { EndpointAppConstants } from '../../../../common/types';
+import { IndexPatternRetriever } from '../../../index_pattern';
 
-export class FakeIndexPatternRetriever {
+export class FakeIndexPatternRetriever implements IndexPatternRetriever {
   constructor(private readonly indexPattern: string) {}
 
   static buildEventIndexPattern() {

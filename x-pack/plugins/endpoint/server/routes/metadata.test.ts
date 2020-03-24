@@ -46,7 +46,7 @@ describe('test endpoint route', () => {
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
     registerEndpointRoutes(routerMock, {
-      ingestManager: { indexPatternService: new FakeIndexPatternService() },
+      ingestManager: { indexPatternService: FakeIndexPatternService.buildMetadataService() },
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });

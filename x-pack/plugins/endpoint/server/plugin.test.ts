@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { EndpointPlugin, EndpointPluginSetupDependencies } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { PluginSetupContract } from '../../features/server';
+import { FakeIndexPatternService } from './services/endpoint/metadata_query_builders.test';
 
 describe('test endpoint plugin', () => {
   let plugin: EndpointPlugin;
@@ -28,7 +28,10 @@ describe('test endpoint plugin', () => {
       getFeaturesUICapabilities: jest.fn(),
       registerLegacyAPI: jest.fn(),
     };
-    mockedEndpointPluginSetupDependencies = { features: mockedPluginSetupContract };
+    mockedEndpointPluginSetupDependencies = {
+      features: mockedPluginSetupContract,
+      ingestManager: { indexPatternService: new FakeIndexPatternService('') },
+    };
   });
 
   it('test properly setup plugin', async () => {
