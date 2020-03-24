@@ -46,6 +46,7 @@ import {
   unmuteAllAlertRoute,
   muteAlertInstanceRoute,
   unmuteAlertInstanceRoute,
+  healthRoute,
 } from './routes';
 import { LicensingPluginSetup } from '../../licensing/server';
 import {
@@ -173,6 +174,7 @@ export class AlertingPlugin {
     unmuteAllAlertRoute(router, this.licenseState);
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
+    healthRoute(router, this.licenseState);
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
@@ -206,7 +208,7 @@ export class AlertingPlugin {
       logger,
       getServices: this.getServicesFactory(core.savedObjects),
       spaceIdToNamespace: this.spaceIdToNamespace,
-      executeAction: plugins.actions.execute,
+      actionsPlugin: plugins.actions,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
     });

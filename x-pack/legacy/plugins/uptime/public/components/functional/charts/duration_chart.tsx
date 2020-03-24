@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
+import { SeriesIdentifier } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
@@ -17,6 +18,9 @@ import { ChartWrapper } from './chart_wrapper';
 import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
+import { DurationAnomaliesBar } from './duration_line_bar_list';
+import { MLIntegrationComponent } from '../../monitor_details/ml/ml_integeration';
+import { AnomalyRecords } from '../../../state/actions';
 
 interface DurationChartProps {
   /**
@@ -29,6 +33,10 @@ interface DurationChartProps {
    * To represent the loading spinner on chart
    */
   loading: boolean;
+
+  hasMLJob: boolean;
+
+  anomalies: AnomalyRecords | null;
 }
 
 /**
@@ -37,10 +45,17 @@ interface DurationChartProps {
  * milliseconds.
  * @param props The props required for this component to render properly
  */
-export const DurationChartComponent = ({ locationDurationLines, loading }: DurationChartProps) => {
+export const DurationChartComponent = ({
+  locationDurationLines,
+  anomalies,
+  loading,
+  hasMLJob,
+}: DurationChartProps) => {
   const hasLines = locationDurationLines.length > 0;
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
+
+  const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
 
   const onBrushEnd = (minX: number, maxX: number) => {
     updateUrlParams({
@@ -48,26 +63,56 @@ export const DurationChartComponent = ({ locationDurationLines, loading }: Durat
       dateRangeEnd: moment(maxX).toISOString(),
     });
   };
+
+  const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
+    if (legendItem) {
+      setHiddenLegends(prevState => {
+        if (prevState.includes(legendItem.specId)) {
+          return [...prevState.filter(item => item !== legendItem.specId)];
+        } else {
+          return [...prevState, legendItem.specId];
+        }
+      });
+    }
+  };
+
   return (
     <>
       <EuiPanel paddingSize="m">
-        <EuiTitle size="xs">
-          <h4>
-            <FormattedMessage
-              id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-              defaultMessage="Monitor duration"
-              description="The 'ms' is an abbreviation for milliseconds."
-            />
-          </h4>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h4>
+                {hasMLJob ? (
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
+                    defaultMessage="Monitor duration (Anomalies: {noOfAnomalies})"
+                    values={{ noOfAnomalies: anomalies?.anomalies?.length ?? 0 }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+                    defaultMessage="Monitor duration"
+                  />
+                )}
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <MLIntegrationComponent />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <ChartWrapper height="400px" loading={loading}>
           {hasLines ? (
             <Chart>
               <Settings
                 xDomain={{ min, max }}
-                showLegend={true}
+                showLegend
+                showLegendExtra
                 legendPosition={Position.Bottom}
                 onBrushEnd={onBrushEnd}
+                onLegendItemClick={legendToggleVisibility}
               />
               <Axis
                 id="bottom"
@@ -88,6 +133,7 @@ export const DurationChartComponent = ({ locationDurationLines, loading }: Durat
                 })}
               />
               <DurationLineSeriesList lines={locationDurationLines} />
+              <DurationAnomaliesBar anomalies={anomalies} hiddenLegends={hiddenLegends} />
             </Chart>
           ) : (
             <ChartEmptyState

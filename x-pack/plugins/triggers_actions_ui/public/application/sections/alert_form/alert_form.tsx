@@ -24,6 +24,8 @@ import {
   EuiButtonIcon,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { some, filter, map, fold } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -74,9 +76,16 @@ interface AlertFormProps {
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
   canChangeTrigger?: boolean; // to hide Change trigger button
+  setHasActionsDisabled?: (value: boolean) => void;
 }
 
-export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: AlertFormProps) => {
+export const AlertForm = ({
+  alert,
+  canChangeTrigger = true,
+  dispatch,
+  errors,
+  setHasActionsDisabled,
+}: AlertFormProps) => {
   const alertsContext = useAlertsContext();
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
 
@@ -218,6 +227,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
       {defaultActionGroupId ? (
         <ActionForm
           actions={alert.actions}
+          setHasActionsDisabled={setHasActionsDisabled}
           messageVariables={
             alertTypesIndex && alertTypesIndex[alert.alertTypeId]
               ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(av => av.name)
@@ -250,7 +260,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkWithTooltip', {
-          defaultMessage: 'This is some help text here for check alert.',
+          defaultMessage: 'Define how often to evaluate the condition.',
         })}
       />
     </>
@@ -260,13 +270,13 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
     <>
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel"
-        defaultMessage="Re-notify every"
+        defaultMessage="Notify every"
       />{' '}
       <EuiIconTip
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
-          defaultMessage: 'This is some help text here for re-notify alert.',
+          defaultMessage: 'Define how often to repeat the action while the alert is active.',
         })}
       />
     </>
@@ -400,9 +410,23 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
                   name="throttle"
                   data-test-subj="throttleInput"
                   onChange={e => {
-                    const throttle = e.target.value !== '' ? parseInt(e.target.value, 10) : null;
-                    setAlertThrottle(throttle);
-                    setAlertProperty('throttle', `${e.target.value}${alertThrottleUnit}`);
+                    pipe(
+                      some(e.target.value.trim()),
+                      filter(value => value !== ''),
+                      map(value => parseInt(value, 10)),
+                      filter(value => !isNaN(value)),
+                      fold(
+                        () => {
+                          // unset throttle
+                          setAlertThrottle(null);
+                          setAlertProperty('throttle', null);
+                        },
+                        throttle => {
+                          setAlertThrottle(throttle);
+                          setAlertProperty('throttle', `${throttle}${alertThrottleUnit}`);
+                        }
+                      )
+                    );
                   }}
                 />
               </EuiFlexItem>
@@ -432,7 +456,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
           <EuiTitle size="s">
             <h5 id="alertTypeTitle">
               <FormattedMessage
-                defaultMessage="Trigger: Select a trigger type"
+                defaultMessage="Select a trigger type"
                 id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle"
               />
             </h5>

@@ -21,12 +21,15 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
-import { tabifyAggResponse, npStart } from '../../legacy_imports';
+import { npStart } from '../../legacy_imports';
+import { search } from '../../../../../../plugins/data/public';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tableVisResponseHandler } from '../../table_vis_response_handler';
 import { start as visualizationsStart } from '../../../../visualizations/public/np_ready/public/legacy';
+
+const { tabifyAggResponse } = search;
 
 describe('Table Vis - AggTableGroup Directive', function() {
   let $rootScope;
@@ -35,22 +38,35 @@ describe('Table Vis - AggTableGroup Directive', function() {
   const tabifiedData = {};
 
   const init = () => {
-    const vis1 = visualizationsStart.createVis(indexPattern, 'table');
-    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, metricOnly);
-
-    const vis2 = visualizationsStart.createVis(indexPattern, {
-      type: 'pie',
-      aggs: [
-        { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-        { type: 'terms', schema: 'split', params: { field: 'extension' } },
-        { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
-        { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
-      ],
+    const searchSource = {
+      getField: name => {
+        if (name === 'index') {
+          return indexPattern;
+        }
+      },
+    };
+    const vis1 = visualizationsStart.createVis('table', {
+      type: 'table',
+      data: { searchSource, aggs: [] },
     });
-    vis2.aggs.aggs.forEach(function(agg, i) {
+    tabifiedData.metricOnly = tabifyAggResponse(vis1.data.aggs, metricOnly);
+
+    const vis2 = visualizationsStart.createVis('pie', {
+      type: 'pie',
+      data: {
+        aggs: [
+          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'terms', schema: 'split', params: { field: 'extension' } },
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+        ],
+        searchSource,
+      },
+    });
+    vis2.data.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
-    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, threeTermBuckets);
+    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.data.aggs, threeTermBuckets);
   };
 
   const initLocalAngular = () => {

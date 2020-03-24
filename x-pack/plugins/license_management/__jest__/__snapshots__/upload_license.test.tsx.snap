@@ -882,6 +882,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                         >
                                           <EuiValidatableControl>
                                             <input
+                                              aria-describedby="licenseFile-filePicker__prompt"
                                               className="euiFilePicker__input"
                                               id="licenseFile"
                                               onChange={[Function]}
@@ -893,6 +894,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                           </EuiValidatableControl>
                                           <div
                                             className="euiFilePicker__prompt"
+                                            id="licenseFile-filePicker__prompt"
                                           >
                                             <EuiIcon
                                               aria-hidden="true"
@@ -1285,7 +1287,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                 <ul>
                                   <li
                                     className="euiForm__error"
-                                    key="The supplied license has expired."
+                                    key="0"
                                   >
                                     The supplied license has expired.
                                   </li>
@@ -1346,6 +1348,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                         >
                                           <EuiValidatableControl>
                                             <input
+                                              aria-describedby="licenseFile-filePicker__prompt"
                                               className="euiFilePicker__input"
                                               id="licenseFile"
                                               onChange={[Function]}
@@ -1357,6 +1360,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                           </EuiValidatableControl>
                                           <div
                                             className="euiFilePicker__prompt"
+                                            id="licenseFile-filePicker__prompt"
                                           >
                                             <EuiIcon
                                               aria-hidden="true"
@@ -1749,7 +1753,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                 <ul>
                                   <li
                                     className="euiForm__error"
-                                    key="The supplied license is not valid for this product."
+                                    key="0"
                                   >
                                     The supplied license is not valid for this product.
                                   </li>
@@ -1810,6 +1814,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                         >
                                           <EuiValidatableControl>
                                             <input
+                                              aria-describedby="licenseFile-filePicker__prompt"
                                               className="euiFilePicker__input"
                                               id="licenseFile"
                                               onChange={[Function]}
@@ -1821,6 +1826,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                           </EuiValidatableControl>
                                           <div
                                             className="euiFilePicker__prompt"
+                                            id="licenseFile-filePicker__prompt"
                                           >
                                             <EuiIcon
                                               aria-hidden="true"
@@ -2213,7 +2219,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                 <ul>
                                   <li
                                     className="euiForm__error"
-                                    key="Error encountered uploading license: Check your license file."
+                                    key="0"
                                   >
                                     Error encountered uploading license: Check your license file.
                                   </li>
@@ -2274,6 +2280,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                         >
                                           <EuiValidatableControl>
                                             <input
+                                              aria-describedby="licenseFile-filePicker__prompt"
                                               className="euiFilePicker__input"
                                               id="licenseFile"
                                               onChange={[Function]}
@@ -2285,6 +2292,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                           </EuiValidatableControl>
                                           <div
                                             className="euiFilePicker__prompt"
+                                            id="licenseFile-filePicker__prompt"
                                           >
                                             <EuiIcon
                                               aria-hidden="true"
@@ -2677,7 +2685,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                 <ul>
                                   <li
                                     className="euiForm__error"
-                                    key="Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled"
+                                    key="0"
                                   >
                                     Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
                                   </li>
@@ -2738,6 +2746,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                         >
                                           <EuiValidatableControl>
                                             <input
+                                              aria-describedby="licenseFile-filePicker__prompt"
                                               className="euiFilePicker__input"
                                               id="licenseFile"
                                               onChange={[Function]}
@@ -2749,6 +2758,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                           </EuiValidatableControl>
                                           <div
                                             className="euiFilePicker__prompt"
+                                            id="licenseFile-filePicker__prompt"
                                           >
                                             <EuiIcon
                                               aria-hidden="true"
