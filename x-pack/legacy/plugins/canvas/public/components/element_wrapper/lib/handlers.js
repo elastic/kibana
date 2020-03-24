@@ -16,7 +16,7 @@ export const createHandlers = dispatch => {
   let oldElement;
   let completeFn = () => {};
 
-  return (element, pageId) => {
+  return element => {
     // reset isComplete when element changes
     if (!isEqual(oldElement, element)) {
       isComplete = false;
@@ -25,7 +25,7 @@ export const createHandlers = dispatch => {
 
     return {
       setFilter(text) {
-        dispatch(setFilter(text, element.id, pageId, true));
+        dispatch(setFilter(text, element.id, true));
       },
 
       getFilter() {
@@ -35,6 +35,8 @@ export const createHandlers = dispatch => {
       onComplete(fn) {
         completeFn = fn;
       },
+
+      getElementId: () => element.id,
 
       onEmbeddableInputChange(embeddableExpression) {
         dispatch(updateEmbeddableExpression({ elementId: element.id, embeddableExpression }));

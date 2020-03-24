@@ -46,13 +46,4 @@ describe('Cancellation Token', () => {
 
     expect(onCancelled).toBeCalled();
   });
-
-  it('throws an error when the callback is not a function', () => {
-    const cancellationToken = new CancellationToken();
-
-    expect(() => {
-      // @ts-ignore
-      cancellationToken.on('cool!');
-    }).toThrowError('Expected callback to be a function');
-  });
 });

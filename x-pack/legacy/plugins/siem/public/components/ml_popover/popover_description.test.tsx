@@ -8,6 +8,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { PopoverDescriptionComponent } from './popover_description';
 
+jest.mock('../../lib/kibana');
+
 describe('JobsTableFilters', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<PopoverDescriptionComponent />);

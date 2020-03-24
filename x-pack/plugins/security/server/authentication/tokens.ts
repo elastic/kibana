@@ -150,21 +150,10 @@ export class Tokens {
   /**
    * Tries to determine whether specified error that occurred while trying to authenticate request
    * using access token happened because access token is expired. We treat all `401 Unauthorized`
-   * as such. Another use case that we should temporarily support (until elastic/elasticsearch#38866
-   * is fixed) is when token document has been removed and ES responds with `500 Internal Server Error`.
+   * as such.
    * @param err Error returned from Elasticsearch.
    */
   public static isAccessTokenExpiredError(err?: any) {
-    const errorStatusCode = getErrorStatusCode(err);
-    return (
-      errorStatusCode === 401 ||
-      (errorStatusCode === 500 &&
-        !!(
-          err &&
-          err.body &&
-          err.body.error &&
-          err.body.error.reason === 'token document is missing and must be present'
-        ))
-    );
+    return getErrorStatusCode(err) === 401;
   }
 }

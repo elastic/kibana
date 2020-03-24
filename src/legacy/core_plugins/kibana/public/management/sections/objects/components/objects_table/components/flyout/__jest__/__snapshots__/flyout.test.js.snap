@@ -115,6 +115,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         }
       }
       responsive={true}
+      tableLayout="fixed"
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
@@ -445,6 +446,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         }
       }
       responsive={true}
+      tableLayout="fixed"
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>

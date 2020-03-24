@@ -33,6 +33,12 @@ export class LegacyAppender implements DisposableAppender {
     legacyLoggingConfig: schema.any(),
   });
 
+  /**
+   * Sets {@link Appender.receiveAllLevels} because legacy does its own filtering based on the legacy logging
+   * configuration.
+   */
+  public readonly receiveAllLevels = true;
+
   private readonly loggingServer: LegacyLoggingServer;
 
   constructor(legacyLoggingConfig: Readonly<LegacyVars>) {

@@ -44,15 +44,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async clickNewVisualization() {
-      // newItemButton button is only visible when there are items in the listing table is displayed.
-      let exists = await testSubjects.exists('newItemButton');
-      if (exists) {
-        return await testSubjects.click('newItemButton');
-      }
-
-      exists = await testSubjects.exists('createVisualizationPromptButton');
-      // no viz exist, click createVisualizationPromptButton to create new dashboard
-      return await this.createVisualizationPromptButton();
+      await listingTable.clickNewButton('createVisualizationPromptButton');
     }
 
     public async createVisualizationPromptButton() {
@@ -87,6 +79,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await this.waitForVisualizationSelectPage();
     }
 
+    public async hasVisType(type: string) {
+      return await testSubjects.exists(`visType-${type}`);
+    }
+
     public async clickVisType(type: string) {
       await testSubjects.click(`visType-${type}`);
       await header.waitUntilLoadingHasFinished();
@@ -108,6 +104,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await this.clickVisType('region_map');
     }
 
+    public async hasRegionMap() {
+      return await this.hasVisType('region_map');
+    }
+
     public async clickMarkdownWidget() {
       await this.clickVisType('markdown');
     }
@@ -126,6 +126,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickTileMap() {
       await this.clickVisType('tile_map');
+    }
+
+    public async hasTileMap() {
+      return await this.hasVisType('tile_map');
     }
 
     public async clickTagCloud() {
@@ -150,6 +154,18 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickInputControlVis() {
       await this.clickVisType('input_control_vis');
+    }
+
+    public async clickLensWidget() {
+      await this.clickVisType('lens');
+    }
+
+    public async clickMapsApp() {
+      await this.clickVisType('maps');
+    }
+
+    public async hasMapsApp() {
+      return await this.hasVisType('maps');
     }
 
     public async createSimpleMarkdownViz(vizName: string) {
@@ -208,7 +224,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async getSideEditorExists() {
-      return await find.existsByCssSelector('.collapsible-sidebar');
+      return await find.existsByCssSelector('.visEditor__collapsibleSidebar');
     }
 
     public async clickSavedSearch(savedSearchName: string) {
@@ -217,7 +233,8 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async clickUnlinkSavedSearch() {
-      await testSubjects.doubleClick('unlinkSavedSearch');
+      await testSubjects.click('showUnlinkSavedSearchPopover');
+      await testSubjects.click('unlinkSavedSearch');
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -321,10 +338,6 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
         'last breadcrumb to have new vis name',
         async () => (await globalNav.getLastBreadcrumb()) === vizName
       );
-    }
-
-    public async clickLensWidget() {
-      await this.clickVisType('lens');
     }
   }
 

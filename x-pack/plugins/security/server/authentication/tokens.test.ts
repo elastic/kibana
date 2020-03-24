@@ -41,10 +41,6 @@ describe('Tokens', () => {
       { statusCode: 401 },
       ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()),
       new errors.AuthenticationException(),
-      {
-        statusCode: 500,
-        body: { error: { reason: 'token document is missing and must be present' } },
-      },
     ];
     for (const error of expirationErrors) {
       expect(Tokens.isAccessTokenExpiredError(error)).toBe(true);

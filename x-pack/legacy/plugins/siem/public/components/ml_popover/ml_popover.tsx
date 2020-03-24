@@ -11,11 +11,10 @@ import React, { useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
 
 import { useKibana } from '../../lib/kibana';
-import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
-import { errorToToaster } from '../ml/api/error_to_toaster';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
 import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
-import { useStateToaster } from '../toasters';
+import { errorToToaster, useStateToaster } from '../toasters';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
 import { filterJobs } from './helpers';
 import { useSiemJobs } from './hooks/use_siem_jobs';

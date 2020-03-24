@@ -19,8 +19,6 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
@@ -37,6 +35,7 @@ import { setup as visualizationsSetup } from '../../../visualizations/public/np_
 
 import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
+import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -65,7 +64,6 @@ let visRegComplete = false;
 describe('CoordinateMapsVisualizationTest', function() {
   let domNode;
   let CoordinateMapsVisualization;
-  let indexPattern;
   let vis;
   let dependencies;
 
@@ -86,13 +84,10 @@ describe('CoordinateMapsVisualizationTest', function() {
 
       if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(
-          createTileMapTypeDefinition(dependencies)
-        );
+        visualizationsSetup.createBaseVisualization(createTileMapTypeDefinition(dependencies));
       }
 
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);
-      indexPattern = Private(LogstashIndexPatternStubProvider);
 
       getManifestStub = serviceSettings.__debugStubManifestCalls(async url => {
         //simulate network calls
@@ -124,7 +119,7 @@ describe('CoordinateMapsVisualizationTest', function() {
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
-      vis = new Vis(indexPattern, {
+      vis = new ExprVis({
         type: 'tile_map',
       });
       vis.params = {

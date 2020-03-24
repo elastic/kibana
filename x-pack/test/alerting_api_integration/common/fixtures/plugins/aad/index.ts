@@ -8,7 +8,7 @@ import Joi from 'joi';
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
-import { PluginStartContract } from '../../../../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../../../../plugins/encrypted_saved_objects/server';
 
 interface CheckAADRequest extends Hapi.Request {
   payload: {
@@ -25,7 +25,8 @@ export default function(kibana: any) {
     name: 'aad-fixtures',
     init(server: Legacy.Server) {
       const newPlatform = ((server as unknown) as KbnServer).newPlatform;
-      const esoPlugin = newPlatform.start.plugins.encryptedSavedObjects as PluginStartContract;
+      const esoPlugin = newPlatform.start.plugins
+        .encryptedSavedObjects as EncryptedSavedObjectsPluginStart;
 
       server.route({
         method: 'POST',

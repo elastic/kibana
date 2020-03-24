@@ -21,6 +21,8 @@ import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
 import { DllCompiler } from './dynamic_dll_plugin';
 import { fromRoot } from '../core/server/utils';
+import { getNpUiPluginPublicDirs } from './np_ui_plugin_public_dirs';
+
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
 
@@ -37,13 +39,14 @@ export default async (kbnServer, server, config) => {
     return await kbnServer.mixin(require('./watch/watch'));
   }
 
-  const { newPlatform, uiBundles } = kbnServer;
+  const { uiBundles } = kbnServer;
   server.route(
     createBundlesRoute({
       regularBundlesPath: uiBundles.getWorkingDir(),
       dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
       basePublicPath: config.get('server.basePath'),
       builtCssPath: fromRoot('built_assets/css'),
+      npUiPluginPublicDirs: getNpUiPluginPublicDirs(kbnServer),
     })
   );
 
@@ -64,7 +67,6 @@ export default async (kbnServer, server, config) => {
   const optimizer = new FsOptimizer({
     logWithMetadata: (tags, message, metadata) => server.logWithMetadata(tags, message, metadata),
     uiBundles,
-    newPlatformPluginInfo: newPlatform.__internals.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
     workers: config.get('optimize.workers'),

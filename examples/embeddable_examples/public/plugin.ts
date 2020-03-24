@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { IEmbeddableSetup, IEmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from './hello_world';
-import { TODO_EMBEDDABLE, TodoEmbeddableFactory } from './todo';
+import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoInput, TodoOutput } from './todo';
 import { MULTI_TASK_TODO_EMBEDDABLE, MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
 import {
   SEARCHABLE_LIST_CONTAINER,
@@ -29,44 +29,56 @@ import {
 import { LIST_CONTAINER, ListContainerFactory } from './list_container';
 
 interface EmbeddableExamplesSetupDependencies {
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
 }
 
 interface EmbeddableExamplesStartDependencies {
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
 }
 
 export class EmbeddableExamplesPlugin
   implements
     Plugin<void, void, EmbeddableExamplesSetupDependencies, EmbeddableExamplesStartDependencies> {
-  public setup(core: CoreSetup, deps: EmbeddableExamplesSetupDependencies) {
+  public setup(
+    core: CoreSetup<EmbeddableExamplesStartDependencies>,
+    deps: EmbeddableExamplesSetupDependencies
+  ) {
     deps.embeddable.registerEmbeddableFactory(
       HELLO_WORLD_EMBEDDABLE,
       new HelloWorldEmbeddableFactory()
     );
 
-    deps.embeddable.registerEmbeddableFactory(TODO_EMBEDDABLE, new TodoEmbeddableFactory());
-
     deps.embeddable.registerEmbeddableFactory(
       MULTI_TASK_TODO_EMBEDDABLE,
       new MultiTaskTodoEmbeddableFactory()
     );
-  }
 
-  public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {
     // These are registered in the start method because `getEmbeddableFactory `
     // is only available in start. We could reconsider this I think and make it
     // available in both.
     deps.embeddable.registerEmbeddableFactory(
       SEARCHABLE_LIST_CONTAINER,
-      new SearchableListContainerFactory(deps.embeddable.getEmbeddableFactory)
+      new SearchableListContainerFactory(async () => ({
+        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+      }))
     );
 
     deps.embeddable.registerEmbeddableFactory(
       LIST_CONTAINER,
-      new ListContainerFactory(deps.embeddable.getEmbeddableFactory)
+      new ListContainerFactory(async () => ({
+        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+      }))
+    );
+
+    deps.embeddable.registerEmbeddableFactory<TodoInput, TodoOutput>(
+      TODO_EMBEDDABLE,
+      new TodoEmbeddableFactory(async () => ({
+        openModal: (await core.getStartServices())[0].overlays.openModal,
+      }))
     );
   }
+
+  public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {}
 
   public stop() {}
 }

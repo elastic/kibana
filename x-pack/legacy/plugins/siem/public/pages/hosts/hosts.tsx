@@ -6,9 +6,8 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { compose } from 'redux';
 
 import { useParams } from 'react-router-dom';
 import { FiltersGlobal } from '../../components/filters_global';
@@ -21,7 +20,6 @@ import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
-import { GlobalTimeArgs } from '../../containers/global_time';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
@@ -29,19 +27,20 @@ import { useKibana } from '../../lib/kibana';
 import { convertToBuildEsQuery } from '../../lib/keury';
 import { inputsSelectors, State, hostsModel } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
-import { HostsComponentProps, HostsComponentReduxProps } from './types';
-import { filterAlertsHosts } from './navigation';
+import { HostsComponentProps } from './types';
+import { filterHostData } from './navigation';
 import { HostsTableType } from '../../store/hosts/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
-export const HostsComponent = React.memo<HostsComponentProps>(
+export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
   ({
     deleteQuery,
     isInitializing,
@@ -56,9 +55,9 @@ export const HostsComponent = React.memo<HostsComponentProps>(
     const capabilities = React.useContext(MlCapabilitiesContext);
     const kibana = useKibana();
     const { tabName } = useParams();
-    const hostsFilters = React.useMemo(() => {
+    const tabsFilters = React.useMemo(() => {
       if (tabName === HostsTableType.alerts) {
-        return filters.length > 0 ? [...filters, ...filterAlertsHosts] : filterAlertsHosts;
+        return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
       }
       return filters;
     }, [tabName, filters]);
@@ -77,7 +76,13 @@ export const HostsComponent = React.memo<HostsComponentProps>(
               config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
-              filters: hostsFilters,
+              filters,
+            });
+            const tabsFilterQuery = convertToBuildEsQuery({
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              indexPattern,
+              queries: [query],
+              filters: tabsFilters,
             });
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
@@ -123,13 +128,13 @@ export const HostsComponent = React.memo<HostsComponentProps>(
                   <HostsTabs
                     deleteQuery={deleteQuery}
                     to={to}
-                    filterQuery={filterQuery}
+                    filterQuery={tabsFilterQuery}
                     isInitializing={isInitializing}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     setQuery={setQuery}
                     from={from}
                     type={hostsModel.HostsType.page}
                     indexPattern={indexPattern}
-                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     hostsPagePath={hostsPagePath}
                   />
                 </WrapperPage>
@@ -154,7 +159,7 @@ HostsComponent.displayName = 'HostsComponent';
 const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const mapStateToProps = (state: State): HostsComponentReduxProps => ({
+  const mapStateToProps = (state: State) => ({
     query: getGlobalQuerySelector(state),
     filters: getGlobalFiltersQuerySelector(state),
   });
@@ -162,13 +167,12 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-interface HostsProps extends GlobalTimeArgs {
-  hostsPagePath: string;
-}
+const mapDispatchToProps = {
+  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+};
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Hosts = compose<React.ComponentClass<HostsProps>>(
-  connect(makeMapStateToProps, {
-    setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-  })
-)(HostsComponent);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const Hosts = connector(HostsComponent);

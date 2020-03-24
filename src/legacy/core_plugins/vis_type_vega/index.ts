@@ -24,10 +24,16 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 
 const vegaPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
-    // TODO: ID property should be changed from 'vega' to 'vis_type_vega'
-    // It is required to change the configuration property
-    //   vega.enableExternalUrls -> vis_type_vega.enableExternalUrls
-    id: 'vega',
+    id: 'vis_type_vega',
+    deprecations: ({ rename }: { rename: any }) => [
+      rename('vega.enabled', 'vis_type_vega.enabled'),
+    ],
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        enableExternalUrls: Joi.boolean().default(false),
+      }).default();
+    },
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
@@ -39,17 +45,10 @@ const vegaPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlugin
 
         return {
           emsTileLayerId: mapConfig.emsTileLayerId,
-          enableExternalUrls: serverConfig.get('vega.enableExternalUrls'),
         };
       },
     },
     init: (server: Legacy.Server) => ({}),
-    config(Joi: any) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        enableExternalUrls: Joi.boolean().default(false),
-      }).default();
-    },
   } as Legacy.PluginSpecOptions);
 
 // eslint-disable-next-line import/no-default-export

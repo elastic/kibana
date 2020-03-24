@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as vega from 'vega-lib';
+import { i18n } from '@kbn/i18n';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
-import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
+import { KibanaMap } from '../legacy_imports';
+import { getEmsTileLayerId, getUISettings } from '../services';
 
 export class VegaMapView extends VegaBaseView {
   async _initViewCustomizations() {
@@ -35,10 +35,10 @@ export class VegaMapView extends VegaBaseView {
       const tmsServices = await this._serviceSettings.getTMSServices();
       // In some cases, Vega may be initialized twice, e.g. after awaiting...
       if (!this._$container) return;
-      const emsTileLayerId = chrome.getInjected('emsTileLayerId', true);
+      const emsTileLayerId = getEmsTileLayerId();
       const mapStyle =
         mapConfig.mapStyle === 'default' ? emsTileLayerId.bright : mapConfig.mapStyle;
-      const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+      const isDarkMode = getUISettings().get('theme:darkMode');
       baseMapOpts = tmsServices.find(s => s.id === mapStyle);
       baseMapOpts = {
         ...baseMapOpts,

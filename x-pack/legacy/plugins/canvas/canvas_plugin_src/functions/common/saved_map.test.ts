@@ -5,7 +5,7 @@
  */
 jest.mock('ui/new_platform');
 import { savedMap } from './saved_map';
-import { getQueryFilters } from '../../../server/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
 
 const filterContext = {
   and: [
@@ -31,13 +31,13 @@ describe('savedMap', () => {
   };
 
   it('accepts null context', () => {
-    const expression = fn(null, args, {});
+    const expression = fn(null, args, {} as any);
 
     expect(expression.input.filters).toEqual([]);
   });
 
   it('accepts filter context', () => {
-    const expression = fn(filterContext, args, {});
+    const expression = fn(filterContext, args, {} as any);
     const embeddableFilters = getQueryFilters(filterContext.and);
 
     expect(expression.input.filters).toEqual(embeddableFilters);

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { QueryString } from '../utils/query_string';
 import { StateProvider } from './state';
 import { uiModules } from '../modules';
 import { createLegacyClass } from '../utils/legacy_class';
@@ -34,10 +33,6 @@ export function GlobalStateProvider(Private) {
 
   // if the url param is missing, write it back
   GlobalState.prototype._persistAcrossApps = true;
-
-  GlobalState.prototype.removeFromUrl = function(url) {
-    return QueryString.replaceParamInUrl(url, this._urlParam, null);
-  };
 
   return new GlobalState();
 }

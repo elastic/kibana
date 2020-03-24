@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { ParsedUrlQuery } from 'querystring';
+import { ParsedQuery } from 'query-string';
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
 
 /**
@@ -33,7 +32,7 @@ export interface URLMeaningfulParts {
   protocol?: string | null;
   slashes?: boolean | null;
   port?: string | null;
-  query: ParsedUrlQuery;
+  query: ParsedQuery;
 }
 
 /**
@@ -99,4 +98,20 @@ export function modifyUrl(
     query: modifiedParts.query,
     slashes: modifiedParts.slashes,
   } as UrlObject);
+}
+
+export function isRelativeUrl(candidatePath: string) {
+  // validate that `candidatePath` is not attempting a redirect to somewhere
+  // outside of this Kibana install
+  const all = parseUrl(candidatePath, false /* parseQueryString */, true /* slashesDenoteHost */);
+  const { protocol, hostname, port } = all;
+  // We should explicitly compare `protocol`, `port` and `hostname` to null to make sure these are not
+  // detected in the URL at all. For example `hostname` can be empty string for Node URL parser, but
+  // browser (because of various bwc reasons) processes URL differently (e.g. `///abc.com` - for browser
+  // hostname is `abc.com`, but for Node hostname is an empty string i.e. everything between schema (`//`)
+  // and the first slash that belongs to path.
+  if (protocol !== null || hostname !== null || port !== null) {
+    return false;
+  }
+  return true;
 }

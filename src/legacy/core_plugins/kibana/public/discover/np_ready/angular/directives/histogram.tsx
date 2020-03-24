@@ -30,7 +30,6 @@ import {
   Axis,
   Chart,
   HistogramBarSeries,
-  GeometryValue,
   LineAnnotation,
   Position,
   ScaleType,
@@ -38,12 +37,15 @@ import {
   RectAnnotation,
   TooltipValue,
   TooltipType,
+  ElementClickListener,
+  XYChartElementEvent,
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
-import { EuiChartThemeType } from '@elastic/eui/src/themes/charts/themes';
+import { IUiSettingsClient } from 'kibana/public';
+import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription } from 'rxjs';
-import { getServices, timezoneProvider } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
 
 export interface DiscoverHistogramProps {
   chartData: any;
@@ -85,6 +87,16 @@ function getIntervalInMs(
   }
 }
 
+function getTimezone(uiSettings: IUiSettingsClient) {
+  if (uiSettings.isDefault('dateFormat:tz')) {
+    const detectedTimezone = moment.tz.guess();
+    if (detectedTimezone) return detectedTimezone;
+    else return moment().format('Z');
+  } else {
+    return uiSettings.get('dateFormat:tz', 'Browser');
+  }
+}
+
 export function findMinInterval(
   xValues: number[],
   esValue: number,
@@ -114,13 +126,13 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
 
   private subscription?: Subscription;
   public state = {
-    chartsTheme: getServices().eui_utils.getChartsThemeDefault(),
+    chartsTheme: getServices().theme.chartsDefaultTheme,
   };
 
   componentDidMount() {
-    this.subscription = getServices()
-      .eui_utils.getChartsTheme$()
-      .subscribe((chartsTheme: EuiChartThemeType['theme']) => this.setState({ chartsTheme }));
+    this.subscription = getServices().theme.chartsTheme$.subscribe(
+      (chartsTheme: EuiChartThemeType['theme']) => this.setState({ chartsTheme })
+    );
   }
 
   componentWillUnmount() {
@@ -139,8 +151,8 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     this.props.timefilterUpdateHandler(range);
   };
 
-  public onElementClick = (xInterval: number) => (elementData: GeometryValue[]) => {
-    const startRange = elementData[0].x;
+  public onElementClick = (xInterval: number): ElementClickListener => ([elementData]) => {
+    const startRange = (elementData as XYChartElementEvent)[0].x;
 
     const range = {
       from: startRange,
@@ -192,7 +204,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
 
   public render() {
     const uiSettings = getServices().uiSettings;
-    const timeZone = timezoneProvider(uiSettings)();
+    const timeZone = getTimezone(uiSettings);
     const { chartData } = this.props;
     const { chartsTheme } = this.state;
 

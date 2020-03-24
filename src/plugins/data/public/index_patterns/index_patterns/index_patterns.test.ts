@@ -18,8 +18,13 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { IndexPatterns } from './index_patterns';
-import { SavedObjectsClientContract, IUiSettingsClient, HttpSetup } from 'kibana/public';
+import { IndexPatternsService } from './index_patterns';
+import {
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+  HttpSetup,
+  SavedObjectsFindResponsePublic,
+} from 'kibana/public';
 
 jest.mock('./index_pattern', () => {
   class IndexPattern {
@@ -44,14 +49,22 @@ jest.mock('./index_patterns_api_client', () => {
 });
 
 describe('IndexPatterns', () => {
-  let indexPatterns: IndexPatterns;
+  let indexPatterns: IndexPatternsService;
+  let savedObjectsClient: SavedObjectsClientContract;
 
   beforeEach(() => {
-    const savedObjectsClient = {} as SavedObjectsClientContract;
+    savedObjectsClient = {} as SavedObjectsClientContract;
+    savedObjectsClient.find = jest.fn(
+      () =>
+        Promise.resolve({
+          savedObjects: [{ id: 'id', attributes: { title: 'title' } }],
+        }) as Promise<SavedObjectsFindResponsePublic<any>>
+    );
+
     const uiSettings = {} as IUiSettingsClient;
     const http = {} as HttpSetup;
 
-    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
+    indexPatterns = new IndexPatternsService(uiSettings, savedObjectsClient, http);
   });
 
   test('does cache gets for the same id', async () => {
@@ -60,5 +73,28 @@ describe('IndexPatterns', () => {
 
     expect(indexPattern).toBeDefined();
     expect(indexPattern).toBe(await indexPatterns.get(id));
+  });
+
+  test('savedObjectCache pre-fetches only title', async () => {
+    expect(await indexPatterns.getIds()).toEqual(['id']);
+    expect(savedObjectsClient.find).toHaveBeenCalledWith({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000,
+    });
+  });
+
+  test('caches saved objects', async () => {
+    await indexPatterns.getIds();
+    await indexPatterns.getTitles();
+    await indexPatterns.getFields(['id', 'title']);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+  });
+
+  test('can refresh the saved objects caches', async () => {
+    await indexPatterns.getIds();
+    await indexPatterns.getTitles(true);
+    await indexPatterns.getFields(['id', 'title'], true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(3);
   });
 });

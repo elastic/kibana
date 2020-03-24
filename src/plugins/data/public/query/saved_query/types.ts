@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RefreshInterval, TimeRange, Query, esFilters } from '../..';
+import { RefreshInterval, TimeRange, Query, Filter } from '../..';
 
 export type SavedQueryTimeFilter = TimeRange & {
   refreshInterval: RefreshInterval;
@@ -32,7 +32,7 @@ export interface SavedQueryAttributes {
   title: string;
   description: string;
   query: Query;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   timefilter?: SavedQueryTimeFilter;
 }
 
@@ -46,7 +46,7 @@ export interface SavedQueryService {
     searchText?: string,
     perPage?: number,
     activePage?: number
-  ) => Promise<SavedQuery[]>;
+  ) => Promise<{ total: number; queries: SavedQuery[] }>;
   getSavedQuery: (id: string) => Promise<SavedQuery>;
   deleteSavedQuery: (id: string) => Promise<{}>;
   getSavedQueryCount: () => Promise<number>;

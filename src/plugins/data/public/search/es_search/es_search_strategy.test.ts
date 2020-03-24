@@ -19,15 +19,15 @@
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
-import { CoreSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { ES_SEARCH_STRATEGY } from '../../../common/search/es_search';
 
 describe('ES search strategy', () => {
-  let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockCoreStart: MockedKeys<CoreStart>;
   const mockSearch = jest.fn();
 
   beforeEach(() => {
-    mockCoreSetup = coreMock.createSetup();
+    mockCoreStart = coreMock.createStart();
     mockSearch.mockClear();
   });
 
@@ -35,12 +35,16 @@ describe('ES search strategy', () => {
     const request = { params: {} };
     const options = {};
 
-    const esSearch = esSearchStrategyProvider(
-      {
-        core: mockCoreSetup,
-      },
-      mockSearch
-    );
+    const esSearch = esSearchStrategyProvider({
+      core: mockCoreStart,
+      getSearchStrategy: jest.fn().mockImplementation(() => {
+        return () => {
+          return {
+            search: mockSearch,
+          };
+        };
+      }),
+    });
     esSearch.search(request, options);
 
     expect(mockSearch.mock.calls[0][0]).toEqual({

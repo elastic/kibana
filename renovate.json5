@@ -25,7 +25,7 @@
     'Team:Operations',
     'renovate',
     'v8.0.0',
-    'v7.6.0',
+    'v7.7.0',
   ],
   major: {
     labels: [
@@ -33,7 +33,7 @@
       'Team:Operations',
       'renovate',
       'v8.0.0',
-      'v7.6.0',
+      'v7.7.0',
       'renovate:major',
     ],
   },
@@ -121,6 +121,14 @@
         packageNames: [
           'bluebird',
           '@types/bluebird',
+        ],
+      },
+      {
+        groupSlug: 'browserslist-useragent',
+        groupName: 'browserslist-useragent related packages',
+        packageNames: [
+          'browserslist-useragent',
+          '@types/browserslist-useragent',
         ],
       },
       {
@@ -238,7 +246,7 @@
           'Team:Operations',
           'renovate',
           'v8.0.0',
-          'v7.6.0',
+          'v7.7.0',
           ':ml',
         ],
       },
@@ -279,6 +287,22 @@
         packageNames: [
           'file-saver',
           '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'flot',
+        groupName: 'flot related packages',
+        packageNames: [
+          'flot',
+          '@types/flot',
+        ],
+      },
+      {
+        groupSlug: 'geojson',
+        groupName: 'geojson related packages',
+        packageNames: [
+          'geojson',
+          '@types/geojson',
         ],
       },
       {
@@ -413,6 +437,14 @@
         packageNames: [
           'jquery',
           '@types/jquery',
+        ],
+      },
+      {
+        groupSlug: 'js-search',
+        groupName: 'js-search related packages',
+        packageNames: [
+          'js-search',
+          '@types/js-search',
         ],
       },
       {
@@ -650,6 +682,22 @@
         ],
       },
       {
+        groupSlug: 'normalize-path',
+        groupName: 'normalize-path related packages',
+        packageNames: [
+          'normalize-path',
+          '@types/normalize-path',
+        ],
+      },
+      {
+        groupSlug: 'numeral',
+        groupName: 'numeral related packages',
+        packageNames: [
+          'numeral',
+          '@types/numeral',
+        ],
+      },
+      {
         groupSlug: 'object-hash',
         groupName: 'object-hash related packages',
         packageNames: [
@@ -846,6 +894,14 @@
         ],
       },
       {
+        groupSlug: 'tar',
+        groupName: 'tar related packages',
+        packageNames: [
+          'tar',
+          '@types/tar',
+        ],
+      },
+      {
         groupSlug: 'tar-fs',
         groupName: 'tar-fs related packages',
         packageNames: [
@@ -890,6 +946,14 @@
         ],
       },
       {
+        groupSlug: 'use-resize-observer',
+        groupName: 'use-resize-observer related packages',
+        packageNames: [
+          'use-resize-observer',
+          '@types/use-resize-observer',
+        ],
+      },
+      {
         groupSlug: 'uuid',
         groupName: 'uuid related packages',
         packageNames: [
@@ -911,6 +975,14 @@
         packageNames: [
           'vinyl-fs',
           '@types/vinyl-fs',
+        ],
+      },
+      {
+        groupSlug: 'watchpack',
+        groupName: 'watchpack related packages',
+        packageNames: [
+          'watchpack',
+          '@types/watchpack',
         ],
       },
       {

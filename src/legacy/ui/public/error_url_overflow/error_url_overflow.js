@@ -22,9 +22,9 @@ import uiRoutes from '../routes';
 import { KbnUrlProvider } from '../url';
 
 import template from './error_url_overflow.html';
-import { UrlOverflowService } from './url_overflow_service';
+import { UrlOverflowService } from '../../../../plugins/kibana_legacy/public';
 
-export * from './url_overflow_service';
+export { UrlOverflowService };
 
 uiRoutes.when('/error/url-overflow', {
   template,

@@ -7,7 +7,7 @@
 import { EuiFlexItem } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext } from 'react';
 
 import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
 import { DescriptionList } from '../../../../../common/utility_types';
@@ -32,7 +32,7 @@ import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
-import { InspectButton } from '../../../inspect';
+import { InspectButton, InspectButtonContainer } from '../../../inspect';
 
 interface OwnProps {
   data: IpOverviewData;
@@ -71,7 +71,6 @@ export const IpOverview = React.memo<IpOverviewProps>(
     anomaliesData,
     narrowDateRange,
   }) => {
-    const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
@@ -140,32 +139,26 @@ export const IpOverview = React.memo<IpOverviewProps>(
       ],
     ];
 
-    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
-    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
-
     return (
-      <OverviewWrapper onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
-        <InspectButton
-          queryId={id}
-          show={showInspect}
-          title={i18n.INSPECT_TITLE}
-          inspectIndex={0}
-        />
+      <InspectButtonContainer>
+        <OverviewWrapper>
+          <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
 
-        {descriptionLists.map((descriptionList, index) =>
-          getDescriptionList(descriptionList, index)
-        )}
+          {descriptionLists.map((descriptionList, index) =>
+            getDescriptionList(descriptionList, index)
+          )}
 
-        {loading && (
-          <Loader
-            overlay
-            overlayBackground={
-              darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
-            }
-            size="xl"
-          />
-        )}
-      </OverviewWrapper>
+          {loading && (
+            <Loader
+              overlay
+              overlayBackground={
+                darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+              }
+              size="xl"
+            />
+          )}
+        </OverviewWrapper>
+      </InspectButtonContainer>
     );
   }
 );

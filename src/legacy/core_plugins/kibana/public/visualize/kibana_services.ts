@@ -19,31 +19,34 @@
 
 import {
   ChromeStart,
-  LegacyCoreStart,
+  CoreStart,
   SavedObjectsClientContract,
   ToastsStart,
   IUiSettingsClient,
+  I18nStart,
+  PluginInitializerContext,
 } from 'kibana/public';
 
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plugins/data/public';
 import { VisualizationsStart } from '../../../visualizations/public';
 import { SavedVisualizations } from './np_ready/types';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
+import { KibanaLegacyStart } from '../../../../../plugins/kibana_legacy/public';
+import { DefaultEditorController } from '../../../vis_default_editor/public';
 
 export interface VisualizeKibanaServices {
+  pluginInitializerContext: PluginInitializerContext;
   addBasePath: (url: string) => string;
   chrome: ChromeStart;
-  core: LegacyCoreStart;
+  core: CoreStart;
   data: DataPublicPluginStart;
-  editorTypes: any;
-  embeddables: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   getBasePath: () => string;
   indexPatterns: IndexPatternsContract;
-  legacyChrome: any;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
@@ -52,9 +55,13 @@ export interface VisualizeKibanaServices {
   savedVisualizations: SavedVisualizations;
   share: SharePluginStart;
   uiSettings: IUiSettingsClient;
+  config: KibanaLegacyStart['config'];
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
   usageCollection?: UsageCollectionSetup;
+  I18nContext: I18nStart['Context'];
+  setActiveUrl: (newUrl: string) => void;
+  DefaultVisualizationEditor: typeof DefaultEditorController;
 }
 
 let services: VisualizeKibanaServices | null = null;

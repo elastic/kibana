@@ -17,24 +17,22 @@
  * under the License.
  */
 
-import React, { useEffect, useMemo } from 'react';
 import { get } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
 import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { tabifyGetColumns, VisOptionsProps } from '../legacy_imports';
-import {
-  NumberInputOption,
-  SwitchOption,
-  SelectOption,
-} from '../../../kbn_vislib_vis_types/public/components/common';
+import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
+import { search } from '../../../../../plugins/data/public';
+import { NumberInputOption, SwitchOption, SelectOption } from '../../../vis_type_vislib/public';
 import { TableVisParams } from '../types';
-import { totalAggregations, isAggConfigNumeric } from './utils';
+import { totalAggregations } from './utils';
+
+const { tabifyGetColumns } = search;
 
 function TableOptions({
   aggs,
-  aggsLabels,
   stateParams,
   setValidity,
   setValue,
@@ -48,17 +46,17 @@ function TableOptions({
         }),
       },
       ...tabifyGetColumns(aggs.getResponseAggs(), true)
-        .filter(col => isAggConfigNumeric(get(col, 'aggConfig.type.name'), stateParams.dimensions))
+        .filter(col => get(col.aggConfig.type.getFormat(col.aggConfig), 'type.id') === 'number')
         .map(({ name }) => ({ value: name, text: name })),
     ],
-    [aggs, aggsLabels, stateParams.percentageCol, stateParams.dimensions]
+    [aggs]
   );
 
   const isPerPageValid = stateParams.perPage === '' || stateParams.perPage > 0;
 
   useEffect(() => {
     setValidity(isPerPageValid);
-  }, [isPerPageValid]);
+  }, [isPerPageValid, setValidity]);
 
   useEffect(() => {
     if (
@@ -68,7 +66,7 @@ function TableOptions({
     ) {
       setValue('percentageCol', percentageColumns[0].value);
     }
-  }, [percentageColumns, stateParams.percentageCol]);
+  }, [percentageColumns, stateParams.percentageCol, setValidity, setValue]);
 
   return (
     <EuiPanel paddingSize="s">

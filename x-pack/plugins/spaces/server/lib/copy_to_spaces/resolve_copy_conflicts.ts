@@ -34,7 +34,6 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
       excludeExportDetails: true,
       objects: options.objects,
       savedObjectsClient,
-      types: eligibleTypes,
       exportSizeLimit: importExport.objectLimit,
     });
     return readStreamToCompletion<SavedObject>(objectStream);

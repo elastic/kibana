@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import { IndexPattern, SearchSource } from '../../../../kibana_services';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
 import { generateIntervals } from './utils/generate_intervals';
 import { getEsQuerySearchAfter } from './utils/get_es_query_search_after';
 import { getEsQuerySort } from './utils/get_es_query_sort';
-import { esFilters, IndexPatternsContract } from '../../../../../../../../../plugins/data/public';
+import {
+  Filter,
+  IndexPatternsContract,
+  IndexPattern,
+  SearchSource,
+} from '../../../../../../../../../plugins/data/public';
 
 export type SurrDocType = 'successors' | 'predecessors';
 export interface EsHitRecord {
@@ -65,18 +69,18 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
     tieBreakerField: string,
     sortDir: SortDirection,
     size: number,
-    filters: esFilters.Filter[]
+    filters: Filter[]
   ) {
-    if (typeof anchor !== 'object' || anchor === null) {
+    if (typeof anchor !== 'object' || anchor === null || !size) {
       return [];
     }
     const indexPattern = await indexPatterns.get(indexPatternId);
     const searchSource = await createSearchSource(indexPattern, filters);
     const sortDirToApply = type === 'successors' ? sortDir : reverseSortDir(sortDir);
 
-    const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchor._source[timeField]) : '';
+    const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchor.fields[timeField][0]) : '';
     const timeValueMillis =
-      nanos !== '' ? convertIsoToMillis(anchor._source[timeField]) : anchor.sort[0];
+      nanos !== '' ? convertIsoToMillis(anchor.fields[timeField][0]) : anchor.sort[0];
 
     const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis, type, sortDir);
     let documents: EsHitRecordList = [];
@@ -110,7 +114,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
     return documents;
   }
 
-  async function createSearchSource(indexPattern: IndexPattern, filters: esFilters.Filter[]) {
+  async function createSearchSource(indexPattern: IndexPattern, filters: Filter[]) {
     return new SearchSource()
       .setParent(undefined)
       .setField('index', indexPattern)

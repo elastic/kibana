@@ -5,7 +5,7 @@
  */
 
 import { getRulesToUpdate } from './get_rules_to_update';
-import { getResult, fullRuleAlertParamsRest } from '../routes/__mocks__/request_responses';
+import { getResult, mockPrepackagedRule } from '../routes/__mocks__/request_responses';
 
 describe('get_rules_to_update', () => {
   test('should return empty array if both rule sets are empty', () => {
@@ -14,7 +14,7 @@ describe('get_rules_to_update', () => {
   });
 
   test('should return empty array if the id of the two rules do not match', () => {
-    const ruleFromFileSystem = fullRuleAlertParamsRest();
+    const ruleFromFileSystem = mockPrepackagedRule();
     ruleFromFileSystem.rule_id = 'rule-1';
     ruleFromFileSystem.version = 2;
 
@@ -26,7 +26,7 @@ describe('get_rules_to_update', () => {
   });
 
   test('should return empty array if the id of file system rule is less than the installed version', () => {
-    const ruleFromFileSystem = fullRuleAlertParamsRest();
+    const ruleFromFileSystem = mockPrepackagedRule();
     ruleFromFileSystem.rule_id = 'rule-1';
     ruleFromFileSystem.version = 1;
 
@@ -38,7 +38,7 @@ describe('get_rules_to_update', () => {
   });
 
   test('should return empty array if the id of file system rule is the same as the installed version', () => {
-    const ruleFromFileSystem = fullRuleAlertParamsRest();
+    const ruleFromFileSystem = mockPrepackagedRule();
     ruleFromFileSystem.rule_id = 'rule-1';
     ruleFromFileSystem.version = 1;
 
@@ -50,7 +50,7 @@ describe('get_rules_to_update', () => {
   });
 
   test('should return the rule to update if the id of file system rule is greater than the installed version', () => {
-    const ruleFromFileSystem = fullRuleAlertParamsRest();
+    const ruleFromFileSystem = mockPrepackagedRule();
     ruleFromFileSystem.rule_id = 'rule-1';
     ruleFromFileSystem.version = 2;
 
@@ -62,7 +62,7 @@ describe('get_rules_to_update', () => {
   });
 
   test('should return 1 rule out of 2 to update if the id of file system rule is greater than the installed version of just one', () => {
-    const ruleFromFileSystem = fullRuleAlertParamsRest();
+    const ruleFromFileSystem = mockPrepackagedRule();
     ruleFromFileSystem.rule_id = 'rule-1';
     ruleFromFileSystem.version = 2;
 
@@ -79,11 +79,11 @@ describe('get_rules_to_update', () => {
   });
 
   test('should return 2 rules out of 2 to update if the id of file system rule is greater than the installed version of both', () => {
-    const ruleFromFileSystem1 = fullRuleAlertParamsRest();
+    const ruleFromFileSystem1 = mockPrepackagedRule();
     ruleFromFileSystem1.rule_id = 'rule-1';
     ruleFromFileSystem1.version = 2;
 
-    const ruleFromFileSystem2 = fullRuleAlertParamsRest();
+    const ruleFromFileSystem2 = mockPrepackagedRule();
     ruleFromFileSystem2.rule_id = 'rule-2';
     ruleFromFileSystem2.version = 2;
 

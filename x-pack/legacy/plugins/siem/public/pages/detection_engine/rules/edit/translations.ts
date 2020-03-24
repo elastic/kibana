@@ -28,3 +28,9 @@ export const SORRY_ERRORS = i18n.translate(
 export const BACK_TO = i18n.translate('xpack.siem.detectionEngine.editRule.backToDescription', {
   defaultMessage: 'Back to',
 });
+
+export const SUCCESSFULLY_SAVED_RULE = (ruleName: string) =>
+  i18n.translate('xpack.siem.detectionEngine.rules.update.successfullySavedRuleTitle', {
+    values: { ruleName },
+    defaultMessage: '{ruleName} was saved',
+  });

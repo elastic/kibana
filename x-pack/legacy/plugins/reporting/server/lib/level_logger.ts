@@ -4,48 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type ServerLog = (tags: string[], msg: string) => void;
+import { LoggerFactory } from 'src/core/server';
 
 const trimStr = (toTrim: string) => {
   return typeof toTrim === 'string' ? toTrim.trim() : toTrim;
 };
 
 export class LevelLogger {
-  private _logger: any;
+  private _logger: LoggerFactory;
   private _tags: string[];
+  public warning: (msg: string, tags?: string[]) => void;
 
-  public warn: (msg: string, tags?: string[]) => void;
-
-  static createForServer(server: any, tags: string[]) {
-    const serverLog: ServerLog = (tgs: string[], msg: string) => server.log(tgs, msg);
-    return new LevelLogger(serverLog, tags);
-  }
-
-  constructor(logger: ServerLog, tags: string[]) {
+  constructor(logger: LoggerFactory, tags?: string[]) {
     this._logger = logger;
-    this._tags = tags;
+    this._tags = tags || [];
 
     /*
      * This shortcut provides maintenance convenience: Reporting code has been
      * using both .warn and .warning
      */
-    this.warn = this.warning.bind(this);
+    this.warning = this.warn.bind(this);
+  }
+
+  private getLogger(tags: string[]) {
+    return this._logger.get(...this._tags, ...tags);
   }
 
   public error(err: string | Error, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'error'], err);
+    this.getLogger(tags).error(err);
   }
 
-  public warning(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'warning'], trimStr(msg));
+  public warn(msg: string, tags: string[] = []) {
+    this.getLogger(tags).warn(msg);
   }
 
   public debug(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'debug'], trimStr(msg));
+    this.getLogger(tags).debug(msg);
   }
 
   public info(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'info'], trimStr(msg));
+    this.getLogger(tags).info(trimStr(msg));
   }
 
   public clone(tags: string[]) {

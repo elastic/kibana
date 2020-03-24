@@ -55,7 +55,7 @@ import {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
-import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
+import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
@@ -77,7 +77,17 @@ import {
 } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly } from '../utils';
+export { RecursiveReadonly, DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  AppCategory,
+  UiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+  ImageValidation,
+  StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
+} from '../types';
 
 export {
   ApplicationSetup,
@@ -98,6 +108,7 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
+  ScopedHistory,
 } from './application';
 
 export {
@@ -133,11 +144,12 @@ export {
   HttpHeadersInit,
   HttpRequestInit,
   HttpFetchOptions,
+  HttpFetchOptionsWithPath,
   HttpFetchQuery,
-  HttpErrorResponse,
-  HttpErrorRequest,
+  HttpInterceptorResponseError,
+  HttpInterceptorRequestError,
   HttpInterceptor,
-  IHttpResponse,
+  HttpResponse,
   HttpHandler,
   IBasePath,
   IAnonymousPaths,
@@ -156,10 +168,11 @@ export {
   ToastInputFields,
   ToastsSetup,
   ToastsStart,
+  ToastOptions,
   ErrorToastOptions,
 } from './notifications';
 
-export { MountPoint, UnmountCallback } from './types';
+export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -195,14 +208,20 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
-
-  /**
-   * Allows plugins to get access to APIs available in start inside async
-   * handlers, such as {@link App.mount}. Promise will not resolve until Core
-   * and plugin dependencies have completed `start`.
-   */
-  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart>;
 }
+
+/**
+ * Allows plugins to get access to APIs available in start inside async
+ * handlers, such as {@link App.mount}. Promise will not resolve until Core
+ * and plugin dependencies have completed `start`.
+ *
+ * @public
+ */
+export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<
+  [CoreStart, TPluginsStart]
+>;
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -232,6 +251,8 @@ export interface CoreStart {
   overlays: OverlayStart;
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
+  /** {@link FatalErrorsStart} */
+  fatalErrors: FatalErrorsStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -302,6 +323,7 @@ export {
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,
+  FatalErrorsStart,
   HttpSetup,
   HttpStart,
   I18nStart,

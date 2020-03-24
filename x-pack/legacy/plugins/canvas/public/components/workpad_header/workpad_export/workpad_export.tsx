@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useState, MouseEvent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiContextMenu, EuiIcon } from '@elastic/eui';
 // @ts-ignore Untyped local
 import { Popover } from '../../popover';
-import { DisabledPanel } from './disabled_panel';
 import { PDFPanel } from './pdf_panel';
 import { ShareWebsiteFlyout } from './flyout';
 
-import { ComponentStrings } from '../../../../i18n';
+import { ComponentStrings } from '../../../../i18n/components';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 type ClosePopoverFn = () => void;
@@ -29,8 +28,6 @@ export type OnCloseFn = (type: CloseTypes) => void;
 export type GetExportUrlFn = (type: ExportUrlTypes) => string;
 
 export interface Props {
-  /** True if exporting is enabled, false otherwise. */
-  enabled: boolean;
   /** Handler to invoke when an export URL is copied to the clipboard. */
   onCopy: OnCopyFn;
   /** Handler to invoke when an end product is exported. */
@@ -42,12 +39,7 @@ export interface Props {
 /**
  * The Menu for Exporting a Workpad from Canvas.
  */
-export const WorkpadExport: FunctionComponent<Props> = ({
-  enabled,
-  onCopy,
-  onExport,
-  getExportUrl,
-}) => {
+export const WorkpadExport: FunctionComponent<Props> = ({ onCopy, onExport, getExportUrl }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   const onClose = () => {
@@ -106,16 +98,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
         panel: {
           id: 1,
           title: strings.getShareDownloadPDFTitle(),
-          content: enabled ? (
-            getPDFPanel(closePopover)
-          ) : (
-            <DisabledPanel
-              onCopy={() => {
-                onCopy('reportingConfig');
-                closePopover();
-              }}
-            />
-          ),
+          content: getPDFPanel(closePopover),
         },
       },
       {
@@ -129,7 +112,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
     ],
   });
 
-  const exportControl = (togglePopover: (ev: MouseEvent) => void) => (
+  const exportControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonIcon
       iconType="share"
       aria-label={strings.getShareWorkpadMessage()}
@@ -160,7 +143,6 @@ export const WorkpadExport: FunctionComponent<Props> = ({
 };
 
 WorkpadExport.propTypes = {
-  enabled: PropTypes.bool.isRequired,
   onCopy: PropTypes.func.isRequired,
   onExport: PropTypes.func.isRequired,
   getExportUrl: PropTypes.func.isRequired,

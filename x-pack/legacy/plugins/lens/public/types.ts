@@ -7,21 +7,16 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'src/core/public';
-import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
-import { DateRange } from '../common';
-import { Query, esFilters } from '../../../../../src/plugins/data/public';
-
-// eslint-disable-next-line
-export interface EditorFrameOptions {}
+import { DateRange } from '../../../../plugins/lens/common';
+import { Query, Filter, SavedQuery } from '../../../../../src/plugins/data/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
 export interface PublicAPIProps<T> {
   state: T;
-  setState: StateSetter<T>;
   layerId: string;
   dateRange: DateRange;
 }
@@ -31,10 +26,11 @@ export interface EditorFrameProps {
   doc?: Document;
   dateRange: DateRange;
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   savedQuery?: SavedQuery;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
+  // This should be replaced with a top-down state
   onChange: (newState: {
     filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
     doc: Document;
@@ -47,12 +43,14 @@ export interface EditorFrameInstance {
 
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T, P>(datasource: Datasource<T, P>) => void;
-  registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
+  registerDatasource: <T, P>(datasource: Datasource<T, P> | Promise<Datasource<T, P>>) => void;
+  registerVisualization: <T, P>(
+    visualization: Visualization<T, P> | Promise<Visualization<T, P>>
+  ) => void;
 }
 
 export interface EditorFrameStart {
-  createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
+  createInstance: () => Promise<EditorFrameInstance>;
 }
 
 // Hints the default nesting to the data source. 0 is the highest priority
@@ -135,9 +133,16 @@ export interface Datasource<T = unknown, P = unknown> {
 
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
+  clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
+  removeColumn: (props: { prevState: T; layerId: string; columnId: string }) => T;
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
+  renderDimensionTrigger: (domElement: Element, props: DatasourceDimensionTriggerProps<T>) => void;
+  renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
+  renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
+  canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
+  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean;
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
@@ -153,21 +158,10 @@ export interface Datasource<T = unknown, P = unknown> {
  * This is an API provided to visualizations by the frame, which calls the publicAPI on the datasource
  */
 export interface DatasourcePublicAPI {
-  getTableSpec: () => TableSpec;
+  datasourceId: string;
+  getTableSpec: () => Array<{ columnId: string }>;
   getOperationForColumnId: (columnId: string) => Operation | null;
-
-  // Render can be called many times
-  renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
-  renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => void;
 }
-
-export interface TableSpecColumn {
-  // Column IDs are the keys for internal state in data sources and visualizations
-  columnId: string;
-}
-
-// TableSpec is managed by visualizations
-export type TableSpec = TableSpecColumn[];
 
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
@@ -176,33 +170,63 @@ export interface DatasourceDataPanelProps<T = unknown> {
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
   dateRange: DateRange;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }
 
-// The only way a visualization has to restrict the query building
-export interface DatasourceDimensionPanelProps {
-  layerId: string;
-  columnId: string;
-
-  dragDropContext: DragContextState;
-
-  // Visualizations can restrict operations based on their own rules
+interface SharedDimensionProps {
+  /** Visualizations can restrict operations based on their own rules.
+   * For example, limiting to only bucketed or only numeric operations.
+   */
   filterOperations: (operation: OperationMetadata) => boolean;
 
-  // Visualizations can hint at the role this dimension would play, which
-  // affects the default ordering of the query
+  /** Visualizations can hint at the role this dimension would play, which
+   * affects the default ordering of the query
+   */
   suggestedPriority?: DimensionPriority;
-  onRemove?: (accessor: string) => void;
 
-  // Some dimension editors will allow users to change the operation grouping
-  // from the panel, and this lets the visualization hint that it doesn't want
-  // users to have that level of control
+  /** Some dimension editors will allow users to change the operation grouping
+   * from the panel, and this lets the visualization hint that it doesn't want
+   * users to have that level of control
+   */
   hideGrouping?: boolean;
 }
 
-export interface DatasourceLayerPanelProps {
+export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   layerId: string;
+  columnId: string;
+  onRemove?: (accessor: string) => void;
+  state: T;
+};
+
+// The only way a visualization has to restrict the query building
+export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
+  setState: StateSetter<T>;
+  core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
+  dateRange: DateRange;
+};
+
+export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
+  dragDropContext: DragContextState;
+  togglePopover: () => void;
+};
+
+export interface DatasourceLayerPanelProps<T> {
+  layerId: string;
+  state: T;
+  setState: StateSetter<T>;
 }
+
+export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
+  layerId: string;
+  columnId: string;
+  state: T;
+  setState: StateSetter<T>;
+  dragDropContext: DragContextState;
+};
+
+export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
+  droppedItem: unknown;
+};
 
 export type DataType = 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip';
 
@@ -237,11 +261,32 @@ export interface LensMultiTable {
   };
 }
 
-export interface VisualizationProps<T = unknown> {
-  dragDropContext: DragContextState;
+export interface VisualizationConfigProps<T = unknown> {
+  layerId: string;
   frame: FramePublicAPI;
   state: T;
+}
+
+export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProps<T> & {
   setState: (newState: T) => void;
+};
+
+type VisualizationDimensionGroupConfig = SharedDimensionProps & {
+  groupLabel: string;
+
+  /** ID is passed back to visualization. For example, `x` */
+  groupId: string;
+  accessors: string[];
+  supportsMoreColumns: boolean;
+  /** If required, a warning will appear if accessors are empty */
+  required?: boolean;
+  dataTestSubj?: string;
+};
+
+interface VisualizationDimensionChangeProps<T> {
+  layerId: string;
+  columnId: string;
+  prevState: T;
 }
 
 /**
@@ -306,7 +351,7 @@ export interface FramePublicAPI {
 
   dateRange: DateRange;
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
@@ -325,6 +370,20 @@ export interface Visualization<T = unknown, P = unknown> {
 
   visualizationTypes: VisualizationType[];
 
+  getLayerIds: (state: T) => string[];
+  clearLayer: (state: T, layerId: string) => T;
+  removeLayer?: (state: T, layerId: string) => T;
+  appendLayer?: (state: T, layerId: string) => T;
+
+  // Layer context menu is used by visualizations for styling the entire layer
+  // For example, the XY visualization uses this to have multiple chart types
+  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+  renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerWidgetProps<T>) => void;
+
+  getConfiguration: (
+    props: VisualizationConfigProps<T>
+  ) => { groups: VisualizationDimensionGroupConfig[] };
+
   getDescription: (
     state: T
   ) => {
@@ -339,7 +398,13 @@ export interface Visualization<T = unknown, P = unknown> {
 
   getPersistableState: (state: T) => P;
 
-  renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
+  // Actions triggered by the frame which tell the datasource that a dimension is being changed
+  setDimension: (
+    props: VisualizationDimensionChangeProps<T> & {
+      groupId: string;
+    }
+  ) => T;
+  removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
 
   toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
 

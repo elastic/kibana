@@ -11,6 +11,7 @@ import styled, { css } from 'styled-components';
 
 interface LinkProps {
   color?: LinkAnchorProps['color'];
+  disabled?: boolean;
   href?: string;
   iconSide?: 'left' | 'right';
   onClick?: Function;
@@ -51,8 +52,15 @@ export interface LinkIconProps extends LinkProps {
 }
 
 export const LinkIcon = React.memo<LinkIconProps>(
-  ({ children, color, href, iconSide = 'left', iconSize = 's', iconType, onClick }) => (
-    <Link className="siemLinkIcon" color={color} href={href} iconSide={iconSide} onClick={onClick}>
+  ({ children, color, disabled, href, iconSide = 'left', iconSize = 's', iconType, onClick }) => (
+    <Link
+      className="siemLinkIcon"
+      color={color}
+      disabled={disabled}
+      href={href}
+      iconSide={iconSide}
+      onClick={onClick}
+    >
       <EuiIcon size={iconSize} type={iconType} />
       <span className="siemLinkIcon__label">{children}</span>
     </Link>

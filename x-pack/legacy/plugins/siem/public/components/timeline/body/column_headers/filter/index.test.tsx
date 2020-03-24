@@ -7,7 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { ColumnHeaderType } from '../column_header';
+import { ColumnHeaderType } from '../../../../../store/timeline/model';
 import { defaultHeaders } from '../default_headers';
 
 import { Filter } from '.';

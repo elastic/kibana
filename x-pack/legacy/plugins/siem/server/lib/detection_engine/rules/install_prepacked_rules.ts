@@ -4,19 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionsClient } from '../../../../../actions';
-import { AlertsClient } from '../../../../../alerting';
+import { Alert } from '../../../../../../../plugins/alerting/common';
+import { ActionsClient } from '../../../../../../../plugins/actions/server';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
 import { createRules } from './create_rules';
-import { RuleAlertParamsRest } from '../types';
+import { PrepackagedRules } from '../types';
 
-export const installPrepackagedRules = async (
+export const installPrepackagedRules = (
   alertsClient: AlertsClient,
   actionsClient: ActionsClient,
-  rules: RuleAlertParamsRest[],
+  rules: PrepackagedRules[],
   outputIndex: string
-): Promise<void> => {
-  await rules.forEach(async rule => {
+): Array<Promise<Alert>> =>
+  rules.reduce<Array<Promise<Alert>>>((acc, rule) => {
     const {
+      actions,
+      anomaly_threshold: anomalyThreshold,
       description,
       enabled,
       false_positives: falsePositives,
@@ -24,6 +27,7 @@ export const installPrepackagedRules = async (
       immutable,
       query,
       language,
+      machine_learning_job_id: machineLearningJobId,
       saved_id: savedId,
       timeline_id: timelineId,
       timeline_title: timelineTitle,
@@ -39,41 +43,50 @@ export const installPrepackagedRules = async (
       tags,
       to,
       type,
-      threats,
+      threat,
+      throttle,
       references,
+      note,
       version,
+      lists,
     } = rule;
-    createRules({
-      alertsClient,
-      actionsClient,
-      description,
-      enabled,
-      falsePositives,
-      from,
-      immutable,
-      query,
-      language,
-      outputIndex,
-      savedId,
-      timelineId,
-      timelineTitle,
-      meta,
-      filters,
-      ruleId,
-      index,
-      interval,
-      maxSignals,
-      riskScore,
-      name,
-      severity,
-      tags,
-      to,
-      type,
-      threats,
-      references,
-      version,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-  });
-};
+    return [
+      ...acc,
+      createRules({
+        alertsClient,
+        actionsClient,
+        actions,
+        anomalyThreshold,
+        description,
+        enabled,
+        falsePositives,
+        from,
+        immutable,
+        query,
+        language,
+        machineLearningJobId,
+        outputIndex,
+        savedId,
+        timelineId,
+        timelineTitle,
+        meta,
+        filters,
+        ruleId,
+        index,
+        interval,
+        maxSignals,
+        riskScore,
+        name,
+        severity,
+        tags,
+        to,
+        type,
+        threat,
+        throttle,
+        references,
+        note,
+        version,
+        lists,
+      }),
+    ];
+  }, []);

@@ -158,7 +158,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 createdBy: 'elastic',
                 throttle: '1m',
                 updatedBy: 'elastic',
-                apiKeyOwner: 'elastic',
+                apiKeyOwner: null,
                 muteAll: false,
                 mutedInstanceIds: [],
                 createdAt: match.createdAt,
@@ -202,7 +202,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 page: 1,
-                perPage: 20,
+                perPage: 10,
                 total: 0,
                 data: [],
               });

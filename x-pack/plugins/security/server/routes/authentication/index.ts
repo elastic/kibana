@@ -27,18 +27,15 @@ export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
   defineSessionRoutes(params);
   defineCommonRoutes(params);
 
-  if (
-    params.config.authc.providers.includes('basic') ||
-    params.config.authc.providers.includes('token')
-  ) {
+  if (params.authc.isProviderTypeEnabled('basic') || params.authc.isProviderTypeEnabled('token')) {
     defineBasicRoutes(params);
   }
 
-  if (params.config.authc.providers.includes('saml')) {
+  if (params.authc.isProviderTypeEnabled('saml')) {
     defineSAMLRoutes(params);
   }
 
-  if (params.config.authc.providers.includes('oidc')) {
+  if (params.authc.isProviderTypeEnabled('oidc')) {
     defineOIDCRoutes(params);
   }
 }

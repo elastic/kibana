@@ -5,15 +5,24 @@
  */
 
 import { createRulesBulkSchema } from './create_rules_bulk_schema';
-import { UpdateRuleAlertParamsRest } from '../../rules/types';
+import { PatchRuleAlertParamsRest } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 // only the basics of testing are here.
 // see: create_rules_schema.test.ts for the bulk of the validation tests
 // this just wraps createRulesSchema in an array
 describe('create_rules_bulk_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('can take an empty array and validate it', () => {
     expect(
-      createRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([]).error
+      createRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([]).error
     ).toBeFalsy();
   });
 
@@ -29,7 +38,7 @@ describe('create_rules_bulk_schema', () => {
 
   test('single array of [id] does validate', () => {
     expect(
-      createRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([
+      createRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([
         {
           rule_id: 'rule-1',
           risk_score: 50,
@@ -37,7 +46,7 @@ describe('create_rules_bulk_schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           type: 'query',
           query: 'some query',
           index: ['index-1'],
@@ -49,7 +58,7 @@ describe('create_rules_bulk_schema', () => {
 
   test('two values of [id] does validate', () => {
     expect(
-      createRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([
+      createRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([
         {
           rule_id: 'rule-1',
           risk_score: 50,
@@ -57,7 +66,7 @@ describe('create_rules_bulk_schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           type: 'query',
           query: 'some query',
           index: ['index-1'],
@@ -70,7 +79,7 @@ describe('create_rules_bulk_schema', () => {
           from: 'now-5m',
           to: 'now',
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           type: 'query',
           query: 'some query',
           index: ['index-1'],
@@ -78,5 +87,174 @@ describe('create_rules_bulk_schema', () => {
         },
       ]).error
     ).toBeFalsy();
+  });
+
+  test('The default for "from" will be "now-6m"', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          version: 1,
+        },
+      ]).value[0].from
+    ).toEqual('now-6m');
+  });
+
+  test('The default for "to" will be "now"', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          version: 1,
+        },
+      ]).value[0].to
+    ).toEqual('now');
+  });
+
+  test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'junk',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          version: 1,
+        },
+      ]).error.message
+    ).toEqual(
+      '"value" at position 0 fails because [child "severity" fails because ["severity" must be one of [low, medium, high, critical]]]'
+    );
+  });
+
+  test('You can set "note" to a string', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: '# test markdown',
+          version: 1,
+        },
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('You can set "note" to an empty string', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: '',
+          version: 1,
+        },
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('You cannot set "note" to anything other than string', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: {
+            something: 'some object',
+          },
+          version: 1,
+        },
+      ]).error.message
+    ).toEqual(
+      '"value" at position 0 fails because [child "note" fails because ["note" must be a string]]'
+    );
+  });
+
+  test('The default for "actions" will be an empty array', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          version: 1,
+        },
+      ]).value[0].actions
+    ).toEqual([]);
+  });
+
+  test('The default for "throttle" will be null', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          version: 1,
+        },
+      ]).value[0].throttle
+    ).toEqual(null);
   });
 });

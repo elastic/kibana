@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../common';
+import { Filter, FilterStateStore } from '../../../../common';
 
 export function getFilter(
-  store: esFilters.FilterStateStore,
+  store: FilterStateStore,
   disabled: boolean,
   negated: boolean,
   queryKey: string,
   queryValue: any
-): esFilters.Filter {
+): Filter {
   return {
     $state: {
       store,

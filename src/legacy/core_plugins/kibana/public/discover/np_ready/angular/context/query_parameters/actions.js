@@ -18,14 +18,11 @@
  */
 
 import _ from 'lodash';
-import { getServices } from '../../../../kibana_services';
-import { generateFilters } from '../../../../../../../../../plugins/data/public';
+import { esFilters } from '../../../../../../../../../plugins/data/public';
 
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE, QUERY_PARAMETER_KEYS } from './constants';
 
-export function getQueryParameterActions() {
-  const filterManager = getServices().filterManager;
-
+export function getQueryParameterActions(filterManager, indexPatterns) {
   const setPredecessorCount = state => predecessorCount =>
     (state.queryParameters.predecessorCount = clamp(
       MIN_CONTEXT_SIZE,
@@ -49,10 +46,18 @@ export function getQueryParameterActions() {
 
   const addFilter = state => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
-    const newFilters = generateFilters(filterManager, field, values, operation, indexPatternId);
+    const newFilters = esFilters.generateFilters(
+      filterManager,
+      field,
+      values,
+      operation,
+      indexPatternId
+    );
     filterManager.addFilters(newFilters);
-    const indexPattern = await getServices().indexPatterns.get(indexPatternId);
-    indexPattern.popularizeField(field.name, 1);
+    if (indexPatterns) {
+      const indexPattern = await indexPatterns.get(indexPatternId);
+      indexPattern.popularizeField(field.name, 1);
+    }
   };
 
   return {

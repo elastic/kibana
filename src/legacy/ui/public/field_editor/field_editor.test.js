@@ -50,9 +50,7 @@ jest.mock('@elastic/eui', () => ({
   EuiText: 'eui-text',
   EuiTextArea: 'eui-textArea',
   htmlIdGenerator: () => 42,
-  palettes: {
-    euiPaletteColorBlind: { colors: ['red'] },
-  },
+  euiPaletteColorBlind: () => ['red'],
 }));
 
 jest.mock('ui/scripting_languages', () => ({

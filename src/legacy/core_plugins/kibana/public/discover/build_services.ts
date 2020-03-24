@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createHashHistory, History } from 'history';
+
 import {
   Capabilities,
   ChromeStart,
@@ -30,12 +32,16 @@ import {
   IndexPatternsContract,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
-import { createSavedSearchesService } from './saved_searches';
+
 import { DiscoverStartPlugins } from './plugin';
-import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
-import { SavedSearch } from './np_ready/types';
-import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
+import { ChartsPluginStart } from '../../../../../plugins/charts/public';
+import { VisualizationsStart } from '../../../visualizations/public';
+import {
+  createSavedSearchesLoader,
+  DocViewerComponent,
+  SavedSearch,
+} from '../../../../../plugins/discover/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -44,8 +50,9 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
-  docViewsRegistry: DocViewsRegistry;
-  eui_utils: EuiUtilsStart;
+  DocViewer: DocViewerComponent;
+  history: History;
+  theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract;
   inspector: unknown;
@@ -56,11 +63,11 @@ export interface DiscoverServices {
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
+  visualizations: VisualizationsStart;
 }
 export async function buildServices(
   core: CoreStart,
-  plugins: DiscoverStartPlugins,
-  docViewsRegistry: DocViewsRegistry
+  plugins: DiscoverStartPlugins
 ): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
@@ -68,7 +75,7 @@ export async function buildServices(
     chrome: core.chrome,
     overlays: core.overlays,
   };
-  const savedObjectService = createSavedSearchesService(services);
+  const savedObjectService = createSavedSearchesLoader(services);
   return {
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
@@ -76,8 +83,9 @@ export async function buildServices(
     core,
     data: plugins.data,
     docLinks: core.docLinks,
-    docViewsRegistry,
-    eui_utils: plugins.eui_utils,
+    DocViewer: plugins.discover.docViews.DocViewer,
+    history: createHashHistory(),
+    theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
@@ -89,5 +97,6 @@ export async function buildServices(
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
+    visualizations: plugins.visualizations,
   };
 }

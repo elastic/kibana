@@ -26,3 +26,10 @@ const uiStyles = require.context(
   /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/
 );
 uiStyles.keys().forEach(key => uiStyles(key));
+
+const json = require.context(
+  '../shareable_runtime/test/workpads',
+  false,
+  /\.json$/
+);
+json.keys().forEach(key => json(key));

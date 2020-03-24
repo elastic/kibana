@@ -21,8 +21,6 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import ChoroplethLayer from '../choropleth_layer';
-import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
 import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
@@ -43,6 +41,7 @@ import { setup as visualizationsSetup } from '../../../visualizations/public/np_
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
+import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
@@ -50,7 +49,6 @@ const PIXEL_DIFF = 96;
 describe('RegionMapsVisualizationTests', function() {
   let domNode;
   let RegionMapsVisualization;
-  let indexPattern;
   let vis;
   let dependencies;
 
@@ -109,13 +107,10 @@ describe('RegionMapsVisualizationTests', function() {
 
       if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(
-          createRegionMapTypeDefinition(dependencies)
-        );
+        visualizationsSetup.createBaseVisualization(createRegionMapTypeDefinition(dependencies));
       }
 
       RegionMapsVisualization = createRegionMapVisualization(dependencies);
-      indexPattern = Private(LogstashIndexPatternStubProvider);
 
       ChoroplethLayer.prototype._makeJsonAjaxCall = async function() {
         //simulate network call
@@ -158,7 +153,7 @@ describe('RegionMapsVisualizationTests', function() {
 
       imageComparator = new ImageComparator();
 
-      vis = new Vis(indexPattern, {
+      vis = new ExprVis({
         type: 'region_map',
       });
 

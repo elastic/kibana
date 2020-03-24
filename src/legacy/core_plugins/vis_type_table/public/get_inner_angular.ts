@@ -21,19 +21,20 @@
 // these are necessary to bootstrap the local angular.
 // They can stay even after NP cutover
 import angular from 'angular';
-import 'ui/angular-bootstrap';
 import 'angular-recursion';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 import {
-  PrivateProvider,
+  initAngularBootstrap,
   PaginateDirectiveProvider,
   PaginateControlsDirectiveProvider,
+  PrivateProvider,
   watchMultiDecorator,
   KbnAccessibleClickProvider,
-  StateManagementConfigProvider,
   configureAppAngularModule,
-} from './legacy_imports';
+} from '../../../../plugins/kibana_legacy/public';
+
+initAngularBootstrap();
 
 const thirdPartyAngularDependencies = ['ngSanitize', 'ui.bootstrap', 'RecursionHelper'];
 
@@ -70,22 +71,19 @@ function createLocalPrivateModule() {
 }
 
 function createLocalConfigModule(uiSettings: IUiSettingsClient) {
-  angular
-    .module('tableVisConfig', ['tableVisPrivate'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', function() {
-      return {
-        $get: () => ({
-          get: (value: string) => {
-            return uiSettings ? uiSettings.get(value) : undefined;
-          },
-          // set method is used in agg_table mocha test
-          set: (key: string, value: string) => {
-            return uiSettings ? uiSettings.set(key, value) : undefined;
-          },
-        }),
-      };
-    });
+  angular.module('tableVisConfig', []).provider('config', function() {
+    return {
+      $get: () => ({
+        get: (value: string) => {
+          return uiSettings ? uiSettings.get(value) : undefined;
+        },
+        // set method is used in agg_table mocha test
+        set: (key: string, value: string) => {
+          return uiSettings ? uiSettings.set(key, value) : undefined;
+        },
+      }),
+    };
+  });
 }
 
 function createLocalI18nModule() {

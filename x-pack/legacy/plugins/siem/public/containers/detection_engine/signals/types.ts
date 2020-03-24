@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './errors_types';
-
 export interface BasicSignals {
   signal: AbortSignal;
 }
@@ -96,5 +94,6 @@ export interface Privilege {
       write: boolean;
     };
   };
-  isAuthenticated: boolean;
+  is_authenticated: boolean;
+  has_encryption_key: boolean;
 }

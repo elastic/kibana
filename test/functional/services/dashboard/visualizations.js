@@ -24,7 +24,14 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'visEditor', 'header', 'discover']);
+  const PageObjects = getPageObjects([
+    'dashboard',
+    'visualize',
+    'visEditor',
+    'header',
+    'discover',
+    'timePicker',
+  ]);
 
   return new (class DashboardVisualizations {
     async createAndAddTSVBVisualization(name) {
@@ -43,7 +50,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       log.debug(`createSavedSearch(${name})`);
       await PageObjects.header.clickDiscover();
 
-      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.timePicker.setHistoricalDataRange();
 
       if (query) {
         await queryBar.setQuery(query);

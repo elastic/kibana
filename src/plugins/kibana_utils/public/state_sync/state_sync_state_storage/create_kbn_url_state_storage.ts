@@ -28,7 +28,11 @@ import {
 } from '../../state_management/url';
 
 export interface IKbnUrlStateStorage extends IStateStorage {
-  set: <State>(key: string, state: State, opts?: { replace: boolean }) => Promise<string>;
+  set: <State>(
+    key: string,
+    state: State,
+    opts?: { replace: boolean }
+  ) => Promise<string | undefined>;
   get: <State = unknown>(key: string) => State | null;
   change$: <State = unknown>(key: string) => Observable<State | null>;
 
@@ -36,7 +40,8 @@ export interface IKbnUrlStateStorage extends IStateStorage {
   cancel: () => void;
 
   // synchronously runs any pending url updates
-  flush: (opts?: { replace?: boolean }) => void;
+  // returned boolean indicates if change occurred
+  flush: (opts?: { replace?: boolean }) => boolean;
 }
 
 /**
@@ -60,7 +65,11 @@ export const createKbnUrlStateStorage = (
         replace
       );
     },
-    get: key => getStateFromKbnUrl(key),
+    get: key => {
+      // if there is a pending url update, then state will be extracted from that pending url,
+      // otherwise current url will be used to retrieve state from
+      return getStateFromKbnUrl(key, url.getPendingUrl());
+    },
     change$: <State>(key: string) =>
       new Observable(observer => {
         const unlisten = url.listen(() => {
@@ -75,7 +84,7 @@ export const createKbnUrlStateStorage = (
         share()
       ),
     flush: ({ replace = false }: { replace?: boolean } = {}) => {
-      url.flush(replace);
+      return !!url.flush(replace);
     },
     cancel() {
       url.cancel();

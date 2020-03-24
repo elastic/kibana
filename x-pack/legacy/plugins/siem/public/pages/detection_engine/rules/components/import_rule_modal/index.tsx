@@ -8,28 +8,26 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
+  // @ts-ignore no-exported-member
+  EuiFilePicker,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  // @ts-ignore no-exported-member
-  EuiFilePicker,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { noop } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
-import { failure } from 'io-ts/lib/PathReporter';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import uuid from 'uuid';
 
-import { duplicateRules, RulesSchema } from '../../../../../containers/detection_engine/rules';
-import { useStateToaster } from '../../../../../components/toasters';
-import { ndjsonToJSON } from '../json_downloader';
+import { importRules } from '../../../../../containers/detection_engine/rules';
+import {
+  displayErrorToast,
+  displaySuccessToast,
+  useStateToaster,
+  errorToToaster,
+} from '../../../../../components/toasters';
 import * as i18n from './translations';
 
 interface ImportRuleModalProps {
@@ -40,10 +38,6 @@ interface ImportRuleModalProps {
 
 /**
  * Modal component for importing Rules from a json file
- *
- * @param filename name of file to be downloaded
- * @param payload JSON string to write to file
- *
  */
 export const ImportRuleModalComponent = ({
   showModal,
@@ -52,57 +46,55 @@ export const ImportRuleModalComponent = ({
 }: ImportRuleModalProps) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [overwrite, setOverwrite] = useState(false);
   const [, dispatchToaster] = useStateToaster();
 
-  const cleanupAndCloseModal = () => {
+  const cleanupAndCloseModal = useCallback(() => {
     setIsImporting(false);
     setSelectedFiles(null);
     closeModal();
-  };
+  }, [setIsImporting, setSelectedFiles, closeModal]);
 
-  const importRules = useCallback(async () => {
+  const importRulesCallback = useCallback(async () => {
     if (selectedFiles != null) {
       setIsImporting(true);
-      const reader = new FileReader();
-      reader.onload = async event => {
-        // @ts-ignore type is string, not ArrayBuffer as FileReader.readAsText is called
-        const importedRules = ndjsonToJSON(event?.target?.result ?? '');
+      const abortCtrl = new AbortController();
 
-        const decodedRules = pipe(
-          RulesSchema.decode(importedRules),
-          fold(errors => {
-            cleanupAndCloseModal();
-            dispatchToaster({
-              type: 'addToaster',
-              toast: {
-                id: uuid.v4(),
-                title: i18n.IMPORT_FAILED,
-                color: 'danger',
-                iconType: 'alert',
-                errors: failure(errors),
-              },
-            });
-            throw new Error(failure(errors).join('\n'));
-          }, identity)
-        );
+      try {
+        const importResponse = await importRules({
+          fileToImport: selectedFiles[0],
+          overwrite,
+          signal: abortCtrl.signal,
+        });
 
-        const duplicatedRules = await duplicateRules({ rules: decodedRules });
+        // TODO: Improve error toast details for better debugging failed imports
+        // e.g. When success == true && success_count === 0 that means no rules were overwritten, etc
+        if (importResponse.success) {
+          displaySuccessToast(
+            i18n.SUCCESSFULLY_IMPORTED_RULES(importResponse.success_count),
+            dispatchToaster
+          );
+        }
+        if (importResponse.errors.length > 0) {
+          const formattedErrors = importResponse.errors.map(e =>
+            i18n.IMPORT_FAILED_DETAILED(e.rule_id, e.error.status_code, e.error.message)
+          );
+          displayErrorToast(i18n.IMPORT_FAILED, formattedErrors, dispatchToaster);
+        }
+
         importComplete();
         cleanupAndCloseModal();
-
-        dispatchToaster({
-          type: 'addToaster',
-          toast: {
-            id: uuid.v4(),
-            title: i18n.SUCCESSFULLY_IMPORTED_RULES(duplicatedRules.length),
-            color: 'success',
-            iconType: 'check',
-          },
-        });
-      };
-      Object.values(selectedFiles).map(f => reader.readAsText(f));
+      } catch (error) {
+        cleanupAndCloseModal();
+        errorToToaster({ title: i18n.IMPORT_FAILED, error, dispatchToaster });
+      }
     }
-  }, [selectedFiles]);
+  }, [selectedFiles, overwrite]);
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedFiles(null);
+    closeModal();
+  }, [closeModal]);
 
   return (
     <>
@@ -121,10 +113,9 @@ export const ImportRuleModalComponent = ({
               <EuiSpacer size="s" />
               <EuiFilePicker
                 id="rule-file-picker"
-                multiple
                 initialPromptText={i18n.INITIAL_PROMPT_TEXT}
-                onChange={(files: FileList) => {
-                  setSelectedFiles(Object.keys(files).length > 0 ? files : null);
+                onChange={(files: FileList | null) => {
+                  setSelectedFiles(files && files.length > 0 ? files : null);
                 }}
                 display={'large'}
                 fullWidth={true}
@@ -134,14 +125,18 @@ export const ImportRuleModalComponent = ({
               <EuiCheckbox
                 id="rule-overwrite-saved-object"
                 label={i18n.OVERWRITE_WITH_SAME_NAME}
-                disabled={true}
-                onChange={() => noop}
+                checked={overwrite}
+                onChange={() => setOverwrite(!overwrite)}
               />
             </EuiModalBody>
 
             <EuiModalFooter>
-              <EuiButtonEmpty onClick={closeModal}>{i18n.CANCEL_BUTTON}</EuiButtonEmpty>
-              <EuiButton onClick={importRules} disabled={selectedFiles == null || isImporting} fill>
+              <EuiButtonEmpty onClick={handleCloseModal}>{i18n.CANCEL_BUTTON}</EuiButtonEmpty>
+              <EuiButton
+                onClick={importRulesCallback}
+                disabled={selectedFiles == null || isImporting}
+                fill
+              >
                 {i18n.IMPORT_RULE}
               </EuiButton>
             </EuiModalFooter>

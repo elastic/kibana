@@ -112,5 +112,6 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     }
   }
   sorting={true}
+  tableLayout="fixed"
 />
 `;

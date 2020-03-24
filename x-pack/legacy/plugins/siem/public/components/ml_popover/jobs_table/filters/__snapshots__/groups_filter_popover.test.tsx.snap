@@ -5,16 +5,12 @@ exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
   anchorPosition="downCenter"
   button={
     <EuiFilterButton
-      color="text"
       data-test-subj="groups-filter-popover-button"
-      grow={true}
       hasActiveFilters={false}
-      iconSide="right"
       iconType="arrowDown"
       isSelected={false}
       numActiveFilters={0}
       onClick={[Function]}
-      type="button"
     >
       Groups
     </EuiFilterButton>

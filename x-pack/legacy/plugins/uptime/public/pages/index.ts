@@ -5,6 +5,5 @@
  */
 
 export { MonitorPage } from './monitor';
-export { OverviewPage } from './overview';
+export { SettingsPage } from './settings';
 export { NotFoundPage } from './not_found';
-export { PageHeader } from './page_header';

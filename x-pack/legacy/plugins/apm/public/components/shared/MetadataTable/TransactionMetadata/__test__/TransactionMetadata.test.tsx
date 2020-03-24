@@ -7,12 +7,12 @@
 import React from 'react';
 import { TransactionMetadata } from '..';
 import { render } from '@testing-library/react';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument,
-  MockApmPluginContextWrapper
+  expectTextsNotInDocument
 } from '../../../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderOptions = {
   wrapper: MockApmPluginContextWrapper

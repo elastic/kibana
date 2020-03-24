@@ -21,7 +21,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-import { getEsShardTimeout } from '../helpers';
+import { getEsShardTimeout } from '../services';
 
 const TIMEFILTER = '%timefilter%';
 const AUTOINTERVAL = '%autointerval%';

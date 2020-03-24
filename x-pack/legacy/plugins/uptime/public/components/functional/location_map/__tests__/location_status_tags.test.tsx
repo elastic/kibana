@@ -6,16 +6,40 @@
 
 import React from 'react';
 import moment from 'moment';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../';
 
-describe('StatusByLocation component', () => {
+// Failing: https://github.com/elastic/kibana/issues/54818
+describe('LocationStatusTags component', () => {
   let monitorLocations: MonitorLocation[];
 
-  const start = moment('2020-01-10T12:22:32.567Z');
-  beforeAll(() => {
-    moment.prototype.fromNow = jest.fn((date: string) => start.from(date));
+  it('renders properly against props', () => {
+    monitorLocations = [
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: moment()
+          .subtract('5', 'w')
+          .toISOString(),
+      },
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: moment()
+          .subtract('5', 'w')
+          .toISOString(),
+      },
+      {
+        summary: { up: 0, down: 2 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: moment()
+          .subtract('5', 'w')
+          .toISOString(),
+      },
+    ];
+    const component = shallowWithIntl(<LocationStatusTags locations={monitorLocations} />);
+    expect(component).toMatchSnapshot();
   });
 
   it('renders when there are many location', () => {
@@ -23,42 +47,58 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.567Z',
+        timestamp: moment()
+          .subtract('5', 's')
+          .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:28.825Z',
+        timestamp: moment()
+          .subtract('5', 'm')
+          .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:31.586Z',
+        timestamp: moment()
+          .subtract('5', 'h')
+          .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
-        geo: { name: 'Tokya', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:25.771Z',
+        geo: { name: 'Tokyo', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: moment()
+          .subtract('5', 'd')
+          .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'New York', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:27.485Z',
+        timestamp: moment()
+          .subtract('5', 'w')
+          .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Toronto', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:28.815Z',
+        timestamp: moment()
+          .subtract('5', 'M')
+          .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Sydney', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.132Z',
+        timestamp: moment()
+          .subtract('5', 'y')
+          .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Paris', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.973Z',
+        timestamp: moment()
+          .subtract('5', 'y')
+          .toISOString(),
       },
     ];
     const component = renderWithIntl(<LocationStatusTags locations={monitorLocations} />);
@@ -70,12 +110,16 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.567Z',
+        timestamp: moment()
+          .subtract('5', 's')
+          .toISOString(),
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-08T12:22:28.825Z',
+        timestamp: moment()
+          .subtract('5', 'd')
+          .toISOString(),
       },
     ];
     const component = renderWithIntl(<LocationStatusTags locations={monitorLocations} />);
@@ -87,12 +131,16 @@ describe('StatusByLocation component', () => {
       {
         summary: { up: 0, down: 2 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-06T12:22:32.567Z',
+        timestamp: moment()
+          .subtract('5', 's')
+          .toISOString(),
       },
       {
         summary: { up: 0, down: 2 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:28.825Z',
+        timestamp: moment()
+          .subtract('5', 'm')
+          .toISOString(),
       },
     ];
     const component = renderWithIntl(<LocationStatusTags locations={monitorLocations} />);

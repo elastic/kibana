@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { map } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
 import { ILicense } from '../../../licensing/common/types';
 import { checkLicense, GraphLicenseInformation } from '../../common/check_license';
@@ -12,13 +13,15 @@ import { checkLicense, GraphLicenseInformation } from '../../common/check_licens
 export class LicenseState {
   private licenseInformation: GraphLicenseInformation = checkLicense(undefined);
   private subscription: Subscription | null = null;
+  private observable: Observable<GraphLicenseInformation> | null = null;
 
-  private updateInformation(license: ILicense | undefined) {
-    this.licenseInformation = checkLicense(license);
+  private updateInformation(licenseInformation: GraphLicenseInformation) {
+    this.licenseInformation = licenseInformation;
   }
 
   public start(license$: Observable<ILicense>) {
-    this.subscription = license$.subscribe(this.updateInformation.bind(this));
+    this.observable = license$.pipe(map(checkLicense));
+    this.subscription = this.observable.subscribe(this.updateInformation.bind(this));
   }
 
   public stop() {
@@ -29,6 +32,10 @@ export class LicenseState {
 
   public getLicenseInformation() {
     return this.licenseInformation;
+  }
+
+  public getLicenseInformation$() {
+    return this.observable;
   }
 }
 

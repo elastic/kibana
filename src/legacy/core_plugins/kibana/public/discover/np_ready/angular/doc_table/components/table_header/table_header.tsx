@@ -21,9 +21,11 @@ import { IndexPattern } from '../../../../../kibana_services';
 // @ts-ignore
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';
+import { getDefaultSort } from '../../lib/get_default_sort';
 
 interface Props {
   columns: string[];
+  defaultSortOrder: string;
   hideTimeColumn: boolean;
   indexPattern: IndexPattern;
   isShortDots: boolean;
@@ -35,6 +37,7 @@ interface Props {
 
 export function TableHeader({
   columns,
+  defaultSortOrder,
   hideTimeColumn,
   indexPattern,
   isShortDots,
@@ -53,7 +56,9 @@ export function TableHeader({
           <TableHeaderColumn
             key={col.name}
             {...col}
-            sortOrder={sortOrder}
+            sortOrder={
+              sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)
+            }
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
             onChangeSortOrder={onChangeSortOrder}

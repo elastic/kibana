@@ -6,14 +6,13 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { Client, SearchParams } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { getDailyEvents } from '../../../../legacy/plugins/lens/server/usage/task';
-import { getVisualizationCounts } from '../../../../legacy/plugins/lens/server/usage/visualization_counts';
+import { getDailyEvents } from '../../../../plugins/lens/server/usage/task';
+import { getVisualizationCounts } from '../../../../plugins/lens/server/usage/visualization_counts';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -23,9 +22,9 @@ const COMMON_HEADERS = {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es: Client = getService('legacyEs');
-  const callCluster: CallCluster = (((path: 'search', searchParams: SearchParams) => {
+  const callCluster: APICaller = (((path: 'search', searchParams: SearchParams) => {
     return es[path].call(es, searchParams);
-  }) as unknown) as CallCluster;
+  }) as unknown) as APICaller;
 
   async function assertExpectedSavedObjects(num: number) {
     // Make sure that new/deleted docs are available to search
@@ -189,13 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await esArchiver.loadIfNeeded('lens/basic');
 
-      const results = await getVisualizationCounts(callCluster, {
-        // Fake KibanaConfig service
-        get() {
-          return '.kibana';
-        },
-        has: () => false,
-      } as KibanaConfig);
+      const results = await getVisualizationCounts(callCluster, '.kibana');
 
       expect(results).to.have.keys([
         'saved_overall',

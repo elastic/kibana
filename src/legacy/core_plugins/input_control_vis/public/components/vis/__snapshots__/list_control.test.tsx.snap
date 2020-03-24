@@ -8,10 +8,7 @@ exports[`disableMsg 1`] = `
   label="list control"
 >
   <EuiFieldText
-    compressed={false}
     disabled={true}
-    fullWidth={false}
-    isLoading={false}
     placeholder="Select..."
   />
 </FormRow>
@@ -28,6 +25,7 @@ exports[`renders ListControl 1`] = `
     compressed={false}
     data-test-subj="listControlSelect0"
     fullWidth={false}
+    inputRef={[Function]}
     isClearable={true}
     isLoading={false}
     onChange={[Function]}

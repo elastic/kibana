@@ -4,54 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import Boom from 'boom';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../../types';
-import { transformError, getIndex, callWithRequestFactory } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 
-export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'GET',
-    path: DETECTION_ENGINE_INDEX_URL,
-    options: {
-      tags: ['access:siem'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
+export const readIndexRoute = (router: IRouter) => {
+  router.get(
+    {
+      path: DETECTION_ENGINE_INDEX_URL,
+      validate: false,
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: RequestFacade, headers) {
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
       try {
-        const index = getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
-        const indexExists = await getIndexExists(callWithRequest, index);
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem.getSiemClient();
+
+        const index = siemClient.signalsIndex;
+        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, index);
+
         if (indexExists) {
-          // head request is used for if you want to get if the index exists
-          // or not and it will return a content-length: 0 along with either a 200 or 404
-          // depending on if the index exists or not.
-          if (request.method.toLowerCase() === 'head') {
-            return headers.response().code(200);
-          } else {
-            return headers.response({ name: index }).code(200);
-          }
+          return response.ok({ body: { name: index } });
         } else {
-          if (request.method.toLowerCase() === 'head') {
-            return headers.response().code(404);
-          } else {
-            return new Boom('index for this space does not exist', { statusCode: 404 });
-          }
+          return siemResponse.error({
+            statusCode: 404,
+            body: 'index for this space does not exist',
+          });
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const readIndexRoute = (server: ServerFacade) => {
-  server.route(createReadIndexRoute(server));
+    }
+  );
 };

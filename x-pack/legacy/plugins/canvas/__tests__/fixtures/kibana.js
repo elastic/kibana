@@ -23,7 +23,6 @@ export class Plugin {
         [this.props.name]: {},
         elasticsearch: mockElasticsearch,
       },
-      injectUiAppVars: noop,
       config: () => ({
         get: key => get(config, key),
         has: key => has(config, key),

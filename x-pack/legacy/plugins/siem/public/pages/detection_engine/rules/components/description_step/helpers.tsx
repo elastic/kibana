@@ -9,9 +9,10 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
@@ -22,14 +23,17 @@ import { esFilters } from '../../../../../../../../../../src/plugins/data/public
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 
-import { FilterLabel } from './filter_label';
 import * as i18n from './translations';
-import { BuildQueryBarDescription, BuildThreatsDescription, ListItems } from './types';
+import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 
-const isNotEmptyArray = (values: string[]) =>
-  !isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0;
+const NoteDescriptionContainer = styled(EuiFlexItem)`
+  height: 105px;
+  overflow-y: hidden;
+`;
+
+export const isNotEmptyArray = (values: string[]) => !isEmpty(values.join(''));
 
 const EuiBadgeWrap = styled(EuiBadge)`
   .euiBadge__text {
@@ -58,7 +62,7 @@ export const buildQueryBarDescription = ({
               <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
-                    <FilterLabel
+                    <esFilters.FilterLabel
                       filter={filter}
                       valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
@@ -73,12 +77,12 @@ export const buildQueryBarDescription = ({
       },
     ];
   }
-  if (!isEmpty(query.query)) {
+  if (!isEmpty(query)) {
     items = [
       ...items,
       {
         title: <>{i18n.QUERY_LABEL} </>,
-        description: <>{query.query} </>,
+        description: <>{query} </>,
       },
     ];
   }
@@ -94,7 +98,7 @@ export const buildQueryBarDescription = ({
   return items;
 };
 
-const ThreatsEuiFlexGroup = styled(EuiFlexGroup)`
+const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
   .euiFlexItem {
     margin-bottom: 0px;
   }
@@ -107,36 +111,31 @@ const TechniqueLinkItem = styled(EuiButtonEmpty)`
   }
 `;
 
-const ReferenceLinkItem = styled(EuiButtonEmpty)`
-  .euiIcon {
-    width: 12px;
-    height: 12px;
-  }
-`;
-
-export const buildThreatsDescription = ({
-  label,
-  threats,
-}: BuildThreatsDescription): ListItems[] => {
-  if (threats.length > 0) {
+export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
+  if (threat.length > 0) {
     return [
       {
         title: label,
         description: (
-          <ThreatsEuiFlexGroup direction="column">
-            {threats.map((threat, index) => {
-              const tactic = tacticsOptions.find(t => t.name === threat.tactic.name);
+          <ThreatEuiFlexGroup direction="column">
+            {threat.map((singleThreat, index) => {
+              const tactic = tacticsOptions.find(t => t.id === singleThreat.tactic.id);
               return (
-                <EuiFlexItem key={`${threat.tactic.name}-${index}`}>
-                  <EuiLink href={threat.tactic.reference} target="_blank">
+                <EuiFlexItem key={`${singleThreat.tactic.name}-${index}`}>
+                  <EuiLink
+                    data-test-subj="threatTacticLink"
+                    href={singleThreat.tactic.reference}
+                    target="_blank"
+                  >
                     {tactic != null ? tactic.text : ''}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {threat.techniques.map(technique => {
-                      const myTechnique = techniquesOptions.find(t => t.name === technique.name);
+                    {singleThreat.technique.map(technique => {
+                      const myTechnique = techniquesOptions.find(t => t.id === technique.id);
                       return (
                         <EuiFlexItem>
                           <TechniqueLinkItem
+                            data-test-subj="threatTechniqueLink"
                             href={technique.reference}
                             target="_blank"
                             iconType={ListTreeIcon}
@@ -153,7 +152,7 @@ export const buildThreatsDescription = ({
               );
             })}
             <EuiSpacer />
-          </ThreatsEuiFlexGroup>
+          </ThreatEuiFlexGroup>
         ),
       },
     ];
@@ -171,11 +170,17 @@ export const buildUnorderedListArrayDescription = (
       {
         title: label,
         description: (
-          <ul>
-            {values.map((val: string) =>
-              isEmpty(val) ? null : <li key={`${field}-${val}`}>{val}</li>
-            )}
-          </ul>
+          <EuiText size="s">
+            <ul>
+              {values.map(val =>
+                isEmpty(val) ? null : (
+                  <li data-test-subj="unorderedListArrayDescriptionItem" key={`${field}-${val}`}>
+                    {val}
+                  </li>
+                )
+              )}
+            </ul>
+          </EuiText>
         ),
       },
     ];
@@ -197,7 +202,9 @@ export const buildStringArrayDescription = (
             {values.map((val: string) =>
               isEmpty(val) ? null : (
                 <EuiFlexItem grow={false} key={`${field}-${val}`}>
-                  <EuiBadgeWrap color="hollow">{val}</EuiBadgeWrap>
+                  <EuiBadgeWrap data-test-subj="stringArrayDescriptionBadgeItem" color="hollow">
+                    {val}
+                  </EuiBadgeWrap>
                 </EuiFlexItem>
               )
             )}
@@ -222,21 +229,37 @@ export const buildUrlsDescription = (label: string, values: string[]): ListItems
       {
         title: label,
         description: (
-          <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-            {values.map((val: string) => (
-              <EuiFlexItem>
-                <ReferenceLinkItem
-                  href={val}
-                  target="_blank"
-                  iconType="link"
-                  size="xs"
-                  flush="left"
-                >
-                  {val}
-                </ReferenceLinkItem>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <EuiText size="s">
+            <ul>
+              {values
+                .filter(v => !isEmpty(v))
+                .map((val, index) => (
+                  <li data-test-subj="urlsDescriptionReferenceLinkItem" key={`${index}-${val}`}>
+                    <EuiLink href={val} external target="_blank">
+                      {val}
+                    </EuiLink>
+                  </li>
+                ))}
+            </ul>
+          </EuiText>
+        ),
+      },
+    ];
+  }
+  return [];
+};
+
+export const buildNoteDescription = (label: string, note: string): ListItems[] => {
+  if (note.trim() !== '') {
+    return [
+      {
+        title: label,
+        description: (
+          <NoteDescriptionContainer>
+            <div data-test-subj="noteDescriptionItem" className="eui-yScrollWithShadows">
+              {note}
+            </div>
+          </NoteDescriptionContainer>
         ),
       },
     ];

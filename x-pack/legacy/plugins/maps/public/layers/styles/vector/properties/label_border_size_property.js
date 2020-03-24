@@ -6,7 +6,8 @@
 
 import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
-import { DEFAULT_LABEL_SIZE, LABEL_BORDER_SIZES } from '../vector_style_defaults';
+import { DEFAULT_LABEL_SIZE } from '../vector_style_defaults';
+import { LABEL_BORDER_SIZES } from '../../../../../common/constants';
 
 const SMALL_SIZE = 1 / 16;
 const MEDIUM_SIZE = 1 / 8;
@@ -30,21 +31,27 @@ export class LabelBorderSizeProperty extends AbstractStyleProperty {
   }
 
   syncLabelBorderSizeWithMb(mbLayerId, mbMap) {
-    const widthRatio = getWidthRatio(this.getOptions().size);
-
     if (this.getOptions().size === LABEL_BORDER_SIZES.NONE) {
       mbMap.setPaintProperty(mbLayerId, 'text-halo-width', 0);
-    } else if (this._labelSizeProperty.isDynamic() && this._labelSizeProperty.isComplete()) {
-      const labelSizeExpression = this._labelSizeProperty.getMbSizeExpression();
-      mbMap.setPaintProperty(mbLayerId, 'text-halo-width', [
-        'max',
-        ['*', labelSizeExpression, widthRatio],
-        1,
-      ]);
-    } else {
-      const labelSize = _.get(this._labelSizeProperty.getOptions(), 'size', DEFAULT_LABEL_SIZE);
-      const labelBorderSize = Math.max(labelSize * widthRatio, 1);
-      mbMap.setPaintProperty(mbLayerId, 'text-halo-width', labelBorderSize);
+      return;
     }
+
+    const widthRatio = getWidthRatio(this.getOptions().size);
+
+    if (this._labelSizeProperty.isDynamic() && this._labelSizeProperty.isComplete()) {
+      const labelSizeExpression = this._labelSizeProperty.getMbSizeExpression();
+      if (labelSizeExpression) {
+        mbMap.setPaintProperty(mbLayerId, 'text-halo-width', [
+          'max',
+          ['*', labelSizeExpression, widthRatio],
+          1,
+        ]);
+        return;
+      }
+    }
+
+    const labelSize = _.get(this._labelSizeProperty.getOptions(), 'size', DEFAULT_LABEL_SIZE);
+    const labelBorderSize = Math.max(labelSize * widthRatio, 1);
+    mbMap.setPaintProperty(mbLayerId, 'text-halo-width', labelBorderSize);
   }
 }

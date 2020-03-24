@@ -36,6 +36,31 @@ jest.mock('../../../kibana_services', () => {
   };
 });
 
+// Mocking to prevent errors with React portal.
+// Temporary until https://github.com/elastic/kibana/pull/55877 provides other alternatives.
+jest.mock('@elastic/eui/lib/components/code/code_block', () => {
+  const React = require.requireActual('react');
+  return {
+    EuiCodeBlock: ({ children }) => (
+      <div>
+        <pre>
+          <code>{children}</code>
+        </pre>
+      </div>
+    ),
+  };
+});
+jest.mock('@elastic/eui/lib/components/code/code', () => {
+  const React = require.requireActual('react');
+  return {
+    EuiCode: ({ children }) => (
+      <span>
+        <code>{children}</code>
+      </span>
+    ),
+  };
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
 });

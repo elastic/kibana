@@ -237,6 +237,43 @@ test('`start` calls plugin.start with context and dependencies', async () => {
   expect(mockPluginInstance.start).toHaveBeenCalledWith(context, deps);
 });
 
+test("`start` resolves `startDependencies` Promise after plugin's start", async () => {
+  expect.assertions(2);
+
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
+  const startContext = { any: 'thing' } as any;
+  const pluginDeps = { someDep: 'value' };
+
+  let startDependenciesResolved = false;
+
+  const mockPluginInstance = {
+    setup: jest.fn(),
+    start: async () => {
+      // delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(startDependenciesResolved).toBe(false);
+    },
+  };
+  mockPluginInitializer.mockReturnValue(mockPluginInstance);
+
+  await plugin.setup({} as any, {} as any);
+
+  const startDependenciesCheck = plugin.startDependencies.then(resolvedStartDeps => {
+    startDependenciesResolved = true;
+    expect(resolvedStartDeps).toEqual([startContext, pluginDeps]);
+  });
+
+  await plugin.start(startContext, pluginDeps);
+  await startDependenciesCheck;
+});
+
 test('`stop` fails if plugin is not set up', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();

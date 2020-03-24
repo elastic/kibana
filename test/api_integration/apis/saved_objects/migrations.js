@@ -27,8 +27,10 @@ import {
   DocumentMigrator,
   IndexMigrator,
 } from '../../../../src/core/server/saved_objects/migrations/core';
-import { SavedObjectsSerializer } from '../../../../src/core/server/saved_objects/serialization';
-import { SavedObjectsSchema } from '../../../../src/core/server/saved_objects/schema';
+import {
+  SavedObjectsSerializer,
+  SavedObjectTypeRegistry,
+} from '../../../../src/core/server/saved_objects';
 
 export default ({ getService }) => {
   const es = getService('legacyEs');
@@ -350,10 +352,15 @@ async function migrateIndex({
   validateDoc,
   obsoleteIndexTemplatePattern,
 }) {
+  const typeRegistry = new SavedObjectTypeRegistry();
+  const types = migrationsToTypes(migrations);
+  types.forEach(type => typeRegistry.registerType(type));
+
   const documentMigrator = new DocumentMigrator({
     kibanaVersion: '99.9.9',
-    migrations,
+    typeRegistry,
     validateDoc: validateDoc || _.noop,
+    log: { info: _.noop, debug: _.noop, warn: _.noop },
   });
 
   const migrator = new IndexMigrator({
@@ -366,10 +373,20 @@ async function migrateIndex({
     log: { info: _.noop, debug: _.noop, warn: _.noop },
     pollInterval: 50,
     scrollDuration: '5m',
-    serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
+    serializer: new SavedObjectsSerializer(typeRegistry),
   });
 
   return await migrator.migrate();
+}
+
+function migrationsToTypes(migrations) {
+  return Object.entries(migrations).map(([type, migrations]) => ({
+    name: type,
+    hidden: false,
+    namespaceAgnostic: false,
+    mappings: { properties: {} },
+    migrations: { ...migrations },
+  }));
 }
 
 async function fetchDocs({ callCluster, index }) {

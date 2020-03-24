@@ -16,14 +16,17 @@ import { getGlyphUrl, isRetina } from '../../../meta';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
+import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 import chrome from 'ui/chrome';
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
+import { clampToLatBounds, clampToLonBounds } from '../../../elasticsearch_geo_utils';
 
 mapboxgl.workerUrl = mbWorkerUrl;
+mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
 export class MBMapContainer extends React.Component {
   state = {
@@ -105,7 +108,6 @@ export class MBMapContainer extends React.Component {
   }
 
   async _createMbMapInstance() {
-    const initialView = this.props.goto ? this.props.goto.center : null;
     return new Promise(resolve => {
       const mbStyle = {
         version: 8,
@@ -125,12 +127,15 @@ export class MBMapContainer extends React.Component {
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false),
         interactive: !this.props.disableInteractive,
       };
+      const initialView = _.get(this.props.goto, 'center');
       if (initialView) {
         options.zoom = initialView.zoom;
         options.center = {
           lng: initialView.lon,
           lat: initialView.lat,
         };
+      } else {
+        options.bounds = [-170, -60, 170, 75];
       }
       const mbMap = new mapboxgl.Map(options);
       mbMap.dragRotate.disable();
@@ -230,12 +235,12 @@ export class MBMapContainer extends React.Component {
       //clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
       const lnLatBounds = new mapboxgl.LngLatBounds(
         new mapboxgl.LngLat(
-          clamp(goto.bounds.min_lon, -180, 180),
-          clamp(goto.bounds.min_lat, -89, 89)
+          clampToLonBounds(goto.bounds.min_lon),
+          clampToLatBounds(goto.bounds.min_lat)
         ),
         new mapboxgl.LngLat(
-          clamp(goto.bounds.max_lon, -180, 180),
-          clamp(goto.bounds.max_lat, -89, 89)
+          clampToLonBounds(goto.bounds.max_lon),
+          clampToLatBounds(goto.bounds.max_lat)
         )
       );
       //maxZoom ensure we're not zooming in too far on single points or small shapes
@@ -301,10 +306,4 @@ export class MBMapContainer extends React.Component {
       </div>
     );
   }
-}
-
-function clamp(val, min, max) {
-  if (val > max) val = max;
-  else if (val < min) val = min;
-  return val;
 }

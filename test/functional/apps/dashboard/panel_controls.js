@@ -33,7 +33,13 @@ export default function({ getService, getPageObjects }) {
   const dashboardReplacePanel = getService('dashboardReplacePanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const renderable = getService('renderable');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
+  const PageObjects = getPageObjects([
+    'dashboard',
+    'header',
+    'visualize',
+    'discover',
+    'timePicker',
+  ]);
   const dashboardName = 'Dashboard Panel Controls Test';
 
   describe('dashboard panel controls', function viewEditModeTests() {
@@ -52,7 +58,7 @@ export default function({ getService, getPageObjects }) {
       let intialDimensions;
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+        await PageObjects.timePicker.setHistoricalDataRange();
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         await dashboardAddPanel.addVisualization(LINE_CHART_VIS_NAME);
         intialDimensions = await PageObjects.dashboard.getPanelDimensions();
@@ -110,7 +116,7 @@ export default function({ getService, getPageObjects }) {
     describe('panel edit controls', function() {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+        await PageObjects.timePicker.setHistoricalDataRange();
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
       });
 

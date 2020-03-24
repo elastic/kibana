@@ -29,3 +29,13 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('stubSIEMapi', function(dataFileName) {
+  cy.on('window:before:load', win => {
+    // @ts-ignore no null, this is a temp hack see issue above
+    win.fetch = null;
+  });
+  cy.server();
+  cy.fixture(dataFileName).as(`${dataFileName}JSON`);
+  cy.route('POST', 'api/siem/graphql', `@${dataFileName}JSON`);
+});

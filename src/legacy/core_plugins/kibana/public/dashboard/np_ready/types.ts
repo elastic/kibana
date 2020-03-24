@@ -18,7 +18,6 @@
  */
 
 import { ViewMode } from 'src/plugins/embeddable/public';
-import { AppState } from '../legacy_imports';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
@@ -26,18 +25,10 @@ import {
   RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
-} from '../migrations/types';
-import { Query, esFilters } from '../../../../../../plugins/data/public';
+} from '../../../../../../plugins/dashboard/public';
+import { Query, Filter } from '../../../../../../plugins/data/public';
 
 export type NavAction = (anchorElement?: any) => void;
-
-export interface GridData {
-  w: number;
-  h: number;
-  x: number;
-  y: number;
-  i: string;
-}
 
 /**
  * This should always represent the latest dashboard panel shape, after all possible migrations.
@@ -93,11 +84,7 @@ export type SavedDashboardPanelTo60 = Pick<
   readonly type: string;
 };
 
-export type DashboardAppStateDefaults = DashboardAppStateParameters & {
-  description?: string;
-};
-
-export interface DashboardAppStateParameters {
+export interface DashboardAppState {
   panels: SavedDashboardPanel[];
   fullScreenMode: boolean;
   title: string;
@@ -108,14 +95,29 @@ export interface DashboardAppStateParameters {
     useMargins: boolean;
   };
   query: Query | string;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   viewMode: ViewMode;
   savedQuery?: string;
 }
 
-// This could probably be improved if we flesh out AppState more... though AppState will be going away
-// so maybe not worth too much time atm.
-export type DashboardAppState = DashboardAppStateParameters & AppState;
+export type DashboardAppStateDefaults = DashboardAppState & {
+  description?: string;
+};
+
+export interface DashboardAppStateTransitions {
+  set: (
+    state: DashboardAppState
+  ) => <T extends keyof DashboardAppState>(
+    prop: T,
+    value: DashboardAppState[T]
+  ) => DashboardAppState;
+  setOption: (
+    state: DashboardAppState
+  ) => <T extends keyof DashboardAppState['options']>(
+    prop: T,
+    value: DashboardAppState['options'][T]
+  ) => DashboardAppState;
+}
 
 export interface SavedDashboardPanelMap {
   [key: string]: SavedDashboardPanel;
@@ -127,30 +129,3 @@ export interface StagedFilter {
   operator: string;
   index: string;
 }
-
-export type ConfirmModalFn = (
-  message: string,
-  confirmOptions: {
-    onConfirm: () => void;
-    onCancel: () => void;
-    confirmButtonText: string;
-    cancelButtonText: string;
-    defaultFocusedButton: string;
-    title: string;
-  }
-) => void;
-
-export type AddFilterFn = (
-  {
-    field,
-    value,
-    operator,
-    index,
-  }: {
-    field: string;
-    value: string;
-    operator: string;
-    index: string;
-  },
-  appState: AppState
-) => void;

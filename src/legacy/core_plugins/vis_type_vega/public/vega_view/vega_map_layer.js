@@ -19,7 +19,7 @@
 
 import L from 'leaflet';
 import 'leaflet-vega';
-import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
+import { KibanaMapLayer } from '../legacy_imports';
 
 export class VegaMapLayer extends KibanaMapLayer {
   constructor(spec, options) {

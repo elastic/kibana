@@ -17,31 +17,22 @@ import {
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
-import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../../src/plugins/kibana_react/public';
-
-const { embeddable: strings } = RendererStrings;
+import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { EmbeddableInput } from '../../expression_types';
 import { RendererHandlers } from '../../../types';
+import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
+
+const { embeddable: strings } = RendererStrings;
 
 const embeddablesRegistry: {
   [key: string]: IEmbeddable;
 } = {};
 
 const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
-  const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi
-      {...props}
-      savedObjects={npStart.core.savedObjects}
-      uiSettings={npStart.core.uiSettings}
-    />
-  );
   return (
     <div
-      className="embeddable"
+      className={CANVAS_EMBEDDABLE_CLASSNAME}
       style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
     >
       <I18nContext>
@@ -53,7 +44,10 @@ const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) =
           notifications={npStart.core.notifications}
           overlays={npStart.core.overlays}
           inspector={npStart.plugins.inspector}
-          SavedObjectFinder={SavedObjectFinder}
+          SavedObjectFinder={getSavedObjectFinder(
+            npStart.core.savedObjects,
+            npStart.core.uiSettings
+          )}
         />
       </I18nContext>
     </div>
@@ -70,7 +64,9 @@ const embeddable = () => ({
     { input, embeddableType }: EmbeddableExpression<EmbeddableInput>,
     handlers: RendererHandlers
   ) => {
-    if (!embeddablesRegistry[input.id]) {
+    const uniqueId = handlers.getElementId();
+
+    if (!embeddablesRegistry[uniqueId]) {
       const factory = Array.from(start.getEmbeddableFactories()).find(
         embeddableFactory => embeddableFactory.type === embeddableType
       ) as EmbeddableFactory<EmbeddableInput>;
@@ -82,7 +78,7 @@ const embeddable = () => ({
 
       const embeddableObject = await factory.createFromSavedObject(input.id, input);
 
-      embeddablesRegistry[input.id] = embeddableObject;
+      embeddablesRegistry[uniqueId] = embeddableObject;
       ReactDOM.unmountComponentAtNode(domNode);
 
       const subscription = embeddableObject.getInput$().subscribe(function(updatedInput) {
@@ -100,12 +96,12 @@ const embeddable = () => ({
         subscription.unsubscribe();
         handlers.onEmbeddableDestroyed();
 
-        delete embeddablesRegistry[input.id];
+        delete embeddablesRegistry[uniqueId];
 
         return ReactDOM.unmountComponentAtNode(domNode);
       });
     } else {
-      embeddablesRegistry[input.id].updateInput(input);
+      embeddablesRegistry[uniqueId].updateInput(input);
     }
   },
 });

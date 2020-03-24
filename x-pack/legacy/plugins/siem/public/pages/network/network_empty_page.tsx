@@ -5,16 +5,14 @@
  */
 
 import React from 'react';
-import chrome from 'ui/chrome';
 
 import { useKibana } from '../../lib/kibana';
 import { EmptyPage } from '../../components/empty_page';
-import * as i18n from './translations';
-
-const basePath = chrome.getBasePath();
+import * as i18n from '../common/translations';
 
 export const NetworkEmptyPage = React.memo(() => {
-  const docLinks = useKibana().services.docLinks;
+  const { http, docLinks } = useKibana().services;
+  const basePath = http.basePath.get();
 
   return (
     <EmptyPage
@@ -24,9 +22,10 @@ export const NetworkEmptyPage = React.memo(() => {
       actionSecondaryIcon="popout"
       actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
       actionSecondaryTarget="_blank"
-      actionSecondaryUrl={docLinks.links.siem}
+      actionSecondaryUrl={docLinks.links.siem.gettingStarted}
       data-test-subj="empty-page"
       title={i18n.EMPTY_TITLE}
+      message={i18n.EMPTY_MESSAGE}
     />
   );
 });

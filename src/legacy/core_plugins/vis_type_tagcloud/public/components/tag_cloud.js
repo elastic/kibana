@@ -19,7 +19,6 @@
 
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
-import { seedColors } from 'ui/vis/components/color/seed_colors';
 import { EventEmitter } from 'events';
 
 const ORIENTATIONS = {
@@ -38,7 +37,7 @@ const D3_SCALING_FUNCTIONS = {
 };
 
 export class TagCloud extends EventEmitter {
-  constructor(domNode) {
+  constructor(domNode, colorScale) {
     super();
 
     //DOM
@@ -67,6 +66,7 @@ export class TagCloud extends EventEmitter {
     this._words = null;
 
     //UTIL
+    this._colorScale = colorScale;
     this._setTimeoutId = null;
     this._pendingJob = null;
     this._layoutIsUpdating = null;
@@ -208,7 +208,7 @@ export class TagCloud extends EventEmitter {
       enteringTags.style('font-style', this._fontStyle);
       enteringTags.style('font-weight', () => this._fontWeight);
       enteringTags.style('font-family', () => this._fontFamily);
-      enteringTags.style('fill', getFill);
+      enteringTags.style('fill', this.getFill.bind(this));
       enteringTags.attr('text-anchor', () => 'middle');
       enteringTags.attr('transform', affineTransform);
       enteringTags.attr('data-test-subj', getDisplayText);
@@ -369,6 +369,10 @@ export class TagCloud extends EventEmitter {
     };
     return debug;
   }
+
+  getFill(tag) {
+    return this._colorScale(tag.text);
+  }
 }
 
 TagCloud.STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
@@ -400,11 +404,6 @@ function getValue(tag) {
 
 function getSizeInPixels(tag) {
   return `${tag.size}px`;
-}
-
-const colorScale = d3.scale.ordinal().range(seedColors);
-function getFill(tag) {
-  return colorScale(tag.text);
 }
 
 function hashWithinRange(str, max) {

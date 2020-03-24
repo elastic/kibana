@@ -19,12 +19,13 @@
 
 import { ConfigPath } from '../../config';
 import { ObjectToConfigAdapter } from '../../config/object_to_config_adapter';
+import { LoggingConfigType } from '../../logging/logging_config';
 import { LegacyVars } from '../types';
 
 /**
  * Represents logging config supported by the legacy platform.
  */
-interface LegacyLoggingConfig {
+export interface LegacyLoggingConfig {
   silent?: boolean;
   verbose?: boolean;
   quiet?: boolean;
@@ -33,18 +34,24 @@ interface LegacyLoggingConfig {
   events?: Record<string, string>;
 }
 
+type MixedLoggingConfig = LegacyLoggingConfig & Partial<LoggingConfigType>;
+
 /**
  * Represents adapter between config provided by legacy platform and `Config`
  * supported by the current platform.
  * @internal
  */
 export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
-  private static transformLogging(configValue: LegacyLoggingConfig = {}) {
+  private static transformLogging(configValue: MixedLoggingConfig = {}) {
+    const { appenders, root, loggers, ...legacyLoggingConfig } = configValue;
+
     const loggingConfig = {
       appenders: {
-        default: { kind: 'legacy-appender', legacyLoggingConfig: configValue },
+        ...appenders,
+        default: { kind: 'legacy-appender', legacyLoggingConfig },
       },
-      root: { level: 'info' },
+      root: { level: 'info', ...root },
+      loggers,
     };
 
     if (configValue.silent) {

@@ -21,6 +21,7 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
+  const listingTable = getService('listingTable');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
 
   describe('dashboard clone', function describeIndexTests() {
@@ -36,14 +37,16 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.addVisualizations(
         PageObjects.dashboard.getTestVisualizationNames()
       );
-      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
+      await PageObjects.dashboard.saveDashboard(dashboardName);
 
       await PageObjects.dashboard.clickClone();
       await PageObjects.dashboard.confirmClone();
-
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      const countOfDashboards = await listingTable.searchAndGetItemsCount(
+        'dashboard',
         clonedDashboardName
       );
+
       expect(countOfDashboards).to.equal(1);
     });
 
@@ -70,8 +73,10 @@ export default function({ getService, getPageObjects }) {
 
     it("and doesn't save", async () => {
       await PageObjects.dashboard.cancelClone();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(
+      const countOfDashboards = await listingTable.searchAndGetItemsCount(
+        'dashboard',
         dashboardName
       );
       expect(countOfDashboards).to.equal(1);
@@ -85,8 +90,10 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
       await PageObjects.dashboard.confirmClone();
       await PageObjects.dashboard.waitForRenderComplete();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(
+      const countOfDashboards = await listingTable.searchAndGetItemsCount(
+        'dashboard',
         dashboardName + ' Copy'
       );
       expect(countOfDashboards).to.equal(2);

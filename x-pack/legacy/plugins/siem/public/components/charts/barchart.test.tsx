@@ -9,7 +9,7 @@ import React from 'react';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';
-import { BarSeries, ScaleType, Axis } from '@elastic/charts';
+import { Chart, BarSeries, Axis, ScaleType } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
 
@@ -18,41 +18,41 @@ const customWidth = '120px';
 const chartDataSets = [
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: '' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: '' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: '' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 0, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: null, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: null, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -63,40 +63,40 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
   [null],
   [
     [
-      { key: 'uniqueSourceIps', color: '#DB1374' },
+      { key: 'uniqueSourceIps', color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{}], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{}], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{}],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 0, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 0, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 0, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -122,12 +122,12 @@ describe('BarChartBaseComponent', () => {
     {
       key: 'uniqueSourceIps',
       value: [{ y: 1714, x: 'uniqueSourceIps', g: 'uniqueSourceIps' }],
-      color: '#DB1374',
+      color: '#D36086',
     },
     {
       key: 'uniqueDestinationIps',
       value: [{ y: 2354, x: 'uniqueDestinationIps', g: 'uniqueDestinationIps' }],
-      color: '#490092',
+      color: '#9170B8',
     },
   ];
 
@@ -139,7 +139,7 @@ describe('BarChartBaseComponent', () => {
     });
 
     it('should render two bar series', () => {
-      expect(shallowWrapper.find('Chart')).toHaveLength(1);
+      expect(shallowWrapper.find(Chart)).toHaveLength(1);
     });
   });
 
@@ -167,7 +167,6 @@ describe('BarChartBaseComponent', () => {
     });
 
     it(`should ${mockBarChartData.length} render BarSeries`, () => {
-      expect(shallow).toMatchSnapshot();
       expect(shallowWrapper.find(BarSeries)).toHaveLength(mockBarChartData.length);
     });
 
@@ -265,7 +264,7 @@ describe('BarChartBaseComponent', () => {
     });
 
     it('should not render without height and width', () => {
-      expect(shallowWrapper.find('Chart')).toHaveLength(0);
+      expect(shallowWrapper.find(Chart)).toHaveLength(0);
     });
   });
 });
@@ -278,7 +277,7 @@ describe.each(chartDataSets)('BarChart with valid data [%o]', data => {
   });
 
   it(`should render chart`, () => {
-    expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
+    expect(shallowWrapper.find('BarChartBase')).toHaveLength(1);
     expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
   });
 });
@@ -290,8 +289,8 @@ describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', data => {
     shallowWrapper = shallow(<BarChartComponent configs={mockConfig} barChart={data} />);
   });
 
-  it(`should render chart holder`, () => {
-    expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
+  it(`should render a ChartPlaceHolder`, () => {
+    expect(shallowWrapper.find('BarChartBase')).toHaveLength(0);
     expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
   });
 });

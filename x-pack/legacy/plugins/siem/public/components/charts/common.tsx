@@ -14,8 +14,11 @@ import {
   ScaleType,
   SettingsSpecProps,
   TickFormatter,
+  Position,
 } from '@elastic/charts';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
+
 import { useUiSetting } from '../../lib/kibana';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
 
@@ -27,14 +30,15 @@ const chartDefaultRendering: Rendering = 'canvas';
 export type UpdateDateRange = (min: number, max: number) => void;
 
 export interface ChartData {
-  x: number | string | null;
-  y: number | string | null;
+  x?: number | string | null;
+  y?: number | string | null;
   y0?: number;
-  g?: number | string;
+  g?: number | string | null;
 }
 
 export interface ChartSeriesConfigs {
   customHeight?: number;
+  color?: string[];
   series?: {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
@@ -52,7 +56,7 @@ export interface ChartSeriesData {
   color?: string | undefined;
 }
 
-export const WrappedByAutoSizer = styled.div<{ height?: string }>`
+const WrappedByAutoSizerComponent = styled.div<{ height?: string }>`
   ${style =>
     `
     height: ${style.height != null ? style.height : defaultChartHeight};
@@ -64,7 +68,9 @@ export const WrappedByAutoSizer = styled.div<{ height?: string }>`
   }
 `;
 
-WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+WrappedByAutoSizerComponent.displayName = 'WrappedByAutoSizer';
+
+export const WrappedByAutoSizer = React.memo(WrappedByAutoSizerComponent);
 
 export enum SeriesType {
   BAR = 'bar',
@@ -94,8 +100,9 @@ const theme: PartialTheme = {
 export const useTheme = () => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
+  const themeValue = useMemo(() => mergeWithDefaultTheme(theme, defaultTheme), []);
 
-  return mergeWithDefaultTheme(theme, defaultTheme);
+  return themeValue;
 };
 
 export const chartDefaultSettings = {
@@ -103,8 +110,9 @@ export const chartDefaultSettings = {
   rendering: chartDefaultRendering,
   animatedData: false,
   showLegend: false,
-  showLegendDisplayValue: false,
+  showLegendExtra: false,
   debug: false,
+  legendPosition: Position.Bottom,
 };
 
 export const getChartHeight = (customHeight?: number, autoSizerHeight?: number): string => {

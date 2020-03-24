@@ -6,9 +6,15 @@
 
 import { connect } from 'react-redux';
 import { LayerControl } from './view';
-import { FLYOUT_STATE } from '../../../reducers/ui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FLYOUT_STATE } from '../../../../../../../plugins/maps/public/reducers/ui.js';
 import { updateFlyout, setIsLayerTOCOpen } from '../../../actions/ui_actions';
-import { getIsReadOnly, getIsLayerTOCOpen } from '../../../selectors/ui_selectors';
+import { setSelectedLayer } from '../../../actions/map_actions';
+import {
+  getIsReadOnly,
+  getIsLayerTOCOpen,
+  getFlyoutDisplay,
+} from '../../../selectors/ui_selectors';
 import { getLayerList } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
@@ -16,12 +22,14 @@ function mapStateToProps(state = {}) {
     isReadOnly: getIsReadOnly(state),
     isLayerTOCOpen: getIsLayerTOCOpen(state),
     layerList: getLayerList(state),
+    isAddButtonActive: getFlyoutDisplay(state) === FLYOUT_STATE.NONE,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    showAddLayerWizard: () => {
+    showAddLayerWizard: async () => {
+      await dispatch(setSelectedLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
     },
     closeLayerTOC: () => {

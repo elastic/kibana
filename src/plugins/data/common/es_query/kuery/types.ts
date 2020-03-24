@@ -33,13 +33,8 @@ export interface KueryParseOptions {
   startRule: string;
   allowLeadingWildcards: boolean;
   errorOnLuceneSyntax: boolean;
+  cursorSymbol?: string;
+  parseCursor?: boolean;
 }
 
 export { nodeTypes } from './node_types';
-
-export type JsonArray = JsonValue[];
-export type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
-
-export interface JsonObject {
-  [key: string]: JsonValue;
-}

@@ -22,3 +22,4 @@ export * from './format_hit';
 export * from './index_pattern';
 export * from './index_patterns';
 export * from './index_patterns_api_client';
+export * from './types';

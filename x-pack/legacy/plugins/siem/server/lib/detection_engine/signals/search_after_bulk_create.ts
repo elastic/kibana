@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
-import { AlertServices } from '../../../../../alerting/server/types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -17,15 +18,20 @@ interface SearchAfterAndBulkCreateParams {
   services: AlertServices;
   logger: Logger;
   id: string;
+  inputIndexPattern: string[];
   signalsIndex: string;
   name: string;
+  actions: RuleAlertAction[];
+  createdAt: string;
   createdBy: string;
   updatedBy: string;
+  updatedAt: string;
   interval: string;
   enabled: boolean;
   pageSize: number;
   filter: unknown;
   tags: string[];
+  throttle: string | null;
 }
 
 // search_after through documents and re-index using bulk endpoint.
@@ -35,15 +41,20 @@ export const searchAfterAndBulkCreate = async ({
   services,
   logger,
   id,
+  inputIndexPattern,
   signalsIndex,
   filter,
+  actions,
   name,
+  createdAt,
   createdBy,
   updatedBy,
+  updatedAt,
   interval,
   enabled,
   pageSize,
   tags,
+  throttle,
 }: SearchAfterAndBulkCreateParams): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
@@ -57,12 +68,16 @@ export const searchAfterAndBulkCreate = async ({
     logger,
     id,
     signalsIndex,
+    actions,
     name,
+    createdAt,
     createdBy,
+    updatedAt,
     updatedBy,
     interval,
     enabled,
     tags,
+    throttle,
   });
   const totalHits =
     typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
@@ -71,7 +86,7 @@ export const searchAfterAndBulkCreate = async ({
   // If the total number of hits for the overall search result is greater than
   // maxSignals, default to requesting a total of maxSignals, otherwise use the
   // totalHits in the response from the searchAfter query.
-  const maxTotalHitsSize = totalHits >= ruleParams.maxSignals ? ruleParams.maxSignals : totalHits;
+  const maxTotalHitsSize = Math.min(totalHits, ruleParams.maxSignals);
 
   // number of docs in the current search result
   let hitsSize = someResult.hits.hits.length;
@@ -92,7 +107,9 @@ export const searchAfterAndBulkCreate = async ({
       logger.debug(`sortIds: ${sortIds}`);
       const searchAfterResult: SignalSearchResponse = await singleSearchAfter({
         searchAfterSortId: sortId,
-        ruleParams,
+        index: inputIndexPattern,
+        from: ruleParams.from,
+        to: ruleParams.to,
         services,
         logger,
         filter,
@@ -117,12 +134,16 @@ export const searchAfterAndBulkCreate = async ({
         logger,
         id,
         signalsIndex,
+        actions,
         name,
+        createdAt,
         createdBy,
+        updatedAt,
         updatedBy,
         interval,
         enabled,
         tags,
+        throttle,
       });
       logger.debug('finished next bulk index');
     } catch (exc) {

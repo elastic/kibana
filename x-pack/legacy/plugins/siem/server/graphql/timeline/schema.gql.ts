@@ -129,6 +129,7 @@ export const timelineSchema = gql`
     columns: [ColumnHeaderInput!]
     dataProviders: [DataProviderInput!]
     description: String
+    eventType: String
     filters: [FilterTimelineInput!]
     kqlMode: String
     kqlQuery: SerializedFilterQueryInput
@@ -149,7 +150,7 @@ export const timelineSchema = gql`
     updated
     created
   }
-  
+
   input SortTimeline {
     sortField: SortFieldTimeline!
     sortOrder: Direction!
@@ -223,6 +224,7 @@ export const timelineSchema = gql`
     dateRange: DateRangePickerResult
     description: String
     eventIdToNoteIds: [NoteResult!]
+    eventType: String
     favorite: [FavoriteTimelineResult!]
     filters: [FilterTimelineResult!]
     kqlMode: String

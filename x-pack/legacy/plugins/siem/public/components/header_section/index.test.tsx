@@ -63,36 +63,6 @@ describe('HeaderSection', () => {
     ).toBe(false);
   });
 
-  test('it renders a transparent inspect button when showInspect is false', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderSection title="Test title" id="test" showInspect={false} />
-      </TestProviders>
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="transparent-inspect-container"]')
-        .first()
-        .exists()
-    ).toBe(true);
-  });
-
-  test('it renders an opaque inspect button when showInspect is true', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderSection title="Test title" id="test" showInspect={true} />
-      </TestProviders>
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="opaque-inspect-container"]')
-        .first()
-        .exists()
-    ).toBe(true);
-  });
-
   test('it renders supplements when children provided', () => {
     const wrapper = mount(
       <TestProviders>

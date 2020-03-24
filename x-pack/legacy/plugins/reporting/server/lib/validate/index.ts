@@ -5,7 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ServerFacade, Logger } from '../../../types';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { Logger, ServerFacade } from '../../../types';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
 import { validateBrowser } from './validate_browser';
 import { validateEncryptionKey } from './validate_encryption_key';
@@ -14,14 +15,15 @@ import { validateServerHost } from './validate_server_host';
 
 export async function runValidations(
   server: ServerFacade,
-  logger: Logger,
-  browserFactory: HeadlessChromiumDriverFactory
+  elasticsearch: ElasticsearchServiceSetup,
+  browserFactory: HeadlessChromiumDriverFactory,
+  logger: Logger
 ) {
   try {
     await Promise.all([
       validateBrowser(server, browserFactory, logger),
       validateEncryptionKey(server, logger),
-      validateMaxContentLength(server, logger),
+      validateMaxContentLength(server, elasticsearch, logger),
       validateServerHost(server),
     ]);
     logger.debug(
@@ -30,6 +32,7 @@ export async function runValidations(
       })
     );
   } catch (err) {
+    logger.error(err);
     logger.warning(
       i18n.translate('xpack.reporting.selfCheck.warning', {
         defaultMessage: `Reporting plugin self-check generated a warning: {err}`,

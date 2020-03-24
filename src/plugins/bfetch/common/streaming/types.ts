@@ -20,5 +20,5 @@
 import { Observable } from 'rxjs';
 
 export interface StreamingResponseHandler<Payload, Response> {
-  onRequest(payload: Payload): Observable<Response>;
+  getResponseStream(payload: Payload): Observable<Response>;
 }

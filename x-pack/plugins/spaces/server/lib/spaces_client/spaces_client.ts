@@ -6,7 +6,7 @@
 import Boom from 'boom';
 import { omit } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../security/server';
+import { SecurityPluginSetup } from '../../../../security/server';
 import { isReservedSpace } from '../../../common/is_reserved_space';
 import { Space } from '../../../common/model/space';
 import { SpacesAuditLogger } from '../audit_logger';
@@ -17,7 +17,7 @@ const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = ['any', 'copySavedObject
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetSpacePurpose,
-  (authorization: SecurityPluginSetupContract['authz']) => string
+  (authorization: SecurityPluginSetup['authz']) => string
 > = {
   any: authorization => authorization.actions.login,
   copySavedObjectsIntoSpace: authorization =>
@@ -28,7 +28,7 @@ export class SpacesClient {
   constructor(
     private readonly auditLogger: SpacesAuditLogger,
     private readonly debugLogger: (message: string) => void,
-    private readonly authorization: SecurityPluginSetupContract['authz'] | null,
+    private readonly authorization: SecurityPluginSetup['authz'] | null,
     private readonly callWithRequestSavedObjectRepository: any,
     private readonly config: ConfigType,
     private readonly internalSavedObjectRepository: any,

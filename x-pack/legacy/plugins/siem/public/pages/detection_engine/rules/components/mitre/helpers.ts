@@ -9,9 +9,9 @@ import { IMitreAttack } from '../../types';
 
 export const isMitreAttackInvalid = (
   tacticName: string | null | undefined,
-  techniques: IMitreAttack[] | null | undefined
+  technique: IMitreAttack[] | null | undefined
 ) => {
-  if (isEmpty(tacticName) || (tacticName !== 'none' && isEmpty(techniques))) {
+  if (isEmpty(tacticName) || (tacticName !== 'none' && isEmpty(technique))) {
     return true;
   }
   return false;

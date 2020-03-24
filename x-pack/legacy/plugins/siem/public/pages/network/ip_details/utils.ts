@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Breadcrumb } from 'ui/chrome';
+import { get, isEmpty } from 'lodash/fp';
 
-import { get } from 'lodash/fp';
+import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import { decodeIpv6 } from '../../../lib/helpers';
 import { getNetworkUrl, getIPDetailsUrl } from '../../../components/link_to/redirect_to_network';
 import { networkModel } from '../../../store/network';
@@ -24,11 +24,14 @@ const TabNameMappedToI18nKey: Record<NetworkRouteType, string> = {
   [NetworkRouteType.tls]: i18n.NAVIGATION_TLS_TITLE,
 };
 
-export const getBreadcrumbs = (params: NetworkRouteSpyState, search: string[]): Breadcrumb[] => {
+export const getBreadcrumbs = (
+  params: NetworkRouteSpyState,
+  search: string[]
+): ChromeBreadcrumb[] => {
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: `${getNetworkUrl()}${search && search[0] ? search[0] : ''}`,
+      href: `${getNetworkUrl()}${!isEmpty(search[0]) ? search[0] : ''}`,
     },
   ];
   if (params.detailName != null) {
@@ -36,7 +39,9 @@ export const getBreadcrumbs = (params: NetworkRouteSpyState, search: string[]): 
       ...breadcrumb,
       {
         text: decodeIpv6(params.detailName),
-        href: `${getIPDetailsUrl(params.detailName)}${search && search[1] ? search[1] : ''}`,
+        href: `${getIPDetailsUrl(params.detailName, params.flowTarget)}${
+          !isEmpty(search[1]) ? search[1] : ''
+        }`,
       },
     ];
   }

@@ -17,7 +17,21 @@
  * under the License.
  */
 
-export { defer } from '../common';
+export {
+  calculateObjectHash,
+  createGetterSetter,
+  defer,
+  Defer,
+  Get,
+  JsonArray,
+  JsonObject,
+  JsonValue,
+  of,
+  Set,
+  UiComponent,
+  UiComponentInstance,
+  url,
+} from '../common';
 export * from './core';
 export * from './errors';
 export * from './field_mapping';
@@ -25,7 +39,7 @@ export * from './field_wildcard';
 export * from './parse';
 export * from './render_complete';
 export * from './resize_checker';
-export * from './state_containers';
+export * from '../common/state_containers';
 export * from './storage';
 export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
 export {
@@ -40,6 +54,7 @@ export {
   unhashUrl,
   unhashQuery,
   createUrlTracker,
+  createKbnUrlTracker,
   createKbnUrlControls,
   getStateFromKbnUrl,
   getStatesFromKbnUrl,
@@ -58,3 +73,5 @@ export {
   StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';
+export { removeQueryParam, redirectWhenMissing, ensureDefaultIndexPattern } from './history';
+export { applyDiff } from './state_management/utils/diff_object';

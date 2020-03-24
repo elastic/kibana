@@ -28,15 +28,42 @@ export const sampleRuleAlertParams = (
   references: ['http://google.com'],
   riskScore: riskScore ? riskScore : 50,
   maxSignals: maxSignals ? maxSignals : 10000,
+  note: '',
+  anomalyThreshold: undefined,
+  machineLearningJobId: undefined,
   filters: undefined,
   savedId: undefined,
   timelineId: undefined,
   timelineTitle: undefined,
   meta: undefined,
-  threats: undefined,
+  threat: undefined,
   version: 1,
-  updatedAt: '2019-12-17T15:04:25.343Z',
-  createdAt: '2019-12-17T15:04:37.105Z',
+  lists: [
+    {
+      field: 'source.ip',
+      boolean_operator: 'and',
+      values: [
+        {
+          name: '127.0.0.1',
+          type: 'value',
+        },
+      ],
+    },
+    {
+      field: 'host.name',
+      boolean_operator: 'and not',
+      values: [
+        {
+          name: 'rock01',
+          type: 'value',
+        },
+        {
+          name: 'mothra',
+          type: 'value',
+        },
+      ],
+    },
+  ],
 });
 
 export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
@@ -75,7 +102,7 @@ export const sampleDocWithSortId = (someUuid: string = sampleIdGuid): SignalSour
   sort: ['1234567891111'],
 });
 
-export const sampleEmptyDocSearchResults: SignalSearchResponse = {
+export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -89,6 +116,44 @@ export const sampleEmptyDocSearchResults: SignalSearchResponse = {
     max_score: 100,
     hits: [],
   },
+});
+
+export const sampleDocWithAncestors = (): SignalSearchResponse => {
+  const sampleDoc = sampleDocNoSortId();
+  sampleDoc._source.signal = {
+    parent: {
+      rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+      id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+      type: 'event',
+      index: 'myFakeSignalIndex',
+      depth: 1,
+    },
+    ancestors: [
+      {
+        rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 1,
+      },
+    ],
+  };
+
+  return {
+    took: 10,
+    timed_out: false,
+    _shards: {
+      total: 10,
+      successful: 10,
+      failed: 0,
+      skipped: 0,
+    },
+    hits: {
+      total: 0,
+      max_score: 100,
+      hits: [sampleDoc],
+    },
+  };
 };
 
 export const sampleBulkCreateDuplicateResult = {
@@ -304,6 +369,7 @@ export const sampleRule = (): Partial<OutputRuleAlertRest> => {
     tags: ['some fake tag 1', 'some fake tag 2'],
     to: 'now',
     type: 'query',
+    note: '',
   };
 };
 

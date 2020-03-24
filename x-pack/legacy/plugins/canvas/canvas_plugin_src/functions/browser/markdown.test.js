@@ -19,7 +19,7 @@ describe('markdown', () => {
   });
 
   describe('args', () => {
-    describe('expression', () => {
+    describe('content', () => {
       it('sets the content to all strings in expression concatenated', () => {
         const result = fn(null, {
           content: ['# this ', 'is ', 'some ', 'markdown'],
@@ -53,6 +53,33 @@ describe('markdown', () => {
 
       // TODO: write test when using an instance of the interpreter
       // it("defaults to the expression '{font}'", () => {});
+    });
+    describe('openLinksInNewTab', () => {
+      it('sets the value of openLinksInNewTab to true ', () => {
+        const result = fn(null, {
+          content: ['some ', 'markdown'],
+          openLinksInNewTab: true,
+        });
+
+        expect(result.value).toHaveProperty('openLinksInNewTab', true);
+      });
+
+      it('sets the value of openLinksInNewTab to false ', () => {
+        const result = fn(null, {
+          content: ['some ', 'markdown'],
+          openLinksInNewTab: false,
+        });
+
+        expect(result.value).toHaveProperty('openLinksInNewTab', false);
+      });
+
+      it('defaults the value of openLinksInNewTab to false ', () => {
+        const result = fn(null, {
+          content: ['some ', 'markdown'],
+        });
+
+        expect(result.value).toHaveProperty('openLinksInNewTab', false);
+      });
     });
   });
 });

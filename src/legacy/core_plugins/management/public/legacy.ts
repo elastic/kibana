@@ -41,5 +41,5 @@ import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core, {});
+export const setup = pluginInstance.setup(npSetup.core, { home: npSetup.plugins.home });
 export const start = pluginInstance.start(npStart.core, {});

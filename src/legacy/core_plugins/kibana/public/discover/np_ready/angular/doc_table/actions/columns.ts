@@ -17,35 +17,40 @@
  * under the License.
  */
 
+/**
+ * Helper function to provide a fallback to a single _source column if the given array of columns
+ * is empty, and removes _source if there are more than 1 columns given
+ * @param columns
+ */
+function buildColumns(columns: string[]) {
+  if (columns.length > 1 && columns.indexOf('_source') !== -1) {
+    return columns.filter(col => col !== '_source');
+  } else if (columns.length !== 0) {
+    return columns;
+  }
+  return ['_source'];
+}
+
 export function addColumn(columns: string[], columnName: string) {
   if (columns.includes(columnName)) {
-    return;
+    return columns;
   }
-
-  columns.push(columnName);
+  return buildColumns([...columns, columnName]);
 }
 
 export function removeColumn(columns: string[], columnName: string) {
   if (!columns.includes(columnName)) {
-    return;
+    return columns;
   }
-
-  columns.splice(columns.indexOf(columnName), 1);
+  return buildColumns(columns.filter(col => col !== columnName));
 }
 
 export function moveColumn(columns: string[], columnName: string, newIndex: number) {
-  if (newIndex < 0) {
-    return;
+  if (newIndex < 0 || newIndex >= columns.length || !columns.includes(columnName)) {
+    return columns;
   }
-
-  if (newIndex >= columns.length) {
-    return;
-  }
-
-  if (!columns.includes(columnName)) {
-    return;
-  }
-
-  columns.splice(columns.indexOf(columnName), 1); // remove at old index
-  columns.splice(newIndex, 0, columnName); // insert before new index
+  const modifiedColumns = [...columns];
+  modifiedColumns.splice(modifiedColumns.indexOf(columnName), 1); // remove at old index
+  modifiedColumns.splice(newIndex, 0, columnName); // insert before new index
+  return modifiedColumns;
 }

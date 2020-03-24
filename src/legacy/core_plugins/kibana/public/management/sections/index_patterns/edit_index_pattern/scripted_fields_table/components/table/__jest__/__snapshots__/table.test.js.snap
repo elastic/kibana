@@ -76,6 +76,7 @@ exports[`Table should render normally 1`] = `
   }
   responsive={true}
   sorting={true}
+  tableLayout="fixed"
 />
 `;
 

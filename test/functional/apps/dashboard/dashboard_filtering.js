@@ -33,14 +33,16 @@ export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard filtering', function() {
     this.tags('smoke');
 
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -49,10 +51,14 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     describe('adding a filter that excludes all data', () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.timePicker.setDefaultDataRange();
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
 
@@ -61,6 +67,10 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await filterBar.addFilter('bytes', 'is', '12345678');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        // first round of requests sometimes times out, refresh all visualizations to fetch again
+        await queryBar.clickQuerySubmitButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
       });
@@ -234,7 +244,7 @@ export default function({ getService, getPageObjects }) {
 
       it('visualization saved with a query filters data', async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.timePicker.setDefaultDataRange();
 
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.waitUntilLoadingHasFinished();

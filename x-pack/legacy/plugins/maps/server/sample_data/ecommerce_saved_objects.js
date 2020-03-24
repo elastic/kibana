@@ -39,7 +39,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'count of kibana_sample_data_ecommerce:geoip.country_iso_code',
               name: '__kbnjoin__count_groupby_kibana_sample_data_ecommerce.geoip.country_iso_code',
               origin: 'join',
             },
@@ -104,7 +103,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'count of kibana_sample_data_ecommerce:geoip.region_name',
               name: '__kbnjoin__count_groupby_kibana_sample_data_ecommerce.geoip.region_name',
               origin: 'join',
             },
@@ -169,7 +167,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'count of kibana_sample_data_ecommerce:geoip.region_name',
               name: '__kbnjoin__count_groupby_kibana_sample_data_ecommerce.geoip.region_name',
               origin: 'join',
             },
@@ -234,7 +231,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'count of kibana_sample_data_ecommerce:geoip.region_name',
               name: '__kbnjoin__count_groupby_kibana_sample_data_ecommerce.geoip.region_name',
               origin: 'join',
             },
@@ -314,7 +310,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'taxful_total_price',
               name: 'taxful_total_price',
               origin: 'source',
             },
@@ -376,7 +371,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'Count',
               name: 'doc_count',
               origin: 'source',
             },
@@ -399,12 +393,36 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'sum of taxful_total_price',
               name: 'sum_of_taxful_total_price',
               origin: 'source',
             },
             minSize: 1,
             maxSize: 20,
+          },
+        },
+        labelText: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              name: 'sum_of_taxful_total_price',
+              origin: 'source',
+            },
+          },
+        },
+        labelSize: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              name: 'sum_of_taxful_total_price',
+              origin: 'source',
+            },
+            minSize: 12,
+            maxSize: 24,
+          },
+        },
+        labelBorderSize: {
+          options: {
+            size: 'MEDIUM',
           },
         },
       },

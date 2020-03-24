@@ -45,6 +45,7 @@ export class NoDataController extends MonitoringViewBaseController {
         }
       }
 
+      this.errors.length = 0;
       if (catchReason) {
         this.reason = catchReason;
       } else if (!this.isCollectionEnabledUpdating && !this.isCollectionIntervalUpdating) {

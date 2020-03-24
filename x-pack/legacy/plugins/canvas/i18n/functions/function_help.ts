@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import { UnionToIntersection } from '@kbn/utility-types';
 import { CanvasFunction } from '../../types';
-import { UnionToIntersection } from '../../types';
 
 import { help as all } from './dict/all';
 import { help as alterColumn } from './dict/alter_column';
@@ -62,6 +62,7 @@ import { help as replace } from './dict/replace';
 import { help as revealImage } from './dict/reveal_image';
 import { help as rounddate } from './dict/rounddate';
 import { help as rowCount } from './dict/row_count';
+import { help as savedLens } from './dict/saved_lens';
 import { help as savedMap } from './dict/saved_map';
 import { help as savedSearch } from './dict/saved_search';
 import { help as savedVisualization } from './dict/saved_visualization';
@@ -109,11 +110,11 @@ import { help as urlparam } from './dict/urlparam';
  * This allows one to ensure each argument is present, and no extraneous arguments
  * remain.
  */
-export type FunctionHelp<T> = T extends ExpressionFunction<
+export type FunctionHelp<T> = T extends ExpressionFunctionDefinition<
   infer Name,
-  infer Context,
+  infer Input,
   infer Arguments,
-  infer Return
+  infer Output
 >
   ? {
       help: string;
@@ -137,11 +138,11 @@ export type FunctionHelp<T> = T extends ExpressionFunction<
 //
 // Given a collection of functions, the map would contain each entry.
 //
-type FunctionHelpMap<T> = T extends ExpressionFunction<
+type FunctionHelpMap<T> = T extends ExpressionFunctionDefinition<
   infer Name,
-  infer Context,
+  infer Input,
   infer Arguments,
-  infer Return
+  infer Output
 >
   ? { [key in Name]: FunctionHelp<T> }
   : never;
@@ -155,8 +156,8 @@ type FunctionHelpDict = UnionToIntersection<FunctionHelpMap<CanvasFunction>>;
 
 /**
  * Help text for Canvas Functions should be properly localized. This function will
- * return a dictionary of help strings, organized by `CanvasFunction` specification
- * and then by available arguments within each `CanvasFunction`.
+ * return a dictionary of help strings, organized by `ExpressionFunctionDefinition`
+ * specification and then by available arguments within each `ExpressionFunctionDefinition`.
  *
  * This a function, rather than an object, to future-proof string initialization,
  * if ever necessary.
@@ -216,6 +217,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   revealImage,
   rounddate,
   rowCount,
+  savedLens,
   savedMap,
   savedSearch,
   savedVisualization,

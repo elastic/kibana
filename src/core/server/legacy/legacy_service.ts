@@ -31,6 +31,7 @@ import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs } from './plugins';
 import { convertLegacyDeprecationProvider } from './config';
 import {
+  ILegacyInternals,
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
   LegacyPlugins,
@@ -82,6 +83,7 @@ export class LegacyService implements CoreService {
   private legacyRawConfig?: LegacyConfig;
   private legacyPlugins?: LegacyPlugins;
   private settings?: LegacyVars;
+  public legacyInternals?: ILegacyInternals;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService } = coreContext;
@@ -125,7 +127,11 @@ export class LegacyService implements CoreService {
       disabledPluginSpecs,
       uiExports,
       navLinks,
-    } = await findLegacyPluginSpecs(this.settings, this.coreContext.logger);
+    } = await findLegacyPluginSpecs(
+      this.settings,
+      this.coreContext.logger,
+      this.coreContext.env.packageInfo
+    );
 
     this.legacyPlugins = {
       pluginSpecs,
@@ -179,6 +185,11 @@ export class LegacyService implements CoreService {
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
     this.legacyRawConfig!.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
     this.setupDeps = setupDeps;
+    this.legacyInternals = new LegacyInternals(
+      this.legacyPlugins.uiExports,
+      this.legacyRawConfig!,
+      setupDeps.core.http.server
+    );
   }
 
   public async start(startDeps: LegacyServiceStartDeps) {
@@ -245,6 +256,19 @@ export class LegacyService implements CoreService {
     startDeps: LegacyServiceStartDeps,
     legacyPlugins: LegacyPlugins
   ) {
+    const coreStart: CoreStart = {
+      capabilities: startDeps.core.capabilities,
+      elasticsearch: startDeps.core.elasticsearch,
+      savedObjects: {
+        getScopedClient: startDeps.core.savedObjects.getScopedClient,
+        createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
+        createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
+        createSerializer: startDeps.core.savedObjects.createSerializer,
+        getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
+      },
+      uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+    };
+
     const coreSetup: CoreSetup = {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
@@ -265,14 +289,22 @@ export class LegacyService implements CoreService {
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
         registerOnPreResponse: setupDeps.core.http.registerOnPreResponse,
         basePath: setupDeps.core.http.basePath,
+        auth: {
+          get: setupDeps.core.http.auth.get,
+          isAuthenticated: setupDeps.core.http.auth.isAuthenticated,
+        },
         csp: setupDeps.core.http.csp,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
+        getServerInfo: setupDeps.core.http.getServerInfo,
+      },
+      metrics: {
+        getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
       },
       savedObjects: {
-        setClientFactory: setupDeps.core.savedObjects.setClientFactory,
+        setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
-        createInternalRepository: setupDeps.core.savedObjects.createInternalRepository,
-        createScopedRepository: setupDeps.core.savedObjects.createScopedRepository,
+        registerType: setupDeps.core.savedObjects.registerType,
+        getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
@@ -280,11 +312,7 @@ export class LegacyService implements CoreService {
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
-    };
-    const coreStart: CoreStart = {
-      capabilities: startDeps.core.capabilities,
-      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
-      uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      getStartServices: () => Promise.resolve([coreStart, startDeps.plugins]),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -313,7 +341,7 @@ export class LegacyService implements CoreService {
           rendering: setupDeps.core.rendering,
           uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
-          legacy: new LegacyInternals(legacyPlugins.uiExports, config, setupDeps.core.http.server),
+          legacy: this.legacyInternals,
         },
         logger: this.coreContext.logger,
       },

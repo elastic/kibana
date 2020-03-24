@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction, Filter } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition, Filter } from 'src/plugins/expressions/common';
 // @ts-ignore untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
 import { getFunctionHelp } from '../../../i18n';
@@ -14,16 +14,16 @@ interface Arguments {
   query: string;
 }
 
-export function escount(): ExpressionFunction<'escount', Filter, Arguments, any> {
+export function escount(): ExpressionFunctionDefinition<'escount', Filter, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().escount;
 
   return {
     name: 'escount',
     type: 'number',
-    help,
     context: {
       types: ['filter'],
     },
+    help,
     args: {
       query: {
         types: ['string'],
@@ -37,8 +37,8 @@ export function escount(): ExpressionFunction<'escount', Filter, Arguments, any>
         help: argHelp.index,
       },
     },
-    fn: (context, args, handlers) => {
-      context.and = context.and.concat([
+    fn: (input, args, handlers) => {
+      input.and = input.and.concat([
         {
           type: 'luceneQueryString',
           query: args.query,
@@ -57,10 +57,10 @@ export function escount(): ExpressionFunction<'escount', Filter, Arguments, any>
             },
           },
         },
-        context
+        input
       );
 
-      return handlers
+      return ((handlers as any) as { elasticsearchClient: any })
         .elasticsearchClient('count', esRequest)
         .then((resp: { count: number }) => resp.count);
     },

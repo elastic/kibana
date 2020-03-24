@@ -9,8 +9,8 @@ Reporting tests have their own top level test folder because:
   ### Running the tests
 
   There is more information on running x-pack tests here: https://github.com/elastic/kibana/blob/master/x-pack/README.md#running-functional-tests. Similar to running the API tests, you need to specify a reporting configuration file. Reporting currently has two configuration files you can point to:
-  - test/reporting/configs/chromium_api.js 
-  - test/reporting/configs/chromium_functional.js 
+  - test/reporting/configs/chromium_api.js
+  - test/reporting/configs/chromium_functional.js
 
   The `api` versions hit the reporting api and ensure report generation completes successfully, but does not verify the output of the reports. This is done in the `functional` test versions, which does a snapshot comparison of the generated URL against a baseline to determine success.
 
@@ -32,10 +32,6 @@ node scripts/functional_tests_server.js --config test/reporting/configs/[test_co
   ```
 node ../scripts/functional_test_runner.js --config test/reporting/configs/[test_config_name_here].js
   ```
-
-**Prerequisites**
-The reporting functional tests use [pdf-image](https://www.npmjs.com/package/pdf-image) to convert PDF's pages to png files for image comparisons between generated reports and baseline reports.
-pdf-image requires the system commands `convert`, `gs`, and `pdfinfo` to function. Those can be set up by running the following.
 
 ```sh
 //OSX
@@ -99,7 +95,7 @@ node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 l
 7. Generate some reporting URLs
   - Use a mixture of Visualize, Discover (CSV), Dashboard
   - Can view the current test coverage by checkout out [api/generation_urls.js](https://github.com/elastic/kibana/blob/master/x-pack/test/reporting/api/generation_urls.js). You can use different ones for better test coverage (e.g. different dashboards, different visualizations).
-  - Don’t generate urls from huge dashboards since this is time consuming.  
+  - Don’t generate urls from huge dashboards since this is time consuming.
   - Use dashboards that have time saved with them if you wish to have data included.
 8. Save these reporting urls.
 9. Navigate back to the main branch via `git checkout master`. Then create, or work off your branch as usual to add the extra test coverage.

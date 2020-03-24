@@ -11,24 +11,20 @@ import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { render, waitForElement } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../../../../plugins/apm/server';
 import { LocationProvider } from '../context/LocationContext';
-import { PromiseReturnType } from '../../typings/common';
+import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
 import {
   ESFilter,
   ESSearchResponse,
   ESSearchRequest
-} from '../../typings/elasticsearch';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue
-} from '../context/ApmPluginContext';
-import { ConfigSchema } from '../new-platform/plugin';
+} from '../../../../../plugins/apm/typings/elasticsearch';
+import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -118,6 +114,7 @@ interface MockSetup {
     'apm_oss.transactionIndices': string;
     'apm_oss.metricsIndices': string;
     apmAgentConfigurationIndex: string;
+    apmCustomLinkIndex: string;
   };
 }
 
@@ -151,23 +148,10 @@ export async function inspectSearchParams(
   const mockSetup = {
     start: 1528113600000,
     end: 1528977600000,
-    client: {
-      search: spy
-    } as any,
-    internalClient: {
-      search: spy
-    } as any,
-    config: new Proxy(
-      {},
-      {
-        get: () => 'myIndex'
-      }
-    ) as APMConfig,
-    uiFiltersES: [
-      {
-        term: { 'service.environment': 'prod' }
-      }
-    ],
+    client: { search: spy } as any,
+    internalClient: { search: spy } as any,
+    config: new Proxy({}, { get: () => 'myIndex' }) as APMConfig,
+    uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
     indices: {
       'apm_oss.sourcemapIndices': 'myIndex',
       'apm_oss.errorIndices': 'myIndex',
@@ -175,7 +159,8 @@ export async function inspectSearchParams(
       'apm_oss.spanIndices': 'myIndex',
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
-      apmAgentConfigurationIndex: 'myIndex'
+      apmAgentConfigurationIndex: 'myIndex',
+      apmCustomLinkIndex: 'myIndex'
     },
     dynamicIndexPattern: null as any
   };
@@ -196,53 +181,3 @@ export async function inspectSearchParams(
 }
 
 export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
-
-const mockCore = {
-  chrome: {
-    setBreadcrumbs: () => {}
-  },
-  http: {
-    basePath: {
-      prepend: (path: string) => `/basepath${path}`
-    }
-  },
-  notifications: {
-    toasts: {
-      addWarning: () => {}
-    }
-  }
-};
-
-const mockConfig: ConfigSchema = {
-  indexPatternTitle: 'apm-*',
-  serviceMapEnabled: false,
-  ui: {
-    enabled: false
-  }
-};
-
-export const mockApmPluginContextValue = {
-  config: mockConfig,
-  core: mockCore,
-  packageInfo: { version: '0' },
-  plugins: {}
-};
-
-export function MockApmPluginContextWrapper({
-  children,
-  value = {} as ApmPluginContextValue
-}: {
-  children?: ReactNode;
-  value?: ApmPluginContextValue;
-}) {
-  return (
-    <ApmPluginContext.Provider
-      value={{
-        ...mockApmPluginContextValue,
-        ...value
-      }}
-    >
-      {children}
-    </ApmPluginContext.Provider>
-  );
-}

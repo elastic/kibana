@@ -85,6 +85,7 @@ describe('kbn_url_storage', () => {
     beforeEach(() => {
       history = createMemoryHistory();
       urlControls = createKbnUrlControls(history);
+      urlControls.update('/', true);
     });
 
     const getCurrentUrl = () => createPath(history.location);
@@ -143,17 +144,6 @@ describe('kbn_url_storage', () => {
       expect(cb).toHaveBeenCalledTimes(3);
     });
 
-    it('should flush async url updates', async () => {
-      const pr1 = urlControls.updateAsync(() => '/1', false);
-      const pr2 = urlControls.updateAsync(() => '/2', false);
-      const pr3 = urlControls.updateAsync(() => '/3', false);
-      expect(getCurrentUrl()).toBe('/');
-      urlControls.flush();
-      expect(getCurrentUrl()).toBe('/3');
-      await Promise.all([pr1, pr2, pr3]);
-      expect(getCurrentUrl()).toBe('/3');
-    });
-
     it('flush should take priority over regular replace behaviour', async () => {
       const pr1 = urlControls.updateAsync(() => '/1', true);
       const pr2 = urlControls.updateAsync(() => '/2', false);
@@ -173,6 +163,48 @@ describe('kbn_url_storage', () => {
       expect(getCurrentUrl()).toBe('/');
       await Promise.all([pr1, pr2, pr3]);
       expect(getCurrentUrl()).toBe('/');
+    });
+
+    it('should retrieve pending url ', async () => {
+      const pr1 = urlControls.updateAsync(() => '/1', true);
+      const pr2 = urlControls.updateAsync(() => '/2', false);
+      const pr3 = urlControls.updateAsync(() => '/3', true);
+      expect(urlControls.getPendingUrl()).toEqual('/3');
+      expect(getCurrentUrl()).toBe('/');
+      await Promise.all([pr1, pr2, pr3]);
+      expect(getCurrentUrl()).toBe('/3');
+
+      expect(urlControls.getPendingUrl()).toBeUndefined();
+    });
+  });
+
+  describe('urlControls - browser history integration', () => {
+    let history: History;
+    let urlControls: IKbnUrlControls;
+    beforeEach(() => {
+      history = createBrowserHistory();
+      urlControls = createKbnUrlControls(history);
+      urlControls.update('/', true);
+    });
+
+    const getCurrentUrl = () => window.location.href;
+
+    it('should flush async url updates', async () => {
+      const pr1 = urlControls.updateAsync(() => '/1', false);
+      const pr2 = urlControls.updateAsync(() => '/2', false);
+      const pr3 = urlControls.updateAsync(() => '/3', false);
+      expect(getCurrentUrl()).toBe('http://localhost/');
+      expect(urlControls.flush()).toBe('http://localhost/3');
+      expect(getCurrentUrl()).toBe('http://localhost/3');
+      await Promise.all([pr1, pr2, pr3]);
+      expect(getCurrentUrl()).toBe('http://localhost/3');
+    });
+
+    it('flush() should return undefined, if no url updates happened', () => {
+      expect(urlControls.flush()).toBeUndefined();
+      urlControls.updateAsync(() => 'http://localhost/1', false);
+      urlControls.updateAsync(() => 'http://localhost/', false);
+      expect(urlControls.flush()).toBeUndefined();
     });
   });
 

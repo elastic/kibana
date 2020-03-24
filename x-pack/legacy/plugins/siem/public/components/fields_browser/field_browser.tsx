@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
 import { Header } from './header';
@@ -57,7 +57,7 @@ type Props = Pick<
   /**
    * The current timeline column headers
    */
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -95,7 +95,7 @@ type Props = Pick<
   /**
    * Invoked to add or remove a column from the timeline
    */
-  toggleColumn: (column: ColumnHeader) => void;
+  toggleColumn: (column: ColumnHeaderOptions) => void;
 };
 
 /**

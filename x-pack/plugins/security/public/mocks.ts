@@ -6,11 +6,13 @@
 
 import { authenticationMock } from './authentication/index.mock';
 import { createSessionTimeoutMock } from './session/session_timeout.mock';
+import { licenseMock } from '../common/licensing/index.mock';
 
 function createSetupMock() {
   return {
     authc: authenticationMock.createSetup(),
     sessionTimeout: createSessionTimeoutMock(),
+    license: licenseMock.create(),
   };
 }
 

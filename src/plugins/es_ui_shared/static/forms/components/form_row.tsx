@@ -28,10 +28,13 @@ interface Props {
   description?: string | JSX.Element;
   field?: FieldHook;
   euiFieldProps?: Record<string, any>;
-  idAria?: string;
   titleTag?: 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   children?: React.ReactNode;
   [key: string]: any;
+}
+
+function isTitleString(title: any): title is string {
+  return typeof title === 'string' || title.type.name === 'FormattedMessage';
 }
 
 export const FormRow = ({
@@ -43,14 +46,15 @@ export const FormRow = ({
   titleTag = 'h4',
   ...rest
 }: Props) => {
-  let titleWrapped = title;
+  let titleWrapped;
 
   // If a string is provided, create a default Euititle of size "m"
-  const isTitleString = typeof title === 'string' || title.type.name === 'FormattedMessage';
-  if (isTitleString) {
+  if (isTitleString(title)) {
     // Create the correct title tag
     const titleWithHTag = React.createElement(titleTag, undefined, title);
     titleWrapped = <EuiTitle size="s">{titleWithHTag}</EuiTitle>;
+  } else {
+    titleWrapped = title;
   }
 
   if (!children && !field) {
@@ -58,8 +62,8 @@ export const FormRow = ({
   }
 
   return (
-    <EuiDescribedFormGroup title={titleWrapped} description={description} idAria={idAria} fullWidth>
-      {children ? children : <Field field={field!} idAria={idAria} {...rest} />}
+    <EuiDescribedFormGroup title={titleWrapped} description={description} fullWidth>
+      {children ? children : <Field field={field!} {...rest} />}
     </EuiDescribedFormGroup>
   );
 };

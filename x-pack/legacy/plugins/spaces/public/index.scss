@@ -1,16 +1,4 @@
 // Import the EUI global scope so we can use EUI constants
 @import 'src/legacy/ui/public/styles/_styling_constants';
 
-/* Spaces plugin styles */
-
-// Prefix all styles with "spc" to avoid conflicts.
-// Examples
-//   spcChart
-//   spcChart__legend
-//   spcChart__legend--small
-//   spcChart__legend-isLoading
-
-@import './management/index';
-@import './nav_control/index';
-@import './space_selector/index';
-@import './copy_saved_objects_to_space/index';
+@import '../../../../plugins/spaces/public/index';

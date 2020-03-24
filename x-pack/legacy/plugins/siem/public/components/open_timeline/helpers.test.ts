@@ -6,7 +6,7 @@
 import { cloneDeep, omit } from 'lodash/fp';
 
 import { mockTimelineResults } from '../../mock/timeline_results';
-import { timelineDefaults } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import {
   defaultTimelineToTimelineModel,
   getNotesCount,
@@ -236,6 +236,7 @@ describe('helpers', () => {
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
+        eventType: 'all',
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -329,6 +330,7 @@ describe('helpers', () => {
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
+        eventType: 'all',
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -415,6 +417,7 @@ describe('helpers', () => {
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
+        eventType: 'all',
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -536,6 +539,7 @@ describe('helpers', () => {
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
+        eventType: 'all',
         filters: [
           {
             $state: {

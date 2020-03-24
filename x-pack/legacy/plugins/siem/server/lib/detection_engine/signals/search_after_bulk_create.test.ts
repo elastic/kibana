@@ -26,20 +26,26 @@ export const mockService = {
 };
 
 describe('searchAfterAndBulkCreate', () => {
+  let inputIndexPattern: string[] = [];
   beforeEach(() => {
     jest.clearAllMocks();
+    inputIndexPattern = ['auditbeat-*'];
   });
 
   test('if successful with empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
     const result = await searchAfterAndBulkCreate({
-      someResult: sampleEmptyDocSearchResults,
+      someResult: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: '5m',
@@ -47,10 +53,12 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockService.callCluster).toHaveBeenCalledTimes(0);
     expect(result).toEqual(true);
   });
+
   test('if successful iteration of while loop with maxDocs', async () => {
     const sampleParams = sampleRuleAlertParams(30);
     const someGuids = Array.from({ length: 13 }).map(x => uuid.v4());
@@ -90,8 +98,12 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: '5m',
@@ -99,10 +111,12 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockService.callCluster).toHaveBeenCalledTimes(5);
     expect(result).toEqual(true);
   });
+
   test('if unsuccessful first bulk create', async () => {
     const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
     const sampleParams = sampleRuleAlertParams(10);
@@ -113,8 +127,12 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: '5m',
@@ -122,10 +140,12 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(result).toEqual(false);
   });
+
   test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockReturnValueOnce({
@@ -143,8 +163,12 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: '5m',
@@ -152,10 +176,12 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(result).toEqual(false);
   });
+
   test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids and 0 total hits', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockReturnValueOnce({
@@ -173,8 +199,12 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: '5m',
@@ -182,9 +212,11 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(result).toEqual(true);
   });
+
   test('if successful iteration of while loop with maxDocs and search after returns results with no sort ids', async () => {
     const sampleParams = sampleRuleAlertParams(10);
     const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
@@ -205,8 +237,12 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: '5m',
@@ -214,9 +250,11 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(result).toEqual(true);
   });
+
   test('if successful iteration of while loop with maxDocs and search after returns empty results with no sort ids', async () => {
     const sampleParams = sampleRuleAlertParams(10);
     const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
@@ -230,15 +268,19 @@ describe('searchAfterAndBulkCreate', () => {
           },
         ],
       })
-      .mockReturnValueOnce(sampleEmptyDocSearchResults);
+      .mockReturnValueOnce(sampleEmptyDocSearchResults());
     const result = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: '5m',
@@ -246,9 +288,11 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(result).toEqual(true);
   });
+
   test('if returns false when singleSearchAfter throws an exception', async () => {
     const sampleParams = sampleRuleAlertParams(10);
     const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
@@ -271,8 +315,12 @@ describe('searchAfterAndBulkCreate', () => {
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
+      inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: '5m',
@@ -280,6 +328,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(result).toEqual(false);
   });

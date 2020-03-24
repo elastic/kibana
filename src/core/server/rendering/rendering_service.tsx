@@ -27,10 +27,10 @@ import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
 import {
+  IRenderOptions,
   RenderingSetupDeps,
   RenderingServiceSetup,
   RenderingMetadata,
-  LegacyRenderOptions,
 } from './types';
 
 /** @internal */
@@ -56,10 +56,11 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
           app = { getId: () => 'core' },
           includeUserSettings = true,
           vars = {},
-        }: LegacyRenderOptions = {}
+        }: IRenderOptions = {}
       ) => {
         const { env } = this.coreContext;
         const basePath = http.basePath.get(request);
+        const serverBasePath = http.basePath.serverBasePath;
         const settings = {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
@@ -79,6 +80,7 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
             buildNumber: env.packageInfo.buildNum,
             branch: env.packageInfo.branch,
             basePath,
+            serverBasePath,
             env,
             legacyMode: appId !== 'core',
             i18n: {

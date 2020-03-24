@@ -1,66 +1,107 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MonitorBarSeries component renders a series when there are down items 1`] = `
+exports[`MonitorBarSeries component renders if the data series is present 1`] = `
 <div
-  style={
+  style="height:50px;width:100%;max-width:1200px;margin-right:15px"
+>
+  <div
+    class="echChart"
+  >
+    <div
+      class="echChartStatus"
+      data-ech-render-complete="false"
+      data-ech-render-count="0"
+    />
+    <div
+      class="echChartResizer"
+    />
+    <div
+      class="echContainer"
+    >
+      <div
+        class="echReactiveChart_unavailable"
+      >
+        <p>
+          No data to display
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`MonitorBarSeries component shallow renders a series when there are down items 1`] = `
+<ContextProvider
+  value={
     Object {
-      "height": 50,
-      "maxWidth": "1200px",
-      "width": "100%",
+      "history": Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      },
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "match": Object {
+        "isExact": true,
+        "params": Object {},
+        "path": "/",
+        "url": "/",
+      },
+      "staticContext": undefined,
     }
   }
 >
-  <Chart
-    renderer="canvas"
-  >
-    <Connect(spec)
-      xDomain={
+  <MonitorBarSeries
+    dangerColor="A danger color"
+    histogramSeries={
+      Array [
         Object {
-          "max": 1548700920000,
-          "min": 1548697920000,
-        }
-      }
-    />
-    <Connect(spec)
-      hide={true}
-      id="bottom"
-      position="bottom"
-      tickFormat={[Function]}
-    />
-    <Connect(spec)
-      customSeriesColors={
-        Array [
-          "A danger color",
-        ]
-      }
-      data={
-        Array [
-          Array [
-            124,
-            1,
-          ],
-          Array [
-            125,
-            1,
-          ],
-          Array [
-            126,
-            1,
-          ],
-        ]
-      }
-      id="downSeries"
-      name="Down checks"
-      timeZone="local"
-      xAccessor={0}
-      xScaleType="time"
-      yAccessors={
-        Array [
-          1,
-        ]
-      }
-      yScaleType="linear"
-    />
-  </Chart>
-</div>
+          "down": 1,
+          "timestamp": 124,
+          "up": 0,
+        },
+        Object {
+          "down": 1,
+          "timestamp": 125,
+          "up": 0,
+        },
+        Object {
+          "down": 1,
+          "timestamp": 126,
+          "up": 0,
+        },
+      ]
+    }
+  />
+</ContextProvider>
 `;

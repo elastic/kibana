@@ -18,9 +18,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggGroupNames, Schemas } from './legacy_imports';
+import { AggGroupNames } from '../../../../plugins/data/public';
+import { Schemas } from '../../vis_default_editor/public';
 import { Vis } from '../../visualizations/public';
-import { tableVisResponseHandler } from './table_vis_request_handler';
+import { tableVisResponseHandler } from './table_vis_response_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
 import { TableOptions } from './components/table_vis_options';

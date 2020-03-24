@@ -5,30 +5,22 @@
   <kbn-top-nav
     app-name="'discover'"
     config="topNavMenu"
-    show-search-bar="true"
+    index-patterns="[indexPattern]"
+    on-query-submit="updateQuery"
+    on-saved-query-id-change="updateSavedQueryId"
+    query="state.query"
+    saved-query-id="state.savedQuery"
+    screen-title="screenTitle"
     show-date-picker="enableTimeRangeSelector"
     show-save-query="showSaveQuery"
-    query="state.query"
-    saved-query="savedQuery"
-    screen-title="screenTitle"
-    on-query-submit="updateQueryAndFetch"
-    index-patterns="[indexPattern]"
-    filters="filters"
-    on-filters-updated="onFiltersUpdated"
-    date-range-from="time.from"
-    date-range-to="time.to"
-    is-refresh-paused="refreshInterval.pause"
-    refresh-interval="refreshInterval.value"
-    on-refresh-change="onRefreshChange"
-    on-saved="onQuerySaved"
-    on-saved-query-updated="onSavedQueryUpdated"
-    on-clear-saved-query="onClearSavedQuery"
+    show-search-bar="true"
+    use-default-behaviors="true"
   >
   </kbn-top-nav>
 
   <main class="container-fluid">
     <div class="row">
-      <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
+      <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar" data-test-subj="discover-sidebar">
         <div class="dscFieldChooser">
           <disc-field-chooser
             columns="state.columns"
@@ -46,11 +38,6 @@
       </div>
 
       <div class="dscWrapper col-md-10">
-        <discover-unsupported-index-pattern
-          ng-if="isUnsupportedIndexPattern"
-          unsupported-type="unsupportedIndexPatternType"
-        ></discover-unsupported-index-pattern>
-
         <discover-no-results
           ng-show="resultState === 'none'"
           shard-failures="failures"
@@ -191,10 +178,10 @@
                 columns="state.columns"
                 infinite-scroll="true"
                 filter="filterQuery"
-                filters="state.filters"
                 data-shared-item
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"
+                data-test-subj="discoverDocTable"
                 minimum-visible-rows="minimumVisibleRows"
                 render-complete
                 on-add-column="addColumn"

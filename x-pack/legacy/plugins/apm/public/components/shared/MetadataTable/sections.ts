@@ -34,6 +34,14 @@ export const HOST: Section = {
   })
 };
 
+export const CLIENT: Section = {
+  key: 'client',
+  label: i18n.translate('xpack.apm.metadataTable.section.clientLabel', {
+    defaultMessage: 'Client'
+  }),
+  properties: ['ip']
+};
+
 export const CONTAINER: Section = {
   key: 'container',
   label: i18n.translate('xpack.apm.metadataTable.section.containerLabel', {

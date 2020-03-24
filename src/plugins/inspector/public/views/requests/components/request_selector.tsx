@@ -35,8 +35,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { RequestStatus } from '../../../adapters';
-import { Request } from '../../../adapters/request/types';
+import { RequestStatus } from '../../../../common/adapters';
+import { Request } from '../../../../common/adapters/request/types';
 
 interface RequestSelectorState {
   isPopoverOpen: boolean;

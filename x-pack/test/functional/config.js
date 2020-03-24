@@ -49,6 +49,7 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
+      resolve(__dirname, './apps/api_keys'),
       resolve(__dirname, './apps/index_patterns'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
@@ -69,7 +70,7 @@ export default async function({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: ['path.repo=/tmp/'],
+      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
     },
 
     kbnTestServer: {
@@ -133,23 +134,14 @@ export default async function({ readConfigFile }) {
         pathname: '/',
       },
       infraOps: {
-        pathname: '/app/infra',
+        pathname: '/app/metrics',
       },
       infraLogs: {
-        pathname: '/app/infra',
-        hash: '/logs',
+        pathname: '/app/logs',
       },
       canvas: {
         pathname: '/app/canvas',
         hash: '/',
-      },
-      code: {
-        pathname: '/app/code',
-        hash: '/admin',
-      },
-      codeSearch: {
-        pathname: '/app/code',
-        hash: '/search',
       },
       uptime: {
         pathname: '/app/uptime',
@@ -167,6 +159,10 @@ export default async function({ readConfigFile }) {
       rollupJob: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/',
+      },
+      apiKeys: {
+        pathname: '/app/kibana',
+        hash: '/management/security/api_keys/',
       },
       licenseManagement: {
         pathname: '/app/kibana',
@@ -220,6 +216,25 @@ export default async function({ readConfigFile }) {
 
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests',
+    },
+    security: {
+      roles: {
+        test_logstash_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['logstash*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+      },
+      defaultRoles: ['superuser'],
     },
   };
 }

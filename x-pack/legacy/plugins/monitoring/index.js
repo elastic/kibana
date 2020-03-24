@@ -4,86 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { resolve } from 'path';
 import { config } from './config';
-import { deprecations } from './deprecations';
 import { getUiExports } from './ui_exports';
-import { Plugin } from './server/plugin';
-import { initInfraSource } from './server/lib/logs/init_infra_source';
+import { KIBANA_ALERTING_ENABLED } from './common/constants';
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
  * @param kibana {Object} Kibana plugin instance
  * @return {Object} Monitoring UI Kibana plugin object
  */
-export const monitoring = kibana =>
-  new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+const deps = ['kibana', 'elasticsearch', 'xpack_main'];
+if (KIBANA_ALERTING_ENABLED) {
+  deps.push(...['alerting', 'actions']);
+}
+export const monitoring = kibana => {
+  return new kibana.Plugin({
+    require: deps,
     id: 'monitoring',
-    configPrefix: 'xpack.monitoring',
+    configPrefix: 'monitoring',
     publicDir: resolve(__dirname, 'public'),
     init(server) {
-      const configs = [
-        'xpack.monitoring.ui.enabled',
-        'xpack.monitoring.kibana.collection.enabled',
-        'xpack.monitoring.max_bucket_size',
-        'xpack.monitoring.min_interval_seconds',
-        'kibana.index',
-        'xpack.monitoring.show_license_expiration',
-        'xpack.monitoring.ui.container.elasticsearch.enabled',
-        'xpack.monitoring.ui.container.logstash.enabled',
-        'xpack.monitoring.tests.cloud_detector.enabled',
-        'xpack.monitoring.kibana.collection.interval',
-        'xpack.monitoring.elasticsearch.hosts',
-        'xpack.monitoring.elasticsearch',
-        'xpack.monitoring.xpack_api_polling_frequency_millis',
-        'server.uuid',
-        'server.name',
-        'server.host',
-        'server.port',
-        'xpack.monitoring.cluster_alerts.email_notifications.enabled',
-        'xpack.monitoring.cluster_alerts.email_notifications.email_address',
-        'xpack.monitoring.ccs.enabled',
-        'xpack.monitoring.elasticsearch.logFetchCount',
-      ];
-
       const serverConfig = server.config();
-      const serverFacade = {
-        config: () => ({
-          get: key => {
-            if (configs.includes(key)) {
-              return serverConfig.get(key);
-            }
-            throw `Unknown key '${key}'`;
+      const npMonitoring = server.newPlatform.setup.plugins.monitoring;
+      if (npMonitoring) {
+        const kbnServerStatus = this.kbnServer.status;
+        npMonitoring.registerLegacyAPI({
+          getServerStatus: () => {
+            const status = kbnServerStatus.toJSON();
+            return get(status, 'overall.state');
           },
-        }),
-        injectUiAppVars: server.injectUiAppVars,
-        log: (...args) => server.log(...args),
-        getOSInfo: server.getOSInfo,
-        events: {
-          on: (...args) => server.events.on(...args),
-        },
-        expose: (...args) => server.expose(...args),
-        route: (...args) => server.route(...args),
-        _hapi: server,
-        _kbnServer: this.kbnServer,
-      };
-      const { usageCollection, licensing } = server.newPlatform.setup.plugins;
-      const plugins = {
-        xpack_main: server.plugins.xpack_main,
-        elasticsearch: server.plugins.elasticsearch,
-        infra: server.plugins.infra,
-        usageCollection,
-        licensing,
-      };
+        });
+      }
 
-      new Plugin().setup(serverFacade, plugins);
+      server.injectUiAppVars('monitoring', () => {
+        return {
+          maxBucketSize: serverConfig.get('monitoring.ui.max_bucket_size'),
+          minIntervalSeconds: serverConfig.get('monitoring.ui.min_interval_seconds'),
+          kbnIndex: serverConfig.get('kibana.index'),
+          showLicenseExpiration: serverConfig.get('monitoring.ui.show_license_expiration'),
+          showCgroupMetricsElasticsearch: serverConfig.get(
+            'monitoring.ui.container.elasticsearch.enabled'
+          ),
+          showCgroupMetricsLogstash: serverConfig.get('monitoring.ui.container.logstash.enabled'), // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
+        };
+      });
     },
     config,
-    deprecations,
     uiExports: getUiExports(),
-    postInit(server) {
-      const serverConfig = server.config();
-      initInfraSource(serverConfig, server.plugins.infra);
-    },
   });
+};

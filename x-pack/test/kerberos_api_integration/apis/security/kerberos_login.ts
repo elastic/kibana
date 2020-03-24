@@ -8,10 +8,14 @@ import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  getMutualAuthenticationResponseToken,
+  getSPNEGOToken,
+} from '../../fixtures/kerberos_tools';
 
 export default function({ getService }: FtrProviderContext) {
-  const spnegoToken =
-    'YIIChwYGKwYBBQUCoIICezCCAnegDTALBgkqhkiG9xIBAgKiggJkBIICYGCCAlwGCSqGSIb3EgECAgEAboICSzCCAkegAwIBBaEDAgEOogcDBQAAAAAAo4IBW2GCAVcwggFToAMCAQWhERsPVEVTVC5FTEFTVElDLkNPohwwGqADAgEDoRMwERsESFRUUBsJbG9jYWxob3N0o4IBGTCCARWgAwIBEqEDAgECooIBBwSCAQNBN2a1Rso+KEJsDwICYLCt7ACLzdlbhEZF5YNsehO109b/WiZR1VTK6kCQyDdBdQFefyvV8EiC35mz7XnTb239nWz6xBGbdmtjSfF0XzpXKbL/zGzLEKkEXQuqFLPUN6qEJXsh0OoNdj9OWwmTr93FVyugs1hO/E5wjlAe2SDYpBN6uZICXu6dFg9nLQKkb/XgbgKM7ZZvgA/UElWDgHav4nPO1VWppCCLKHqXTRnvpr/AsxeON4qeJLaukxBigfIaJlLFMNQal5H7MyXa0j3Y1sckbURnWoBt6r4XE7c8F8cz0rYoGwoCO+Cs5tNutKY6XcsAFbLh59hjgIkhVBhhyTeypIHSMIHPoAMCARKigccEgcSsXqIRAcHfZivrbHfsnvbFgmzmnrKVPFNtJ9Hl23KunCsNW49nP4VF2dEf9n12prDaIguJDV5LPHpTew9rmCj1GCahKJ9bJbRKIgImLFd+nelm3E2zxRqAhrgM1469oDg0ksE3+5lJBuJlVEECMp0F/gxvEiL7DhasICqw+FOJ/jD9QUYvg+E6BIxWgZyPszaxerzBBszAhIF1rxCHRRL1KLjskNeJlBhH77DkAO6AEmsYGdsgEq7b7uCov9PKPiiPAuFF';
+  const spnegoToken = getSPNEGOToken();
+
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
@@ -38,7 +42,7 @@ export default function({ getService }: FtrProviderContext) {
       await getService('esSupertest')
         .post('/_security/role_mapping/krb5')
         .send({
-          roles: ['kibana_user'],
+          roles: ['kibana_admin'],
           enabled: true,
           rules: { field: { 'realm.name': 'kerb1' } },
         })
@@ -74,6 +78,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
     });
 
     describe('initiating SPNEGO', () => {
@@ -104,7 +109,7 @@ export default function({ getService }: FtrProviderContext) {
 
         // Verify that mutual authentication works.
         expect(response.headers['www-authenticate']).to.be(
-          'Negotiate oRQwEqADCgEAoQsGCSqGSIb3EgECAg=='
+          `Negotiate ${getMutualAuthenticationResponseToken()}`
         );
 
         const cookies = response.headers['set-cookie'];
@@ -119,7 +124,7 @@ export default function({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(200, {
             username: 'tester@TEST.ELASTIC.CO',
-            roles: ['kibana_user'],
+            roles: ['kibana_admin'],
             full_name: null,
             email: null,
             metadata: {
@@ -129,6 +134,7 @@ export default function({ getService }: FtrProviderContext) {
             enabled: true,
             authentication_realm: { name: 'kerb1', type: 'kerberos' },
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
+            authentication_provider: 'kerberos',
           });
       });
 
@@ -197,7 +203,7 @@ export default function({ getService }: FtrProviderContext) {
         const systemAPIResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -240,7 +246,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(cookies).to.have.length(1);
         checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(logoutResponse.headers.location).to.be('/logged_out');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out');
 
         // Token that was stored in the previous cookie should be invalidated as well and old
         // session cookie should not allow API access.
@@ -344,8 +350,7 @@ export default function({ getService }: FtrProviderContext) {
       });
     });
 
-    // FAILING: https://github.com/elastic/kibana/issues/52969
-    describe.skip('API access with missing access token document or expired refresh token.', () => {
+    describe('API access with missing access token document or expired refresh token.', () => {
       let sessionCookie: Cookie;
 
       beforeEach(async () => {

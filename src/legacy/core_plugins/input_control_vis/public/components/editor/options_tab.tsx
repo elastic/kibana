@@ -23,7 +23,7 @@ import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSwitchEvent } from '@elastic/eui';
 
-import { VisOptionsProps } from '../../legacy_imports';
+import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
 
 interface OptionsTabParams {
   updateFiltersOnChange: boolean;

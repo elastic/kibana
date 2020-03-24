@@ -79,24 +79,25 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModal
   let newId = await emptyPattern.create(overwriteAll);
   if (!newId) {
     // We can override and we want to prompt for confirmation
-    try {
-      await confirmModalPromise(
-        i18n.translate('kbn.management.indexPattern.confirmOverwriteLabel', {
-          values: { title: this.title },
-          defaultMessage: "Are you sure you want to overwrite '{title}'?",
+    const isConfirmed = await confirmModalPromise(
+      i18n.translate('kbn.management.indexPattern.confirmOverwriteLabel', {
+        values: { title: this.title },
+        defaultMessage: "Are you sure you want to overwrite '{title}'?",
+      }),
+      {
+        title: i18n.translate('kbn.management.indexPattern.confirmOverwriteTitle', {
+          defaultMessage: 'Overwrite {type}?',
+          values: { type },
         }),
-        {
-          title: i18n.translate('kbn.management.indexPattern.confirmOverwriteTitle', {
-            defaultMessage: 'Overwrite {type}?',
-            values: { type },
-          }),
-          confirmButtonText: i18n.translate('kbn.management.indexPattern.confirmOverwriteButton', {
-            defaultMessage: 'Overwrite',
-          }),
-        }
-      );
+        confirmButtonText: i18n.translate('kbn.management.indexPattern.confirmOverwriteButton', {
+          defaultMessage: 'Overwrite',
+        }),
+      }
+    );
+
+    if (isConfirmed) {
       newId = await emptyPattern.create(true);
-    } catch (err) {
+    } else {
       return;
     }
   }

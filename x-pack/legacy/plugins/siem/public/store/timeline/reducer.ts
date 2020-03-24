@@ -53,6 +53,7 @@ import {
   updateIsLoading,
   setSavedQueryId,
   setFilters,
+  updateEventType,
 } from './actions';
 import {
   addNewTimeline,
@@ -93,6 +94,7 @@ import {
   upsertTimelineColumn,
   updateSavedQuery,
   updateFilters,
+  updateTimelineEventType,
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
@@ -118,6 +120,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       state,
       {
         id,
+        dataProviders,
         dateRange,
         show,
         columns,
@@ -132,6 +135,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       ...state,
       timelineById: addNewTimeline({
         columns,
+        dataProviders,
         dateRange,
         filters,
         id,
@@ -340,6 +344,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(updateDescription, (state, { id, description }) => ({
     ...state,
     timelineById: updateTimelineDescription({ id, description, timelineById: state.timelineById }),
+  }))
+  .case(updateEventType, (state, { id, eventType }) => ({
+    ...state,
+    timelineById: updateTimelineEventType({ id, eventType, timelineById: state.timelineById }),
   }))
   .case(updateIsFavorite, (state, { id, isFavorite }) => ({
     ...state,

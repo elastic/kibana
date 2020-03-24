@@ -61,13 +61,13 @@ export default function({ getService, getPageObjects }) {
         fullname: 'RashmiFirst RashmiLast',
         email: 'rashmi@myEmail.com',
         save: true,
-        roles: ['logstash_reader', 'kibana_user'],
+        roles: ['logstash_reader', 'kibana_admin'],
       });
       log.debug('After Add user: , userObj.userName');
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       log.debug('roles: ', users.Rashmi.roles);
-      expect(users.Rashmi.roles).to.eql(['logstash_reader', 'kibana_user']);
+      expect(users.Rashmi.roles).to.eql(['logstash_reader', 'kibana_admin']);
       expect(users.Rashmi.fullname).to.eql('RashmiFirst RashmiLast');
       expect(users.Rashmi.reserved).to.be(false);
       await PageObjects.security.forceLogout();

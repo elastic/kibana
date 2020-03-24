@@ -6,6 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADVANCED_SETTINGS = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.advancedSettingsButton',
+  {
+    defaultMessage: 'Advanced settings',
+  }
+);
+
 export const ADD_REFERENCE = i18n.translate(
   'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.addReferenceDescription',
   {
@@ -59,5 +66,12 @@ export const URL_FORMAT_INVALID = i18n.translate(
   'xpack.siem.detectionEngine.createRule.stepDefineRule.referencesUrlInvalidError',
   {
     defaultMessage: 'Url is invalid format',
+  }
+);
+
+export const ADD_RULE_NOTE_HELP_TEXT = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepAboutrule.noteHelpText',
+  {
+    defaultMessage: 'Add rule investigation notes...',
   }
 );

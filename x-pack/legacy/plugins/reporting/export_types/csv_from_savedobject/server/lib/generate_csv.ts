@@ -5,14 +5,20 @@
  */
 
 import { badRequest } from 'boom';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { ReportingCore } from '../../../../server';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';
 import { SearchPanel, VisPanel, JobParamsPanelCsv, FakeRequest } from '../../types';
 import { generateCsvSearch } from './generate_csv_search';
 
-export function createGenerateCsv(logger: Logger) {
+export function createGenerateCsv(
+  reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  logger: Logger
+) {
   return async function generateCsv(
     request: RequestFacade | FakeRequest,
-    server: ServerFacade,
     visType: string,
     panel: VisPanel | SearchPanel,
     jobParams: JobParamsPanelCsv
@@ -26,7 +32,9 @@ export function createGenerateCsv(logger: Logger) {
       case 'search':
         return await generateCsvSearch(
           request as RequestFacade,
+          reporting,
           server,
+          elasticsearch,
           logger,
           panel as SearchPanel,
           jobParams

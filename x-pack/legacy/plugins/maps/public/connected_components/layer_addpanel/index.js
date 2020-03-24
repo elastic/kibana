@@ -6,11 +6,13 @@
 
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
-import { FLYOUT_STATE, INDEXING_STAGE } from '../../reducers/ui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FLYOUT_STATE, INDEXING_STAGE } from '../../../../../../plugins/maps/public/reducers/ui';
 import { updateFlyout, updateIndexingStage } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIndexingStage } from '../../selectors/ui_selectors';
 import { getMapColors } from '../../selectors/map_selectors';
-import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import {
   setTransientLayer,
   addLayer,
@@ -52,7 +54,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(
+const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps, null, { forwardRef: true })(
   AddLayerPanel
 );
 export { connectedFlyOut as AddLayerPanel };

@@ -8,7 +8,19 @@ import { rgba } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 
-const Field = styled.div`
+interface WidthProp {
+  width?: number;
+}
+
+const Field = styled.div.attrs<WidthProp>(({ width }) => {
+  if (width) {
+    return {
+      style: {
+        width: `${width}px`,
+      },
+    };
+  }
+})<WidthProp>`
   background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border: ${({ theme }) => theme.eui.euiBorderThin};
   box-shadow: 0 2px 2px -1px ${({ theme }) => rgba(theme.eui.euiColorMediumShade, 0.3)},
@@ -24,12 +36,9 @@ Field.displayName = 'Field';
  * Renders a field (e.g. `event.action`) as a draggable badge
  */
 
-// Passing the styles directly to the component because the width is
-// being calculated and is recommended by Styled Components for performance
-// https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-export const DraggableFieldBadge = React.memo<{ fieldId: string; fieldWidth?: string }>(
+export const DraggableFieldBadge = React.memo<{ fieldId: string; fieldWidth?: number }>(
   ({ fieldId, fieldWidth }) => (
-    <Field data-test-subj="field" style={{ width: fieldWidth }}>
+    <Field data-test-subj="field" width={fieldWidth}>
       {fieldId}
     </Field>
   )

@@ -1,14 +1,14 @@
 [[targz]]
-=== Install Kibana with `.tar.gz`
+=== Install {kib} from archive on Linux or MacOS
 
 Kibana is provided for Linux and Darwin as a `.tar.gz` package. These packages
 are the easiest formats to use when trying out Kibana.
 
-These packages are free to use under the Elastic license. They contain open 
-source and free commercial features and access to paid commercial features. 
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the 
-paid commercial features. See the 
-https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+These packages are free to use under the Elastic license. They contain open
+source and free commercial features and access to paid commercial features.
+{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the
+paid commercial features. See the
+https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
 
 The latest stable version of Kibana can be found on the
@@ -47,6 +47,27 @@ endif::[]
 [[install-darwin64]]
 ==== Download and install the Darwin package
 
+[IMPORTANT]
+.macOS Gatekeeper warnings
+====
+Apple's rollout of stricter notarization requirements affected the notarization
+of the {version} {kib} artifacts. If macOS Catalina displays a dialog when you
+first run {kib} that interrupts it, you will need to take an action to allow it
+to run.
+
+To prevent Gatekeeper checks on the {kib} files, run the following command on the
+downloaded `.tar.gz` archive or the directory to which was extracted:
+[source,sh]
+----
+xattr -d -r com.apple.quarantine <archive-or-directory>
+----
+
+Alternatively, you can add a security override if a Gatekeeper popup appears by
+following the instructions in the _How to open an app that hasn’t been notarized
+or is from an unidentified developer_ section of
+https://support.apple.com/en-us/HT202491[Safely open apps on your Mac].
+====
+
 ifeval::["{release-state}"=="unreleased"]
 
 Version {version} of Kibana has not yet been released.
@@ -68,9 +89,9 @@ cd kibana-{version}-darwin-x86_64/ <2>
     `kibana-{version}-darwin-x86_64.tar.gz: OK`.
 <2> This directory is known as `$KIBANA_HOME`.
 
-Alternatively, you can download the following package, which contains only 
+Alternatively, you can download the following package, which contains only
 features that are available under the Apache 2.0 license:
-https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-darwin-x86_64.tar.gz  
+https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-darwin-x86_64.tar.gz
 
 endif::[]
 

@@ -7,7 +7,10 @@
 import { VectorStyle } from './vector_style';
 import { DataRequest } from '../../util/data_request';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
-import { FIELD_ORIGIN } from '../../../../common/constants';
+import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../common/constants';
+
+jest.mock('../../../kibana_services');
+jest.mock('ui/new_platform');
 
 class MockField {
   constructor({ fieldName }) {
@@ -30,6 +33,9 @@ class MockSource {
   getSupportedShapeTypes() {
     return this._supportedShapeTypes;
   }
+  getFieldByName(fieldName) {
+    return new MockField({ fieldName });
+  }
   createField({ fieldName }) {
     return new MockField({ fieldName });
   }
@@ -39,11 +45,11 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
   const fieldName = 'doIStillExist';
   const properties = {
     fillColor: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: STYLE_TYPE.STATIC,
       options: {},
     },
     lineColor: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: STYLE_TYPE.DYNAMIC,
       options: {
         field: {
           name: fieldName,
@@ -52,7 +58,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
       },
     },
     iconSize: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: STYLE_TYPE.DYNAMIC,
       options: {
         color: 'a color',
         field: { name: fieldName, origin: FIELD_ORIGIN.SOURCE },
@@ -60,28 +66,38 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     },
   };
 
-  it('Should return no changes when next oridinal fields contain existing style property fields', () => {
+  beforeEach(() => {
+    require('../../../kibana_services').getUiSettings = () => ({
+      get: jest.fn(),
+    });
+  });
+
+  it('Should return no changes when next ordinal fields contain existing style property fields', () => {
     const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const nextOridinalFields = [new MockField({ fieldName })];
-    const { hasChanges } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(
-      nextOridinalFields
-    );
+    const nextFields = [new MockField({ fieldName })];
+    const { hasChanges } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields);
     expect(hasChanges).toBe(false);
   });
 
-  it('Should clear missing fields when next oridinal fields do not contain existing style property fields', () => {
+  it('Should clear missing fields when next ordinal fields do not contain existing style property fields', () => {
     const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const nextOridinalFields = [];
+    const nextFields = [];
     const {
       hasChanges,
       nextStyleDescriptor,
-    } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextOridinalFields);
+    } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields);
     expect(hasChanges).toBe(true);
     expect(nextStyleDescriptor.properties).toEqual({
       fillColor: {
         options: {},
+        type: 'STATIC',
+      },
+      icon: {
+        options: {
+          value: 'airfield',
+        },
         type: 'STATIC',
       },
       iconOrientation: {
@@ -135,10 +151,9 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
         },
         type: 'STATIC',
       },
-      symbol: {
+      symbolizeAs: {
         options: {
-          symbolId: 'airfield',
-          symbolizeAs: 'circle',
+          value: 'circle',
         },
       },
     });
@@ -234,7 +249,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
         {
           properties: {
             fillColor: {
-              type: VectorStyle.STYLE_TYPE.DYNAMIC,
+              type: STYLE_TYPE.DYNAMIC,
               options: {
                 field: {
                   origin: FIELD_ORIGIN.SOURCE,
@@ -258,7 +273,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
         {
           properties: {
             fillColor: {
-              type: VectorStyle.STYLE_TYPE.DYNAMIC,
+              type: STYLE_TYPE.DYNAMIC,
               options: {
                 field: {
                   origin: FIELD_ORIGIN.SOURCE,
@@ -271,8 +286,8 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
         new MockSource()
       );
 
-      const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.myDynamicField).toEqual({
+      const styleMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(styleMeta.fieldMeta.myDynamicField.range).toEqual({
         delta: 9,
         max: 10,
         min: 1,

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isEqual, get } from 'lodash/fp';
+import { isEmpty, get } from 'lodash/fp';
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import {
@@ -14,34 +15,33 @@ import {
   getIndexFields,
   sourceQuery,
 } from '../../../containers/source';
-import { useStateToaster } from '../../../components/toasters';
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { SourceQuery } from '../../../graphql/types';
 import { useApolloClient } from '../../../utils/apollo_context';
 
 import * as i18n from './translations';
 
 interface FetchIndexPatternReturn {
-  browserFields: BrowserFields | null;
+  browserFields: BrowserFields;
   isLoading: boolean;
   indices: string[];
   indicesExists: boolean;
-  indexPatterns: IIndexPattern | null;
+  indexPatterns: IIndexPattern;
 }
 
-type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
+export type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
 
 export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => {
   const apolloClient = useApolloClient();
   const [indices, setIndices] = useState<string[]>(defaultIndices);
   const [indicesExists, setIndicesExists] = useState(false);
-  const [indexPatterns, setIndexPatterns] = useState<IIndexPattern | null>(null);
-  const [browserFields, setBrowserFields] = useState<BrowserFields | null>(null);
+  const [indexPatterns, setIndexPatterns] = useState<IIndexPattern>({ fields: [], title: '' });
+  const [browserFields, setBrowserFields] = useState<BrowserFields>({});
   const [isLoading, setIsLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
-    if (!isEqual(defaultIndices, indices)) {
+    if (!deepEqual(defaultIndices, indices)) {
       setIndices(defaultIndices);
     }
   }, [defaultIndices, indices]);
@@ -75,7 +75,9 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
                 setIndexPatterns(
                   getIndexFields(indices.join(), get('data.source.status.indexFields', result))
                 );
-                setBrowserFields(getBrowserFields(get('data.source.status.indexFields', result)));
+                setBrowserFields(
+                  getBrowserFields(indices.join(), get('data.source.status.indexFields', result))
+                );
               }
             },
             error => {

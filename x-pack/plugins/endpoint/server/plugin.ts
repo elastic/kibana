@@ -5,11 +5,14 @@
  */
 import { Plugin, CoreSetup, PluginInitializerContext, Logger } from 'kibana/server';
 import { first } from 'rxjs/operators';
-import { addRoutes } from './routes';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { createConfig$, EndpointConfigType } from './config';
 import { EndpointAppContext } from './types';
-import { registerEndpointRoutes } from './routes/endpoints';
+
+import { addRoutes } from './routes';
+import { registerEndpointRoutes } from './routes/metadata';
+import { registerAlertRoutes } from './routes/alerts';
+import { registerResolverRoutes } from './routes/resolver';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -40,6 +43,7 @@ export class EndpointPlugin
       app: ['endpoint', 'kibana'],
       privileges: {
         all: {
+          app: ['endpoint', 'kibana'],
           api: ['resolver'],
           savedObject: {
             all: [],
@@ -48,6 +52,7 @@ export class EndpointPlugin
           ui: ['save'],
         },
         read: {
+          app: ['endpoint', 'kibana'],
           api: [],
           savedObject: {
             all: [],
@@ -68,6 +73,8 @@ export class EndpointPlugin
     const router = core.http.createRouter();
     addRoutes(router);
     registerEndpointRoutes(router, endpointContext);
+    registerResolverRoutes(router, endpointContext);
+    registerAlertRoutes(router, endpointContext);
   }
 
   public start() {

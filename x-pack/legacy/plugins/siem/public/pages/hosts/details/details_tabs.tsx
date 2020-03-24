@@ -24,7 +24,7 @@ import {
   HostAlertsQueryTabBody,
 } from '../navigation';
 
-const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
+export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
     pageFilters,
     deleteQuery,
@@ -73,37 +73,28 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
 
     return (
       <Switch>
-        <Route
-          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}
-          render={() => <AuthenticationsQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}
-          render={() => <HostsQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}
-          render={() => <UncommonProcessQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.anomalies})`}
-          render={() => (
-            <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
-          )}
-        />
-        <Route
-          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}
-          render={() => <EventsQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}
-          render={() => <HostAlertsQueryTabBody {...tabProps} pageFilters={pageFilters} />}
-        />
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
+          <AuthenticationsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}>
+          <HostsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
+          <UncommonProcessQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.anomalies})`}>
+          <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
+        </Route>
+
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}>
+          <EventsQueryTabBody {...tabProps} pageFilters={pageFilters} />
+        </Route>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}>
+          <HostAlertsQueryTabBody {...tabProps} pageFilters={pageFilters} />
+        </Route>
       </Switch>
     );
   }
 );
 
 HostDetailsTabs.displayName = 'HostDetailsTabs';
-
-export { HostDetailsTabs };

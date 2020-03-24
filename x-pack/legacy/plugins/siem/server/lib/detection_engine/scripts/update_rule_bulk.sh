@@ -10,7 +10,7 @@ set -e
 ./check_env_variables.sh
 
 # Uses a default if no argument is specified
-RULES=${1:-./rules/bulk/update_names.json}
+RULES=${1:-./rules/bulk/multiple_simplest_queries.json}
 
 # Example: ./update_rule_bulk.sh
 curl -s -k \

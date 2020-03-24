@@ -28,7 +28,7 @@ export default function({ getPageObjects }) {
     });
 
     afterEach(async () => {
-      await PageObjects.maps.cancelLayerAdd();
+      await PageObjects.maps.closeOrCancelLayer();
     });
 
     it('should add GeoJSON file to map', async () => {

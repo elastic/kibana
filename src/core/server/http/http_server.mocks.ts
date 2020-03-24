@@ -19,8 +19,7 @@
 import { Request } from 'hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
-
-import querystring from 'querystring';
+import { stringify } from 'query-string';
 
 import { schema } from '@kbn/config-schema';
 
@@ -29,12 +28,15 @@ import {
   LifecycleResponseFactory,
   RouteMethod,
   KibanaResponseFactory,
+  RouteValidationSpec,
+  KibanaRouteState,
 } from './router';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 
-interface RequestFixtureOptions {
+interface RequestFixtureOptions<P = any, Q = any, B = any> {
+  auth?: { isAuthenticated: boolean };
   headers?: Record<string, string>;
   params?: Record<string, any>;
   body?: Record<string, any>;
@@ -43,9 +45,16 @@ interface RequestFixtureOptions {
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
+  kibanaRouteState?: KibanaRouteState;
+  routeAuthRequired?: false;
+  validation?: {
+    params?: RouteValidationSpec<P>;
+    query?: RouteValidationSpec<Q>;
+    body?: RouteValidationSpec<B>;
+  };
 }
 
-function createKibanaRequestMock({
+function createKibanaRequestMock<P = any, Q = any, B = any>({
   path = '/path',
   headers = { accept: 'something/html' },
   params = {},
@@ -54,10 +63,16 @@ function createKibanaRequestMock({
   method = 'get',
   socket = new Socket(),
   routeTags,
-}: RequestFixtureOptions = {}) {
-  const queryString = querystring.stringify(query);
-  return KibanaRequest.from(
+  routeAuthRequired,
+  validation = {},
+  kibanaRouteState = { xsrfRequired: true },
+  auth = { isAuthenticated: true },
+}: RequestFixtureOptions<P, Q, B> = {}) {
+  const queryString = stringify(query, { sort: false });
+
+  return KibanaRequest.from<P, Q, B>(
     createRawRequestMock({
+      auth,
       headers,
       params,
       query,
@@ -70,15 +85,17 @@ function createKibanaRequestMock({
         query: queryString,
         search: queryString ? `?${queryString}` : queryString,
       },
-      route: { settings: { tags: routeTags } },
+      route: {
+        settings: { tags: routeTags, auth: routeAuthRequired, app: kibanaRouteState },
+      },
       raw: {
         req: { socket },
       },
     }),
     {
-      params: schema.object({}, { allowUnknowns: true }),
-      body: schema.object({}, { allowUnknowns: true }),
-      query: schema.object({}, { allowUnknowns: true }),
+      params: validation.params || schema.any(),
+      body: validation.body || schema.any(),
+      query: validation.query || schema.any(),
     }
   );
 }
@@ -98,6 +115,10 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
   return merge(
     {},
     {
+      app: { xsrfRequired: true } as any,
+      auth: {
+        isAuthenticated: true,
+      },
       headers: {},
       path: '/',
       route: { settings: {} },

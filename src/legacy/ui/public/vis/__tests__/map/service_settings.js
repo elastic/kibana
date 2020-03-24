@@ -21,7 +21,6 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import url from 'url';
 
-import EMS_CATALOGUE from './ems_mocks/sample_manifest.json';
 import EMS_FILES from './ems_mocks/sample_files.json';
 import EMS_TILES from './ems_mocks/sample_tiles.json';
 import EMS_STYLE_ROAD_MAP_BRIGHT from './ems_mocks/sample_style_bright';
@@ -34,14 +33,18 @@ describe('service_settings (FKA tilemaptest)', function() {
   let mapConfig;
   let tilemapsConfig;
 
-  const manifestUrl = 'https://foobar/manifest';
-  const manifestUrl2 = 'https://foobar_override/v1/manifest';
+  const emsFileApiUrl = 'https://files.foobar';
+  const emsTileApiUrl = 'https://tiles.foobar';
+
+  const emsTileApiUrl2 = 'https://tiles_override.foobar';
+  const emsFileApiUrl2 = 'https://files_override.foobar';
 
   beforeEach(
     ngMock.module('kibana', $provide => {
       $provide.decorator('mapConfig', () => {
         return {
-          manifestServiceUrl: manifestUrl,
+          emsFileApiUrl,
+          emsTileApiUrl,
           includeElasticMapsService: true,
           emsTileLayerId: {
             bright: 'road_map',
@@ -53,7 +56,8 @@ describe('service_settings (FKA tilemaptest)', function() {
     })
   );
 
-  let manifestServiceUrlOriginal;
+  let emsTileApiUrlOriginal;
+  let emsFileApiUrlOriginal;
   let tilemapsConfigDeprecatedOriginal;
   let getManifestStub;
   beforeEach(
@@ -61,26 +65,26 @@ describe('service_settings (FKA tilemaptest)', function() {
       serviceSettings = $injector.get('serviceSettings');
       getManifestStub = serviceSettings.__debugStubManifestCalls(async url => {
         //simulate network calls
-        if (url.startsWith('https://foobar')) {
-          return EMS_CATALOGUE;
-        } else if (url.startsWith('https://tiles.foobar')) {
-          return EMS_TILES;
-        } else if (url.startsWith('https://files.foobar')) {
-          return EMS_FILES;
-        } else if (url.startsWith('https://raster-style.foobar')) {
-          if (url.includes('osm-bright-desaturated')) {
+        if (url.startsWith('https://tiles.foobar')) {
+          if (url.includes('/manifest')) {
+            return EMS_TILES;
+          } else if (url.includes('osm-bright-desaturated.json')) {
             return EMS_STYLE_ROAD_MAP_DESATURATED;
-          } else if (url.includes('osm-bright')) {
+          } else if (url.includes('osm-bright.json')) {
             return EMS_STYLE_ROAD_MAP_BRIGHT;
-          } else if (url.includes('dark-matter')) {
+          } else if (url.includes('dark-matter.json')) {
             return EMS_STYLE_DARK_MAP;
           }
+        } else if (url.startsWith('https://files.foobar')) {
+          return EMS_FILES;
         }
       });
       mapConfig = $injector.get('mapConfig');
       tilemapsConfig = $injector.get('tilemapsConfig');
 
-      manifestServiceUrlOriginal = mapConfig.manifestServiceUrl;
+      emsTileApiUrlOriginal = mapConfig.emsTileApiUrl;
+      emsFileApiUrlOriginal = mapConfig.emsFileApiUrl;
+
       tilemapsConfigDeprecatedOriginal = tilemapsConfig.deprecated;
       $rootScope.$digest();
     })
@@ -88,7 +92,8 @@ describe('service_settings (FKA tilemaptest)', function() {
 
   afterEach(function() {
     getManifestStub.removeStub();
-    mapConfig.manifestServiceUrl = manifestServiceUrlOriginal;
+    mapConfig.emsTileApiUrl = emsTileApiUrlOriginal;
+    mapConfig.emsFileApiUrl = emsFileApiUrlOriginal;
     tilemapsConfig.deprecated = tilemapsConfigDeprecatedOriginal;
   });
 
@@ -110,7 +115,7 @@ describe('service_settings (FKA tilemaptest)', function() {
       expect(attrs.url).to.contain('{z}');
 
       const urlObject = url.parse(attrs.url, true);
-      expect(urlObject.hostname).to.be('raster-style.foobar');
+      expect(urlObject.hostname).to.be('tiles.foobar');
       expect(urlObject.query).to.have.property('my_app_name', 'kibana');
       expect(urlObject.query).to.have.property('elastic_tile_service_tos', 'agree');
       expect(urlObject.query).to.have.property('my_app_version');
@@ -161,7 +166,8 @@ describe('service_settings (FKA tilemaptest)', function() {
       });
 
       it('when overridden, should continue to work', async () => {
-        mapConfig.manifestServiceUrl = manifestUrl2;
+        mapConfig.emsFileApiUrl = emsFileApiUrl2;
+        mapConfig.emsTileApiUrl = emsTileApiUrl2;
         serviceSettings.addQueryParams({ foo: 'bar' });
         tilemapServices = await serviceSettings.getTMSServices();
         await assertQuery({ foo: 'bar' });
@@ -187,11 +193,11 @@ describe('service_settings (FKA tilemaptest)', function() {
             id: 'road_map',
             name: 'Road Map - Bright',
             url:
-              'https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
+              'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
             minZoom: 0,
             maxZoom: 10,
             attribution:
-              '<p><a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>',
+              '<a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a>',
             subdomains: [],
           },
         ];
@@ -233,19 +239,19 @@ describe('service_settings (FKA tilemaptest)', function() {
         );
 
         expect(desaturationFalse.url).to.equal(
-          'https://raster-style.foobar/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
         );
         expect(desaturationFalse.maxZoom).to.equal(10);
         expect(desaturationTrue.url).to.equal(
-          'https://raster-style.foobar/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
         );
         expect(desaturationTrue.maxZoom).to.equal(18);
         expect(darkThemeDesaturationFalse.url).to.equal(
-          'https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
         );
         expect(darkThemeDesaturationFalse.maxZoom).to.equal(22);
         expect(darkThemeDesaturationTrue.url).to.equal(
-          'https://raster-style.foobar/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
         );
         expect(darkThemeDesaturationTrue.maxZoom).to.equal(22);
       });

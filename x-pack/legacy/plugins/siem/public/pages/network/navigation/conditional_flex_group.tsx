@@ -9,7 +9,7 @@ import styled from 'styled-components';
 
 export const ConditionalFlexGroup = styled(EuiFlexGroup)`
   @media only screen and (min-width: 1441px) {
-    flex-direction: row;
+    flex-direction: row !important;
   }
 `;
 

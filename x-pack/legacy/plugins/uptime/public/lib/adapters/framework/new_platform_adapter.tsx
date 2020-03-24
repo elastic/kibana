@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChromeBreadcrumb, LegacyCoreStart } from 'src/core/public';
+import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { PluginsStart } from 'ui/new_platform/new_platform';
-import { CreateGraphQLClient } from './framework_adapter_types';
+import { PluginsSetup } from 'ui/new_platform/new_platform';
+import { alertTypeInitializers } from '../../alert_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 import {
@@ -19,12 +19,12 @@ import {
   DEFAULT_DARK_MODE,
   DEFAULT_TIMEPICKER_QUICK_RANGES,
 } from '../../../../common/constants';
-import { UMFrameworkAdapter, BootstrapUptimeApp } from '../../lib';
+import { UMFrameworkAdapter } from '../../lib';
 import { createApolloClient } from './apollo_client_adapter';
 
 export const getKibanaFrameworkAdapter = (
-  core: LegacyCoreStart,
-  plugins: PluginsStart
+  core: CoreStart,
+  plugins: PluginsSetup
 ): UMFrameworkAdapter => {
   const {
     application: { capabilities },
@@ -33,15 +33,30 @@ export const getKibanaFrameworkAdapter = (
     http: { basePath },
     i18n,
   } = core;
+
+  const {
+    data: { autocomplete },
+    // TODO: after NP migration we can likely fix this typing problem
+    // @ts-ignore we don't control this type
+    triggers_actions_ui,
+  } = plugins;
+
+  alertTypeInitializers.forEach(init =>
+    triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }))
+  );
+
   let breadcrumbs: ChromeBreadcrumb[] = [];
   core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
     breadcrumbs = nextBreadcrumbs || [];
   });
+
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
     capabilities,
     INTEGRATED_SOLUTIONS
   );
+
   const canSave = get(capabilities, 'uptime.save', false);
+
   const props: UptimeAppProps = {
     basePath: basePath.get(),
     canSave,
@@ -77,11 +92,9 @@ export const getKibanaFrameworkAdapter = (
   };
 
   return {
-    // TODO: these parameters satisfy the interface but are no longer needed
-    render: async (createComponent: BootstrapUptimeApp, cgc: CreateGraphQLClient) => {
-      const node = await document.getElementById('react-uptime-root');
-      if (node) {
-        ReactDOM.render(<UptimeApp {...props} />, node);
+    render: async (element: any) => {
+      if (element) {
+        ReactDOM.render(<UptimeApp {...props} />, element);
       }
     },
   };

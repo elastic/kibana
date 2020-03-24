@@ -170,22 +170,20 @@ export class WatchCache {
  * very large folders (with 84K+ files) cause a stack overflow.
  */
 async function recursiveDelete(directory: string) {
-  const entries = await readdirAsync(directory, { withFileTypes: true });
-  await Promise.all(
-    entries.map(entry => {
-      const absolutePath = path.join(directory, entry.name);
-      const result = entry.isDirectory()
-        ? recursiveDelete(absolutePath)
-        : unlinkAsync(absolutePath);
+  try {
+    const entries = await readdirAsync(directory, { withFileTypes: true });
 
-      // Ignore errors, if the file or directory doesn't exist.
-      return result.catch(e => {
-        if (e.code !== 'ENOENT') {
-          throw e;
-        }
-      });
-    })
-  );
+    await Promise.all(
+      entries.map(entry => {
+        const absolutePath = path.join(directory, entry.name);
+        return entry.isDirectory() ? recursiveDelete(absolutePath) : unlinkAsync(absolutePath);
+      })
+    );
 
-  return rmdirAsync(directory);
+    return rmdirAsync(directory);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
 }

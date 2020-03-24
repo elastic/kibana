@@ -16,7 +16,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
 
 import * as I18n from './translations';
 
@@ -25,6 +25,7 @@ interface ScheduleItemProps {
   dataTestSubj: string;
   idAria: string;
   isDisabled: boolean;
+  minimumValue?: number;
 }
 
 const timeTypeOptions = [
@@ -61,7 +62,13 @@ const MyEuiSelect = styled(EuiSelect)`
   width: auto;
 `;
 
-export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: ScheduleItemProps) => {
+export const ScheduleItem = ({
+  dataTestSubj,
+  field,
+  idAria,
+  isDisabled,
+  minimumValue = 0,
+}: ScheduleItemProps) => {
   const [timeType, setTimeType] = useState('s');
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -143,7 +150,13 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
           />
         }
       >
-        <EuiFieldNumber fullWidth min={0} onChange={onChangeTimeVal} value={timeVal} {...rest} />
+        <EuiFieldNumber
+          fullWidth
+          min={minimumValue}
+          onChange={onChangeTimeVal}
+          value={timeVal}
+          {...rest}
+        />
       </EuiFormControlLayout>
     </StyledEuiFormRow>
   );

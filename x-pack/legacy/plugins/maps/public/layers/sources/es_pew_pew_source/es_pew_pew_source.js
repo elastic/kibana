@@ -12,27 +12,22 @@ import { VectorLayer } from '../../vector_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import {
-  getDefaultDynamicProperties,
-  VECTOR_STYLES,
-} from '../../styles/vector/vector_style_defaults';
+import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 import {
-  SOURCE_DATA_ID_ORIGIN,
+  FIELD_ORIGIN,
   ES_PEW_PEW,
   COUNT_PROP_NAME,
-  COUNT_PROP_LABEL,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggConfigs } from 'ui/agg_types';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { COLOR_GRADIENTS } from '../../styles/color_utils';
+import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 const MAX_GEOTILE_LEVEL = 29;
-
-const aggSchemas = new Schemas([AbstractESAggSource.METRIC_SCHEMA_CONFIG]);
 
 export class ESPewPewSource extends AbstractESAggSource {
   static type = ES_PEW_PEW;
@@ -71,7 +66,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   renderSourceSettingsEditor({ onChange }) {
     return (
       <UpdateSourceEditor
-        indexPatternId={this._descriptor.indexPatternId}
+        indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
         applyGlobalQuery={this._descriptor.applyGlobalQuery}
@@ -96,7 +91,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   async getImmutableProperties() {
-    let indexPatternTitle = this._descriptor.indexPatternId;
+    let indexPatternTitle = this.getIndexPatternId();
     try {
       const indexPattern = await this.getIndexPattern();
       indexPatternTitle = indexPattern.title;
@@ -138,11 +133,10 @@ export class ESPewPewSource extends AbstractESAggSource {
         options: {
           ...defaultDynamicProperties[VECTOR_STYLES.LINE_COLOR].options,
           field: {
-            label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
-          color: 'Blues',
+          color: COLOR_GRADIENTS[0].value,
         },
       },
       [VECTOR_STYLES.LINE_WIDTH]: {
@@ -150,9 +144,8 @@ export class ESPewPewSource extends AbstractESAggSource {
         options: {
           ...defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH].options,
           field: {
-            label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
         },
       },
@@ -176,10 +169,7 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
-    const metricAggConfigs = this.createMetricAggConfigs();
-    const aggConfigs = new AggConfigs(indexPattern, metricAggConfigs, aggSchemas.all);
-
-    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       destSplit: {
         terms: {
@@ -205,7 +195,7 @@ export class ESPewPewSource extends AbstractESAggSource {
                   field: this._descriptor.sourceGeoField,
                 },
               },
-              ...aggConfigs.toDsl(),
+              ...this.getValueAggsDsl(indexPattern),
             },
           },
         },
@@ -234,7 +224,8 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async _getGeoField() {
     const indexPattern = await this.getIndexPattern();
-    const geoField = indexPattern.fields.getByName(this._descriptor.destGeoField);
+    const field = indexPattern.fields.getByName(this._descriptor.destGeoField);
+    const geoField = indexPatterns.isNestedField(field) ? undefined : field;
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {

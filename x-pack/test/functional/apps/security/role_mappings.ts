@@ -28,7 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('allows a role mapping to be created', async () => {
       await testSubjects.click('createRoleMappingButton');
       await testSubjects.setValue('roleMappingFormNameInput', 'new_role_mapping');
-      await testSubjects.setValue('roleMappingFormRoleComboBox', 'superuser');
+      await testSubjects.setValue('rolesDropdown', 'superuser');
       await browser.pressKeys(browser.keys.ENTER);
 
       await testSubjects.click('roleMappingsAddRuleButton');
@@ -93,7 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const url = parse(await browser.getCurrentUrl());
 
-      expect(url.hash).to.eql('#/management/security/role_mappings?_g=()');
+      expect(url.hash).to.eql('#/management/security/role_mappings');
     });
 
     describe('with role mappings', () => {

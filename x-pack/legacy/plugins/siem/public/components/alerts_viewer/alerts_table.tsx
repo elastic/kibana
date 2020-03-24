@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 
-import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { StatefulEventsViewer } from '../events_viewer';
 import * as i18n from './translations';
 import { alertsDefaultModel } from './default_headers';
@@ -18,7 +18,7 @@ export interface OwnProps {
 }
 
 const ALERTS_TABLE_ID = 'timeline-alerts-table';
-const defaultAlertsFilters: esFilters.Filter[] = [
+const defaultAlertsFilters: Filter[] = [
   {
     meta: {
       alias: null,
@@ -54,11 +54,21 @@ const defaultAlertsFilters: esFilters.Filter[] = [
 interface Props {
   endDate: number;
   startDate: number;
-  pageFilters?: esFilters.Filter[];
+  pageFilters?: Filter[];
 }
 
 const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters = [] }) => {
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
+  const timelineTypeContext = useMemo(
+    () => ({
+      documentType: i18n.ALERTS_DOCUMENT_TYPE,
+      footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+      title: i18n.ALERTS_TABLE_TITLE,
+      unit: i18n.UNIT,
+    }),
+    []
+  );
+
   return (
     <StatefulEventsViewer
       pageFilters={alertsFilter}
@@ -66,14 +76,7 @@ const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters
       end={endDate}
       id={ALERTS_TABLE_ID}
       start={startDate}
-      timelineTypeContext={useMemo(
-        () => ({
-          documentType: i18n.ALERTS_DOCUMENT_TYPE,
-          footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-          title: i18n.ALERTS_TABLE_TITLE,
-        }),
-        []
-      )}
+      timelineTypeContext={timelineTypeContext}
     />
   );
 };

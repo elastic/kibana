@@ -27,12 +27,12 @@ export class KqlTelemetryService implements Plugin<void> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(
-    { http, savedObjects }: CoreSetup,
+    { http, getStartServices }: CoreSetup,
     { usageCollection }: { usageCollection?: UsageCollectionSetup }
   ) {
     registerKqlTelemetryRoute(
       http.createRouter(),
-      savedObjects,
+      getStartServices,
       this.initializerContext.logger.get('data', 'kql-telemetry')
     );
 

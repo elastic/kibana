@@ -9,14 +9,23 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { LicenseState } from './lib/license_state';
 import { registerSearchRoute } from './routes/search';
 import { registerExploreRoute } from './routes/explore';
+import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
+import { registerSampleData } from './sample_data';
 
 export class GraphPlugin implements Plugin {
   private licenseState: LicenseState | null = null;
 
-  public async setup(core: CoreSetup, { licensing }: { licensing: LicensingPluginSetup }) {
+  public async setup(
+    core: CoreSetup,
+    { licensing, home }: { licensing: LicensingPluginSetup; home?: HomeServerPluginSetup }
+  ) {
     const licenseState = new LicenseState();
     licenseState.start(licensing.license$);
     this.licenseState = licenseState;
+
+    if (home) {
+      registerSampleData(home.sampleData, licenseState);
+    }
 
     const router = core.http.createRouter();
     registerSearchRoute({ licenseState, router });

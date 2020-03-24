@@ -1,8 +1,7 @@
 // Import the EUI global scope so we can use EUI constants
 @import 'src/legacy/ui/public/styles/_styling_constants';
-@import './app/sections/remote_cluster_list/components/connection_status/index';
 
-// Index management plugin styles
+// Remote clusters plugin styles
 
 // Prefix all styles with "remoteClusters" to avoid conflicts.
 // Examples
@@ -16,8 +15,14 @@
  *    as the 'Reset to defaults' link is added to and removed from the DOM.
  * 2. Fix the positioning.
  */
-
 .remoteClusterSkipIfUnavailableSwitch {
   justify-content: flex-start !important; /* 1 */
   padding-top: $euiSizeS !important;
+}
+
+/**
+ * 1. Prevent inherited flexbox layout from compressing this element on IE.
+ */
+ .remoteClustersConnectionStatus__message {
+  flex-basis: auto !important; /* 1 */
 }

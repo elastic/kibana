@@ -18,17 +18,14 @@ import { Loader } from '../loader';
 import { displayErrorToast, useStateToaster } from '../toasters';
 import { Embeddable } from './embeddable';
 import { EmbeddableHeader } from './embeddable_header';
-import { createEmbeddable } from './embedded_map_helpers';
+import { createEmbeddable, findMatchingIndexPatterns } from './embedded_map_helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { MapEmbeddable, SetQuery } from './types';
-import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana, useUiSetting$ } from '../../lib/kibana';
-import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -73,7 +70,7 @@ EmbeddableMap.displayName = 'EmbeddableMap';
 
 export interface EmbeddedMapProps {
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   startDate: number;
   endDate: number;
   setQuery: SetQuery;
@@ -107,10 +104,12 @@ export const EmbeddedMapComponent = ({
   useEffect(() => {
     let isSubscribed = true;
     async function setupEmbeddable() {
-      // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
-      const matchingIndexPatterns = kibanaIndexPatterns.filter(ip =>
-        siemDefaultIndices.includes(ip.attributes.title)
-      );
+      // Ensure at least one `siem:defaultIndex` kibana index pattern exists before creating embeddable
+      const matchingIndexPatterns = findMatchingIndexPatterns({
+        kibanaIndexPatterns,
+        siemDefaultIndices,
+      });
+
       if (matchingIndexPatterns.length === 0 && isSubscribed) {
         setIsLoading(false);
         setIsIndexError(true);
@@ -175,14 +174,6 @@ export const EmbeddedMapComponent = ({
     }
   }, [startDate, endDate]);
 
-  const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi
-      {...props}
-      savedObjects={services.savedObjects}
-      uiSettings={services.uiSettings}
-    />
-  );
-
   return isError ? null : (
     <Embeddable>
       <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
@@ -211,7 +202,7 @@ export const EmbeddedMapComponent = ({
             notifications={services.notifications}
             overlays={services.overlays}
             inspector={services.inspector}
-            SavedObjectFinder={SavedObjectFinder}
+            SavedObjectFinder={getSavedObjectFinder(services.savedObjects, services.uiSettings)}
           />
         ) : !isLoading && isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />

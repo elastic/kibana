@@ -7,10 +7,11 @@
 import React, { Component, Fragment } from 'react';
 
 import { MetricsEditor } from '../../../components/metrics_editor';
-import { indexPatternService } from '../../../kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 export class UpdateSourceEditor extends Component {
   state = {
@@ -29,7 +30,7 @@ export class UpdateSourceEditor extends Component {
   async _loadFields() {
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(this.props.indexPatternId);
+      indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({
@@ -48,7 +49,9 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
-    this.setState({ fields: indexPattern.fields });
+    this.setState({
+      fields: indexPattern.fields.filter(field => !indexPatterns.isNestedField(field)),
+    });
   }
 
   _onMetricsChange = metrics => {

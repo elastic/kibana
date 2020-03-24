@@ -4,82 +4,63 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useState, useContext } from 'react';
-import { connect } from 'react-redux';
-import { useRouteMatch, useParams } from 'react-router-dom';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Link } from 'react-router-dom';
 import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
-import { AppState } from '../state';
-import { selectSelectedMonitor } from '../state/selectors';
-import { getMonitorPageBreadcrumb, getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { UptimeSettingsContext } from '../contexts';
-import { getTitle } from '../lib/helper/get_title';
-import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { MONITOR_ROUTE } from '../routes';
+import { SETTINGS_ROUTE } from '../../common/constants';
+import { ToggleAlertFlyoutButton } from '../components/connected';
 
 interface PageHeaderProps {
-  monitorStatus?: any;
-  setBreadcrumbs: UMUpdateBreadcrumbs;
+  headingText: string;
+  extraLinks?: boolean;
+  datePicker?: boolean;
 }
 
-export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeaderProps) => {
-  const monitorPage = useRouteMatch({
-    path: MONITOR_ROUTE,
-  });
-  const { refreshApp } = useContext(UptimeSettingsContext);
+export const PageHeader = React.memo(
+  ({ headingText, extraLinks = false, datePicker = true }: PageHeaderProps) => {
+    const datePickerComponent = datePicker ? (
+      <EuiFlexItem grow={false}>
+        <UptimeDatePicker />
+      </EuiFlexItem>
+    ) : null;
 
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useParams();
-
-  const headingText = i18n.translate('xpack.uptime.overviewPage.headerText', {
-    defaultMessage: 'Overview',
-    description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-  });
-
-  const [headerText, setHeaderText] = useState(headingText);
-
-  useEffect(() => {
-    if (monitorPage) {
-      setHeaderText(monitorStatus?.url?.full);
-      if (monitorStatus?.monitor) {
-        const { name, id } = monitorStatus.monitor;
-        document.title = getTitle(name || id);
-      }
-    } else {
-      document.title = getTitle();
-    }
-  }, [monitorStatus, monitorPage, setHeaderText]);
-
-  useEffect(() => {
-    if (monitorPage) {
-      if (headerText) {
-        setBreadcrumbs(getMonitorPageBreadcrumb(headerText, stringifyUrlParams(params)));
-      }
-    } else {
-      setBreadcrumbs(getOverviewPageBreadcrumbs());
-    }
-  }, [headerText, setBreadcrumbs, params, monitorPage]);
-
-  return (
-    <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-        <EuiFlexItem>
-          <EuiTitle>
-            <h1>{headerText}</h1>
-          </EuiTitle>
+    const settingsLinkText = i18n.translate('xpack.uptime.page_header.settingsLink', {
+      defaultMessage: 'Settings',
+    });
+    const extraLinkComponents = !extraLinks ? null : (
+      <EuiFlexGroup alignItems="flexEnd">
+        <EuiFlexItem grow={false}>
+          <ToggleAlertFlyoutButton />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <UptimeDatePicker refreshApp={refreshApp} />
+          <Link to={SETTINGS_ROUTE}>
+            <EuiButtonEmpty data-test-subj="settings-page-link" iconType="gear">
+              {settingsLinkText}
+            </EuiButtonEmpty>
+          </Link>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-    </>
-  );
-};
+    );
 
-const mapStateToProps = (state: AppState) => ({
-  monitorStatus: selectSelectedMonitor(state),
-});
-
-export const PageHeader = connect(mapStateToProps, null)(PageHeaderComponent);
+    return (
+      <>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" wrap={true}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h1>{headingText}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem>{extraLinkComponents}</EuiFlexItem>
+              <EuiFlexItem>{datePickerComponent}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+      </>
+    );
+  }
+);

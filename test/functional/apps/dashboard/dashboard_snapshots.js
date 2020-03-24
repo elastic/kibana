@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects, updateBaselines }) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common', 'timePicker']);
   const screenshot = getService('screenshots');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
@@ -48,9 +48,9 @@ export default function({ getService, getPageObjects, updateBaselines }) {
     it('compare TSVB snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInLogstashDataRange();
+      await PageObjects.timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
-      await PageObjects.common.closeToast();
+      await PageObjects.common.closeToastIfExists();
 
       await PageObjects.dashboard.saveDashboard('tsvb');
       await PageObjects.dashboard.clickFullScreenMode();
@@ -71,9 +71,9 @@ export default function({ getService, getPageObjects, updateBaselines }) {
     it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInLogstashDataRange();
+      await PageObjects.timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
-      await PageObjects.common.closeToast();
+      await PageObjects.common.closeToastIfExists();
 
       await PageObjects.dashboard.saveDashboard('area');
       await PageObjects.dashboard.clickFullScreenMode();

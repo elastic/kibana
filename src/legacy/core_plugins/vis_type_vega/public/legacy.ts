@@ -26,9 +26,8 @@ import { LegacyDependenciesPlugin } from './shim';
 import { plugin } from '.';
 
 const setupPlugins: Readonly<VegaPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
+  ...npSetup.plugins,
   visualizations: visualizationsSetup,
-  data: npSetup.plugins.data,
 
   // Temporary solution
   // It will be removed when all dependent services are migrated to the new platform.
@@ -36,7 +35,7 @@ const setupPlugins: Readonly<VegaPluginSetupDependencies> = {
 };
 
 const startPlugins: Readonly<VegaPluginStartDependencies> = {
-  data: npStart.plugins.data,
+  ...npStart.plugins,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

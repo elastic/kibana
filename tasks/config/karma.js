@@ -21,6 +21,7 @@ import { dirname } from 'path';
 import { times } from 'lodash';
 import { makeJunitReportPath } from '@kbn/test';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import { DllCompiler } from '../../src/optimize/dynamic_dll_plugin';
 
 const TOTAL_CI_SHARDS = 4;
 const ROOT = dirname(require.resolve('../../package.json'));
@@ -54,16 +55,22 @@ module.exports = function(grunt) {
       'http://localhost:5610/test_bundle/built_css.css',
 
       `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.distFilename}`,
-      'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
+      'http://localhost:5610/built_assets/dlls/vendors_runtime.bundle.dll.js',
+      ...DllCompiler.getRawDllConfig().chunks.map(
+        chunk => `http://localhost:5610/built_assets/dlls/vendors${chunk}.bundle.dll.js`
+      ),
 
       shardNum === undefined
         ? `http://localhost:5610/bundles/tests.bundle.js`
         : `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${shardNum}`,
 
+      `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
       // this causes tilemap tests to fail, probably because the eui styles haven't been
       // included in the karma harness a long some time, if ever
       // `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
-      'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
+      ...DllCompiler.getRawDllConfig().chunks.map(
+        chunk => `http://localhost:5610/built_assets/dlls/vendors${chunk}.style.dll.css`
+      ),
       'http://localhost:5610/bundles/tests.style.css',
     ];
   }
@@ -170,11 +177,11 @@ module.exports = function(grunt) {
    *  (&shard_num=Y), are added to the testing bundle url and read by the
    *  test_harness/setup_test_sharding[1] module. This allows us to use a
    *  different number of shards in different scenarios (ie. running
-   *  `yarn test:browser` runs the tests in a single shard, effectively
+   *  `yarn test:karma` runs the tests in a single shard, effectively
    *  disabling sharding)
    *
    *  These same parameters can also be defined in the URL/query string of the
-   *  karma debug page (started when you run `yarn test:dev`).
+   *  karma debug page (started when you run `yarn test:karma:debug`).
    *
    *  ## debugging
    *

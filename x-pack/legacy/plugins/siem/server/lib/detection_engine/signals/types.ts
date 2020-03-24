@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
-import { RequestFacade } from '../../../types';
-import { AlertType, State, AlertExecutorOptions } from '../../../../../alerting/server/types';
+import {
+  AlertType,
+  State,
+  AlertExecutorOptions,
+} from '../../../../../../../plugins/alerting/server';
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
@@ -35,14 +39,6 @@ export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
 
 export type SignalsQueryRestParams = SignalQueryParams;
 
-export interface SignalsStatusRequest extends RequestFacade {
-  payload: SignalsStatusRestParams;
-}
-
-export interface SignalsQueryRequest extends RequestFacade {
-  payload: SignalsQueryRestParams;
-}
-
 export type SearchTypes =
   | string
   | string[]
@@ -51,11 +47,16 @@ export type SearchTypes =
   | boolean
   | boolean[]
   | object
-  | object[];
+  | object[]
+  | undefined;
 
 export interface SignalSource {
   [key: string]: SearchTypes;
   '@timestamp': string;
+  signal?: {
+    parent: Ancestor;
+    ancestors: Ancestor[];
+  };
 }
 
 export interface BulkResponse {
@@ -104,7 +105,7 @@ export interface GetResponse {
 }
 
 export type SignalSearchResponse = SearchResponse<SignalSource>;
-export type SignalSourceHit = SignalSearchResponse['hits']['hits'][0];
+export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
 
 export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
   params: RuleAlertParams & {
@@ -123,14 +124,18 @@ export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
   executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
 };
 
+export interface Ancestor {
+  rule: string;
+  id: string;
+  type: string;
+  index: string;
+  depth: number;
+}
+
 export interface Signal {
   rule: Partial<OutputRuleAlertRest>;
-  parent: {
-    id: string;
-    type: string;
-    index: string;
-    depth: number;
-  };
+  parent: Ancestor;
+  ancestors: Ancestor[];
   original_time: string;
   original_event?: SearchTypes;
   status: 'open' | 'closed';
@@ -140,4 +145,22 @@ export interface SignalHit {
   '@timestamp': string;
   event: object;
   signal: Partial<Signal>;
+}
+
+export interface AlertAttributes {
+  actions: RuleAlertAction[];
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  schedule: {
+    interval: string;
+  };
+  throttle: string | null;
+}
+
+export interface RuleAlertAttributes extends AlertAttributes {
+  params: RuleAlertParams;
 }

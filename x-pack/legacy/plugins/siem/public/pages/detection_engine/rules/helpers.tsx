@@ -4,66 +4,199 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick } from 'lodash/fp';
+import dateMath from '@elastic/datemath';
+import { get } from 'lodash/fp';
+import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
-import { Rule } from '../../../containers/detection_engine/rules';
-import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
+import { Filter } from '../../../../../../../../src/plugins/data/public';
+import { Rule, RuleType } from '../../../containers/detection_engine/rules';
+import { FormData, FormHook, FormSchema } from '../../../shared_imports';
+import {
+  AboutStepRule,
+  AboutStepRuleDetails,
+  DefineStepRule,
+  IMitreEnterpriseAttack,
+  ScheduleStepRule,
+} from './types';
 
-interface GetStepsData {
-  aboutRuleData: AboutStepRule | null;
-  defineRuleData: DefineStepRule | null;
-  scheduleRuleData: ScheduleStepRule | null;
+export interface GetStepsData {
+  aboutRuleData: AboutStepRule;
+  modifiedAboutRuleDetailsData: AboutStepRuleDetails;
+  defineRuleData: DefineStepRule;
+  scheduleRuleData: ScheduleStepRule;
 }
 
 export const getStepsData = ({
   rule,
   detailsView = false,
 }: {
-  rule: Rule | null;
+  rule: Rule;
   detailsView?: boolean;
 }): GetStepsData => {
-  const defineRuleData: DefineStepRule | null =
-    rule != null
-      ? {
-          isNew: false,
-          index: rule.index,
-          queryBar: {
-            query: { query: rule.query as string, language: rule.language },
-            filters: rule.filters as esFilters.Filter[],
-            saved_id: rule.saved_id ?? null,
-          },
-        }
-      : null;
-  const aboutRuleData: AboutStepRule | null =
-    rule != null
-      ? {
-          isNew: false,
-          ...pick(['description', 'name', 'references', 'severity', 'tags', 'threats'], rule),
-          ...(detailsView ? { name: '' } : {}),
-          threats: rule.threats as IMitreEnterpriseAttack[],
-          falsePositives: rule.false_positives,
-          riskScore: rule.risk_score,
-          timeline: {
-            id: rule.timeline_id ?? null,
-            title: rule.timeline_title ?? null,
-          },
-        }
-      : null;
-  const scheduleRuleData: ScheduleStepRule | null =
-    rule != null
-      ? {
-          isNew: false,
-          ...pick(['enabled', 'interval'], rule),
-          from:
-            rule?.meta?.from != null
-              ? rule.meta.from.replace('now-', '')
-              : rule.from.replace('now-', ''),
-        }
-      : null;
+  const defineRuleData: DefineStepRule = getDefineStepsData(rule);
+  const aboutRuleData: AboutStepRule = getAboutStepsData(rule, detailsView);
+  const modifiedAboutRuleDetailsData: AboutStepRuleDetails = getModifiedAboutDetailsData(rule);
+  const scheduleRuleData: ScheduleStepRule = getScheduleStepsData(rule);
 
-  return { aboutRuleData, defineRuleData, scheduleRuleData };
+  return { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData };
 };
 
+export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
+  isNew: false,
+  ruleType: rule.type,
+  anomalyThreshold: rule.anomaly_threshold ?? 50,
+  machineLearningJobId: rule.machine_learning_job_id ?? '',
+  index: rule.index ?? [],
+  queryBar: {
+    query: { query: rule.query ?? '', language: rule.language ?? '' },
+    filters: (rule.filters ?? []) as Filter[],
+    saved_id: rule.saved_id,
+  },
+  timeline: {
+    id: rule.timeline_id ?? null,
+    title: rule.timeline_title ?? null,
+  },
+});
+
+export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
+  const { enabled, interval, from } = rule;
+  const fromHumanizedValue = getHumanizedDuration(from, interval);
+
+  return {
+    isNew: false,
+    enabled,
+    interval,
+    from: fromHumanizedValue,
+  };
+};
+
+export const getHumanizedDuration = (from: string, interval: string): string => {
+  const fromValue = dateMath.parse(from) ?? moment();
+  const intervalValue = dateMath.parse(`now-${interval}`) ?? moment();
+
+  const fromDuration = moment.duration(intervalValue.diff(fromValue));
+  const fromHumanize = `${Math.floor(fromDuration.asHours())}h`;
+
+  if (fromDuration.asSeconds() < 60) {
+    return `${Math.floor(fromDuration.asSeconds())}s`;
+  } else if (fromDuration.asMinutes() < 60) {
+    return `${Math.floor(fromDuration.asMinutes())}m`;
+  }
+
+  return fromHumanize;
+};
+
+export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRule => {
+  const { name, description, note } = determineDetailsValue(rule, detailsView);
+  const {
+    references,
+    severity,
+    false_positives: falsePositives,
+    risk_score: riskScore,
+    tags,
+    threat,
+  } = rule;
+
+  return {
+    isNew: false,
+    name,
+    description,
+    note: note!,
+    references,
+    severity,
+    tags,
+    riskScore,
+    falsePositives,
+    threat: threat as IMitreEnterpriseAttack[],
+  };
+};
+
+export const determineDetailsValue = (
+  rule: Rule,
+  detailsView: boolean
+): Pick<Rule, 'name' | 'description' | 'note'> => {
+  const { name, description, note } = rule;
+  if (detailsView) {
+    return { name: '', description: '', note: '' };
+  }
+
+  return { name, description, note: note ?? '' };
+};
+
+export const getModifiedAboutDetailsData = (rule: Rule): AboutStepRuleDetails => ({
+  note: rule.note ?? '',
+  description: rule.description,
+});
+
 export const useQuery = () => new URLSearchParams(useLocation().search);
+
+export type PrePackagedRuleStatus =
+  | 'ruleInstalled'
+  | 'ruleNotInstalled'
+  | 'ruleNeedUpdate'
+  | 'someRuleUninstall'
+  | 'unknown';
+
+export const getPrePackagedRuleStatus = (
+  rulesInstalled: number | null,
+  rulesNotInstalled: number | null,
+  rulesNotUpdated: number | null
+): PrePackagedRuleStatus => {
+  if (
+    rulesNotInstalled != null &&
+    rulesInstalled === 0 &&
+    rulesNotInstalled > 0 &&
+    rulesNotUpdated === 0
+  ) {
+    return 'ruleNotInstalled';
+  } else if (
+    rulesInstalled != null &&
+    rulesInstalled > 0 &&
+    rulesNotInstalled === 0 &&
+    rulesNotUpdated === 0
+  ) {
+    return 'ruleInstalled';
+  } else if (
+    rulesInstalled != null &&
+    rulesNotInstalled != null &&
+    rulesInstalled > 0 &&
+    rulesNotInstalled > 0 &&
+    rulesNotUpdated === 0
+  ) {
+    return 'someRuleUninstall';
+  } else if (
+    rulesInstalled != null &&
+    rulesNotInstalled != null &&
+    rulesNotUpdated != null &&
+    rulesInstalled > 0 &&
+    rulesNotInstalled >= 0 &&
+    rulesNotUpdated > 0
+  ) {
+    return 'ruleNeedUpdate';
+  }
+  return 'unknown';
+};
+export const setFieldValue = (
+  form: FormHook<FormData>,
+  schema: FormSchema<FormData>,
+  defaultValues: unknown
+) =>
+  Object.keys(schema).forEach(key => {
+    const val = get(key, defaultValues);
+    if (val != null) {
+      form.setFieldValue(key, val);
+    }
+  });
+
+export const isMlRule = (ruleType: RuleType) => ruleType === 'machine_learning';
+
+export const redirectToDetections = (
+  isSignalIndexExists: boolean | null,
+  isAuthenticated: boolean | null,
+  hasEncryptionKey: boolean | null
+) =>
+  isSignalIndexExists != null &&
+  isAuthenticated != null &&
+  hasEncryptionKey != null &&
+  (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);

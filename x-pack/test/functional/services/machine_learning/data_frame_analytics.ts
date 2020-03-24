@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlApi } from './api';
 
-import { DATA_FRAME_TASK_STATE } from '../../../../legacy/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/data_frame_task_state';
 
 export function MachineLearningDataFrameAnalyticsProvider(
   { getService }: FtrProviderContext,
@@ -30,6 +30,31 @@ export function MachineLearningDataFrameAnalyticsProvider(
 
     async assertCreateNewAnalyticsButtonExists() {
       await testSubjects.existOrFail('mlAnalyticsButtonCreate');
+    },
+
+    async assertRegressionEvaluatePanelElementsExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationEvaluatePanel');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionGenMSEstat');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionGenRSquaredStat');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionTrainingMSEstat');
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionTrainingRSquaredStat');
+    },
+
+    async assertRegressionTablePanelExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationTablePanel');
+    },
+
+    async assertClassificationEvaluatePanelElementsExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationEvaluatePanel');
+      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationConfusionMatrix');
+    },
+
+    async assertClassificationTablePanelExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationTablePanel');
+    },
+
+    async assertOutlierTablePanelExists() {
+      await testSubjects.existOrFail('mlDFAnalyticsOutlierExplorationTablePanel');
     },
 
     async assertAnalyticsStatsBarExists() {

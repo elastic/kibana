@@ -19,7 +19,12 @@
 
 import { PluginInitializerContext } from 'src/core/public';
 import { coreMock } from '../../../../../core/public/mocks';
-import { ManagementSetup, ManagementStart, ManagementPlugin } from './plugin';
+import {
+  ManagementSetup,
+  ManagementStart,
+  ManagementPlugin,
+  ManagementPluginSetupDependencies,
+} from './plugin';
 
 const createSetupContract = (): ManagementSetup => ({
   indexPattern: {
@@ -49,7 +54,13 @@ const createStartContract = (): ManagementStart => ({});
 const createInstance = async () => {
   const plugin = new ManagementPlugin({} as PluginInitializerContext);
 
-  const setup = plugin.setup(coreMock.createSetup(), {});
+  const setup = plugin.setup(coreMock.createSetup(), ({
+    home: {
+      featureCatalogue: {
+        register: jest.fn(),
+      },
+    },
+  } as unknown) as ManagementPluginSetupDependencies);
   const doStart = () => plugin.start(coreMock.createStart(), {});
 
   return {

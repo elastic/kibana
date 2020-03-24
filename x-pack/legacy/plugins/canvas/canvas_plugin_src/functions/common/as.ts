@@ -4,24 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable, ExpressionFunction, getType } from '../../../types';
+import { Datatable, ExpressionFunctionDefinition, getType } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   name: string;
 }
 
-type Context = string | boolean | number | null;
+type Input = string | boolean | number | null;
 
-export function asFn(): ExpressionFunction<'as', Context, Arguments, Datatable> {
+export function asFn(): ExpressionFunctionDefinition<'as', Input, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().as;
 
   return {
     name: 'as',
     type: 'datatable',
-    context: {
-      types: ['string', 'boolean', 'number', 'null'],
-    },
+    inputTypes: ['string', 'boolean', 'number', 'null'],
     help,
     args: {
       name: {
@@ -31,18 +29,18 @@ export function asFn(): ExpressionFunction<'as', Context, Arguments, Datatable> 
         default: 'value',
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
         type: 'datatable',
         columns: [
           {
             name: args.name,
-            type: getType(context),
+            type: getType(input),
           },
         ],
         rows: [
           {
-            [args.name]: context,
+            [args.name]: input,
           },
         ],
       };

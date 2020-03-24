@@ -4,21 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
-import moment from 'moment';
 import {
   SIGNALS_ID,
-  DEFAULT_MAX_SIGNALS,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+  NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { getInputIndex } from './get_input_output_index';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
-import { SignalRuleAlertTypeDefinition } from './types';
+import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
 import { getGapBetweenRuns } from './utils';
+import { writeSignalRuleExceptionToSavedObject } from './write_signal_rule_exception_to_saved_object';
+import { signalParamsSchema } from './signal_params_schema';
+import { siemRuleActionGroups } from './siem_rule_action_groups';
+import { writeGapErrorToSavedObject } from './write_gap_error_to_saved_object';
+import { getRuleStatusSavedObjects } from './get_rule_status_saved_objects';
+import { getCurrentStatusSavedObject } from './get_current_status_saved_object';
+import { writeCurrentStatusSucceeded } from './write_current_status_succeeded';
+import { findMlSignals } from './find_ml_signals';
+import { bulkCreateMlSignals } from './bulk_create_ml_signals';
+import { getSignalsCount } from '../notifications/get_signals_count';
+import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 
 export const signalRulesAlertType = ({
   logger,
@@ -30,145 +39,237 @@ export const signalRulesAlertType = ({
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
-    actionGroups: ['default'],
+    actionGroups: siemRuleActionGroups,
+    defaultActionGroupId: 'default',
     validate: {
-      params: schema.object({
-        createdAt: schema.string(),
-        description: schema.string(),
-        falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
-        from: schema.string(),
-        ruleId: schema.string(),
-        immutable: schema.boolean({ defaultValue: false }),
-        index: schema.nullable(schema.arrayOf(schema.string())),
-        language: schema.nullable(schema.string()),
-        outputIndex: schema.nullable(schema.string()),
-        savedId: schema.nullable(schema.string()),
-        timelineId: schema.nullable(schema.string()),
-        timelineTitle: schema.nullable(schema.string()),
-        meta: schema.nullable(schema.object({}, { allowUnknowns: true })),
-        query: schema.nullable(schema.string()),
-        filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
-        maxSignals: schema.number({ defaultValue: DEFAULT_MAX_SIGNALS }),
-        riskScore: schema.number(),
-        severity: schema.string(),
-        threats: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
-        to: schema.string(),
-        type: schema.string(),
-        updatedAt: schema.string(),
-        references: schema.arrayOf(schema.string(), { defaultValue: [] }),
-        version: schema.number({ defaultValue: 1 }),
-      }),
+      params: signalParamsSchema(),
     },
-    // fun fact: previousStartedAt is not actually a Date but a String of a date
     async executor({ previousStartedAt, alertId, services, params }) {
       const {
+        anomalyThreshold,
         from,
         ruleId,
         index,
         filters,
         language,
+        meta,
+        machineLearningJobId,
         outputIndex,
         savedId,
         query,
         to,
         type,
       } = params;
-      // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
-      const savedObject = await services.savedObjectsClient.get('alert', alertId);
-      const name: string = savedObject.attributes.name;
-      const tags: string[] = savedObject.attributes.tags;
+      const savedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
+        'alert',
+        alertId
+      );
 
-      const createdBy: string = savedObject.attributes.createdBy;
-      const updatedBy: string = savedObject.attributes.updatedBy;
-      const interval: string = savedObject.attributes.schedule.interval;
-      const enabled: boolean = savedObject.attributes.enabled;
-      const gap = getGapBetweenRuns({
-        previousStartedAt: previousStartedAt != null ? moment(previousStartedAt) : null, // TODO: Remove this once previousStartedAt is no longer a string
-        interval,
-        from,
-        to,
-      });
-      if (gap != null && gap.asMilliseconds() > 0) {
-        logger.warn(
-          `Signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" has a time gap of ${gap.humanize()} (${gap.asMilliseconds()}ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.`
-        );
-      }
-      // set searchAfter page size to be the lesser of default page size or maxSignals.
-      const searchAfterSize =
-        DEFAULT_SEARCH_AFTER_PAGE_SIZE <= params.maxSignals
-          ? DEFAULT_SEARCH_AFTER_PAGE_SIZE
-          : params.maxSignals;
-
-      const inputIndex = await getInputIndex(services, version, index);
-      const esFilter = await getFilter({
-        type,
-        filters,
-        language,
-        query,
-        savedId,
+      const ruleStatusSavedObjects = await getRuleStatusSavedObjects({
+        alertId,
         services,
-        index: inputIndex,
       });
 
-      const noReIndex = buildEventsSearchQuery({
-        index: inputIndex,
-        from,
-        to,
-        filter: esFilter,
-        size: searchAfterSize,
-        searchAfterSortId: undefined,
+      const currentStatusSavedObject = await getCurrentStatusSavedObject({
+        alertId,
+        services,
+        ruleStatusSavedObjects,
       });
+
+      const {
+        actions,
+        name,
+        tags,
+        createdAt,
+        createdBy,
+        updatedBy,
+        enabled,
+        schedule: { interval },
+        throttle,
+        params: ruleParams,
+      } = savedObject.attributes;
+
+      const updatedAt = savedObject.updated_at ?? '';
+
+      const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
+
+      await writeGapErrorToSavedObject({
+        alertId,
+        logger,
+        ruleId: ruleId ?? '(unknown rule id)',
+        currentStatusSavedObject,
+        services,
+        gap,
+        ruleStatusSavedObjects,
+        name,
+      });
+
+      const searchAfterSize = Math.min(params.maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
+      let creationSucceeded = false;
 
       try {
-        logger.debug(
-          `Starting signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-        );
-        logger.debug(
-          `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-        );
-        const noReIndexResult = await services.callCluster('search', noReIndex);
-        if (noReIndexResult.hits.total.value !== 0) {
-          logger.info(
-            `Found ${
-              noReIndexResult.hits.total.value
-            } signals from the indexes of "[${inputIndex.join(
-              ', '
-            )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
-          );
-        }
+        if (type === 'machine_learning') {
+          if (machineLearningJobId == null || anomalyThreshold == null) {
+            throw new Error(
+              `Attempted to execute machine learning rule, but it is missing job id and/or anomaly threshold for rule id: "${ruleId}", name: "${name}", signals index: "${outputIndex}", job id: "${machineLearningJobId}", anomaly threshold: "${anomalyThreshold}"`
+            );
+          }
 
-        const bulkIndexResult = await searchAfterAndBulkCreate({
-          someResult: noReIndexResult,
-          ruleParams: params,
-          services,
-          logger,
-          id: alertId,
-          signalsIndex: outputIndex,
-          filter: esFilter,
-          name,
-          createdBy,
-          updatedBy,
-          interval,
-          enabled,
-          pageSize: searchAfterSize,
-          tags,
-        });
-
-        if (bulkIndexResult) {
-          logger.debug(
-            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          const anomalyResults = await findMlSignals(
+            machineLearningJobId,
+            anomalyThreshold,
+            from,
+            to,
+            services.callCluster
           );
+
+          const anomalyCount = anomalyResults.hits.hits.length;
+          if (anomalyCount) {
+            logger.info(
+              `Found ${anomalyCount} signals from ML anomalies for signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+            );
+          }
+
+          creationSucceeded = await bulkCreateMlSignals({
+            actions,
+            throttle,
+            someResult: anomalyResults,
+            ruleParams: params,
+            services,
+            logger,
+            id: alertId,
+            signalsIndex: outputIndex,
+            name,
+            createdBy,
+            createdAt,
+            updatedBy,
+            updatedAt,
+            interval,
+            enabled,
+            tags,
+          });
         } else {
-          logger.error(
-            `Error processing signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          const inputIndex = await getInputIndex(services, version, index);
+          const esFilter = await getFilter({
+            type,
+            filters,
+            language,
+            query,
+            savedId,
+            services,
+            index: inputIndex,
+          });
+
+          const noReIndex = buildEventsSearchQuery({
+            index: inputIndex,
+            from,
+            to,
+            filter: esFilter,
+            size: searchAfterSize,
+            searchAfterSortId: undefined,
+          });
+
+          logger.debug(
+            `Starting signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
+          logger.debug(
+            `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          );
+          const noReIndexResult = await services.callCluster('search', noReIndex);
+          if (noReIndexResult.hits.total.value !== 0) {
+            logger.info(
+              `Found ${
+                noReIndexResult.hits.total.value
+              } signals from the indexes of "[${inputIndex.join(
+                ', '
+              )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+            );
+          }
+
+          creationSucceeded = await searchAfterAndBulkCreate({
+            someResult: noReIndexResult,
+            ruleParams: params,
+            services,
+            logger,
+            id: alertId,
+            inputIndexPattern: inputIndex,
+            signalsIndex: outputIndex,
+            filter: esFilter,
+            actions,
+            name,
+            createdBy,
+            createdAt,
+            updatedBy,
+            updatedAt,
+            interval,
+            enabled,
+            pageSize: searchAfterSize,
+            tags,
+            throttle,
+          });
         }
-      } catch (err) {
-        // TODO: Error handling and writing of errors into a signal that has error
-        // handling/conditions
-        logger.error(
-          `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${err.message}`
-        );
+
+        if (creationSucceeded) {
+          if (meta?.throttle === NOTIFICATION_THROTTLE_RULE && actions.length) {
+            const notificationRuleParams = {
+              ...ruleParams,
+              name,
+            };
+            const { signalsCount, resultsLink } = await getSignalsCount({
+              from: `now-${interval}`,
+              to: 'now',
+              index: ruleParams.outputIndex,
+              ruleId: ruleParams.ruleId!,
+              kibanaUrl: meta?.kibanaUrl as string,
+              ruleAlertId: savedObject.id,
+              callCluster: services.callCluster,
+            });
+
+            logger.info(
+              `Found ${signalsCount} signals using signal rule name: "${notificationRuleParams.name}", id: "${notificationRuleParams.ruleId}", rule_id: "${notificationRuleParams.ruleId}" in "${notificationRuleParams.outputIndex}" index`
+            );
+
+            if (signalsCount) {
+              const alertInstance = services.alertInstanceFactory(alertId);
+              scheduleNotificationActions({
+                alertInstance,
+                signalsCount,
+                resultsLink,
+                ruleParams: notificationRuleParams,
+              });
+            }
+          }
+
+          logger.debug(
+            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", output_index: "${outputIndex}"`
+          );
+          await writeCurrentStatusSucceeded({
+            services,
+            currentStatusSavedObject,
+          });
+        } else {
+          await writeSignalRuleExceptionToSavedObject({
+            name,
+            alertId,
+            currentStatusSavedObject,
+            logger,
+            message: `Bulk Indexing signals failed. Check logs for further details Rule name: "${name}" id: "${alertId}" rule_id: "${ruleId}" output_index: "${outputIndex}"`,
+            services,
+            ruleStatusSavedObjects,
+            ruleId: ruleId ?? '(unknown rule id)',
+          });
+        }
+      } catch (error) {
+        await writeSignalRuleExceptionToSavedObject({
+          name,
+          alertId,
+          currentStatusSavedObject,
+          logger,
+          message: error?.message ?? '(no error message given)',
+          services,
+          ruleStatusSavedObjects,
+          ruleId: ruleId ?? '(unknown rule id)',
+        });
       }
     },
   };

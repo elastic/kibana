@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ChartWrapper component renders the component with loading false 1`] = `
-<Fragment>
+<EuiErrorBoundary>
   <div
     intl={
       Object {
@@ -114,7 +114,6 @@ exports[`ChartWrapper component renders the component with loading false 1`] = `
     }
   >
     <SnapshotHeading
-      down={8}
       total={12}
     />
     <EuiSpacer
@@ -127,11 +126,11 @@ exports[`ChartWrapper component renders the component with loading false 1`] = `
       width={144}
     />
   </div>
-</Fragment>
+</EuiErrorBoundary>
 `;
 
 exports[`ChartWrapper component renders the component with loading true 1`] = `
-<Fragment>
+<EuiErrorBoundary>
   <div
     intl={
       Object {
@@ -244,7 +243,6 @@ exports[`ChartWrapper component renders the component with loading true 1`] = `
     }
   >
     <SnapshotHeading
-      down={8}
       total={12}
     />
     <EuiSpacer
@@ -276,5 +274,5 @@ exports[`ChartWrapper component renders the component with loading true 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</Fragment>
+</EuiErrorBoundary>
 `;

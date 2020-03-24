@@ -10,13 +10,11 @@ import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { useSiemJobs } from '../../ml_popover/hooks/use_siem_jobs';
-import { useStateToaster } from '../../toasters';
-import { errorToToaster } from '../api/error_to_toaster';
+import { useStateToaster, errorToToaster } from '../../toasters';
 
 import * as i18n from './translations';
-import { useUiSetting$ } from '../../../lib/kibana';
+import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
-import { useTimeZone } from '../../../hooks';
 
 interface Args {
   influencers?: InfluencerInput[];

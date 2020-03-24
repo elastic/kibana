@@ -43,9 +43,11 @@ import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.
 import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
 import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
+import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyVars, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './types';
 import { LegacyService } from './legacy_service';
+import { coreMock } from '../mocks';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -83,16 +85,17 @@ beforeEach(() => {
           getAuthHeaders: () => undefined,
         } as any,
       },
-      savedObjects: savedObjectsServiceMock.createSetupContract(),
+      savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       plugins: {
         contracts: new Map([['plugin-id', 'plugin-value']]),
         uiPlugins: {
           public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
-          internal: new Map([['plugin-id', { entryPointPath: 'path/to/plugin/public' }]]),
+          internal: new Map([['plugin-id', { publicTargetDir: 'path/to/target/public' }]]),
           browserConfigs: new Map(),
         },
       },
       rendering: renderingServiceMock,
+      metrics: metricsServiceMock.createInternalSetupContract(),
       uuid: uuidSetup,
     },
     plugins: { 'plugin-id': 'plugin-value' },
@@ -100,9 +103,8 @@ beforeEach(() => {
 
   startDeps = {
     core: {
-      capabilities: capabilitiesServiceMock.createStartContract(),
-      savedObjects: savedObjectsServiceMock.createStartContract(),
-      uiSettings: uiSettingsServiceMock.createStartContract(),
+      ...coreMock.createStart(),
+      savedObjects: savedObjectsServiceMock.createInternalStartContract(),
       plugins: { contracts: new Map() },
     },
     plugins: {},
@@ -424,7 +426,7 @@ describe('#discoverPlugins()', () => {
 
     await legacyService.discoverPlugins();
     expect(findLegacyPluginSpecs).toHaveBeenCalledTimes(1);
-    expect(findLegacyPluginSpecs).toHaveBeenCalledWith(expect.any(Object), logger);
+    expect(findLegacyPluginSpecs).toHaveBeenCalledWith(expect.any(Object), logger, env.packageInfo);
   });
 
   it(`register legacy plugin's deprecation providers`, async () => {

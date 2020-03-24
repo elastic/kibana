@@ -23,10 +23,6 @@ export function PointSeriesPageProvider({ getService }) {
   const find = getService('find');
 
   class PointSeriesVis {
-    async clickAxisOptions() {
-      return await testSubjects.click('visEditorTabadvanced');
-    }
-
     async clickAddAxis() {
       return await testSubjects.click('visualizeAddYAxisButton');
     }

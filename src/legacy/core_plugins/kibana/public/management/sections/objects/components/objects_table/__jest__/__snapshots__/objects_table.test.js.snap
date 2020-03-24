@@ -71,13 +71,13 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
     pagination={true}
     responsive={true}
     sorting={false}
+    tableLayout="fixed"
   />
 </EuiConfirmModal>
 `;
 
 exports[`ObjectsTable export should allow the user to choose when exporting all 1`] = `
 <EuiModal
-  maxWidth={true}
   onClose={[Function]}
 >
   <EuiModalHeader>

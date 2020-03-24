@@ -21,10 +21,9 @@ import _ from 'lodash';
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
-import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
-import { getRootPropertiesObjects } from '../../mappings/lib/get_root_properties_objects';
 import { encodeHitVersion } from '../../version';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
@@ -35,6 +34,7 @@ describe('SavedObjectsRepository', () => {
   let callAdminCluster;
   let savedObjectsRepository;
   let migrator;
+
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
   const mockTimestampFields = { updated_at: mockTimestamp };
   const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
@@ -240,12 +240,95 @@ describe('SavedObjectsRepository', () => {
     },
   };
 
-  const schema = new SavedObjectsSchema({
-    globaltype: { isNamespaceAgnostic: true },
-    foo: { isNamespaceAgnostic: true },
-    bar: { isNamespaceAgnostic: true },
-    baz: { indexPattern: 'beats' },
-    hiddenType: { isNamespaceAgnostic: true, hidden: true },
+  const typeRegistry = new SavedObjectTypeRegistry();
+  typeRegistry.registerType({
+    name: 'config',
+    hidden: false,
+    namespaceAgnostic: false,
+    mappings: {
+      properties: {
+        type: 'keyword',
+      },
+    },
+  });
+  typeRegistry.registerType({
+    name: 'index-pattern',
+    hidden: false,
+    namespaceAgnostic: false,
+    mappings: {
+      properties: {
+        someField: {
+          type: 'keyword',
+        },
+      },
+    },
+  });
+  typeRegistry.registerType({
+    name: 'dashboard',
+    hidden: false,
+    namespaceAgnostic: false,
+    mappings: {
+      properties: {
+        otherField: {
+          type: 'keyword',
+        },
+      },
+    },
+  });
+  typeRegistry.registerType({
+    name: 'globaltype',
+    hidden: false,
+    namespaceAgnostic: true,
+    mappings: {
+      properties: {
+        yetAnotherField: {
+          type: 'keyword',
+        },
+      },
+    },
+  });
+  typeRegistry.registerType({
+    name: 'foo',
+    hidden: false,
+    namespaceAgnostic: true,
+    mappings: {
+      properties: {
+        type: 'keyword',
+      },
+    },
+  });
+  typeRegistry.registerType({
+    name: 'bar',
+    hidden: false,
+    namespaceAgnostic: true,
+    mappings: {
+      properties: {
+        type: 'keyword',
+      },
+    },
+  });
+  typeRegistry.registerType({
+    name: 'baz',
+    hidden: false,
+    namespaceAgnostic: false,
+    indexPattern: 'beats',
+    mappings: {
+      properties: {
+        type: 'keyword',
+      },
+    },
+  });
+  typeRegistry.registerType({
+    name: 'hiddenType',
+    hidden: true,
+    namespaceAgnostic: true,
+    mappings: {
+      properties: {
+        someField: {
+          type: 'keyword',
+        },
+      },
+    },
   });
 
   beforeEach(() => {
@@ -255,16 +338,16 @@ describe('SavedObjectsRepository', () => {
       runMigrations: async () => ({ status: 'skipped' }),
     };
 
-    const serializer = new SavedObjectsSerializer(schema);
-    const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-    const allowedTypes = [...new Set(allTypes.filter(type => !schema.isHiddenType(type)))];
+    const serializer = new SavedObjectsSerializer(typeRegistry);
+    const allTypes = typeRegistry.getAllTypes().map(type => type.name);
+    const allowedTypes = [...new Set(allTypes.filter(type => !typeRegistry.isHidden(type)))];
 
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
       callCluster: callAdminCluster,
       migrator,
-      schema,
+      typeRegistry,
       serializer,
       allowedTypes,
     });
@@ -1171,7 +1254,7 @@ describe('SavedObjectsRepository', () => {
       expect(result).toEqual(deleteByQueryResults);
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
 
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, {
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, typeRegistry, {
         namespace: 'my-namespace',
         type: ['config', 'baz', 'index-pattern', 'dashboard'],
       });
@@ -1261,7 +1344,11 @@ describe('SavedObjectsRepository', () => {
 
       await savedObjectsRepository.find(relevantOpts);
       expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, relevantOpts);
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+        mappings,
+        typeRegistry,
+        relevantOpts
+      );
     });
 
     it('accepts KQL filter and passes keuryNode to getSearchDsl', async () => {

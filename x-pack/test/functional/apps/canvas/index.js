@@ -9,6 +9,7 @@ export default function canvasApp({ loadTestFile }) {
     this.tags('ciGroup2'); // CI requires tags ヽ(゜Q。)ノ？
     loadTestFile(require.resolve('./smoke_test'));
     loadTestFile(require.resolve('./expression'));
+    loadTestFile(require.resolve('./custom_elements'));
     loadTestFile(require.resolve('./feature_controls/canvas_security'));
     loadTestFile(require.resolve('./feature_controls/canvas_spaces'));
   });

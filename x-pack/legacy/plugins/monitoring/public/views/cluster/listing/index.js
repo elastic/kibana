@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import uiRoutes from 'ui/routes';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { I18nContext } from 'ui/i18n';
@@ -56,6 +56,7 @@ uiRoutes
         const globalState = $injector.get('globalState');
         const storage = $injector.get('localStorage');
         const showLicenseExpiration = $injector.get('showLicenseExpiration');
+
         this.data = $route.current.locals.clusters;
 
         $scope.$watch(

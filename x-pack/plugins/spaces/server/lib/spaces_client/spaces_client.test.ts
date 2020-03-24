@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginSetupContract as SecuritySetupContract } from '../../../../security/server';
+import { SecurityPluginSetup } from '../../../../security/server';
 import { SpacesClient } from './spaces_client';
 import { ConfigType, ConfigSchema } from '../../config';
 import { GetSpacePurpose } from '../../../common/model/types';
@@ -224,17 +224,17 @@ describe('#getAll', () => {
     [
       {
         purpose: undefined,
-        expectedPrivilege: (mockAuthorization: SecuritySetupContract['authz']) =>
+        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.login,
       },
       {
         purpose: 'any',
-        expectedPrivilege: (mockAuthorization: SecuritySetupContract['authz']) =>
+        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.login,
       },
       {
         purpose: 'copySavedObjectsIntoSpace',
-        expectedPrivilege: (mockAuthorization: SecuritySetupContract['authz']) =>
+        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
       },
     ].forEach(scenario => {

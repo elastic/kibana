@@ -6,7 +6,7 @@
 
 import { EMSFileSource } from './ems_file_source';
 
-jest.mock('../../../kibana_services', () => {});
+jest.mock('ui/new_platform');
 jest.mock('../../vector_layer', () => {});
 
 function makeEMSFileSource(tooltipProperties) {

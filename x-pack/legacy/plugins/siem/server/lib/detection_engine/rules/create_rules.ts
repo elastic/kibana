@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Alert } from '../../../../../../../plugins/alerting/common';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
-import { RuleParams } from './types';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
+import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
+import { hasListsFeature } from '../feature_flags';
 
 export const createRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
+  actions,
+  anomalyThreshold,
   description,
   enabled,
   falsePositives,
@@ -21,6 +26,7 @@ export const createRules = async ({
   timelineId,
   timelineTitle,
   meta,
+  machineLearningJobId,
   filters,
   ruleId,
   immutable,
@@ -32,12 +38,17 @@ export const createRules = async ({
   name,
   severity,
   tags,
-  threats,
+  threat,
+  throttle,
   to,
   type,
   references,
+  note,
   version,
-}: RuleParams) => {
+  lists,
+}: CreateRuleParams): Promise<Alert> => {
+  // TODO: Remove this and use regular lists once the feature is stable for a release
+  const listsParam = hasListsFeature() ? { lists } : {};
   return alertsClient.create({
     data: {
       name,
@@ -45,7 +56,7 @@ export const createRules = async ({
       alertTypeId: SIGNALS_ID,
       consumer: APP_ID,
       params: {
-        createdAt: new Date().toISOString(),
+        anomalyThreshold,
         description,
         ruleId,
         index,
@@ -59,21 +70,23 @@ export const createRules = async ({
         timelineId,
         timelineTitle,
         meta,
+        machineLearningJobId,
         filters,
         maxSignals,
         riskScore,
         severity,
-        threats,
+        threat,
         to,
         type,
-        updatedAt: new Date().toISOString(),
         references,
+        note,
         version,
+        ...listsParam,
       },
       schedule: { interval },
       enabled,
-      actions: [], // TODO: Create and add actions here once we have email, etc...
-      throttle: null,
+      actions: actions?.map(transformRuleToAlertAction),
+      throttle,
     },
   });
 };

@@ -6,8 +6,8 @@
 
 import { getQueryFilter, getFilter } from './get_filter';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { AlertServices } from '../../../../../alerting/server/types';
 import { PartialFilter } from '../types';
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
 
 describe('get_filter', () => {
   let savedObjectsClient = savedObjectsClientMock.create();
@@ -508,6 +508,20 @@ describe('get_filter', () => {
           index: undefined,
         })
       ).rejects.toThrow('savedId parameter should be defined');
+    });
+
+    test('throws on machine learning query', async () => {
+      await expect(
+        getFilter({
+          type: 'machine_learning',
+          filters: undefined,
+          language: undefined,
+          query: undefined,
+          savedId: 'some-id',
+          services: servicesMock,
+          index: undefined,
+        })
+      ).rejects.toThrow('Unsupported Rule of type "machine_learning" supplied to getFilter');
     });
 
     test('it works with references and does not add indexes', () => {

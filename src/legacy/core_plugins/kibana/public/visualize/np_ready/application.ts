@@ -18,28 +18,15 @@
  */
 
 import angular, { IModule } from 'angular';
-import { EuiConfirmModal } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
-import { AppMountContext, LegacyCoreStart } from 'kibana/public';
+import { AppMountContext } from 'kibana/public';
+import { configureAppAngularModule } from '../legacy_imports';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import {
-  AppStateProvider,
-  AppState,
-  configureAppAngularModule,
-  confirmModalFactory,
   createTopNavDirective,
   createTopNavHelper,
-  EventsProvider,
-  GlobalStateProvider,
-  KbnUrlProvider,
-  RedirectWhenMissingProvider,
-  IPrivate,
-  PersistedState,
-  PrivateProvider,
-  PromiseServiceCreator,
-  StateManagementConfigProvider,
-} from '../legacy_imports';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
+} from '../../../../../../plugins/kibana_legacy/public';
 
 // @ts-ignore
 import { initVisualizeApp } from './legacy_app';
@@ -47,7 +34,7 @@ import { VisualizeKibanaServices } from '../kibana_services';
 
 let angularModuleInstance: IModule | null = null;
 
-export const renderApp = async (
+export const renderApp = (
   element: HTMLElement,
   appBasePath: string,
   deps: VisualizeKibanaServices
@@ -55,17 +42,19 @@ export const renderApp = async (
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
-    configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
-    // custom routing stuff
+    configureAppAngularModule(
+      angularModuleInstance,
+      { core: deps.core, env: deps.pluginInitializerContext.env },
+      true
+    );
     initVisualizeApp(angularModuleInstance, deps);
   }
   const $injector = mountVisualizeApp(appBasePath, element);
   return () => $injector.get('$rootScope').$destroy();
 };
 
-const mainTemplate = (basePath: string) => `<div style="height: 100%">
+const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
   <base href="${basePath}" />
-  <div ng-view style="height: 100%;"></div>
 </div>
 `;
 
@@ -75,7 +64,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
 function mountVisualizeApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('style', 'height: 100%');
+  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
@@ -87,94 +76,14 @@ function mountVisualizeApp(appBasePath: string, element: HTMLElement) {
 
 function createLocalAngularModule(core: AppMountContext['core'], navigation: NavigationStart) {
   createLocalI18nModule();
-  createLocalPrivateModule();
-  createLocalPromiseModule();
-  createLocalConfigModule(core);
-  createLocalKbnUrlModule();
-  createLocalStateModule();
-  createLocalPersistedStateModule();
   createLocalTopNavModule(navigation);
-  createLocalConfirmModalModule();
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
-    'app/visualize/Config',
     'app/visualize/I18n',
-    'app/visualize/Private',
-    'app/visualize/PersistedState',
     'app/visualize/TopNav',
-    'app/visualize/State',
-    'app/visualize/ConfirmModal',
   ]);
   return visualizeAngularModule;
-}
-
-function createLocalConfirmModalModule() {
-  angular
-    .module('app/visualize/ConfirmModal', ['react'])
-    .factory('confirmModal', confirmModalFactory)
-    .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
-}
-
-function createLocalStateModule() {
-  angular
-    .module('app/visualize/State', [
-      'app/visualize/Private',
-      'app/visualize/Config',
-      'app/visualize/KbnUrl',
-      'app/visualize/Promise',
-      'app/visualize/PersistedState',
-    ])
-    .factory('AppState', function(Private: IPrivate) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: IPrivate) {
-      return Private<AppState>(AppStateProvider).getAppState;
-    })
-    .service('globalState', function(Private: IPrivate) {
-      return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalPersistedStateModule() {
-  angular
-    .module('app/visualize/PersistedState', ['app/visualize/Private', 'app/visualize/Promise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: any) {
-          super(value, path, Events);
-        }
-      };
-    });
-}
-
-function createLocalKbnUrlModule() {
-  angular
-    .module('app/visualize/KbnUrl', ['app/visualize/Private', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
-}
-
-function createLocalConfigModule(core: AppMountContext['core']) {
-  angular
-    .module('app/visualize/Config', ['app/visualize/Private'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', () => {
-      return {
-        $get: () => ({
-          get: core.uiSettings.get.bind(core.uiSettings),
-        }),
-      };
-    });
-}
-
-function createLocalPromiseModule() {
-  angular.module('app/visualize/Promise', []).service('Promise', PromiseServiceCreator);
-}
-
-function createLocalPrivateModule() {
-  angular.module('app/visualize/Private', []).provider('Private', PrivateProvider);
 }
 
 function createLocalTopNavModule(navigation: NavigationStart) {

@@ -23,6 +23,11 @@ import {
   notInNodeModules,
   inDllPluginPublic,
 } from './dll_allowed_modules';
+import {
+  dllEntryFileContentArrayToString,
+  dllEntryFileContentStringToArray,
+  dllMergeAllEntryFilesContent,
+} from './dll_entry_template';
 import { fromRoot } from '../../core/server/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
@@ -30,6 +35,8 @@ import webpack from 'webpack';
 import { promisify } from 'util';
 import path from 'path';
 import del from 'del';
+import { chunk } from 'lodash';
+import seedrandom from 'seedrandom';
 
 const readFileAsync = promisify(fs.readFile);
 const mkdirAsync = promisify(fs.mkdir);
@@ -37,11 +44,17 @@ const accessAsync = promisify(fs.access);
 const writeFileAsync = promisify(fs.writeFile);
 
 export class DllCompiler {
-  static getRawDllConfig(uiBundles = {}, babelLoaderCacheDir = '', threadLoaderPoolConfig = {}) {
+  static getRawDllConfig(
+    uiBundles = {},
+    babelLoaderCacheDir = '',
+    threadLoaderPoolConfig = {},
+    chunks = Array.from(Array(4).keys()).map(chunkN => `_${chunkN}`)
+  ) {
     return {
       uiBundles,
       babelLoaderCacheDir,
       threadLoaderPoolConfig,
+      chunks,
       context: fromRoot('.'),
       entryName: 'vendors',
       dllName: '[name]',
@@ -66,13 +79,49 @@ export class DllCompiler {
   }
 
   async init() {
-    await this.ensureEntryFileExists();
-    await this.ensureManifestFileExists();
+    await this.ensureEntryFilesExists();
+    await this.ensureManifestFilesExists();
     await this.ensureOutputPathExists();
   }
 
-  async upsertEntryFile(content) {
-    await this.upsertFile(this.getEntryPath(), content);
+  seededShuffle(array) {
+    // Implementation based on https://github.com/TimothyGu/knuth-shuffle-seeded/blob/gh-pages/index.js#L46
+    let currentIndex;
+    let temporaryValue;
+    let randomIndex;
+    const rand = seedrandom('predictable', { global: false });
+
+    if (array.constructor !== Array) throw new Error('Input is not an array');
+    currentIndex = array.length;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+      // Pick a remaining element...
+      randomIndex = Math.floor(rand() * currentIndex--);
+
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+  }
+
+  async upsertEntryFiles(content) {
+    const arrayContent = this.seededShuffle(dllEntryFileContentStringToArray(content));
+    const chunks = chunk(
+      arrayContent,
+      Math.ceil(arrayContent.length / this.rawDllConfig.chunks.length)
+    );
+    const entryPaths = this.getEntryPaths();
+
+    await Promise.all(
+      entryPaths.map(
+        async (entryPath, idx) =>
+          await this.upsertFile(entryPath, dllEntryFileContentArrayToString(chunks[idx]))
+      )
+    );
   }
 
   async upsertFile(filePath, content = '') {
@@ -80,38 +129,57 @@ export class DllCompiler {
     await writeFileAsync(filePath, content, 'utf8');
   }
 
-  getDllPath() {
-    return this.resolvePath(`${this.rawDllConfig.entryName}${this.rawDllConfig.dllExt}`);
+  getDllPaths() {
+    return this.rawDllConfig.chunks.map(chunk =>
+      this.resolvePath(`${this.rawDllConfig.entryName}${chunk}${this.rawDllConfig.dllExt}`)
+    );
   }
 
-  getEntryPath() {
-    return this.resolvePath(`${this.rawDllConfig.entryName}${this.rawDllConfig.entryExt}`);
+  getEntryPaths() {
+    return this.rawDllConfig.chunks.map(chunk =>
+      this.resolvePath(`${this.rawDllConfig.entryName}${chunk}${this.rawDllConfig.entryExt}`)
+    );
   }
 
-  getManifestPath() {
-    return this.resolvePath(`${this.rawDllConfig.entryName}${this.rawDllConfig.manifestExt}`);
+  getManifestPaths() {
+    return this.rawDllConfig.chunks.map(chunk =>
+      this.resolvePath(`${this.rawDllConfig.entryName}${chunk}${this.rawDllConfig.manifestExt}`)
+    );
   }
 
-  getStylePath() {
-    return this.resolvePath(`${this.rawDllConfig.entryName}${this.rawDllConfig.styleExt}`);
+  getStylePaths() {
+    return this.rawDllConfig.chunks.map(chunk =>
+      this.resolvePath(`${this.rawDllConfig.entryName}${chunk}${this.rawDllConfig.styleExt}`)
+    );
   }
 
-  async ensureEntryFileExists() {
-    await this.ensureFileExists(this.getEntryPath());
+  async ensureEntryFilesExists() {
+    const entryPaths = this.getEntryPaths();
+
+    await Promise.all(entryPaths.map(async entryPath => await this.ensureFileExists(entryPath)));
   }
 
-  async ensureManifestFileExists() {
-    await this.ensureFileExists(
-      this.getManifestPath(),
-      JSON.stringify({
-        name: this.rawDllConfig.entryName,
-        content: {},
-      })
+  async ensureManifestFilesExists() {
+    const manifestPaths = this.getManifestPaths();
+
+    await Promise.all(
+      manifestPaths.map(
+        async (manifestPath, idx) =>
+          await this.ensureFileExists(
+            manifestPath,
+            JSON.stringify({
+              name: `${this.rawDllConfig.entryName}${this.rawDllConfig.chunks[idx]}`,
+              content: {},
+            })
+          )
+      )
     );
   }
 
   async ensureStyleFileExists() {
-    await this.ensureFileExists(this.getStylePath());
+    const stylePaths = this.getStylePaths();
+
+    await Promise.all(stylePaths.map(async stylePath => await this.ensureFileExists(stylePath)));
   }
 
   async ensureFileExists(filePath, content) {
@@ -137,8 +205,10 @@ export class DllCompiler {
     await this.ensurePathExists(this.rawDllConfig.outputPath);
   }
 
-  dllExistsSync() {
-    return this.existsSync(this.getDllPath());
+  dllsExistsSync() {
+    const dllPaths = this.getDllPaths();
+
+    return dllPaths.every(dllPath => this.existsSync(dllPath));
   }
 
   existsSync(filePath) {
@@ -149,8 +219,16 @@ export class DllCompiler {
     return path.resolve(this.rawDllConfig.outputPath, ...arguments);
   }
 
-  async readEntryFile() {
-    return await this.readFile(this.getEntryPath());
+  async readEntryFiles() {
+    const entryPaths = this.getEntryPaths();
+
+    const entryFilesContent = await Promise.all(
+      entryPaths.map(async entryPath => await this.readFile(entryPath))
+    );
+
+    // merge all the module contents from entry files again into
+    // sorted single one
+    return dllMergeAllEntryFilesContent(entryFilesContent);
   }
 
   async readFile(filePath, content) {
@@ -160,7 +238,7 @@ export class DllCompiler {
 
   async run(dllEntries) {
     const dllConfig = this.dllConfigGenerator(this.rawDllConfig);
-    await this.upsertEntryFile(dllEntries);
+    await this.upsertEntryFiles(dllEntries);
 
     try {
       this.logWithMetadata(
@@ -234,7 +312,7 @@ export class DllCompiler {
 
           // ignore if this module represents the
           // dll entry file
-          if (module.resource === this.getEntryPath()) {
+          if (this.getEntryPaths().includes(module.resource)) {
             return;
           }
 
@@ -259,7 +337,6 @@ export class DllCompiler {
               // node_module or no?
               if (notInNodeModules(reason.module.resource)) {
                 notAllowedModules.push(module.resource);
-                return;
               }
             });
           }

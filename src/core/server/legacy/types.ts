@@ -20,7 +20,7 @@
 import { Server } from 'hapi';
 
 import { ChromeNavLink } from '../../public';
-import { LegacyRequest } from '../http';
+import { KibanaRequest, LegacyRequest } from '../http';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { RenderingServiceSetup } from '../rendering';
@@ -131,16 +131,20 @@ export type VarsReplacer = (
  * @internal
  * @deprecated
  */
-export type LegacyNavLinkSpec = Record<string, unknown> & ChromeNavLink;
+export type LegacyNavLinkSpec = Partial<LegacyNavLink> & {
+  id: string;
+  title: string;
+  url: string;
+};
 
 /**
  * @internal
  * @deprecated
  */
-export type LegacyAppSpec = Pick<
-  ChromeNavLink,
-  'title' | 'order' | 'icon' | 'euiIconType' | 'url' | 'linkToLastSubUrl' | 'hidden'
-> & { pluginId?: string; id?: string; listed?: boolean };
+export type LegacyAppSpec = Partial<LegacyNavLink> & {
+  pluginId?: string;
+  listed?: boolean;
+};
 
 /**
  * @internal
@@ -198,7 +202,11 @@ export interface ILegacyInternals {
   /**
    * Get the metadata vars for a particular plugin
    */
-  getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<LegacyVars>;
+  getVars(
+    id: string,
+    request: KibanaRequest | LegacyRequest,
+    injected?: LegacyVars
+  ): Promise<LegacyVars>;
 }
 
 /**

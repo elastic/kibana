@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { pluginInstance } from 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 import ngMock from 'ng_mock';
 import { fieldCalculator } from '../../np_ready/components/field_chooser/lib/field_calculator';
 import expect from '@kbn/expect';

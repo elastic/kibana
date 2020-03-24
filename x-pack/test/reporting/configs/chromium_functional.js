@@ -25,11 +25,14 @@ export default async function({ readConfigFile }) {
         '["info","warning","error","fatal","optimize","reporting"]',
         '--xpack.endpoint.enabled=true',
         '--xpack.reporting.csv.enablePanelActionDownload=true',
+        '--xpack.reporting.csv.checkForFormulas=false',
+        '--xpack.reporting.csv.maxSizeBytes=25000000',
         '--xpack.security.session.idleTimeout=3600000',
         '--xpack.spaces.enabled=false',
       ],
     },
     esArchiver: functionalConfig.get('esArchiver'),
     esTestCluster: functionalConfig.get('esTestCluster'),
+    security: { disableTestUser: true },
   };
 }

@@ -22,6 +22,7 @@ export const mockData: { OverviewHost: OverviewHostData } = {
     endgameRegistry: 39161718,
     endgameSecurity: 39202122,
     filebeatSystemModule: 568,
-    winlogbeat: 296999,
+    winlogbeatSecurity: 195929,
+    winlogbeatMWSysmonOperational: 101070,
   },
 };

@@ -4,38 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
-
+import { IRouter, RouteConfig, RequestHandler } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { deleteRules } from '../../rules/delete_rules';
-import { ServerFacade } from '../../../../types';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
-import { transformOrBulkError, getIdBulkError } from './utils';
-import { transformBulkError } from '../utils';
-import { QueryBulkRequest } from '../../rules/types';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
+import { getIdBulkError } from './utils';
+import { transformValidateBulkError, validate } from './validate';
+import { transformBulkError, buildRouteValidation, buildSiemResponse } from '../utils';
+import {
+  IRuleSavedAttributesSavedObjectAttributes,
+  DeleteRulesRequestParams,
+} from '../../rules/types';
+import { deleteRules } from '../../rules/delete_rules';
+import { deleteNotifications } from '../../notifications/delete_notifications';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createDeleteRulesBulkRoute: Hapi.ServerRoute = {
-  method: ['POST', 'DELETE'], // allow both POST and DELETE in case their client does not support bodies in DELETE
-  path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  options: {
-    tags: ['access:siem'],
+type Config = RouteConfig<unknown, unknown, DeleteRulesRequestParams, 'delete' | 'post'>;
+type Handler = RequestHandler<unknown, unknown, DeleteRulesRequestParams, 'delete' | 'post'>;
+
+export const deleteRulesBulkRoute = (router: IRouter) => {
+  const config: Config = {
     validate: {
-      options: {
-        abortEarly: false,
-      },
-      payload: queryRulesBulkSchema,
+      body: buildRouteValidation<DeleteRulesRequestParams>(queryRulesBulkSchema),
     },
-  },
-  async handler(request: QueryBulkRequest, headers) {
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-    const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    options: {
+      tags: ['access:siem'],
+    },
+  };
+  const handler: Handler = async (context, request, response) => {
+    const siemResponse = buildSiemResponse(response);
 
-    if (alertsClient == null || actionsClient == null) {
-      return headers.response().code(404);
+    if (!context.alerting || !context.actions) {
+      return siemResponse.error({ statusCode: 404 });
     }
-    const rules = Promise.all(
-      request.payload.map(async payloadRule => {
+    const alertsClient = context.alerting.getAlertsClient();
+    const actionsClient = context.actions.getActionsClient();
+    const savedObjectsClient = context.core.savedObjects.client;
+
+    if (!actionsClient || !alertsClient) {
+      return siemResponse.error({ statusCode: 404 });
+    }
+
+    const rules = await Promise.all(
+      request.body.map(async payloadRule => {
         const { id, rule_id: ruleId } = payloadRule;
         const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
         try {
@@ -45,9 +57,20 @@ export const createDeleteRulesBulkRoute: Hapi.ServerRoute = {
             id,
             ruleId,
           });
-
           if (rule != null) {
-            return transformOrBulkError(idOrRuleIdOrUnknown, rule);
+            await deleteNotifications({ alertsClient, ruleAlertId: rule.id });
+            const ruleStatuses = await savedObjectsClient.find<
+              IRuleSavedAttributesSavedObjectAttributes
+            >({
+              type: ruleStatusSavedObjectType,
+              perPage: 6,
+              search: rule.id,
+              searchFields: ['alertId'],
+            });
+            ruleStatuses.saved_objects.forEach(async obj =>
+              savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
+            );
+            return transformValidateBulkError(idOrRuleIdOrUnknown, rule, ruleStatuses);
           } else {
             return getIdBulkError({ id, ruleId });
           }
@@ -56,10 +79,14 @@ export const createDeleteRulesBulkRoute: Hapi.ServerRoute = {
         }
       })
     );
-    return rules;
-  },
-};
+    const [validated, errors] = validate(rules, rulesBulkSchema);
+    if (errors != null) {
+      return siemResponse.error({ statusCode: 500, body: errors });
+    } else {
+      return response.ok({ body: validated ?? {} });
+    }
+  };
 
-export const deleteRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createDeleteRulesBulkRoute);
+  router.delete(config, handler);
+  router.post(config, handler);
 };

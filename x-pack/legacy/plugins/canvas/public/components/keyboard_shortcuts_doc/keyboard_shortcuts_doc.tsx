@@ -17,11 +17,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { keymap } from '../../lib/keymap';
-import { ShortcutMap, ShortcutNameSpace } from '../../../types';
+import { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
 import { getClientPlatform } from '../../lib/get_client_platform';
 import { getId } from '../../lib/get_id';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';
-import { ComponentStrings } from '../../../i18n';
+import { ComponentStrings } from '../../../i18n/components';
 
 const { KeyboardShortcutsDoc: strings } = ComponentStrings;
 

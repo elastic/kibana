@@ -39,14 +39,14 @@ export function getEsQuerySearchAfter(
     const afterTimeRecIdx = type === 'successors' && documents.length ? documents.length - 1 : 0;
     const afterTimeDoc = documents[afterTimeRecIdx];
     const afterTimeValue = nanoSeconds
-      ? convertIsoToNanosAsStr(afterTimeDoc._source[timeFieldName])
+      ? convertIsoToNanosAsStr(afterTimeDoc.fields[timeFieldName][0])
       : afterTimeDoc.sort[0];
     return [afterTimeValue, afterTimeDoc.sort[1]];
   }
   // if data_nanos adapt timestamp value for sorting, since numeric value was rounded by browser
   // ES search_after also works when number is provided as string
   return [
-    nanoSeconds ? convertIsoToNanosAsStr(anchor._source[timeFieldName]) : anchor.sort[0],
+    nanoSeconds ? convertIsoToNanosAsStr(anchor.fields[timeFieldName][0]) : anchor.sort[0],
     anchor.sort[1],
   ];
 }

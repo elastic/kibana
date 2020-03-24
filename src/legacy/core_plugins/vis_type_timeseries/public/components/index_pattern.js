@@ -42,8 +42,11 @@ import {
   AUTO_INTERVAL,
 } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
-import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../common/timerange_data_modes';
-import { PANEL_TYPES } from '../../common/panel_types';
+import {
+  TIME_RANGE_DATA_MODES,
+  TIME_RANGE_MODE_KEY,
+} from '../../../../../plugins/vis_type_timeseries/common/timerange_data_modes';
+import { PANEL_TYPES } from '../../../../../plugins/vis_type_timeseries/common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
 
@@ -138,8 +141,8 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
             </EuiFormRow>
             <EuiText size="xs" style={{ margin: 0 }}>
               {i18n.translate('visTypeTimeseries.indexPattern.timeRange.hint', {
-                defaultMessage: `This setting controls the timespan used for matching documents. 
-                "Entire timerange" will match all the documents selected in the timepicker. 
+                defaultMessage: `This setting controls the timespan used for matching documents.
+                "Entire timerange" will match all the documents selected in the timepicker.
                 "Last value" will match only the documents for the specified interval from the end of the timerange.`,
               })}
             </EuiText>
@@ -203,6 +206,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
             })}
           >
             <EuiFieldText
+              data-test-subj="metricsIndexPatternInterval"
               isInvalid={!intervalValidation.isValid}
               disabled={disabled || isEntireTimeRangeActive(model, isTimeSeries)}
               onChange={handleTextChange(intervalName, AUTO_INTERVAL)}
@@ -219,6 +223,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
             })}
           >
             <YesNo
+              data-test-subj="metricsDropLastBucket"
               value={model[dropBucketName]}
               name={dropBucketName}
               onChange={onChange}

@@ -17,7 +17,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../plugins/apm/common/i18n';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
@@ -25,7 +25,7 @@ import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTrackPageview } from '../../../../../infra/public';
+import { useTrackPageview } from '../../../../../../../plugins/observability/public';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};

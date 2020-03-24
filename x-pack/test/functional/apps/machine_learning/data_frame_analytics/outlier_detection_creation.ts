@@ -15,6 +15,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/ihp_outlier');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
@@ -27,9 +28,10 @@ export default function({ getService }: FtrProviderContext) {
         suiteTitle: 'iowa house prices',
         jobType: 'outlier_detection',
         jobId: `ihp_1_${Date.now()}`,
+        jobDescription: 'This is the job description',
         source: 'ihp_outlier',
         get destinationIndex(): string {
-          return `dest_${this.jobId}`;
+          return `user-${this.jobId}`;
         },
         modelMemory: '55mb',
         createIndexPattern: true,
@@ -76,6 +78,11 @@ export default function({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setJobId(testData.jobId);
         });
 
+        it('inputs the job description', async () => {
+          await ml.dataFrameAnalyticsCreation.assertJobDescriptionInputExists();
+          await ml.dataFrameAnalyticsCreation.setJobDescription(testData.jobDescription);
+        });
+
         it('selects the source index', async () => {
           await ml.dataFrameAnalyticsCreation.assertSourceIndexInputExists();
           await ml.dataFrameAnalyticsCreation.selectSourceIndex(testData.source);
@@ -100,7 +107,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it('creates the analytics job', async () => {
           await ml.dataFrameAnalyticsCreation.assertCreateButtonExists();
-          await ml.dataFrameAnalyticsCreation.createAnalyticsJob();
+          await ml.dataFrameAnalyticsCreation.createAnalyticsJob(testData.jobId);
         });
 
         it('starts the analytics job', async () => {
@@ -139,6 +146,7 @@ export default function({ getService }: FtrProviderContext) {
         it('displays details for the created job in the analytics table', async () => {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
+            description: testData.jobDescription,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,
@@ -150,6 +158,11 @@ export default function({ getService }: FtrProviderContext) {
         it('creates the destination index and writes results to it', async () => {
           await ml.api.assertIndicesExist(testData.destinationIndex);
           await ml.api.assertIndicesNotEmpty(testData.destinationIndex);
+        });
+
+        it('displays the results view for created job', async () => {
+          await ml.dataFrameAnalyticsTable.openResultsView();
+          await ml.dataFrameAnalytics.assertOutlierTablePanelExists();
         });
       });
     }

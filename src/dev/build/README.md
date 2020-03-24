@@ -44,7 +44,7 @@ The majority of this logic is extracted from the grunt build that has existed fo
 
 We have introduced in our bundle a webpack dll for the client vendor modules in order to improve
 the optimization time both in dev and in production. As for those modules we already have the 
-code into the vendors.bundle.dll.js we have decided to delete those bundled modules from the 
+code into the vendors_${chunk_number}.bundle.dll.js we have decided to delete those bundled modules from the 
 distributable node_modules folder. However, in order to accomplish this, we need to exclude 
 every node_module used in the server side code. This logic is performed 
 under `nodejs_modules/clean_client_modules_on_dll_task.js`. In case we need to add any new cli

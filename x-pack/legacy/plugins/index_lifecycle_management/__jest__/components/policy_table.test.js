@@ -6,18 +6,24 @@
 import moment from 'moment-timezone';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { fetchedPolicies } from '../../public/store/actions';
-import { indexLifecycleManagementStore } from '../../public/store';
-import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
-import { PolicyTable } from '../../public/sections/policy_table';
-import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import { setHttpClient } from '../../public/services/api';
-setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 import sinon from 'sinon';
+import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
+
+import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
+import { fetchedPolicies } from '../../public/np_ready/application/store/actions';
+import { indexLifecycleManagementStore } from '../../public/np_ready/application/store';
+import { PolicyTable } from '../../public/np_ready/application/sections/policy_table';
+import { init as initHttp } from '../../public/np_ready/application/services/http';
+import { init as initUiMetric } from '../../public/np_ready/application/services/ui_metric';
+
+initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
+initUiMetric(() => () => {});
+
 jest.mock('ui/new_platform');
+
 let server = null;
 
 let store = null;

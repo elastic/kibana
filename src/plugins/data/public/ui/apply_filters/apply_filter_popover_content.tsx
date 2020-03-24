@@ -30,14 +30,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { mapAndFlattenFilters, esFilters, IIndexPattern } from '../..';
+import { IIndexPattern } from '../..';
+import { getDisplayValueFromFilter, Filter } from '../../../common';
 import { FilterLabel } from '../filter_bar';
+import { mapAndFlattenFilters } from '../../query';
 
 interface Props {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   indexPatterns: IIndexPattern[];
   onCancel: () => void;
-  onSubmit: (filters: esFilters.Filter[]) => void;
+  onSubmit: (filters: Filter[]) => void;
 }
 
 interface State {
@@ -55,8 +57,8 @@ export class ApplyFiltersPopoverContent extends Component<Props, State> {
       isFilterSelected: props.filters.map(() => true),
     };
   }
-  private getLabel(filter: esFilters.Filter) {
-    const valueLabel = esFilters.getDisplayValueFromFilter(filter, this.props.indexPatterns);
+  private getLabel(filter: Filter) {
+    const valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
     return <FilterLabel filter={filter} valueLabel={valueLabel} />;
   }
 

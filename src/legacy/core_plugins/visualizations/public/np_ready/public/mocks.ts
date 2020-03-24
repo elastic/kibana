@@ -17,40 +17,50 @@
  * under the License.
  */
 
-jest.mock('ui/vis/vis_filters');
-jest.mock('ui/vis/default_feedback_message');
-jest.mock('ui/vis/index.js');
-jest.mock('ui/vis/vis_factory');
-jest.mock('ui/registry/vis_types');
-jest.mock('./types/vis_type_alias_registry');
-
-import { PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, PluginInitializerContext } from '../../../../../../core/public';
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock } from '../../../../../../core/public/mocks';
+import { embeddablePluginMock } from '../../../../../../plugins/embeddable/public/mocks';
+import { expressionsPluginMock } from '../../../../../../plugins/expressions/public/mocks';
+import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
+import { usageCollectionPluginMock } from '../../../../../../plugins/usage_collection/public/mocks';
+import { uiActionsPluginMock } from '../../../../../../plugins/ui_actions/public/mocks';
+import { VisualizationsStartDeps } from './plugin';
 
 const createSetupContract = (): VisualizationsSetup => ({
-  types: {
-    createBaseVisualization: jest.fn(),
-    createReactVisualization: jest.fn(),
-    registerAlias: jest.fn(),
-    hideTypes: jest.fn(),
-  },
+  createBaseVisualization: jest.fn(),
+  createReactVisualization: jest.fn(),
+  registerAlias: jest.fn(),
+  hideTypes: jest.fn(),
 });
 
 const createStartContract = (): VisualizationsStart => ({
-  types: {
-    get: jest.fn(),
-    all: jest.fn(),
-    getAliases: jest.fn(),
-  },
+  get: jest.fn(),
+  all: jest.fn(),
+  getAliases: jest.fn(),
+  savedVisualizationsLoader: {} as any,
+  showNewVisModal: jest.fn(),
+  createVis: jest.fn(),
+  convertFromSerializedVis: jest.fn(),
+  convertToSerializedVis: jest.fn(),
 });
 
 const createInstance = async () => {
   const plugin = new VisualizationsPlugin({} as PluginInitializerContext);
 
-  const setup = plugin.setup(coreMock.createSetup());
-  const doStart = () => plugin.start(coreMock.createStart());
+  const setup = plugin.setup(coreMock.createSetup() as CoreSetup<VisualizationsStartDeps>, {
+    data: dataPluginMock.createSetupContract(),
+    expressions: expressionsPluginMock.createSetupContract(),
+    embeddable: embeddablePluginMock.createSetupContract(),
+    usageCollection: usageCollectionPluginMock.createSetupContract(),
+  });
+  const doStart = () =>
+    plugin.start(coreMock.createStart(), {
+      data: dataPluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
+      uiActions: uiActionsPluginMock.createStartContract(),
+    });
 
   return {
     plugin,

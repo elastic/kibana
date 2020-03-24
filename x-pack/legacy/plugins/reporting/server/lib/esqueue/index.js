@@ -32,7 +32,7 @@ export class Esqueue extends EventEmitter {
   }
 
   _initTasks() {
-    const initTasks = [this.client.callWithInternalUser('ping')];
+    const initTasks = [this.client.callAsInternalUser('ping')];
 
     return Promise.all(initTasks).catch(err => {
       this._logger(['initTasks', 'error'], err);

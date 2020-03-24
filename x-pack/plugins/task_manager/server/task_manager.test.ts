@@ -21,13 +21,13 @@ import {
   TaskLifecycleEvent,
 } from './task_manager';
 import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
-import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core/server';
+import { SavedObjectsSerializer, SavedObjectTypeRegistry } from '../../../../src/core/server';
 import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
-const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
 
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;

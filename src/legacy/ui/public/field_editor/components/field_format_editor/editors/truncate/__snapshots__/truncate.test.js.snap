@@ -21,6 +21,7 @@ exports[`TruncateFormatEditor should render normally 1`] = `
   >
     <EuiFieldNumber
       isInvalid={false}
+      min={1}
       onChange={[Function]}
     />
   </EuiFormRow>

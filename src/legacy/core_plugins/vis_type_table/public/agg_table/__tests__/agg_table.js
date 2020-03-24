@@ -21,79 +21,103 @@ import $ from 'jquery';
 import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import fixtures from 'fixtures/fake_hierarchical_data';
+import {
+  metricOnly,
+  threeTermBuckets,
+  oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
+} from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
-import { legacyResponseHandlerProvider, tabifyAggResponse, npStart } from '../../legacy_imports';
+import { npStart } from '../../legacy_imports';
+import { search } from '../../../../../../plugins/data/public';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { round } from 'lodash';
-
-import { Vis } from '../../../../visualizations/public';
 import { tableVisTypeDefinition } from '../../table_vis_type';
-import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
+import {
+  setup as visualizationsSetup,
+  start as visualizationsStart,
+} from '../../../../visualizations/public/np_ready/public/legacy';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
+import { tableVisResponseHandler } from '../../table_vis_response_handler';
+
+const { tabifyAggResponse } = search;
 
 describe('Table Vis - AggTable Directive', function() {
   let $rootScope;
   let $compile;
   let indexPattern;
   let settings;
-  let tableAggResponse;
   const tabifiedData = {};
 
   const init = () => {
-    const vis1 = new Vis(indexPattern, 'table');
-    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, fixtures.metricOnly);
+    const searchSource = {
+      getField: name => {
+        if (name === 'index') {
+          return indexPattern;
+        }
+      },
+    };
+    const vis1 = visualizationsStart.createVis('table', {
+      type: 'table',
+      data: { searchSource, aggs: [] },
+    });
+    tabifiedData.metricOnly = tabifyAggResponse(vis1.data.aggs, metricOnly);
 
-    const vis2 = new Vis(indexPattern, {
+    const vis2 = visualizationsStart.createVis('table', {
       type: 'table',
       params: {
         showMetricsAtAllLevels: true,
       },
-      aggs: [
-        { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-        { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
-        { type: 'terms', schema: 'bucket', params: { field: 'geo.src' } },
-        { type: 'terms', schema: 'bucket', params: { field: 'machine.os' } },
-      ],
+      data: {
+        aggs: [
+          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
+          { type: 'terms', schema: 'bucket', params: { field: 'geo.src' } },
+          { type: 'terms', schema: 'bucket', params: { field: 'machine.os' } },
+        ],
+        searchSource,
+      },
     });
-    vis2.aggs.aggs.forEach(function(agg, i) {
+    vis2.data.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
-    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets, {
+    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.data.aggs, threeTermBuckets, {
       metricsAtAllLevels: true,
     });
 
-    const vis3 = new Vis(indexPattern, {
+    const vis3 = visualizationsStart.createVis('table', {
       type: 'table',
-      aggs: [
-        { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-        { type: 'min', schema: 'metric', params: { field: '@timestamp' } },
-        { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
-        {
-          type: 'date_histogram',
-          schema: 'bucket',
-          params: { field: '@timestamp', interval: 'd' },
-        },
-        {
-          type: 'derivative',
-          schema: 'metric',
-          params: { metricAgg: 'custom', customMetric: { id: '5-orderAgg', type: 'count' } },
-        },
-        {
-          type: 'top_hits',
-          schema: 'metric',
-          params: { field: 'bytes', aggregate: { val: 'min' }, size: 1 },
-        },
-      ],
+      data: {
+        aggs: [
+          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'min', schema: 'metric', params: { field: '@timestamp' } },
+          { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
+          {
+            type: 'date_histogram',
+            schema: 'bucket',
+            params: { field: '@timestamp', interval: 'd' },
+          },
+          {
+            type: 'derivative',
+            schema: 'metric',
+            params: { metricAgg: 'custom', customMetric: { id: '5-orderAgg', type: 'count' } },
+          },
+          {
+            type: 'top_hits',
+            schema: 'metric',
+            params: { field: 'bytes', aggregate: { val: 'min' }, size: 1 },
+          },
+        ],
+        searchSource,
+      },
     });
-    vis3.aggs.aggs.forEach(function(agg, i) {
+    vis3.data.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
 
     tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = tabifyAggResponse(
-      vis3.aggs,
-      fixtures.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative
+      vis3.data.aggs,
+      oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative
     );
   };
 
@@ -105,13 +129,12 @@ describe('Table Vis - AggTable Directive', function() {
   beforeEach(initLocalAngular);
 
   ngMock.inject(function() {
-    visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
+    visualizationsSetup.createBaseVisualization(tableVisTypeDefinition);
   });
 
   beforeEach(ngMock.module('kibana/table_vis'));
   beforeEach(
     ngMock.inject(function($injector, Private, config) {
-      tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       settings = config;
 
@@ -130,12 +153,12 @@ describe('Table Vis - AggTable Directive', function() {
     $scope.$destroy();
   });
 
-  it('renders a simple response properly', async function() {
+  it('renders a simple response properly', function() {
     $scope.dimensions = {
       metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
       buckets: [],
     };
-    $scope.table = (await tableAggResponse(tabifiedData.metricOnly, $scope.dimensions)).tables[0];
+    $scope.table = tableVisResponseHandler(tabifiedData.metricOnly, $scope.dimensions).tables[0];
 
     const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
       $scope
@@ -171,8 +194,9 @@ describe('Table Vis - AggTable Directive', function() {
         { accessor: 5, params: {} },
       ],
     };
-    $scope.table = (
-      await tableAggResponse(tabifiedData.threeTermBuckets, $scope.dimensions)
+    $scope.table = tableVisResponseHandler(
+      tabifiedData.threeTermBuckets,
+      $scope.dimensions
     ).tables[0];
     const $el = $('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>');
     $compile($el)($scope);
@@ -237,7 +261,7 @@ describe('Table Vis - AggTable Directive', function() {
           { accessor: 5, format: { id: 'number' } },
         ],
       };
-      const response = await tableAggResponse(
+      const response = tableVisResponseHandler(
         tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
         $scope.dimensions
       );
@@ -337,8 +361,9 @@ describe('Table Vis - AggTable Directive', function() {
           { accessor: 5, params: {} },
         ],
       };
-      $scope.table = (
-        await tableAggResponse(tabifiedData.threeTermBuckets, $scope.dimensions)
+      $scope.table = tableVisResponseHandler(
+        tabifiedData.threeTermBuckets,
+        $scope.dimensions
       ).tables[0];
 
       const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
@@ -394,8 +419,9 @@ describe('Table Vis - AggTable Directive', function() {
           { accessor: 5, params: {} },
         ],
       };
-      $scope.table = (
-        await tableAggResponse(tabifiedData.threeTermBuckets, $scope.dimensions)
+      $scope.table = tableVisResponseHandler(
+        tabifiedData.threeTermBuckets,
+        $scope.dimensions
       ).tables[0];
 
       const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
@@ -455,7 +481,7 @@ describe('Table Vis - AggTable Directive', function() {
         { accessor: 5, format: { id: 'number' } },
       ],
     };
-    const response = await tableAggResponse(
+    const response = tableVisResponseHandler(
       tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
       $scope.dimensions
     );

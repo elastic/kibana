@@ -1,6 +1,6 @@
 # Dev tools plugin
 
-The ui/registry/dev_tools is removed in favor of the `dev_tools` plugin which exposes a register method in the setup contract.
+The ui/registry/dev_tools is removed in favor of the `devTools` plugin which exposes a register method in the setup contract.
 Registering app works mostly the same as registering apps in core.application.register.
 Routing will be handled by the id of the dev tool - your dev tool will be mounted when the URL matches `/app/kibana#/dev_tools/<YOUR ID>`.
 This API doesn't support angular, for registering angular dev tools, bootstrap a local module on mount into the given HTML element.
@@ -14,15 +14,15 @@ not be used by other plugins.
 ```ts
 // For legacy plugins
 import { npSetup } from 'ui/new_platform';
-npSetup.plugins.dev_tools.register(/* same details here */);
+npSetup.plugins.devTools.register(/* same details here */);
 
-// For new plugins: first add 'dev_tools' to the list of `optionalPlugins` 
+// For new plugins: first add 'devTools' to the list of `optionalPlugins` 
 // in your kibana.json file. Then access the plugin directly in `setup`:
 
 class MyPlugin {
   setup(core, plugins) {
-    if (plugins.dev_tools) {
-      plugins.dev_tools.register(/* same details here. */);
+    if (plugins.devTools) {
+      plugins.devTools.register(/* same details here. */);
     }
   }
 }

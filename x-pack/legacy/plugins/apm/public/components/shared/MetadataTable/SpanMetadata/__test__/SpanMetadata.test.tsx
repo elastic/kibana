@@ -7,12 +7,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { SpanMetadata } from '..';
-import { Span } from '../../../../../../typings/es_schemas/ui/Span';
+import { Span } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument,
-  MockApmPluginContextWrapper
+  expectTextsNotInDocument
 } from '../../../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderOptions = {
   wrapper: MockApmPluginContextWrapper

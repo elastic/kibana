@@ -100,21 +100,24 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     private async loginIfPrompted(appUrl: string) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
+      await testSubjects.find('kibanaChrome', 6 * defaultFindTimeout); // 60 sec waiting
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
       if (loginPage && !wantedLoginPage) {
-        log.debug(
-          `Found login page.  Logging in with username = ${config.get('servers.kibana.username')}`
-        );
-        await PageObjects.shield.login(
-          config.get('servers.kibana.username'),
-          config.get('servers.kibana.password')
-        );
+        log.debug('Found login page');
+        if (config.get('security.disableTestUser')) {
+          await PageObjects.shield.login(
+            config.get('servers.kibana.username'),
+            config.get('servers.kibana.password')
+          );
+        } else {
+          await PageObjects.shield.login('test_user', 'changeme');
+        }
+
         await find.byCssSelector(
           '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-          2 * defaultFindTimeout
+          6 * defaultFindTimeout
         );
         await browser.get(appUrl);
         currentUrl = await browser.getCurrentUrl();
@@ -192,6 +195,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     public async navigateToUrlWithBrowserHistory(
       appName: string,
       subUrl?: string,
+      search?: string,
       {
         basePath = '',
         ensureCurrentUrl = true,
@@ -203,6 +207,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       const appConfig = {
         // subUrl following the basePath, assumes no hashes.  Ex: 'app/endpoint/management'
         pathname: `${basePath}${config.get(['apps', appName]).pathname}${subUrl}`,
+        search,
       };
 
       await this.navigate({
@@ -371,6 +376,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await browser.pressKeys(browser.keys.ENTER);
     }
 
+    // Pause the browser at a certain place for debugging
+    // Not meant for usage in CI, only for dev-usage
+    async pause() {
+      return browser.pause();
+    }
+
     /**
      * Clicks cancel button on modal
      * @param overlayWillStay pass in true if your test will show multiple modals in succession
@@ -425,6 +436,13 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       log.debug(`Toast title: ${title}`);
       await find.clickByCssSelector('.euiToast__closeButton');
       return title;
+    }
+
+    async closeToastIfExists() {
+      const toastShown = await find.existsByCssSelector('.euiToast');
+      if (toastShown) {
+        await this.closeToast();
+      }
     }
 
     async clearAllToasts() {
@@ -495,6 +513,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           throw new Error('save modal still open');
         }
       });
+    }
+
+    async setFileInputPath(path: string) {
+      log.debug(`Setting the path '${path}' on the file input`);
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
     }
   }
 

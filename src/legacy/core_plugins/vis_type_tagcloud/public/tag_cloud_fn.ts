@@ -20,15 +20,13 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
 import { TagCloudVisParams } from './types';
 
 const name = 'tagcloud';
-
-type Context = KibanaDatatable;
 
 interface Arguments extends TagCloudVisParams {
   metric: any; // these aren't typed yet
@@ -37,24 +35,20 @@ interface Arguments extends TagCloudVisParams {
 
 interface RenderValue {
   visType: typeof name;
-  visData: Context;
+  visData: KibanaDatatable;
   visConfig: Arguments;
   params: any;
 }
 
-type Return = Render<RenderValue>;
-
-export const createTagCloudFn = (): ExpressionFunction<
+export const createTagCloudFn = (): ExpressionFunctionDefinition<
   typeof name,
-  Context,
+  KibanaDatatable,
   Arguments,
-  Return
+  Render<RenderValue>
 > => ({
   name,
   type: 'render',
-  context: {
-    types: ['kibana_datatable'],
-  },
+  inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeTagCloud.function.help', {
     defaultMessage: 'Tagcloud visualization',
   }),
@@ -104,7 +98,7 @@ export const createTagCloudFn = (): ExpressionFunction<
       }),
     },
   },
-  fn(context, args) {
+  fn(input, args) {
     const visConfig = {
       scale: args.scale,
       orientation: args.orientation,
@@ -122,7 +116,7 @@ export const createTagCloudFn = (): ExpressionFunction<
       type: 'render',
       as: 'visualization',
       value: {
-        visData: context,
+        visData: input,
         visType: name,
         visConfig,
         params: {

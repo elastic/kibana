@@ -50,8 +50,24 @@ export class AbstractVectorSource extends AbstractSource {
     );
   }
 
+  /**
+   * factory function creating a new field-instance
+   * @param fieldName
+   * @param label
+   * @returns {IField}
+   */
   createField() {
     throw new Error(`Should implemement ${this.constructor.type} ${this}`);
+  }
+
+  /**
+   * Retrieves a field. This may be an existing instance.
+   * @param fieldName
+   * @param label
+   * @returns {IField}
+   */
+  getFieldByName(name) {
+    return this.createField({ fieldName: name });
   }
 
   _createDefaultLayerDescriptor(options, mapColors) {
@@ -82,10 +98,6 @@ export class AbstractVectorSource extends AbstractSource {
     return false;
   }
 
-  isFilterByMapBoundsConfigurable() {
-    return false;
-  }
-
   isBoundsAware() {
     return false;
   }
@@ -95,16 +107,8 @@ export class AbstractVectorSource extends AbstractSource {
     return null;
   }
 
-  async getDateFields() {
-    return [];
-  }
-
-  async getNumberFields() {
-    return [];
-  }
-
   async getFields() {
-    return [...(await this.getDateFields()), ...(await this.getNumberFields())];
+    return [];
   }
 
   async getLeftJoinFields() {

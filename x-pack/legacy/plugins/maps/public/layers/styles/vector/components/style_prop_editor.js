@@ -5,10 +5,16 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { FieldMetaOptionsPopover } from './field_meta_options_popover';
-import { getVectorStyleLabel } from './get_vector_style_label';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { VectorStyle } from '../vector_style';
+import { getVectorStyleLabel, getDisabledByMessage } from './get_vector_style_label';
+import {
+  EuiFormRow,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiToolTip,
+} from '@elastic/eui';
+import { STYLE_TYPE } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
 export class StylePropEditor extends Component {
@@ -46,7 +52,7 @@ export class StylePropEditor extends Component {
   renderStaticDynamicSelect() {
     const options = [
       {
-        value: VectorStyle.STYLE_TYPE.STATIC,
+        value: STYLE_TYPE.STATIC,
         text: this.props.customStaticOptionLabel
           ? this.props.customStaticOptionLabel
           : i18n.translate('xpack.maps.styles.staticDynamicSelect.staticLabel', {
@@ -54,7 +60,7 @@ export class StylePropEditor extends Component {
             }),
       },
       {
-        value: VectorStyle.STYLE_TYPE.DYNAMIC,
+        value: STYLE_TYPE.DYNAMIC,
         text: i18n.translate('xpack.maps.styles.staticDynamicSelect.dynamicLabel', {
           defaultMessage: 'By value',
         }),
@@ -64,13 +70,9 @@ export class StylePropEditor extends Component {
     return (
       <EuiSelect
         options={options}
-        value={
-          this.props.styleProperty.isDynamic()
-            ? VectorStyle.STYLE_TYPE.DYNAMIC
-            : VectorStyle.STYLE_TYPE.STATIC
-        }
+        value={this.props.styleProperty.isDynamic() ? STYLE_TYPE.DYNAMIC : STYLE_TYPE.STATIC}
         onChange={this._onTypeToggle}
-        disabled={this.props.fields.length === 0}
+        disabled={this.props.disabled || this.props.fields.length === 0}
         aria-label={i18n.translate('xpack.maps.styles.staticDynamicSelect.ariaLabel', {
           defaultMessage: 'Select to style by fixed value or by data value',
         })}
@@ -80,24 +82,41 @@ export class StylePropEditor extends Component {
   }
 
   render() {
-    const fieldMetaOptionsPopover = this.props.styleProperty.isDynamic() ? (
-      <FieldMetaOptionsPopover
-        styleProperty={this.props.styleProperty}
-        onChange={this._onFieldMetaOptionsChange}
-      />
-    ) : null;
+    const fieldMetaOptionsPopover = this.props.styleProperty.renderFieldMetaPopover(
+      this._onFieldMetaOptionsChange
+    );
+
+    const staticDynamicSelect = this.renderStaticDynamicSelect();
+
+    const stylePropertyForm = this.props.disabled ? (
+      <EuiToolTip
+        anchorClassName="mapStyleFormDisabledTooltip"
+        content={getDisabledByMessage(this.props.disabledBy)}
+      >
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+            {staticDynamicSelect}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldText compressed disabled />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
+    ) : (
+      <Fragment>
+        {React.cloneElement(this.props.children, {
+          staticDynamicSelect,
+        })}
+        {fieldMetaOptionsPopover}
+      </Fragment>
+    );
 
     return (
       <EuiFormRow
         label={getVectorStyleLabel(this.props.styleProperty.getStyleName())}
         display="rowCompressed"
       >
-        <Fragment>
-          {React.cloneElement(this.props.children, {
-            staticDynamicSelect: this.renderStaticDynamicSelect(),
-          })}
-          {fieldMetaOptionsPopover}
-        </Fragment>
+        {stylePropertyForm}
       </EuiFormRow>
     );
   }

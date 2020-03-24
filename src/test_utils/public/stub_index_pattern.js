@@ -23,10 +23,10 @@ import sinon from 'sinon';
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
 
 import {
-  FieldList,
-  FIELD_FORMAT_IDS,
+  IndexPatternFieldList,
   IndexPattern,
   indexPatterns,
+  KBN_FIELD_TYPES,
 } from '../../plugins/data/public';
 
 import { setFieldFormats } from '../../plugins/data/public/services';
@@ -61,13 +61,13 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.flattenHit = indexPatterns.flattenHitWrapper(this, this.metaFields);
   this.formatHit = indexPatterns.formatHitProvider(
     this,
-    registeredFieldFormats.getDefaultInstance(FIELD_FORMAT_IDS.STRING)
+    registeredFieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
   );
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
 
   this._reindexFields = function() {
-    this.fields = new FieldList(this, this.fields || fields);
+    this.fields = new IndexPatternFieldList(this, this.fields || fields);
   };
 
   this.stubSetFieldFormat = function(fieldName, id, params) {

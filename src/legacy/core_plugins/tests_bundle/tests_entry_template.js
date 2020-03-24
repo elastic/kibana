@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Type } from '@kbn/config-schema';
 import pkg from '../../../../package.json';
 
 export const createTestEntryTemplate = defaultUiSettings => bundle => `
@@ -29,16 +29,7 @@ export const createTestEntryTemplate = defaultUiSettings => bundle => `
  *
  */
 
-// import global polyfills before everything else
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
-import 'childnode-remove-polyfill';
 import fetchMock from 'fetch-mock/es5/client';
-import Symbol_observable from 'symbol-observable';
-
 import { CoreSystem } from '__kibanaCore__';
 
 // Fake uiCapabilities returned to Core in browser tests
@@ -87,12 +78,23 @@ const coreSystem = new CoreSystem({
     buildNumber: 1234,
     legacyMode: true,
     legacyMetadata: {
+      app: {
+        id: 'karma',
+        title: 'Karma',
+      },
       nav: [],
       version: '1.2.3',
       buildNum: 1234,
       devMode: true,
       uiSettings: {
-        defaults: ${JSON.stringify(defaultUiSettings, null, 2)
+        defaults: ${JSON.stringify(
+          defaultUiSettings,
+          (key, value) => {
+            if (value instanceof Type) return null;
+            return value;
+          },
+          2
+        )
           .split('\n')
           .join('\n    ')},
         user: {}
@@ -123,7 +125,8 @@ const coreSystem = new CoreSystem({
       },
       mapConfig: {
         includeElasticMapsService: true,
-        manifestServiceUrl: 'https://catalogue-staging.maps.elastic.co/v2/manifest'
+        emsFileApiUrl: 'https://vector-staging.maps.elastic.co',
+        emsTileApiUrl: 'https://tiles.maps.elastic.co',
       },
       vegaConfig: {
         enabled: true,

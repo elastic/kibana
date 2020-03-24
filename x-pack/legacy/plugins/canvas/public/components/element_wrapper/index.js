@@ -61,7 +61,7 @@ export const ElementWrapper = compose(
     (props, nextProps) => !isEqual(props.element, nextProps.element),
     props => {
       const { element, createHandlers } = props;
-      const handlers = createHandlers(element, props.selectedPage);
+      const handlers = createHandlers(element);
       // this removes element and createHandlers from passed props
       return { handlers };
     }

@@ -6,7 +6,7 @@
 
 import { rgba } from 'polished';
 import React from 'react';
-import { Droppable } from 'react-beautiful-dnd';
+import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 interface Props {
@@ -16,6 +16,7 @@ interface Props {
   isDropDisabled?: boolean;
   type?: string;
   render?: ({ isDraggingOver }: { isDraggingOver: boolean }) => React.ReactNode;
+  renderClone?: DraggableChildrenFn;
 }
 
 const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string }>`
@@ -94,12 +95,14 @@ export const DroppableWrapper = React.memo<Props>(
     isDropDisabled = false,
     type,
     render = null,
+    renderClone,
   }) => (
     <Droppable
       isDropDisabled={isDropDisabled}
       droppableId={droppableId}
       direction={'horizontal'}
       type={type}
+      renderClone={renderClone}
     >
       {(provided, snapshot) => (
         <ReactDndDropTarget

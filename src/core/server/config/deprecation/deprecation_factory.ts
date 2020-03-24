@@ -26,7 +26,8 @@ const _rename = (
   rootPath: string,
   log: ConfigDeprecationLogger,
   oldKey: string,
-  newKey: string
+  newKey: string,
+  silent?: boolean
 ) => {
   const fullOldPath = getPath(rootPath, oldKey);
   const oldValue = get(config, fullOldPath);
@@ -40,11 +41,16 @@ const _rename = (
   const newValue = get(config, fullNewPath);
   if (newValue === undefined) {
     set(config, fullNewPath, oldValue);
-    log(`"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`);
+
+    if (!silent) {
+      log(`"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`);
+    }
   } else {
-    log(
-      `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`
-    );
+    if (!silent) {
+      log(
+        `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`
+      );
+    }
   }
   return config;
 };
@@ -67,11 +73,11 @@ const _unused = (
 const rename = (oldKey: string, newKey: string): ConfigDeprecation => (config, rootPath, log) =>
   _rename(config, rootPath, log, oldKey, newKey);
 
-const renameFromRoot = (oldKey: string, newKey: string): ConfigDeprecation => (
+const renameFromRoot = (oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation => (
   config,
   rootPath,
   log
-) => _rename(config, '', log, oldKey, newKey);
+) => _rename(config, '', log, oldKey, newKey, silent);
 
 const unused = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
   _unused(config, rootPath, log, unusedKey);

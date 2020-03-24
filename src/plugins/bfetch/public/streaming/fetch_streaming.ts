@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { defer } from '../../../kibana_utils/common';
 import { fromStreamingXhr } from './from_streaming_xhr';
 
 export interface FetchStreamingParams {
@@ -38,7 +37,6 @@ export function fetchStreaming({
   body = '',
 }: FetchStreamingParams) {
   const xhr = new window.XMLHttpRequest();
-  const { promise, resolve, reject } = defer<void>();
 
   // Begin the request
   xhr.open(method, url);
@@ -49,17 +47,11 @@ export function fetchStreaming({
 
   const stream = fromStreamingXhr(xhr);
 
-  stream.subscribe({
-    complete: () => resolve(),
-    error: error => reject(error),
-  });
-
   // Send the payload to the server
   xhr.send(body);
 
   return {
     xhr,
-    promise,
     stream,
   };
 }

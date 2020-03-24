@@ -26,7 +26,7 @@ import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { LegacyManagementSection } from './legacy';
 import { ManagementChrome } from './components';
 import { ManagementSection } from './management_section';
-import { ChromeBreadcrumb, CoreSetup } from '../../../core/public/';
+import { ChromeBreadcrumb, StartServicesAccessor } from '../../../core/public/';
 
 export class ManagementApp {
   readonly id: string;
@@ -34,14 +34,14 @@ export class ManagementApp {
   readonly basePath: string;
   readonly order: number;
   readonly mount: ManagementSectionMount;
-  protected enabledStatus: boolean = true;
+  private enabledStatus = true;
 
   constructor(
     { id, title, basePath, order = 100, mount }: CreateManagementApp,
     getSections: () => ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagementSections: () => LegacyManagementSection,
-    getStartServices: CoreSetup['getStartServices']
+    getStartServices: StartServicesAccessor
   ) {
     this.id = id;
     this.title = title;
@@ -54,6 +54,11 @@ export class ManagementApp {
       title,
       mount: async ({}, params) => {
         let appUnmount: Unmount;
+        if (!this.enabledStatus) {
+          const [coreStart] = await getStartServices();
+          coreStart.application.navigateToApp('kibana#/management');
+          return () => {};
+        }
         async function setBreadcrumbs(crumbs: ChromeBreadcrumb[]) {
           const [coreStart] = await getStartServices();
           coreStart.chrome.setBreadcrumbs([

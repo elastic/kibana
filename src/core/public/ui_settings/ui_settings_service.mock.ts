@@ -40,6 +40,7 @@ const createSetupContractMock = () => {
   setupContract.getUpdate$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getSaved$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getUpdateErrors$.mockReturnValue(new Rx.Subject<any>());
+  setupContract.getAll.mockReturnValue({});
 
   return setupContract;
 };

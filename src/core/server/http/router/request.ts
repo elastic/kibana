@@ -18,16 +18,24 @@
  */
 
 import { Url } from 'url';
-import { Request } from 'hapi';
+import { Request, ApplicationState } from 'hapi';
+import { Observable, fromEvent, merge } from 'rxjs';
+import { shareReplay, first, takeUntil } from 'rxjs/operators';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
-import { RouteMethod, RouteConfigOptions, validBodyOutput } from './route';
+import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
 import { RouteValidator, RouteValidatorFullConfig } from './validator';
 
 const requestSymbol = Symbol('request');
 
+/**
+ * @internal
+ */
+export interface KibanaRouteState extends ApplicationState {
+  xsrfRequired: boolean;
+}
 /**
  * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
  * @public
@@ -44,6 +52,17 @@ export interface KibanaRequestRoute<Method extends RouteMethod> {
   path: string;
   method: Method;
   options: KibanaRequestRouteOptions<Method>;
+}
+
+/**
+ * Request events.
+ * @public
+ * */
+export interface KibanaRequestEvents {
+  /**
+   * Observable that emits once if and when the request has been aborted.
+   */
+  aborted$: Observable<void>;
 }
 
 /**
@@ -114,8 +133,20 @@ export class KibanaRequest<
    * This property will contain a `filtered` copy of request headers.
    */
   public readonly headers: Headers;
+  /**
+   * Whether or not the request is a "system request" rather than an application-level request.
+   * Can be set on the client using the `HttpFetchOptions#asSystemRequest` option.
+   */
+  public readonly isSystemRequest: boolean;
 
+  /** {@link IKibanaSocket} */
   public readonly socket: IKibanaSocket;
+  /** Request events {@link KibanaRequestEvents} */
+  public readonly events: KibanaRequestEvents;
+  public readonly auth: {
+    /* true if the request has been successfully authenticated, otherwise false. */
+    isAuthenticated: boolean;
+  };
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
@@ -131,6 +162,10 @@ export class KibanaRequest<
   ) {
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
+    this.isSystemRequest =
+      request.headers['kbn-system-request'] === 'true' ||
+      // Remove support for `kbn-system-api` in 8.x. Used only by legacy platform.
+      request.headers['kbn-system-api'] === 'true';
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
@@ -138,19 +173,36 @@ export class KibanaRequest<
       enumerable: false,
     });
 
-    this.route = deepFreeze(this.getRouteInfo());
+    this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = new KibanaSocket(request.raw.req.socket);
+    this.events = this.getEvents(request);
+
+    this.auth = {
+      // missing in fakeRequests, so we cast to false
+      isAuthenticated: Boolean(request.auth?.isAuthenticated),
+    };
   }
 
-  private getRouteInfo(): KibanaRequestRoute<Method> {
-    const request = this[requestSymbol];
+  private getEvents(request: Request): KibanaRequestEvents {
+    const finish$ = merge(
+      fromEvent(request.raw.req, 'end'), // all data consumed
+      fromEvent(request.raw.req, 'close') // connection was closed
+    ).pipe(shareReplay(1), first());
+    return {
+      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$)),
+    } as const;
+  }
+
+  private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
     const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
 
     const options = ({
-      authRequired: request.route.settings.auth !== false,
+      authRequired: this.getAuthRequired(request),
+      // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
-      body: ['get', 'options'].includes(method)
+      body: isSafeMethod(method)
         ? undefined
         : {
             parse,
@@ -165,6 +217,31 @@ export class KibanaRequest<
       method,
       options,
     };
+  }
+
+  private getAuthRequired(request: Request): boolean | 'optional' {
+    const authOptions = request.route.settings.auth;
+    if (typeof authOptions === 'object') {
+      // 'try' is used in the legacy platform
+      if (authOptions.mode === 'optional' || authOptions.mode === 'try') {
+        return 'optional';
+      }
+      if (authOptions.mode === 'required') {
+        return true;
+      }
+    }
+
+    // legacy platform routes
+    if (authOptions === undefined) {
+      return true;
+    }
+
+    if (authOptions === false) return false;
+    throw new Error(
+      `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
+        this.url.href
+      }`
+    );
   }
 }
 

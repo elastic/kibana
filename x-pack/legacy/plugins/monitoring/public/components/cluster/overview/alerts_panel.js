@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
+import moment from 'moment-timezone';
+import chrome from '../../../np_imports/ui/chrome';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
-import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
+import {
+  CALCULATE_DURATION_SINCE,
+  KIBANA_ALERTING_ENABLED,
+  ALERT_TYPE_LICENSE_EXPIRATION,
+  CALCULATE_DURATION_UNTIL,
+} from '../../../../common/constants';
 import { formatDateTimeLocal } from '../../../../common/formatting';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +28,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 
 export function AlertsPanel({ alerts, changeUrl }) {
@@ -50,6 +58,9 @@ export function AlertsPanel({ alerts, changeUrl }) {
       severityIcon.iconType = 'check';
     }
 
+    const injector = chrome.dangerouslyGetActiveInjector();
+    const timezone = injector.get('config').get('dateFormat:tz');
+
     return (
       <EuiCallOut
         key={`alert-item-${index}`}
@@ -72,7 +83,7 @@ export function AlertsPanel({ alerts, changeUrl }) {
               id="xpack.monitoring.cluster.overview.alertsPanel.lastCheckedTimeText"
               defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
               values={{
-                updateDateTime: formatDateTimeLocal(item.update_timestamp),
+                updateDateTime: formatDateTimeLocal(item.update_timestamp, timezone),
                 duration: formatTimestampToDuration(item.timestamp, CALCULATE_DURATION_SINCE),
               }}
             />
@@ -82,9 +93,52 @@ export function AlertsPanel({ alerts, changeUrl }) {
     );
   }
 
-  const topAlertItems = alerts.map((item, index) => (
-    <TopAlertItem item={item} key={`top-alert-item-${index}`} index={index} />
-  ));
+  const alertsList = KIBANA_ALERTING_ENABLED
+    ? alerts.map((alert, idx) => {
+        const callOutProps = mapSeverity(alert.severity);
+        let message = alert.message
+          // scan message prefix and replace relative times
+          // \w: Matches any alphanumeric character from the basic Latin alphabet, including the underscore. Equivalent to [A-Za-z0-9_].
+          .replace(
+            '#relative',
+            formatTimestampToDuration(alert.expirationTime, CALCULATE_DURATION_UNTIL)
+          )
+          .replace('#absolute', moment.tz(alert.expirationTime, moment.tz.guess()).format('LLL z'));
+
+        if (!alert.isFiring) {
+          callOutProps.title = i18n.translate(
+            'xpack.monitoring.cluster.overview.alertsPanel.severityIconTitle',
+            {
+              defaultMessage: '{severityIconTitle} (resolved {time} ago)',
+              values: {
+                severityIconTitle: callOutProps.title,
+                time: formatTimestampToDuration(alert.resolvedMS, CALCULATE_DURATION_SINCE),
+              },
+            }
+          );
+          callOutProps.color = 'success';
+          callOutProps.iconType = 'check';
+        } else {
+          if (alert.type === ALERT_TYPE_LICENSE_EXPIRATION) {
+            message = (
+              <Fragment>
+                {message}
+                &nbsp;
+                <EuiLink href="#license">Please update your license</EuiLink>
+              </Fragment>
+            );
+          }
+        }
+
+        return (
+          <EuiCallOut key={idx} {...callOutProps}>
+            <p>{message}</p>
+          </EuiCallOut>
+        );
+      })
+    : alerts.map((item, index) => (
+        <TopAlertItem item={item} key={`top-alert-item-${index}`} index={index} />
+      ));
 
   return (
     <div data-test-subj="clusterAlertsContainer">
@@ -109,7 +163,7 @@ export function AlertsPanel({ alerts, changeUrl }) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {topAlertItems}
+      {alertsList}
       <EuiSpacer size="xxl" />
     </div>
   );

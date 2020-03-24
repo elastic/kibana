@@ -5,17 +5,16 @@
  */
 
 import React from 'react';
-
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { getLegendColors, getColor } from 'ui/vis/map/color_util';
-import { ColorGradient } from './components/color_gradient';
-import { palettes } from '@elastic/eui/lib/services';
 import tinycolor from 'tinycolor2';
 import chroma from 'chroma-js';
+import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+import { ColorGradient } from './components/color_gradient';
+import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
+import { vislibColorMaps } from '../../../../../../../src/plugins/charts/public';
 
 const GRADIENT_INTERVALS = 8;
 
-export const DEFAULT_FILL_COLORS = palettes.euiPaletteColorBlind.colors;
+export const DEFAULT_FILL_COLORS = euiPaletteColorBlind();
 export const DEFAULT_LINE_COLORS = [
   ...DEFAULT_FILL_COLORS.map(color =>
     tinycolor(color)
@@ -26,6 +25,24 @@ export const DEFAULT_LINE_COLORS = [
   '#000',
   '#FFF',
 ];
+
+function getLegendColors(colorRamp, numLegendColors = 4) {
+  const colors = [];
+  colors[0] = getColor(colorRamp, 0);
+  for (let i = 1; i < numLegendColors - 1; i++) {
+    colors[i] = getColor(colorRamp, Math.floor((colorRamp.length * i) / numLegendColors));
+  }
+  colors[numLegendColors - 1] = getColor(colorRamp, colorRamp.length - 1);
+  return colors;
+}
+
+function getColor(colorRamp, i) {
+  const color = colorRamp[i][1];
+  const red = Math.floor(color[0] * 255);
+  const green = Math.floor(color[1] * 255);
+  const blue = Math.floor(color[2] * 255);
+  return `rgb(${red},${green},${blue})`;
+}
 
 function getColorRamp(colorRampName) {
   const colorRamp = vislibColorMaps[colorRampName];
@@ -51,6 +68,9 @@ export function getHexColorRangeStrings(colorRampName, numberColors = GRADIENT_I
 }
 
 export function getColorRampCenterColor(colorRampName) {
+  if (!colorRampName) {
+    return null;
+  }
   const colorRamp = getColorRamp(colorRampName);
   const centerIndex = Math.floor(colorRamp.value.length / 2);
   return getColor(colorRamp.value, centerIndex);
@@ -58,14 +78,26 @@ export function getColorRampCenterColor(colorRampName) {
 
 // Returns an array of color stops
 // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
-export function getColorRampStops(colorRampName, numberColors = GRADIENT_INTERVALS) {
-  return getHexColorRangeStrings(colorRampName, numberColors).reduce(
-    (accu, stopColor, idx, srcArr) => {
-      const stopNumber = idx / srcArr.length; // number between 0 and 1, increasing as index increases
-      return [...accu, stopNumber, stopColor];
-    },
-    []
-  );
+export function getOrdinalColorRampStops(colorRampName, min, max) {
+  if (!colorRampName) {
+    return null;
+  }
+
+  if (min > max) {
+    return null;
+  }
+
+  const hexColors = getHexColorRangeStrings(colorRampName, GRADIENT_INTERVALS);
+  if (max === min) {
+    //just return single stop value
+    return [max, hexColors[hexColors.length - 1]];
+  }
+
+  const delta = max - min;
+  return hexColors.reduce((accu, stopColor, idx, srcArr) => {
+    const stopNumber = min + (delta * idx) / srcArr.length;
+    return [...accu, stopNumber, stopColor];
+  }, []);
 }
 
 export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorRampName => ({
@@ -84,3 +116,36 @@ export function getLinearGradient(colorStrings) {
   }
   return `${linearGradient} ${colorStrings[colorStrings.length - 1]} 100%)`;
 }
+
+const COLOR_PALETTES_CONFIGS = [
+  {
+    id: 'palette_0',
+    colors: DEFAULT_FILL_COLORS.slice(0, COLOR_PALETTE_MAX_SIZE),
+  },
+];
+
+export function getColorPalette(paletteId) {
+  const palette = COLOR_PALETTES_CONFIGS.find(palette => palette.id === paletteId);
+  return palette ? palette.colors : null;
+}
+
+export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map(palette => {
+  const paletteDisplay = palette.colors.map(color => {
+    const style = {
+      backgroundColor: color,
+      width: '10%',
+      position: 'relative',
+      height: '100%',
+      display: 'inline-block',
+    };
+    return (
+      <div style={style} key={color}>
+        &nbsp;
+      </div>
+    );
+  });
+  return {
+    value: palette.id,
+    inputDisplay: <div className={'mapColorGradient'}>{paletteDisplay}</div>,
+  };
+});

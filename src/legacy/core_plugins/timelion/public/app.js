@@ -24,10 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
 import { docTitle } from 'ui/doc_title';
 import { fatalError, toastNotifications } from 'ui/notify';
-import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
 import { npStart } from 'ui/new_platform';
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
+import { getTimezone } from '../../vis_type_timelion/public';
 
 import 'uiExports/savedObjectTypes';
 
@@ -37,13 +37,14 @@ require('ui/autoload/all');
 import 'ui/directives/input_focus';
 import './directives/saved_object_finder';
 import 'ui/directives/listen';
-import 'ui/kbn_top_nav';
-import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
-import '../../data/public/legacy';
+import './directives/saved_object_save_as_checkbox';
 import './services/saved_sheet_register';
 
 import rootTemplate from 'plugins/timelion/index.html';
-import { createSavedVisLoader } from '../../kibana/public/visualize';
+import { start as visualizations } from '../../visualizations/public/np_ready/public/legacy';
+
+import { loadKbnTopNavDirectives } from '../../../../plugins/kibana_legacy/public';
+loadKbnTopNavDirectives(npStart.plugins.navigation.ui);
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
@@ -58,8 +59,6 @@ require('plugins/timelion/directives/timelion_options_sheet');
 document.title = 'Timelion - Kibana';
 
 const app = require('ui/modules').get('apps/timelion', []);
-
-require('./vis');
 
 require('ui/routes').enable();
 
@@ -116,9 +115,7 @@ app.controller('timelion', function(
   $timeout,
   AppState,
   config,
-  confirmModal,
-  kbnUrl,
-  Private
+  kbnUrl
 ) {
   // Keeping this at app scope allows us to keep the current page when the user
   // switches to say, the timepicker.
@@ -128,13 +125,8 @@ app.controller('timelion', function(
   timefilter.enableAutoRefreshSelector();
   timefilter.enableTimeRangeSelector();
 
-  const savedVisualizations = createSavedVisLoader({
-    savedObjectsClient: npStart.core.savedObjects.client,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  });
-  const timezone = Private(timezoneProvider)();
+  const savedVisualizations = visualizations.savedVisualizationsLoader;
+  const timezone = getTimezone(config);
 
   const defaultExpression = '.es(*)';
   const savedSheet = $route.current.locals.savedSheet;
@@ -231,7 +223,6 @@ app.controller('timelion', function(
         }
 
         const confirmModalOptions = {
-          onConfirm: doDelete,
           confirmButtonText: i18n.translate('timelion.topNavMenu.delete.modal.confirmButtonLabel', {
             defaultMessage: 'Delete',
           }),
@@ -242,12 +233,18 @@ app.controller('timelion', function(
         };
 
         $scope.$evalAsync(() => {
-          confirmModal(
-            i18n.translate('timelion.topNavMenu.delete.modal.warningText', {
-              defaultMessage: `You can't recover deleted sheets.`,
-            }),
-            confirmModalOptions
-          );
+          npStart.core.overlays
+            .openConfirm(
+              i18n.translate('timelion.topNavMenu.delete.modal.warningText', {
+                defaultMessage: `You can't recover deleted sheets.`,
+              }),
+              confirmModalOptions
+            )
+            .then(isConfirmed => {
+              if (isConfirmed) {
+                doDelete();
+              }
+            });
         });
       },
       testId: 'timelionDeleteButton',

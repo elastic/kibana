@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEmpty } from 'lodash';
-import { ErrorRaw } from '../../../../../../../typings/es_schemas/raw/ErrorRaw';
+import { ErrorRaw } from '../../../../../../../../../../plugins/apm/typings/es_schemas/raw/error_raw';
 import {
-  IWaterfallItem,
   IWaterfallError,
   IServiceColors
 } from '../Waterfall/waterfall_helpers/waterfall_helpers';
@@ -19,16 +18,14 @@ export interface ErrorMark extends Mark {
 }
 
 export const getErrorMarks = (
-  items: IWaterfallItem[],
+  errorItems: IWaterfallError[],
   serviceColors: IServiceColors
 ): ErrorMark[] => {
-  if (isEmpty(items)) {
+  if (isEmpty(errorItems)) {
     return [];
   }
 
-  return (items.filter(
-    item => item.docType === 'error'
-  ) as IWaterfallError[]).map(error => ({
+  return errorItems.map(error => ({
     type: 'errorMark',
     offset: error.offset + error.skew,
     verticalLine: false,
