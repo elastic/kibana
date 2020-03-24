@@ -515,6 +515,8 @@ export default function({ getService, getPageObjects }) {
         before(async () => {
           // to trigger displaying of error messages
           await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          // this will avoid issues with the play tooltip covering the interval field
+          await testSubjects.scrollIntoView('advancedParams-2');
         });
 
         it('should not fail during changing interval when the field is not selected', async () => {
