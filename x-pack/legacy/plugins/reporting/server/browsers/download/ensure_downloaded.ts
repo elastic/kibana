@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { existsSync } from 'fs';
 import { resolve as resolvePath } from 'path';
-import { BROWSER_TYPE } from '../../../common/constants';
+import { existsSync } from 'fs';
+
 import { chromium } from '../index';
-import { BrowserDownload } from '../types';
+import { BrowserDownload, BrowserType } from '../types';
+
 import { md5 } from './checksum';
-import { clean } from './clean';
-import { download } from './download';
 import { asyncMap } from './util';
+import { download } from './download';
+import { clean } from './clean';
 
 /**
  * Check for the downloaded archive of each requested browser type and
@@ -20,7 +21,7 @@ import { asyncMap } from './util';
  * @param  {String} browserType
  * @return {Promise<undefined>}
  */
-export async function ensureBrowserDownloaded(browserType = BROWSER_TYPE) {
+export async function ensureBrowserDownloaded(browserType: BrowserType) {
   await ensureDownloaded([chromium]);
 }
 
