@@ -155,6 +155,8 @@ export const TimeSeries = ({
             stack,
             points,
             useDefaultGroupDomain,
+            y1AccessorFormat,
+            y0AccessorFormat,
           },
           sortIndex
         ) => {
@@ -181,6 +183,8 @@ export const TimeSeries = ({
                 enableHistogramMode={enableHistogramMode}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
+                y1AccessorFormat={y1AccessorFormat}
+                y0AccessorFormat={y0AccessorFormat}
               />
             );
           }
@@ -205,6 +209,8 @@ export const TimeSeries = ({
                 enableHistogramMode={enableHistogramMode}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
+                y1AccessorFormat={y1AccessorFormat}
+                y0AccessorFormat={y0AccessorFormat}
               />
             );
           }
