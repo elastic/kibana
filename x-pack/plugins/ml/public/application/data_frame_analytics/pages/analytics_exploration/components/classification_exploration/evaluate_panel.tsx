@@ -211,8 +211,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }) => {
     const cellValue = columnsData[rowIndex][columnId];
     const actualCount = columnsData[rowIndex] && columnsData[rowIndex].actual_class_doc_count;
-    // @ts-ignore
-    let accuracy;
+    let accuracy: number | string = '0%';
 
     if (columnId !== ACTUAL_CLASS_ID && actualCount) {
       accuracy = cellValue / actualCount;
@@ -225,7 +224,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       if (columnId !== ACTUAL_CLASS_ID) {
         setCellProps({
           style: {
-            // @ts-ignore
             backgroundColor: `rgba(0, 179, 164, ${accuracy})`,
           },
         });
@@ -373,7 +371,12 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                         <EuiFlexItem grow={false} style={{ width: '90%' }}>
                           <EuiDataGrid
                             data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
-                            aria-label="Classification confusion matrix"
+                            aria-label={i18n.translate(
+                              'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixLabel',
+                              {
+                                defaultMessage: 'Classification confusion matrix',
+                              }
+                            )}
                             columns={shownColumns}
                             columnVisibility={{ visibleColumns, setVisibleColumns }}
                             rowCount={rowCount}
@@ -381,13 +384,12 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                             inMemory={{ level: 'sorting' }}
                             toolbarVisibility={{
                               showColumnSelector: true,
-                              showStyleSelector: true,
+                              showStyleSelector: false,
                               showFullScreenSelector: false,
                               showSortSelector: false,
                             }}
                             popoverContents={popoverContents}
                             gridStyle={{ rowHover: 'none' }}
-                            // @ts-ignore
                             trailingControlColumns={
                               showTrailingColumns === true && showFullColumns === false
                                 ? getTrailingControlColumns(extraColumns, setShowFullColumns)

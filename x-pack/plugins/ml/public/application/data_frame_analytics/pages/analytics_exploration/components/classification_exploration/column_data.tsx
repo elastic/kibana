@@ -6,13 +6,19 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiDataGridControlColumn,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 import { ConfusionMatrix } from '../../../../common/analytics';
 
 interface ColumnData {
   actual_class: string;
   actual_class_doc_count: number;
-  [key: string]: any;
+  [key: string]: string | number;
 }
 
 export const ACTUAL_CLASS_ID = 'actual_class';
@@ -63,12 +69,15 @@ export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
   return { columns, columnData: colData };
 }
 
-export function getTrailingControlColumns(numColumns: number, setShowFullColumns: any) {
+export function getTrailingControlColumns(
+  numColumns: number,
+  setShowFullColumns: any
+): EuiDataGridControlColumn[] {
   return [
     {
       id: 'actions',
       width: 60,
-      headerCellRender: () => `${numColumns} more`,
+      headerCellRender: () => <span>{`${numColumns} more`}</span>,
       rowCellRender: function RowCellRender() {
         const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
         return (
@@ -77,7 +86,12 @@ export function getTrailingControlColumns(numColumns: number, setShowFullColumns
             anchorPosition="upCenter"
             button={
               <EuiButtonIcon
-                aria-label="show actions"
+                aria-label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.classificationExploration.showActions',
+                  {
+                    defaultMessage: 'Show actions',
+                  }
+                )}
                 iconType="boxesHorizontal"
                 color="text"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
