@@ -48,7 +48,12 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
               {
                 type: 'endpoint',
                 enabled: true,
-                config: policyData,
+                config: {
+                  policy: {
+                    value: policyData,
+                  },
+                },
+                streams: [],
               },
             ],
             namespace: 'default',
