@@ -12,7 +12,7 @@ echo "2/3 Ingest test data ..."
 pushd ${E2E_DIR}
 yarn install
 curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output ingest-data/events.json
-node ingest-data/replay.js --server-url http://localhost:8201 --secret-token abcd --events ./ingest-data/events.json > ingest-data.log
+node ingest-data/replay.js --server-url http://localhost:8201 --events ./ingest-data/events.json > ingest-data.log
 
 echo "3/3 Start Kibana ..."
 popd
