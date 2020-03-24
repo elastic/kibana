@@ -16,6 +16,7 @@ import {
   Position,
   PartialTheme,
   GeometryValue,
+  XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -40,12 +41,6 @@ type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof BarSeries> &
   InferPropType<typeof AreaSeries>;
-
-export interface XYChartSeriesIdentifier {
-  yAccessor: string | number;
-  splitAccessors: Map<string | number, string | number>; // does the map have a size vs making it optional
-  seriesKeys: Array<string | number>;
-}
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -225,6 +220,7 @@ export function XYChart({
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onElementClick={([[geometry, series]]) => {
+          // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
           const xySeries = series as XYChartSeriesIdentifier;
           const xyGeometry = geometry as GeometryValue;
 
@@ -243,7 +239,7 @@ export function XYChart({
                 row => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
               ),
               column: table.columns.findIndex(col => col.id === layer.xAccessor),
-              value: (xyGeometry as GeometryValue).x,
+              value: xyGeometry.x,
             },
           ];
 
@@ -259,11 +255,11 @@ export function XYChart({
             });
           }
 
-          const xAxisFieldName = table.columns.find(col => col.id === layer.xAccessor)?.meta
-            ?.aggConfigParams?.field;
+          const xAxisFieldName: string | undefined = table.columns.find(
+            col => col.id === layer.xAccessor
+          )?.meta?.aggConfigParams?.field;
 
-          const timeFieldName =
-            xDomain && xAxisFieldName ? { timeFieldName: xAxisFieldName } : null;
+          const timeFieldName = xDomain && xAxisFieldName;
 
           const context: EmbeddableVisTriggerContext = {
             data: {
@@ -274,7 +270,7 @@ export function XYChart({
                 table,
               })),
             },
-            ...timeFieldName,
+            timeFieldName,
           };
 
           executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
@@ -329,6 +325,9 @@ export function XYChart({
             : {};
 
           const table = data.tables[layerId];
+
+          // For date histogram chart type, we're getting the rows that represent intervals without data.
+          // To not display them in the legend, they need to be filtered out.
           const rows = table.rows.filter(
             row =>
               !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))

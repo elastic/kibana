@@ -19,9 +19,10 @@ import {
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
 import React from 'react';
-import { mount, shallow, ReactWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
 import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 const executeTriggerActions = jest.fn();
 
@@ -268,7 +269,7 @@ describe('xy_expression', () => {
 
       const { args, data } = sampleArgs();
 
-      const wrapper: ReactWrapper = mount(
+      const wrapper = mountWithIntl(
         <XYChart
           data={data}
           args={{
