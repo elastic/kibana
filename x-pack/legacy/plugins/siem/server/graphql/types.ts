@@ -1014,6 +1014,8 @@ export interface RuleField {
   updated_by?: Maybe<string[] | string>;
 
   version?: Maybe<string[] | string>;
+
+  note?: Maybe<string[] | string>;
 }
 
 export interface SuricataEcsFields {
@@ -4824,6 +4826,8 @@ export namespace RuleFieldResolvers {
     updated_by?: UpdatedByResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
     version?: VersionResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    note?: NoteResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
   export type IdResolver<
@@ -4972,6 +4976,11 @@ export namespace RuleFieldResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type VersionResolver<
+    R = Maybe<string[] | string>,
+    Parent = RuleField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type NoteResolver<
     R = Maybe<string[] | string>,
     Parent = RuleField,
     TContext = SiemContext
