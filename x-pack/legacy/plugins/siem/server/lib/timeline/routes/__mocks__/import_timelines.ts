@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash/fp';
+
 export const mockDuplicateIdErrors = [];
 
 export const mockParsedObjects = [
@@ -75,7 +77,7 @@ export const mockUniqueParsedObjects = [
     eventType: 'all',
     filters: [],
     kqlMode: 'filter',
-    kqlQuery: { filterQuery: [Object] },
+    kqlQuery: { filterQuery: [] },
     title: 'My duplicate timeline',
     dateRange: { start: 1584523907294, end: 1584610307294 },
     savedQueryId: null,
@@ -89,7 +91,7 @@ export const mockUniqueParsedObjects = [
         noteId: '73ac2370-6bc2-11ea-a90b-f5341fb7a189',
         version: 'WzExMjgsMV0=',
         eventId: 'ZaAi8nAB5OldxqFfdhke',
-        note: 'event note2',
+        note: 'event note1',
         timelineId: 'da49a0e0-6bc1-11ea-a90b-f5341fb7a189',
         created: 1584829349563,
         createdBy: 'angela',
@@ -124,29 +126,42 @@ export const mockUniqueParsedObjects = [
   },
 ];
 
-export const mockGetTimelineValue = [
-  {
-    savedObjectId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
-    version: 'WzEyMjUsMV0=',
-    columns: [],
-    dataProviders: [],
-    description: 'description',
-    eventType: 'all',
-    filters: [],
-    kqlMode: 'filter',
-    kqlQuery: { filterQuery: [Object] },
-    title: 'My duplicate timeline',
-    dateRange: { start: 1584523907294, end: 1584610307294 },
-    savedQueryId: null,
-    sort: { columnId: '@timestamp', sortDirection: 'desc' },
-    created: 1584828930463,
-    createdBy: 'angela',
-    updated: 1584868346013,
-    updatedBy: 'angela',
-    noteIds: [],
-    pinnedEventIds: ['k-gi8nABm-sIqJ_scOoS'],
-  },
-];
+export const mockGetTimelineValue = {
+  savedObjectId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+  version: 'WzEyMjUsMV0=',
+  columns: [],
+  dataProviders: [],
+  description: 'description',
+  eventType: 'all',
+  filters: [],
+  kqlMode: 'filter',
+  kqlQuery: { filterQuery: [] },
+  title: 'My duplicate timeline',
+  dateRange: { start: 1584523907294, end: 1584610307294 },
+  savedQueryId: null,
+  sort: { columnId: '@timestamp', sortDirection: 'desc' },
+  created: 1584828930463,
+  createdBy: 'angela',
+  updated: 1584868346013,
+  updatedBy: 'angela',
+  noteIds: [],
+  pinnedEventIds: ['k-gi8nABm-sIqJ_scOoS'],
+};
+
+export const mockParsedTimelineObject = omit(
+  [
+    'globalNotes',
+    'eventNotes',
+    'pinnedEventIds',
+    'version',
+    'savedObjectId',
+    'created',
+    'createdBy',
+    'updated',
+    'updatedBy',
+  ],
+  mockUniqueParsedObjects[0]
+);
 
 export const mockConfig = {
   get: () => {

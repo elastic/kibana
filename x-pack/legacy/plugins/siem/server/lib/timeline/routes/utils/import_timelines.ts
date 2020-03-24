@@ -97,9 +97,11 @@ export const saveTimelines = async (
     timelineVersion ?? null,
     timeline
   );
-  const newSavedObjectId = newTimelineRes?.timeline?.savedObjectId ?? null;
 
-  return newSavedObjectId;
+  return {
+    newTimelineSavedObjectId: newTimelineRes?.timeline?.savedObjectId ?? null,
+    newTimelineVersion: newTimelineRes?.timeline?.version ?? null,
+  };
 };
 
 export const savePinnedEvents = async (
@@ -136,6 +138,7 @@ export const saveNotes = async (
           note: note.note,
           timelineId: timelineSavedObjectId,
         };
+
         return noteLib.persistNote(
           frameworkRequest,
           existingNoteIds?.find(nId => nId === note.noteId) ?? null,
@@ -156,28 +159,27 @@ export const createTimelines = async (
   notes?: NoteResult[],
   existingNoteIds?: string[]
 ) => {
-  const newSavedObjectId = await saveTimelines(
+  const { newTimelineSavedObjectId, newTimelineVersion } = await saveTimelines(
     frameworkRequest,
     timeline,
     timelineSavedObjectId,
     timelineVersion
   );
-
   await savePinnedEvents(
     frameworkRequest,
-    timelineSavedObjectId ?? newSavedObjectId,
+    timelineSavedObjectId ?? newTimelineSavedObjectId,
     pinnedEventIds
   );
 
   await saveNotes(
     frameworkRequest,
-    timelineSavedObjectId ?? newSavedObjectId,
-    timelineVersion,
+    timelineSavedObjectId ?? newTimelineSavedObjectId,
+    newTimelineVersion,
     existingNoteIds,
     notes
   );
 
-  return newSavedObjectId;
+  return newTimelineSavedObjectId;
 };
 
 export const isImportRegular = (
