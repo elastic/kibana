@@ -62,5 +62,4 @@ function createSamplePanelAction() {
 }
 
 const action = createSamplePanelAction();
-npSetup.plugins.uiActions.registerAction(action);
-npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);
+npSetup.plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
