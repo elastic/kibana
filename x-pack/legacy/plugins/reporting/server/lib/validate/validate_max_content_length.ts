@@ -7,17 +7,17 @@
 import numeral from '@elastic/numeral';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { defaults, get } from 'lodash';
-import { Logger, ServerFacade } from '../../../types';
+import { Logger } from '../../../types';
+import { ReportingConfig } from '../../types';
 
-const KIBANA_MAX_SIZE_BYTES_PATH = 'xpack.reporting.csv.maxSizeBytes';
+const KIBANA_MAX_SIZE_BYTES_PATH = 'csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
 
 export async function validateMaxContentLength(
-  server: ServerFacade,
+  config: ReportingConfig,
   elasticsearch: ElasticsearchServiceSetup,
   logger: Logger
 ) {
-  const config = server.config();
   const { callAsInternalUser } = elasticsearch.dataClient;
 
   const elasticClusterSettingsResponse = await callAsInternalUser('cluster.getSettings', {
@@ -28,13 +28,13 @@ export async function validateMaxContentLength(
 
   const elasticSearchMaxContent = get(elasticClusterSettings, 'http.max_content_length', '100mb');
   const elasticSearchMaxContentBytes = numeral().unformat(elasticSearchMaxContent.toUpperCase());
-  const kibanaMaxContentBytes: number = config.get(KIBANA_MAX_SIZE_BYTES_PATH);
+  const kibanaMaxContentBytes = config.get('csv', 'maxSizeBytes');
 
   if (kibanaMaxContentBytes > elasticSearchMaxContentBytes) {
     // TODO this should simply throw an error and let the handler conver it to a warning mesasge. See validateServerHost.
     logger.warning(
-      `${KIBANA_MAX_SIZE_BYTES_PATH} (${kibanaMaxContentBytes}) is higher than ElasticSearch's ${ES_MAX_SIZE_BYTES_PATH} (${elasticSearchMaxContentBytes}). ` +
-        `Please set ${ES_MAX_SIZE_BYTES_PATH} in ElasticSearch to match, or lower your ${KIBANA_MAX_SIZE_BYTES_PATH} in Kibana to avoid this warning.`
+      `xpack.reporting.${KIBANA_MAX_SIZE_BYTES_PATH} (${kibanaMaxContentBytes}) is higher than ElasticSearch's ${ES_MAX_SIZE_BYTES_PATH} (${elasticSearchMaxContentBytes}). ` +
+        `Please set ${ES_MAX_SIZE_BYTES_PATH} in ElasticSearch to match, or lower your xpack.reporting.${KIBANA_MAX_SIZE_BYTES_PATH} in Kibana to avoid this warning.`
     );
   }
 }
