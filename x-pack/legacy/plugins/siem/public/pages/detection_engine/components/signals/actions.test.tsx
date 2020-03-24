@@ -152,8 +152,6 @@ describe('signals actions', () => {
                 width: 180,
               },
             ],
-            created: 1584557256090,
-            createdBy: 'elastic',
             dataProviders: [],
             dateRange: {
               end: 1541444605937,
@@ -169,23 +167,16 @@ describe('signals actions', () => {
                   store: 'appState',
                 },
                 meta: {
-                  alias: null,
-                  controlledBy: null,
-                  disabled: false,
-                  field: null,
-                  formattedValue: null,
-                  index: null,
                   key: 'host.name',
                   negate: false,
                   params: {
-                    query: ['apache'],
+                    query: 'apache',
                   },
                   type: 'phrase',
-                  value: null,
                 },
                 query: {
                   match_phrase: {
-                    'host.name': ['apache'],
+                    'host.name': 'apache',
                   },
                 },
               },
@@ -228,8 +219,6 @@ describe('signals actions', () => {
               sortDirection: 'desc',
             },
             title: '',
-            updated: 1584563721473,
-            updatedBy: 'elastic',
             version: null,
             width: 1100,
           },

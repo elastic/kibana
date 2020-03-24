@@ -141,7 +141,7 @@ describe('StepAboutRuleToggleDetails', () => {
       expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeFalsy();
 
       wrapper
-        .find('input[title="Investigation notes"]')
+        .find('input[title="Investigation guide"]')
         .at(0)
         .simulate('change', { target: { value: 'notes' } });
 
@@ -164,7 +164,7 @@ describe('StepAboutRuleToggleDetails', () => {
       );
 
       wrapper
-        .find('input[title="Investigation notes"]')
+        .find('input[title="Investigation guide"]')
         .at(0)
         .simulate('change', { target: { value: 'notes' } });
 

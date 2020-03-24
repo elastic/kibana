@@ -212,7 +212,7 @@ export const getSignalsActions = ({
     getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
       <EuiToolTip
         data-test-subj="send-signal-to-timeline-tool-tip"
-        content={i18n.ACTION_VIEW_IN_TIMELINE}
+        content={i18n.ACTION_INVESTIGATE_IN_TIMELINE}
       >
         <EuiButtonIcon
           data-test-subj="send-signal-to-timeline-button"
