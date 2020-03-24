@@ -48,8 +48,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           );
         }
 
-        const updatedBy = await caseService.getUser({ request, response });
-        const { email, full_name, username } = updatedBy;
+        const { username, full_name, email } = await caseService.getUser({ request, response });
 
         const updateDate = new Date().toISOString();
         const patch = await caseConfigureService.patch({

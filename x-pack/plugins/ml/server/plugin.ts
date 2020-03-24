@@ -70,12 +70,15 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
         defaultMessage: 'Machine Learning',
       }),
       icon: PLUGIN_ICON,
+      order: 500,
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID],
-      privileges: {},
+      privileges: null,
       reserved: {
         privilege: {
+          app: [PLUGIN_ID, 'kibana'],
+          catalogue: [PLUGIN_ID],
           savedObject: {
             all: [],
             read: [],

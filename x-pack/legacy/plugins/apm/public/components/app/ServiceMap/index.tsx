@@ -3,20 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
-import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/service_map';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import {
+  invalidLicenseMessage,
+  isValidPlatinumLicense
+} from '../../../../../../../plugins/apm/common/service_map';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { BetaBadge } from './BetaBadge';
+import { LicensePrompt } from '../../shared/LicensePrompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
 import { cytoscapeDivStyle } from './cytoscapeOptions';
 import { EmptyBanner } from './EmptyBanner';
-import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
 
@@ -74,6 +77,18 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       </Cytoscape>
     </div>
   ) : (
-    <PlatinumLicensePrompt />
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceAround"
+      // Set the height to give it some top margin
+      style={{ height: '60vh' }}
+    >
+      <EuiFlexItem
+        grow={false}
+        style={{ width: 600, textAlign: 'center' as const }}
+      >
+        <LicensePrompt text={invalidLicenseMessage} showBetaBadge />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -18,7 +18,7 @@ import {
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { SAMLAuthenticationProvider, SAMLLoginStep } from './saml';
+import { SAMLAuthenticationProvider, SAMLLogin } from './saml';
 
 function expectAuthenticateCall(
   mockClusterClient: jest.Mocked<IClusterClient>,
@@ -36,7 +36,7 @@ describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
-    mockOptions = mockAuthenticationProviderOptions();
+    mockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
     provider = new SAMLAuthenticationProvider(mockOptions, {
       maxRedirectURLSize: new ByteSizeValue(100),
     });
@@ -66,13 +66,18 @@ describe('SAMLAuthenticationProvider', () => {
         username: 'user',
         access_token: 'some-token',
         refresh_token: 'some-refresh-token',
+        realm: 'test-realm',
       });
 
       await expect(
         provider.login(
           request,
-          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
-          { requestId: 'some-request-id', redirectURL: '/test-base-path/some-path#some-app' }
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
+          {
+            requestId: 'some-request-id',
+            redirectURL: '/test-base-path/some-path#some-app',
+            realm: 'test-realm',
+          }
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
@@ -80,13 +85,14 @@ describe('SAMLAuthenticationProvider', () => {
             username: 'user',
             accessToken: 'some-token',
             refreshToken: 'some-refresh-token',
+            realm: 'test-realm',
           },
         })
       );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
         'shield.samlAuthenticate',
-        { body: { ids: ['some-request-id'], content: 'saml-response-xml' } }
+        { body: { ids: ['some-request-id'], content: 'saml-response-xml', realm: 'test-realm' } }
       );
     });
 
@@ -96,8 +102,8 @@ describe('SAMLAuthenticationProvider', () => {
       await expect(
         provider.login(
           request,
-          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
-          {}
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
+          {} as any
         )
       ).resolves.toEqual(
         AuthenticationResult.failed(
@@ -108,32 +114,61 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
 
-    it('redirects to the default location if state contains empty redirect URL.', async () => {
+    it('fails if realm from state is different from the realm provider is configured with.', async () => {
       const request = httpServerMock.createKibanaRequest();
-
-      mockOptions.client.callAsInternalUser.mockResolvedValue({
-        access_token: 'user-initiated-login-token',
-        refresh_token: 'user-initiated-login-refresh-token',
+      const customMockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
+      provider = new SAMLAuthenticationProvider(customMockOptions, {
+        realm: 'test-realm',
+        maxRedirectURLSize: new ByteSizeValue(100),
       });
 
       await expect(
         provider.login(
           request,
-          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
-          { requestId: 'some-request-id', redirectURL: '' }
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
+          { realm: 'other-realm' }
+        )
+      ).resolves.toEqual(
+        AuthenticationResult.failed(
+          Boom.unauthorized(
+            'State based on realm "other-realm", but provider with the name "saml" is configured to use realm "test-realm".'
+          )
+        )
+      );
+
+      expect(customMockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('redirects to the default location if state contains empty redirect URL.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
+        username: 'user',
+        access_token: 'user-initiated-login-token',
+        refresh_token: 'user-initiated-login-refresh-token',
+        realm: 'test-realm',
+      });
+
+      await expect(
+        provider.login(
+          request,
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
+          { requestId: 'some-request-id', redirectURL: '', realm: 'test-realm' }
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/base-path/', {
           state: {
+            username: 'user',
             accessToken: 'user-initiated-login-token',
             refreshToken: 'user-initiated-login-refresh-token',
+            realm: 'test-realm',
           },
         })
       );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
         'shield.samlAuthenticate',
-        { body: { ids: ['some-request-id'], content: 'saml-response-xml' } }
+        { body: { ids: ['some-request-id'], content: 'saml-response-xml', realm: 'test-realm' } }
       );
     });
 
@@ -141,20 +176,24 @@ describe('SAMLAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
 
       mockOptions.client.callAsInternalUser.mockResolvedValue({
+        username: 'user',
+        realm: 'test-realm',
         access_token: 'idp-initiated-login-token',
         refresh_token: 'idp-initiated-login-refresh-token',
       });
 
       await expect(
         provider.login(request, {
-          step: SAMLLoginStep.SAMLResponseReceived,
+          type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response-xml',
         })
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/base-path/', {
           state: {
+            username: 'user',
             accessToken: 'idp-initiated-login-token',
             refreshToken: 'idp-initiated-login-refresh-token',
+            realm: 'test-realm',
           },
         })
       );
@@ -174,14 +213,18 @@ describe('SAMLAuthenticationProvider', () => {
       await expect(
         provider.login(
           request,
-          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
-          { requestId: 'some-request-id', redirectURL: '/test-base-path/some-path' }
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
+          {
+            requestId: 'some-request-id',
+            redirectURL: '/test-base-path/some-path',
+            realm: 'test-realm',
+          }
         )
       ).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
         'shield.samlAuthenticate',
-        { body: { ids: ['some-request-id'], content: 'saml-response-xml' } }
+        { body: { ids: ['some-request-id'], content: 'saml-response-xml', realm: 'test-realm' } }
       );
     });
 
@@ -189,7 +232,7 @@ describe('SAMLAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
 
       // Create new provider instance with additional `realm` option.
-      const customMockOptions = mockAuthenticationProviderOptions();
+      const customMockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
       provider = new SAMLAuthenticationProvider(customMockOptions, {
         realm: 'test-realm',
         maxRedirectURLSize: new ByteSizeValue(100),
@@ -199,13 +242,18 @@ describe('SAMLAuthenticationProvider', () => {
         username: 'user',
         access_token: 'some-token',
         refresh_token: 'some-refresh-token',
+        realm: 'test-realm',
       });
 
       await expect(
         provider.login(
           request,
-          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
-          { requestId: 'some-request-id', redirectURL: '/test-base-path/some-path' }
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
+          {
+            requestId: 'some-request-id',
+            redirectURL: '/test-base-path/some-path',
+            realm: 'test-realm',
+          }
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/test-base-path/some-path', {
@@ -213,6 +261,7 @@ describe('SAMLAuthenticationProvider', () => {
             username: 'user',
             accessToken: 'some-token',
             refreshToken: 'some-refresh-token',
+            realm: 'test-realm',
           },
         })
       );
@@ -226,7 +275,7 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     describe('IdP initiated login with existing session', () => {
-      it('fails if new SAML Response is rejected.', async () => {
+      it('fails if new SAML Response is rejected and provider is not configured with specific realm.', async () => {
         const request = httpServerMock.createKibanaRequest({ headers: {} });
         const authorization = 'Bearer some-valid-token';
 
@@ -241,11 +290,12 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(
             request,
-            { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
             {
               username: 'user',
               accessToken: 'some-valid-token',
               refreshToken: 'some-valid-refresh-token',
+              realm: 'test-realm',
             }
           )
         ).resolves.toEqual(AuthenticationResult.failed(failureReason));
@@ -260,51 +310,43 @@ describe('SAMLAuthenticationProvider', () => {
         );
       });
 
-      it('fails if token received in exchange to new SAML Response is rejected.', async () => {
-        const request = httpServerMock.createKibanaRequest();
+      it('returns `notHandled` if new SAML Response is rejected and provider is configured with specific realm.', async () => {
+        const request = httpServerMock.createKibanaRequest({ headers: {} });
+        const authorization = 'Bearer some-valid-token';
 
-        // Call to `authenticate` using existing valid session and also with token received in
-        // exchange to new SAML payload.
+        const customMockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
+        provider = new SAMLAuthenticationProvider(customMockOptions, {
+          realm: 'test-realm',
+          maxRedirectURLSize: new ByteSizeValue(100),
+        });
+
         const user = mockAuthenticatedUser();
-        const failureReason = new Error('Access token is invalid!');
-        mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
-          if (scopeableRequest?.headers.authorization === 'Bearer new-invalid-token') {
-            const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-            mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
-            return mockScopedClusterClient;
-          }
+        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+        customMockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-          if (scopeableRequest?.headers.authorization === 'Bearer existing-valid-token') {
-            const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-            mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-            return mockScopedClusterClient;
-          }
-
-          throw new Error('Unexpected call');
-        });
-
-        mockOptions.client.callAsInternalUser.mockResolvedValue({
-          username: 'user',
-          access_token: 'new-invalid-token',
-          refresh_token: 'new-invalid-token',
-        });
+        const failureReason = new Error('SAML response is invalid!');
+        customMockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
         await expect(
           provider.login(
             request,
-            { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
             {
               username: 'user',
-              accessToken: 'existing-valid-token',
-              refreshToken: 'existing-valid-refresh-token',
+              accessToken: 'some-valid-token',
+              refreshToken: 'some-valid-refresh-token',
+              realm: 'test-realm',
             }
           )
-        ).resolves.toEqual(AuthenticationResult.failed(failureReason));
+        ).resolves.toEqual(AuthenticationResult.notHandled());
 
-        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
+        expectAuthenticateCall(customMockOptions.client, { headers: { authorization } });
+
+        expect(customMockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
           'shield.samlAuthenticate',
           {
-            body: { ids: [], content: 'saml-response-xml' },
+            body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
           }
         );
       });
@@ -315,6 +357,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'user',
           accessToken: 'existing-valid-token',
           refreshToken: 'existing-valid-refresh-token',
+          realm: 'test-realm',
         };
 
         const user = mockAuthenticatedUser();
@@ -334,7 +377,7 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(
             request,
-            { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
             state
           )
         ).resolves.toEqual(AuthenticationResult.failed(failureReason));
@@ -359,6 +402,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'user',
           accessToken: 'existing-valid-token',
           refreshToken: 'existing-valid-refresh-token',
+          realm: 'test-realm',
         };
 
         const user = { username: 'user', authentication_realm: { name: 'saml1' } };
@@ -370,6 +414,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'user',
           access_token: 'new-valid-token',
           refresh_token: 'new-valid-refresh-token',
+          realm: 'test-realm',
         });
 
         mockOptions.tokens.invalidate.mockResolvedValue(undefined);
@@ -377,7 +422,7 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(
             request,
-            { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
             state
           )
         ).resolves.toEqual(
@@ -386,6 +431,7 @@ describe('SAMLAuthenticationProvider', () => {
               username: 'user',
               accessToken: 'new-valid-token',
               refreshToken: 'new-valid-refresh-token',
+              realm: 'test-realm',
             },
           })
         );
@@ -410,6 +456,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'user',
           accessToken: 'existing-valid-token',
           refreshToken: 'existing-valid-refresh-token',
+          realm: 'test-realm',
         };
 
         const existingUser = { username: 'user', authentication_realm: { name: 'saml1' } };
@@ -434,6 +481,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'new-user',
           access_token: 'new-valid-token',
           refresh_token: 'new-valid-refresh-token',
+          realm: 'test-realm',
         });
 
         mockOptions.tokens.invalidate.mockResolvedValue(undefined);
@@ -441,7 +489,7 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(
             request,
-            { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
             state
           )
         ).resolves.toEqual(
@@ -450,6 +498,7 @@ describe('SAMLAuthenticationProvider', () => {
               username: 'new-user',
               accessToken: 'new-valid-token',
               refreshToken: 'new-valid-refresh-token',
+              realm: 'test-realm',
             },
           })
         );
@@ -474,6 +523,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'user',
           accessToken: 'existing-valid-token',
           refreshToken: 'existing-valid-refresh-token',
+          realm: 'saml1',
         };
 
         const existingUser = { username: 'user', authentication_realm: { name: 'saml1' } };
@@ -498,6 +548,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'user',
           access_token: 'new-valid-token',
           refresh_token: 'new-valid-refresh-token',
+          realm: 'saml2',
         });
 
         mockOptions.tokens.invalidate.mockResolvedValue(undefined);
@@ -505,7 +556,7 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(
             request,
-            { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
             state
           )
         ).resolves.toEqual(
@@ -514,6 +565,7 @@ describe('SAMLAuthenticationProvider', () => {
               username: 'user',
               accessToken: 'new-valid-token',
               refreshToken: 'new-valid-refresh-token',
+              realm: 'saml2',
             },
           })
         );
@@ -534,53 +586,37 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     describe('User initiated login with captured redirect URL', () => {
-      it('fails if state is not available', async () => {
+      it('fails if redirectURLPath is not available', async () => {
         const request = httpServerMock.createKibanaRequest();
 
         await expect(
           provider.login(request, {
-            step: SAMLLoginStep.RedirectURLFragmentCaptured,
+            type: SAMLLogin.LoginInitiatedByUser,
             redirectURLFragment: '#some-fragment',
           })
         ).resolves.toEqual(
           AuthenticationResult.failed(
-            Boom.badRequest('State does not include URL path to redirect to.')
+            Boom.badRequest('State or login attempt does not include URL path to redirect to.')
           )
         );
 
         expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
       });
 
-      it('does not handle AJAX requests.', async () => {
-        const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
-
-        await expect(
-          provider.login(
-            request,
-            {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
-              redirectURLFragment: '#some-fragment',
-            },
-            { redirectURL: '/test-base-path/some-path' }
-          )
-        ).resolves.toEqual(AuthenticationResult.notHandled());
-
-        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-      });
-
-      it('redirects non-AJAX requests to the IdP remembering combined redirect URL.', async () => {
+      it('redirects requests to the IdP remembering combined redirect URL.', async () => {
         const request = httpServerMock.createKibanaRequest();
 
         mockOptions.client.callAsInternalUser.mockResolvedValue({
           id: 'some-request-id',
           redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          realm: 'test-realm',
         });
 
         await expect(
           provider.login(
             request,
             {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
+              type: SAMLLogin.LoginInitiatedByUser,
               redirectURLFragment: '#some-fragment',
             },
             { redirectURL: '/test-base-path/some-path' }
@@ -592,6 +628,48 @@ describe('SAMLAuthenticationProvider', () => {
               state: {
                 requestId: 'some-request-id',
                 redirectURL: '/test-base-path/some-path#some-fragment',
+                realm: 'test-realm',
+              },
+            }
+          )
+        );
+
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlPrepare', {
+          body: {
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+          },
+        });
+
+        expect(mockOptions.logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('redirects requests to the IdP remembering combined redirect URL if path is provided in attempt.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockOptions.client.callAsInternalUser.mockResolvedValue({
+          id: 'some-request-id',
+          redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          realm: 'test-realm',
+        });
+
+        await expect(
+          provider.login(
+            request,
+            {
+              type: SAMLLogin.LoginInitiatedByUser,
+              redirectURLPath: '/test-base-path/some-path',
+              redirectURLFragment: '#some-fragment',
+            },
+            null
+          )
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            'https://idp-host/path/login?SAMLRequest=some%20request%20',
+            {
+              state: {
+                requestId: 'some-request-id',
+                redirectURL: '/test-base-path/some-path#some-fragment',
+                realm: 'test-realm',
               },
             }
           )
@@ -612,13 +690,14 @@ describe('SAMLAuthenticationProvider', () => {
         mockOptions.client.callAsInternalUser.mockResolvedValue({
           id: 'some-request-id',
           redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          realm: 'test-realm',
         });
 
         await expect(
           provider.login(
             request,
             {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
+              type: SAMLLogin.LoginInitiatedByUser,
               redirectURLFragment: '../some-fragment',
             },
             { redirectURL: '/test-base-path/some-path' }
@@ -630,6 +709,7 @@ describe('SAMLAuthenticationProvider', () => {
               state: {
                 requestId: 'some-request-id',
                 redirectURL: '/test-base-path/some-path#../some-fragment',
+                realm: 'test-realm',
               },
             }
           )
@@ -647,19 +727,20 @@ describe('SAMLAuthenticationProvider', () => {
         );
       });
 
-      it('redirects non-AJAX requests to the IdP remembering only redirect URL path if fragment is too large.', async () => {
+      it('redirects requests to the IdP remembering only redirect URL path if fragment is too large.', async () => {
         const request = httpServerMock.createKibanaRequest();
 
         mockOptions.client.callAsInternalUser.mockResolvedValue({
           id: 'some-request-id',
           redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          realm: 'test-realm',
         });
 
         await expect(
           provider.login(
             request,
             {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
+              type: SAMLLogin.LoginInitiatedByUser,
               redirectURLFragment: '#some-fragment'.repeat(10),
             },
             { redirectURL: '/test-base-path/some-path' }
@@ -671,6 +752,7 @@ describe('SAMLAuthenticationProvider', () => {
               state: {
                 requestId: 'some-request-id',
                 redirectURL: '/test-base-path/some-path',
+                realm: 'test-realm',
               },
             }
           )
@@ -701,16 +783,17 @@ describe('SAMLAuthenticationProvider', () => {
         customMockOptions.client.callAsInternalUser.mockResolvedValue({
           id: 'some-request-id',
           redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          realm: 'test-realm',
         });
 
         await expect(
           provider.login(
             request,
             {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
+              type: SAMLLogin.LoginInitiatedByUser,
               redirectURLFragment: '#some-fragment',
             },
-            { redirectURL: '/test-base-path/some-path' }
+            { redirectURL: '/test-base-path/some-path', realm: 'test-realm' }
           )
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(
@@ -719,6 +802,7 @@ describe('SAMLAuthenticationProvider', () => {
               state: {
                 requestId: 'some-request-id',
                 redirectURL: '/test-base-path/some-path#some-fragment',
+                realm: 'test-realm',
               },
             }
           )
@@ -727,6 +811,43 @@ describe('SAMLAuthenticationProvider', () => {
         expect(
           customMockOptions.client.callAsInternalUser
         ).toHaveBeenCalledWith('shield.samlPrepare', { body: { realm: 'test-realm' } });
+      });
+
+      it('redirects requests to the IdP remembering base path if redirect URL path in attempt is too large.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockOptions.client.callAsInternalUser.mockResolvedValue({
+          id: 'some-request-id',
+          redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+          realm: 'test-realm',
+        });
+
+        await expect(
+          provider.login(
+            request,
+            {
+              type: SAMLLogin.LoginInitiatedByUser,
+              redirectURLPath: `/s/foo/${'some-path'.repeat(11)}`,
+              redirectURLFragment: '#some-fragment',
+            },
+            null
+          )
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            'https://idp-host/path/login?SAMLRequest=some%20request%20',
+            { state: { requestId: 'some-request-id', redirectURL: '', realm: 'test-realm' } }
+          )
+        );
+
+        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlPrepare', {
+          body: {
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+          },
+        });
+
+        expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
+        expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+          'Max URL path size should not exceed 100b but it was 106b. URL is not captured.'
+        );
       });
 
       it('fails if SAML request preparation fails.', async () => {
@@ -739,7 +860,7 @@ describe('SAMLAuthenticationProvider', () => {
           provider.login(
             request,
             {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
+              type: SAMLLogin.LoginInitiatedByUser,
               redirectURLFragment: '#some-fragment',
             },
             { redirectURL: '/test-base-path/some-path' }
@@ -760,6 +881,13 @@ describe('SAMLAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
 
       await expect(provider.authenticate(request, null)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
+    });
+
+    it('does not handle non-AJAX request that does not require authentication.', async () => {
+      const request = httpServerMock.createKibanaRequest({ routeAuthRequired: false });
+      await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.notHandled()
       );
     });
@@ -787,6 +915,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'user',
           accessToken: 'some-valid-token',
           refreshToken: 'some-valid-refresh-token',
+          realm: 'test-realm',
         })
       ).resolves.toEqual(AuthenticationResult.notHandled());
 
@@ -797,14 +926,9 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects non-AJAX request that can not be authenticated to the "capture fragment" page.', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
 
-      mockOptions.client.callAsInternalUser.mockResolvedValue({
-        id: 'some-request-id',
-        redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
-      });
-
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/api/security/saml/capture-url-fragment',
+          '/mock-server-basepath/internal/security/saml/capture-url-fragment',
           { state: { redirectURL: '/base-path/s/foo/some-path' } }
         )
       );
@@ -820,12 +944,13 @@ describe('SAMLAuthenticationProvider', () => {
       mockOptions.client.callAsInternalUser.mockResolvedValue({
         id: 'some-request-id',
         redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+        realm: 'test-realm',
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.redirectTo(
           'https://idp-host/path/login?SAMLRequest=some%20request%20',
-          { state: { requestId: 'some-request-id', redirectURL: '' } }
+          { state: { requestId: 'some-request-id', redirectURL: '', realm: 'test-realm' } }
         )
       );
 
@@ -867,6 +992,7 @@ describe('SAMLAuthenticationProvider', () => {
         username: 'user',
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
+        realm: 'test-realm',
       };
       const authorization = `Bearer ${state.accessToken}`;
 
@@ -892,6 +1018,7 @@ describe('SAMLAuthenticationProvider', () => {
         username: 'user',
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
+        realm: 'test-realm',
       };
       const authorization = `Bearer ${state.accessToken}`;
 
@@ -916,6 +1043,7 @@ describe('SAMLAuthenticationProvider', () => {
         username: 'user',
         accessToken: 'expired-token',
         refreshToken: 'valid-refresh-token',
+        realm: 'test-realm',
       };
 
       mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
@@ -950,6 +1078,7 @@ describe('SAMLAuthenticationProvider', () => {
               username: 'user',
               accessToken: 'new-access-token',
               refreshToken: 'new-refresh-token',
+              realm: 'test-realm',
             },
           }
         )
@@ -967,6 +1096,7 @@ describe('SAMLAuthenticationProvider', () => {
         username: 'user',
         accessToken: 'expired-token',
         refreshToken: 'invalid-refresh-token',
+        realm: 'test-realm',
       };
       const authorization = `Bearer ${state.accessToken}`;
 
@@ -1000,6 +1130,7 @@ describe('SAMLAuthenticationProvider', () => {
         username: 'user',
         accessToken: 'expired-token',
         refreshToken: 'expired-refresh-token',
+        realm: 'test-realm',
       };
       const authorization = `Bearer ${state.accessToken}`;
 
@@ -1025,12 +1156,45 @@ describe('SAMLAuthenticationProvider', () => {
       expect(request.headers).not.toHaveProperty('authorization');
     });
 
+    it('fails for non-AJAX requests that do not require authentication with user friendly message if refresh token is expired.', async () => {
+      const request = httpServerMock.createKibanaRequest({ routeAuthRequired: false, headers: {} });
+      const state = {
+        username: 'user',
+        accessToken: 'expired-token',
+        refreshToken: 'expired-refresh-token',
+        realm: 'test-realm',
+      };
+      const authorization = `Bearer ${state.accessToken}`;
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      mockOptions.tokens.refresh.mockResolvedValue(null);
+
+      await expect(provider.authenticate(request, state)).resolves.toEqual(
+        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+      );
+
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(state.refreshToken);
+
+      expectAuthenticateCall(mockOptions.client, {
+        headers: { authorization },
+      });
+
+      expect(request.headers).not.toHaveProperty('authorization');
+    });
+
     it('re-capture URL for non-AJAX requests if refresh token is expired.', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path', headers: {} });
       const state = {
         username: 'user',
         accessToken: 'expired-token',
         refreshToken: 'expired-refresh-token',
+        realm: 'test-realm',
       };
       const authorization = `Bearer ${state.accessToken}`;
 
@@ -1044,7 +1208,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/api/security/saml/capture-url-fragment',
+          '/mock-server-basepath/internal/security/saml/capture-url-fragment',
           { state: { redirectURL: '/base-path/s/foo/some-path' } }
         )
       );
@@ -1066,12 +1230,14 @@ describe('SAMLAuthenticationProvider', () => {
         username: 'user',
         accessToken: 'expired-token',
         refreshToken: 'expired-refresh-token',
+        realm: 'test-realm',
       };
       const authorization = `Bearer ${state.accessToken}`;
 
       mockOptions.client.callAsInternalUser.mockResolvedValue({
         id: 'some-request-id',
         redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+        realm: 'test-realm',
       });
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -1085,7 +1251,7 @@ describe('SAMLAuthenticationProvider', () => {
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.redirectTo(
           'https://idp-host/path/login?SAMLRequest=some%20request%20',
-          { state: { requestId: 'some-request-id', redirectURL: '' } }
+          { state: { requestId: 'some-request-id', redirectURL: '', realm: 'test-realm' } }
         )
       );
 
@@ -1103,6 +1269,25 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
       expect(mockOptions.logger.warn).toHaveBeenCalledWith(
         'Max URL path size should not exceed 100b but it was 107b. URL is not captured.'
+      );
+    });
+
+    it('fails if realm from state is different from the realm provider is configured with.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      // Create new provider instance with additional `realm` option.
+      const customMockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
+      provider = new SAMLAuthenticationProvider(customMockOptions, {
+        realm: 'test-realm',
+        maxRedirectURLSize: new ByteSizeValue(100),
+      });
+
+      await expect(provider.authenticate(request, { realm: 'other-realm' })).resolves.toEqual(
+        AuthenticationResult.failed(
+          Boom.unauthorized(
+            'State based on realm "other-realm", but provider with the name "saml" is configured to use realm "test-realm".'
+          )
+        )
       );
     });
   });
@@ -1131,7 +1316,12 @@ describe('SAMLAuthenticationProvider', () => {
       mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
 
       await expect(
-        provider.logout(request, { username: 'user', accessToken, refreshToken })
+        provider.logout(request, {
+          username: 'user',
+          accessToken,
+          refreshToken,
+          realm: 'test-realm',
+        })
       ).resolves.toEqual(DeauthenticationResult.failed(failureReason));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
@@ -1167,7 +1357,12 @@ describe('SAMLAuthenticationProvider', () => {
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
       await expect(
-        provider.logout(request, { username: 'user', accessToken, refreshToken })
+        provider.logout(request, {
+          username: 'user',
+          accessToken,
+          refreshToken,
+          realm: 'test-realm',
+        })
       ).resolves.toEqual(
         DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
       );
@@ -1186,7 +1381,12 @@ describe('SAMLAuthenticationProvider', () => {
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: undefined });
 
       await expect(
-        provider.logout(request, { username: 'user', accessToken, refreshToken })
+        provider.logout(request, {
+          username: 'user',
+          accessToken,
+          refreshToken,
+          realm: 'test-realm',
+        })
       ).resolves.toEqual(
         DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
       );
@@ -1207,7 +1407,12 @@ describe('SAMLAuthenticationProvider', () => {
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
       await expect(
-        provider.logout(request, { username: 'user', accessToken, refreshToken })
+        provider.logout(request, {
+          username: 'user',
+          accessToken,
+          refreshToken,
+          realm: 'test-realm',
+        })
       ).resolves.toEqual(
         DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
       );
@@ -1228,6 +1433,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'user',
           accessToken: 'x-saml-token',
           refreshToken: 'x-saml-refresh-token',
+          realm: 'test-realm',
         })
       ).resolves.toEqual(
         DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
@@ -1235,10 +1441,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlInvalidate', {
-        body: {
-          queryString: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
-        },
+        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
       });
     });
 
@@ -1288,7 +1491,12 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       await expect(
-        provider.logout(request, { username: 'user', accessToken, refreshToken })
+        provider.logout(request, {
+          username: 'user',
+          accessToken,
+          refreshToken,
+          realm: 'test-realm',
+        })
       ).resolves.toEqual(
         DeauthenticationResult.redirectTo('http://fake-idp/SLO?SAMLRequest=7zlH37H')
       );
@@ -1308,6 +1516,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'user',
           accessToken: 'x-saml-token',
           refreshToken: 'x-saml-refresh-token',
+          realm: 'test-realm',
         })
       ).resolves.toEqual(
         DeauthenticationResult.redirectTo('http://fake-idp/SLO?SAMLRequest=7zlH37H')
