@@ -110,19 +110,24 @@ describe('FeatureRegistry', () => {
       ],
       privilegesTooltip: 'some fancy tooltip',
       reserved: {
-        privilege: {
-          catalogue: ['foo'],
-          management: {
-            foo: ['bar'],
+        privileges: [
+          {
+            id: 'reserved',
+            privilege: {
+              catalogue: ['foo'],
+              management: {
+                foo: ['bar'],
+              },
+              app: ['app1'],
+              savedObject: {
+                all: ['space', 'etc', 'telemetry'],
+                read: ['canvas', 'config', 'url'],
+              },
+              api: ['someApiEndpointTag', 'anotherEndpointTag'],
+              ui: ['allowsFoo', 'showBar', 'showBaz'],
+            },
           },
-          app: ['app1'],
-          savedObject: {
-            all: ['space', 'etc', 'telemetry'],
-            read: ['canvas', 'config', 'url'],
-          },
-          api: ['someApiEndpointTag', 'anotherEndpointTag'],
-          ui: ['allowsFoo', 'showBar', 'showBaz'],
-        },
+        ],
         description: 'some completely adequate description',
       },
     };
@@ -264,13 +269,18 @@ describe('FeatureRegistry', () => {
       privileges: null,
       reserved: {
         description: 'foo',
-        privilege: {
-          ui: [],
-          savedObject: {
-            all: [],
-            read: [],
+        privileges: [
+          {
+            id: 'reserved',
+            privilege: {
+              ui: [],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+            },
           },
-        },
+        ],
       },
     };
 
@@ -278,7 +288,7 @@ describe('FeatureRegistry', () => {
     featureRegistry.register(feature);
     const result = featureRegistry.getAll();
 
-    const reservedPrivilege = result[0]!.reserved!.privilege;
+    const reservedPrivilege = result[0]!.reserved!.privileges[0].privilege;
     expect(reservedPrivilege.savedObject.all).toEqual(['telemetry']);
     expect(reservedPrivilege.savedObject.read).toEqual(['config', 'url']);
   });
@@ -520,14 +530,19 @@ describe('FeatureRegistry', () => {
       privileges: null,
       reserved: {
         description: 'something',
-        privilege: {
-          savedObject: {
-            all: [],
-            read: [],
+        privileges: [
+          {
+            id: 'reserved',
+            privilege: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: ['foo', 'bar', 'baz'],
+            },
           },
-          ui: [],
-          app: ['foo', 'bar', 'baz'],
-        },
+        ],
       },
     };
 
@@ -546,14 +561,19 @@ describe('FeatureRegistry', () => {
       privileges: null,
       reserved: {
         description: 'something',
-        privilege: {
-          savedObject: {
-            all: [],
-            read: [],
+        privileges: [
+          {
+            id: 'reserved',
+            privilege: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: ['foo', 'bar'],
+            },
           },
-          ui: [],
-          app: ['foo', 'bar'],
-        },
+        ],
       },
     };
 
@@ -666,15 +686,20 @@ describe('FeatureRegistry', () => {
       privileges: null,
       reserved: {
         description: 'something',
-        privilege: {
-          catalogue: ['foo', 'bar', 'baz'],
-          savedObject: {
-            all: [],
-            read: [],
+        privileges: [
+          {
+            id: 'reserved',
+            privilege: {
+              catalogue: ['foo', 'bar', 'baz'],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
           },
-          ui: [],
-          app: [],
-        },
+        ],
       },
     };
 
@@ -694,15 +719,20 @@ describe('FeatureRegistry', () => {
       privileges: null,
       reserved: {
         description: 'something',
-        privilege: {
-          catalogue: ['foo', 'bar'],
-          savedObject: {
-            all: [],
-            read: [],
+        privileges: [
+          {
+            id: 'reserved',
+            privilege: {
+              catalogue: ['foo', 'bar'],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
           },
-          ui: [],
-          app: [],
-        },
+        ],
       },
     };
 
@@ -840,18 +870,23 @@ describe('FeatureRegistry', () => {
       privileges: null,
       reserved: {
         description: 'something',
-        privilege: {
-          catalogue: ['bar'],
-          management: {
-            kibana: ['hey-there'],
+        privileges: [
+          {
+            id: 'reserved',
+            privilege: {
+              catalogue: ['bar'],
+              management: {
+                kibana: ['hey-there'],
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
           },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-          app: [],
-        },
+        ],
       },
     };
 
@@ -874,18 +909,23 @@ describe('FeatureRegistry', () => {
       privileges: null,
       reserved: {
         description: 'something',
-        privilege: {
-          catalogue: ['bar'],
-          management: {
-            kibana: ['hey-there'],
+        privileges: [
+          {
+            id: 'reserved',
+            privilege: {
+              catalogue: ['bar'],
+              management: {
+                kibana: ['hey-there'],
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
           },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-          app: [],
-        },
+        ],
       },
     };
 

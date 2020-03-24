@@ -39,9 +39,9 @@ export class FeatureRegistry {
 function applyAutomaticPrivilegeGrants(feature: FeatureConfig): FeatureConfig {
   const allPrivilege = feature.privileges?.all;
   const readPrivilege = feature.privileges?.read;
-  const reservedPrivilege = feature.reserved?.privilege;
+  const reservedPrivileges = (feature.reserved?.privileges ?? []).map(rp => rp.privilege);
 
-  applyAutomaticAllPrivilegeGrants(allPrivilege, reservedPrivilege);
+  applyAutomaticAllPrivilegeGrants(allPrivilege, ...reservedPrivileges);
   applyAutomaticReadPrivilegeGrants(readPrivilege);
 
   return feature;

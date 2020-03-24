@@ -26,13 +26,18 @@ it('allows features with reserved privileges to be defined', () => {
     privileges: null,
     reserved: {
       description: 'foo',
-      privilege: {
-        savedObject: {
-          all: ['foo'],
-          read: ['bar'],
+      privileges: [
+        {
+          id: 'reserved',
+          privilege: {
+            savedObject: {
+              all: ['foo'],
+              read: ['bar'],
+            },
+            ui: [],
+          },
         },
-        ui: [],
-      },
+      ],
     },
   });
 

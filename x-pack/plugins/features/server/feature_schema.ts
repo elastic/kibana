@@ -118,8 +118,15 @@ const schema = Joi.object({
   }),
   privilegesTooltip: Joi.string(),
   reserved: Joi.object({
-    privilege: privilegeSchema.required(),
     description: Joi.string().required(),
+    privileges: Joi.array()
+      .items(
+        Joi.object({
+          id: Joi.string().required(),
+          privilege: privilegeSchema.required(),
+        })
+      )
+      .required(),
   }),
 });
 
@@ -209,7 +216,9 @@ export function validateFeature(feature: FeatureConfig) {
     privilegeEntries.push(...Object.entries(feature.privileges));
   }
   if (feature.reserved) {
-    privilegeEntries.push(['reserved', feature.reserved.privilege]);
+    feature.reserved.privileges.forEach(reservedPrivilege => {
+      privilegeEntries.push([reservedPrivilege.id, reservedPrivilege.privilege]);
+    });
   }
 
   if (privilegeEntries.length === 0) {

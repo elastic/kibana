@@ -29,6 +29,7 @@ import { initAppAuthorization } from './app_authorization';
 import { initAPIAuthorization } from './api_authorization';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
+import { validateReservedPrivileges } from './validate_reserved_privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { APPLICATION_PREFIX } from '../../common/constants';
 import { SecurityLicense } from '../../common/licensing';
@@ -121,7 +122,9 @@ export function setupAuthorization({
     },
 
     registerPrivilegesWithCluster: async () => {
-      validateFeaturePrivileges(featuresService.getFeatures());
+      const features = featuresService.getFeatures();
+      validateFeaturePrivileges(features);
+      validateReservedPrivileges(features);
 
       await registerPrivilegesWithCluster(logger, privileges, applicationName, clusterClient);
     },

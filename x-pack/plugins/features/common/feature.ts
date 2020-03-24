@@ -122,8 +122,11 @@ export interface FeatureConfig {
    * @private
    */
   reserved?: {
-    privilege: FeatureKibanaPrivileges;
     description: string;
+    privileges: Array<{
+      id: string;
+      privilege: FeatureKibanaPrivileges;
+    }>;
   };
 }
 
