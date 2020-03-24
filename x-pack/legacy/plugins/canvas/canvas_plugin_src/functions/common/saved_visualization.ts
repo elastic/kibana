@@ -18,8 +18,8 @@ import { getFunctionHelp } from '../../../i18n';
 interface Arguments {
   id: string;
   timerange: TimeRangeArg | null;
-  colors: SeriesStyle[] | undefined;
-  hideLegend: boolean | undefined;
+  colors: SeriesStyle[] | null;
+  hideLegend: boolean | null;
 }
 
 type Output = EmbeddableExpression<VisualizeInput>;
@@ -51,14 +51,15 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         required: false,
       },
       colors: {
-        multi: true,
         types: ['seriesStyle'],
         help: argHelp.colors,
+        multi: true,
+        required: false,
       },
       hideLegend: {
-        required: false,
         types: ['boolean'],
         help: argHelp.hideLegend,
+        required: false,
       },
     },
     type: EmbeddableExpressionType,
