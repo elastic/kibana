@@ -11,7 +11,7 @@ import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { DynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
-type APICaller = (
+export type APICaller = (
   endpoint: string,
   clientParams: Record<string, any>,
   options?: CallAPIOptions

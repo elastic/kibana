@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { KibanaTelemetryAdapter } from '../../lib/adapters/telemetry';
 import { UMRestApiRouteFactory } from '../types';
+import { PageViewParams } from '../../lib/adapters/telemetry/types';
 
 export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
@@ -20,8 +21,8 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       autorefreshInterval: schema.number(),
     }),
   },
-  handler: async (_customParams, _context, _request, response): Promise<any> => {
-    const result = await KibanaTelemetryAdapter.countPageView(_request.body);
+  handler: async ({ callES, dynamicSettings }, _context, _request, response): Promise<any> => {
+    const result = KibanaTelemetryAdapter.countPageView(_request.body as PageViewParams);
     return response.ok({
       body: result,
     });

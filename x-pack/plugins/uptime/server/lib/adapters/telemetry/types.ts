@@ -23,8 +23,7 @@ export interface UptimeTelemetry {
   monitor_page: number;
   settings_page: number;
   no_of_unique_monitors: number;
-  monitor_frequency: string[];
-  no_of_unique_observer_locations: number;
+  monitor_frequency: number[];
   no_of_unique_observer_locations: number;
   monitor_name_stats: Stats;
   observer_location_name_stats: Stats;

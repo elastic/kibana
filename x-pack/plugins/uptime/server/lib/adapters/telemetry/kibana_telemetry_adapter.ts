@@ -8,6 +8,7 @@ import moment from 'moment';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import { PageViewParams, UptimeTelemetry } from './types';
+import { APICaller } from '../framework';
 
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
@@ -27,7 +28,7 @@ export class KibanaTelemetryAdapter {
   public static initUsageCollector(usageCollector: UsageCollectionSetup) {
     return usageCollector.makeUsageCollector({
       type: 'uptime',
-      fetch: async (callCluster: APICluster) => {
+      fetch: async (callCluster: APICaller) => {
         this.countNoOfUniqueMonitorAndLocations(callCluster);
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
@@ -36,7 +37,7 @@ export class KibanaTelemetryAdapter {
     });
   }
 
-  public static async countPageView(pageView: PageViewParams) {
+  public static countPageView(pageView: PageViewParams) {
     const bucketId = this.getBucketToIncrement();
     const bucket = this.collector[bucketId];
     if (pageView.page === 'Overview') {
@@ -59,11 +60,15 @@ export class KibanaTelemetryAdapter {
     const prevDateStart = [...bucket.dateRangeStart].pop();
     if (!prevDateStart || prevDateStart !== dateStart) {
       bucket.dateRangeStart.push(dateStart);
-    }
-    const prevDateEnd = [...bucket.dateRangeEnd].pop();
-    if (!prevDateEnd || prevDateEnd !== dateEnd) {
       bucket.dateRangeEnd.push(dateEnd);
+    } else {
+      const prevDateEnd = [...bucket.dateRangeEnd].pop();
+      if (!prevDateEnd || prevDateEnd !== dateEnd) {
+        bucket.dateRangeStart.push(dateStart);
+        bucket.dateRangeEnd.push(dateEnd);
+      }
     }
+
     const prevAutorefreshInterval = [...bucket.autorefreshInterval].pop();
     if (!prevAutorefreshInterval || prevAutorefreshInterval !== autorefreshInterval) {
       bucket.autorefreshInterval.push(autorefreshInterval);
@@ -71,7 +76,7 @@ export class KibanaTelemetryAdapter {
     bucket.autoRefreshEnabled = autoRefreshEnabled;
   }
 
-  public static async countNoOfUniqueMonitorAndLocations(callCluster: APICluster) {
+  public static async countNoOfUniqueMonitorAndLocations(callCluster: APICaller) {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -159,11 +164,15 @@ export class KibanaTelemetryAdapter {
   private static getMonitorsFrequency(uniqueMonitors = []) {
     const frequencies: number[] = [];
     uniqueMonitors
-      .map(item => item.docs.hits.hits[0])
+      .map((item: any) => item!.docs.hits?.hits?.[0] ?? {})
       .forEach(monitor => {
-        const timespan = monitor._source.monitor.timespan;
-        const timeDiffSec = (moment(timespan.lt) - moment(timespan.gte)) / 1000;
-        frequencies.push(timeDiffSec);
+        const timespan = monitor?._source?.monitor?.timespan;
+        if (timespan) {
+          const timeDiffSec = moment
+            .duration(moment(timespan.lt).diff(moment(timespan.gte)))
+            .asSeconds();
+          frequencies.push(timeDiffSec);
+        }
       });
     return frequencies;
   }

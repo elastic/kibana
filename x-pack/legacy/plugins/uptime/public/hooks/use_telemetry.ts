@@ -25,7 +25,7 @@ export const useUptimeTelemetry = (page?: UptimePage) => {
 
     const params = {
       page,
-      autorefreshInterval,
+      autorefreshInterval: autorefreshInterval / 1000, // divide by 1000 to keep it in secs
       dateStart: dateRangeStart,
       dateEnd: dateRangeEnd,
       autoRefreshEnabled: !autorefreshIsPaused,

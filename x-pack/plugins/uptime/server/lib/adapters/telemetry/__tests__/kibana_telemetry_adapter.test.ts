@@ -20,9 +20,27 @@ describe('KibanaTelemetryAdapter', () => {
   it('collects monitor and overview data', async () => {
     expect.assertions(1);
     KibanaTelemetryAdapter.initUsageCollector(usageCollection);
-    KibanaTelemetryAdapter.countMonitor();
-    KibanaTelemetryAdapter.countOverview();
-    KibanaTelemetryAdapter.countOverview();
+    KibanaTelemetryAdapter.countPageView({
+      page: 'Overview',
+      dateStart: 'now-15',
+      dateEnd: 'now',
+      autoRefreshEnabled: true,
+      autorefreshInterval: 30,
+    });
+    KibanaTelemetryAdapter.countPageView({
+      page: 'Monitor',
+      dateStart: 'now-15',
+      dateEnd: 'now',
+      autoRefreshEnabled: true,
+      autorefreshInterval: 30,
+    });
+    KibanaTelemetryAdapter.countPageView({
+      page: 'Settings',
+      dateStart: 'now-15',
+      dateEnd: 'now',
+      autoRefreshEnabled: true,
+      autorefreshInterval: 30,
+    });
     const result = await collector.fetch();
     expect(result).toMatchSnapshot();
   });
@@ -32,14 +50,35 @@ describe('KibanaTelemetryAdapter', () => {
     // give a time of > 24 hours ago
     Date.now = jest.fn(() => 1559053560000);
     KibanaTelemetryAdapter.initUsageCollector(usageCollection);
-    KibanaTelemetryAdapter.countMonitor();
-    KibanaTelemetryAdapter.countOverview();
-    // give a time of now
+    KibanaTelemetryAdapter.countPageView({
+      page: 'Overview',
+      dateStart: 'now-15',
+      dateEnd: 'now',
+      autoRefreshEnabled: true,
+      autorefreshInterval: 30,
+    });
+    KibanaTelemetryAdapter.countPageView({
+      page: 'Monitor',
+      dateStart: 'now-15',
+      dateEnd: 'now',
+      autoRefreshEnabled: true,
+      autorefreshInterval: 30,
+    }); // give a time of now
     Date.now = jest.fn(() => new Date().valueOf());
-    KibanaTelemetryAdapter.countMonitor();
-    KibanaTelemetryAdapter.countMonitor();
-    KibanaTelemetryAdapter.countOverview();
-    KibanaTelemetryAdapter.countOverview();
+    KibanaTelemetryAdapter.countPageView({
+      page: 'Monitor',
+      dateStart: 'now-15',
+      dateEnd: 'now',
+      autoRefreshEnabled: true,
+      autorefreshInterval: 30,
+    });
+    KibanaTelemetryAdapter.countPageView({
+      page: 'Settings',
+      dateStart: 'now-15',
+      dateEnd: 'now',
+      autoRefreshEnabled: true,
+      autorefreshInterval: 30,
+    });
     const result = await collector.fetch();
     expect(result).toMatchSnapshot();
   });
