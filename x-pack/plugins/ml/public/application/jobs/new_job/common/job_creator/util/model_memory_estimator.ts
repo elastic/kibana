@@ -19,7 +19,7 @@ import { JobValidationResult, VALIDATION_DELAY_MS } from '../../job_validator/jo
 
 export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
 
-export const estimatorProvider = (
+export const modelMemoryEstimatorProvider = (
   modelMemoryCheck$: Observable<CalculatePayload>,
   validationResults$: Observable<JobValidationResult>
 ) => {

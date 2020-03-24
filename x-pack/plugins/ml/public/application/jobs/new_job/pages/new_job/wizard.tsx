@@ -9,7 +9,7 @@ import React, { FC, useReducer, useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
 import { pairwise } from 'rxjs/operators';
 import { useMlKibana } from '../../../../contexts/kibana';
-import { estimatorProvider } from '../../common/job_creator/util/model_memory_estimator';
+import { modelMemoryEstimatorProvider } from '../../common/job_creator/util/model_memory_estimator';
 
 import { WIZARD_STEPS } from '../components/step_types';
 
@@ -87,7 +87,7 @@ export const Wizard: FC<Props> = ({
   );
 
   useEffect(() => {
-    const estimator = estimatorProvider(
+    const estimator = modelMemoryEstimatorProvider(
       jobCreator.modelMemoryEstimationPayload$,
       jobValidator.validationResult$
     );
