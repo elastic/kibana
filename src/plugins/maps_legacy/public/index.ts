@@ -17,9 +17,30 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
 import { MapsLegacyPlugin } from './plugin';
+// @ts-ignore
+import * as colorUtil from './map/color_util'
+// @ts-ignore
+import { KibanaMapLayer } from './map/kibana_map_layer';
+// @ts-ignore
+import {
+  VectorLayer,
+  FileLayerField,
+  FileLayer,
+  ServiceSettingsSetupContract
+} from './map/service_settings';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new MapsLegacyPlugin(initializerContext);
+
+export function plugin() {
+  return new MapsLegacyPlugin();
+}
+
+/** @public */
+export {
+  colorUtil,
+  KibanaMapLayer,
+  VectorLayer,
+  FileLayerField,
+  FileLayer,
+  ServiceSettingsSetupContract
 }

@@ -32,6 +32,7 @@ const regionmapsConfig = npSetup.core.injectedMetadata.getInjectedVar(
 const plugins: Readonly<RegionMapPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
+  maps_legacy: npSetup.plugins.maps_legacy,
 
   // Temporary solution
   // It will be removed when all dependent services are migrated to the new platform.

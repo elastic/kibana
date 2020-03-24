@@ -18,9 +18,10 @@
  */
 
 // @ts-ignore
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 // @ts-ignore
 import { setToasts, setUiSettings, setInjectedVarFunc } from './kibana_services';
+// @ts-ignore
 import { ServiceSettings } from './map/service_settings';
 
 /**
@@ -38,7 +39,7 @@ export type MapsLegacyPluginSetup = ReturnType<MapsLegacyPlugin['setup']>;
 export type MapsLegacyPluginStart = ReturnType<MapsLegacyPlugin['start']>;
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor() {}
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
     setToasts(core.notifications.toasts);
