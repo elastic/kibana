@@ -55,6 +55,12 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
       () => <EuiLink href={getTimelinesUrl(urlSearch)}>{i18n.VIEW_ALL_TIMELINES}</EuiLink>,
       [urlSearch]
     );
+    const loadingPlaceholders = useMemo(
+      () => (
+        <LoadingPlaceholders lines={2} placeholders={filterBy === 'favorites' ? 1 : PAGE_SIZE} />
+      ),
+      [filterBy]
+    );
 
     return (
       <AllTimelinesQuery
@@ -72,10 +78,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
         {({ timelines, loading }) => (
           <>
             {loading ? (
-              <LoadingPlaceholders
-                lines={2}
-                placeholders={filterBy === 'favorites' ? 1 : PAGE_SIZE}
-              />
+              loadingPlaceholders
             ) : (
               <RecentTimelines
                 noTimelinesMessage={noTimelinesMessage}

@@ -35,11 +35,7 @@ const RecentCasesComponent = ({ cases }: { cases: Case[] }) => {
               <EuiLink href={getCaseDetailsUrl({ id: c.id, search })}>{c.title}</EuiLink>
             </EuiText>
 
-            <IconWithCount
-              count={c.comments.length}
-              icon={'editorComment'}
-              tooltip={i18n.COMMENTS}
-            />
+            <IconWithCount count={c.totalComment} icon={'editorComment'} tooltip={i18n.COMMENTS} />
             {c.description && c.description.length && (
               <MarkdownContainer>
                 <EuiText color="subdued" size="xs">

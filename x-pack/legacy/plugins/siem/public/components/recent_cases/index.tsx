@@ -53,16 +53,21 @@ const StatefulRecentCasesComponent = React.memo(
       }
     }, [previousFilterOptions, filterOptions, setFilters]);
 
-    return (
-      <EuiText color="subdued" size="s">
-        {isLoadingCases ? (
+    const content = useMemo(
+      () =>
+        isLoadingCases ? (
           <LoadingPlaceholders lines={2} placeholders={3} />
         ) : !isLoadingCases && data.cases.length === 0 ? (
           <NoCases />
         ) : (
           <RecentCases cases={data.cases} />
-        )}
+        ),
+      [isLoadingCases, data]
+    );
 
+    return (
+      <EuiText color="subdued" size="s">
+        {content}
         <EuiHorizontalRule margin="s" />
         <EuiText size="xs">{allCasesLink}</EuiText>
       </EuiText>

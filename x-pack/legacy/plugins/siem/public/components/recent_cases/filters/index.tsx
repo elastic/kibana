@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonGroup, EuiButtonGroupOption } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { FilterMode } from '../types';
 
@@ -38,17 +38,14 @@ export const Filters = React.memo<{
         : toggleButtonIcons.filter(x => x.id !== MY_RECENTLY_REPORTED_ID),
     [showMyRecentlyReported]
   );
-
-  return (
-    <EuiButtonGroup
-      options={options}
-      idSelected={filterBy}
-      onChange={f => {
-        setFilterBy(f as FilterMode);
-      }}
-      isIconOnly
-    />
+  const onChange = useCallback(
+    (filterMode: string) => {
+      setFilterBy(filterMode as FilterMode);
+    },
+    [setFilterBy]
   );
+
+  return <EuiButtonGroup options={options} idSelected={filterBy} onChange={onChange} isIconOnly />;
 });
 
 Filters.displayName = 'Filters';
