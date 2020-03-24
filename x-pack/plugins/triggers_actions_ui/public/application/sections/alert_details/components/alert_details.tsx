@@ -34,6 +34,7 @@ import {
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
+import { PLUGIN } from '../../../constants/plugin';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -78,7 +79,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
                       {
                         defaultMessage:
-                          'Alerts and Actions is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                          '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                        values: {
+                          pluginName: PLUGIN.getI18nName(i18n),
+                        },
                       }
                     )}
                   />

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCard, EuiLink } from '@elastic/eui';
@@ -32,7 +33,7 @@ export function checkActionTypeEnabled(
         {
           defaultMessage: 'This connector requires a {minimumLicenseRequired} license.',
           values: {
-            minimumLicenseRequired: actionType.minimumLicenseRequired,
+            minimumLicenseRequired: capitalize(actionType.minimumLicenseRequired),
           },
         }
       ),
@@ -44,9 +45,7 @@ export function checkActionTypeEnabled(
             {
               defaultMessage: 'This feature requires a {minimumLicenseRequired} license.',
               values: {
-                minimumLicenseRequired: `${actionType.minimumLicenseRequired
-                  .charAt(0)
-                  .toUpperCase()}${actionType.minimumLicenseRequired.slice(1)}`,
+                minimumLicenseRequired: capitalize(actionType.minimumLicenseRequired),
               },
             }
           )}

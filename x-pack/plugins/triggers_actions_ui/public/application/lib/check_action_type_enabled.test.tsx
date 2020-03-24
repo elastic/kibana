@@ -47,7 +47,7 @@ test('returns isEnabled:false when action type is disabled by license', async ()
       "messageCard": <EuiCard
         className="actCheckActionTypeEnabled__disabledActionWarningCard"
         description="To re-enable this action, please upgrade your license."
-        title="This feature requires a basic license."
+        title="This feature requires a Basic license."
         titleSize="xs"
       >
         <ForwardRef

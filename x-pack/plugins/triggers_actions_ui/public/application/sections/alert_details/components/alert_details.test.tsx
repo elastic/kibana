@@ -20,6 +20,7 @@ import { times, random } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ViewInApp } from './view_in_app';
+import { PLUGIN } from '../../../constants/plugin';
 
 jest.mock('../../../app_context', () => ({
   useAppDependencies: jest.fn(() => ({
@@ -72,7 +73,10 @@ describe('alert_details', () => {
                 'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
                 {
                   defaultMessage:
-                    'Alerts and Actions is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                    '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                  values: {
+                    pluginName: PLUGIN.getI18nName(i18n),
+                  },
                 }
               )}
             />

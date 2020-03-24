@@ -24,6 +24,7 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
+import { PLUGIN } from '../../constants/plugin';
 
 interface AlertAddProps {
   consumer: string;
@@ -110,7 +111,7 @@ export const AlertAdd = ({
     } catch (errorRes) {
       toastNotifications.addDanger(
         i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
-          defaultMessage: 'Failed to save alert: {message}',
+          defaultMessage: '{message}',
           values: {
             message: errorRes.body?.message ?? '',
           },
@@ -142,7 +143,10 @@ export const AlertAdd = ({
                   'xpack.triggersActionsUI.sections.alertAdd.betaBadgeTooltipContent',
                   {
                     defaultMessage:
-                      'Alerts and Actions is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                      '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                    values: {
+                      pluginName: PLUGIN.getI18nName(i18n),
+                    },
                   }
                 )}
               />

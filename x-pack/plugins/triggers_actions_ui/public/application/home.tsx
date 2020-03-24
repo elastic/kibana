@@ -29,6 +29,7 @@ import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabil
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
+import { PLUGIN } from './constants/plugin';
 
 interface MatchParams {
   section: Section;
@@ -101,7 +102,10 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
                     'xpack.triggersActionsUI.home.betaBadgeTooltipContent',
                     {
                       defaultMessage:
-                        'Alerts and Actions is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                        '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                      values: {
+                        pluginName: PLUGIN.getI18nName(i18n),
+                      },
                     }
                   )}
                 />

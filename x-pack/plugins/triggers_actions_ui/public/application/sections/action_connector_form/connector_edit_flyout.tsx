@@ -25,6 +25,7 @@ import { connectorReducer } from './connector_reducer';
 import { updateActionConnector } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { PLUGIN } from '../../constants/plugin';
 
 export interface ConnectorEditProps {
   initialConnector: ActionConnectorTableItem;
@@ -86,9 +87,9 @@ export const ConnectorEditFlyout = ({
           i18n.translate(
             'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
             {
-              defaultMessage: 'Failed to update connector: {message}',
+              defaultMessage: '{message}',
               values: {
-                message: errorRes.body?.message ?? '',
+                message: errorRes.body?.message ?? 'Cannot update a connector.',
               },
             }
           )
@@ -119,7 +120,10 @@ export const ConnectorEditFlyout = ({
                     'xpack.triggersActionsUI.sections.editConnectorForm.betaBadgeTooltipContent',
                     {
                       defaultMessage:
-                        'Alerts and Actions is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                        '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                      values: {
+                        pluginName: PLUGIN.getI18nName(i18n),
+                      },
                     }
                   )}
                 />
