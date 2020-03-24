@@ -16,6 +16,8 @@ Definition of done for a feature:
 - has a dedicated Github issue describing problem space
 - an umbrella task closed/updated with follow-ups
 - all code review comments are resolved
+- can be used by first & third party plugins
+- there is no contradiction between client and server API
 - works for OSS version
    - works with and without a `server.basePath` configured
    - cannot crash the Kibana server when it fails
@@ -23,9 +25,12 @@ Definition of done for a feature:
    - for a logged-in user
    - for anonymous user
    - compatible with Spaces
-- can be used by the first & third party plugins
 - has unit & integration tests for public contracts
 - has functional tests for user scenarios
+- uses standard tooling:
+    - code - `TypeScript`
+    - UI - `React`
+    - tests - `jest` & `FTR`
 - has documentation for the public contract, provides a usage example
 
 ## Technical Conventions
