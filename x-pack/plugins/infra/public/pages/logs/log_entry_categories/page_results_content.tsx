@@ -9,13 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled, useTrackPageview } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
-import { LogAnalysisJobProblemIndicator } from '../../../components/logging/log_analysis_job_status';
 import { useInterval } from '../../../hooks/use_interval';
-import { useTrackPageview } from '../../../../../observability/public';
+import { CategoryJobNoticesSection } from './sections/notices/notices_section';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
@@ -40,6 +38,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
     hasOutdatedJobDefinitions,
     hasStoppedJobs,
     jobIds,
+    categoryQualityWarnings,
     sourceConfiguration: { sourceId },
   } = useLogEntryCategoriesModuleContext();
 
@@ -179,13 +178,14 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LogAnalysisJobProblemIndicator
+          <CategoryJobNoticesSection
             hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
             hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
             hasStoppedJobs={hasStoppedJobs}
             isFirstUse={isFirstUse}
             onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
             onRecreateMlJobForUpdate={viewSetupForUpdate}
+            qualityWarnings={categoryQualityWarnings}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

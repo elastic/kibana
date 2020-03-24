@@ -68,6 +68,8 @@ const jobModelSizeStatsRT = rt.type({
   total_category_count: rt.number,
 });
 
+export type JobModelSizeStats = rt.TypeOf<typeof jobModelSizeStatsRT>;
+
 export const jobSummaryRT = rt.intersection([
   rt.type({
     id: rt.string,
