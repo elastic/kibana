@@ -21,7 +21,7 @@ mkdir -p tmp
 echo "
 ${bold}To start Kibana please run the following command:${normal}
 
-node ./scripts/kibana --no-base-path --optimize.watch=false --server.port=${KIBANA_PORT} --config x-pack/legacy/plugins/apm/e2e/ci/kibana.e2e.yml
+node ./scripts/kibana --no-base-path --dev --no-dev-config --config x-pack/legacy/plugins/apm/e2e/ci/kibana.e2e.yml
 "
 
 # Clone or pull apm-integration-testing
