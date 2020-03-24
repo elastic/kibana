@@ -25,7 +25,8 @@ import {
 } from 'kibana/public';
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
 import {
@@ -40,6 +41,7 @@ import {
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 import { ConfigSchema as VisTypeXyConfigSchema } from '../../vis_type_xy';
+import { setDataActions } from './services';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -55,8 +57,7 @@ export interface VisTypeVislibPluginSetupDependencies {
 
 /** @internal */
 export interface VisTypeVislibPluginStartDependencies {
-  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
-  visualizations: VisualizationsStart;
+  data: DataPublicPluginStart;
 }
 
 type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies>;
@@ -108,7 +109,7 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
     );
   }
 
-  public start(core: CoreStart, deps: VisTypeVislibPluginStartDependencies) {
-    // nothing to do here
+  public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
+    setDataActions({ createFiltersFromEvent: data.actions.createFiltersFromEvent });
   }
 }

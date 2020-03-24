@@ -17,10 +17,17 @@
  * under the License.
  */
 
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { search } from '../../../../plugins/data/public';
-export const { tabifyAggResponse, tabifyGetColumns } = search;
-// @ts-ignore
-export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
-// @ts-ignore
-export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+
+let dataActions: DataPublicPluginStart['actions'] | null = null;
+
+export function setDataActions(actions: DataPublicPluginStart['actions']) {
+  dataActions = actions;
+}
+
+export function getDataActions() {
+  if (!dataActions) {
+    throw new Error('Data Actions weren not set');
+  }
+  return dataActions;
+}
