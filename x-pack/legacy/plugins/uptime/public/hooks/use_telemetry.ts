@@ -7,6 +7,7 @@
 import { useEffect } from 'react';
 import { HttpHandler } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useUrlParams } from './use_url_params';
 
 export enum UptimePage {
   Overview = '/api/uptime/logOverview',
@@ -29,6 +30,8 @@ const logPageLoad = async (fetch: HttpHandler, page?: UptimePage) => {
 
 export const useUptimeTelemetry = (page?: UptimePage) => {
   const kibana = useKibana();
+  // const [getUrlParams] = useUrlParams();
+  // const { dateRangeStart, dateRangeEnd, autorefreshInterval, autorefreshIsPaused } = getUrlParams();
   const fetch = kibana.services.http?.fetch;
   useEffect(() => {
     if (!fetch) throw new Error('Core http services are not defined');

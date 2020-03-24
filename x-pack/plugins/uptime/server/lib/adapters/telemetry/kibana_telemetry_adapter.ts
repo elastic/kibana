@@ -3,7 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import moment from 'moment';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
 
 interface UptimeTelemetry {
   overview_page: number;
@@ -28,7 +30,8 @@ export class KibanaTelemetryAdapter {
   public static initUsageCollector(usageCollector: UsageCollectionSetup) {
     return usageCollector.makeUsageCollector({
       type: 'uptime',
-      fetch: async () => {
+      fetch: async (callCluster: APICluster) => {
+        this.countNoOfUniqueMonitorAndLocations(callCluster);
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
       },
@@ -44,6 +47,103 @@ export class KibanaTelemetryAdapter {
   public static countMonitor() {
     const bucket = this.getBucketToIncrement();
     this.collector[bucket].monitor_page += 1;
+  }
+
+  public static async countNoOfUniqueMonitorAndLocations(callCluster: APICluster) {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1d/d',
+                    lt: 'now',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
+        aggs: {
+          unique_monitors: {
+            cardinality: {
+              field: 'monitor.id',
+            },
+          },
+          unique_locations: {
+            cardinality: {
+              field: 'observer.geo.name',
+              missing: 'N/A',
+            },
+          },
+          monitor_name: {
+            string_stats: {
+              field: 'monitor.name',
+            },
+          },
+          observer_loc_name: {
+            string_stats: {
+              field: 'observer.geo.name',
+            },
+          },
+          monitors: {
+            terms: {
+              field: 'monitor.id',
+              size: 10000,
+            },
+            aggs: {
+              docs: {
+                top_hits: {
+                  size: 1,
+                  _source: ['monitor.timespan'],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const result = await callCluster('search', params);
+    const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
+    const numberOfUniqueLocations: number = result?.aggregations?.unique_locations?.value ?? 0;
+    const monitorName: any = result?.aggregations?.monitor_name;
+    const locationName: any = result?.aggregations?.observer_loc_name;
+    const uniqueMonitors: any = result?.aggregations?.monitors.buckets;
+    const bucket = this.getBucketToIncrement();
+
+    this.collector[bucket].no_of_unique_monitors = numberOfUniqueMonitors;
+    this.collector[bucket].no_of_unique_observer_locations = numberOfUniqueLocations;
+    this.collector[bucket].no_of_unique_observer_locations = numberOfUniqueLocations;
+    this.collector[bucket].monitor_name_stats = {
+      min_length: monitorName.min_length,
+      max_length: monitorName.max_length,
+      avg_length: +monitorName.avg_length.toFixed(2),
+    };
+
+    this.collector[bucket].observer_location_name_stats = {
+      min_length: locationName.min_length,
+      max_length: locationName.max_length,
+      avg_length: +locationName.avg_length.toFixed(2),
+    };
+
+    this.collector[bucket].monitor_frequency = this.getMonitorsFrequency(uniqueMonitors);
+  }
+
+  private static getMonitorsFrequency(uniqueMonitors = []) {
+    const frequencies: number[] = [];
+    uniqueMonitors
+      .map(item => item.docs.hits.hits[0])
+      .forEach(monitor => {
+        const timespan = monitor._source.monitor.timespan;
+        const timeDiffSec = (moment(timespan.lt) - moment(timespan.gte)) / 1000;
+        frequencies.push(timeDiffSec);
+      });
+    return frequencies;
   }
 
   private static collector: UptimeTelemetryCollector = {};
@@ -77,6 +177,7 @@ export class KibanaTelemetryAdapter {
       this.collector[bucketId] = {
         overview_page: 0,
         monitor_page: 0,
+        number_of_monitor: 0,
       };
     }
     return bucketId;
