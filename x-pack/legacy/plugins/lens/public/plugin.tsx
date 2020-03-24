@@ -143,17 +143,9 @@ export class LensPlugin {
             if (!lastDashboardLink || !lastDashboardLink.url) {
               throw new Error('Cannot get last dashboard url');
             }
-            const basePath = coreStart.http.basePath.get();
-            const lensUrl = `${basePath}/app/kibana#/lens/edit/${id}`;
-            window.history.pushState({}, '', lensUrl);
             const urlVars = getUrlVars(lastDashboardLink.url);
             updateUrlTime(urlVars); // we need to pass in timerange in query params directly
-            const dashboardUrl = addEmbeddableToDashboardUrl(
-              lastDashboardLink.url,
-              basePath,
-              id,
-              urlVars
-            );
+            const dashboardUrl = addEmbeddableToDashboardUrl(lastDashboardLink.url, id, urlVars);
             window.history.pushState({}, '', dashboardUrl);
           }
         };

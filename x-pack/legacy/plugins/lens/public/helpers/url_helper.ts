@@ -5,7 +5,7 @@
  */
 
 import { parseUrl, stringify } from 'query-string';
-import { DashboardConstants } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard';
+import { DashboardConstants } from '../legacy_imports';
 
 type UrlVars = Record<string, string>;
 
@@ -24,31 +24,22 @@ export function getUrlVars(url: string): Record<string, string> {
 /** *
  * Returns dashboard URL with added embeddableType and embeddableId query params
  * eg.
- * input: url: /app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now)), embeddableId: 12345, embeddableType: 'lens'
- * output: basePath/app/kibana#/dashboard?addEmbeddableType=lens&addEmbeddableId=12345&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
+ * input: url: lol/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now)), embeddableId: 12345
+ * output: lol/app/kibana#/dashboard?addEmbeddableType=lens&addEmbeddableId=12345&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
  * @param url dasbhoard absolute url
  * @param embeddableId id of the saved visualization
- * @param basePath current base path
  * @param urlVars url query params
  */
-export function addEmbeddableToDashboardUrl(
-  url: string,
-  basePath: string,
-  embeddableId: string,
-  urlVars: UrlVars
-) {
+export function addEmbeddableToDashboardUrl(url: string, embeddableId: string, urlVars: UrlVars) {
   const dashboardParsedUrl = parseUrl(url);
+  const keys = Object.keys(urlVars).sort();
 
-  if (urlVars) {
-    const keys = Object.keys(urlVars).sort();
-    keys.forEach(key => {
-      dashboardParsedUrl.query[key] = urlVars[key];
-    });
-  }
-
+  keys.forEach(key => {
+    dashboardParsedUrl.query[key] = urlVars[key];
+  });
   dashboardParsedUrl.query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = 'lens';
   dashboardParsedUrl.query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
   const query = stringify(dashboardParsedUrl.query);
 
-  return `${basePath}${dashboardParsedUrl.url}?${query}`;
+  return `${dashboardParsedUrl.url}?${query}`;
 }
