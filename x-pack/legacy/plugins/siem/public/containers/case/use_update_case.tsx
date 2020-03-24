@@ -5,7 +5,7 @@
  */
 
 import { useReducer, useCallback } from 'react';
-
+import { cloneDeep } from 'lodash/fp';
 import { CaseRequest } from '../../../../../../plugins/case/common/api';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 
@@ -25,6 +25,7 @@ interface NewCaseState {
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CaseRequest[UpdateKey];
+  fetchCaseUserActions?: (caseId: string) => void;
 }
 
 type Action =
@@ -47,7 +48,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         ...state,
         isLoading: false,
         isError: false,
-        caseData: action.payload,
+        caseData: cloneDeep(action.payload),
         updateKey: null,
       };
     case 'FETCH_FAILURE':
@@ -64,6 +65,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 
 interface UseUpdateCase extends NewCaseState {
   updateCaseProperty: (updates: UpdateByKey) => void;
+  updateCase: (newCase: Case) => void;
 }
 export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
@@ -74,8 +76,12 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
   });
   const [, dispatchToaster] = useStateToaster();
 
+  const updateCase = useCallback((newCase: Case) => {
+    dispatch({ type: 'FETCH_SUCCESS', payload: newCase });
+  }, []);
+
   const dispatchUpdateCaseProperty = useCallback(
-    async ({ updateKey, updateValue }: UpdateByKey) => {
+    async ({ fetchCaseUserActions, updateKey, updateValue }: UpdateByKey) => {
       let cancel = false;
       try {
         dispatch({ type: 'FETCH_INIT', payload: updateKey });
@@ -85,6 +91,9 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
           state.caseData.version
         );
         if (!cancel) {
+          if (fetchCaseUserActions != null) {
+            fetchCaseUserActions(caseId);
+          }
           dispatch({ type: 'FETCH_SUCCESS', payload: response[0] });
         }
       } catch (error) {
@@ -104,5 +113,5 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
     [state]
   );
 
-  return { ...state, updateCaseProperty: dispatchUpdateCaseProperty };
+  return { ...state, updateCase, updateCaseProperty: dispatchUpdateCaseProperty };
 };

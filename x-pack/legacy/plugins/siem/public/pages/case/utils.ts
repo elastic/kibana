@@ -21,15 +21,15 @@ export const getBreadcrumbs = (params: RouteSpyState): Breadcrumb[] => {
       ...breadcrumb,
       {
         text: i18n.CREATE_BC_TITLE,
-        href: getCreateCaseUrl(),
+        href: getCreateCaseUrl(''),
       },
     ];
   } else if (params.detailName != null) {
     breadcrumb = [
       ...breadcrumb,
       {
-        text: params.detailName,
-        href: getCaseDetailsUrl(params.detailName),
+        text: params.state?.caseTitle ?? '',
+        href: getCaseDetailsUrl(params.detailName, ''),
       },
     ];
   }

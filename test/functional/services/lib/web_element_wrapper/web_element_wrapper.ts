@@ -538,6 +538,40 @@ export class WebElementWrapper {
   }
 
   /**
+   * Gets the first element inside this element matching the given data-test-subj selector.
+   *
+   * @param {string} selector
+   * @return {Promise<WebElementWrapper>}
+   */
+  public async findByTestSubject(selector: string) {
+    return await this.retryCall(async function find(wrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector))),
+        wrapper.By.css(selector)
+      );
+    });
+  }
+
+  /**
+   * Gets all elements inside this element matching the given data-test-subj selector.
+   *
+   * @param {string} selector
+   * @param {number} timeout
+   * @return {Promise<WebElementWrapper[]>}
+   */
+  public async findAllByTestSubject(selector: string, timeout?: number) {
+    return await this.retryCall(async function findAll(wrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () =>
+            await wrapper._webElement.findElements(wrapper.By.css(testSubjSelector(selector))),
+          timeout
+        )
+      );
+    });
+  }
+
+  /**
    * Gets the first element inside this element matching the given CSS class name.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
    *

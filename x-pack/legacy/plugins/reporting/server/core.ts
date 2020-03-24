@@ -7,12 +7,14 @@
 import * as Rx from 'rxjs';
 import { first, mapTo } from 'rxjs/operators';
 import {
+  ElasticsearchServiceSetup,
   IUiSettingsClient,
   KibanaRequest,
   SavedObjectsClient,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
 } from 'src/core/server';
+import { ConfigType as ReportingConfigType } from '../../../../plugins/reporting/server';
 // @ts-ignore no module definition
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
@@ -25,13 +27,62 @@ import { ReportingSetupDeps } from './types';
 
 interface ReportingInternalSetup {
   browserDriverFactory: HeadlessChromiumDriverFactory;
+  config: ReportingConfig;
+  elasticsearch: ElasticsearchServiceSetup;
 }
 interface ReportingInternalStart {
+  enqueueJob: EnqueueJobFn;
+  esqueue: ESQueueInstance;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
-  esqueue: ESQueueInstance;
-  enqueueJob: EnqueueJobFn;
 }
+
+// make config.get() aware of the value type it returns
+interface Config<BaseType> {
+  get<Key1 extends keyof BaseType>(key1: Key1): BaseType[Key1];
+  get<Key1 extends keyof BaseType, Key2 extends keyof BaseType[Key1]>(
+    key1: Key1,
+    key2: Key2
+  ): BaseType[Key1][Key2];
+  get<
+    Key1 extends keyof BaseType,
+    Key2 extends keyof BaseType[Key1],
+    Key3 extends keyof BaseType[Key1][Key2]
+  >(
+    key1: Key1,
+    key2: Key2,
+    key3: Key3
+  ): BaseType[Key1][Key2][Key3];
+  get<
+    Key1 extends keyof BaseType,
+    Key2 extends keyof BaseType[Key1],
+    Key3 extends keyof BaseType[Key1][Key2],
+    Key4 extends keyof BaseType[Key1][Key2][Key3]
+  >(
+    key1: Key1,
+    key2: Key2,
+    key3: Key3,
+    key4: Key4
+  ): BaseType[Key1][Key2][Key3][Key4];
+}
+
+interface KbnServerConfigType {
+  path: { data: string };
+  server: {
+    basePath: string;
+    host: string;
+    name: string;
+    port: number;
+    protocol: string;
+    uuid: string;
+  };
+}
+
+export interface ReportingConfig extends Config<ReportingConfigType> {
+  kbnConfig: Config<KbnServerConfigType>;
+}
+
+export { ReportingConfigType };
 
 export class ReportingCore {
   private pluginSetupDeps?: ReportingInternalSetup;
@@ -45,6 +96,7 @@ export class ReportingCore {
   legacySetup(
     xpackMainPlugin: XPackMainPlugin,
     reporting: ReportingPluginSpecOptions,
+    config: ReportingConfig,
     __LEGACY: ServerFacade,
     plugins: ReportingSetupDeps
   ) {
@@ -56,7 +108,7 @@ export class ReportingCore {
       xpackMainPlugin.info.feature(PLUGIN_ID).registerLicenseCheckResultsGenerator(checkLicense);
     });
     // Reporting routes
-    registerRoutes(this, __LEGACY, plugins, this.logger);
+    registerRoutes(this, config, __LEGACY, plugins, this.logger);
   }
 
   public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {
@@ -90,21 +142,29 @@ export class ReportingCore {
     return (await this.getPluginSetupDeps()).browserDriverFactory;
   }
 
+  public async getConfig(): Promise<ReportingConfig> {
+    return (await this.getPluginSetupDeps()).config;
+  }
+
   /*
-   * Kibana core module dependencies
+   * Outside dependencies
    */
-  private async getPluginSetupDeps() {
+  private async getPluginSetupDeps(): Promise<ReportingInternalSetup> {
     if (this.pluginSetupDeps) {
       return this.pluginSetupDeps;
     }
     return await this.pluginSetup$.pipe(first()).toPromise();
   }
 
-  private async getPluginStartDeps() {
+  private async getPluginStartDeps(): Promise<ReportingInternalStart> {
     if (this.pluginStartDeps) {
       return this.pluginStartDeps;
     }
     return await this.pluginStart$.pipe(first()).toPromise();
+  }
+
+  public async getElasticsearchService(): Promise<ElasticsearchServiceSetup> {
+    return (await this.getPluginSetupDeps()).elasticsearch;
   }
 
   public async getSavedObjectsClient(fakeRequest: KibanaRequest): Promise<SavedObjectsClient> {

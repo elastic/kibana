@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Axis } from '@elastic/charts';
-import { AreaSeries, BarSeries, Position, LineSeries, Settings, ScaleType } from '@elastic/charts';
+import {
+  AreaSeries,
+  Axis,
+  BarSeries,
+  Position,
+  LineSeries,
+  Settings,
+  ScaleType,
+  SeriesNameFn,
+} from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
 import React from 'react';
@@ -360,7 +368,7 @@ describe('xy_expression', () => {
       expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
     });
 
-    test('it rewrites the rows based on provided labels', () => {
+    test('it names the series for multiple accessors', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
@@ -372,25 +380,56 @@ describe('xy_expression', () => {
           chartTheme={{}}
         />
       );
-      expect(component.find(LineSeries).prop('data')).toEqual([
-        { 'Label A': 1, 'Label B': 2, c: 'I', 'Label D': 'Foo', d: 'Foo' },
-        { 'Label A': 1, 'Label B': 5, c: 'J', 'Label D': 'Bar', d: 'Bar' },
-      ]);
+      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+      expect(
+        nameFn(
+          {
+            seriesKeys: ['a', 'b', 'c', 'd'],
+            key: '',
+            specId: 'a',
+            yAccessor: '',
+            splitAccessors: new Map(),
+          },
+          false
+        )
+      ).toEqual('Label A - Label B - c - Label D');
     });
 
-    test('it uses labels as Y accessors', () => {
+    test('it names the series for a single accessor', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
         <XYChart
           data={data}
-          args={args}
+          args={{
+            ...args,
+            layers: [
+              {
+                ...args.layers[0],
+                accessors: ['a'],
+              },
+            ],
+          }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
         />
       );
-      expect(component.find(LineSeries).prop('yAccessors')).toEqual(['Label A', 'Label B']);
+      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+
+      expect(
+        nameFn(
+          {
+            seriesKeys: ['a', 'b', 'c', 'd'],
+            key: '',
+            specId: 'a',
+            yAccessor: '',
+            splitAccessors: new Map(),
+          },
+          false
+        )
+      ).toEqual('Label A');
     });
 
     test('it set the scale of the x axis according to the args prop', () => {

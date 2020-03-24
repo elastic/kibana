@@ -19,16 +19,24 @@ import { coreMock } from 'src/core/server/mocks';
 import { ReportingPlugin, ReportingCore } from '../server';
 import { ReportingSetupDeps, ReportingStartDeps } from '../server/types';
 
-export const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => ({
-  elasticsearch: setupMock.elasticsearch,
-  security: setupMock.security,
-  usageCollection: {} as any,
-  __LEGACY: { plugins: { xpack_main: { status: new EventEmitter() } } } as any,
-});
+const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
+  const configGetStub = jest.fn();
+  return {
+    elasticsearch: setupMock.elasticsearch,
+    security: setupMock.security,
+    usageCollection: {} as any,
+    reporting: {
+      config: {
+        get: configGetStub,
+        kbnConfig: { get: configGetStub },
+      },
+    },
+    __LEGACY: { plugins: { xpack_main: { status: new EventEmitter() } } } as any,
+  };
+};
 
 export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
   data: startMock.data,
-  elasticsearch: startMock.elasticsearch,
   __LEGACY: {} as any,
 });
 

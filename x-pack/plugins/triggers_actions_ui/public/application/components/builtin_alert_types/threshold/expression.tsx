@@ -50,7 +50,7 @@ const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
-  THRESHOLD: [1000, 5000],
+  THRESHOLD: [1000],
   GROUP_BY: 'all',
 };
 
@@ -399,8 +399,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         <EuiFlexItem grow={false}>
           <ForLastExpression
             popupPosition={'upLeft'}
-            timeWindowSize={timeWindowSize || 1}
-            timeWindowUnit={timeWindowUnit || ''}
+            timeWindowSize={timeWindowSize}
+            timeWindowUnit={timeWindowUnit}
             errors={errors}
             onChangeWindowSize={(selectedWindowSize: any) =>
               setAlertParams('timeWindowSize', selectedWindowSize)

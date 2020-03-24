@@ -7,13 +7,21 @@
 import React, { useReducer, useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { noop, isEmpty } from 'lodash/fp';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiCallOut,
+  EuiBottomBar,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import { useKibana } from '../../../../lib/kibana';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
 import {
   ActionsConnectorsContextProvider,
+  ActionType,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
 } from '../../../../../../../../plugins/triggers_actions_ui/public';
@@ -32,6 +40,9 @@ import { Mapping } from '../configure_cases/mapping';
 import { SectionWrapper } from '../wrappers';
 import { configureCasesReducer, State } from './reducer';
 import * as i18n from './translations';
+import { getCaseUrl } from '../../../../components/link_to';
+
+const CASE_URL = getCaseUrl();
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -50,11 +61,14 @@ const initialState: State = {
   mapping: null,
 };
 
-const actionTypes = [
+const actionTypes: ActionType[] = [
   {
     id: '.servicenow',
     name: 'ServiceNow',
     enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+    minimumLicenseRequired: 'platinum',
   },
 ];
 
@@ -67,6 +81,8 @@ const ConfigureCasesComponent: React.FC = () => {
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
     null
   );
+
+  const [actionBarVisible, setActionBarVisible] = useState(false);
 
   const handleShowAddFlyout = useCallback(() => setAddFlyoutVisibility(true), []);
 
@@ -97,7 +113,7 @@ const ConfigureCasesComponent: React.FC = () => {
   }, []);
 
   const { loading: loadingCaseConfigure, persistLoading, persistCaseConfigure } = useCaseConfigure({
-    setConnectorId,
+    setConnector: setConnectorId,
     setClosureType,
   });
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
@@ -111,10 +127,25 @@ const ConfigureCasesComponent: React.FC = () => {
   const handleSubmit = useCallback(
     // TO DO give a warning/error to user when field are not mapped so they have chance to do it
     () => {
-      persistCaseConfigure({ connectorId, closureType });
+      setActionBarVisible(false);
+      persistCaseConfigure({
+        connectorId,
+        connectorName: connectors.find(c => c.id === connectorId)?.name ?? '',
+        closureType,
+      });
     },
-    [connectorId, closureType, mapping]
+    [connectorId, connectors, closureType, mapping]
   );
+
+  const onChangeConnector = useCallback((newConnectorId: string) => {
+    setActionBarVisible(true);
+    setConnectorId(newConnectorId);
+  }, []);
+
+  const onChangeClosureType = useCallback((newClosureType: ClosureType) => {
+    setActionBarVisible(true);
+    setClosureType(newClosureType);
+  }, []);
 
   useEffect(() => {
     if (
@@ -171,7 +202,7 @@ const ConfigureCasesComponent: React.FC = () => {
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors}
           isLoading={isLoadingConnectors}
-          onChangeConnector={setConnectorId}
+          onChangeConnector={onChangeConnector}
           handleShowAddFlyout={handleShowAddFlyout}
           selectedConnector={connectorId}
         />
@@ -180,7 +211,7 @@ const ConfigureCasesComponent: React.FC = () => {
         <ClosureOptions
           closureTypeSelected={closureType}
           disabled={persistLoading || isLoadingConnectors || connectorId === 'none'}
-          onChangeClosureType={setClosureType}
+          onChangeClosureType={onChangeClosureType}
         />
       </SectionWrapper>
       <SectionWrapper>
@@ -192,37 +223,41 @@ const ConfigureCasesComponent: React.FC = () => {
           setEditFlyoutVisibility={setEditFlyoutVisibility}
         />
       </SectionWrapper>
-      <SectionWrapper>
-        <EuiSpacer />
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="flexEnd"
-          gutterSize="xs"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill={false}
-              isDisabled={isLoadingAny}
-              isLoading={persistLoading}
-              onClick={noop} // TO DO redirect to the main page of cases
-            >
-              {i18n.CANCEL}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="save"
-              isDisabled={isLoadingAny}
-              isLoading={persistLoading}
-              onClick={handleSubmit}
-            >
-              {i18n.SAVE_CHANGES}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </SectionWrapper>
+      {actionBarVisible && (
+        <EuiBottomBar>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="ghost"
+                    iconType="cross"
+                    isDisabled={isLoadingAny}
+                    isLoading={persistLoading}
+                    aria-label="Cancel"
+                    href={CASE_URL}
+                  >
+                    {i18n.CANCEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    color="secondary"
+                    iconType="save"
+                    aria-label="Save"
+                    isDisabled={isLoadingAny}
+                    isLoading={persistLoading}
+                    onClick={handleSubmit}
+                  >
+                    {i18n.SAVE_CHANGES}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBottomBar>
+      )}
       <ActionsConnectorsContextProvider
         value={{
           http,

@@ -6,27 +6,18 @@
 
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFormRow,
-  EuiSwitch,
-  EuiSelect,
-  EuiTitle,
-  EuiPanel,
-  EuiSpacer,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
-import { indexPatternService } from '../../../kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
-import { ValidatedRange } from '../../../components/validated_range';
-import { DEFAULT_MAX_INNER_RESULT_WINDOW, SORT_ORDER } from '../../../../common/constants';
+import { SORT_ORDER } from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { loadIndexSettings } from './load_index_settings';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
+import { ScalingForm } from './scaling_form';
 
 export class UpdateSourceEditor extends Component {
   static propTypes = {
@@ -35,7 +26,7 @@ export class UpdateSourceEditor extends Component {
     tooltipFields: PropTypes.arrayOf(PropTypes.object).isRequired,
     sortField: PropTypes.string,
     sortOrder: PropTypes.string.isRequired,
-    useTopHits: PropTypes.bool.isRequired,
+    scalingType: PropTypes.string.isRequired,
     topHitsSplitField: PropTypes.string,
     topHitsSize: PropTypes.number.isRequired,
     source: PropTypes.object,
@@ -45,35 +36,22 @@ export class UpdateSourceEditor extends Component {
     sourceFields: null,
     termFields: null,
     sortFields: null,
-    maxInnerResultWindow: DEFAULT_MAX_INNER_RESULT_WINDOW,
+    supportsClustering: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
     this.loadFields();
-    this.loadIndexSettings();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async loadIndexSettings() {
-    try {
-      const indexPattern = await indexPatternService.get(this.props.indexPatternId);
-      const { maxInnerResultWindow } = await loadIndexSettings(indexPattern.title);
-      if (this._isMounted) {
-        this.setState({ maxInnerResultWindow });
-      }
-    } catch (err) {
-      return;
-    }
-  }
-
   async loadFields() {
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(this.props.indexPatternId);
+      indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({
@@ -84,6 +62,16 @@ export class UpdateSourceEditor extends Component {
             },
           }),
         });
+      }
+      return;
+    }
+
+    let geoField;
+    try {
+      geoField = await this.props.getGeoField();
+    } catch (err) {
+      if (this._isMounted) {
+        this.setState({ loadError: err.message });
       }
       return;
     }
@@ -102,6 +90,7 @@ export class UpdateSourceEditor extends Component {
     });
 
     this.setState({
+      supportsClustering: geoField.aggregatable,
       sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(
@@ -113,101 +102,13 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  onUseTopHitsChange = event => {
-    this.props.onChange({ propName: 'useTopHits', value: event.target.checked });
-  };
-
-  onTopHitsSplitFieldChange = topHitsSplitField => {
-    this.props.onChange({ propName: 'topHitsSplitField', value: topHitsSplitField });
-  };
-
-  onSortFieldChange = sortField => {
+  _onSortFieldChange = sortField => {
     this.props.onChange({ propName: 'sortField', value: sortField });
   };
 
-  onSortOrderChange = e => {
+  _onSortOrderChange = e => {
     this.props.onChange({ propName: 'sortOrder', value: e.target.value });
   };
-
-  onTopHitsSizeChange = size => {
-    this.props.onChange({ propName: 'topHitsSize', value: size });
-  };
-
-  renderTopHitsForm() {
-    const topHitsSwitch = (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.source.esSearch.topHitsLabel', {
-          defaultMessage: `Top hits`,
-        })}
-        display="columnCompressed"
-      >
-        <EuiSwitch
-          label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-            defaultMessage: `Show top hits per entity`,
-          })}
-          checked={this.props.useTopHits}
-          onChange={this.onUseTopHitsChange}
-          compressed
-        />
-      </EuiFormRow>
-    );
-
-    if (!this.props.useTopHits) {
-      return topHitsSwitch;
-    }
-
-    let sizeSlider;
-    if (this.props.topHitsSplitField) {
-      sizeSlider = (
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
-            defaultMessage: 'Documents per entity',
-          })}
-          display="columnCompressed"
-        >
-          <ValidatedRange
-            min={1}
-            max={this.state.maxInnerResultWindow}
-            step={1}
-            value={this.props.topHitsSize}
-            onChange={this.onTopHitsSizeChange}
-            showLabels
-            showInput
-            showRange
-            data-test-subj="layerPanelTopHitsSize"
-            compressed
-          />
-        </EuiFormRow>
-      );
-    }
-
-    return (
-      <Fragment>
-        {topHitsSwitch}
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldLabel', {
-            defaultMessage: 'Entity',
-          })}
-          display="columnCompressed"
-        >
-          <SingleFieldSelect
-            placeholder={i18n.translate(
-              'xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder',
-              {
-                defaultMessage: 'Select entity field',
-              }
-            )}
-            value={this.props.topHitsSplitField}
-            onChange={this.onTopHitsSplitFieldChange}
-            fields={this.state.termFields}
-            compressed
-          />
-        </EuiFormRow>
-
-        {sizeSlider}
-      </Fragment>
-    );
-  }
 
   _renderTooltipsPanel() {
     return (
@@ -254,7 +155,7 @@ export class UpdateSourceEditor extends Component {
               defaultMessage: 'Select sort field',
             })}
             value={this.props.sortField}
-            onChange={this.onSortFieldChange}
+            onChange={this._onSortFieldChange}
             fields={this.state.sortFields}
             compressed
           />
@@ -283,13 +184,27 @@ export class UpdateSourceEditor extends Component {
               },
             ]}
             value={this.props.sortOrder}
-            onChange={this.onSortOrderChange}
+            onChange={this._onSortOrderChange}
             compressed
           />
         </EuiFormRow>
+      </EuiPanel>
+    );
+  }
 
-        <EuiHorizontalRule margin="xs" />
-        {this.renderTopHitsForm()}
+  _renderScalingPanel() {
+    return (
+      <EuiPanel>
+        <ScalingForm
+          filterByMapBounds={this.props.filterByMapBounds}
+          indexPatternId={this.props.indexPatternId}
+          onChange={this.props.onChange}
+          scalingType={this.props.scalingType}
+          supportsClustering={this.state.supportsClustering}
+          termFields={this.state.termFields}
+          topHitsSplitField={this.props.topHitsSplitField}
+          topHitsSize={this.props.topHitsSize}
+        />
       </EuiPanel>
     );
   }
@@ -301,6 +216,9 @@ export class UpdateSourceEditor extends Component {
         <EuiSpacer size="s" />
 
         {this._renderSortPanel()}
+        <EuiSpacer size="s" />
+
+        {this._renderScalingPanel()}
         <EuiSpacer size="s" />
       </Fragment>
     );

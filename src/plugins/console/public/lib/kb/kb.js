@@ -146,6 +146,10 @@ function loadApisFromJson(
   return api;
 }
 
+// TODO: clean up setting up of active API and use of jQuery.
+// This function should be attached to a class that holds the current state, not setup
+// when the file is required. Also, jQuery should not be used to make network requests
+// like this, it looks like a minor security issue.
 export function setActiveApi(api) {
   if (!api) {
     $.ajax({

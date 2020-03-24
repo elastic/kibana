@@ -5,6 +5,7 @@
  */
 
 export const toastNotifications = {
+  addInfo: () => {},
   addSuccess: () => {},
   addDanger: () => {},
   addWarning: () => {},

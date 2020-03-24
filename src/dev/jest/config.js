@@ -37,6 +37,7 @@ export default {
     '<rootDir>/packages',
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
+    '<rootDir>/src/dev/code_coverage/ingest_coverage',
   ],
   collectCoverageFrom: [
     'src/plugins/**/*.{ts,tsx}',
@@ -49,9 +50,6 @@ export default {
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
     'src/legacy/core_plugins/**/*.{js,jsx,ts,tsx}',
     '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
-    'src/legacy/ui/public/{agg_types,vis}/**/*.{ts,tsx}',
-    '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
-    'src/dev/code_coverage/ingest_coverage/**/*.js',
   ],
   moduleNameMapper: {
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
