@@ -153,13 +153,13 @@ export function serializeCluster(deserializedClusterObject: Cluster): ClusterPay
       cluster: {
         remote: {
           [name]: {
-            skip_unavailable: skipUnavailable !== undefined ? skipUnavailable : null,
-            mode: mode ?? null,
-            proxy_address: proxyAddress ?? null,
-            proxy_socket_connections: proxySocketConnections ?? null,
-            server_name: serverName && serverName !== '' ? serverName : null,
-            seeds: seeds ?? null,
-            node_connections: nodeConnections ?? null,
+            skip_unavailable: skipUnavailable || null,
+            mode: mode || null,
+            proxy_address: proxyAddress || null,
+            proxy_socket_connections: proxySocketConnections || null,
+            server_name: serverName || null,
+            seeds: seeds || null,
+            node_connections: nodeConnections || null,
           },
         },
       },
