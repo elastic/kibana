@@ -72,3 +72,7 @@ export const UP_TO_DATE = i18n.translate('xpack.siem.case.caseTable.upToDate', {
 export const NOT_PUSHED = i18n.translate('xpack.siem.case.caseTable.notPushed', {
   defaultMessage: 'Not pushed',
 });
+
+export const REFRESH = i18n.translate('xpack.siem.case.caseTable.refreshTitle', {
+  defaultMessage: 'Refresh',
+});
