@@ -30,7 +30,7 @@ interface ServiceMapProps {
 
 export function ServiceMap({ serviceName }: ServiceMapProps) {
   const license = useLicense();
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams } = useUrlParams();
 
   const { data } = useFetcher(() => {
     const { start, end, environment } = urlParams;
@@ -42,16 +42,12 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
             start,
             end,
             environment,
-            serviceName,
-            uiFilters: JSON.stringify({
-              ...uiFilters,
-              environment: undefined
-            })
+            serviceName
           }
         }
       });
     }
-  }, [serviceName, uiFilters, urlParams]);
+  }, [serviceName, urlParams]);
 
   const { ref, height, width } = useRefDimensions();
 
