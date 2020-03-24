@@ -21,8 +21,10 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
     }),
   },
   handler: async (_customParams, _context, _request, response): Promise<any> => {
-    await KibanaTelemetryAdapter.countPageView(_request.body);
-    return response.ok();
+    const result = await KibanaTelemetryAdapter.countPageView(_request.body);
+    return response.ok({
+      body: result,
+    });
   },
   options: {
     tags: ['access:uptime-read'],

@@ -8,7 +8,6 @@ import moment from 'moment';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import { PageViewParams, UptimeTelemetry } from './types';
-import { UptimePage } from '../../../../../../legacy/plugins/uptime/public/hooks';
 
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
@@ -37,20 +36,39 @@ export class KibanaTelemetryAdapter {
     });
   }
 
-  public static countPageView(pageView: PageViewParams) {
-    const bucket = this.getBucketToIncrement();
-
-    switch (pageView.page) {
-      case UptimePage.Overview:
-        this.collector[bucket].overview_page += 1;
-        break;
-      case UptimePage.Monitor:
-        this.collector[bucket].monitor_page += 1;
-        break;
-      case UptimePage.Settings:
-        this.collector[bucket].settings_page += 1;
-        break;
+  public static async countPageView(pageView: PageViewParams) {
+    const bucketId = this.getBucketToIncrement();
+    const bucket = this.collector[bucketId];
+    if (pageView.page === 'Overview') {
+      bucket.overview_page += 1;
     }
+    if (pageView.page === 'Monitor') {
+      bucket.monitor_page += 1;
+    }
+    if (pageView.page === 'Settings') {
+      bucket.settings_page += 1;
+    }
+    this.updateDateData(pageView, bucket);
+    return bucket;
+  }
+
+  public static updateDateData(
+    { dateStart, dateEnd, autoRefreshEnabled, autorefreshInterval }: PageViewParams,
+    bucket: UptimeTelemetry
+  ) {
+    const prevDateStart = [...bucket.dateRangeStart].pop();
+    if (!prevDateStart || prevDateStart !== dateStart) {
+      bucket.dateRangeStart.push(dateStart);
+    }
+    const prevDateEnd = [...bucket.dateRangeEnd].pop();
+    if (!prevDateEnd || prevDateEnd !== dateEnd) {
+      bucket.dateRangeEnd.push(dateEnd);
+    }
+    const prevAutorefreshInterval = [...bucket.autorefreshInterval].pop();
+    if (!prevAutorefreshInterval || prevAutorefreshInterval !== autorefreshInterval) {
+      bucket.autorefreshInterval.push(autorefreshInterval);
+    }
+    bucket.autoRefreshEnabled = autoRefreshEnabled;
   }
 
   public static async countNoOfUniqueMonitorAndLocations(callCluster: APICluster) {
@@ -163,6 +181,7 @@ export class KibanaTelemetryAdapter {
 
     return Object.values(this.collector).reduce(
       (acc, cum) => ({
+        ...cum,
         overview_page: acc.overview_page + cum.overview_page,
         monitor_page: acc.monitor_page + cum.monitor_page,
         settings_page: acc.settings_page + cum.settings_page,
@@ -183,7 +202,7 @@ export class KibanaTelemetryAdapter {
         overview_page: 0,
         monitor_page: 0,
         no_of_unique_monitors: 0,
-        setting_page: 0,
+        settings_page: 0,
         monitor_frequency: [],
         monitor_name_stats: {
           min_length: 0,
@@ -196,6 +215,10 @@ export class KibanaTelemetryAdapter {
           max_length: 0,
           avg_length: 0,
         },
+        dateRangeStart: [],
+        dateRangeEnd: [],
+        autoRefreshEnabled: false,
+        autorefreshInterval: [],
       };
     }
     return bucketId;

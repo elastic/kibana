@@ -22,15 +22,14 @@ export const useUptimeTelemetry = (page?: UptimePage) => {
 
   useEffect(() => {
     if (!apiService.http) throw new Error('Core http services are not defined');
-    {
-      const params = {
-        page,
-        autorefreshInterval,
-        dateStart: dateRangeStart,
-        dateEnd: dateRangeEnd,
-        autoRefreshEnabled: !autorefreshIsPaused,
-      };
-      apiService.post(API_URLS.logPageView, params);
-    }
+
+    const params = {
+      page,
+      autorefreshInterval,
+      dateStart: dateRangeStart,
+      dateEnd: dateRangeEnd,
+      autoRefreshEnabled: !autorefreshIsPaused,
+    };
+    apiService.post(API_URLS.logPageView, params);
   }, [autorefreshInterval, autorefreshIsPaused, dateRangeEnd, dateRangeStart, page]);
 };

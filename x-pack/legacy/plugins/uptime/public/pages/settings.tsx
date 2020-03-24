@@ -53,6 +53,7 @@ export const SettingsPageComponent = ({
     defaultMessage: 'Settings',
   });
   useBreadcrumbs([{ text: settingsBreadcrumbText }]);
+
   useUptimeTelemetry(UptimePage.Settings);
 
   useEffect(() => {

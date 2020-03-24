@@ -28,4 +28,9 @@ export interface UptimeTelemetry {
   no_of_unique_observer_locations: number;
   monitor_name_stats: Stats;
   observer_location_name_stats: Stats;
+
+  dateRangeStart: string[];
+  dateRangeEnd: string[];
+  autorefreshInterval: number[];
+  autoRefreshEnabled: boolean;
 }
