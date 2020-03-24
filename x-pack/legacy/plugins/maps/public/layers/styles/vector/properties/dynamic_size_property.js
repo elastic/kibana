@@ -5,6 +5,7 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
+import { OrdinalLegend } from './components/ordinal_legend';
 import { makeMbClampedNumberExpression } from '../style_util';
 import {
   HALF_LARGE_MAKI_ICON_SIZE,
@@ -162,7 +163,11 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     );
   }
 
-  renderRangeLegendHeader() {
+  renderLegendDetailRow() {
+    return <OrdinalLegend style={this} />;
+  }
+
+  renderRangeLegend() {
     let icons;
     if (this.getStyleName() === VECTOR_STYLES.LINE_WIDTH) {
       icons = getLineWidthIcons();

@@ -24,6 +24,7 @@ import {
 import { Category } from '../components/legend/category';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
+import { CategoricalLegend } from './components/categorical_legend';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
@@ -99,12 +100,15 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return true;
   }
 
-  isOrdinalRanged() {
-    return this.isOrdinal() && !this._options.useCustomColorRamp;
-  }
-
-  hasOrdinalBreaks() {
-    return (this.isOrdinal() && this._options.useCustomColorRamp) || this.isCategorical();
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
+    return (
+      <CategoricalLegend
+        style={this}
+        isPointsOnly={isPointsOnly}
+        isLinesOnly={isLinesOnly}
+        symbolId={symbolId}
+      />
+    );
   }
 
   _getMbColor() {
@@ -247,7 +251,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
-  renderRangeLegendHeader() {
+  renderRangeLegend() {
     if (this._options.color) {
       return <ColorGradient colorRampName={this._options.color} />;
     } else {

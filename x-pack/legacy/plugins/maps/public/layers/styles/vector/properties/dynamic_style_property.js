@@ -14,7 +14,6 @@ import {
   FIELD_ORIGIN,
 } from '../../../../../common/constants';
 import React from 'react';
-import { CategoricalLegend } from './components/categorical_legend';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
 import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
 
@@ -274,23 +273,8 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return isNaN(valueAsFloat) ? null : valueAsFloat;
   }
 
-  renderBreakedLegend() {
+  renderLegendDetailRow() {
     return null;
-  }
-
-  _renderBreakedLegend({ isPointsOnly, isLinesOnly, symbolId }) {
-    return (
-      <CategoricalLegend
-        style={this}
-        isPointsOnly={isPointsOnly}
-        isLinesOnly={isLinesOnly}
-        symbolId={symbolId}
-      />
-    );
-  }
-
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
-    return this._renderBreakedLegend({ isPointsOnly, isLinesOnly, symbolId });
   }
 
   renderFieldMetaPopover(onFieldMetaOptionsChange) {

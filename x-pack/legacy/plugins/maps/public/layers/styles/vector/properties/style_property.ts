@@ -26,7 +26,8 @@ export interface IStyleProperty {
   formatField(value: string | undefined): string;
   getStyleName(): VECTOR_STYLES;
   getOptions(): StylePropertyOptions;
-  renderRangeLegendHeader(): ReactElement<any> | null;
+  renderRangeLegend(): ReactElement<any> | null;
+  renderBreakedLegend(): ReactElement<any> | null;
   renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
   renderFieldMetaPopover(
     onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
@@ -70,7 +71,11 @@ export class AbstractStyleProperty implements IStyleProperty {
     return this._options || {};
   }
 
-  renderRangeLegendHeader() {
+  renderRangeLegend() {
+    return null;
+  }
+
+  renderBreakedLegend() {
     return null;
   }
 

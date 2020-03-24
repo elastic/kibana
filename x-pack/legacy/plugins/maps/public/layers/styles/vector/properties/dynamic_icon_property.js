@@ -19,6 +19,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { Category } from '../components/legend/category';
+import { CategoricalLegend } from './components/categorical_legend';
 
 export class DynamicIconProperty extends DynamicStyleProperty {
   isOrdinal() {
@@ -105,13 +106,24 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     return this._field && this._field.isValid();
   }
 
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
+    return (
+      <CategoricalLegend
+        style={this}
+        isPointsOnly={isPointsOnly}
+        isLinesOnly={isLinesOnly}
+        symbolId={symbolId}
+      />
+    );
+  }
+
   renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly }) {
     const categories = [];
     const { stops, fallback } = this._getPaletteStops();
-    stops.map(({ stop, style }) => {
+    stops.map(({ stop, style }, index) => {
       categories.push(
         <Category
-          key={stop}
+          key={index}
           styleName={this.getStyleName()}
           label={this.formatField(stop)}
           color="grey"
