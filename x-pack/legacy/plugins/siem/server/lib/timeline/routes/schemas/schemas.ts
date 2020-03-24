@@ -55,15 +55,15 @@ export const noteId = allowEmptyString;
 export const note = allowEmptyString;
 
 export const start = Joi.number();
-export const savedQueryId = Joi.string().allow(null);
+export const savedQueryId = allowEmptyString;
 export const savedObjectId = allowEmptyString;
 
-export const timelineId = Joi.string().allow(null);
+export const timelineId = allowEmptyString;
 export const title = allowEmptyString;
 
 export const updated = Joi.number().allow(null);
-export const updatedBy = Joi.string().allow(null);
-export const version = Joi.string().allow(null);
+export const updatedBy = allowEmptyString;
+export const version = allowEmptyString;
 
 export const columns = Joi.array().items(
   Joi.object({
@@ -71,11 +71,11 @@ export const columns = Joi.array().items(
     category: Joi.string(),
     columnHeaderType,
     description,
-    example: Joi.string().allow(null),
-    indexes: Joi.string(),
+    example: allowEmptyString,
+    indexes: allowEmptyString,
     id: Joi.string(),
     name,
-    placeholder: Joi.string().allow(null),
+    placeholder: allowEmptyString,
     searchable: Joi.boolean().allow(null),
     type: Joi.string(),
   }).required()

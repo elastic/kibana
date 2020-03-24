@@ -172,7 +172,6 @@ export const importTimelinesRoute = (
                         resolve({ timeline_id: newSavedObjectId, status_code: 200 });
                       } else if (timeline != null && frameworkRequest.query.overwrite) {
                         // update timeline
-                        console.log('--------------', timeline.noteIds);
                         const updatedSavedObjectId = await createTimelines(
                           (frameworkRequest as unknown) as FrameworkRequest,
                           parsedTimelineObject,
@@ -180,7 +179,7 @@ export const importTimelinesRoute = (
                           timeline.version,
                           pinnedEventIds,
                           [...globalNotes, ...eventNotes],
-                          timeline.noteIds
+                          timeline.notes?.map(n => n.noteId)
                         );
 
                         resolve({ timeline_id: updatedSavedObjectId, status_code: 200 });
@@ -246,137 +245,4 @@ export const importTimelinesRoute = (
       }
     }
   );
-};
-
-const a = {
-  savedObjectId: 'd728f8a0-6d71-11ea-8681-136b509323c9',
-  version: 'WzY2LDFd',
-  columns: [
-    { columnHeaderType: 'not-filtered', id: '@timestamp' },
-    {
-      aggregatable: true,
-      columnHeaderType: 'not-filtered',
-      id: 'dns.id',
-      category: 'dns',
-      type: 'string',
-    },
-    {
-      aggregatable: true,
-      columnHeaderType: 'not-filtered',
-      id: 'event.category',
-      category: 'event',
-      type: 'string',
-    },
-    { columnHeaderType: 'not-filtered', id: 'message' },
-    { columnHeaderType: 'not-filtered', id: 'event.action' },
-    { columnHeaderType: 'not-filtered', id: 'host.name' },
-    { columnHeaderType: 'not-filtered', id: 'source.ip' },
-    { columnHeaderType: 'not-filtered', id: 'destination.ip' },
-    { columnHeaderType: 'not-filtered', id: 'user.name' },
-  ],
-  dataProviders: [
-    {
-      excluded: false,
-      and: [
-        {
-          excluded: false,
-          kqlQuery: '',
-          name: 'network_traffic',
-          queryMatch: { field: 'event.category', value: 'network_traffic', operator: ':' },
-          id:
-            'event-details-value-default-draggable-plain-column-renderer-formatted-field-value-timeline-1-tqFOCXEB5OldxqFfSHbK-event_category-network_traffic',
-          enabled: true,
-        },
-      ],
-      kqlQuery: '',
-      name: 'rock01',
-      queryMatch: { field: 'host.name', value: 'rock01', operator: ':' },
-      id: 'hosts-table-hostName-rock01',
-      enabled: true,
-    },
-    {
-      excluded: false,
-      and: [],
-      kqlQuery: '',
-      name: 'North America',
-      queryMatch: { field: 'source.geo.continent_name', value: 'North America', operator: ':' },
-      id:
-        'geo-field-values-default-draggable-netflow-renderer-timeline-1-yk1OCXEBIp5jk4oNSdBr-yk1OCXEBIp5jk4oNSdBr-source_geo_continent_name-North America',
-      enabled: true,
-    },
-  ],
-  description: 'Description of first timeline',
-  eventType: 'raw',
-  filters: [],
-  kqlMode: 'search',
-  kqlQuery: {
-    filterQuery: {
-      serializedQuery:
-        '{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}',
-      kuery: { expression: 'host.name : * ', kind: 'kuery' },
-    },
-  },
-  title: 'First Timeline I',
-  dateRange: { start: 1584394420034, end: 1584999220034 },
-  savedQueryId: null,
-  sort: { columnId: '@timestamp', sortDirection: 'desc' },
-  favorite: [
-    {
-      favoriteDate: 1584999237951,
-      keySearch: 'cm9iZXJ0LnNtaXRo',
-      fullName: 'Robert Smith',
-      userName: 'robert.smith',
-    },
-  ],
-  created: 1585014629568,
-  createdBy: 'angela',
-  updated: 1585014629568,
-  updatedBy: 'angela',
-  eventNotes: [
-    {
-      noteId: 'd8ab2bd0-6d71-11ea-8681-136b509323c9',
-      version: 'Wzc1LDFd',
-      eventId: 'R5NQCXEBTvtefqrDwzsz',
-      note: '# Local comment 2\n\n> the raven',
-      timelineId: 'd728f8a0-6d71-11ea-8681-136b509323c9',
-      created: 1585014631901,
-      createdBy: 'angela',
-      updated: 1585014631901,
-      updatedBy: 'angela',
-    },
-    {
-      noteId: 'd8ac1630-6d71-11ea-8681-136b509323c9',
-      version: 'Wzc3LDFd',
-      eventId: 'R5NQCXEBTvtefqrDwzsz',
-      note: '# Local comment 1\na local comment',
-      timelineId: 'd728f8a0-6d71-11ea-8681-136b509323c9',
-      created: 1585014631900,
-      createdBy: 'angela',
-      updated: 1585014631900,
-      updatedBy: 'angela',
-    },
-  ],
-  globalNotes: [
-    {
-      noteId: 'd88c8040-6d71-11ea-8681-136b509323c9',
-      version: 'WzcyLDFd',
-      note: '# First timeline, second global note\nAnother global note',
-      timelineId: 'd728f8a0-6d71-11ea-8681-136b509323c9',
-      created: 1585014631900,
-      createdBy: 'angela',
-      updated: 1585014631900,
-      updatedBy: 'angela',
-    },
-    {
-      noteId: 'd8ab04c0-6d71-11ea-8681-136b509323c9',
-      version: 'Wzc2LDFd',
-      note: '# First timeline, first global note\n\n> The raven',
-      timelineId: 'd728f8a0-6d71-11ea-8681-136b509323c9',
-      created: 1585014631900,
-      createdBy: 'angela',
-      updated: 1585014631900,
-      updatedBy: 'angela',
-    },
-  ],
-  pinnedEventIds: ['R5NQCXEBTvtefqrDwzsz'],
 };

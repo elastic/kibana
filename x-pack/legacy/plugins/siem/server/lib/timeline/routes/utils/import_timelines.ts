@@ -47,10 +47,6 @@ export interface ImportTimelinesRequestParams {
   body: { file: HapiReadableStream };
 }
 
-type Resolve = (
-  value?: ImportRegular | BulkError | PromiseLike<ImportTimelineResponse> | undefined
-) => void;
-
 export const getTupleDuplicateErrorsAndUniqueTimeline = (
   timelines: PromiseFromStreams[],
   isOverwrite: boolean
@@ -167,9 +163,19 @@ export const createTimelines = async (
     timelineVersion
   );
 
-  await savePinnedEvents(frameworkRequest, newSavedObjectId, pinnedEventIds);
+  await savePinnedEvents(
+    frameworkRequest,
+    timelineSavedObjectId ?? newSavedObjectId,
+    pinnedEventIds
+  );
 
-  await saveNotes(frameworkRequest, newSavedObjectId, timelineVersion, existingNoteIds, notes);
+  await saveNotes(
+    frameworkRequest,
+    timelineSavedObjectId ?? newSavedObjectId,
+    timelineVersion,
+    existingNoteIds,
+    notes
+  );
 
   return newSavedObjectId;
 };
