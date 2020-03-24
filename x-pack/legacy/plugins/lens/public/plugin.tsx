@@ -12,7 +12,6 @@ import { AppMountParameters, CoreSetup, CoreStart } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 import { isObject } from 'lodash';
-import { npStart } from 'ui/new_platform';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { EditorFrameService } from './editor_frame_service';
 import { IndexPatternDatasource } from './indexpattern_datasource';
@@ -29,6 +28,8 @@ import {
   stopReportManager,
   trackUiEvent,
 } from './lens_ui_telemetry';
+
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { KibanaLegacySetup } from '../../../../../src/plugins/kibana_legacy/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../../../plugins/lens/common';
 import {
@@ -46,6 +47,7 @@ export interface LensPluginSetupDependencies {
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
+  uiActions: UiActionsStart;
   __LEGACY: {
     formatFactory: FormatFactory;
     visualizations: VisualizationsSetup;
@@ -84,6 +86,7 @@ export class LensPlugin {
       expressions,
       data,
       embeddable,
+      uiActions,
       __LEGACY: { formatFactory, visualizations },
     }: LensPluginSetupDependencies
   ) {
@@ -97,7 +100,7 @@ export class LensPlugin {
       data,
       editorFrame: editorFrameSetupInterface,
       formatFactory,
-      executeTriggerActions: npStart.plugins.uiActions.executeTriggerActions,
+      executeTriggerActions: uiActions.executeTriggerActions,
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
