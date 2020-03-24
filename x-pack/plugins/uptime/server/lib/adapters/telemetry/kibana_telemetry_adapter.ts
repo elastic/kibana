@@ -43,7 +43,9 @@ export class KibanaTelemetryAdapter {
       type: 'uptime',
       fetch: async (callCluster: APICaller) => {
         const savedObjectsClient = getSavedObjectsClient()!;
-        this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
+        if (savedObjectsClient) {
+          this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
+        }
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
       },
