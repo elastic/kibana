@@ -25,11 +25,13 @@ import { useGetCase } from '../../../../containers/case/use_get_case';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
+import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { getTypedPayload } from '../../../../containers/case/utils';
 import { WhitePageWrapper } from '../wrappers';
 import { useBasePath } from '../../../../lib/kibana';
 import { CaseStatus } from '../case_status';
+import { navTabs } from '../../../home/home_navigations';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 import { usePushToService } from './push_to_service';
@@ -61,6 +63,8 @@ export interface CaseProps {
 export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => {
   const basePath = window.location.origin + useBasePath();
   const caseLink = `${basePath}/app/siem#/case/${caseId}`;
+  const search = useGetUrlSearch(navTabs.case);
+
   const [initLoadingData, setInitLoadingData] = useState(true);
   const {
     caseUserActions,
@@ -190,7 +194,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
       <MyWrapper>
         <HeaderPage
           backOptions={{
-            href: getCaseUrl(),
+            href: getCaseUrl(search),
             text: i18n.BACK_TO_ALL,
           }}
           data-test-subj="case-view-title"
