@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NotificationsStart } from 'kibana/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
@@ -18,8 +17,7 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 export const jobCreatorFactory = (jobType: JOB_TYPE) => (
   indexPattern: IndexPattern,
   savedSearch: SavedSearchSavedObject | null,
-  query: object,
-  notifications: NotificationsStart
+  query: object
 ) => {
   let jc;
   switch (jobType) {
@@ -42,5 +40,5 @@ export const jobCreatorFactory = (jobType: JOB_TYPE) => (
       jc = SingleMetricJobCreator;
       break;
   }
-  return new jc(indexPattern, savedSearch, query, notifications);
+  return new jc(indexPattern, savedSearch, query);
 };

@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FC, useReducer, useState, useEffect } from 'react';
+import { useMlKibana } from '../../../../contexts/kibana';
 
 import { WIZARD_STEPS } from '../components/step_types';
 
@@ -41,6 +43,9 @@ export const Wizard: FC<Props> = ({
   existingJobsAndGroups,
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
+  const {
+    services: { notifications },
+  } = useMlKibana();
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number, action: any) => number>(
     s => s + 1,
     0
@@ -77,6 +82,20 @@ export const Wizard: FC<Props> = ({
   const [stringifiedConfigs, setStringifiedConfigs] = useState(
     stringifyConfigs(jobCreator.jobConfig, jobCreator.datafeedConfig)
   );
+
+  useEffect(() => {
+    jobCreator.initModelMemoryEstimator(jobValidator.validationResult$, jobCreatorUpdate);
+    jobCreator.errors$.subscribe(jobCreatorError => {
+      notifications.toasts.addError(jobCreatorError, {
+        title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
+          defaultMessage: 'Model memory limit could not be calculated',
+        }),
+      });
+    });
+    return () => {
+      jobCreator.unsubscribeAll();
+    };
+  }, []);
 
   useEffect(() => {
     const subscription = jobValidator.validationResult$.subscribe(() => {

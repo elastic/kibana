@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NotificationsStart } from 'kibana/public';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { pairwise, takeUntil } from 'rxjs/operators';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
@@ -22,6 +21,7 @@ import {
   CustomSettings,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { Aggregation, Field } from '../../../../../../common/types/fields';
+import { JobValidationResult } from '../job_validator/job_validator';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -39,6 +39,8 @@ import { estimatorProvider, ModelMemoryEstimator } from './util/model_memory_est
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
+  protected _indexPattern: IndexPattern;
+  protected _savedSearch: SavedSearchSavedObject | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _job_config: Job;
   protected _calendars: Calendar[];
@@ -60,15 +62,17 @@ export class JobCreator {
   } = { stop: false };
 
   private _unsubscribeAll = new Subject();
-  private modelMemoryEstimator: ModelMemoryEstimator;
+  public modelMemoryEstimator: ModelMemoryEstimator | null = null;
+  public errors$ = new Subject<Error>();
 
   constructor(
-    protected _indexPattern: IndexPattern,
-    protected _savedSearch: SavedSearchSavedObject | null,
-    query: object,
-    protected notification: NotificationsStart
+    indexPattern: IndexPattern,
+    savedSearch: SavedSearchSavedObject | null,
+    query: object
   ) {
-    this._indexPatternTitle = this._indexPattern.title;
+    this._indexPattern = indexPattern;
+    this._savedSearch = savedSearch;
+    this._indexPatternTitle = indexPattern.title;
 
     this._job_config = createEmptyJob();
     this._calendars = [];
@@ -76,37 +80,43 @@ export class JobCreator {
     this._detectors = this._job_config.analysis_config.detectors;
     this._influencers = this._job_config.analysis_config.influencers;
 
-    if (typeof this._indexPattern.timeFieldName === 'string') {
-      this._job_config.data_description.time_field = this._indexPattern.timeFieldName;
+    if (typeof indexPattern.timeFieldName === 'string') {
+      this._job_config.data_description.time_field = indexPattern.timeFieldName;
     }
 
     this._datafeed_config.query = query;
-
-    this.modelMemoryEstimator = estimatorProvider(notification);
-    this.listenForModelMemoryCheck();
   }
 
-  private listenForModelMemoryCheck() {
-    this.modelMemoryEstimator
-      .updates$()
+  public initModelMemoryEstimator(
+    validationResults$: Observable<JobValidationResult>,
+    jobCreatorUpdate: Function
+  ) {
+    this.modelMemoryEstimator = estimatorProvider(validationResults$);
+    this.modelMemoryEstimator.updates$
       .pipe(takeUntil(this._unsubscribeAll), pairwise())
       .subscribe(([previousEstimation, currentEstimation]) => {
         // to make sure we don't overwrite a manual input
-        if (this.modelMemoryLimit === previousEstimation) {
+        if (this.modelMemoryLimit === null || this.modelMemoryLimit === previousEstimation) {
           this.modelMemoryLimit = currentEstimation;
+          jobCreatorUpdate();
         }
       });
+    this.modelMemoryEstimator.error$.subscribe(e => {
+      this.errors$.next(e);
+    });
   }
 
   protected updateModelMemoryEstimation() {
-    this.modelMemoryEstimator.runEstimation({
-      analysisConfig: this.jobConfig.analysis_config,
-      indexPattern: this._indexPatternTitle,
-      query: this._datafeed_config.query,
-      timeFieldName: this._job_config.data_description.time_field,
-      earliestMs: this._start,
-      latestMs: this._end,
-    });
+    if (this.modelMemoryEstimator !== null) {
+      this.modelMemoryEstimator.runEstimation({
+        analysisConfig: this.jobConfig.analysis_config,
+        indexPattern: this._indexPatternTitle,
+        query: this._datafeed_config.query,
+        timeFieldName: this._job_config.data_description.time_field,
+        earliestMs: this._start,
+        latestMs: this._end,
+      });
+    }
   }
 
   public get type(): JOB_TYPE {

@@ -6,7 +6,7 @@
 
 import { ReactElement } from 'react';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, startWith, tap } from 'rxjs/operators';
 import {
   basicJobValidation,
   basicDatafeedValidation,
@@ -21,7 +21,7 @@ import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/co
 // delay start of validation to allow the user to make changes
 // e.g. if they are typing in a new value, try not to validate
 // after every keystroke
-const VALIDATION_DELAY_MS = 500;
+export const VALIDATION_DELAY_MS = 500;
 
 type AsyncValidatorsResult = Partial<CardinalityValidatorResult>;
 
@@ -109,7 +109,8 @@ export class JobValidator {
             ...(curr ? curr : {}),
           };
         }, {});
-      })
+      }),
+      startWith({})
     );
 
     this.validationResult$ = combineLatest([
