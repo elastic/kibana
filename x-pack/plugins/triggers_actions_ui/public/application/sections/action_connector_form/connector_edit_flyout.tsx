@@ -67,32 +67,26 @@ export const ConnectorEditFlyout = ({
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
       .then(savedConnector => {
-        if (toastNotifications) {
-          toastNotifications.addSuccess(
-            i18n.translate(
-              'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
-              {
-                defaultMessage: "Updated '{connectorName}'",
-                values: {
-                  connectorName: savedConnector.name,
-                },
-              }
-            )
-          );
-        }
+        toastNotifications.addSuccess(
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
+            {
+              defaultMessage: "Updated '{connectorName}'",
+              values: {
+                connectorName: savedConnector.name,
+              },
+            }
+          )
+        );
         return savedConnector;
       })
       .catch(errorRes => {
         toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
-            {
-              defaultMessage: '{message}',
-              values: {
-                message: errorRes.body?.message ?? 'Cannot update a connector.',
-              },
-            }
-          )
+          errorRes.body?.message ??
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
+              { defaultMessage: 'Cannot update a connector.' }
+            )
         );
         return undefined;
       });

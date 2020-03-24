@@ -139,15 +139,11 @@ export const ConnectorAddFlyout = ({
       })
       .catch(errorRes => {
         toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addConnectorForm.updateErrorNotificationText',
-            {
-              defaultMessage: '{message}',
-              values: {
-                message: errorRes.body?.message ?? 'Cannot create a connector.',
-              },
-            }
-          )
+          errorRes.body?.message ??
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.addConnectorForm.updateErrorNotificationText',
+              { defaultMessage: 'Cannot create a connector.' }
+            )
         );
         return undefined;
       });

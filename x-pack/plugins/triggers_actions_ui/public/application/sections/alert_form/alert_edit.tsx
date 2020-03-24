@@ -83,28 +83,22 @@ export const AlertEdit = ({
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
       const newAlert = await updateAlert({ http, alert, id: alert.id });
-      if (toastNotifications) {
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
-            defaultMessage: "Updated '{alertName}'",
-            values: {
-              alertName: newAlert.name,
-            },
-          })
-        );
-      }
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
+          defaultMessage: "Updated '{alertName}'",
+          values: {
+            alertName: newAlert.name,
+          },
+        })
+      );
       return newAlert;
     } catch (errorRes) {
-      if (toastNotifications) {
-        toastNotifications.addDanger(
+      toastNotifications.addDanger(
+        errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveErrorNotificationText', {
-            defaultMessage: '{message}',
-            values: {
-              message: errorRes.body?.message ?? '',
-            },
+            defaultMessage: 'Cannot update alert.',
           })
-        );
-      }
+      );
     }
   }
 

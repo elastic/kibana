@@ -110,12 +110,10 @@ export const AlertAdd = ({
       return newAlert;
     } catch (errorRes) {
       toastNotifications.addDanger(
-        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
-          defaultMessage: '{message}',
-          values: {
-            message: errorRes.body?.message ?? '',
-          },
-        })
+        errorRes.body?.message ??
+          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
+            defaultMessage: 'Cannot create alert.',
+          })
       );
     }
   }
