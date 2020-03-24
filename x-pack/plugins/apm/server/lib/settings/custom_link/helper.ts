@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEmpty } from 'lodash';
-import { FILTER_OPTIONS } from '../../../../common/customLink/custom_link_filter_options';
 import {
   CustomLinkES,
   CustomLink,
-  Filter
+  Filter,
+  FilterKey
 } from '../../../../common/customLink/custom_link_types';
 
 export function fromESFormat(customLinkES: CustomLinkES): CustomLink {
@@ -20,7 +20,7 @@ export function fromESFormat(customLinkES: CustomLinkES): CustomLink {
     url,
     filters: Object.entries(filters).map(
       ([key, value]: [string, string[]]) => ({
-        key: key as typeof FILTER_OPTIONS[number],
+        key: key as FilterKey,
         value: isEmpty(value) ? '' : value.join()
       })
     )

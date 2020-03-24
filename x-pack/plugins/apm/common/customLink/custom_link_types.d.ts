@@ -23,8 +23,10 @@ export interface CustomLinkES {
   [TRANSACTION_TYPE]?: string[];
 }
 
+export type FilterKey = typeof FILTER_OPTIONS[number];
+
 export interface Filter {
-  key: typeof FILTER_OPTIONS[number] | '';
+  key: FilterKey | '';
   value: string;
 }
 

@@ -7,11 +7,14 @@ import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
 import { isEmpty, get } from 'lodash';
 import { FILTER_OPTIONS } from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_filter_options';
-import { Filter } from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_types';
+import {
+  Filter,
+  FilterKey
+} from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_types';
 import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 
 interface FilterSelectOption {
-  value: 'DEFAULT' | typeof FILTER_OPTIONS[number];
+  value: 'DEFAULT' | FilterKey;
   text: string;
 }
 
@@ -105,4 +108,13 @@ export const replaceTemplateVariables = (
     // errors will be caught on validateUrl function
     return { formattedUrl: url, error };
   }
+};
+
+export const convertFiltersToQuery = (filters: Filter[]) => {
+  return filters.reduce((acc: Record<string, string>, { key, value }) => {
+    if (key && value) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
 };

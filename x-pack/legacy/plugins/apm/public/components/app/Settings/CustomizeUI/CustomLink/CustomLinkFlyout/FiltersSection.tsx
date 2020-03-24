@@ -16,8 +16,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { FILTER_OPTIONS } from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_filter_options';
-import { Filter } from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_types';
+import {
+  Filter,
+  FilterKey
+} from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_types';
 import {
   DEFAULT_OPTION,
   FILTER_SELECT_OPTIONS,
@@ -104,11 +106,7 @@ export const FiltersSection = ({
                   }
                 )}
                 onChange={e =>
-                  onChangeFilter(
-                    e.target.value as typeof FILTER_OPTIONS[number],
-                    value,
-                    idx
-                  )
+                  onChangeFilter(e.target.value as FilterKey, value, idx)
                 }
                 isInvalid={
                   !isEmpty(value) &&

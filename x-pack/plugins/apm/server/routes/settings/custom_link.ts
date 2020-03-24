@@ -9,8 +9,8 @@ import { FILTER_OPTIONS } from '../../../common/customLink/custom_link_filter_op
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_or_update_custom_link';
 import {
-  FilterOptionsRt,
-  PayloadRt
+  filterOptionsRt,
+  payloadRt
 } from '../../lib/settings/custom_link/custom_link_types';
 import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_link';
 import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
@@ -20,7 +20,7 @@ import { createRoute } from '../create_route';
 export const customLinkTransactionRoute = createRoute(core => ({
   path: '/api/apm/settings/custom_links/transaction',
   params: {
-    query: FilterOptionsRt
+    query: filterOptionsRt
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -34,7 +34,7 @@ export const customLinkTransactionRoute = createRoute(core => ({
 export const listCustomLinksRoute = createRoute(core => ({
   path: '/api/apm/settings/custom_links',
   params: {
-    query: FilterOptionsRt
+    query: filterOptionsRt
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -49,7 +49,7 @@ export const createCustomLinkRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/custom_links',
   params: {
-    body: PayloadRt
+    body: payloadRt
   },
   options: {
     tags: ['access:apm', 'access:apm_write']
@@ -69,7 +69,7 @@ export const updateCustomLinkRoute = createRoute(() => ({
     path: t.type({
       id: t.string
     }),
-    body: PayloadRt
+    body: payloadRt
   },
   options: {
     tags: ['access:apm', 'access:apm_write']

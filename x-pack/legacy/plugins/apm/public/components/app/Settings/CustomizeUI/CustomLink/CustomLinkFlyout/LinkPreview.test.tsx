@@ -16,7 +16,7 @@ describe('LinkPreview', () => {
 
   it('shows label and url default values', () => {
     const { container } = render(
-      <LinkPreview label="" url="" filters={[['', '']]} />
+      <LinkPreview label="" url="" filters={[{ key: '', value: '' }]} />
     );
     expect(getElementValue(container, 'preview-label')).toEqual('Elastic.co');
     expect(getElementValue(container, 'preview-url')).toEqual(
@@ -26,7 +26,11 @@ describe('LinkPreview', () => {
 
   it('shows label and url values', () => {
     const { container } = render(
-      <LinkPreview label="foo" url="https://baz.co" filters={[['', '']]} />
+      <LinkPreview
+        label="foo"
+        url="https://baz.co"
+        filters={[{ key: '', value: '' }]}
+      />
     );
     expect(getElementValue(container, 'preview-label')).toEqual('foo');
     expect(
@@ -39,7 +43,7 @@ describe('LinkPreview', () => {
       <LinkPreview
         label="foo"
         url="https://baz.co?service.name={{invalid}"
-        filters={[['', '']]}
+        filters={[{ key: '', value: '' }]}
       />
     );
     expect(getElementValue(container, 'preview-label')).toEqual('foo');

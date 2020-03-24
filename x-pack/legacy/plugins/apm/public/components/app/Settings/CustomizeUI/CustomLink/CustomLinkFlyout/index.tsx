@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { isEmpty } from 'lodash';
 import {
   CustomLink,
   Filter

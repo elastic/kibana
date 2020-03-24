@@ -10,14 +10,14 @@ import {
 } from '../../../../common/customLink/custom_link_types';
 import { Setup } from '../../helpers/setup_request';
 import { fromESFormat } from './helper';
-import { FilterOptionsRt } from './custom_link_types';
+import { filterOptionsRt } from './custom_link_types';
 
 export async function listCustomLinks({
   setup,
   filters = {}
 }: {
   setup: Setup;
-  filters?: t.TypeOf<typeof FilterOptionsRt>;
+  filters?: t.TypeOf<typeof filterOptionsRt>;
 }): Promise<CustomLink[]> {
   const { internalClient, indices } = setup;
   const esFilters = Object.entries(filters).map(([key, value]) => {

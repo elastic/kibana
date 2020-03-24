@@ -22,14 +22,14 @@ export interface CustomLinkES {
   [TRANSACTION_TYPE]?: string[];
 }
 
-export const FilterOptionsRt = t.partial({
+export const filterOptionsRt = t.partial({
   [SERVICE_NAME]: t.string,
   [SERVICE_ENVIRONMENT]: t.string,
   [TRANSACTION_NAME]: t.string,
   [TRANSACTION_TYPE]: t.string
 });
 
-export const PayloadRt = t.intersection([
+export const payloadRt = t.intersection([
   t.type({
     label: t.string,
     url: t.string
