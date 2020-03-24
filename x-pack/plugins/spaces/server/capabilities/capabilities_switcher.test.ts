@@ -147,7 +147,7 @@ describe('capabilitiesSwitcher', () => {
     const capabilities = buildCapabilities();
 
     const { switcher } = setup(space);
-    const request = httpServerMock.createKibanaRequest({ routeAuthRequired: false });
+    const request = httpServerMock.createKibanaRequest({ auth: { isAuthenticated: false } });
 
     const result = await switcher(request, capabilities);
 

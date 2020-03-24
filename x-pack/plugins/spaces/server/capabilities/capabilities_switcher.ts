@@ -16,9 +16,7 @@ export function setupCapabilitiesSwitcher(
   logger: Logger
 ): CapabilitiesSwitcher {
   return async (request, capabilities) => {
-    const isAnonymousRequest = !request.route.options.authRequired;
-
-    if (isAnonymousRequest) {
+    if (!request.auth.isAuthenticated) {
       return capabilities;
     }
 
