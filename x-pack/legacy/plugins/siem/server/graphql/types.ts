@@ -1863,15 +1863,13 @@ export interface TlsNode {
 
   timestamp?: Maybe<string>;
 
-  alternativeNames?: Maybe<string[]>;
-
   notAfter?: Maybe<string[]>;
 
-  commonNames?: Maybe<string[]>;
+  subjects?: Maybe<string[]>;
 
   ja3?: Maybe<string[]>;
 
-  issuerNames?: Maybe<string[]>;
+  issuers?: Maybe<string[]>;
 }
 
 export interface UncommonProcessesData {
@@ -7833,15 +7831,13 @@ export namespace TlsNodeResolvers {
 
     timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
 
-    alternativeNames?: AlternativeNamesResolver<Maybe<string[]>, TypeParent, TContext>;
-
     notAfter?: NotAfterResolver<Maybe<string[]>, TypeParent, TContext>;
 
-    commonNames?: CommonNamesResolver<Maybe<string[]>, TypeParent, TContext>;
+    subjects?: SubjectsResolver<Maybe<string[]>, TypeParent, TContext>;
 
     ja3?: Ja3Resolver<Maybe<string[]>, TypeParent, TContext>;
 
-    issuerNames?: IssuerNamesResolver<Maybe<string[]>, TypeParent, TContext>;
+    issuers?: IssuersResolver<Maybe<string[]>, TypeParent, TContext>;
   }
 
   export type _IdResolver<R = Maybe<string>, Parent = TlsNode, TContext = SiemContext> = Resolver<
@@ -7854,17 +7850,12 @@ export namespace TlsNodeResolvers {
     Parent = TlsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type AlternativeNamesResolver<
-    R = Maybe<string[]>,
-    Parent = TlsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
   export type NotAfterResolver<
     R = Maybe<string[]>,
     Parent = TlsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type CommonNamesResolver<
+  export type SubjectsResolver<
     R = Maybe<string[]>,
     Parent = TlsNode,
     TContext = SiemContext
@@ -7874,7 +7865,7 @@ export namespace TlsNodeResolvers {
     Parent,
     TContext
   >;
-  export type IssuerNamesResolver<
+  export type IssuersResolver<
     R = Maybe<string[]>,
     Parent = TlsNode,
     TContext = SiemContext

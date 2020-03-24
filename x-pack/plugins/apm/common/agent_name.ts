@@ -4,40 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AgentName } from '../typings/es_schemas/ui/fields/agent';
-
 /*
  * Agent names can be any string. This list only defines the official agents
  * that we might want to target specifically eg. linking to their documentation
  * & telemetry reporting. Support additional agent types by appending
  * definitions in mappings.json (for telemetry), the AgentName type, and the
- * AGENT_NAMES array.
+ * agentNames object.
  */
+import { AgentName } from '../typings/es_schemas/ui/fields/agent';
 
-export const AGENT_NAMES: AgentName[] = [
-  'java',
-  'js-base',
-  'rum-js',
-  'dotnet',
-  'go',
-  'java',
-  'nodejs',
-  'python',
-  'ruby'
-];
+const agentNames: { [agentName in AgentName]: agentName } = {
+  python: 'python',
+  java: 'java',
+  nodejs: 'nodejs',
+  'js-base': 'js-base',
+  'rum-js': 'rum-js',
+  dotnet: 'dotnet',
+  ruby: 'ruby',
+  go: 'go'
+};
 
-export function isAgentName(agentName: string): agentName is AgentName {
-  return AGENT_NAMES.includes(agentName as AgentName);
+export function isAgentName(agentName: string): boolean {
+  return Object.values(agentNames).includes(agentName as AgentName);
 }
 
-export function isRumAgentName(
-  agentName: string | undefined
-): agentName is 'js-base' | 'rum-js' {
-  return agentName === 'js-base' || agentName === 'rum-js';
+export function isRumAgentName(agentName: string | undefined) {
+  return (
+    agentName === agentNames['js-base'] || agentName === agentNames['rum-js']
+  );
 }
 
-export function isJavaAgentName(
-  agentName: string | undefined
-): agentName is 'java' {
-  return agentName === 'java';
+export function isJavaAgentName(agentName: string | undefined) {
+  return agentName === agentNames.java;
 }

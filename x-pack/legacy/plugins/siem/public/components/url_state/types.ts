@@ -64,15 +64,15 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
-    CONSTANTS.timeline,
     CONSTANTS.timerange,
+    CONSTANTS.timeline,
   ],
   case: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
     CONSTANTS.savedQuery,
-    CONSTANTS.timeline,
     CONSTANTS.timerange,
+    CONSTANTS.timeline,
   ],
 };
 

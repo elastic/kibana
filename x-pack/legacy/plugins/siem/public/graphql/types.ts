@@ -1861,15 +1861,13 @@ export interface TlsNode {
 
   timestamp?: Maybe<string>;
 
-  alternativeNames?: Maybe<string[]>;
-
   notAfter?: Maybe<string[]>;
 
-  commonNames?: Maybe<string[]>;
+  subjects?: Maybe<string[]>;
 
   ja3?: Maybe<string[]>;
 
-  issuerNames?: Maybe<string[]>;
+  issuers?: Maybe<string[]>;
 }
 
 export interface UncommonProcessesData {
@@ -5683,13 +5681,11 @@ export namespace GetTlsQuery {
 
     _id: Maybe<string>;
 
-    alternativeNames: Maybe<string[]>;
-
-    commonNames: Maybe<string[]>;
+    subjects: Maybe<string[]>;
 
     ja3: Maybe<string[]>;
 
-    issuerNames: Maybe<string[]>;
+    issuers: Maybe<string[]>;
 
     notAfter: Maybe<string[]>;
   };
