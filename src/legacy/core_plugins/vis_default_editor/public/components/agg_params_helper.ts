@@ -28,7 +28,6 @@ import {
   IndexPattern,
   IndexPatternField,
 } from 'src/plugins/data/public';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
@@ -36,12 +35,13 @@ import { aggParamsMap } from './agg_params_map';
 import { EditorConfig } from './utils';
 import { Schema, getSchemaByName } from '../schemas';
 import { search } from '../../../../../plugins/data/public';
+import { EditorVisState } from './sidebar/state/reducers';
 
 interface ParamInstanceBase {
   agg: IAggConfig;
   editorConfig: EditorConfig;
   metricAggs: IAggConfig[];
-  state: VisState;
+  state: EditorVisState;
   schemas: Schema[];
   hideCustomLabel?: boolean;
 }

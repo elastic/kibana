@@ -13,7 +13,13 @@ import {
   RouteConfig,
 } from '../../../../../../src/core/server';
 import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
-import { Authentication, DeauthenticationResult } from '../../authentication';
+import {
+  Authentication,
+  AuthenticationResult,
+  DeauthenticationResult,
+  OIDCLogin,
+  SAMLLogin,
+} from '../../authentication';
 import { defineCommonRoutes } from './common';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
@@ -170,6 +176,262 @@ describe('Common authentication routes', () => {
       expect(response.status).toBe(200);
       expect(response.payload).toEqual(mockUser);
       expect(authc.getCurrentUser).toHaveBeenCalledWith(mockRequest);
+    });
+  });
+
+  describe('login_with', () => {
+    let routeHandler: RequestHandler<any, any, any>;
+    let routeConfig: RouteConfig<any, any, any, any>;
+    beforeEach(() => {
+      const [acsRouteConfig, acsRouteHandler] = router.post.mock.calls.find(
+        ([{ path }]) => path === '/internal/security/login_with'
+      )!;
+
+      routeConfig = acsRouteConfig;
+      routeHandler = acsRouteHandler;
+    });
+
+    it('correctly defines route.', () => {
+      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.validate).toEqual({
+        body: expect.any(Type),
+        query: undefined,
+        params: undefined,
+      });
+
+      const bodyValidator = (routeConfig.validate as any).body as Type<any>;
+      expect(
+        bodyValidator.validate({
+          providerType: 'saml',
+          providerName: 'saml1',
+          currentURL: '/some-url',
+        })
+      ).toEqual({
+        providerType: 'saml',
+        providerName: 'saml1',
+        currentURL: '/some-url',
+      });
+
+      expect(
+        bodyValidator.validate({
+          providerType: 'saml',
+          providerName: 'saml1',
+          currentURL: '',
+        })
+      ).toEqual({
+        providerType: 'saml',
+        providerName: 'saml1',
+        currentURL: '',
+      });
+
+      expect(() => bodyValidator.validate({})).toThrowErrorMatchingInlineSnapshot(
+        `"[providerType]: expected value of type [string] but got [undefined]"`
+      );
+
+      expect(() =>
+        bodyValidator.validate({ providerType: 'saml' })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[providerName]: expected value of type [string] but got [undefined]"`
+      );
+
+      expect(() =>
+        bodyValidator.validate({ providerType: 'saml', providerName: 'saml1' })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[currentURL]: expected value of type [string] but got [undefined]"`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'saml',
+          providerName: 'saml1',
+          currentURL: '/some-url',
+          UnknownArg: 'arg',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"[UnknownArg]: definition for this key is missing"`);
+    });
+
+    it('returns 500 if login throws unhandled exception.', async () => {
+      const unhandledException = new Error('Something went wrong.');
+      authc.login.mockRejectedValue(unhandledException);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { providerType: 'saml', providerName: 'saml1', currentURL: '/some-url' },
+      });
+
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 500,
+        payload: 'Internal Error',
+        options: {},
+      });
+    });
+
+    it('returns 401 if login fails.', async () => {
+      const failureReason = new Error('Something went wrong.');
+      authc.login.mockResolvedValue(
+        AuthenticationResult.failed(failureReason, {
+          authResponseHeaders: { 'WWW-Something': 'something' },
+        })
+      );
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { providerType: 'saml', providerName: 'saml1', currentURL: '/some-url' },
+      });
+
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 401,
+        payload: failureReason,
+        options: { body: failureReason, headers: { 'WWW-Something': 'something' } },
+      });
+    });
+
+    it('returns 401 if login is not handled.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.notHandled());
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { providerType: 'saml', providerName: 'saml1', currentURL: '/some-url' },
+      });
+
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 401,
+        payload: 'Unauthorized',
+        options: {},
+      });
+    });
+
+    it('returns redirect location from authentication result if any.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.redirectTo('http://redirect-to/path'));
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { providerType: 'saml', providerName: 'saml1', currentURL: '/some-url' },
+      });
+
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 200,
+        payload: { location: 'http://redirect-to/path' },
+        options: { body: { location: 'http://redirect-to/path' } },
+      });
+    });
+
+    it('returns location extracted from `next` parameter if authentication result does not specify any.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          providerType: 'saml',
+          providerName: 'saml1',
+          currentURL: 'https://kibana.com/?next=/mock-server-basepath/some-url#/app/nav',
+        },
+      });
+
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 200,
+        payload: { location: '/mock-server-basepath/some-url#/app/nav' },
+        options: { body: { location: '/mock-server-basepath/some-url#/app/nav' } },
+      });
+    });
+
+    it('returns base path if location cannot be extracted from `currentURL` parameter and authentication result does not specify any.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
+
+      const invalidCurrentURLs = [
+        'https://kibana.com/?next=https://evil.com/mock-server-basepath/some-url#/app/nav',
+        'https://kibana.com/?next=https://kibana.com:9000/mock-server-basepath/some-url#/app/nav',
+        'https://kibana.com/?next=kibana.com/mock-server-basepath/some-url#/app/nav',
+        'https://kibana.com/?next=//mock-server-basepath/some-url#/app/nav',
+        'https://kibana.com/?next=../mock-server-basepath/some-url#/app/nav',
+        'https://kibana.com/?next=/some-url#/app/nav',
+        '',
+      ];
+
+      for (const currentURL of invalidCurrentURLs) {
+        const request = httpServerMock.createKibanaRequest({
+          body: { providerType: 'saml', providerName: 'saml1', currentURL },
+        });
+
+        await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+          status: 200,
+          payload: { location: '/mock-server-basepath/' },
+          options: { body: { location: '/mock-server-basepath/' } },
+        });
+      }
+    });
+
+    it('correctly performs SAML login.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.redirectTo('http://redirect-to/path'));
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          providerType: 'saml',
+          providerName: 'saml1',
+          currentURL: 'https://kibana.com/?next=/mock-server-basepath/some-url#/app/nav',
+        },
+      });
+
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 200,
+        payload: { location: 'http://redirect-to/path' },
+        options: { body: { location: 'http://redirect-to/path' } },
+      });
+
+      expect(authc.login).toHaveBeenCalledTimes(1);
+      expect(authc.login).toHaveBeenCalledWith(request, {
+        provider: { name: 'saml1' },
+        value: {
+          type: SAMLLogin.LoginInitiatedByUser,
+          redirectURLPath: '/mock-server-basepath/some-url',
+          redirectURLFragment: '#/app/nav',
+        },
+      });
+    });
+
+    it('correctly performs OIDC login.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.redirectTo('http://redirect-to/path'));
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          providerType: 'oidc',
+          providerName: 'oidc1',
+          currentURL: 'https://kibana.com/?next=/mock-server-basepath/some-url#/app/nav',
+        },
+      });
+
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 200,
+        payload: { location: 'http://redirect-to/path' },
+        options: { body: { location: 'http://redirect-to/path' } },
+      });
+
+      expect(authc.login).toHaveBeenCalledTimes(1);
+      expect(authc.login).toHaveBeenCalledWith(request, {
+        provider: { name: 'oidc1' },
+        value: {
+          type: OIDCLogin.LoginInitiatedByUser,
+          redirectURLPath: '/mock-server-basepath/some-url',
+        },
+      });
+    });
+
+    it('correctly performs generic login.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.redirectTo('http://redirect-to/path'));
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          providerType: 'some-type',
+          providerName: 'some-name',
+          currentURL: 'https://kibana.com/?next=/mock-server-basepath/some-url#/app/nav',
+        },
+      });
+
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 200,
+        payload: { location: 'http://redirect-to/path' },
+        options: { body: { location: 'http://redirect-to/path' } },
+      });
+
+      expect(authc.login).toHaveBeenCalledTimes(1);
+      expect(authc.login).toHaveBeenCalledWith(request, {
+        provider: { name: 'some-name' },
+      });
     });
   });
 });

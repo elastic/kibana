@@ -14,9 +14,11 @@ import { Observable, combineLatest, AsyncSubject } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { Server } from 'hapi';
 import { once } from 'lodash';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { TaskManagerSetupContract } from '../../task_manager/server';
+import { AlertingPlugin } from '../../alerting/server';
+import { ActionsPlugin } from '../../actions/server';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
-import { makeApmUsageCollector } from './lib/apm_telemetry';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { createApmApi } from './routes/create_apm_api';
@@ -27,6 +29,8 @@ import { tutorialProvider } from './tutorial';
 import { CloudSetup } from '../../cloud/server';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { LicensingPluginSetup } from '../../licensing/public';
+import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
+import { createApmTelemetry } from './lib/apm_telemetry';
 
 export interface LegacySetup {
   server: Server;
@@ -55,13 +59,24 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       licensing: LicensingPluginSetup;
       cloud?: CloudSetup;
       usageCollection?: UsageCollectionSetup;
+      taskManager?: TaskManagerSetupContract;
+      alerting?: AlertingPlugin['setup'];
+      actions?: ActionsPlugin['setup'];
     }
   ) {
-    this.logger = this.initContext.logger.get('apm');
+    this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMXPackConfig>();
     const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
     );
+
+    if (plugins.actions && plugins.alerting) {
+      registerApmAlerts({
+        alerting: plugins.alerting,
+        actions: plugins.actions,
+        config$: mergedConfig$
+      });
+    }
 
     this.legacySetup$.subscribe(__LEGACY => {
       createApmApi().init(core, {
@@ -72,6 +87,20 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     });
 
     this.currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
+
+    if (
+      plugins.taskManager &&
+      plugins.usageCollection &&
+      this.currentConfig['xpack.apm.telemetryCollectionEnabled']
+    ) {
+      createApmTelemetry({
+        core,
+        config$: mergedConfig$,
+        usageCollector: plugins.usageCollection,
+        taskManager: plugins.taskManager,
+        logger: this.logger
+      });
+    }
 
     plugins.home.tutorials.registerTutorial(
       tutorialProvider({
@@ -87,18 +116,6 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         }
       })
     );
-
-    const usageCollection = plugins.usageCollection;
-    if (usageCollection) {
-      getInternalSavedObjectsClient(core)
-        .then(savedObjectsClient => {
-          makeApmUsageCollector(usageCollection, savedObjectsClient);
-        })
-        .catch(error => {
-          this.logger!.error('Unable to initialize use collection');
-          this.logger!.error(error.message);
-        });
-    }
 
     return {
       config$: mergedConfig$,
@@ -132,5 +149,6 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       logger: this.logger
     });
   }
+
   public stop() {}
 }
