@@ -8,7 +8,10 @@ import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
 import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
-import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
+import {
+  DASHBOARD_APP_URL_GENERATOR,
+  DashboardContainerInput,
+} from '../../../../../../../src/plugins/dashboard/public';
 import { VisualizeEmbeddableContract } from '../../../../../../../src/legacy/core_plugins/visualizations/public';
 import { PlaceContext, ActionContext, Config, CollectConfigProps } from './types';
 
@@ -60,6 +63,8 @@ export class DashboardToDashboardDrilldown
   ) => {
     const getUrlGenerator = await this.params.getGetUrlGenerator();
     const navigateToApp = await this.params.getNavigateToApp();
+    const savedObjectsClient = await this.params.getSavedObjectsClient();
+
     const {
       selectRangeActionGetFilters,
       valueClickActionGetFilters,
@@ -69,6 +74,16 @@ export class DashboardToDashboardDrilldown
       query,
       filters: currentFilters,
     } = context.embeddable.getInput();
+
+    const savedDashboard = await savedObjectsClient.get<{ timeTo: string; timeFrom: string }>(
+      'dashboard',
+      config.dashboardId as string
+    );
+
+    const defaultTimeRange = {
+      to: savedDashboard.attributes.timeTo,
+      from: savedDashboard.attributes.timeFrom,
+    };
 
     // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
     // otherwise preserve only pinned
@@ -80,7 +95,7 @@ export class DashboardToDashboardDrilldown
     // if useCurrentDashboardDataRange is enabled, then preserve current time range
     // if undefined is passed, then destination dashboard will figure out time range itself
     // for brush event this time range would be overwritten
-    let timeRange = config.useCurrentDateRange ? currentTimeRange : undefined;
+    let timeRange = config.useCurrentDateRange ? currentTimeRange : defaultTimeRange;
 
     if (context.data.range) {
       // look up by range
