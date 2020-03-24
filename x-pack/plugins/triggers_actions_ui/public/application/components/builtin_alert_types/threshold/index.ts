@@ -10,7 +10,7 @@ import { validateExpression } from './validation';
 export function getAlertType(): AlertTypeModel {
   return {
     id: '.index-threshold',
-    name: 'Index Threshold',
+    name: 'Index threshold',
     iconClass: 'alert',
     alertParamsExpression: IndexThresholdAlertTypeExpression,
     validate: validateExpression,
