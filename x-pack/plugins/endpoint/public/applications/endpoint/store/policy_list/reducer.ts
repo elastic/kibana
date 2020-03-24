@@ -12,6 +12,7 @@ const initialPolicyListState = (): PolicyListState => {
   return {
     policyItems: [],
     isLoading: false,
+    apiError: undefined,
     pageIndex: 0,
     pageSize: 10,
     total: 0,
@@ -30,12 +31,21 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
     };
   }
 
+  if (action.type === 'serverFailedToReturnPolicyListData') {
+    return {
+      ...state,
+      apiError: action.payload,
+      isLoading: false,
+    };
+  }
+
   if (
     action.type === 'userPaginatedPolicyListTable' ||
     (action.type === 'userNavigatedToPage' && action.payload === 'policyListPage')
   ) {
     return {
       ...state,
+      apiError: undefined,
       isLoading: true,
     };
   }
