@@ -91,24 +91,34 @@ export const apm: LegacyPluginInitializer = kibana => {
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
         catalogue: ['apm'],
+        // see x-pack/plugins/features/common/feature_kibana_privileges.ts
         privileges: {
           all: {
-            api: ['apm', 'apm_write'],
+            api: ['apm', 'apm_write', 'actions-read', 'alerting-read'],
             catalogue: ['apm'],
             savedObject: {
-              all: [],
+              all: ['action', 'action_task_params'],
               read: []
             },
-            ui: ['show', 'save']
+            ui: [
+              'show',
+              'save',
+              'alerting:show',
+              'actions:show',
+              'alerting:save',
+              'actions:save',
+              'alerting:delete',
+              'actions:delete'
+            ]
           },
           read: {
-            api: ['apm'],
+            api: ['apm', 'actions-read', 'alerting-read'],
             catalogue: ['apm'],
             savedObject: {
-              all: [],
+              all: ['action', 'action_task_params'],
               read: []
             },
-            ui: ['show']
+            ui: ['show', 'alerting:show', 'actions:show']
           }
         }
       });
