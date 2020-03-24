@@ -55,7 +55,7 @@ export interface Operation {
    * @remark
    * For now, when we init profile data for rendering we take a top-level
    * operation and designate it the root of the operations tree - this is not
-   * information we get from ES!
+   * information we get from ES.
    */
   treeRoot?: Operation;
 
