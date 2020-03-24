@@ -16,7 +16,7 @@ export interface ActionGroup {
 }
 
 export interface AlertingFrameworkHealth {
-  canGenerateApiKeys: boolean;
+  isSufficientlySecure: boolean;
 }
 
 export const BASE_ALERT_API_PATH = '/api/alert';

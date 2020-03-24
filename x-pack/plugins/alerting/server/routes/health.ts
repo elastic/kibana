@@ -53,7 +53,7 @@ export function healthRoute(router: IRouter, licenseState: LicenseState) {
           });
 
         const frameworkHealth: AlertingFrameworkHealth = {
-          canGenerateApiKeys: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
+          isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
         };
 
         return res.ok({

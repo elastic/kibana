@@ -37,7 +37,7 @@ export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ docLink
 
   return pipe(
     alertingHealth,
-    filter(healthCheck => !healthCheck?.canGenerateApiKeys),
+    filter(healthCheck => !healthCheck?.isSufficientlySecure),
     fold(
       () => <Fragment />,
       () => (

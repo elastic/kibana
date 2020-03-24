@@ -150,7 +150,16 @@ export const AlertAdd = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertActionSecurityCallOut docLinks={docLinks} action={'creation'} http={http} />
+        <AlertActionSecurityCallOut
+          docLinks={docLinks}
+          action={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertAdd.securityCalloutAction',
+            {
+              defaultMessage: 'creation',
+            }
+          )}
+          http={http}
+        />
         <EuiFlyoutBody>
           <AlertForm
             alert={alert}

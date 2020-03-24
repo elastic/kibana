@@ -73,7 +73,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "canGenerateApiKeys": true,
+          "isSufficientlySecure": true,
         },
       }
     `);
@@ -94,7 +94,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "canGenerateApiKeys": true,
+          "isSufficientlySecure": true,
         },
       }
     `);
@@ -117,7 +117,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "canGenerateApiKeys": false,
+          "isSufficientlySecure": false,
         },
       }
     `);
@@ -140,7 +140,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "canGenerateApiKeys": false,
+          "isSufficientlySecure": false,
         },
       }
     `);
@@ -163,7 +163,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "canGenerateApiKeys": true,
+          "isSufficientlySecure": true,
         },
       }
     `);

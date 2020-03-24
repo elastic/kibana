@@ -41,7 +41,7 @@ export const AlertActionSecurityCallOut: React.FunctionComponent<Props> = ({
 
   return pipe(
     alertingHealth,
-    filter(healthCheck => !healthCheck.canGenerateApiKeys),
+    filter(healthCheck => !healthCheck.isSufficientlySecure),
     fold(
       () => <Fragment />,
       () => (

@@ -42,7 +42,7 @@ describe('security call out', () => {
   });
 
   test('renders nothing if keys are enabled', async () => {
-    http.get.mockResolvedValue({ canGenerateApiKeys: true });
+    http.get.mockResolvedValue({ isSufficientlySecure: true });
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
@@ -54,7 +54,7 @@ describe('security call out', () => {
   });
 
   test('renders the callout if keys are disabled', async () => {
-    http.get.mockImplementationOnce(async () => ({ canGenerateApiKeys: false }));
+    http.get.mockImplementationOnce(async () => ({ isSufficientlySecure: false }));
 
     let component: ShallowWrapper | undefined;
     await act(async () => {

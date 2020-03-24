@@ -140,7 +140,16 @@ export const AlertEdit = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertActionSecurityCallOut docLinks={docLinks} action={'editing'} http={http} />
+        <AlertActionSecurityCallOut
+          docLinks={docLinks}
+          action={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertEdit.securityCalloutAction',
+            {
+              defaultMessage: 'editing',
+            }
+          )}
+          http={http}
+        />
         <EuiFlyoutBody>
           {hasActionsDisabled && (
             <Fragment>
