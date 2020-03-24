@@ -32,6 +32,8 @@ import {
   buildNoteDescription,
   buildRuleTypeDescription,
 } from './helpers';
+import { useSiemJobs } from '../../../../../components/ml_popover/hooks/use_siem_jobs';
+import { buildMlJobDescription } from './ml_job_description';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -57,15 +59,22 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
 }) => {
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
+  const [, siemJobs] = useSiemJobs(true);
 
   const keys = Object.keys(schema);
-  const listItems = keys.reduce(
-    (acc: ListItems[], key: string) => [
-      ...acc,
-      ...buildListItems(data, pick(key, schema), filterManager, indexPatterns),
-    ],
-    []
-  );
+  const listItems = keys.reduce((acc: ListItems[], key: string) => {
+    if (key === 'machineLearningJobId') {
+      return [
+        ...acc,
+        buildMlJobDescription(
+          get(key, data) as string,
+          (get(key, schema) as { label: string }).label,
+          siemJobs
+        ),
+      ];
+    }
+    return [...acc, ...buildListItems(data, pick(key, schema), filterManager, indexPatterns)];
+  }, []);
 
   if (columns === 'multi') {
     return (
