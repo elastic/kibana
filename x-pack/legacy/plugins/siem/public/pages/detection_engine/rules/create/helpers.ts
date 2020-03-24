@@ -6,6 +6,7 @@
 
 import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
+import deepmerge from 'deepmerge';
 
 import {
   NOTIFICATION_THROTTLE_RULE,
@@ -156,7 +157,12 @@ export const getAlertThrottle = (throttle: string | null) =>
     : null;
 
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
-  const { actions = [], enabled, throttle = NOTIFICATION_THROTTLE_NO_ACTIONS } = actionsStepData;
+  const {
+    actions = [],
+    enabled,
+    kibanaSiemAppUrl,
+    throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
+  } = actionsStepData;
 
   return {
     actions: actions.map(transformAlertToRuleAction),
@@ -164,6 +170,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
     throttle: actions.length ? getAlertThrottle(throttle) : null,
     meta: {
       throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
+      kibanaSiemAppUrl,
     },
   };
 };
@@ -173,9 +180,10 @@ export const formatRule = (
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule
-): NewRule => ({
-  ...formatDefineStepData(defineStepData),
-  ...formatAboutStepData(aboutStepData),
-  ...formatScheduleStepData(scheduleData),
-  ...formatActionsStepData(actionsData),
-});
+): NewRule =>
+  deepmerge.all([
+    formatDefineStepData(defineStepData),
+    formatAboutStepData(aboutStepData),
+    formatScheduleStepData(scheduleData),
+    formatActionsStepData(actionsData),
+  ]) as NewRule;

@@ -75,59 +75,75 @@ const MetaRule = t.intersection([
   }),
   t.partial({
     throttle: t.string,
+    kibanaSiemAppUrl: t.string,
   }),
 ]);
 
-export const RuleSchema = t.intersection([
+export const RuleStatusSchema = t.intersection([
   t.type({
     created_at: t.string,
     created_by: t.string,
+    updated_at: t.string,
+    updated_by: t.string,
+  }),
+  t.partial({
+    last_success_at: t.string,
+    last_success_message: t.string,
+    last_failure_at: t.string,
+    last_failure_message: t.string,
+    status: t.string,
+    status_date: t.string,
+  }),
+]);
+
+export const RuleAlertSchema = t.type({
+  actions: t.array(action),
+  enabled: t.boolean,
+  throttle: t.union([t.string, t.null]),
+  tags: t.array(t.string),
+  name: t.string,
+  interval: t.string,
+  id: t.string,
+});
+
+export const RuleParamsSchema = t.intersection([
+  t.type({
     description: t.string,
-    enabled: t.boolean,
     false_positives: t.array(t.string),
     from: t.string,
-    id: t.string,
-    interval: t.string,
     immutable: t.boolean,
-    name: t.string,
     max_signals: t.number,
     references: t.array(t.string),
     risk_score: t.number,
     rule_id: t.string,
     severity: t.string,
-    tags: t.array(t.string),
-    type: RuleTypeSchema,
-    to: t.string,
     threat: t.array(t.unknown),
-    updated_at: t.string,
-    updated_by: t.string,
-    actions: t.array(action),
-    throttle: t.union([t.string, t.null]),
+    to: t.string,
+    type: RuleTypeSchema,
   }),
   t.partial({
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),
     index: t.array(t.string),
     language: t.string,
-    last_failure_at: t.string,
-    last_failure_message: t.string,
-    meta: MetaRule,
     machine_learning_job_id: t.string,
+    name: t.string,
+    meta: MetaRule,
+    note: t.string,
     output_index: t.string,
     query: t.string,
     saved_id: t.string,
-    status: t.string,
-    status_date: t.string,
     timeline_id: t.string,
     timeline_title: t.string,
-    note: t.string,
     version: t.number,
   }),
 ]);
 
+export const RuleSchema = t.intersection([RuleAlertSchema, RuleParamsSchema, RuleStatusSchema]);
 export const RulesSchema = t.array(RuleSchema);
 
 export type Rule = t.TypeOf<typeof RuleSchema>;
+export type RuleParams = t.TypeOf<typeof RuleParamsSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
 
 export interface RuleError {

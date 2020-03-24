@@ -87,6 +87,7 @@ export interface ScheduleStepRule extends StepRuleData {
 export interface ActionsStepRule extends StepRuleData {
   actions: AlertAction[];
   enabled: boolean;
+  kibanaSiemAppUrl?: string;
   throttle?: string | null;
 }
 
@@ -128,10 +129,6 @@ export interface ActionsStepRuleJson {
   throttle?: string | null;
   meta?: unknown;
 }
-
-export type MyRule = Omit<DefineStepRule & ScheduleStepRule & AboutStepRule, 'isNew'> & {
-  immutable: boolean;
-};
 
 export interface IMitreAttack {
   id: string;

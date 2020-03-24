@@ -33,7 +33,7 @@ import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
 import { StepRuleActions } from '../components/step_rule_actions';
 import { formatRule } from '../create/helpers';
-import { getStepsData, redirectToDetections } from '../helpers';
+import { getStepsData, redirectToDetections, getActionMessageParams } from '../helpers';
 import * as ruleI18n from '../translations';
 import {
   RuleStep,
@@ -103,6 +103,7 @@ const EditRulePageComponent: FC = () => {
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
+  const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule]);
   const setStepsForm = useCallback(
     (step: RuleStep, form: FormHook<FormData>) => {
       stepsForm.current[step] = form;
@@ -192,6 +193,7 @@ const EditRulePageComponent: FC = () => {
                   isUpdateView
                   defaultValues={myActionsRuleForm.data}
                   setForm={setStepsForm}
+                  actionMessageParams={actionMessageParams}
                 />
               )}
               <EuiSpacer />
@@ -210,6 +212,7 @@ const EditRulePageComponent: FC = () => {
       myActionsRuleForm,
       setStepsForm,
       stepsForm,
+      actionMessageParams,
     ]
   );
 

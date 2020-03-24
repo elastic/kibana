@@ -559,7 +559,8 @@ describe('helpers', () => {
         actions: [],
         enabled: false,
         meta: {
-          throttle: null,
+          throttle: 'no_actions',
+          kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
         },
         throttle: null,
       };
@@ -578,6 +579,7 @@ describe('helpers', () => {
         enabled: false,
         meta: {
           throttle: mockStepData.throttle,
+          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
         },
         throttle: null,
       };
@@ -589,13 +591,29 @@ describe('helpers', () => {
       const mockStepData = {
         ...mockData,
         throttle: 'rule',
+        actions: [
+          {
+            group: 'default',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
       };
       const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
       const expected = {
-        actions: [],
+        actions: [
+          {
+            group: mockStepData.actions[0].group,
+            id: mockStepData.actions[0].id,
+            action_type_id: mockStepData.actions[0].actionTypeId,
+            params: mockStepData.actions[0].params,
+          },
+        ],
         enabled: false,
         meta: {
           throttle: mockStepData.throttle,
+          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
         },
         throttle: null,
       };
@@ -607,13 +625,29 @@ describe('helpers', () => {
       const mockStepData = {
         ...mockData,
         throttle: '1d',
+        actions: [
+          {
+            group: 'default',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
       };
       const result: ActionsStepRuleJson = formatActionsStepData(mockStepData);
       const expected = {
-        actions: [],
+        actions: [
+          {
+            group: mockStepData.actions[0].group,
+            id: mockStepData.actions[0].id,
+            action_type_id: mockStepData.actions[0].actionTypeId,
+            params: mockStepData.actions[0].params,
+          },
+        ],
         enabled: false,
         meta: {
           throttle: mockStepData.throttle,
+          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
         },
         throttle: mockStepData.throttle,
       };
@@ -625,7 +659,7 @@ describe('helpers', () => {
       const mockAction = {
         group: 'default',
         id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-        params: { message: 'ML Rule generated {{state.signalsCount}} singals' },
+        params: { message: 'ML Rule generated {{state.signalsCount}} signals' },
         actionTypeId: '.slack',
       };
 
@@ -646,6 +680,7 @@ describe('helpers', () => {
         enabled: false,
         meta: {
           throttle: null,
+          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
         },
         throttle: null,
       };

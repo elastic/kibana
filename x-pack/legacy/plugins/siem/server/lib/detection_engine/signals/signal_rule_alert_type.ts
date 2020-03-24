@@ -32,11 +32,9 @@ import { scheduleNotificationActions } from '../notifications/schedule_notificat
 export const signalRulesAlertType = ({
   logger,
   version,
-  kibanaUrl,
 }: {
   logger: Logger;
   version: string;
-  kibanaUrl: string;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -222,7 +220,7 @@ export const signalRulesAlertType = ({
               to: 'now',
               index: ruleParams.outputIndex,
               ruleId: ruleParams.ruleId!,
-              kibanaUrl: meta?.kibanaUrl as string,
+              kibanaSiemAppUrl: meta.kibanaSiemAppUrl,
               ruleAlertId: savedObject.id,
               callCluster: services.callCluster,
             });

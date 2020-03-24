@@ -7,6 +7,7 @@
 import dateMath from '@elastic/datemath';
 import { get } from 'lodash/fp';
 import moment from 'moment';
+import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
@@ -62,6 +63,7 @@ export const getActionsStepsData = (
     actions: actions?.map(transformRuleToAlertAction),
     isNew: false,
     throttle: meta?.throttle,
+    kibanaSiemAppUrl: meta?.kibanaSiemAppUrl,
     enabled,
   };
 };
@@ -227,3 +229,45 @@ export const redirectToDetections = (
   isAuthenticated != null &&
   hasEncryptionKey != null &&
   (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);
+
+export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
+  const commonRuleParamsKeys = [
+    'name',
+    'description',
+    'false_positives',
+    'rule_id',
+    'max_signals',
+    'risk_score',
+    'output_index',
+    'references',
+    'severity',
+    'timeline_id',
+    'timeline_title',
+    'threat',
+    'type',
+    'version',
+    // 'lists',
+  ];
+
+  const ruleParamsKeys = [
+    ...commonRuleParamsKeys,
+    ...(isMlRule(ruleType)
+      ? ['anomaly_threshold', 'machine_learning_job_id']
+      : ['index', 'filters', 'language', 'query', 'saved_id']),
+  ].sort();
+
+  return ruleParamsKeys;
+};
+
+export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined): string[] => {
+  if (!ruleType) {
+    return [];
+  }
+  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+
+  return [
+    'state.signals_count',
+    '{context.results_link}',
+    ...actionMessageRuleParams.map(param => `context.rule.${param}`),
+  ];
+});

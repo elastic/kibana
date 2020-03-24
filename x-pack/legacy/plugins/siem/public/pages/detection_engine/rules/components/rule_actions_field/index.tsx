@@ -5,7 +5,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import memoizeOne from 'memoize-one';
 import deepMerge from 'deepmerge';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -22,26 +21,16 @@ import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../../commo
 type ThrottleSelectField = typeof SelectField;
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
-const DEFAULT_ACTION_MESSAGE = 'Rule generated {{state.signalsCount}} singals';
+const DEFAULT_ACTION_MESSAGE =
+  'Rule {{context.rule.name}} generated {{state.signalsCount}} signals';
 
-const MESSAGE_STATE_VARIABLES = ['signalsCount'];
-const MESSAGE_CONTEXT_VARIABLES = ['rule.id', 'rule.name', '{context.resultsLink}'];
-
-const getMessageVariables = memoizeOne(() => {
-  const stateVariables = MESSAGE_STATE_VARIABLES.map(variableName => `state.${variableName}`);
-  const contextVariables = MESSAGE_CONTEXT_VARIABLES.map(variableName => `context.${variableName}`);
-
-  return [...stateVariables, ...contextVariables];
-});
-
-export const RuleActionsField: ThrottleSelectField = ({ field }) => {
+export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables }) => {
   const [supportedActionTypes, setSupportedActionTypes] = useState<ActionType[] | undefined>();
   const {
     http,
     triggers_actions_ui: { actionTypeRegistry },
     notifications,
   } = useKibana().services;
-  const messageVariables = getMessageVariables();
 
   const setActionIdByIndex = useCallback(
     (id: string, index: number) => {

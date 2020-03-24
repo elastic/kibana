@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled, { StyledComponent } from 'styled-components';
 
@@ -24,7 +24,7 @@ import { StepScheduleRule } from '../components/step_schedule_rule';
 import { StepRuleActions } from '../components/step_rule_actions';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
-import { redirectToDetections } from '../helpers';
+import { redirectToDetections, getActionMessageParams } from '../helpers';
 import {
   AboutStepRule,
   DefineStepRule,
@@ -112,6 +112,11 @@ const CreateRulePageComponent: React.FC = () => {
     [RuleStep.ruleActions]: false,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const actionMessageParams = useMemo(
+    () =>
+      getActionMessageParams((stepsData.current['define-rule'].data as DefineStepRule).ruleType),
+    [stepsData.current['define-rule'].data]
+  );
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
@@ -412,6 +417,7 @@ const CreateRulePageComponent: React.FC = () => {
               isLoading={isLoading || loading}
               setForm={setStepsForm}
               setStepData={setStepData}
+              actionMessageParams={actionMessageParams}
             />
           </EuiAccordion>
         </MyEuiPanel>

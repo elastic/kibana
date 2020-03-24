@@ -15,19 +15,24 @@ import { Form, UseField, useForm } from '../../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { ThrottleSelectField, THROTTLE_OPTIONS } from '../throttle_select_field';
 import { RuleActionsField } from '../rule_actions_field';
+import { useKibana } from '../../../../../lib/kibana';
 import { schema } from './schema';
 import * as I18n from './translations';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
+  actionMessageParams: string[];
 }
 
 const stepActionsDefaultValue = {
   enabled: true,
   isNew: true,
   actions: [],
+  kibanaSiemAppUrl: '',
   throttle: THROTTLE_OPTIONS[0].value,
 };
+
+const GhostFormField = () => <></>;
 
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   addPadding = false,
@@ -37,14 +42,22 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   isUpdateView = false,
   setStepData,
   setForm,
+  actionMessageParams,
 }) => {
   const [myStepData, setMyStepData] = useState<ActionsStepRule>(stepActionsDefaultValue);
+  const {
+    services: { application },
+  } = useKibana();
 
   const { form } = useForm({
     defaultValue: myStepData,
     options: { stripEmptyFields: false },
     schema,
   });
+
+  const kibanaAbsoluteUrl = useMemo(() => application.getUrlForApp('siem', { absolute: true }), [
+    application,
+  ]);
 
   const onSubmit = useCallback(
     async (enabled: boolean) => {
@@ -117,6 +130,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 path="actions"
                 defaultValue={myStepData.actions}
                 component={RuleActionsField}
+                componentProps={{
+                  messageVariables: actionMessageParams,
+                }}
+              />
+              <UseField
+                path="kibanaSiemAppUrl"
+                defaultValue={kibanaAbsoluteUrl}
+                component={GhostFormField}
               />
             </>
           )}
