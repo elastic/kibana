@@ -40,7 +40,7 @@ const customSettingsSchema = schema.object(
     created_by: schema.maybe(schema.string()),
     custom_urls: schema.maybe(schema.arrayOf(schema.maybe(schema.object({ ...customUrlSchema })))),
   },
-  { unknowns: 'allow' } // Create/ Update job API allows other fields to be added to custom_settings.
+  { unknowns: 'allow' } // Create / Update job API allows other fields to be added to custom_settings.
 );
 
 export const anomalyDetectionUpdateJobSchema = {
