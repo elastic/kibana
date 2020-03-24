@@ -147,11 +147,11 @@ export class ColumnChart extends PointSeries {
     function x(d, i) {
       if (isTimeScale) {
         return (
-          xScale(d.x) +
+          xScale(d.xFormatted) +
           datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount) * groupNum
         );
       }
-      return xScale(d.x) + (xScale.rangeBand() / groupCount) * groupNum;
+      return xScale(d.xFormatted) + (xScale.rangeBand() / groupCount) * groupNum;
     }
 
     function y(d) {
@@ -270,11 +270,11 @@ export class ColumnChart extends PointSeries {
     function x(d, i) {
       if (isTimeScale) {
         return (
-          xScale(d.x) +
+          xScale(d.xFormatted) +
           datumWidth(barWidth, d, bars.data()[i + 1], xScale, gutterWidth, groupCount) * groupNum
         );
       }
-      return xScale(d.x) + (xScale.rangeBand() / groupCount) * groupNum;
+      return xScale(d.xFormatted) + (xScale.rangeBand() / groupCount) * groupNum;
     }
 
     function y(d) {

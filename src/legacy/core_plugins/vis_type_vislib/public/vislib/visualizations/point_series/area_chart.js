@@ -102,9 +102,9 @@ export class AreaChart extends PointSeries {
 
     function x(d) {
       if (isTimeSeries) {
-        return xScale(d.x);
+        return xScale(d.xFormatted);
       }
-      return xScale(d.x) + xScale.rangeBand() / 2;
+      return xScale(d.xFormatted) + xScale.rangeBand() / 2;
     }
 
     function y1(d) {

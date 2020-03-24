@@ -67,6 +67,7 @@ export class Data {
                 const newVal = _.clone(val);
                 newVal.extraMetrics = val.extraMetrics;
                 newVal.series = val.series || seri.label;
+                newVal.xFormatted = getFormat(newData.xAxisFormat).convert(newVal.x);
                 return newVal;
               }),
               yAxisFormatter: val => converter.convert(val),
