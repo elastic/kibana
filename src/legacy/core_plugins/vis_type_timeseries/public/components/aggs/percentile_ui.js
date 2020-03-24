@@ -135,6 +135,8 @@ class PercentilesUi extends Component {
           <EuiFlexItem style={optionsStyle} grow={false}>
             <EuiFieldNumber
               id={htmlId('fillTo')}
+              min={0}
+              max={100}
               step={1}
               onChange={this.handleTextChange(model, 'percentile')}
               value={Number(model.percentile)}
