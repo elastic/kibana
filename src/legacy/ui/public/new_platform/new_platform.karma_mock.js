@@ -86,6 +86,7 @@ const mockCore = {
 };
 
 const querySetup = {
+  state$: mockObservable(),
   filterManager: {
     getFetches$: sinon.fake(),
     getFilters: sinon.fake(),
