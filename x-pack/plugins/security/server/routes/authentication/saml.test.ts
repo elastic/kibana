@@ -5,7 +5,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { Authentication, AuthenticationResult, SAMLLoginStep } from '../../authentication';
+import { Authentication, AuthenticationResult, SAMLLogin } from '../../authentication';
 import { defineSAMLRoutes } from './saml';
 import { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
 
@@ -37,7 +37,7 @@ describe('SAML authentication routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.options).toEqual({ authRequired: false, xsrfRequired: false });
       expect(routeConfig.validate).toEqual({
         body: expect.any(Type),
         query: undefined,
@@ -84,9 +84,9 @@ describe('SAML authentication routes', () => {
       );
 
       expect(authc.login).toHaveBeenCalledWith(request, {
-        provider: 'saml',
+        provider: { type: 'saml' },
         value: {
-          step: SAMLLoginStep.SAMLResponseReceived,
+          type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response',
         },
       });
@@ -163,9 +163,9 @@ describe('SAML authentication routes', () => {
       );
 
       expect(authc.login).toHaveBeenCalledWith(request, {
-        provider: 'saml',
+        provider: { type: 'saml' },
         value: {
-          step: SAMLLoginStep.SAMLResponseReceived,
+          type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response',
         },
       });

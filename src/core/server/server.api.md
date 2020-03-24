@@ -629,7 +629,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
-    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+    // (undocumented)
+    getStartServices: StartServicesAccessor<TPluginsStart>;
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
@@ -2339,6 +2340,9 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
 }>;
+
+// @public
+export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<[CoreStart, TPluginsStart]>;
 
 // @public
 export interface StatusServiceSetup {

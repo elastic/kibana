@@ -1,0 +1,13 @@
+{
+  "job_id": "JOB_ID",
+  "indices": ["INDEX_PATTERN_NAME"],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "must": [
+        { "bool": { "filter": { "term": { "agent.type": "heartbeat" } } } },
+        { "bool": { "filter": { "term": { "event.dataset": "uptime" } } } }
+      ]
+    }
+  }
+}

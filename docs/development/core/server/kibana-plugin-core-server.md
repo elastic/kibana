@@ -266,6 +266,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ScopeableRequest](./kibana-plugin-core-server.scopeablerequest.md) | A user credentials container. It accommodates the necessary auth credentials to impersonate the current user.<!-- -->See [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md)<!-- -->. |
 |  [ServiceStatus](./kibana-plugin-core-server.servicestatus.md) | The current status of a service at a point in time. |
 |  [SharedGlobalConfig](./kibana-plugin-core-server.sharedglobalconfig.md) |  |
+|  [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. This should only be used inside handlers registered during <code>setup</code> that will only be executed after <code>start</code> lifecycle. |
 |  [StringValidation](./kibana-plugin-core-server.stringvalidation.md) | Allows regex objects or a regex string |
 |  [UiSettingsType](./kibana-plugin-core-server.uisettingstype.md) | UI element type to represent the settings. |
 
