@@ -50,7 +50,7 @@ export async function fetchFindLatestPackage(
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
-    return searchResults[0];
+    return searchResults[searchResults.length - 1];
   } else {
     throw new Error('package not found');
   }
