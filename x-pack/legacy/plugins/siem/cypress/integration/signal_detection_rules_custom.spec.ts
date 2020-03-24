@@ -26,7 +26,6 @@ import {
 } from '../screens/rule_details';
 import {
   CUSTOM_RULES_BTN,
-  ELASTIC_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
   RULES_ROW,
@@ -40,58 +39,38 @@ import {
   fillDefineRuleAndContinue,
 } from '../tasks/create_new_rule';
 import {
-  changeToThreeHundredRowsPerPage,
-  filterByCustomRules,
-  goToCreateNewRule,
-  goToRuleDetails,
-  loadPrebuiltDetectionRules,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForPrebuiltDetectionRulesToBeLoaded,
-  waitForRulesToBeLoaded,
-} from '../tasks/signal_detection_rules';
-import {
   goToManageSignalDetectionRules,
   waitForSignalsIndexToBeCreated,
   waitForSignalsPanelToBeLoaded,
 } from '../tasks/detections';
-import { esArchiverLoadEmptyKibana, esArchiverUnloadEmptyKibana } from '../tasks/es_archiver';
+import {
+  changeToThreeHundredRowsPerPage,
+  filterByCustomRules,
+  goToCreateNewRule,
+  goToRuleDetails,
+  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
+  waitForRulesToBeLoaded,
+} from '../tasks/signal_detection_rules';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
-describe('Signal detection rules', () => {
+describe('Signal detection rules, custom', () => {
   before(() => {
-    esArchiverLoadEmptyKibana();
+    esArchiverLoad('prebuilt_rules_loaded');
+  });
+
+  after(() => {
+    esArchiverUnload('prebuilt_rules_loaded');
+  });
+
+  it('Creates and activates a new custom rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     waitForSignalsPanelToBeLoaded();
     waitForSignalsIndexToBeCreated();
     goToManageSignalDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
-  });
-
-  after(() => {
-    esArchiverUnloadEmptyKibana();
-  });
-
-  it('Loads prebuilt rules', () => {
-    loadPrebuiltDetectionRules();
-    waitForPrebuiltDetectionRulesToBeLoaded();
-
-    const expectedElasticRulesBtnText = 'Elastic rules (92)';
-    cy.get(ELASTIC_RULES_BTN)
-      .invoke('text')
-      .should('eql', expectedElasticRulesBtnText);
-
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
-
-    const expectedNumberOfRules = 92;
-    cy.get(RULES_TABLE).then($table => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
-  });
-
-  it('Creates and activates new rule', () => {
     goToCreateNewRule();
     fillDefineRuleAndContinue(newRule);
     fillAboutRuleAndContinue(newRule);
