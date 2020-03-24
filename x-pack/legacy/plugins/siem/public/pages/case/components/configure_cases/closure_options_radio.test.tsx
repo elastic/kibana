@@ -11,7 +11,7 @@ import { ClosureOptionsRadio } from './closure_options_radio';
 import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { TestProviders } from '../../../../mock';
 
-describe('ClosureOptionsRadio ', () => {
+describe('ClosureOptionsRadio', () => {
   const mount = useMountAppended();
 
   test('it renders', () => {

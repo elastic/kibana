@@ -27,8 +27,13 @@ const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({
       fullWidth
       title={<h3>{i18n.CASE_CLOSURE_OPTIONS_TITLE}</h3>}
       description={i18n.CASE_CLOSURE_OPTIONS_DESC}
+      data-test-subj="case-closure-options-form-group"
     >
-      <EuiFormRow fullWidth label={i18n.CASE_CLOSURE_OPTIONS_LABEL}>
+      <EuiFormRow
+        fullWidth
+        label={i18n.CASE_CLOSURE_OPTIONS_LABEL}
+        data-test-subj="case-closure-options-form-row"
+      >
         <ClosureOptionsRadio
           closureTypeSelected={closureTypeSelected}
           disabled={disabled}
