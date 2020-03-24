@@ -16,7 +16,9 @@ export function setupCapabilitiesSwitcher(
   logger: Logger
 ): CapabilitiesSwitcher {
   return async (request, capabilities) => {
-    if (!request.auth.isAuthenticated) {
+    const isAnonymousRequest = !request.route.options.authRequired;
+
+    if (isAnonymousRequest) {
       return capabilities;
     }
 
@@ -28,9 +30,10 @@ export function setupCapabilitiesSwitcher(
 
       const registeredFeatures = features.getFeatures();
 
+      // try to retrieve capabilities for authenticated or "maybe authenticated" users
       return toggleCapabilities(registeredFeatures, capabilities, activeSpace);
     } catch (e) {
-      logger.warn(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
+      logger.debug(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
       return capabilities;
     }
   };
