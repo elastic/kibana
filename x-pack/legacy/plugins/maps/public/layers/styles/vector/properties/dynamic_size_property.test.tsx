@@ -55,8 +55,8 @@ const mockLayer: IVectorLayer = {
     return undefined;
   },
   getStyle(): IVectorStyle {
+    // @ts-ignore
     return {
-      // @ts-ignore
       getStyleMeta(): StyleMeta {
         return new StyleMeta({
           geometryTypes: {
