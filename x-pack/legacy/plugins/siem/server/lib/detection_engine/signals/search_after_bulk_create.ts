@@ -38,7 +38,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
   searchAfterTimes: string[];
   bulkCreateTimes: string[];
-  lastLookBackDate: Date | null;
+  lastLookBackDate: Date | null | undefined;
 }
 
 // search_after through documents and re-index using bulk endpoint.
@@ -93,9 +93,10 @@ export const searchAfterAndBulkCreate = async ({
     tags,
     throttle,
   });
-  toReturn.lastLookBackDate = new Date(
-    someResult.hits.hits[someResult.hits.hits.length - 1]._source['@timestamp']
-  );
+  toReturn.lastLookBackDate =
+    someResult.hits.hits.length > 0
+      ? new Date(someResult.hits.hits[someResult.hits.hits.length - 1]?._source['@timestamp'])
+      : null;
   if (bulkCreateDuration) {
     toReturn.bulkCreateTimes.push(bulkCreateDuration);
   }

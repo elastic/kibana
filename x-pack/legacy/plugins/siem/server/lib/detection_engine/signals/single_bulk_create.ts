@@ -10,7 +10,7 @@ import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { SignalSearchResponse, BulkResponse } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
-import { generateId } from './utils';
+import { generateId, makeFloatString } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
 
@@ -127,7 +127,7 @@ export const singleBulkCreate = async ({
     body: bulkBody,
   });
   const end = performance.now();
-  logger.debug(`individual bulk process time took: ${Number(end - start).toFixed(2)} milliseconds`);
+  logger.debug(`individual bulk process time took: ${makeFloatString(end - start)} milliseconds`);
   logger.debug(`took property says bulk took: ${response.took} milliseconds`);
 
   if (response.errors) {
@@ -145,5 +145,5 @@ export const singleBulkCreate = async ({
       );
     }
   }
-  return { success: true, bulkCreateDuration: Number(end - start).toFixed(2) };
+  return { success: true, bulkCreateDuration: makeFloatString(end - start) };
 };

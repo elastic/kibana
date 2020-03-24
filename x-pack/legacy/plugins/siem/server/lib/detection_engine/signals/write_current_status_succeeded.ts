@@ -30,13 +30,13 @@ export const writeCurrentStatusSucceeded = async ({
   currentStatusSavedObject.attributes.statusDate = sDate;
   currentStatusSavedObject.attributes.lastSuccessAt = sDate;
   currentStatusSavedObject.attributes.lastSuccessMessage = 'succeeded';
-  if (lastLookBackDate) {
+  if (lastLookBackDate != null) {
     currentStatusSavedObject.attributes.lastLookBackDate = lastLookBackDate;
   }
-  if (bulkCreateTimes) {
+  if (bulkCreateTimes != null) {
     currentStatusSavedObject.attributes.bulkCreateTimeDurations = bulkCreateTimes;
   }
-  if (searchAfterTimes) {
+  if (searchAfterTimes != null) {
     currentStatusSavedObject.attributes.searchAfterTimeDurations = searchAfterTimes;
   }
   await services.savedObjectsClient.update(ruleStatusSavedObjectType, currentStatusSavedObject.id, {

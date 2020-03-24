@@ -9,6 +9,7 @@ import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { Logger } from '../../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
+import { makeFloatString } from './utils';
 
 interface SingleSearchAfterParams {
   searchAfterSortId: string | undefined;
@@ -53,7 +54,7 @@ export const singleSearchAfter = async ({
       searchAfterQuery
     );
     const end = performance.now();
-    return { searchResult: nextSearchAfterResult, searchDuration: Number(end - start).toFixed(2) };
+    return { searchResult: nextSearchAfterResult, searchDuration: makeFloatString(end - start) };
   } catch (exc) {
     logger.error(`[-] nextSearchAfter threw an error ${exc}`);
     throw exc;

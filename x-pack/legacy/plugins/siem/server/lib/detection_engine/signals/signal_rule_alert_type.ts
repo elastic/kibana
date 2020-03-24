@@ -20,7 +20,7 @@ import {
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import { getGapBetweenRuns } from './utils';
+import { getGapBetweenRuns, makeFloatString } from './utils';
 import { writeSignalRuleExceptionToSavedObject } from './write_signal_rule_exception_to_saved_object';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -222,7 +222,7 @@ export const signalRulesAlertType = ({
             tags,
             throttle,
           });
-          creationSucceeded.searchAfterTimes.push(Number(end - start).toFixed(2));
+          creationSucceeded.searchAfterTimes.push(makeFloatString(end - start));
         }
 
         if (creationSucceeded.success) {
@@ -263,8 +263,8 @@ export const signalRulesAlertType = ({
             services,
             currentStatusSavedObject,
             bulkCreateTimes: creationSucceeded.bulkCreateTimes,
-            searchAfterTimes: [...creationSucceeded.searchAfterTimes],
-            lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString(),
+            searchAfterTimes: creationSucceeded.searchAfterTimes,
+            lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString() ?? null,
           });
         } else {
           await writeSignalRuleExceptionToSavedObject({
@@ -277,8 +277,8 @@ export const signalRulesAlertType = ({
             ruleStatusSavedObjects,
             ruleId: ruleId ?? '(unknown rule id)',
             bulkCreateTimes: creationSucceeded.bulkCreateTimes,
-            searchAfterTimes: [...creationSucceeded.searchAfterTimes],
-            lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString(),
+            searchAfterTimes: creationSucceeded.searchAfterTimes,
+            lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString() ?? null,
           });
         }
       } catch (err) {
@@ -292,8 +292,8 @@ export const signalRulesAlertType = ({
           ruleStatusSavedObjects,
           ruleId: ruleId ?? '(unknown rule id)',
           bulkCreateTimes: creationSucceeded.bulkCreateTimes,
-          searchAfterTimes: [...creationSucceeded.searchAfterTimes],
-          lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString(),
+          searchAfterTimes: creationSucceeded.searchAfterTimes,
+          lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString() ?? null,
         });
       }
     },
