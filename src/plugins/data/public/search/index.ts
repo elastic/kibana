@@ -51,5 +51,6 @@ export {
 } from './search_source';
 
 export { SearchInterceptor } from './search_interceptor';
+export { RequestTimeoutError } from './request_timeout_error';
 
 export { FetchOptions } from './fetch';

@@ -5,6 +5,7 @@
  */
 
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
@@ -20,6 +21,7 @@ interface SearchAfterAndBulkCreateParams {
   inputIndexPattern: string[];
   signalsIndex: string;
   name: string;
+  actions: RuleAlertAction[];
   createdAt: string;
   createdBy: string;
   updatedBy: string;
@@ -29,6 +31,7 @@ interface SearchAfterAndBulkCreateParams {
   pageSize: number;
   filter: unknown;
   tags: string[];
+  throttle: string | null;
 }
 
 // search_after through documents and re-index using bulk endpoint.
@@ -41,6 +44,7 @@ export const searchAfterAndBulkCreate = async ({
   inputIndexPattern,
   signalsIndex,
   filter,
+  actions,
   name,
   createdAt,
   createdBy,
@@ -50,6 +54,7 @@ export const searchAfterAndBulkCreate = async ({
   enabled,
   pageSize,
   tags,
+  throttle,
 }: SearchAfterAndBulkCreateParams): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
@@ -63,6 +68,7 @@ export const searchAfterAndBulkCreate = async ({
     logger,
     id,
     signalsIndex,
+    actions,
     name,
     createdAt,
     createdBy,
@@ -71,6 +77,7 @@ export const searchAfterAndBulkCreate = async ({
     interval,
     enabled,
     tags,
+    throttle,
   });
   const totalHits =
     typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
@@ -127,6 +134,7 @@ export const searchAfterAndBulkCreate = async ({
         logger,
         id,
         signalsIndex,
+        actions,
         name,
         createdAt,
         createdBy,
@@ -135,6 +143,7 @@ export const searchAfterAndBulkCreate = async ({
         interval,
         enabled,
         tags,
+        throttle,
       });
       logger.debug('finished next bulk index');
     } catch (exc) {

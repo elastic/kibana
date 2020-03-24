@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
 import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './es_client';
+import { SearchInterceptor } from './search_interceptor';
 
 /**
  * Search strategy interface contains a search method that takes in
@@ -73,9 +73,7 @@ export interface ISearchSetup {
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
-  cancel: () => void;
-  getPendingCount$: () => Observable<number>;
-  runBeyondTimeout: () => void;
+  setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
   __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
 }

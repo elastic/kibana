@@ -10,6 +10,7 @@ import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
+import { umDynamicSettings } from './lib/saved_objects';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -31,29 +32,34 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
   features.registerFeature({
     id: PLUGIN.ID,
     name: PLUGIN.NAME,
+    order: 1000,
     navLinkId: PLUGIN.ID,
     icon: 'uptimeApp',
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
     privileges: {
       all: {
-        api: ['uptime'],
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
+        api: ['uptime-read', 'uptime-write'],
         savedObject: {
-          all: [],
+          all: [umDynamicSettings.name],
           read: [],
         },
-        ui: ['save'],
+        ui: ['save', 'configureSettings', 'show'],
       },
       read: {
-        api: ['uptime'],
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
+        api: ['uptime-read'],
         savedObject: {
           all: [],
-          read: [],
+          read: [umDynamicSettings.name],
         },
-        ui: [],
+        ui: ['show'],
       },
     },
   });
 
-  initUptimeServer(libs);
+  initUptimeServer(server, libs, plugins);
 };

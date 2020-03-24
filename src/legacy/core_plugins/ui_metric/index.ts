@@ -25,9 +25,6 @@ export default function(kibana: any) {
     id: 'ui_metric',
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      mappings: require('./mappings.json'),
-    },
     init() {},
   });
 }

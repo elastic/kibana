@@ -37,7 +37,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.security.authc.token.timeout=15s',
         'xpack.security.authc.realms.saml.saml1.order=0',
         `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
-        'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co',
+        'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
         `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,

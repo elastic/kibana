@@ -51,10 +51,7 @@ export const security = (kibana: Record<string, any>) =>
     uiExports: {
       hacks: ['plugins/security/hacks/legacy'],
       injectDefaultVars: (server: Server) => {
-        return {
-          secureCookies: getSecurityPluginSetup(server).__legacyCompat.config.secureCookies,
-          enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
-        };
+        return { enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled') };
       },
     },
 
