@@ -52,7 +52,7 @@ import { InfraPluginSetup } from '../../infra/server';
 export interface LegacyAPI {
   telemetryCollectionManager: TelemetryCollectionManager;
   getServerStatus: () => string;
-  infra: any;
+  locale: string;
 }
 
 interface PluginsSetup {
@@ -86,6 +86,7 @@ interface LegacyShimDependencies {
 
 interface IBulkUploader {
   setKibanaStatusGetter: (getter: () => string | undefined) => void;
+  setKibanaLocaleGetter: (getter: () => string | undefined) => void;
   getKibanaStats: () => any;
 }
 
@@ -279,6 +280,7 @@ export class Plugin {
 
     // Set the stats getter
     this.bulkUploader.setKibanaStatusGetter(() => legacyAPI.getServerStatus());
+    this.bulkUploader.setKibanaLocaleGetter(() => legacyAPI.locale);
   }
 
   getLegacyShim(

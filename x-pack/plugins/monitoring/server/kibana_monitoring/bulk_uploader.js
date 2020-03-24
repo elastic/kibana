@@ -62,10 +62,15 @@ export class BulkUploader {
 
     this.kibanaStats = kibanaStats;
     this.kibanaStatusGetter = null;
+    this.kibanaLocaleGetter = null;
   }
 
   setKibanaStatusGetter(getter) {
     this.kibanaStatusGetter = getter;
+  }
+
+  setKibanaLocaleGetter(getter) {
+    this.kibanaLocaleGetter = getter;
   }
 
   filterCollectorSet(usageCollection) {
@@ -191,6 +196,7 @@ export class BulkUploader {
   getKibanaStats() {
     return {
       ...this.kibanaStats,
+      locale: this.kibanaLocaleGetter(),
       status: this.kibanaStatusGetter(),
     };
   }

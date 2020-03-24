@@ -37,6 +37,7 @@ export const monitoring = kibana => {
             const status = kbnServerStatus.toJSON();
             return get(status, 'overall.state');
           },
+          locale: serverConfig.get('i18n.locale'),
         });
       }
 
