@@ -9,6 +9,7 @@
     "xpack.beatsManagement": "legacy/plugins/beats_management",
     "xpack.canvas": "legacy/plugins/canvas",
     "xpack.crossClusterReplication": "legacy/plugins/cross_cluster_replication",
+    "xpack.dashboard": "plugins/dashboard_enhanced",
     "xpack.dashboardMode": "legacy/plugins/dashboard_mode",
     "xpack.data": "plugins/data_enhanced",
     "xpack.drilldowns": "plugins/drilldowns",
