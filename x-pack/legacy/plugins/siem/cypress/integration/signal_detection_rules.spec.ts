@@ -13,10 +13,10 @@ import {
   ABOUT_SEVERITY,
   ABOUT_STEP,
   ABOUT_TAGS,
-  ABOUT_TIMELINE,
   ABOUT_URLS,
   DEFINITION_CUSTOM_QUERY,
   DEFINITION_INDEX_PATTERNS,
+  DEFINITION_TIMELINE,
   DEFINITION_STEP,
   RULE_NAME_HEADER,
   SCHEDULE_LOOPBACK,
@@ -171,10 +171,6 @@ describe('Signal detection rules', () => {
       .invoke('text')
       .should('eql', newRule.riskScore);
     cy.get(ABOUT_STEP)
-      .eq(ABOUT_TIMELINE)
-      .invoke('text')
-      .should('eql', 'Default blank timeline');
-    cy.get(ABOUT_STEP)
       .eq(ABOUT_URLS)
       .invoke('text')
       .should('eql', expectedUrls);
@@ -202,6 +198,10 @@ describe('Signal detection rules', () => {
       .eq(DEFINITION_CUSTOM_QUERY)
       .invoke('text')
       .should('eql', `${newRule.customQuery} `);
+    cy.get(DEFINITION_STEP)
+      .eq(DEFINITION_TIMELINE)
+      .invoke('text')
+      .should('eql', 'Default blank timeline');
 
     cy.get(SCHEDULE_STEP)
       .eq(SCHEDULE_RUNS)
