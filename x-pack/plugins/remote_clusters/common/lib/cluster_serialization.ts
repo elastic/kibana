@@ -153,7 +153,7 @@ export function serializeCluster(deserializedClusterObject: Cluster): ClusterPay
       cluster: {
         remote: {
           [name]: {
-            skip_unavailable: skipUnavailable || null,
+            skip_unavailable: typeof skipUnavailable === 'boolean' ? skipUnavailable : null,
             mode: mode || null,
             proxy_address: proxyAddress || null,
             proxy_socket_connections: proxySocketConnections || null,
