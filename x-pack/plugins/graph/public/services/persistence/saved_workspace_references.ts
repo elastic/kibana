@@ -5,7 +5,6 @@
  */
 
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
-import { SavedWorkspace } from './saved_workspace';
 
 export function extractReferences({
   attributes,
@@ -38,7 +37,10 @@ export function extractReferences({
   };
 }
 
-export function injectReferences(savedObject: SavedWorkspace, references: SavedObjectReference[]) {
+export function injectReferences(
+  savedObject: { wsState?: string },
+  references: SavedObjectReference[]
+) {
   // Skip if wsState is missing, at the time of development of this, there is no guarantee each
   // saved object has wsState.
   if (typeof savedObject.wsState !== 'string') {

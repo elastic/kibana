@@ -191,6 +191,22 @@ export const buildQuery = ({
                 ],
               },
             },
+            {
+              bool: {
+                filter: [
+                  {
+                    term: {
+                      'event.category': 'process',
+                    },
+                  },
+                  {
+                    term: {
+                      'event.type': 'start',
+                    },
+                  },
+                ],
+              },
+            },
           ],
           minimum_should_match: 1,
           filter,

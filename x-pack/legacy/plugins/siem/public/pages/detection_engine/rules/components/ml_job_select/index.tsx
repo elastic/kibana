@@ -20,10 +20,11 @@ const JobDisplay = ({ title, description }: { title: string; description: string
 );
 
 interface MlJobSelectProps {
+  describedByIds: string[];
   field: FieldHook;
 }
 
-export const MlJobSelect: React.FC<MlJobSelectProps> = ({ field }) => {
+export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], field }) => {
   const jobId = field.value as string;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [isLoading, siemJobs] = useSiemJobs(false);
@@ -41,7 +42,14 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ field }) => {
   }));
 
   return (
-    <EuiFormRow fullWidth label={field.label} isInvalid={isInvalid} error={errorMessage}>
+    <EuiFormRow
+      fullWidth
+      label={field.label}
+      isInvalid={isInvalid}
+      error={errorMessage}
+      data-test-subj="mlJobSelect"
+      describedByIds={describedByIds}
+    >
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiSuperSelect

@@ -135,6 +135,7 @@ export class Relationships extends Component {
                 aria-label={getSavedObjectLabel(type)}
                 type={object.meta.icon || 'apps'}
                 size="s"
+                data-test-subj="relationshipsObjectType"
               />
             </EuiToolTip>
           );
@@ -149,6 +150,7 @@ export class Relationships extends Component {
         dataType: 'string',
         sortable: false,
         width: '125px',
+        'data-test-subj': 'directRelationship',
         render: relationship => {
           if (relationship === 'parent') {
             return (
@@ -187,10 +189,16 @@ export class Relationships extends Component {
           const { path } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
           if (!canGoInApp) {
-            return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
+            return (
+              <EuiText size="s" data-test-subj="relationshipsTitle">
+                {title || getDefaultTitle(object)}
+              </EuiText>
+            );
           }
           return (
-            <EuiLink href={chrome.addBasePath(path)}>{title || getDefaultTitle(object)}</EuiLink>
+            <EuiLink href={chrome.addBasePath(path)} data-test-subj="relationshipsTitle">
+              {title || getDefaultTitle(object)}
+            </EuiLink>
           );
         },
       },
@@ -211,6 +219,7 @@ export class Relationships extends Component {
             ),
             type: 'icon',
             icon: 'inspect',
+            'data-test-subj': 'relationshipsTableAction-inspect',
             onClick: object => goInspectObject(object),
             available: object => !!object.meta.editUrl,
           },
@@ -295,6 +304,9 @@ export class Relationships extends Component {
           columns={columns}
           pagination={true}
           search={search}
+          rowProps={() => ({
+            'data-test-subj': `relationshipsTableRow`,
+          })}
         />
       </div>
     );

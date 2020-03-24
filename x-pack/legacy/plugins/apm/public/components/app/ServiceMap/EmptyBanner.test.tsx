@@ -7,9 +7,9 @@
 import { act, render, wait } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import React, { FunctionComponent } from 'react';
-import { MockApmPluginContextWrapper } from '../../../utils/testHelpers';
 import { CytoscapeContext } from './Cytoscape';
 import { EmptyBanner } from './EmptyBanner';
+import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 
 const cy = cytoscape({});
 

@@ -378,7 +378,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
-    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+    // (undocumented)
+    getStartServices: StartServicesAccessor<TPluginsStart>;
     // (undocumented)
     http: HttpSetup;
     // @deprecated
@@ -561,7 +562,7 @@ export interface EnvironmentMode {
 }
 
 // @public
-export interface ErrorToastOptions {
+export interface ErrorToastOptions extends ToastOptions {
     title: string;
     toastMessage?: string;
 }
@@ -778,7 +779,7 @@ export interface ImageValidation {
 }
 
 // @public
-export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'>;
+export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 
 // @public
 export interface IUiSettingsClient {
@@ -1236,6 +1237,9 @@ export class SimpleSavedObject<T = unknown> {
 }
 
 // @public
+export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<[CoreStart, TPluginsStart]>;
+
+// @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
 
 // @public
@@ -1271,15 +1275,21 @@ export type ToastInputFields = Pick<EuiGlobalToastListToast, Exclude<keyof EuiGl
 };
 
 // @public
+export interface ToastOptions {
+    toastLifeTimeMs?: number;
+}
+
+// @public
 export class ToastsApi implements IToasts {
     constructor(deps: {
         uiSettings: IUiSettingsClient;
     });
     add(toastOrTitle: ToastInput): Toast;
-    addDanger(toastOrTitle: ToastInput): Toast;
+    addDanger(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
     addError(error: Error, options: ErrorToastOptions): Toast;
-    addSuccess(toastOrTitle: ToastInput): Toast;
-    addWarning(toastOrTitle: ToastInput): Toast;
+    addInfo(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
+    addSuccess(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
+    addWarning(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
     get$(): Rx.Observable<Toast[]>;
     remove(toastOrId: Toast | string): void;
     // @internal (undocumented)

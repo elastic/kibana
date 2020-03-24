@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertAction } from '../../../../../../../../plugins/alerting/common';
 import { updateRulesSchema } from './update_rules_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { ThreatParams, RuleAlertParamsRest } from '../../types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
@@ -1251,6 +1253,184 @@ describe('create rules schema', () => {
     ).toEqual(
       'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
     );
+  });
+
+  test('The default for "actions" will be an empty array', () => {
+    expect(
+      updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.actions
+    ).toEqual([]);
+  });
+
+  test('You cannot send in an array of actions that are missing "group"', () => {
+    expect(
+      updateRulesSchema.validate<
+        Partial<
+          Omit<RuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'group'>>;
+          }
+        >
+      >({
+        actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "group" fails because ["group" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "id"', () => {
+    expect(
+      updateRulesSchema.validate<
+        Partial<
+          Omit<RuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'id'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "id" fails because ["id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
+    expect(
+      updateRulesSchema.validate<
+        Partial<
+          Omit<RuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'action_type_id'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', id: 'id', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "params"', () => {
+    expect(
+      updateRulesSchema.validate<
+        Partial<
+          Omit<RuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'params'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "params" fails because ["params" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are including "actionTypeId"', () => {
+    expect(
+      updateRulesSchema.validate<
+        Partial<
+          Omit<RuleAlertParamsRest, 'actions'> & {
+            actions: AlertAction[];
+          }
+        >
+      >({
+        actions: [
+          {
+            group: 'group',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
+    );
+  });
+
+  test('The default for "throttle" will be null', () => {
+    expect(
+      updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.throttle
+    ).toEqual(null);
   });
 
   describe('note', () => {

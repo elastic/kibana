@@ -7,8 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { VectorLayer } from './vector_layer';
 import { IVectorStyle, VectorStyle } from './styles/vector/vector_style';
-// @ts-ignore
-import { getDefaultDynamicProperties, VECTOR_STYLES } from './styles/vector/vector_style_defaults';
+import { getDefaultDynamicProperties } from './styles/vector/vector_style_defaults';
 import { IDynamicStyleProperty } from './styles/vector/properties/dynamic_style_property';
 import { IStyleProperty } from './styles/vector/properties/style_property';
 import {
@@ -17,12 +16,13 @@ import {
   ES_GEO_GRID,
   LAYER_TYPE,
   AGG_TYPE,
-  SOURCE_DATA_ID_ORIGIN,
   RENDER_AS,
   STYLE_TYPE,
+  VECTOR_STYLES,
+  LAYER_STYLE_TYPE,
+  FIELD_ORIGIN,
 } from '../../common/constants';
 import { ESGeoGridSource } from './sources/es_geo_grid_source/es_geo_grid_source';
-// @ts-ignore
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
 import { IVectorLayer, VectorLayerArguments } from './vector_layer';
 import { IESSource } from './sources/es_source';
@@ -30,6 +30,11 @@ import { IESAggSource } from './sources/es_agg_source';
 import { ISource } from './sources/source';
 import { SyncContext } from '../actions/map_actions';
 import { DataRequestAbortError } from './util/data_request';
+import {
+  VectorStyleDescriptor,
+  SizeDynamicOptions,
+  DynamicStylePropertyOptions,
+} from '../../common/style_property_descriptor_types';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -62,28 +67,28 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
 function getClusterStyleDescriptor(
   documentStyle: IVectorStyle,
   clusterSource: IESAggSource
-): unknown {
+): VectorStyleDescriptor {
   const defaultDynamicProperties = getDefaultDynamicProperties();
-  const clusterStyleDescriptor: any = {
-    ...documentStyle.getDescriptor(),
+  const clusterStyleDescriptor: VectorStyleDescriptor = {
+    type: LAYER_STYLE_TYPE.VECTOR,
     properties: {
       [VECTOR_STYLES.LABEL_TEXT]: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]!.options,
           field: {
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
         },
       },
       [VECTOR_STYLES.ICON_SIZE]: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
+          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
           field: {
             name: COUNT_PROP_NAME,
-            origin: SOURCE_DATA_ID_ORIGIN,
+            origin: FIELD_ORIGIN.SOURCE,
           },
         },
       },
@@ -99,8 +104,15 @@ function getClusterStyleDescriptor(
       return;
     }
 
-    if (styleProperty.isDynamic()) {
-      const options = (styleProperty as IDynamicStyleProperty).getOptions();
+    if (styleName === VECTOR_STYLES.SYMBOLIZE_AS || styleName === VECTOR_STYLES.LABEL_BORDER_SIZE) {
+      // copy none static/dynamic styles to cluster style
+      // @ts-ignore
+      clusterStyleDescriptor.properties[styleName] = {
+        options: { ...styleProperty.getOptions() },
+      };
+    } else if (styleProperty.isDynamic()) {
+      // copy dynamic styles to cluster style
+      const options = styleProperty.getOptions() as DynamicStylePropertyOptions;
       const field =
         options && options.field && options.field.name
           ? {
@@ -111,6 +123,7 @@ function getClusterStyleDescriptor(
               ),
             }
           : undefined;
+      // @ts-ignore
       clusterStyleDescriptor.properties[styleName] = {
         type: STYLE_TYPE.DYNAMIC,
         options: {
@@ -119,6 +132,8 @@ function getClusterStyleDescriptor(
         },
       };
     } else {
+      // copy static styles to cluster style
+      // @ts-ignore
       clusterStyleDescriptor.properties[styleName] = {
         type: STYLE_TYPE.STATIC,
         options: { ...styleProperty.getOptions() },
