@@ -118,6 +118,7 @@ describe('alert_edit', () => {
             alertTypeRegistry: deps!.alertTypeRegistry,
             toastNotifications: deps!.toastNotifications,
             uiSettings: deps!.uiSettings,
+            docLinks: deps.docLinks,
           }}
         >
           <AlertEdit
