@@ -21,6 +21,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const elasticChart = getService('elasticChart');
+  const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
+  const filterBar = getService('filterBar');
 
   async function assertExpectedMetric() {
     await PageObjects.lens.assertExactText(
@@ -41,6 +45,29 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     );
   }
 
+  async function assertExpectedChart() {
+    await PageObjects.lens.assertExactText(
+      '[data-test-subj="embeddablePanelHeading-lnsXYvis"]',
+      'lnsXYvis'
+    );
+  }
+
+  async function assertExpectedTimerange() {
+    const time = await PageObjects.timePicker.getTimeConfig();
+    expect(time.start).to.equal('Sep 21, 2015 @ 09:00:00.000');
+    expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');
+  }
+
+  async function clickOnBarHistogram() {
+    const el = await elasticChart.getCanvas();
+
+    await browser
+      .getActions()
+      .move({ x: 5, y: 5, origin: el._webElement })
+      .click()
+      .perform();
+  }
+
   describe('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
@@ -49,7 +76,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await assertExpectedMetric();
     });
 
-    it('should be embeddable in dashboards', async () => {
+    it('metric should be embeddable in dashboards', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
@@ -57,6 +84,22 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
       await assertExpectedMetric();
+    });
+
+    it('click on the bar in XYChart adds proper filters/timerange', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await find.clickByButtonText('lnsXYvis');
+      await dashboardAddPanel.closeAddPanel();
+      await PageObjects.lens.goToTimeRange();
+      await clickOnBarHistogram();
+      await testSubjects.click('applyFiltersPopoverButton');
+
+      await assertExpectedChart();
+      await assertExpectedTimerange();
+      const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
+      expect(hasIpFilter).to.be(true);
     });
 
     it('should allow seamless transition to and from table view', async () => {
