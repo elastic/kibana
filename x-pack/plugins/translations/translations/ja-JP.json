@@ -2424,7 +2424,6 @@
     "savedObjects.saveDuplicateRejectedDescription": "重複ファイルの保存確認が拒否されました",
     "savedObjects.saveModal.cancelButtonLabel": "キャンセル",
     "savedObjects.saveModal.descriptionLabel": "説明",
-    "savedObjects.saveModal.duplicateTitleDescription": "{confirmSaveLabel} をクリックすると、既存の {objectType} が上書きされます。",
     "savedObjects.saveModal.duplicateTitleLabel": "「{title}」というタイトルの {objectType} が既に存在します",
     "savedObjects.saveModal.saveAsNewLabel": "新規 {objectType} として保存",
     "savedObjects.saveModal.saveButtonLabel": "保存",
