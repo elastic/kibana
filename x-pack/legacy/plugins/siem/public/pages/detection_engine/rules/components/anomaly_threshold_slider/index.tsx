@@ -10,12 +10,16 @@ import { EuiFlexGrid, EuiFlexItem, EuiRange, EuiFormRow } from '@elastic/eui';
 import { FieldHook } from '../../../../../shared_imports';
 
 interface AnomalyThresholdSliderProps {
+  describedByIds: string[];
   field: FieldHook;
 }
 type Event = React.ChangeEvent<HTMLInputElement>;
 type EventArg = Event | React.MouseEvent<HTMLButtonElement>;
 
-export const AnomalyThresholdSlider: React.FC<AnomalyThresholdSliderProps> = ({ field }) => {
+export const AnomalyThresholdSlider: React.FC<AnomalyThresholdSliderProps> = ({
+  describedByIds = [],
+  field,
+}) => {
   const threshold = field.value as number;
   const onThresholdChange = useCallback(
     (event: EventArg) => {
@@ -26,7 +30,12 @@ export const AnomalyThresholdSlider: React.FC<AnomalyThresholdSliderProps> = ({ 
   );
 
   return (
-    <EuiFormRow label={field.label} fullWidth>
+    <EuiFormRow
+      fullWidth
+      label={field.label}
+      data-test-subj="anomalyThresholdSlider"
+      describedByIds={describedByIds}
+    >
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiRange
