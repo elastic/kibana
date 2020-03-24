@@ -12,7 +12,7 @@ import {
 } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { validateUrls } from '../../../common/validate_urls';
-import { ReportingConfig } from '../../../server/types';
+import { ServerFacade } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
@@ -24,23 +24,19 @@ function isPdfJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloa
 }
 
 export function getFullUrls<JobDocPayloadType>({
-  config,
+  server,
   job,
 }: {
-  config: ReportingConfig;
+  server: ServerFacade;
   job: JobDocPayloadPDF | JobDocPayloadPNG;
 }) {
-  const [basePath, protocol, hostname, port] = [
-    config.kbnConfig.get('server', 'basePath'),
-    config.get('kibanaServer', 'protocol'),
-    config.get('kibanaServer', 'hostname'),
-    config.get('kibanaServer', 'port'),
-  ] as string[];
+  const config = server.config();
+
   const getAbsoluteUrl = getAbsoluteUrlFactory({
-    defaultBasePath: basePath,
-    protocol,
-    hostname,
-    port,
+    defaultBasePath: config.get('server.basePath'),
+    protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
+    hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
+    port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
   });
 
   // PDF and PNG job params put in the url differently

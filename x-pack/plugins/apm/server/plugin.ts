@@ -13,7 +13,6 @@ import { TaskManagerSetupContract } from '../../task_manager/server';
 import { AlertingPlugin } from '../../alerting/server';
 import { ActionsPlugin } from '../../actions/server';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
-import { makeApmUsageCollector } from './lib/apm_telemetry';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { createApmApi } from './routes/create_apm_api';
@@ -25,6 +24,7 @@ import { CloudSetup } from '../../cloud/server';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
+import { createApmTelemetry } from './lib/apm_telemetry';
 
 export interface LegacySetup {
   server: Server;
@@ -56,7 +56,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       actions?: ActionsPlugin['setup'];
     }
   ) {
-    const logger = this.initContext.logger.get('apm');
+    const logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMXPackConfig>();
     const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
@@ -75,6 +75,20 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     });
 
     const currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
+
+    if (
+      plugins.taskManager &&
+      plugins.usageCollection &&
+      currentConfig['xpack.apm.telemetryCollectionEnabled']
+    ) {
+      createApmTelemetry({
+        core,
+        config$: mergedConfig$,
+        usageCollector: plugins.usageCollection,
+        taskManager: plugins.taskManager,
+        logger
+      });
+    }
 
     // create agent configuration index without blocking setup lifecycle
     createApmAgentConfigurationIndex({
@@ -104,18 +118,6 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       })
     );
 
-    const usageCollection = plugins.usageCollection;
-    if (usageCollection) {
-      getInternalSavedObjectsClient(core)
-        .then(savedObjectsClient => {
-          makeApmUsageCollector(usageCollection, savedObjectsClient);
-        })
-        .catch(error => {
-          logger.error('Unable to initialize use collection');
-          logger.error(error.message);
-        });
-    }
-
     return {
       config$: mergedConfig$,
       registerLegacyAPI: once((__LEGACY: LegacySetup) => {
@@ -130,6 +132,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     };
   }
 
-  public start() {}
+  public async start() {}
+
   public stop() {}
 }

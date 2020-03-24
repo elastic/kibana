@@ -14,7 +14,13 @@ import mappings from './mappings.json';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
+    require: [
+      'kibana',
+      'elasticsearch',
+      'xpack_main',
+      'apm_oss',
+      'task_manager'
+    ],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
@@ -76,7 +82,10 @@ export const apm: LegacyPluginInitializer = kibana => {
         serviceMapTraceIdBucketSize: Joi.number().default(65),
         serviceMapFingerprintGlobalBucketSize: Joi.number().default(1000),
         serviceMapTraceIdGlobalBucketSize: Joi.number().default(6),
-        serviceMapMaxTracesPerRequest: Joi.number().default(50)
+        serviceMapMaxTracesPerRequest: Joi.number().default(50),
+
+        // telemetry
+        telemetryCollectionEnabled: Joi.boolean().default(true)
       }).default();
     },
 
@@ -87,6 +96,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
           defaultMessage: 'APM'
         }),
+        order: 900,
         icon: 'apmApp',
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
@@ -94,6 +104,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         // see x-pack/plugins/features/common/feature_kibana_privileges.ts
         privileges: {
           all: {
+            app: ['apm', 'kibana'],
             api: ['apm', 'apm_write', 'actions-read', 'alerting-read'],
             catalogue: ['apm'],
             savedObject: {
@@ -112,6 +123,7 @@ export const apm: LegacyPluginInitializer = kibana => {
             ]
           },
           read: {
+            app: ['apm', 'kibana'],
             api: ['apm', 'actions-read', 'alerting-read'],
             catalogue: ['apm'],
             savedObject: {
@@ -122,10 +134,12 @@ export const apm: LegacyPluginInitializer = kibana => {
           }
         }
       });
-
       const apmPlugin = server.newPlatform.setup.plugins
         .apm as APMPluginContract;
-      apmPlugin.registerLegacyAPI({ server });
+
+      apmPlugin.registerLegacyAPI({
+        server
+      });
     }
   });
 };
