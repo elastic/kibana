@@ -91,6 +91,12 @@ describe('BasicAuthenticationProvider', () => {
       ).resolves.toEqual(AuthenticationResult.notHandled());
     });
 
+    it('does not redirect requests that do not require authentication to the login page.', async () => {
+      await expect(
+        provider.authenticate(httpServerMock.createKibanaRequest({ routeAuthRequired: false }))
+      ).resolves.toEqual(AuthenticationResult.notHandled());
+    });
+
     it('redirects non-AJAX requests that can not be authenticated to the login page.', async () => {
       await expect(
         provider.authenticate(
@@ -172,8 +178,14 @@ describe('BasicAuthenticationProvider', () => {
   });
 
   describe('`logout` method', () => {
-    it('always redirects to the login page.', async () => {
+    it('does not handle logout if state is not present', async () => {
       await expect(provider.logout(httpServerMock.createKibanaRequest())).resolves.toEqual(
+        DeauthenticationResult.notHandled()
+      );
+    });
+
+    it('always redirects to the login page.', async () => {
+      await expect(provider.logout(httpServerMock.createKibanaRequest(), {})).resolves.toEqual(
         DeauthenticationResult.redirectTo('/base-path/login?msg=LOGGED_OUT')
       );
     });
@@ -181,7 +193,10 @@ describe('BasicAuthenticationProvider', () => {
     it('passes query string parameters to the login page.', async () => {
       await expect(
         provider.logout(
-          httpServerMock.createKibanaRequest({ query: { next: '/app/ml', msg: 'SESSION_EXPIRED' } })
+          httpServerMock.createKibanaRequest({
+            query: { next: '/app/ml', msg: 'SESSION_EXPIRED' },
+          }),
+          {}
         )
       ).resolves.toEqual(
         DeauthenticationResult.redirectTo('/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED')

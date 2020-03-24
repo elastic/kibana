@@ -85,7 +85,7 @@ export class PersistedState extends EventEmitter {
   setSilent(key: PersistedStateKey | any, value?: any) {
     const params = prepSetParams(key, value, this._path);
 
-    if (params.key) {
+    if (params.key || params.value) {
       return this.setValue(params.key, params.value, true);
     }
   }
