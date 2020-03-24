@@ -3,6 +3,9 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
+// TODO: Remove
+env.TEST_ES_FROM = 'source'
+
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
   githubPr.withDefaultPrComments {
     catchError {
