@@ -23,10 +23,9 @@ import { PersistedState } from '../../../../../../../plugins/visualizations/publ
 import { memoizeLast } from '../legacy/memoize';
 import { VisualizationChart } from './visualization_chart';
 import { VisualizationNoResults } from './visualization_noresults';
-import { VisualizationRequestError } from './visualization_requesterror';
-import { Vis } from '..';
+import { ExprVis } from '../expressions/vis';
 
-function shouldShowNoResultsMessage(vis: Vis, visData: any): boolean {
+function shouldShowNoResultsMessage(vis: ExprVis, visData: any): boolean {
   const requiresSearch = get(vis, 'type.requiresSearch');
   const rows: object[] | undefined = get(visData, 'rows');
   const isZeroHits = get(visData, 'hits') === 0 || (rows && !rows.length);
@@ -35,17 +34,11 @@ function shouldShowNoResultsMessage(vis: Vis, visData: any): boolean {
   return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
 }
 
-function shouldShowRequestErrorMessage(vis: Vis, visData: any): boolean {
-  const requestError = get(vis, 'requestError');
-  const showRequestError = get(vis, 'showRequestError');
-  return Boolean(!visData && requestError && showRequestError);
-}
-
 interface VisualizationProps {
   listenOnChange: boolean;
   onInit?: () => void;
   uiState: PersistedState;
-  vis: Vis;
+  vis: ExprVis;
   visData: any;
   visParams: any;
 }
@@ -56,20 +49,17 @@ export class Visualization extends React.Component<VisualizationProps> {
   constructor(props: VisualizationProps) {
     super(props);
 
-    props.vis._setUiState(props.uiState);
+    props.vis.setUiState(props.uiState);
   }
 
   public render() {
     const { vis, visData, visParams, onInit, uiState, listenOnChange } = this.props;
 
     const noResults = this.showNoResultsMessage(vis, visData);
-    const requestError = shouldShowRequestErrorMessage(vis, visData);
 
     return (
       <div className="visualization">
-        {requestError ? (
-          <VisualizationRequestError onInit={onInit} error={vis.requestError} />
-        ) : noResults ? (
+        {noResults ? (
           <VisualizationNoResults onInit={onInit} />
         ) : (
           <VisualizationChart

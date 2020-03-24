@@ -36,11 +36,9 @@ export const loginApp = Object.freeze({
         ]);
         return renderLoginPage(coreStart.i18n, element, {
           http: coreStart.http,
+          notifications: coreStart.notifications,
           fatalErrors: coreStart.fatalErrors,
           loginAssistanceMessage: config.loginAssistanceMessage,
-          requiresSecureConnection: coreStart.injectedMetadata.getInjectedVar(
-            'secureCookies'
-          ) as boolean,
         });
       },
     });
