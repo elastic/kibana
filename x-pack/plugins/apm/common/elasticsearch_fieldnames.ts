@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const AGENT_NAME = 'agent.name';
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
-export const SERVICE_AGENT_NAME = 'agent.name';
 export const SERVICE_FRAMEWORK_NAME = 'service.framework.name';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
@@ -39,6 +39,8 @@ export const SPAN_SELF_TIME_SUM = 'span.self_time.sum.us';
 export const SPAN_ACTION = 'span.action';
 export const SPAN_NAME = 'span.name';
 export const SPAN_ID = 'span.id';
+export const SPAN_DESTINATION_SERVICE_RESOURCE =
+  'span.destination.service.resource';
 
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';

@@ -50,6 +50,7 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
       technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
+  throttle: null,
   enabled: true,
   filters: [],
   immutable: false,

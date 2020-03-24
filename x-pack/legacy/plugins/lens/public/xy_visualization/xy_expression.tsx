@@ -18,7 +18,6 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
-  KibanaDatatable,
   IInterpreterRenderHandlers,
   ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
@@ -32,6 +31,11 @@ import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
+
+type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
+type SeriesSpec = InferPropType<typeof LineSeries> &
+  InferPropType<typeof BarSeries> &
+  InferPropType<typeof AreaSeries>;
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -191,7 +195,7 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
       <Settings
         showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
         legendPosition={legend.position}
-        showLegendDisplayValue={false}
+        showLegendExtra={false}
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
         xDomain={
@@ -247,80 +251,43 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
             return;
           }
 
-          const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
-          const splitAccessorLabel = splitAccessor ? columnToLabelMap[splitAccessor] : '';
-          const yAccessors = accessors.map(accessor => columnToLabelMap[accessor] || accessor);
-          const idForLegend = splitAccessorLabel || yAccessors;
-          const sanitized = sanitizeRows({
-            splitAccessor,
-            formatFactory,
-            columnToLabelMap,
-            table: data.tables[layerId],
-          });
-
-          const seriesProps = {
-            key: index,
-            splitSeriesAccessors: sanitized.splitAccessor ? [sanitized.splitAccessor] : [],
+          const columnToLabelMap: Record<string, string> = columnToLabel
+            ? JSON.parse(columnToLabel)
+            : {};
+          const table = data.tables[layerId];
+          const seriesProps: SeriesSpec = {
+            splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
-            id: idForLegend,
+            id: splitAccessor || accessors.join(','),
             xAccessor,
-            yAccessors,
-            data: sanitized.rows,
+            yAccessors: accessors,
+            data: table.rows,
             xScaleType,
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
+            name(d) {
+              if (accessors.length > 1) {
+                return d.seriesKeys
+                  .map((key: string | number) => columnToLabelMap[key] || key)
+                  .join(' - ');
+              }
+              return columnToLabelMap[d.seriesKeys[0]] ?? d.seriesKeys[0];
+            },
           };
 
           return seriesType === 'line' ? (
-            <LineSeries {...seriesProps} />
+            <LineSeries key={index} {...seriesProps} />
           ) : seriesType === 'bar' ||
             seriesType === 'bar_stacked' ||
             seriesType === 'bar_horizontal' ||
             seriesType === 'bar_horizontal_stacked' ? (
-            <BarSeries {...seriesProps} />
+            <BarSeries key={index} {...seriesProps} />
           ) : (
-            <AreaSeries {...seriesProps} />
+            <AreaSeries key={index} {...seriesProps} />
           );
         }
       )}
     </Chart>
   );
-}
-
-/**
- * Renames the columns to match the user-configured accessors in
- * columnToLabelMap. If a splitAccessor is provided, formats the
- * values in that column.
- */
-function sanitizeRows({
-  splitAccessor,
-  table,
-  formatFactory,
-  columnToLabelMap,
-}: {
-  splitAccessor?: string;
-  table: KibanaDatatable;
-  formatFactory: FormatFactory;
-  columnToLabelMap: Record<string, string | undefined>;
-}) {
-  const column = table.columns.find(c => c.id === splitAccessor);
-  const formatter = formatFactory(column && column.formatHint);
-
-  return {
-    splitAccessor: column && column.id,
-    rows: table.rows.map(r => {
-      const newRow: typeof r = {};
-
-      if (column) {
-        newRow[column.id] = formatter.convert(r[column.id]);
-      }
-
-      Object.keys(r).forEach(key => {
-        const newKey = columnToLabelMap[key] || key;
-        newRow[newKey] = r[key];
-      });
-      return newRow;
-    }),
-  };
 }

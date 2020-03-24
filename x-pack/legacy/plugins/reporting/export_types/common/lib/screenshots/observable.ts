@@ -6,25 +6,22 @@
 
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
-import { CaptureConfig, HeadlessChromiumDriverFactory, ServerFacade } from '../../../../types';
+import { CaptureConfig } from '../../../../server/types';
+import { HeadlessChromiumDriverFactory } from '../../../../types';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
+import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
-import { skipTelemetry } from './skip_telemetry';
 import { ScreenSetupData, ScreenshotObservableOpts, ScreenshotResults } from './types';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
-import { injectCustomCss } from './inject_css';
 
 export function screenshotsObservableFactory(
-  server: ServerFacade,
+  captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory
 ) {
-  const config = server.config();
-  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
-
   return function screenshotsObservable({
     logger,
     urls,
@@ -42,14 +39,13 @@ export function screenshotsObservableFactory(
           mergeMap(({ driver, exit$ }) => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               takeUntil(exit$),
-              mergeMap(() => openUrl(server, driver, url, conditionalHeaders, logger)),
-              mergeMap(() => skipTelemetry(driver, logger)),
-              mergeMap(() => getNumberOfItems(server, driver, layout, logger)),
+              mergeMap(() => openUrl(captureConfig, driver, url, conditionalHeaders, logger)),
+              mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
               mergeMap(async itemsCount => {
                 const viewport = layout.getViewport(itemsCount);
                 await Promise.all([
                   driver.setViewport(viewport, logger),
-                  waitForVisualizations(server, driver, itemsCount, layout, logger),
+                  waitForVisualizations(captureConfig, driver, itemsCount, layout, logger),
                 ]);
               }),
               mergeMap(async () => {
@@ -62,7 +58,7 @@ export function screenshotsObservableFactory(
                   await layout.positionElements(driver, logger);
                 }
 
-                await waitForRenderComplete(driver, layout, captureConfig, logger);
+                await waitForRenderComplete(captureConfig, driver, layout, logger);
               }),
               mergeMap(async () => {
                 return await Promise.all([

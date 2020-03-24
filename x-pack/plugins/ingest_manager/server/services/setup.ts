@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';
 import { ensureInstalledDefaultPackages } from './epm/packages/install';
 import {
-  packageToConfigDatasourceInputs,
+  packageToConfigDatasource,
   Datasource,
   AgentConfig,
   Installation,
@@ -19,8 +20,12 @@ import {
 } from '../../common';
 import { getPackageInfo } from './epm/packages';
 import { datasourceService } from './datasource';
+import { generateEnrollmentAPIKey } from './api_keys';
 
-export async function setup(
+const FLEET_ENROLL_USERNAME = 'fleet_enroll';
+const FLEET_ENROLL_ROLE = 'fleet_enroll';
+
+export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
@@ -60,6 +65,53 @@ export async function setup(
   }
 }
 
+export async function setupFleet(
+  soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+) {
+  // Create fleet_enroll role
+  // This should be done directly in ES at some point
+  await callCluster('transport.request', {
+    method: 'PUT',
+    path: `/_security/role/${FLEET_ENROLL_ROLE}`,
+    body: {
+      cluster: ['monitor', 'manage_api_key'],
+      indices: [
+        {
+          names: ['logs-*', 'metrics-*', 'events-*'],
+          privileges: ['write', 'create_index'],
+        },
+      ],
+    },
+  });
+  const password = generateRandomPassword();
+  // Create fleet enroll user
+  await callCluster('transport.request', {
+    method: 'PUT',
+    path: `/_security/user/${FLEET_ENROLL_USERNAME}`,
+    body: {
+      password,
+      roles: [FLEET_ENROLL_ROLE],
+    },
+  });
+
+  // save fleet admin user
+  await outputService.updateOutput(soClient, await outputService.getDefaultOutputId(soClient), {
+    fleet_enroll_username: FLEET_ENROLL_USERNAME,
+    fleet_enroll_password: password,
+  });
+
+  // Generate default enrollment key
+  await generateEnrollmentAPIKey(soClient, {
+    name: 'Default',
+    configId: await agentConfigService.getDefaultAgentConfigId(soClient),
+  });
+}
+
+function generateRandomPassword() {
+  return Buffer.from(uuid.v4()).toString('base64');
+}
+
 async function addPackageToConfig(
   soClient: SavedObjectsClientContract,
   packageToInstall: Installation,
@@ -70,16 +122,8 @@ async function addPackageToConfig(
     savedObjectsClient: soClient,
     pkgkey: `${packageToInstall.name}-${packageToInstall.version}`,
   });
-  await datasourceService.create(soClient, {
-    name: `${packageInfo.name}-1`,
-    enabled: true,
-    package: {
-      name: packageInfo.name,
-      title: packageInfo.title,
-      version: packageInfo.version,
-    },
-    inputs: packageToConfigDatasourceInputs(packageInfo),
-    config_id: config.id,
-    output_id: defaultOutput.id,
-  });
+  await datasourceService.create(
+    soClient,
+    packageToConfigDatasource(packageInfo, config.id, defaultOutput.id, undefined, config.namespace)
+  );
 }

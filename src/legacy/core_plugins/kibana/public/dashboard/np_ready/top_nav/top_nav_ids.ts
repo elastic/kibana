@@ -18,7 +18,6 @@
  */
 
 export const TopNavIds = {
-  ADD: 'add',
   SHARE: 'share',
   OPTIONS: 'options',
   SAVE: 'save',
@@ -27,4 +26,5 @@ export const TopNavIds = {
   CLONE: 'clone',
   FULL_SCREEN: 'fullScreenMode',
   VISUALIZE: 'visualize',
+  ADD_EXISTING: 'addExisting',
 };
