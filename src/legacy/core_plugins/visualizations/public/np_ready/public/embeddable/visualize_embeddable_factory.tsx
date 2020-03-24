@@ -38,6 +38,7 @@ import {
   getTimeFilter,
 } from '../services';
 import { showNewVisModal } from '../wizard';
+import { VisualizationsStartDeps } from '../plugin';
 import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
@@ -52,7 +53,11 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  constructor() {
+  constructor(
+    private readonly getUiActions: () => Promise<
+      Pick<VisualizationsStartDeps, 'uiActions'>['uiActions']
+    >
+  ) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -114,6 +119,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 
       const indexPattern = vis.data.indexPattern;
       const indexPatterns = indexPattern ? [indexPattern] : [];
+      const uiActions = await this.getUiActions();
+
       const editable = await this.isEditable();
       return new VisualizeEmbeddable(
         getTimeFilter(),
@@ -124,6 +131,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           editable,
           appState: input.appState,
           uiState: input.uiState,
+          uiActions,
         },
         input,
         parent
