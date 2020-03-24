@@ -36,7 +36,6 @@ const getCoreMock = () => {
     put,
     createRouter,
     context: {
-      measure: () => undefined,
       config$: new BehaviorSubject({} as APMConfig),
       logger: ({
         error: jest.fn()
