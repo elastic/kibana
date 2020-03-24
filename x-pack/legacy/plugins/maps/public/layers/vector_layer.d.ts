@@ -25,6 +25,7 @@ export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
+  getStyle(): IVectorStyle;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -41,6 +42,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
+  getStyle(): IVectorStyle;
   _getSearchFilters(
     dataFilters: MapFilters,
     source: IVectorSource,

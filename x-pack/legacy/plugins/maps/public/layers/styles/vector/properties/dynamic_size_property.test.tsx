@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IVectorStyle } from '../vector_style';
+
 jest.mock('ui/new_platform');
 jest.mock('../components/vector_style_editor', () => ({
   VectorStyleEditor: () => {
@@ -18,8 +20,12 @@ import { shallow } from 'enzyme';
 import { DynamicSizeProperty } from './dynamic_size_property';
 import { StyleMeta } from '../style_meta';
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
+import { DataRequest } from '../../../util/data_request';
+import { IVectorLayer } from '../../../vector_layer';
+import { IField } from '../../../fields/field';
 
-const mockField = {
+// @ts-ignore
+const mockField: IField = {
   async getLabel() {
     return 'foobar_label';
   },
@@ -35,15 +41,23 @@ const mockField = {
   supportsFieldMeta() {
     return true;
   },
+  canValueBeFormatted() {
+    return true;
+  },
+  async getDataType() {
+    return 'number';
+  },
 };
 
-const mockLayer = {
-  getDataRequest() {
-    return null;
+// @ts-ignore
+const mockLayer: IVectorLayer = {
+  getDataRequest(): DataRequest | undefined {
+    return undefined;
   },
-  getStyle() {
+  getStyle(): IVectorStyle {
     return {
-      getStyleMeta() {
+      // @ts-ignore
+      getStyleMeta(): StyleMeta {
         return new StyleMeta({
           geometryTypes: {
             isPointsOnly: true,
@@ -53,6 +67,7 @@ const mockLayer = {
           fieldMeta: {
             foobar: {
               range: { min: 0, max: 100, delta: 100 },
+              categories: { categories: [] },
             },
           },
         });
@@ -61,17 +76,10 @@ const mockLayer = {
   },
 };
 
-const makeProperty = (options, mockStyle, field = mockField) => {
-  return new DynamicSizeProperty(
-    options,
-    VECTOR_STYLES.ICON_SIZE,
-    field,
-    // new MockLayer(mockStyle),
-    mockLayer,
-    () => {
-      return x => x + '_format';
-    }
-  );
+const makeProperty: DynamicSizeProperty = (options: object) => {
+  return new DynamicSizeProperty(options, VECTOR_STYLES.ICON_SIZE, mockField, mockLayer, () => {
+    return (x: string) => x + '_format';
+  });
 };
 
 const defaultLegendParams = {
@@ -82,16 +90,13 @@ const defaultLegendParams = {
 describe('renderLegendDetailRow', () => {
   test('Should render as range', async () => {
     const sizeProp = makeProperty();
-
     const legendRow = sizeProp.renderLegendDetailRow(defaultLegendParams);
-
     const component = shallow(legendRow);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
-
     expect(component).toMatchSnapshot();
   });
 });

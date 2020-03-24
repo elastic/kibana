@@ -8,11 +8,13 @@ import { IDynamicStyleProperty } from './properties/dynamic_style_property';
 import { IVectorLayer } from '../../vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
 import { VectorStyleDescriptor } from '../../../../common/style_property_descriptor_types';
+import { StyleMeta } from './style_meta';
 
 export interface IVectorStyle {
   getAllStyleProperties(): IStyleProperty[];
   getDescriptor(): VectorStyleDescriptor;
   getDynamicPropertiesArray(): IDynamicStyleProperty[];
+  getStyleMeta(): StyleMeta;
 }
 
 export class VectorStyle implements IVectorStyle {
@@ -21,4 +23,5 @@ export class VectorStyle implements IVectorStyle {
   getAllStyleProperties(): IStyleProperty[];
   getDescriptor(): VectorStyleDescriptor;
   getDynamicPropertiesArray(): IDynamicStyleProperty[];
+  getStyleMeta(): StyleMeta;
 }
