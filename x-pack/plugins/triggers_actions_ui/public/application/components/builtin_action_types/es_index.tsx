@@ -239,13 +239,13 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               fullWidth
               name="executionTimeField"
               data-test-subj="executionTimeFieldSelect"
-              value={executionTimeField}
+              value={executionTimeField ?? ''}
               onChange={e => {
-                editActionConfig('executionTimeField', e.target.value);
+                editActionConfig('executionTimeField', nullableString(e.target.value));
               }}
               onBlur={() => {
                 if (executionTimeField === undefined) {
-                  editActionConfig('executionTimeField', '');
+                  editActionConfig('executionTimeField', null);
                 }
               }}
             />
@@ -306,3 +306,9 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
     </Fragment>
   );
 };
+
+// if the string == null or is empty, return null, else return string
+function nullableString(str: string | null | undefined) {
+  if (str == null || str.trim() === '') return null;
+  return str;
+}
