@@ -27,8 +27,7 @@ export const LinkToLogsPage: React.FC<LinkToPageProps> = props => {
         path={`${props.match.url}/:sourceId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
         component={RedirectToNodeLogs}
       />
-      <Route path={`${props.match.url}/:sourceId?/stream`} component={RedirectToLogs} />
-      <Redirect from={`${props.match.url}/logs`} to={`/link-to/stream?${props.location.search}`} />
+      <Route path={`${props.match.url}/:sourceId?`} component={RedirectToLogs} />
       <Redirect to="/" />
     </Switch>
   );
