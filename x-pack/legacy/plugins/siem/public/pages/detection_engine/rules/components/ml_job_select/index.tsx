@@ -18,6 +18,7 @@ import {
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
 import { useSiemJobs } from '../../../../../components/ml_popover/hooks/use_siem_jobs';
 import { useKibana } from '../../../../../lib/kibana';
+import { ML_JOB_SELECT_PLACEHOLDER_TEXT } from '../step_define_rule/translations';
 
 const HelpText: React.FC<{ href: string }> = ({ href }) => (
   <FormattedMessage
@@ -61,12 +62,20 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
     },
     [field]
   );
+  const placeholderOption = {
+    value: 'placeholder',
+    inputDisplay: ML_JOB_SELECT_PLACEHOLDER_TEXT,
+    dropdownDisplay: ML_JOB_SELECT_PLACEHOLDER_TEXT,
+    disabled: true,
+  };
 
-  const options = siemJobs.map(job => ({
+  const jobOptions = siemJobs.map(job => ({
     value: job.id,
     inputDisplay: job.id,
     dropdownDisplay: <JobDisplay title={job.id} description={job.description} />,
   }));
+
+  const options = [placeholderOption, ...jobOptions];
 
   return (
     <EuiFormRow
@@ -84,7 +93,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
             isLoading={isLoading}
             onChange={handleJobChange}
             options={options}
-            valueOfSelected={jobId}
+            valueOfSelected={jobId || 'placeholder'}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
