@@ -24,8 +24,17 @@ import {
   TriggerId,
   TriggerContextMapping,
   ActionType,
+  ActionFactoryRegistry,
 } from '../types';
-import { Action, ActionByType } from '../actions';
+import {
+  ActionInternal,
+  Action,
+  ActionByType,
+  ActionFactory,
+  ActionDefinition,
+  ActionFactoryDefinition,
+  ActionContext,
+} from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
@@ -38,21 +47,25 @@ export interface UiActionsServiceParams {
    * A 1-to-N mapping from `Trigger` to zero or more `Action`.
    */
   readonly triggerToActions?: TriggerToActionsRegistry;
+  readonly actionFactories?: ActionFactoryRegistry;
 }
 
 export class UiActionsService {
   protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;
+  protected readonly actionFactories: ActionFactoryRegistry;
 
   constructor({
     triggers = new Map(),
     actions = new Map(),
     triggerToActions = new Map(),
+    actionFactories = new Map(),
   }: UiActionsServiceParams = {}) {
     this.triggers = triggers;
     this.actions = actions;
     this.triggerToActions = triggerToActions;
+    this.actionFactories = actionFactories;
   }
 
   public readonly registerTrigger = (trigger: Trigger) => {
@@ -76,49 +89,44 @@ export class UiActionsService {
     return trigger.contract;
   };
 
-  public readonly registerAction = <T extends ActionType>(action: ActionByType<T>) => {
-    if (this.actions.has(action.id)) {
-      throw new Error(`Action [action.id = ${action.id}] already registered.`);
+  public readonly registerAction = <A extends ActionDefinition>(
+    definition: A
+  ): ActionInternal<A> => {
+    if (this.actions.has(definition.id)) {
+      throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
+
+    const action = new ActionInternal(definition);
 
     this.actions.set(action.id, action);
+
+    return action;
   };
 
-  public readonly getAction = <T extends ActionType>(id: string): ActionByType<T> => {
-    if (!this.actions.has(id)) {
-      throw new Error(`Action [action.id = ${id}] not registered.`);
+  public readonly unregisterAction = (actionId: string): void => {
+    if (!this.actions.has(actionId)) {
+      throw new Error(`Action [action.id = ${actionId}] is not registered.`);
     }
 
-    return this.actions.get(id) as ActionByType<T>;
+    this.actions.delete(actionId);
   };
 
-  public readonly attachAction = <TType extends TriggerId, AType extends ActionType>(
-    triggerId: TType,
-    // The action can accept partial or no context, but if it needs context not provided
-    // by this type of trigger, typescript will complain. yay!
-    action: ActionByType<AType> & Action<TriggerContextMapping[TType]>
+  public readonly attachAction = <TriggerId extends keyof TriggerContextMapping>(
+    triggerId: TriggerId,
+    actionId: string
   ): void => {
-    if (!this.actions.has(action.id)) {
-      this.registerAction(action);
-    } else {
-      const registeredAction = this.actions.get(action.id);
-      if (registeredAction !== action) {
-        throw new Error(`A different action instance with this id is already registered.`);
-      }
-    }
-
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
       throw new Error(
-        `No trigger [triggerId = ${triggerId}] exists, for attaching action [actionId = ${action.id}].`
+        `No trigger [triggerId = ${triggerId}] exists, for attaching action [actionId = ${actionId}].`
       );
     }
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    if (!actionIds!.find(id => id === action.id)) {
-      this.triggerToActions.set(triggerId, [...actionIds!, action.id]);
+    if (!actionIds!.find(id => id === actionId)) {
+      this.triggerToActions.set(triggerId, [...actionIds!, actionId]);
     }
   };
 
@@ -139,6 +147,26 @@ export class UiActionsService {
     );
   };
 
+  public readonly addTriggerAction = <TType extends TriggerId, AType extends ActionType>(
+    triggerId: TType,
+    // The action can accept partial or no context, but if it needs context not provided
+    // by this type of trigger, typescript will complain. yay!
+    action: ActionByType<AType> & Action<TriggerContextMapping[TType]>
+  ): void => {
+    if (!this.actions.has(action.id)) this.registerAction(action);
+    this.attachAction(triggerId, action.id);
+  };
+
+  public readonly getAction = <T extends ActionDefinition>(
+    id: string
+  ): Action<ActionContext<T>> => {
+    if (!this.actions.has(id)) {
+      throw new Error(`Action [action.id = ${id}] not registered.`);
+    }
+
+    return this.actions.get(id) as ActionInternal<T>;
+  };
+
   public readonly getTriggerActions = <T extends TriggerId>(
     triggerId: T
   ): Array<Action<TriggerContextMapping[T]>> => {
@@ -147,9 +175,9 @@ export class UiActionsService {
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    const actions = actionIds!.map(actionId => this.actions.get(actionId)).filter(Boolean) as Array<
-      Action<TriggerContextMapping[T]>
-    >;
+    const actions = actionIds!
+      .map(actionId => this.actions.get(actionId) as ActionInternal)
+      .filter(Boolean);
 
     return actions as Array<Action<TriggerContext<T>>>;
   };
@@ -187,6 +215,7 @@ export class UiActionsService {
     this.actions.clear();
     this.triggers.clear();
     this.triggerToActions.clear();
+    this.actionFactories.clear();
   };
 
   /**
@@ -205,5 +234,42 @@ export class UiActionsService {
       triggerToActions.set(key, [...value]);
 
     return new UiActionsService({ triggers, actions, triggerToActions });
+  };
+
+  /**
+   * Register an action factory. Action factories are used to configure and
+   * serialize/deserialize dynamic actions.
+   */
+  public readonly registerActionFactory = <
+    Config extends object = object,
+    FactoryContext extends object = object,
+    ActionContext extends object = object
+  >(
+    definition: ActionFactoryDefinition<Config, FactoryContext, ActionContext>
+  ) => {
+    if (this.actionFactories.has(definition.id)) {
+      throw new Error(`ActionFactory [actionFactory.id = ${definition.id}] already registered.`);
+    }
+
+    const actionFactory = new ActionFactory<Config, FactoryContext, ActionContext>(definition);
+
+    this.actionFactories.set(actionFactory.id, actionFactory as ActionFactory<any, any, any>);
+  };
+
+  public readonly getActionFactory = (actionFactoryId: string): ActionFactory => {
+    const actionFactory = this.actionFactories.get(actionFactoryId);
+
+    if (!actionFactory) {
+      throw new Error(`Action factory [actionFactoryId = ${actionFactoryId}] does not exist.`);
+    }
+
+    return actionFactory;
+  };
+
+  /**
+   * Returns an array of all action factories.
+   */
+  public readonly getActionFactories = (): ActionFactory[] => {
+    return [...this.actionFactories.values()];
   };
 }

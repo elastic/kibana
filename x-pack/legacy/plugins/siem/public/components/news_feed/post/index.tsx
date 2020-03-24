@@ -45,6 +45,7 @@ export const Post = React.memo<{ newsItem: NewsItem }>(({ newsItem }) => {
           <PreferenceFormattedP1DTDate value={publishOn} />
           <EuiSpacer size="s" />
           <div>{description}</div>
+          <EuiSpacer size="l" />
         </EuiText>
       </EuiFlexItem>
 
