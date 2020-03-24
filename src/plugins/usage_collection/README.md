@@ -90,7 +90,7 @@ class Plugin {
   }
 
   public start(core: CoreStart) {
-    this.savedObjectsClient = core.savedObjects.client
+    this.savedObjectsClient = core.savedObjects.createInternalRepository();
   }
 }
 ```
