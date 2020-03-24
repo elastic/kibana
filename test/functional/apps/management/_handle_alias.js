@@ -51,8 +51,7 @@ export default function({ getService, getPageObjects }) {
 
     it('should be able to create index pattern without time field', async function() {
       await PageObjects.settings.createIndexPattern('alias1', null);
-      const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-      const patternName = await indexPageHeading.getVisibleText();
+      const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('alias1*');
     });
 
@@ -66,8 +65,7 @@ export default function({ getService, getPageObjects }) {
 
     it('should be able to create index pattern with timefield', async function() {
       await PageObjects.settings.createIndexPattern('alias2', 'date');
-      const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-      const patternName = await indexPageHeading.getVisibleText();
+      const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('alias2*');
     });
 
