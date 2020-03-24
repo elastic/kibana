@@ -30,6 +30,13 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click('dashboardAddPanelButton');
     }
 
+    async clickCreateNewLink() {
+      log.debug('DashboardAddPanel.clickAddNewPanelButton');
+      await testSubjects.click('dashboardAddNewPanelButton');
+      // Give some time for the animation to complete
+      await PageObjects.common.sleep(500);
+    }
+
     async clickAddNewEmbeddableLink(type) {
       await testSubjects.click('createNew');
       await testSubjects.click(`createNew-${type}`);
