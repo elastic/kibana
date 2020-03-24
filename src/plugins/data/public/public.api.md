@@ -300,6 +300,8 @@ export enum ES_FIELD_TYPES {
     // (undocumented)
     HALF_FLOAT = "half_float",
     // (undocumented)
+    HISTOGRAM = "histogram",
+    // (undocumented)
     _ID = "_id",
     // (undocumented)
     _INDEX = "_index",
@@ -1151,6 +1153,8 @@ export enum KBN_FIELD_TYPES {
     GEO_POINT = "geo_point",
     // (undocumented)
     GEO_SHAPE = "geo_shape",
+    // (undocumented)
+    HISTOGRAM = "histogram",
     // (undocumented)
     IP = "ip",
     // (undocumented)
