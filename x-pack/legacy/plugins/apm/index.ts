@@ -96,6 +96,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
           defaultMessage: 'APM'
         }),
+        order: 900,
         icon: 'apmApp',
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
@@ -103,6 +104,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         // see x-pack/plugins/features/common/feature_kibana_privileges.ts
         privileges: {
           all: {
+            app: ['apm', 'kibana'],
             api: ['apm', 'apm_write', 'actions-read', 'alerting-read'],
             catalogue: ['apm'],
             savedObject: {
@@ -121,6 +123,7 @@ export const apm: LegacyPluginInitializer = kibana => {
             ]
           },
           read: {
+            app: ['apm', 'kibana'],
             api: ['apm', 'actions-read', 'alerting-read'],
             catalogue: ['apm'],
             savedObject: {
