@@ -214,13 +214,14 @@ export const signalRulesAlertType = ({
             const notificationRuleParams = {
               ...ruleParams,
               name,
+              id: savedObject.id,
             };
             const { signalsCount, resultsLink } = await getSignalsCount({
               from: `now-${interval}`,
               to: 'now',
               index: ruleParams.outputIndex,
               ruleId: ruleParams.ruleId!,
-              kibanaSiemAppUrl: meta.kibanaSiemAppUrl,
+              kibanaSiemAppUrl: meta.kibanaSiemAppUrl as string,
               ruleAlertId: savedObject.id,
               callCluster: services.callCluster,
             });

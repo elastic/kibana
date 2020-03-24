@@ -21,7 +21,7 @@ interface GetSignalsCount {
   ruleAlertId: string;
   ruleId: string;
   index: string;
-  kibanaSiemAppUrl: string | {} | undefined;
+  kibanaSiemAppUrl: string | undefined;
   callCluster: NotificationExecutorOptions['services']['callCluster'];
 }
 

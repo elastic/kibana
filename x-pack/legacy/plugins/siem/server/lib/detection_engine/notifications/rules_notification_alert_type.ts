@@ -40,14 +40,14 @@ export const rulesNotificationAlertType = ({
     }
 
     const { params: ruleAlertParams, name: ruleName } = ruleAlertSavedObject.attributes;
-    const ruleParams = { ...ruleAlertParams, name: ruleName };
+    const ruleParams = { ...ruleAlertParams, name: ruleName, id: ruleAlertSavedObject.id };
 
     const { signalsCount, resultsLink } = await getSignalsCount({
       from: previousStartedAt ?? `now-${ruleParams.interval}`,
       to: startedAt,
       index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId!,
-      kibanaSiemAppUrl: ruleAlertParams.meta?.kibanaSiemAppUrl,
+      kibanaSiemAppUrl: ruleAlertParams.meta?.kibanaSiemAppUrl as string,
       ruleAlertId: ruleAlertSavedObject.id,
       callCluster: services.callCluster,
     });

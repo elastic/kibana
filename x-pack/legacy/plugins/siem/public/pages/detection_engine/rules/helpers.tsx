@@ -228,6 +228,7 @@ export const redirectToDetections = (
 
 export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
   const commonRuleParamsKeys = [
+    'id',
     'name',
     'description',
     'false_positives',

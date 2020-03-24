@@ -10,6 +10,7 @@ import { RuleTypeParams } from '../types';
 
 type NotificationRuleTypeParams = RuleTypeParams & {
   name: string;
+  id: string;
 };
 
 interface ScheduleNotificationActions {

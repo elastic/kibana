@@ -70,9 +70,6 @@ export type RuleTypeParams = Omit<
   'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
 >;
 
-export type RuleTypeParamsWithName = RuleTypeParams & {
-  name: string;
-};
 export type RuleAlertParamsRest = Omit<
   RuleAlertParams,
   | 'anomalyThreshold'
