@@ -9,8 +9,11 @@ import { SecurityEnabledCallOut } from './security_call_out';
 
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 
 const docLinks = { ELASTIC_WEBSITE_URL: 'elastic.co/', DOC_LINK_VERSION: 'current' };
+
+const http = httpServiceMock.createStartContract();
 
 describe('security call out', () => {
   let useEffect: any;
@@ -21,18 +24,17 @@ describe('security call out', () => {
   };
 
   beforeEach(() => {
+    jest.resetAllMocks();
     useEffect = jest.spyOn(React, 'useEffect');
     mockUseEffect();
   });
 
   test('renders nothing while health is loading', async () => {
-    const health = jest.fn();
-
-    health.mockImplementationOnce(() => new Promise(() => {}));
+    http.get.mockImplementationOnce(() => new Promise(() => {}));
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
-      component = shallow(<SecurityEnabledCallOut getHealth={health} docLinks={docLinks} />);
+      component = shallow(<SecurityEnabledCallOut http={http} docLinks={docLinks} />);
     });
 
     expect(component?.is(Fragment)).toBeTruthy();
@@ -40,13 +42,11 @@ describe('security call out', () => {
   });
 
   test('renders nothing if keys are enabled', async () => {
-    const health = jest.fn();
-
-    health.mockResolvedValue({ canGenerateApiKeys: true });
+    http.get.mockResolvedValue({ canGenerateApiKeys: true });
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
-      component = shallow(<SecurityEnabledCallOut getHealth={health} docLinks={docLinks} />);
+      component = shallow(<SecurityEnabledCallOut http={http} docLinks={docLinks} />);
     });
 
     expect(component?.is(Fragment)).toBeTruthy();
@@ -54,13 +54,11 @@ describe('security call out', () => {
   });
 
   test('renders the callout if keys are disabled', async () => {
-    const health = jest.fn();
-
-    health.mockImplementationOnce(async () => ({ canGenerateApiKeys: false }));
+    http.get.mockImplementationOnce(async () => ({ canGenerateApiKeys: false }));
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
-      component = shallow(<SecurityEnabledCallOut getHealth={health} docLinks={docLinks} />);
+      component = shallow(<SecurityEnabledCallOut http={http} docLinks={docLinks} />);
     });
 
     expect(component?.find(EuiCallOut).prop('title')).toMatchInlineSnapshot(

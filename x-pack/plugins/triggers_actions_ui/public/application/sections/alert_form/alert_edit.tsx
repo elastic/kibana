@@ -26,7 +26,7 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
-import { AlertActionSecurityCallOutWithApi as AlertActionSecurityCallOut } from '../../components/alert_action_security_call_out';
+import { AlertActionSecurityCallOut } from '../../components/alert_action_security_call_out';
 import { useAppDependencies } from '../../app_context';
 
 interface AlertEditProps {
@@ -140,7 +140,7 @@ export const AlertEdit = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertActionSecurityCallOut docLinks={docLinks} action={'edited'} />
+        <AlertActionSecurityCallOut docLinks={docLinks} action={'edited'} http={http} />
         <EuiFlyoutBody>
           {hasActionsDisabled && (
             <Fragment>

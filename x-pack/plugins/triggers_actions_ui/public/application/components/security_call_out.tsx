@@ -12,30 +12,28 @@ import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { DocLinksStart } from 'kibana/public';
-import {
-  ComponentOpts as BulkOperationsComponentOpts,
-  withBulkAlertOperations,
-} from '../sections/common/components/with_bulk_alert_api_operations';
+import { DocLinksStart, HttpSetup } from 'kibana/public';
+
 import { AlertingFrameworkHealth } from '../../types';
+import { health } from '../lib/alert_api';
 
-type Props = { docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'> } & Pick<
-  BulkOperationsComponentOpts,
-  'getHealth'
->;
+interface Props {
+  docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
+  http: HttpSetup;
+}
 
-export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ getHealth, docLinks }) => {
+export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ docLinks, http }) => {
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
   const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
 
   React.useEffect(() => {
     async function fetchSecurityConfigured() {
-      setAlertingHealth(some(await getHealth()));
+      setAlertingHealth(some(await health({ http })));
     }
 
     fetchSecurityConfigured();
-  }, [getHealth]);
+  }, [http]);
 
   return pipe(
     alertingHealth,
@@ -75,5 +73,3 @@ export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ getHeal
     )
   );
 };
-
-export const SecurityEnabledCallOutWithApi = withBulkAlertOperations(SecurityEnabledCallOut);

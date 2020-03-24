@@ -9,8 +9,11 @@ import { AlertActionSecurityCallOut } from './alert_action_security_call_out';
 
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 
 const docLinks = { ELASTIC_WEBSITE_URL: 'elastic.co/', DOC_LINK_VERSION: 'current' };
+
+const http = httpServiceMock.createStartContract();
 
 describe('alert action security call out', () => {
   let useEffect: any;
@@ -21,19 +24,18 @@ describe('alert action security call out', () => {
   };
 
   beforeEach(() => {
+    jest.resetAllMocks();
     useEffect = jest.spyOn(React, 'useEffect');
     mockUseEffect();
   });
 
   test('renders nothing while health is loading', async () => {
-    const health = jest.fn();
-
-    health.mockImplementationOnce(() => new Promise(() => {}));
+    http.get.mockImplementationOnce(() => new Promise(() => {}));
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
       component = shallow(
-        <AlertActionSecurityCallOut action="created" getHealth={health} docLinks={docLinks} />
+        <AlertActionSecurityCallOut action="created" http={http} docLinks={docLinks} />
       );
     });
 
@@ -42,14 +44,12 @@ describe('alert action security call out', () => {
   });
 
   test('renders nothing if keys are enabled', async () => {
-    const health = jest.fn();
-
-    health.mockResolvedValue({ canGenerateApiKeys: true });
+    http.get.mockResolvedValue({ canGenerateApiKeys: true });
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
       component = shallow(
-        <AlertActionSecurityCallOut action="created" getHealth={health} docLinks={docLinks} />
+        <AlertActionSecurityCallOut action="created" http={http} docLinks={docLinks} />
       );
     });
 
@@ -58,14 +58,12 @@ describe('alert action security call out', () => {
   });
 
   test('renders the callout if keys are disabled', async () => {
-    const health = jest.fn();
-
-    health.mockResolvedValue({ canGenerateApiKeys: false });
+    http.get.mockResolvedValue({ canGenerateApiKeys: false });
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
       component = shallow(
-        <AlertActionSecurityCallOut action="created" getHealth={health} docLinks={docLinks} />
+        <AlertActionSecurityCallOut action="created" http={http} docLinks={docLinks} />
       );
     });
 

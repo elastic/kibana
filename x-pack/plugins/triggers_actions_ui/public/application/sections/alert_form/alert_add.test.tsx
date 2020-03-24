@@ -99,6 +99,7 @@ describe('alert_add', () => {
             alertTypeRegistry: deps.alertTypeRegistry,
             toastNotifications: deps.toastNotifications,
             uiSettings: deps.uiSettings,
+            docLinks: deps.docLinks,
             metadata: { test: 'some value', fields: ['test'] },
           }}
         >

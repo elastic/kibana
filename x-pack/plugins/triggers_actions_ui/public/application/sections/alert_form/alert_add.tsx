@@ -24,8 +24,7 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
-import { AlertActionSecurityCallOutWithApi as AlertActionSecurityCallOut } from '../../components/alert_action_security_call_out';
-import { useAppDependencies } from '../../app_context';
+import { AlertActionSecurityCallOut } from '../../components/alert_action_security_call_out';
 
 interface AlertAddProps {
   consumer: string;
@@ -42,8 +41,6 @@ export const AlertAdd = ({
   canChangeTrigger,
   alertTypeId,
 }: AlertAddProps) => {
-  const { docLinks } = useAppDependencies();
-
   const initialAlert = ({
     params: {},
     consumer,
@@ -68,6 +65,7 @@ export const AlertAdd = ({
     toastNotifications,
     alertTypeRegistry,
     actionTypeRegistry,
+    docLinks,
   } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
@@ -152,7 +150,7 @@ export const AlertAdd = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertActionSecurityCallOut docLinks={docLinks} action={'created'} />
+        <AlertActionSecurityCallOut docLinks={docLinks} action={'created'} http={http} />
         <EuiFlyoutBody>
           <AlertForm
             alert={alert}

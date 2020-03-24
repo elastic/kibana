@@ -59,6 +59,7 @@ export const AlertsList: React.FunctionComponent = () => {
     alertTypeRegistry,
     actionTypeRegistry,
     uiSettings,
+    docLinks,
     charts,
     dataPlugin,
   } = useAppDependencies();
@@ -480,6 +481,7 @@ export const AlertsList: React.FunctionComponent = () => {
           alertTypeRegistry,
           toastNotifications,
           uiSettings,
+          docLinks,
           charts,
           dataFieldsFormats: dataPlugin.fieldFormats,
         }}
