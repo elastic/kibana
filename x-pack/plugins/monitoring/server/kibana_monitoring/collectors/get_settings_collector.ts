@@ -12,10 +12,6 @@ import { MonitoringConfig } from '../../config';
  * If so, use uiSettings API to fetch the X-Pack default admin email
  */
 export async function getDefaultAdminEmail(config: MonitoringConfig) {
-  if (!config.cluster_alerts.email_notifications.enabled) {
-    return null;
-  }
-
   return config.cluster_alerts.email_notifications.email_address || null;
 }
 
