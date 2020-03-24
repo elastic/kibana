@@ -10,35 +10,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-
-# ensure that background tasks (kibana) are killed when the script ends
-# trap "exit" INT TERM ERR
-# trap "kill 0" EXIT
-# killall node &> /dev/null # TODO: REMOVE!!
-# sleep 2
-
-# Ensure Kibana port is available
-if lsof -Pi :$KIBANA_PORT -sTCP:LISTEN -t >/dev/null ; then
-    printf "⚠️  Cannot start Kibana because another process is already running on port ${KIBANA_PORT}:\n\n"
-    lsof -Pi :$KIBANA_PORT -sTCP:LISTEN
-    exit 1
-fi
-
 # Create tmp folder
 mkdir -p tmp
 
-# Start Kibana in background
-printf "\n===Kibana===\n"
-echo "Starting (logs: tmp/kibana.logs)"
-(cd ../../../../../ && \
-node ./scripts/kibana \
-    --no-base-path \
-    --optimize.watch=false \
-    --server.port=${KIBANA_PORT} \
-    --config x-pack/legacy/plugins/apm/e2e/ci/kibana.e2e.yml
-) &> ./tmp/kibana.log &
+# Ask user to start Kibana
+echo "
+To start Kibana please run the following command:
 
-KIBANA_BG_PID=$!
+node ./scripts/kibana --no-base-path --optimize.watch=false --server.port=${KIBANA_PORT} --config x-pack/legacy/plugins/apm/e2e/ci/kibana.e2e.yml
+"
 
 # Clone or pull apm-integration-testing
 printf "\n===apm-integration-testing===\n"
@@ -48,8 +28,6 @@ if [ $? -eq 0 ]; then
     echo "Pulling..."
     git -C "./tmp/apm-integration-testing" pull &> /dev/null
 fi
-
-
 
 # Start apm-integration-testing
 echo "Starting (logs: ./tmp/apm-it.log)"
@@ -67,7 +45,6 @@ if [ $? -ne 0 ]; then
     printf "As a last resort, reset docker with:\n\n./tmp/apm-integration-testing/scripts/compose.py stop && system prune --all --force --volumes\n"
     exit 1
 fi
-
 
 printf "\n===Static mock data===\n"
 
@@ -93,11 +70,11 @@ echo "Installing local dependencies (logs: tmp/e2e-yarn.log)"
 yarn &> ./tmp/e2e-yarn.log
 
 # Wait for Kibana to start
-echo "Waiting for Kibana to start... (Running as: ${KIBANA_BG_PID})"
+echo "Waiting for Kibana to start..."
 yarn wait-on -i 500 -w 500 http://localhost:$KIBANA_PORT > /dev/null
 
 echo "✅ Setup completed successfully. Running tests..."
 
 # run cypress tests
-yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true
+yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
 
