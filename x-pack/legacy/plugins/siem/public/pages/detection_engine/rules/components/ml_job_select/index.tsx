@@ -5,12 +5,38 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiSuperSelect,
+  EuiText,
+} from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
 import { useSiemJobs } from '../../../../../components/ml_popover/hooks/use_siem_jobs';
+import { useKibana } from '../../../../../lib/kibana';
 
-const JobDisplay = ({ title, description }: { title: string; description: string }) => (
+const HelpText: React.FC<{ href: string }> = ({ href }) => (
+  <FormattedMessage
+    id="xpack.siem.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText"
+    defaultMessage="We've provided a few common jobs to get you started. To add your own custom jobs, assign a group of “siem” to those jobs in the {machineLearning} application to make them appear here."
+    values={{
+      machineLearning: (
+        <EuiLink href={href} target="_blank">
+          <FormattedMessage
+            id="xpack.siem.components.mlJobSelect.machineLearningLink"
+            defaultMessage="Machine Learning"
+          />
+        </EuiLink>
+      ),
+    }}
+  />
+);
+
+const JobDisplay: React.FC<{ title: string; description: string }> = ({ title, description }) => (
   <>
     <strong>{title}</strong>
     <EuiText size="xs" color="subdued">
@@ -28,6 +54,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
   const jobId = field.value as string;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [isLoading, siemJobs] = useSiemJobs(false);
+  const mlUrl = useKibana().services.application.getUrlForApp('ml');
   const handleJobChange = useCallback(
     (machineLearningJobId: string) => {
       field.setValue(machineLearningJobId);
@@ -44,7 +71,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
   return (
     <EuiFormRow
       label={field.label}
-      helpText={field.helpText}
+      helpText={<HelpText href={mlUrl} />}
       isInvalid={isInvalid}
       error={errorMessage}
       data-test-subj="mlJobSelect"

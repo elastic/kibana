@@ -18,12 +18,7 @@ import {
   FormSchema,
   ValidationFunc,
 } from '../../../../../shared_imports';
-import {
-  CUSTOM_QUERY_REQUIRED,
-  INVALID_CUSTOM_QUERY,
-  INDEX_HELPER_TEXT,
-  ML_JOB_HELP_TEXT,
-} from './translations';
+import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
 import { isMlRule } from '../../helpers';
 
 export const schema: FormSchema = {
@@ -139,7 +134,6 @@ export const schema: FormSchema = {
         defaultMessage: 'Machine Learning job',
       }
     ),
-    helpText: <EuiText size="xs">{ML_JOB_HELP_TEXT}</EuiText>,
     validations: [
       {
         validator: (
