@@ -115,7 +115,7 @@ export class Explorer extends React.Component {
     showCharts: PropTypes.bool.isRequired,
   };
 
-  state = { filterIconTriggeredQuery: '' };
+  state = { filterIconTriggeredQuery: undefined };
 
   _unsubscribeAll = new Subject();
   // make sure dragSelect is only available if the mouse pointer is actually over a swimlane

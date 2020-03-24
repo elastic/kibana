@@ -5,7 +5,6 @@
  */
 
 import React, { FC, useState, useEffect } from 'react';
-// import { i18n } from '@kbn/i18n';
 import {
   Query,
   esKuery,
@@ -13,7 +12,6 @@ import {
   QueryStringInput,
 } from '../../../../../../../../src/plugins/data/public';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
-// @ts-ignore cannot find module
 import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE } from '../../explorer_constants';
 import { explorerService } from '../../explorer_dashboard_service';
 
@@ -26,16 +24,16 @@ export function getKqlQueryValues({
   queryLanguage: string;
   indexPattern: IIndexPattern;
 }) {
-  let influencersFilterQuery;
+  let influencersFilterQuery: any = {};
   const ast = esKuery.fromKueryExpression(inputString);
   const isAndOperator = ast.function === 'and';
-  const filteredFields: any = [];
+  const filteredFields: string[] = [];
   // if ast.type == 'function' then layout of ast.arguments:
   // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
   if (ast && Array.isArray(ast.arguments)) {
     ast.arguments.forEach(arg => {
       if (arg.arguments !== undefined) {
-        arg.arguments.forEach((nestedArg: any) => {
+        arg.arguments.forEach((nestedArg: { type: string; value: string }) => {
           if (typeof nestedArg.value === 'string') {
             filteredFields.push(nestedArg.value);
           }
@@ -55,7 +53,6 @@ export function getKqlQueryValues({
   }
 
   const clearSettings =
-    // @ts-ignore // TODO: fix type
     influencersFilterQuery?.match_all && Object.keys(influencersFilterQuery.match_all).length === 0;
 
   return {
@@ -111,9 +108,9 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   );
 
   useEffect(() => {
-    if (filterIconTriggeredQuery !== undefined && filterIconTriggeredQuery !== '') {
+    if (filterIconTriggeredQuery !== undefined) {
       setSearchInput({
-        language: QUERY_LANGUAGE_KUERY,
+        language: searchInput.language,
         query: filterIconTriggeredQuery,
       });
     }
