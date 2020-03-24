@@ -8,7 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, FatalErrorsSetup } from 'src/core/public';
+import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { SecurityLicense } from '../../../common/licensing';
 import { PluginStartDependencies } from '../../plugin';
@@ -23,7 +23,7 @@ import { PrivilegesAPIClient } from './privileges_api_client';
 interface CreateParams {
   fatalErrors: FatalErrorsSetup;
   license: SecurityLicense;
-  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 export const rolesManagementApp = Object.freeze({
