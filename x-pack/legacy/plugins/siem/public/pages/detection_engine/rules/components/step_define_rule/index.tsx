@@ -44,6 +44,7 @@ import {
 import { schema } from './schema';
 import * as i18n from './translations';
 import { filterRuleFieldsForType, RuleFields } from '../../create/helpers';
+import { hasMlAdminPermissions } from '../../../../../components/ml/permissions/has_ml_admin_permissions';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -169,8 +170,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={SelectRuleType}
             componentProps={{
               describedByIds: ['detectionEngineStepDefineRuleType'],
-              hasValidLicense: mlCapabilities.isPlatinumOrTrialLicense,
               isReadOnly: isUpdateView,
+              hasValidLicense: mlCapabilities.isPlatinumOrTrialLicense,
+              isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
           />
           <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'none' : 'flex' }}>
