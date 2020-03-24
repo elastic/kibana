@@ -45,8 +45,17 @@ export interface SendSignalToTimelineActionProps {
   apolloClient?: ApolloClient<{}>;
   createTimeline: CreateTimeline;
   ecsData: Ecs;
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
+  updateTimelineIsLoading: UpdateTimelineLoading;
+  createTimelineNote: CreateTimelineNote;
 }
+
+export interface CreateTimelineNoteProps {
+  noteContent: string;
+}
+
+export type CreateTimelineNote = ({ noteContent }: CreateTimelineNoteProps) => void;
+
+export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 
 export interface CreateTimelineProps {
   from: number;

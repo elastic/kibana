@@ -23,7 +23,13 @@ import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { FILTER_OPEN } from './signals_filter_group';
 import { sendSignalToTimelineAction, updateSignalStatusAction } from './actions';
 import * as i18n from './translations';
-import { CreateTimeline, SetEventsDeletedProps, SetEventsLoadingProps } from './types';
+import {
+  CreateTimeline,
+  SetEventsDeletedProps,
+  SetEventsLoadingProps,
+  CreateTimelineNote,
+  UpdateTimelineLoading,
+} from './types';
 
 export const signalsOpenFilters: Filter[] = [
   {
@@ -190,6 +196,7 @@ export const getSignalsActions = ({
   createTimeline,
   status,
   updateTimelineIsLoading,
+  createTimelineNote,
 }: {
   apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
@@ -198,7 +205,8 @@ export const getSignalsActions = ({
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
+  updateTimelineIsLoading: UpdateTimelineLoading;
+  createTimelineNote: CreateTimelineNote;
 }): TimelineAction[] => [
   {
     getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
@@ -214,6 +222,7 @@ export const getSignalsActions = ({
               createTimeline,
               ecsData,
               updateTimelineIsLoading,
+              createTimelineNote,
             })
           }
           iconType="timeline"
