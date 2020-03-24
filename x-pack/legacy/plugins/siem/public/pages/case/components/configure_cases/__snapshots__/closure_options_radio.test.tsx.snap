@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ClosureOptionsRadio  it renders 1`] = `
+<EuiRadioGroup
+  data-test-subj="closure-options-radio-group"
+  disabled={false}
+  idSelected="close-by-user"
+  name="closure_options"
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "close-by-user",
+        "label": "Manually close SIEM cases",
+      },
+      Object {
+        "id": "close-by-pushing",
+        "label": "Automatically close SIEM cases when pushing new incident to third-party",
+      },
+    ]
+  }
+/>
+`;

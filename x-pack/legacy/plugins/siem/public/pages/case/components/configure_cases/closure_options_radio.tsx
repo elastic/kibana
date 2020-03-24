@@ -51,6 +51,7 @@ const ClosureOptionsRadioComponent: React.FC<ClosureOptionsRadioComponentProps> 
       idSelected={closureTypeSelected}
       onChange={onChangeLocal}
       name="closure_options"
+      data-test-subj="closure-options-radio-group"
     />
   );
 };
