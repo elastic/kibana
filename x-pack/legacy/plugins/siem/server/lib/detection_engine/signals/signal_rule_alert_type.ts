@@ -5,7 +5,11 @@
  */
 
 import { Logger } from 'src/core/server';
-import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
+import {
+  SIGNALS_ID,
+  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+  NOTIFICATION_THROTTLE_RULE,
+} from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { getInputIndex } from './get_input_output_index';
@@ -208,7 +212,7 @@ export const signalRulesAlertType = ({
         }
 
         if (creationSucceeded) {
-          if (meta?.throttle === 'rule' && actions.length) {
+          if (meta?.throttle === NOTIFICATION_THROTTLE_RULE && actions.length) {
             const notificationRuleParams = {
               ...ruleParams,
               name,
@@ -218,7 +222,7 @@ export const signalRulesAlertType = ({
               to: 'now',
               index: ruleParams.outputIndex,
               ruleId: ruleParams.ruleId!,
-              kibanaUrl,
+              kibanaUrl: meta?.kibanaUrl as string,
               ruleAlertId: savedObject.id,
               callCluster: services.callCluster,
             });

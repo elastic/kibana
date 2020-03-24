@@ -20,9 +20,7 @@ describe('types', () => {
 
   it('isNotificationAlertExecutor should return true it passed object is NotificationAlertTypeDefinition type', () => {
     expect(
-      isNotificationAlertExecutor(
-        rulesNotificationAlertType({ logger: loggerMock.create(), kibanaUrl: '' })
-      )
+      isNotificationAlertExecutor(rulesNotificationAlertType({ logger: loggerMock.create() }))
     ).toEqual(true);
   });
 });

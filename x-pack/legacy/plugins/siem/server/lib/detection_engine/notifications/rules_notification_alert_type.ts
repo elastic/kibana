@@ -6,34 +6,22 @@
 
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
 import { getSignalsCount } from './get_signals_count';
 import { RuleAlertAttributes } from '../signals/types';
+import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 
 export const rulesNotificationAlertType = ({
   logger,
-  kibanaUrl,
 }: {
   logger: Logger;
-  kibanaUrl: string;
 }): NotificationAlertTypeDefinition => ({
   id: NOTIFICATIONS_ID,
   name: 'SIEM Notifications',
-  actionGroups: [
-    {
-      id: 'default',
-      name: i18n.translate(
-        'xpack.siem.detectionEngine.ruleNotificationAlert.actionGroups.default',
-        {
-          defaultMessage: 'Default',
-        }
-      ),
-    },
-  ],
+  actionGroups: siemRuleActionGroups,
   defaultActionGroupId: 'default',
   validate: {
     params: schema.object({
@@ -59,7 +47,7 @@ export const rulesNotificationAlertType = ({
       to: startedAt,
       index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId!,
-      kibanaUrl,
+      kibanaUrl: ruleAlertParams.meta?.kibanaUrl as string,
       ruleAlertId: ruleAlertSavedObject.id,
       callCluster: services.callCluster,
     });

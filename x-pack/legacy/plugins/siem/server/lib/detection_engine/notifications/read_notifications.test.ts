@@ -13,7 +13,6 @@ import {
 
 class TestError extends Error {
   constructor() {
-    // Pass remaining arguments (including vendor specific ones) to parent constructor
     super();
 
     this.name = 'CustomError';

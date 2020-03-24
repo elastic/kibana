@@ -5,13 +5,17 @@
  */
 
 import { AlertInstance } from '../../../../../../../plugins/alerting/server';
-import { RuleTypeParamsWithName } from '../types';
+import { RuleTypeParams } from '../types';
+
+type NotificationRuleTypeParams = RuleTypeParams & {
+  name: string;
+};
 
 interface ScheduleNotificationActions {
   alertInstance: AlertInstance;
   signalsCount: string;
   resultsLink: string;
-  ruleParams: RuleTypeParamsWithName;
+  ruleParams: NotificationRuleTypeParams;
 }
 
 export const scheduleNotificationActions = ({

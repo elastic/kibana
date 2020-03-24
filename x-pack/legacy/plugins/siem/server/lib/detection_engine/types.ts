@@ -52,7 +52,7 @@ export interface RuleAlertParams {
   query: string | undefined | null;
   references: string[];
   savedId?: string | undefined | null;
-  meta: Record<string, {}> | undefined | null;
+  meta: Record<string, {} | string> | undefined | null;
   severity: string;
   tags: string[];
   to: string;

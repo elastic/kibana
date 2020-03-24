@@ -323,7 +323,7 @@ export const createRuleWithActionsRequest = () => {
         {
           group: 'default',
           id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-          params: { message: 'Rule generated {{state.signalsCount}} singals' },
+          params: { message: 'Rule generated {{state.signalsCount}} signals' },
           action_type_id: '.slack',
         },
       ],
@@ -656,7 +656,7 @@ export const getNotificationResult = (): RuleNotificationAlertType => ({
     {
       actionTypeId: '.slack',
       params: {
-        message: 'Rule generated {{state.signalsCount}} singals\n\n{{rule.name}}\n{{resultsLink}}',
+        message: 'Rule generated {{state.signalsCount}} signals\n\n{{rule.name}}\n{{resultsLink}}',
       },
       group: 'default',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
