@@ -37,3 +37,7 @@ export const SCHEDULE_STEP = '[data-test-subj="schedule"]  .euiDescriptionList__
 export const SCHEDULE_RUNS = 0;
 
 export const SCHEDULE_LOOPBACK = 1;
+
+export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle"]';
+
+export const ABOUT_INVESTIGATION_NOTES = '[data-test-subj="stepAboutDetailsNoteContent"]';

@@ -23,6 +23,8 @@ import {
   SCHEDULE_RUNS,
   SCHEDULE_STEP,
   ABOUT_RULE_DESCRIPTION,
+  ABOUT_INVESTIGATION_NOTES,
+  INVESTIGATION_NOTES_TOGGLE,
 } from '../screens/rule_details';
 import {
   CUSTOM_RULES_BTN,
@@ -186,6 +188,13 @@ describe('Signal detection rules', () => {
       .eq(ABOUT_TAGS)
       .invoke('text')
       .should('eql', expectedTags);
+
+    cy.get(INVESTIGATION_NOTES_TOGGLE)
+      .eq(1)
+      .click({ force: true });
+    cy.get(ABOUT_INVESTIGATION_NOTES)
+      .invoke('text')
+      .should('eql', 'test markdown');
 
     cy.get(DEFINITION_INDEX_PATTERNS).then(patterns => {
       cy.wrap(patterns).each((pattern, index) => {
