@@ -8,6 +8,7 @@ import { KibanaTelemetryAdapter } from '../kibana_telemetry_adapter';
 
 describe('KibanaTelemetryAdapter', () => {
   let usageCollection: any;
+  let getSavedObjectsClient: any;
   let collector: { type: string; fetch: () => Promise<any>; isReady: () => boolean };
   beforeEach(() => {
     usageCollection = {
@@ -15,11 +16,14 @@ describe('KibanaTelemetryAdapter', () => {
         collector = val;
       },
     };
+    getSavedObjectsClient = () => {
+      return {};
+    };
   });
 
   it('collects monitor and overview data', async () => {
     expect.assertions(1);
-    KibanaTelemetryAdapter.initUsageCollector(usageCollection);
+    KibanaTelemetryAdapter.initUsageCollector(usageCollection, getSavedObjectsClient);
     KibanaTelemetryAdapter.countPageView({
       page: 'Overview',
       dateStart: 'now-15',
@@ -49,10 +53,10 @@ describe('KibanaTelemetryAdapter', () => {
     expect.assertions(1);
     // give a time of > 24 hours ago
     Date.now = jest.fn(() => 1559053560000);
-    KibanaTelemetryAdapter.initUsageCollector(usageCollection);
+    KibanaTelemetryAdapter.initUsageCollector(usageCollection, getSavedObjectsClient);
     KibanaTelemetryAdapter.countPageView({
       page: 'Overview',
-      dateStart: 'now-15',
+      dateStart: 'now-20',
       dateEnd: 'now',
       autoRefreshEnabled: true,
       autorefreshInterval: 30,
@@ -84,7 +88,7 @@ describe('KibanaTelemetryAdapter', () => {
   });
 
   it('defaults ready to `true`', async () => {
-    KibanaTelemetryAdapter.initUsageCollector(usageCollection);
+    KibanaTelemetryAdapter.initUsageCollector(usageCollection, getSavedObjectsClient);
     expect(collector.isReady()).toBe(true);
   });
 });

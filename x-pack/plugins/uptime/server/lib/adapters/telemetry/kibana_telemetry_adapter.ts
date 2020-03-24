@@ -5,10 +5,11 @@
  */
 
 import moment from 'moment';
+import { ISavedObjectsRepository } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import { PageViewParams, UptimeTelemetry } from './types';
 import { APICaller } from '../framework';
+import { savedObjectsAdapter } from '../../saved_objects';
 
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
@@ -20,20 +21,33 @@ const BUCKET_SIZE = 3600;
 const BUCKET_NUMBER = 24;
 
 export class KibanaTelemetryAdapter {
-  public static registerUsageCollector = (usageCollector: UsageCollectionSetup) => {
-    const collector = KibanaTelemetryAdapter.initUsageCollector(usageCollector);
+  public static registerUsageCollector = (
+    usageCollector: UsageCollectionSetup,
+    getSavedObjectsClient: () => ISavedObjectsRepository | undefined
+  ) => {
+    if (!usageCollector) {
+      return;
+    }
+    const collector = KibanaTelemetryAdapter.initUsageCollector(
+      usageCollector,
+      getSavedObjectsClient
+    );
     usageCollector.registerCollector(collector);
   };
 
-  public static initUsageCollector(usageCollector: UsageCollectionSetup) {
+  public static initUsageCollector(
+    usageCollector: UsageCollectionSetup,
+    getSavedObjectsClient: () => ISavedObjectsRepository | undefined
+  ) {
     return usageCollector.makeUsageCollector({
       type: 'uptime',
       fetch: async (callCluster: APICaller) => {
-        this.countNoOfUniqueMonitorAndLocations(callCluster);
+        const savedObjectsClient = getSavedObjectsClient()!;
+        this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
       },
-      isReady: () => true,
+      isReady: () => typeof getSavedObjectsClient() !== 'undefined',
     });
   }
 
@@ -76,9 +90,13 @@ export class KibanaTelemetryAdapter {
     bucket.autoRefreshEnabled = autoRefreshEnabled;
   }
 
-  public static async countNoOfUniqueMonitorAndLocations(callCluster: APICaller) {
+  public static async countNoOfUniqueMonitorAndLocations(
+    callCluster: APICaller,
+    savedObjectsClient: ISavedObjectsRepository
+  ) {
+    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
     const params = {
-      index: INDEX_NAMES.HEARTBEAT,
+      index: dynamicSettings.heartbeatIndices,
       body: {
         query: {
           bool: {
@@ -120,7 +138,7 @@ export class KibanaTelemetryAdapter {
           monitors: {
             terms: {
               field: 'monitor.id',
-              size: 10000,
+              size: 1000,
             },
             aggs: {
               docs: {
