@@ -44,7 +44,7 @@ function getProps(
   const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({}, (() => null) as any, {} as any)
+    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
   );
 
   const options: DashboardContainerOptions = {

@@ -30,12 +30,15 @@ import {
 import { coreMock } from '../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(
+// eslint-disable-next-line
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+
+const { setup, doStart } = embeddablePluginMock.createInstance();
+setup.registerEmbeddableFactory(
   CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
+  new ContactCardEmbeddableFactory((() => null) as any, {} as any)
 );
-const getEmbeddableFactories = () => embeddableFactories.values();
+const start = doStart();
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
@@ -46,9 +49,7 @@ beforeEach(async () => {
     ExitFullScreenButton: () => null,
     SavedObjectFinder: () => null,
     application: {} as any,
-    embeddable: {
-      getEmbeddableFactory: (id: string) => embeddableFactories.get(id)!,
-    } as any,
+    embeddable: start,
     inspector: {} as any,
     notifications: {} as any,
     overlays: coreStart.overlays,
@@ -87,7 +88,7 @@ test('Executes the replace panel action', async () => {
     coreStart,
     SavedObjectFinder,
     notifications,
-    getEmbeddableFactories
+    start.getEmbeddableFactories
   );
   action.execute({ embeddable });
 });
@@ -99,7 +100,7 @@ test('Is not compatible when embeddable is not in a dashboard container', async 
     coreStart,
     SavedObjectFinder,
     notifications,
-    getEmbeddableFactories
+    start.getEmbeddableFactories
   );
   expect(
     await action.isCompatible({
@@ -118,7 +119,7 @@ test('Execute throws an error when called with an embeddable not in a parent', a
     coreStart,
     SavedObjectFinder,
     notifications,
-    getEmbeddableFactories
+    start.getEmbeddableFactories
   );
   async function check() {
     await action.execute({ embeddable: container });
@@ -133,7 +134,7 @@ test('Returns title', async () => {
     coreStart,
     SavedObjectFinder,
     notifications,
-    getEmbeddableFactories
+    start.getEmbeddableFactories
   );
   expect(action.getDisplayName({ embeddable })).toBeDefined();
 });
@@ -145,7 +146,7 @@ test('Returns an icon', async () => {
     coreStart,
     SavedObjectFinder,
     notifications,
-    getEmbeddableFactories
+    start.getEmbeddableFactories
   );
   expect(action.getIconType({ embeddable })).toBeDefined();
 });

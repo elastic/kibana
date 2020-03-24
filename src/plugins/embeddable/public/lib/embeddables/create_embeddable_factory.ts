@@ -16,23 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { SavedObjectAttributes } from 'kibana/public';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-  EmbeddableFactoryDefinition,
-} from './lib/embeddables';
+import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { EmbeddableFactory } from './embeddable_factory';
+import { IContainer } from '..';
 
-export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
-
-export type EmbeddableFactoryProvider = <
+export const defaultEmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
   T extends SavedObjectAttributes = SavedObjectAttributes
 >(
   def: EmbeddableFactoryDefinition<I, O, E, T>
-) => EmbeddableFactory<I, O, E, T>;
+): EmbeddableFactory<I, O, E, T> => {
+  const factory: EmbeddableFactory<I, O, E, T> = {
+    isContainerType: def.isContainerType ?? false,
+    canCreateNew: def.canCreateNew ?? (() => true),
+    getDefaultInput: def.getDefaultInput ?? (() => ({})),
+    getExplicitInput: def.getExplicitInput ?? (() => Promise.resolve({})),
+    createFromSavedObject:
+      def.createFromSavedObject ??
+      ((savedObjectId: string, input: Partial<I>, parent?: IContainer) => {
+        throw new Error(`Creation from saved object not supported by type ${def.type}`);
+      }),
+    create: def.create,
+    type: def.type,
+    isEditable: def.isEditable,
+    getDisplayName: def.getDisplayName,
+  };
+  return factory;
+};

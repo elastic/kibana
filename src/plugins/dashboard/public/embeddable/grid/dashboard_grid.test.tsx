@@ -39,7 +39,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({} as any, (() => {}) as any, {} as any)
+    new ContactCardEmbeddableFactory((() => {}) as any, {} as any)
   );
   const getEmbeddableFactory = (id: string) => embeddableFactories.get(id);
   const initialInput = getSampleDashboardInput({

@@ -18,6 +18,8 @@
  */
 import { coreMock } from '../../../core/public/mocks';
 import { testPlugin } from './tests/test_plugin';
+import { EmbeddableFactoryProvider } from './types';
+import { defaultEmbeddableFactoryProvider } from './lib';
 
 test('cannot register embeddable factory with the same ID', async () => {
   const coreSetup = coreMock.createSetup();
@@ -32,4 +34,27 @@ test('cannot register embeddable factory with the same ID', async () => {
   ).toThrowError(
     'Embeddable factory [embeddableFactoryId = ID] already registered in Embeddables API.'
   );
+});
+
+test('can set custom embeddable factory provider', async () => {
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const { setup, doStart } = testPlugin(coreSetup, coreStart);
+
+  const customProvider: EmbeddableFactoryProvider = def => ({
+    ...defaultEmbeddableFactoryProvider(def),
+    getDisplayName: () => 'Intercepted!',
+  });
+
+  setup.setEmbeddableFactoryProvider(customProvider);
+  setup.registerEmbeddableFactory('test', {
+    type: 'test',
+    create: () => Promise.resolve(undefined),
+    getDisplayName: () => 'Test',
+    isEditable: () => Promise.resolve(true),
+  });
+
+  const start = doStart();
+  const factory = start.getEmbeddableFactory('test');
+  expect(() => factory!.getDisplayName()).toEqual('Intercepted!');
 });

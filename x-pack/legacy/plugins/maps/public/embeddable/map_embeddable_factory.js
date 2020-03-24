@@ -8,10 +8,7 @@ import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
-import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { ErrorEmbeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { MapEmbeddable } from './map_embeddable';
 import { getIndexPatternService } from '../kibana_services';
@@ -27,23 +24,21 @@ import '../angular/services/gis_map_saved_object_loader';
 import { bindSetupCoreAndPlugins, bindStartCoreAndPlugins } from '../plugin';
 import { npSetup, npStart } from 'ui/new_platform';
 
-export class MapEmbeddableFactory extends EmbeddableFactory {
+export class MapEmbeddableFactory {
   type = MAP_SAVED_OBJECT_TYPE;
-
+  savedObjectMetaData = {
+    name: i18n.translate('xpack.maps.mapSavedObjectLabel', {
+      defaultMessage: 'Map',
+    }),
+    type: MAP_SAVED_OBJECT_TYPE,
+    getIconForSavedObject: () => APP_ICON,
+  };
   constructor() {
-    super({
-      savedObjectMetaData: {
-        name: i18n.translate('xpack.maps.mapSavedObjectLabel', {
-          defaultMessage: 'Map',
-        }),
-        type: MAP_SAVED_OBJECT_TYPE,
-        getIconForSavedObject: () => APP_ICON,
-      },
-    });
     // Init required services. Necessary while in legacy
     bindSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
     bindStartCoreAndPlugins(npStart.core, npStart.plugins);
   }
+
   isEditable() {
     return capabilities.get().maps.save;
   }

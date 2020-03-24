@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
   ContainerInput,
   EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
@@ -29,13 +29,11 @@ interface StartServices {
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
 }
 
-export class ListContainerFactory extends EmbeddableFactory {
+export class ListContainerFactory implements EmbeddableFactoryDefinition {
   public readonly type = LIST_CONTAINER;
   public readonly isContainerType = true;
 
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super();
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public async isEditable() {
     return true;

@@ -22,9 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { getServices } from '../../kibana_services';
 import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
+  EmbeddableFactoryDefinition,
   Container,
+  ErrorEmbeddable,
 } from '../../../../../../../plugins/embeddable/public';
 
 import { TimeRange } from '../../../../../../../plugins/data/public';
@@ -37,28 +37,23 @@ interface StartServices {
   isEditable: () => boolean;
 }
 
-export class SearchEmbeddableFactory extends EmbeddableFactory<
-  SearchInput,
-  SearchOutput,
-  SearchEmbeddable
-> {
+export class SearchEmbeddableFactory
+  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SearchEmbeddable> {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private $injector: auto.IInjectorService | null;
   private getInjector: () => Promise<auto.IInjectorService> | null;
+  public readonly savedObjectMetaData = {
+    name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
+      defaultMessage: 'Saved search',
+    }),
+    type: 'search',
+    getIconForSavedObject: () => 'search',
+  };
 
   constructor(
     private getStartServices: () => Promise<StartServices>,
     getInjector: () => Promise<auto.IInjectorService>
   ) {
-    super({
-      savedObjectMetaData: {
-        name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
-          defaultMessage: 'Saved search',
-        }),
-        type: 'search',
-        getIconForSavedObject: () => 'search',
-      },
-    });
     this.$injector = null;
     this.getInjector = getInjector;
   }

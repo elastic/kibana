@@ -23,7 +23,7 @@ import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { CoreStart } from '../../../../core/public';
 import {
   ContainerOutput,
-  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
   ErrorEmbeddable,
   Container,
 } from '../embeddable_plugin';
@@ -43,21 +43,18 @@ interface StartServices {
   uiActions: UiActionsStart;
 }
 
-export class DashboardContainerFactory extends EmbeddableFactory<
-  DashboardContainerInput,
-  ContainerOutput
-> {
+export class DashboardContainerFactory
+  implements
+    EmbeddableFactoryDefinition<DashboardContainerInput, ContainerOutput, DashboardContainer> {
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
-  constructor(private readonly getStartServices: () => Promise<StartServices>) {
-    super();
-  }
+  constructor(private readonly getStartServices: () => Promise<StartServices>) {}
 
-  public async isEditable() {
+  public isEditable = async () => {
     const { capabilities } = await this.getStartServices();
     return !!capabilities.createNew && !!capabilities.showWriteControls;
-  }
+  };
 
   public getDisplayName() {
     return i18n.translate('dashboard.factory.displayName', {
@@ -73,11 +70,11 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     };
   }
 
-  public async create(
+  public create = async (
     initialInput: DashboardContainerInput,
     parent?: Container
-  ): Promise<DashboardContainer | ErrorEmbeddable> {
+  ): Promise<DashboardContainer | ErrorEmbeddable> => {
     const services = await this.getStartServices();
     return new DashboardContainer(initialInput, services, parent);
-  }
+  };
 }

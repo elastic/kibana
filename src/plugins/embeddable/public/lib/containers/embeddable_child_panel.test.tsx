@@ -32,16 +32,17 @@ import {
 // eslint-disable-next-line
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { mount } from 'enzyme';
+import { embeddablePluginMock } from '../../mocks';
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
   const inspector = inspectorPluginMock.createStartContract();
-
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
     new SlowContactCardEmbeddableFactory({ execAction: (() => null) as any })
   );
-  const getEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+  const start = doStart();
+  const getEmbeddableFactory = start.getEmbeddableFactory;
 
   const container = new HelloWorldContainer({ id: 'hello', panels: {} }, {
     getEmbeddableFactory,
@@ -63,8 +64,8 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
       container={container}
       embeddableId={newEmbeddable.id}
       getActions={() => Promise.resolve([])}
-      getAllEmbeddableFactories={(() => []) as any}
-      getEmbeddableFactory={(() => undefined) as any}
+      getAllEmbeddableFactories={start.getEmbeddableFactories}
+      getEmbeddableFactory={getEmbeddableFactory}
       notifications={{} as any}
       overlays={{} as any}
       inspector={inspector}

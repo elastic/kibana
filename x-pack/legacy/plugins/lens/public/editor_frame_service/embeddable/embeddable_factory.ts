@@ -18,7 +18,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import {
-  EmbeddableFactory as AbstractEmbeddableFactory,
+  EmbeddableFactoryDefinition,
   ErrorEmbeddable,
   EmbeddableInput,
   IContainer,
@@ -36,20 +36,17 @@ interface StartServices {
   indexPatternService: IndexPatternsContract;
 }
 
-export class EmbeddableFactory extends AbstractEmbeddableFactory {
+export class EmbeddableFactory implements EmbeddableFactoryDefinition {
   type = DOC_TYPE;
+  savedObjectMetaData = {
+    name: i18n.translate('xpack.lens.lensSavedObjectLabel', {
+      defaultMessage: 'Lens Visualization',
+    }),
+    type: DOC_TYPE,
+    getIconForSavedObject: () => 'lensApp',
+  };
 
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super({
-      savedObjectMetaData: {
-        name: i18n.translate('xpack.lens.lensSavedObjectLabel', {
-          defaultMessage: 'Lens Visualization',
-        }),
-        type: DOC_TYPE,
-        getIconForSavedObject: () => 'lensApp',
-      },
-    });
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public async isEditable() {
     const { capabilities } = await this.getStartServices();

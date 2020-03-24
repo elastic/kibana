@@ -316,7 +316,9 @@ test(`badge is compatible with embeddable that inherits from parent`, async () =
 
 test('Attempting to execute on incompatible embeddable throws an error', async () => {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
+  embeddableFactories.set(HELLO_WORLD_EMBEDDABLE, {
+    ...new HelloWorldEmbeddableFactory(),
+  } as EmbeddableFactory);
   const container = new HelloWorldContainer(
     {
       panels: {

@@ -51,16 +51,21 @@ const getResolvedResults = deps => {
     results.savedVis = savedVis;
     return visualizations
       .convertToSerializedVis(savedVis)
-      .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
-      .then(vis => {
+      .then(serializedVis => ({
+        vis: visualizations.createVis(serializedVis.type, serializedVis),
+        serializedVis,
+      }))
+      .then(({ vis, serializedVis }) => {
         if (vis.type.setup) {
           return vis.type.setup(vis).catch(() => vis);
         }
-        return vis;
+        return { vis, serializedVis };
       })
-      .then(vis => {
+      .then(({ vis, serializedVis }) => {
         results.vis = vis;
-        return deps.embeddable.getEmbeddableFactory('visualization').createFromObject(results.vis, {
+        return deps.embeddable.getEmbeddableFactory('visualization').create({
+          visType: savedVis.type,
+          visObject: serializedVis,
           timeRange: data.query.timefilter.timefilter.getTime(),
           filters: data.query.filterManager.getFilters(),
         });
