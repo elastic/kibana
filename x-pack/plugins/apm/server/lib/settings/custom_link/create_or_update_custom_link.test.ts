@@ -23,8 +23,10 @@ describe('Create or Update Custom link', () => {
   const customLink = ({
     label: 'foo',
     url: 'http://elastic.com/{{trace.id}}',
-    'service.name': 'opbeans-java',
-    'transaction.type': 'Request'
+    filters: [
+      { key: 'service.name', value: 'opbeans-java' },
+      { key: 'transaction.type', value: 'Request' }
+    ]
   } as unknown) as CustomLink;
   afterEach(() => {
     internalClientIndexMock.mockClear();
@@ -43,8 +45,8 @@ describe('Create or Update Custom link', () => {
         '@timestamp': 1570737000000,
         label: 'foo',
         url: 'http://elastic.com/{{trace.id}}',
-        'service.name': 'opbeans-java',
-        'transaction.type': 'Request'
+        'service.name': ['opbeans-java'],
+        'transaction.type': ['Request']
       }
     });
   });
@@ -62,8 +64,8 @@ describe('Create or Update Custom link', () => {
         '@timestamp': 1570737000000,
         label: 'foo',
         url: 'http://elastic.com/{{trace.id}}',
-        'service.name': 'opbeans-java',
-        'transaction.type': 'Request'
+        'service.name': ['opbeans-java'],
+        'transaction.type': ['Request']
       }
     });
   });

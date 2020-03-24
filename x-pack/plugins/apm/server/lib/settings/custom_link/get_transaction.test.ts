@@ -18,17 +18,6 @@ import {
 
 describe('custom link get transaction', () => {
   let mock: SearchParamsMock;
-  it('removes not listed filters from query', async () => {
-    mock = await inspectSearchParams(setup =>
-      getTransaction({
-        setup: (setup as unknown) as Setup,
-        // @ts-ignore ignoring the _debug is not part of filter options
-        filters: { _debug: true, [SERVICE_NAME]: 'foo' }
-      })
-    );
-
-    expect(mock.params).toMatchSnapshot();
-  });
   it('fetches without filter', async () => {
     mock = await inspectSearchParams(setup =>
       getTransaction({

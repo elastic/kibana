@@ -45,7 +45,20 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
   const [transaction, setTransaction] = useState<Transaction | undefined>();
 
   useEffect(() => {
-    fetchTransaction(filters, setTransaction);
+    /*
+      React throwns "Can't perform a React state update on an unmounted component"
+      It happens when the Custom Link flyout is closed before the return of the api request.
+      To avoid such case, sets the isUnmounted to true when component unmount and check its value before update the transaction.
+    */
+    let isUnmounted = false;
+    fetchTransaction(filters, (_transaction: Transaction) => {
+      if (!isUnmounted) {
+        setTransaction(_transaction);
+      }
+    });
+    return () => {
+      isUnmounted = true;
+    };
   }, [filters]);
 
   const { formattedUrl, error } = replaceTemplateVariables(url, transaction);
