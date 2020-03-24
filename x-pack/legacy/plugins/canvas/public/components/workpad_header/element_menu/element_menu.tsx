@@ -22,7 +22,7 @@ import { Popover, ClosePopoverFn } from '../../popover';
 // @ts-ignore Untyped local
 import { AssetManager } from '../../asset_manager';
 // @ts-ignore Untyped local
-import { ElementTypes } from '../../element_types';
+import { SavedElementsModal } from '../../saved_elements_modal';
 import { getId } from '../../../lib/get_id';
 
 interface CategorizedElementLists {
@@ -188,7 +188,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
       </Popover>
       {isAssetModalVisible ? <AssetManager onClose={hideAssetModal} /> : null}
       {isEmbedPanelVisible ? <AddEmbeddablePanel onClose={hideEmbeddablePanel} /> : null}
-      {isSavedElementsModalVisible ? <ElementTypes onClose={hideSavedElementsModal} /> : null}
+      {isSavedElementsModalVisible ? <SavedElementsModal onClose={hideSavedElementsModal} /> : null}
     </Fragment>
   );
 };

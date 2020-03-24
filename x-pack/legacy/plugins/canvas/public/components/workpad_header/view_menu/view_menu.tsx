@@ -85,7 +85,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
   enterFullscreen,
   doRefresh,
 }) => {
-  const exportControl = (togglePopover: React.MouseEventHandler<any>) => (
+  const viewControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty size="s" aria-label={strings.getViewMenuLabel()} onClick={togglePopover}>
       {strings.getViewMenuButtonLabel()}
     </EuiButtonEmpty>
@@ -172,7 +172,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
   });
 
   return (
-    <Popover button={exportControl} panelPaddingSize="none">
+    <Popover button={viewControl} panelPaddingSize="none">
       {({ closePopover }: { closePopover: ClosePopoverFn }) => (
         <EuiContextMenu initialPanelId={0} panels={flattenPanelTree(getPanelTree(closePopover))} />
       )}
