@@ -104,50 +104,46 @@ export const saveTimelines = async (
   };
 };
 
-export const savePinnedEvents = async (
+export const savePinnedEvents = (
   frameworkRequest: FrameworkRequest,
   timelineSavedObjectId: string,
   pinnedEventIds?: string[] | null
 ) => {
-  if (pinnedEventIds?.length !== 0) {
-    await Promise.all(
-      pinnedEventIds?.map(eventId => {
-        return pinnedEventLib.persistPinnedEventOnTimeline(
-          frameworkRequest,
-          null, // pinnedEventSavedObjectId
-          eventId,
-          timelineSavedObjectId
-        );
-      }) ?? []
-    );
-  }
+  return (
+    pinnedEventIds?.map(eventId => {
+      return pinnedEventLib.persistPinnedEventOnTimeline(
+        frameworkRequest,
+        null, // pinnedEventSavedObjectId
+        eventId,
+        timelineSavedObjectId
+      );
+    }) ?? []
+  );
 };
 
-export const saveNotes = async (
+export const saveNotes = (
   frameworkRequest: FrameworkRequest,
   timelineSavedObjectId: string,
   timelineVersion?: string | null,
   existingNoteIds?: string[],
   newNotes?: NoteResult[]
 ) => {
-  if (newNotes?.length !== 0) {
-    await Promise.all(
-      newNotes?.map(note => {
-        const newNote: SavedNote = {
-          eventId: note.eventId,
-          note: note.note,
-          timelineId: timelineSavedObjectId,
-        };
+  return (
+    newNotes?.map(note => {
+      const newNote: SavedNote = {
+        eventId: note.eventId,
+        note: note.note,
+        timelineId: timelineSavedObjectId,
+      };
 
-        return noteLib.persistNote(
-          frameworkRequest,
-          existingNoteIds?.find(nId => nId === note.noteId) ?? null,
-          timelineVersion ?? null,
-          newNote
-        );
-      }) ?? []
-    );
-  }
+      return noteLib.persistNote(
+        frameworkRequest,
+        existingNoteIds?.find(nId => nId === note.noteId) ?? null,
+        timelineVersion ?? null,
+        newNote
+      );
+    }) ?? []
+  );
 };
 
 export const createTimelines = async (
@@ -165,19 +161,20 @@ export const createTimelines = async (
     timelineSavedObjectId,
     timelineVersion
   );
-  await savePinnedEvents(
-    frameworkRequest,
-    timelineSavedObjectId ?? newTimelineSavedObjectId,
-    pinnedEventIds
-  );
-
-  await saveNotes(
-    frameworkRequest,
-    timelineSavedObjectId ?? newTimelineSavedObjectId,
-    newTimelineVersion,
-    existingNoteIds,
-    notes
-  );
+  await Promise.all([
+    savePinnedEvents(
+      frameworkRequest,
+      timelineSavedObjectId ?? newTimelineSavedObjectId,
+      pinnedEventIds
+    ),
+    saveNotes(
+      frameworkRequest,
+      timelineSavedObjectId ?? newTimelineSavedObjectId,
+      newTimelineVersion,
+      existingNoteIds,
+      notes
+    ),
+  ]);
 
   return newTimelineSavedObjectId;
 };

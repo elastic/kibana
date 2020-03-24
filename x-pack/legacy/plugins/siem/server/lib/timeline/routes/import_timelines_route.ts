@@ -102,6 +102,10 @@ export const importTimelinesRoute = (
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importTimelineResponse: ImportTimelineResponse[] = [];
 
+        const user = await securityPluginSetup.authc.getCurrentUser(request);
+        let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
+        frameworkRequest = set('user', user, frameworkRequest);
+
         while (chunkParseObjects.length) {
           const batchParseObjects = chunkParseObjects.shift() ?? [];
           const newImportTimelineResponse = await Promise.all(
@@ -142,13 +146,6 @@ export const importTimelinesRoute = (
                       parsedTimeline
                     );
                     try {
-                      const user = await securityPluginSetup.authc.getCurrentUser(request);
-                      let frameworkRequest = set(
-                        'context.core.savedObjects.client',
-                        savedObjectsClient,
-                        request
-                      );
-                      frameworkRequest = set('user', user, frameworkRequest);
                       let timeline = null;
                       try {
                         timeline = await timelineLib.getTimeline(
