@@ -10,22 +10,28 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# formatting
+bold=$(tput bold)
+normal=$(tput sgr0)
+
 # Create tmp folder
 mkdir -p tmp
 
 # Ask user to start Kibana
 echo "
-To start Kibana please run the following command:
+${bold}To start Kibana please run the following command:${normal}
 
 node ./scripts/kibana --no-base-path --optimize.watch=false --server.port=${KIBANA_PORT} --config x-pack/legacy/plugins/apm/e2e/ci/kibana.e2e.yml
 "
 
 # Clone or pull apm-integration-testing
-printf "\n===apm-integration-testing===\n"
-echo "Cloning"
+printf "\n${bold}=== apm-integration-testing ===\n${normal}"
+
 git clone "https://github.com/elastic/apm-integration-testing.git" "./tmp/apm-integration-testing" &> /dev/null
 if [ $? -eq 0 ]; then
-    echo "Pulling..."
+    echo "Cloning repository"
+else
+    echo "Pulling from master..."
     git -C "./tmp/apm-integration-testing" pull &> /dev/null
 fi
 
@@ -46,7 +52,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-printf "\n===Static mock data===\n"
+printf "\n${bold}=== Static mock data ===\n${normal}"
 
 # Download static data if not already done
 if [ -e "./tmp/events.json" ]; then
@@ -73,8 +79,15 @@ yarn &> ./tmp/e2e-yarn.log
 echo "Waiting for Kibana to start..."
 yarn wait-on -i 500 -w 500 http://localhost:$KIBANA_PORT > /dev/null
 
-echo "✅ Setup completed successfully. Running tests..."
+echo "\n✅ Setup completed successfully. Running tests...\n"
 
 # run cypress tests
 yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
+
+echo "
+
+${bold}If you want to run the test interactively, run:${normal}
+
+yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true
+"
 
