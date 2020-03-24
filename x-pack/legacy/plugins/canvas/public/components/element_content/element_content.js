@@ -57,6 +57,11 @@ export const ElementContent = compose(
     getElementId,
   } = handlers;
 
+  const selfTrackingEmeddableTypes = ['map', 'lens'];
+  const shouldTrackComplete = !(
+    renderable.value && selfTrackingEmeddableTypes.includes(renderable.value.embeddableType)
+  );
+
   return Style.it(
     renderable.css,
     <div
@@ -69,6 +74,7 @@ export const ElementContent = compose(
         className="canvasElement__content"
         onComplete={onComplete}
         functionName={renderFunction.name}
+        shouldTrackComplete={shouldTrackComplete}
       >
         <RenderWithFn
           name={renderFunction.name}

@@ -11,6 +11,7 @@ export class ElementShareContainer extends React.PureComponent {
   static propTypes = {
     functionName: PropTypes.string.isRequired,
     onComplete: PropTypes.func.isRequired,
+    shouldTrackComplete: PropTypes.bool.isRequired,
     className: PropTypes.string,
     children: PropTypes.node.isRequired,
   };
@@ -84,8 +85,10 @@ export class ElementShareContainer extends React.PureComponent {
     // NOTE: the data-shared-item and data-render-complete attributes are used for reporting
     return (
       <div
-        data-shared-item
-        data-render-complete={this.state.renderComplete}
+        data-shared-item={this.props.shouldTrackComplete ? this.state.renderComplete : undefined}
+        data-render-complete={
+          this.props.shouldTrackComplete ? this.state.renderComplete : undefined
+        }
         className={this.props.className}
         ref={ref => (this.sharedItemRef = ref)}
       >
