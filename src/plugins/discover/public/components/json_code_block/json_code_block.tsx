@@ -16,20 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { getServices, wrapInI18nContext } from '../../../kibana_services';
+import React from 'react';
+import { EuiCodeBlock } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
-export function FieldNameDirectiveProvider(reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(FieldName),
-    [
-      ['field', { watchDepth: 'collection' }],
-      ['fieldName', { watchDepth: 'reference' }],
-      ['fieldType', { watchDepth: 'reference' }],
-    ],
-    { restrict: 'AE' },
-    {
-      useShortDots: getServices().uiSettings.get('shortDots:enable'),
-    }
+export function JsonCodeBlock({ hit }: DocViewRenderProps) {
+  const label = i18n.translate('discover.docViews.json.codeEditorAriaLabel', {
+    defaultMessage: 'Read only JSON view of an elasticsearch document',
+  });
+  return (
+    <EuiCodeBlock aria-label={label} language="json" isCopyable paddingSize="s">
+      {JSON.stringify(hit, null, 2)}
+    </EuiCodeBlock>
   );
 }

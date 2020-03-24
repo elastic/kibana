@@ -16,20 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { getServices, wrapInI18nContext } from '../../../kibana_services';
 
-export function FieldNameDirectiveProvider(reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(FieldName),
-    [
-      ['field', { watchDepth: 'collection' }],
-      ['fieldName', { watchDepth: 'reference' }],
-      ['fieldType', { watchDepth: 'reference' }],
-    ],
-    { restrict: 'AE' },
-    {
-      useShortDots: getServices().uiSettings.get('shortDots:enable'),
-    }
-  );
-}
+export { shortenDottedString } from './shorten_dotted_string';

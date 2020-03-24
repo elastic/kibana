@@ -16,20 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { getServices, wrapInI18nContext } from '../../../kibana_services';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
-export function FieldNameDirectiveProvider(reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(FieldName),
-    [
-      ['field', { watchDepth: 'collection' }],
-      ['fieldName', { watchDepth: 'reference' }],
-      ['fieldType', { watchDepth: 'reference' }],
-    ],
-    { restrict: 'AE' },
-    {
-      useShortDots: getServices().uiSettings.get('shortDots:enable'),
-    }
+export interface Props {
+  onClick: () => void;
+  isCollapsed: boolean;
+}
+
+export function DocViewTableRowBtnCollapse({ onClick, isCollapsed }: Props) {
+  const label = i18n.translate('discover.docViews.table.toggleFieldDetails', {
+    defaultMessage: 'Toggle field details',
+  });
+  return (
+    <EuiToolTip content={label}>
+      <EuiButtonIcon
+        aria-expanded={!isCollapsed}
+        aria-label={label}
+        data-test-subj="collapseBtn"
+        onClick={() => onClick()}
+        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+        iconSize={'s'}
+      />
+    </EuiToolTip>
   );
 }

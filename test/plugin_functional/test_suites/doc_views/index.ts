@@ -16,20 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { getServices, wrapInI18nContext } from '../../../kibana_services';
+import { PluginFunctionalProviderContext } from '../../services';
 
-export function FieldNameDirectiveProvider(reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(FieldName),
-    [
-      ['field', { watchDepth: 'collection' }],
-      ['fieldName', { watchDepth: 'reference' }],
-      ['fieldType', { watchDepth: 'reference' }],
-    ],
-    { restrict: 'AE' },
-    {
-      useShortDots: getServices().uiSettings.get('shortDots:enable'),
-    }
-  );
+export default function({ getService, loadTestFile }: PluginFunctionalProviderContext) {
+  const esArchiver = getService('esArchiver');
+
+  describe('doc views', function() {
+    before(async () => {
+      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/discover');
+    });
+
+    loadTestFile(require.resolve('./doc_views'));
+  });
 }

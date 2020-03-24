@@ -16,20 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { getServices, wrapInI18nContext } from '../../../kibana_services';
 
-export function FieldNameDirectiveProvider(reactDirective) {
+import React from 'react';
+import { getServices } from '../../kibana_services';
+
+export function createDocViewerDirective(reactDirective: any) {
   return reactDirective(
-    wrapInI18nContext(FieldName),
+    (props: any) => {
+      const { DocViewer } = getServices();
+      return <DocViewer {...props} />;
+    },
     [
-      ['field', { watchDepth: 'collection' }],
-      ['fieldName', { watchDepth: 'reference' }],
-      ['fieldType', { watchDepth: 'reference' }],
+      'hit',
+      ['indexPattern', { watchDepth: 'reference' }],
+      ['filter', { watchDepth: 'reference' }],
+      ['columns', { watchDepth: 'collection' }],
+      ['onAddColumn', { watchDepth: 'reference' }],
+      ['onRemoveColumn', { watchDepth: 'reference' }],
     ],
-    { restrict: 'AE' },
     {
-      useShortDots: getServices().uiSettings.get('shortDots:enable'),
+      restrict: 'E',
+      scope: {
+        hit: '=',
+        indexPattern: '=',
+        filter: '=?',
+        columns: '=?',
+        onAddColumn: '=?',
+        onRemoveColumn: '=?',
+      },
     }
   );
 }
