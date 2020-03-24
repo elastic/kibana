@@ -35,8 +35,7 @@ export function getAssets(
 
     // if dataset, filter for them
     if (datasetName) {
-      // TODO: Filter for dataset path
-      const comparePath = `${EPR_PATH_PREFIX}/${packageInfo.name}-${packageInfo.version}/dataset/${datasetName}`;
+      const comparePath = `${EPR_PATH_PREFIX}/${packageInfo.name}-${packageInfo.version}/dataset/${datasetName}/`;
       if (!path.includes(comparePath)) {
         continue;
       }
