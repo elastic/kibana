@@ -3,14 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import moment from 'moment';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
-
-interface UptimeTelemetry {
-  overview_page: number;
-  monitor_page: number;
-}
+import { PageViewParams, UptimeTelemetry } from './types';
+import { UptimePage } from '../../../../../../legacy/plugins/uptime/public/hooks';
 
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
@@ -39,14 +37,20 @@ export class KibanaTelemetryAdapter {
     });
   }
 
-  public static countOverview() {
+  public static countPageView(pageView: PageViewParams) {
     const bucket = this.getBucketToIncrement();
-    this.collector[bucket].overview_page += 1;
-  }
 
-  public static countMonitor() {
-    const bucket = this.getBucketToIncrement();
-    this.collector[bucket].monitor_page += 1;
+    switch (pageView.page) {
+      case UptimePage.Overview:
+        this.collector[bucket].overview_page += 1;
+        break;
+      case UptimePage.Monitor:
+        this.collector[bucket].monitor_page += 1;
+        break;
+      case UptimePage.Settings:
+        this.collector[bucket].settings_page += 1;
+        break;
+    }
   }
 
   public static async countNoOfUniqueMonitorAndLocations(callCluster: APICluster) {
@@ -161,8 +165,9 @@ export class KibanaTelemetryAdapter {
       (acc, cum) => ({
         overview_page: acc.overview_page + cum.overview_page,
         monitor_page: acc.monitor_page + cum.monitor_page,
+        settings_page: acc.settings_page + cum.settings_page,
       }),
-      { overview_page: 0, monitor_page: 0 }
+      { overview_page: 0, monitor_page: 0, settings_page: 0 }
     );
   }
 
@@ -177,7 +182,20 @@ export class KibanaTelemetryAdapter {
       this.collector[bucketId] = {
         overview_page: 0,
         monitor_page: 0,
-        number_of_monitor: 0,
+        no_of_unique_monitors: 0,
+        setting_page: 0,
+        monitor_frequency: [],
+        monitor_name_stats: {
+          min_length: 0,
+          max_length: 0,
+          avg_length: 0,
+        },
+        no_of_unique_observer_locations: 0,
+        observer_location_name_stats: {
+          min_length: 0,
+          max_length: 0,
+          avg_length: 0,
+        },
       };
     }
     return bucketId;
