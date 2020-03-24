@@ -172,6 +172,7 @@ export class ApmPlugin
         <AlertsContextProvider
           value={{
             http: core.http,
+            docLinks: core.docLinks,
             toastNotifications: core.notifications.toasts,
             actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
             alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry
