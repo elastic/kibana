@@ -16,20 +16,13 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('settings-page-link', 5000);
     },
     changeHeartbeatIndicesInput: async (text: string) => {
-      const input = await testSubjects.find('heartbeat-indices-input', 5000);
+      const input = await testSubjects.find('heartbeat-indices-input-loaded', 5000);
       await input.clearValueWithKeyboard();
       await input.type(text);
     },
     loadFields: async () => {
-      let heartbeatIndices;
-      await retry.tryForTime(5000, async () => {
-        const input = await testSubjects.find('heartbeat-indices-input', 5000);
-        const klass = await input.getAttribute('class');
-        if (klass.match(/euiFieldText-isLoading/)) {
-          throw new Error('Input in loading state, no value');
-        }
-        heartbeatIndices = await input.getAttribute('value');
-      });
+      const input = await testSubjects.find('heartbeat-indices-input-loaded', 5000);
+      const heartbeatIndices = await input.getAttribute('value');
 
       return { heartbeatIndices };
     },
@@ -41,7 +34,7 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       await retry.waitFor('submit to succeed', async () => {
         // When the form submit is complete the form will no longer be disabled
         const disabled = await (
-          await testSubjects.find('heartbeat-indices-input', 5000)
+          await testSubjects.find('heartbeat-indices-input-loaded', 5000)
         ).getAttribute('disabled');
         return disabled === null;
       });
