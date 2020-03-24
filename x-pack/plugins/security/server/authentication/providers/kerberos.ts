@@ -28,6 +28,15 @@ type ProviderState = TokenPair;
 const WWWAuthenticateHeaderName = 'WWW-Authenticate';
 
 /**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication.
+  return request.route.options.authRequired === true;
+}
+
+/**
  * Provider that supports Kerberos request authentication.
  */
 export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
@@ -35,6 +44,20 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * Type of the provider.
    */
   static readonly type = 'kerberos';
+
+  /**
+   * Performs initial login request.
+   * @param request Request instance.
+   */
+  public async login(request: KibanaRequest) {
+    this.logger.debug('Trying to perform a login.');
+
+    if (HTTPAuthorizationHeader.parseFromRequest(request)?.scheme.toLowerCase() === 'negotiate') {
+      return await this.authenticateWithNegotiateScheme(request);
+    }
+
+    return await this.authenticateViaSPNEGO(request);
+  }
 
   /**
    * Performs Kerberos request authentication.
@@ -66,7 +89,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If we couldn't authenticate by means of all methods above, let's try to check if Elasticsearch can
     // start authentication mechanism negotiation, otherwise just return authentication result we have.
-    return authenticationResult.notHandled()
+    return authenticationResult.notHandled() && canStartNewSession(request)
       ? await this.authenticateViaSPNEGO(request, state)
       : authenticationResult;
   }
@@ -239,10 +262,10 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If refresh token is no longer valid, then we should clear session and renegotiate using SPNEGO.
     if (refreshedTokenPair === null) {
-      this.logger.debug(
-        'Both access and refresh tokens are expired. Re-initiating SPNEGO handshake.'
-      );
-      return this.authenticateViaSPNEGO(request, state);
+      this.logger.debug('Both access and refresh tokens are expired.');
+      return canStartNewSession(request)
+        ? this.authenticateViaSPNEGO(request, state)
+        : AuthenticationResult.notHandled();
     }
 
     try {

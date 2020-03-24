@@ -754,7 +754,7 @@ export class DashboardAppController {
        * When de-angularizing this code, please call the underlaying action function
        * directly and not via the top nav object.
        **/
-      navActions[TopNavIds.ADD]();
+      navActions[TopNavIds.ADD_EXISTING]();
     };
     $scope.enterEditMode = () => {
       dashboardStateManager.setFullScreenMode(false);
@@ -847,7 +847,8 @@ export class DashboardAppController {
 
       showCloneModal(onClone, currentTitle);
     };
-    navActions[TopNavIds.ADD] = () => {
+
+    navActions[TopNavIds.ADD_EXISTING] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
@@ -889,7 +890,8 @@ export class DashboardAppController {
       share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
-        allowShortUrl: !dashboardConfig.getHideWriteControls(),
+        allowShortUrl:
+          !dashboardConfig.getHideWriteControls() || dashboardCapabilities.createShortUrl,
         shareableUrl: unhashUrl(window.location.href),
         objectId: dash.id,
         objectType: 'dashboard',

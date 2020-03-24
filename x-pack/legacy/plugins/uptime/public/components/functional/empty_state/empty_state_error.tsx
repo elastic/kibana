@@ -7,9 +7,10 @@
 import { EuiEmptyPrompt, EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
+import { IHttpFetchError } from '../../../../../../../../target/types/core/public/http';
 
 interface EmptyStateErrorProps {
-  errors: Error[];
+  errors: IHttpFetchError[];
 }
 
 export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
