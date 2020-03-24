@@ -159,10 +159,6 @@ export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   references: ['www.test.co'],
   falsePositives: ['test'],
   tags: ['tag1', 'tag2'],
-  timeline: {
-    id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-    title: 'Titled timeline',
-  },
   threat: [
     {
       framework: 'mockFramework',
@@ -198,6 +194,10 @@ export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
   machineLearningJobId: '',
   index: ['filebeat-'],
   queryBar: mockQueryBar,
+  timeline: {
+    id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+    title: 'Titled timeline',
+  },
 });
 
 export const mockScheduleStepRule = (isNew = false): ScheduleStepRule => ({

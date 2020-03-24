@@ -8,21 +8,14 @@ import React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react/pure';
 import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
 import { TEST_SUBJ_ACTION_FACTORY_ITEM, TEST_SUBJ_SELECTED_ACTION_FACTORY } from './action_wizard';
-import {
-  dashboardDrilldownActionFactory,
-  dashboards,
-  Demo,
-  urlDrilldownActionFactory,
-} from './test_data';
+import { dashboardFactory, dashboards, Demo, urlFactory } from './test_data';
 
 // TODO: afterEach is not available for it globally during setup
 // https://github.com/elastic/kibana/issues/59469
 afterEach(cleanup);
 
 test('Pick and configure action', () => {
-  const screen = render(
-    <Demo actionFactories={[dashboardDrilldownActionFactory, urlDrilldownActionFactory]} />
-  );
+  const screen = render(<Demo actionFactories={[dashboardFactory, urlFactory]} />);
 
   // check that all factories are displayed to pick
   expect(screen.getAllByTestId(TEST_SUBJ_ACTION_FACTORY_ITEM)).toHaveLength(2);
@@ -47,7 +40,7 @@ test('Pick and configure action', () => {
 });
 
 test('If only one actions factory is available then actionFactory selection is emitted without user input', () => {
-  const screen = render(<Demo actionFactories={[urlDrilldownActionFactory]} />);
+  const screen = render(<Demo actionFactories={[urlFactory]} />);
 
   // check that no factories are displayed to pick from
   expect(screen.queryByTestId(TEST_SUBJ_ACTION_FACTORY_ITEM)).not.toBeInTheDocument();

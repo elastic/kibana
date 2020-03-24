@@ -13,6 +13,7 @@ import deepEqual from 'fast-deep-equal';
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import { MlCapabilitiesContext } from '../../../../../components/ml/permissions/ml_capabilities_provider';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { setFieldValue, isMlRule } from '../../helpers';
@@ -22,6 +23,7 @@ import { QueryBarDefineRule } from '../query_bar';
 import { SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 import { MlJobSelect } from '../ml_job_select';
+import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import {
@@ -54,6 +56,10 @@ const stepDefineDefaultValue: DefineStepRule = {
     filters: [],
     saved_id: undefined,
   },
+  timeline: {
+    id: null,
+    title: DEFAULT_TIMELINE_TITLE,
+  },
 };
 
 const MyLabelButton = styled(EuiButtonEmpty)`
@@ -70,23 +76,6 @@ MyLabelButton.defaultProps = {
   flush: 'right',
 };
 
-const getStepDefaultValue = (
-  indicesConfig: string[],
-  defaultValues: DefineStepRule | null
-): DefineStepRule => {
-  if (defaultValues != null) {
-    return {
-      ...defaultValues,
-      isNew: false,
-    };
-  } else {
-    return {
-      ...stepDefineDefaultValue,
-      index: indicesConfig != null ? indicesConfig : [],
-    };
-  }
-};
-
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
   defaultValues,
@@ -99,18 +88,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 }) => {
   const mlCapabilities = useContext(MlCapabilitiesContext);
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
-  const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState(false);
+  const [indexModified, setIndexModified] = useState(false);
   const [localIsMlRule, setIsMlRule] = useState(false);
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [mylocalIndicesConfig, setMyLocalIndicesConfig] = useState(
-    defaultValues != null ? defaultValues.index : indicesConfig ?? []
-  );
+  const [myStepData, setMyStepData] = useState<DefineStepRule>({
+    ...stepDefineDefaultValue,
+    index: indicesConfig ?? [],
+  });
   const [
     { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
-  ] = useFetchIndexPatterns(mylocalIndicesConfig);
-  const [myStepData, setMyStepData] = useState<DefineStepRule>(
-    getStepDefaultValue(indicesConfig, null)
-  );
+  ] = useFetchIndexPatterns(myStepData.index);
 
   const { form } = useForm({
     defaultValue: myStepData,
@@ -131,15 +118,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [form]);
 
   useEffect(() => {
-    if (indicesConfig != null && defaultValues != null) {
-      const myDefaultValues = getStepDefaultValue(indicesConfig, defaultValues);
-      if (!deepEqual(myDefaultValues, myStepData)) {
-        setMyStepData(myDefaultValues);
-        setLocalUseIndicesConfig(deepEqual(myDefaultValues.index, indicesConfig));
-        setFieldValue(form, schema, myDefaultValues);
-      }
+    const { isNew, ...values } = myStepData;
+    if (defaultValues != null && !deepEqual(values, defaultValues)) {
+      const newValues = { ...values, ...defaultValues, isNew: false };
+      setMyStepData(newValues);
+      setFieldValue(form, schema, newValues);
     }
-  }, [defaultValues, indicesConfig]);
+  }, [defaultValues, setMyStepData, setFieldValue]);
 
   useEffect(() => {
     if (setForm != null) {
@@ -188,7 +173,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 path="index"
                 config={{
                   ...schema.index,
-                  labelAppend: !localUseIndicesConfig ? (
+                  labelAppend: indexModified ? (
                     <MyLabelButton onClick={handleResetIndices} iconType="refresh">
                       {i18n.RESET_DEFAULT_INDEX}
                     </MyLabelButton>
@@ -246,17 +231,22 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </EuiFormRow>
+          <UseField
+            path="timeline"
+            component={PickTimeline}
+            componentProps={{
+              idAria: 'detectionEngineStepDefineRuleTimeline',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
+            }}
+          />
           <FormDataProvider pathsToWatch={['index', 'ruleType']}>
             {({ index, ruleType }) => {
               if (index != null) {
-                if (deepEqual(index, indicesConfig) && !localUseIndicesConfig) {
-                  setLocalUseIndicesConfig(true);
-                }
-                if (!deepEqual(index, indicesConfig) && localUseIndicesConfig) {
-                  setLocalUseIndicesConfig(false);
-                }
-                if (index != null && !isEmpty(index) && !deepEqual(index, mylocalIndicesConfig)) {
-                  setMyLocalIndicesConfig(index);
+                if (deepEqual(index, indicesConfig) && indexModified) {
+                  setIndexModified(false);
+                } else if (!deepEqual(index, indicesConfig) && !indexModified) {
+                  setIndexModified(true);
                 }
               }
 

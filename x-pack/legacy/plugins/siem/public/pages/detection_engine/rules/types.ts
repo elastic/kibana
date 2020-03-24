@@ -60,7 +60,6 @@ export interface AboutStepRule extends StepRuleData {
   references: string[];
   falsePositives: string[];
   tags: string[];
-  timeline: FieldValueTimeline;
   threat: IMitreEnterpriseAttack[];
   note: string;
 }
@@ -76,6 +75,7 @@ export interface DefineStepRule extends StepRuleData {
   machineLearningJobId: string;
   queryBar: FieldValueQueryBar;
   ruleType: RuleType;
+  timeline: FieldValueTimeline;
 }
 
 export interface ScheduleStepRule extends StepRuleData {
@@ -99,6 +99,8 @@ export interface DefineStepRuleJson {
   saved_id?: string;
   query?: string;
   language?: string;
+  timeline_id?: string;
+  timeline_title?: string;
   type: RuleType;
 }
 
@@ -110,8 +112,6 @@ export interface AboutStepRuleJson {
   references: string[];
   false_positives: string[];
   tags: string[];
-  timeline_id?: string;
-  timeline_title?: string;
   threat: IMitreEnterpriseAttack[];
   note?: string;
 }

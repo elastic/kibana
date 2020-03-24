@@ -68,20 +68,22 @@ export const getActionsStepsData = (
   };
 };
 
-export const getDefineStepsData = (rule: Rule): DefineStepRule => {
-  return {
-    isNew: false,
-    ruleType: rule.type,
-    anomalyThreshold: rule.anomaly_threshold ?? 50,
-    machineLearningJobId: rule.machine_learning_job_id ?? '',
-    index: rule.index ?? [],
-    queryBar: {
-      query: { query: rule.query ?? '', language: rule.language ?? '' },
-      filters: (rule.filters ?? []) as Filter[],
-      saved_id: rule.saved_id,
-    },
-  };
-};
+export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
+  isNew: false,
+  ruleType: rule.type,
+  anomalyThreshold: rule.anomaly_threshold ?? 50,
+  machineLearningJobId: rule.machine_learning_job_id ?? '',
+  index: rule.index ?? [],
+  queryBar: {
+    query: { query: rule.query ?? '', language: rule.language ?? '' },
+    filters: (rule.filters ?? []) as Filter[],
+    saved_id: rule.saved_id,
+  },
+  timeline: {
+    id: rule.timeline_id ?? null,
+    title: rule.timeline_title ?? null,
+  },
+});
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
   const { interval, from } = rule;
@@ -119,8 +121,6 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     risk_score: riskScore,
     tags,
     threat,
-    timeline_id: timelineId,
-    timeline_title: timelineTitle,
   } = rule;
 
   return {
@@ -134,10 +134,6 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     riskScore,
     falsePositives,
     threat: threat as IMitreEnterpriseAttack[],
-    timeline: {
-      id: timelineId ?? null,
-      title: timelineTitle ?? null,
-    },
   };
 };
 

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { CryptoFactory, ServerFacade, Logger } from '../../../types';
+import { CryptoFactory, Logger } from '../../../types';
 
 interface HasEncryptedHeaders {
   headers?: string;
@@ -17,15 +17,15 @@ export const decryptJobHeaders = async <
   JobParamsType,
   JobDocPayloadType extends HasEncryptedHeaders
 >({
-  server,
+  encryptionKey,
   job,
   logger,
 }: {
-  server: ServerFacade;
+  encryptionKey?: string;
   job: JobDocPayloadType;
   logger: Logger;
 }): Promise<Record<string, string>> => {
-  const crypto: CryptoFactory = cryptoFactory(server);
+  const crypto: CryptoFactory = cryptoFactory(encryptionKey);
   try {
     const decryptedHeaders: Record<string, string> = await crypto.decrypt(job.headers);
     return decryptedHeaders;

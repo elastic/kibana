@@ -47,7 +47,7 @@ export const rulesNotificationAlertType = ({
       to: startedAt,
       index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId!,
-      kibanaUrl: ruleAlertParams.meta?.kibanaSiemAppUrl as string,
+      kibanaUrl: ruleAlertParams.meta?.kibanaSiemAppUrl,
       ruleAlertId: ruleAlertSavedObject.id,
       callCluster: services.callCluster,
     });

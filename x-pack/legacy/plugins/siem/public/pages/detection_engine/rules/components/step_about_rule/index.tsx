@@ -28,7 +28,6 @@ import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from './helpers';
 import { schema } from './schema';
 import * as I18n from './translations';
-import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { MarkdownEditorForm } from '../../../../../components/markdown_editor/form';
@@ -208,15 +207,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             buttonContent={AdvancedSettingsAccordionButton}
           >
             <EuiSpacer size="m" />
-            <UseField
-              path="timeline"
-              component={PickTimeline}
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleTimeline',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
-              }}
-            />
             <UseField
               path="references"
               component={AddItem}
