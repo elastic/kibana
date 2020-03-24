@@ -50,9 +50,6 @@ export function setServices(newServices: any) {
 export { wrapInI18nContext } from 'ui/i18n';
 import { search } from '../../../../../plugins/data/public';
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
-// @ts-ignore
-// @ts-ignore
-export { timezoneProvider } from 'ui/vis/lib/timezone';
 export {
   unhashUrl,
   redirectWhenMissing,

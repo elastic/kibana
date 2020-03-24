@@ -20,12 +20,12 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { Schema } from '../schemas';
+import { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -93,8 +93,8 @@ describe('DefaultEditorAgg component', () => {
       metricAggs: [],
       groupName: 'metrics',
       state: {
-        aggs,
-      } as VisState,
+        data: { aggs },
+      } as EditorVisState,
       schemas: [
         {
           name: 'metrics',
@@ -147,8 +147,8 @@ describe('DefaultEditorAgg component', () => {
     });
 
     expect(reorderAggs).toHaveBeenCalledWith(
-      defaultProps.state.aggs.aggs[0],
-      defaultProps.state.aggs.aggs[1]
+      defaultProps.state.data.aggs!.aggs[0],
+      defaultProps.state.data.aggs!.aggs[1]
     );
   });
 
