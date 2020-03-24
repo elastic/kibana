@@ -62,7 +62,7 @@ pipeline {
       steps {
         notifyStatus('Starting services', 'PENDING')
         dir("${APM_ITS}"){
-          sh './scripts/compose.py start master --no-kibana --elasticsearch-heap 4g'
+          sh './scripts/compose.py start master --no-kibana --elasticsearch-port 9201 --apm-server-port=8201 --elasticsearch-heap 4g'
         }
       }
       post {
