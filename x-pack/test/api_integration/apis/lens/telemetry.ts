@@ -201,6 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(results.saved_overall).to.eql({
         lnsMetric: 1,
+        bar_stacked: 1,
       });
       expect(results.saved_overall_total).to.eql(1);
 
