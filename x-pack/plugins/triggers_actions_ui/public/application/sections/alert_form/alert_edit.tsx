@@ -26,6 +26,7 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
+import { AlertActionSecurityCallOut } from '../../components/alert_action_security_call_out';
 import { PLUGIN } from '../../constants/plugin';
 
 interface AlertEditProps {
@@ -49,6 +50,7 @@ export const AlertEdit = ({
     toastNotifications,
     alertTypeRegistry,
     actionTypeRegistry,
+    docLinks,
   } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
@@ -135,6 +137,16 @@ export const AlertEdit = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
+        <AlertActionSecurityCallOut
+          docLinks={docLinks}
+          action={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertEdit.securityCalloutAction',
+            {
+              defaultMessage: 'editing',
+            }
+          )}
+          http={http}
+        />
         <EuiFlyoutBody>
           {hasActionsDisabled && (
             <Fragment>
