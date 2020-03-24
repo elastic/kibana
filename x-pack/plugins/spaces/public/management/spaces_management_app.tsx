@@ -8,7 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import { SecurityLicense } from '../../../security/public';
 import { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
 import { PluginsStart } from '../plugin';
@@ -18,7 +18,7 @@ import { ManageSpacePage } from './edit_space';
 import { Space } from '..';
 
 interface CreateParams {
-  getStartServices: CoreSetup<PluginsStart>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
   securityLicense?: SecurityLicense;
 }
