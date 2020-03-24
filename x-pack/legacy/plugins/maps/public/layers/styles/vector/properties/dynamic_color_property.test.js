@@ -310,7 +310,7 @@ describe('supportsFieldMeta', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.ORDINAL,
     };
-    const styleProp = makeProperty(dynamicStyleOptions, null);
+    const styleProp = makeProperty(dynamicStyleOptions, undefined, null);
 
     expect(styleProp.supportsFieldMeta()).toEqual(false);
   });
