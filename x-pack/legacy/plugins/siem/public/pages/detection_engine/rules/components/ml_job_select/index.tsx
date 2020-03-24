@@ -43,7 +43,6 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
 
   return (
     <EuiFormRow
-      fullWidth
       label={field.label}
       helpText={field.helpText}
       isInvalid={isInvalid}
