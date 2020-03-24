@@ -36,7 +36,7 @@ export interface SavedVisState {
 }
 
 export interface ISavedVis {
-  id: string;
+  id?: string;
   title: string;
   description?: string;
   visState: SavedVisState;
@@ -46,7 +46,6 @@ export interface ISavedVis {
   savedSearchId?: string;
 }
 
-// @ts-ignore-next-line
 export interface VisSavedObject extends SavedObject, ISavedVis {}
 
 export interface VisResponseValue {

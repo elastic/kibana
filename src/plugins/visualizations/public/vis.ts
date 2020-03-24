@@ -49,7 +49,7 @@ export interface SerializedVisData {
 }
 
 export interface SerializedVis {
-  id: string;
+  id?: string;
   title: string;
   description?: string;
   type: string;
@@ -72,7 +72,7 @@ export interface VisParams {
 
 export class Vis {
   public readonly type: VisType;
-  public readonly id: string;
+  public readonly id?: string;
   public title: string = '';
   public description: string = '';
   public params: VisParams = {};
