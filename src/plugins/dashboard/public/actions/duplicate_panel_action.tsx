@@ -27,6 +27,7 @@ import {
 import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
 import { ViewMode, IContainer, EmbeddableStart } from '../embeddable_plugin';
 import { VisSavedObject } from '../../../../legacy/core_plugins/visualizations/public';
+import { EmbeddableInput } from '../../../embeddable/public';
 import { DashboardPanelState } from '..';
 
 export const ACTION_DUPLICATE_PANEL = 'duplicatePanel';
@@ -65,11 +66,7 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
       }
     }
 
-    return Boolean(
-      embeddable.getRoot() &&
-        embeddable.getRoot().isContainer &&
-        embeddable.type === VISUALIZE_EMBEDDABLE_TYPE
-    );
+    return Boolean(embeddable.getRoot() && embeddable.getRoot().isContainer);
   }
 
   public async execute({ embeddable }: DuplicatePanelActionContext) {
@@ -112,15 +109,23 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
 
       // Place duplicated panel
       const finalPanels = _.cloneDeep(dashboard.getInput().panels);
+      const duplicatedPanel = finalPanels[duplicatedEmbeddable.id] as DashboardPanelState;
+      duplicatedPanel.gridData.w = panelToDuplicate.gridData.w;
+      duplicatedPanel.gridData.h = panelToDuplicate.gridData.h;
+      duplicatedPanel.gridData.x = panelToDuplicate.gridData.x + panelToDuplicate.gridData.w;
+      duplicatedPanel.gridData.y = panelToDuplicate.gridData.y;
 
-      (finalPanels[duplicatedEmbeddable.id] as DashboardPanelState).gridData.w =
-        panelToDuplicate.gridData.w;
-      (finalPanels[duplicatedEmbeddable.id] as DashboardPanelState).gridData.h =
-        panelToDuplicate.gridData.h;
-      (finalPanels[duplicatedEmbeddable.id] as DashboardPanelState).gridData.x =
-        panelToDuplicate.gridData.x + panelToDuplicate.gridData.w;
-      (finalPanels[duplicatedEmbeddable.id] as DashboardPanelState).gridData.y =
-        panelToDuplicate.gridData.y;
+      const originalPanel = finalPanels[embeddable.id] as DashboardPanelState;
+      _.forOwn(finalPanels, (panel: DashboardPanelState<EmbeddableInput>) => {
+        if (
+          (panel.gridData.y === originalPanel.gridData.y &&
+            panel.gridData.x > originalPanel.gridData.x &&
+            panel.savedObjectId !== duplicatedPanel.savedObjectId) ||
+          panel.gridData.y > originalPanel.gridData.y
+        ) {
+          panel.gridData.y += duplicatedPanel.gridData.h;
+        }
+      });
 
       dashboard.updateInput({ panels: finalPanels });
       dashboard.reload();

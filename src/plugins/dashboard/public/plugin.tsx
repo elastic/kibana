@@ -105,10 +105,6 @@ export class DashboardEmbeddableContainerPublicPlugin
         }, []);
       };
 
-      const duplicatePanelAction = new DuplicatePanelAction(core);
-      uiActions.registerAction(duplicatePanelAction);
-      uiActions.attachAction(CONTEXT_MENU_TRIGGER, duplicatePanelAction);
-
       const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
         useHideChrome();
         return <ExitFullScreenButtonUi {...props} />;
@@ -144,6 +140,10 @@ export class DashboardEmbeddableContainerPublicPlugin
     );
     uiActions.registerAction(changeViewAction);
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, changeViewAction);
+
+    const duplicatePanelAction = new DuplicatePanelAction(core);
+    uiActions.registerAction(duplicatePanelAction);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, duplicatePanelAction);
   }
 
   public stop() {}
