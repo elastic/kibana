@@ -17,7 +17,15 @@ import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/i
 import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE } from '../../explorer_constants';
 import { explorerService } from '../../explorer_dashboard_service';
 
-export function getKqlQueryValues({ inputString, queryLanguage, indexPattern }: any) {
+export function getKqlQueryValues({
+  inputString,
+  queryLanguage,
+  indexPattern,
+}: {
+  inputString: string | { [key: string]: any };
+  queryLanguage: string;
+  indexPattern: IIndexPattern;
+}) {
   let influencersFilterQuery;
   const ast = esKuery.fromKueryExpression(inputString);
   const isAndOperator = ast.function === 'and';
@@ -98,20 +106,21 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   queryString,
 }) => {
   // The internal state of the input query bar updated on every key stroke.
-  // TODO: update searchInput type
-  const [searchInput, setSearchInput] = useState<any>(
+  const [searchInput, setSearchInput] = useState<Query>(
     getInitSearchInputState({ filterActive, queryString })
   );
 
   useEffect(() => {
-    setSearchInput({
-      language: QUERY_LANGUAGE_KUERY,
-      query: filterIconTriggeredQuery,
-    });
+    if (filterIconTriggeredQuery !== undefined && filterIconTriggeredQuery !== '') {
+      setSearchInput({
+        language: QUERY_LANGUAGE_KUERY,
+        query: filterIconTriggeredQuery,
+      });
+    }
   }, [filterIconTriggeredQuery]);
 
   const searchChangeHandler = (query: Query) => setSearchInput(query);
-  const applyInfluencersFilterQuery = (query: any) => {
+  const applyInfluencersFilterQuery = (query: Query) => {
     const { clearSettings, settings } = getKqlQueryValues({
       inputString: query.query,
       queryLanguage: query.language,
