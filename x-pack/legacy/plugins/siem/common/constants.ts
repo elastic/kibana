@@ -94,4 +94,9 @@ export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_UR
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated';
 
+/*
+  Licensing requirements
+ */
+export const MINIMUM_ML_LICENSE = 'platinum';
+
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
