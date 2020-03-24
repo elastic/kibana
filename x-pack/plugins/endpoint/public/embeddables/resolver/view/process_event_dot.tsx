@@ -20,7 +20,7 @@ const nodeAssets = {
   runningProcessCube: {
     cubeSymbol: `#${SymbolIds.runningProcessCube}`,
     labelFill: `url(#${PaintServerIds.runningProcess})`,
-    descriptionFill: NamedColors.activeNoWarning,
+    descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningProcess', {
       defaultMessage: 'Running Process',
     }),
@@ -28,7 +28,7 @@ const nodeAssets = {
   runningTriggerCube: {
     cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
     labelFill: `url(#${PaintServerIds.runningTrigger})`,
-    descriptionFill: NamedColors.activeWarning,
+    descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningTrigger', {
       defaultMessage: 'Running Trigger',
     }),
@@ -36,7 +36,7 @@ const nodeAssets = {
   terminatedProcessCube: {
     cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
     labelFill: NamedColors.fullLabelBackground,
-    descriptionFill: NamedColors.inertDescription,
+    descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
       defaultMessage: 'Terminated Process',
     }),
@@ -44,7 +44,7 @@ const nodeAssets = {
   terminatedTriggerCube: {
     cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
     labelFill: NamedColors.fullLabelBackground,
-    descriptionFill: NamedColors.inertDescription,
+    descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedTrigger', {
       defaultMessage: 'Terminated Trigger',
     }),
