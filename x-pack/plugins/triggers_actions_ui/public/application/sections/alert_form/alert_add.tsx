@@ -24,6 +24,7 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
+import { PLUGIN } from '../../constants/plugin';
 
 interface AlertAddProps {
   consumer: string;
@@ -109,12 +110,10 @@ export const AlertAdd = ({
       return newAlert;
     } catch (errorRes) {
       toastNotifications.addDanger(
-        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
-          defaultMessage: 'Failed to save alert: {message}',
-          values: {
-            message: errorRes.body?.message ?? '',
-          },
-        })
+        errorRes.body?.message ??
+          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
+            defaultMessage: 'Cannot create alert.',
+          })
       );
     }
   }
@@ -132,7 +131,7 @@ export const AlertAdd = ({
           <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Create Alert"
+                defaultMessage="Create alert"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
               />
               &emsp;
@@ -141,7 +140,11 @@ export const AlertAdd = ({
                 tooltipContent={i18n.translate(
                   'xpack.triggersActionsUI.sections.alertAdd.betaBadgeTooltipContent',
                   {
-                    defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                    defaultMessage:
+                      '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                    values: {
+                      pluginName: PLUGIN.getI18nName(i18n),
+                    },
                   }
                 )}
               />
