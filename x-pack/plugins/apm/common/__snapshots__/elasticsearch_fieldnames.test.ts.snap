@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Error AGENT_NAME 1`] = `"java"`;
+
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
 exports[`Error CONTAINER_ID 1`] = `undefined`;
@@ -62,8 +64,6 @@ exports[`Error POD_NAME 1`] = `undefined`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
-exports[`Error SERVICE_AGENT_NAME 1`] = `"java"`;
-
 exports[`Error SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Error SERVICE_FRAMEWORK_NAME 1`] = `undefined`;
@@ -111,6 +111,8 @@ exports[`Error URL_FULL 1`] = `undefined`;
 exports[`Error USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Error USER_ID 1`] = `undefined`;
+
+exports[`Span AGENT_NAME 1`] = `"java"`;
 
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
@@ -174,8 +176,6 @@ exports[`Span POD_NAME 1`] = `undefined`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
-exports[`Span SERVICE_AGENT_NAME 1`] = `"java"`;
-
 exports[`Span SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Span SERVICE_FRAMEWORK_NAME 1`] = `undefined`;
@@ -223,6 +223,8 @@ exports[`Span URL_FULL 1`] = `undefined`;
 exports[`Span USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
+
+exports[`Transaction AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
@@ -285,8 +287,6 @@ exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 exports[`Transaction POD_NAME 1`] = `undefined`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
-
-exports[`Transaction SERVICE_AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction SERVICE_ENVIRONMENT 1`] = `undefined`;
 

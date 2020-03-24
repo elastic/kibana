@@ -9,6 +9,8 @@ import ReactDOM from 'react-dom';
 
 import { AppMountParameters, CoreStart } from 'kibana/public';
 
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
@@ -21,10 +23,39 @@ type MlDependencies = MlSetupDependencies & MlStartDependencies;
 interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
-  appMountParams: AppMountParameters;
 }
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
+const localStorage = new Storage(window.localStorage);
+
+const App: FC<AppProps> = ({ coreStart, deps }) => {
+  const pageDeps = {
+    indexPatterns: deps.data.indexPatterns,
+    config: coreStart.uiSettings!,
+    setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
+  };
+  const services = {
+    appName: 'ML',
+    data: deps.data,
+    security: deps.security,
+    storage: localStorage,
+    ...coreStart,
+  };
+
+  const I18nContext = coreStart.i18n.Context;
+  return (
+    <I18nContext>
+      <KibanaContextProvider services={services}>
+        <MlRouter pageDeps={pageDeps} />
+      </KibanaContextProvider>
+    </I18nContext>
+  );
+};
+
+export const renderApp = (
+  coreStart: CoreStart,
+  deps: MlDependencies,
+  appMountParams: AppMountParameters
+) => {
   setDependencyCache({
     indexPatterns: deps.data.indexPatterns,
     timefilter: deps.data.query.timefilter,
@@ -46,44 +77,13 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 
   const mlLicense = setLicenseCache(deps.licensing);
 
-  appMountParams.onAppLeave(actions => {
+  appMountParams.onAppLeave(actions => actions.default());
+
+  ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element);
+
+  return () => {
     mlLicense.unsubscribe();
     clearCache();
-    return actions.default();
-  });
-
-  const pageDeps = {
-    indexPatterns: deps.data.indexPatterns,
-    config: coreStart.uiSettings!,
-    setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
+    ReactDOM.unmountComponentAtNode(appMountParams.element);
   };
-
-  const services = {
-    appName: 'ML',
-    data: deps.data,
-    security: deps.security,
-    ...coreStart,
-  };
-
-  const I18nContext = coreStart.i18n.Context;
-  return (
-    <I18nContext>
-      <KibanaContextProvider services={services}>
-        <MlRouter pageDeps={pageDeps} />
-      </KibanaContextProvider>
-    </I18nContext>
-  );
-};
-
-export const renderApp = (
-  coreStart: CoreStart,
-  deps: MlDependencies,
-  appMountParams: AppMountParameters
-) => {
-  ReactDOM.render(
-    <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
-    appMountParams.element
-  );
-
-  return () => ReactDOM.unmountComponentAtNode(appMountParams.element);
 };
