@@ -55,3 +55,11 @@ export const IMPORT_TIMELINE_QUERY = i18n.translate(
     defaultMessage: 'Import query from saved timeline',
   }
 );
+
+export const ML_JOB_HELP_TEXT = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText',
+  {
+    defaultMessage:
+      "We've provided a few common jobs to get you started. To add your own custom jobs, assign a group of “siem” to those jobs in the Machine Learning application to make them appear here.",
+  }
+);

@@ -45,6 +45,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
     <EuiFormRow
       fullWidth
       label={field.label}
+      helpText={field.helpText}
       isInvalid={isInvalid}
       error={errorMessage}
       data-test-subj="mlJobSelect"
