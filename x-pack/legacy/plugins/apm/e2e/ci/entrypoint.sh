@@ -30,7 +30,7 @@ yarn install
 
 # Wait for the kibana to be up and running
 npm install wait-on
-./node_modules/.bin/wait-on ${CYPRESS_BASE_URL}/status && echo 'Kibana is up and running'
+./node_modules/.bin/wait-on -i 500 -w 500 ${CYPRESS_BASE_URL}/status && echo 'Kibana is up and running'
 
 # Run cypress
-npm run cypress:run
+npm run cypress:run --config pageLoadTimeout=100000,watchForFileChanges=true
