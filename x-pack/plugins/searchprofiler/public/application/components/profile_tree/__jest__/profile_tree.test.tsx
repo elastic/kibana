@@ -25,10 +25,12 @@ describe('ProfileTree', () => {
     const props: Props = {
       onHighlight: () => {},
       target: 'searches',
+      onDataInitError: jest.fn(),
       data: [{}] as any,
     };
 
     const init = registerTestBed(ProfileTree);
     await init(props);
+    expect(props.onDataInitError).toHaveBeenCalled();
   });
 });

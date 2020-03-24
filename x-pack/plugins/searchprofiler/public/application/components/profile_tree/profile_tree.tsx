@@ -29,8 +29,6 @@ export const ProfileTree = memo(({ data, target, onHighlight, onDataInitError }:
   try {
     sortedIndices = initDataFor(target)(data);
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(e);
     onDataInitError(e);
     return null;
   }
