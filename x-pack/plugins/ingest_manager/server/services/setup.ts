@@ -11,7 +11,7 @@ import { agentConfigService } from './agent_config';
 import { outputService } from './output';
 import { ensureInstalledDefaultPackages } from './epm/packages/install';
 import {
-  packageToConfigDatasourceInputs,
+  packageToConfigDatasource,
   Datasource,
   AgentConfig,
   Installation,
@@ -122,16 +122,8 @@ async function addPackageToConfig(
     savedObjectsClient: soClient,
     pkgkey: `${packageToInstall.name}-${packageToInstall.version}`,
   });
-  await datasourceService.create(soClient, {
-    name: `${packageInfo.name}-1`,
-    enabled: true,
-    package: {
-      name: packageInfo.name,
-      title: packageInfo.title,
-      version: packageInfo.version,
-    },
-    inputs: packageToConfigDatasourceInputs(packageInfo),
-    config_id: config.id,
-    output_id: defaultOutput.id,
-  });
+  await datasourceService.create(
+    soClient,
+    packageToConfigDatasource(packageInfo, config.id, defaultOutput.id, undefined, config.namespace)
+  );
 }

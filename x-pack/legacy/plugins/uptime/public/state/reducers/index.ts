@@ -16,6 +16,7 @@ import { pingReducer } from './ping';
 import { pingListReducer } from './ping_list';
 import { monitorDurationReducer } from './monitor_duration';
 import { indexStatusReducer } from './index_status';
+import { mlJobsReducer } from './ml_anomaly';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -27,6 +28,7 @@ export const rootReducer = combineReducers({
   indexPattern: indexPatternReducer,
   ping: pingReducer,
   pingList: pingListReducer,
+  ml: mlJobsReducer,
   monitorDuration: monitorDurationReducer,
   indexStatus: indexStatusReducer,
 });

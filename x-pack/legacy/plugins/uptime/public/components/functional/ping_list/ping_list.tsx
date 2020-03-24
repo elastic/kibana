@@ -25,7 +25,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Ping } from '../../../../common/types/ping/ping';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
-import { LocationName } from './../location_name';
+import { LocationName } from './location_name';
 import { Pagination } from './../monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
 import { GetPingsParams } from '../../../../common/types/ping/ping';
