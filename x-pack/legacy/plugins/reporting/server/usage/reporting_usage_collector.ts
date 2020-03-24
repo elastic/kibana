@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { ReportingCore } from '../../server';
-import { ESCallCluster, ExportTypesRegistry, ServerFacade } from '../../types';
+import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../../server/types';
+import { ESCallCluster, ExportTypesRegistry } from '../../types';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
 
@@ -15,19 +14,19 @@ import { RangeStats } from './types';
 const METATYPE = 'kibana_stats';
 
 /*
- * @param {Object} server
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(
-  server: ServerFacade,
-  usageCollection: UsageCollectionSetup,
+  config: ReportingConfig,
+  plugins: ReportingSetupDeps,
   exportTypesRegistry: ExportTypesRegistry,
   isReady: () => Promise<boolean>
 ) {
+  const { usageCollection } = plugins;
   return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
     fetch: (callCluster: ESCallCluster) =>
-      getReportingUsage(server, callCluster, exportTypesRegistry),
+      getReportingUsage(config, plugins, callCluster, exportTypesRegistry),
     isReady,
 
     /*
@@ -52,17 +51,17 @@ export function getReportingUsageCollector(
 
 export function registerReportingUsageCollector(
   reporting: ReportingCore,
-  server: ServerFacade,
-  usageCollection: UsageCollectionSetup
+  config: ReportingConfig,
+  plugins: ReportingSetupDeps
 ) {
   const exportTypesRegistry = reporting.getExportTypesRegistry();
   const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
 
   const collector = getReportingUsageCollector(
-    server,
-    usageCollection,
+    config,
+    plugins,
     exportTypesRegistry,
     collectionIsReady
   );
-  usageCollection.registerCollector(collector);
+  plugins.usageCollection.registerCollector(collector);
 }
