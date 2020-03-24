@@ -19,7 +19,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { Category } from '../components/legend/category';
-import { CategoricalLegend } from './components/categorical_legend';
+import { BreakedLegend } from './components/breaked_legend';
 
 export class DynamicIconProperty extends DynamicStyleProperty {
   isOrdinal() {
@@ -108,7 +108,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
     return (
-      <CategoricalLegend
+      <BreakedLegend
         style={this}
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}

@@ -8,7 +8,7 @@ import React from 'react';
 import _ from 'lodash';
 const EMPTY_VALUE = '';
 
-export class CategoricalLegend extends React.Component {
+export class BreakedLegend extends React.Component {
   state = {
     label: EMPTY_VALUE,
   };

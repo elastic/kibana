@@ -24,7 +24,7 @@ import {
 import { Category } from '../components/legend/category';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
-import { CategoricalLegend } from './components/categorical_legend';
+import { BreakedLegend } from './components/breaked_legend';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
@@ -102,7 +102,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
     return (
-      <CategoricalLegend
+      <BreakedLegend
         style={this}
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
