@@ -60,7 +60,9 @@ export const topHitMetricAgg = new MetricAggType({
       name: 'field',
       type: 'field',
       onlyAggregatable: false,
-      filterFieldTypes: '*',
+      filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
+        type => type !== KBN_FIELD_TYPES.HISTOGRAM
+      ),
       write(agg, output) {
         const field = agg.getParam('field');
         output.params = {};
