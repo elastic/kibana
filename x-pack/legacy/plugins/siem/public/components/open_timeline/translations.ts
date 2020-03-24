@@ -156,7 +156,7 @@ export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
 export const SELECT_TIMELINE = i18n.translate(
   'xpack.siem.timelines.components.importTimelineModal.selectTimelineDescription',
   {
-    defaultMessage: 'Select a SIEM timeline (as exported from the Timeline UI) to import',
+    defaultMessage: 'Select a SIEM timeline (as exported from the Timeline view) to import',
   }
 );
 

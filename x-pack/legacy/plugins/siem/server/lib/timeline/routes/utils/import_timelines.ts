@@ -91,7 +91,6 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
 
 export const saveTimelines = async (
   frameworkRequest: FrameworkRequest,
-  resolve: Resolve,
   timeline: SavedTimeline,
   timelineSavedObjectId?: string | null,
   timelineVersion?: string | null
@@ -109,7 +108,6 @@ export const saveTimelines = async (
 
 export const savePinnedEvents = async (
   frameworkRequest: FrameworkRequest,
-  resolve: Resolve,
   timelineSavedObjectId: string,
   pinnedEventIds?: string[] | null
 ) => {
@@ -129,7 +127,6 @@ export const savePinnedEvents = async (
 
 export const saveNotes = async (
   frameworkRequest: FrameworkRequest,
-  resolve: Resolve,
   timelineSavedObjectId: string,
   timelineVersion?: string | null,
   existingNoteIds?: string[],
@@ -156,7 +153,6 @@ export const saveNotes = async (
 
 export const createTimelines = async (
   frameworkRequest: FrameworkRequest,
-  resolve: Resolve,
   timeline: SavedTimeline,
   timelineSavedObjectId?: string | null,
   timelineVersion?: string | null,
@@ -166,24 +162,16 @@ export const createTimelines = async (
 ) => {
   const newSavedObjectId = await saveTimelines(
     frameworkRequest,
-    resolve,
     timeline,
     timelineSavedObjectId,
     timelineVersion
   );
 
-  await savePinnedEvents(frameworkRequest, resolve, newSavedObjectId, pinnedEventIds);
+  await savePinnedEvents(frameworkRequest, newSavedObjectId, pinnedEventIds);
 
-  await saveNotes(
-    frameworkRequest,
-    resolve,
-    newSavedObjectId,
-    timelineVersion,
-    existingNoteIds,
-    notes
-  );
+  await saveNotes(frameworkRequest, newSavedObjectId, timelineVersion, existingNoteIds, notes);
 
-  resolve({ timeline_id: newSavedObjectId, status_code: 200 });
+  return newSavedObjectId;
 };
 
 export const isImportRegular = (

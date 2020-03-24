@@ -114,7 +114,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       if (refetch != null) {
         refetch();
       }
-    }, [setImportCompleteToggle]);
+    }, [setImportCompleteToggle, refetch]);
 
     return (
       <>
