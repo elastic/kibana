@@ -27,7 +27,7 @@ import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { AlertActionSecurityCallOut } from '../../components/alert_action_security_call_out';
-import { useAppDependencies } from '../../app_context';
+import { PLUGIN } from '../../constants/plugin';
 
 interface AlertEditProps {
   initialAlert: Alert;
@@ -40,8 +40,6 @@ export const AlertEdit = ({
   editFlyoutVisible,
   setEditFlyoutVisibility,
 }: AlertEditProps) => {
-  const { docLinks } = useAppDependencies();
-
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
@@ -52,6 +50,7 @@ export const AlertEdit = ({
     toastNotifications,
     alertTypeRegistry,
     actionTypeRegistry,
+    docLinks,
   } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
@@ -86,28 +85,22 @@ export const AlertEdit = ({
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
       const newAlert = await updateAlert({ http, alert, id: alert.id });
-      if (toastNotifications) {
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
-            defaultMessage: "Updated '{alertName}'",
-            values: {
-              alertName: newAlert.name,
-            },
-          })
-        );
-      }
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
+          defaultMessage: "Updated '{alertName}'",
+          values: {
+            alertName: newAlert.name,
+          },
+        })
+      );
       return newAlert;
     } catch (errorRes) {
-      if (toastNotifications) {
-        toastNotifications.addDanger(
+      toastNotifications.addDanger(
+        errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveErrorNotificationText', {
-            defaultMessage: 'Failed to save alert: {message}',
-            values: {
-              message: errorRes.body?.message ?? '',
-            },
+            defaultMessage: 'Cannot update alert.',
           })
-        );
-      }
+      );
     }
   }
 
@@ -124,7 +117,7 @@ export const AlertEdit = ({
           <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Edit Alert"
+                defaultMessage="Edit alert"
                 id="xpack.triggersActionsUI.sections.alertEdit.flyoutTitle"
               />
               &emsp;
@@ -133,7 +126,11 @@ export const AlertEdit = ({
                 tooltipContent={i18n.translate(
                   'xpack.triggersActionsUI.sections.alertEdit.betaBadgeTooltipContent',
                   {
-                    defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                    defaultMessage:
+                      '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                    values: {
+                      pluginName: PLUGIN.getI18nName(i18n),
+                    },
                   }
                 )}
               />
