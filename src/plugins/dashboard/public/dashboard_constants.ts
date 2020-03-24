@@ -17,13 +17,16 @@
  * under the License.
  */
 
-import {
-  SavedObjectLoader,
-  SavedObjectKibanaServices,
-} from '../../../../../../plugins/saved_objects/public';
-import { createSavedDashboardClass } from './saved_dashboard';
+export const DashboardConstants = {
+  ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM: 'addToDashboard',
+  LANDING_PAGE_PATH: '/dashboards',
+  CREATE_NEW_DASHBOARD_URL: '/dashboard',
+  ADD_EMBEDDABLE_ID: 'addEmbeddableId',
+  ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
+  DASHBOARDS_ID: 'dashboards',
+  DASHBOARD_ID: 'dashboard',
+};
 
-export function createSavedDashboardLoader(services: SavedObjectKibanaServices) {
-  const SavedDashboard = createSavedDashboardClass(services);
-  return new SavedObjectLoader(SavedDashboard, services.savedObjectsClient, services.chrome);
+export function createDashboardEditUrl(id: string) {
+  return `/dashboard/${id}`;
 }
