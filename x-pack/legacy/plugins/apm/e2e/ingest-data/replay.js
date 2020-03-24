@@ -71,7 +71,6 @@ function updateSpinnerText({ success }) {
 async function insertItem(item) {
   try {
     const url = `${APM_SERVER_URL}${item.url}`;
-
     const headers = {
       'content-type': 'application/x-ndjson'
     };
@@ -116,13 +115,20 @@ async function init() {
 }
 
 init()
+  .then(() => {
+    if (requestProgress.succeeded === requestProgress.total) {
+      spinner.succeed(
+        `Successfully ingested ${requestProgress.succeeded} of ${requestProgress.total} events`
+      );
+      process.exit(0);
+    } else {
+      spinner.fail(
+        `Ingested ${requestProgress.succeeded} of ${requestProgress.total} events`
+      );
+      process.exit(1);
+    }
+  })
   .catch(e => {
     console.log('An error occurred:', e);
     process.exit(1);
-  })
-  .then(() => {
-    spinner.succeed(
-      `Successfully ingested ${requestProgress.succeeded} of ${requestProgress.total} events`
-    );
-    process.exit(0);
   });
