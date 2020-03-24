@@ -34,7 +34,7 @@ import {
   OutputError,
 } from '../utils';
 import { hasListsFeature } from '../../feature_flags';
-import { transformAlertToRuleAction } from '../../rules/transform_actions';
+import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 

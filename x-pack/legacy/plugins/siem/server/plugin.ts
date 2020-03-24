@@ -28,6 +28,8 @@ import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
+import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
+import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
@@ -97,12 +99,15 @@ export class Plugin {
       name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
         defaultMessage: 'SIEM',
       }),
+      order: 1100,
       icon: 'securityAnalyticsApp',
       navLinkId: 'siem',
       app: ['siem', 'kibana'],
       catalogue: ['siem'],
       privileges: {
         all: {
+          app: ['siem', 'kibana'],
+          catalogue: ['siem'],
           api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
             all: [
@@ -128,6 +133,8 @@ export class Plugin {
           ],
         },
         read: {
+          app: ['siem', 'kibana'],
+          catalogue: ['siem'],
           api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
             all: ['alert', 'action', 'action_task_params'],
@@ -153,12 +160,20 @@ export class Plugin {
     });
 
     if (plugins.alerting != null) {
-      const type = signalRulesAlertType({
+      const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
       });
-      if (isAlertExecutor(type)) {
-        plugins.alerting.registerType(type);
+      const ruleNotificationType = rulesNotificationAlertType({
+        logger: this.logger,
+      });
+
+      if (isAlertExecutor(signalRuleType)) {
+        plugins.alerting.registerType(signalRuleType);
+      }
+
+      if (isNotificationAlertExecutor(ruleNotificationType)) {
+        plugins.alerting.registerType(ruleNotificationType);
       }
     }
 

@@ -28,6 +28,7 @@ import {
 } from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
 import { requestMock } from './request';
+import { RuleNotificationAlertType } from '../../notifications/types';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
@@ -204,11 +205,11 @@ export const getPrepackagedRulesStatusRequest = () =>
     path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
   });
 
-export interface FindHit {
+export interface FindHit<T = RuleAlertType> {
   page: number;
   perPage: number;
   total: number;
-  data: RuleAlertType[];
+  data: T[];
 }
 
 export const getEmptyFindResult = (): FindHit => ({
@@ -318,6 +319,27 @@ export const createBulkMlRuleRequest = () => {
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
     body: [typicalMlRulePayload()],
+  });
+};
+
+export const createRuleWithActionsRequest = () => {
+  const payload = typicalPayload();
+
+  return requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: {
+      ...payload,
+      throttle: '5m',
+      actions: [
+        {
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+          params: { message: 'Rule generated {{state.signalsCount}} signals' },
+          action_type_id: '.slack',
+        },
+      ],
+    },
   });
 };
 
@@ -627,4 +649,46 @@ export const getEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
 });
 export const getNonEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
   _shards: { total: 1 },
+});
+
+export const getNotificationResult = (): RuleNotificationAlertType => ({
+  id: '200dbf2f-b269-4bf9-aa85-11ba32ba73ba',
+  name: 'Notification for Rule Test',
+  tags: ['__internal_rule_alert_id:85b64e8a-2e40-4096-86af-5ac172c10825'],
+  alertTypeId: 'siem.notifications',
+  consumer: 'siem',
+  params: {
+    ruleAlertId: '85b64e8a-2e40-4096-86af-5ac172c10825',
+  },
+  schedule: {
+    interval: '5m',
+  },
+  enabled: true,
+  actions: [
+    {
+      actionTypeId: '.slack',
+      params: {
+        message: 'Rule generated {{state.signalsCount}} signals\n\n{{rule.name}}\n{{resultsLink}}',
+      },
+      group: 'default',
+      id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+    },
+  ],
+  throttle: null,
+  apiKey: null,
+  apiKeyOwner: 'elastic',
+  createdBy: 'elastic',
+  updatedBy: 'elastic',
+  createdAt: new Date('2020-03-21T11:15:13.530Z'),
+  muteAll: false,
+  mutedInstanceIds: [],
+  scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
+  updatedAt: new Date('2020-03-21T12:37:08.730Z'),
+});
+
+export const getFindNotificationsResultWithSingleHit = (): FindHit<RuleNotificationAlertType> => ({
+  page: 1,
+  perPage: 1,
+  total: 1,
+  data: [getNotificationResult()],
 });

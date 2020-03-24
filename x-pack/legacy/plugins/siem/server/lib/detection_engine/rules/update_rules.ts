@@ -5,13 +5,13 @@
  */
 
 import { PartialAlert } from '../../../../../../../plugins/alerting/server';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { readRules } from './read_rules';
 import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion } from './utils';
 import { hasListsFeature } from '../feature_flags';
-import { transformRuleToAlertAction } from './transform_actions';
 
 export const updateRules = async ({
   alertsClient,
