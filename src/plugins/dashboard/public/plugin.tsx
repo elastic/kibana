@@ -83,7 +83,7 @@ export class DashboardEmbeddableContainerPublicPlugin
   ): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
     const startServices = core.getStartServices();
 
     if (share) {
@@ -104,6 +104,10 @@ export class DashboardEmbeddableContainerPublicPlugin
           return () => coreStart.chrome.setIsVisible(true);
         }, []);
       };
+
+      const duplicatePanelAction = new DuplicatePanelAction(core);
+      uiActions.registerAction(duplicatePanelAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, duplicatePanelAction);
 
       const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
         useHideChrome();
@@ -139,14 +143,7 @@ export class DashboardEmbeddableContainerPublicPlugin
       plugins.embeddable.getEmbeddableFactories
     );
     uiActions.registerAction(changeViewAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
-
-    const duplicatePanelAction = new DuplicatePanelAction(
-      core,
-      plugins.embeddable.getEmbeddableFactories
-    );
-    uiActions.registerAction(duplicatePanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, duplicatePanelAction);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, changeViewAction);
   }
 
   public stop() {}

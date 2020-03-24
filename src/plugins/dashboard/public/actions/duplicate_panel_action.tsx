@@ -40,10 +40,7 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
   public readonly id = ACTION_DUPLICATE_PANEL;
   public order = 11;
 
-  constructor(
-    private core: CoreStart,
-    private getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories']
-  ) {}
+  constructor(private core: CoreStart) {}
 
   public getDisplayName({ embeddable }: DuplicatePanelActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
