@@ -15,7 +15,6 @@ import { SelectField } from '../../../../../shared_imports';
 export const THROTTLE_OPTIONS = [
   { value: NOTIFICATION_THROTTLE_NO_ACTIONS, text: 'Perform no actions' },
   { value: NOTIFICATION_THROTTLE_RULE, text: 'On each rule execution' },
-  { value: '5m', text: '5 minutes' }, // just for testing
   { value: '1h', text: 'Hourly' },
   { value: '1d', text: 'Daily' },
   { value: '7d', text: 'Weekly' },
