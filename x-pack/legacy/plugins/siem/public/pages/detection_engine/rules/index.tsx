@@ -20,7 +20,7 @@ import { SpyRoute } from '../../../utils/route/spy_routes';
 
 import { useUserInfo } from '../components/user_info';
 import { AllRules } from './all';
-import { ImportDataModal } from './components/import_rule_modal';
+import { ImportDataModal } from '../../../components/import_data_modala_modal';
 import { ReadOnlyCallOut } from './components/read_only_callout';
 import { UpdatePrePackagedRulesCallOut } from './components/pre_packaged_rules/update_callout';
 import { getPrePackagedRuleStatus, redirectToDetections } from './helpers';
@@ -105,6 +105,7 @@ const RulesPageComponent: React.FC = () => {
         importComplete={handleRefreshRules}
         importData={importRules}
         successMessage={i18n.SUCCESSFULLY_IMPORTED_RULES}
+        showCheckBox={true}
         showModal={showImportModal}
         submitBtnText={i18n.IMPORT_RULE_BTN_TITLE}
         subtitle={i18n.INITIAL_PROMPT_TEXT}

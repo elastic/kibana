@@ -21,19 +21,16 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import {
-  ImportRulesResponse,
-  ImportRulesProps,
-} from '../../../../../containers/detection_engine/rules';
+import { ImportRulesResponse, ImportRulesProps } from '../../containers/detection_engine/rules';
 import {
   displayErrorToast,
   displaySuccessToast,
   useStateToaster,
   errorToToaster,
-} from '../../../../../components/toasters';
+} from '../toasters';
 import * as i18n from './translations';
 
-interface ImportRuleModalProps {
+interface ImportDataModalProps {
   checkBoxLabel: string;
   closeModal: () => void;
   description: string;
@@ -66,7 +63,7 @@ export const ImportDataModalComponent = ({
   subtitle,
   successMessage,
   title,
-}: ImportRuleModalProps) => {
+}: ImportDataModalProps) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [overwrite, setOverwrite] = useState(false);

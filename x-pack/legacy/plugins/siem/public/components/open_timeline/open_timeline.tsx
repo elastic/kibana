@@ -12,7 +12,7 @@ import { OpenTimelineProps, OpenTimelineResult } from './types';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import { TitleRow } from './title_row';
-import { ImportDataModal } from '../../pages/detection_engine/rules/components/import_rule_modal';
+import { ImportDataModal } from '../import_data_modal';
 import * as i18n from './translations';
 import { importTimelines } from '../../containers/timeline/all/api';
 

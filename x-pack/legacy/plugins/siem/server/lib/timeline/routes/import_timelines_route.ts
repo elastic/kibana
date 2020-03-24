@@ -91,7 +91,7 @@ export const importTimelinesRoute = (
         ]);
         const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueTimeline(
           parsedObjects,
-          request.query.overwrite
+          false
         );
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importTimelineResponse: ImportTimelineResponse[] = [];
