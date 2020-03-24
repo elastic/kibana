@@ -27,8 +27,8 @@ export function ErrorRateAlertTrigger(props: Props) {
   const { setAlertParams, setAlertProperty, alertParams } = props;
 
   const defaults = {
-    threshold: 2,
-    windowSize: 5,
+    threshold: 25,
+    windowSize: 1,
     windowUnit: 'm'
   };
 

@@ -24,7 +24,6 @@ import { tutorialProvider } from './tutorial';
 import { CloudSetup } from '../../cloud/server';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { createApmTelemetry } from './lib/apm_telemetry';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 
 export interface LegacySetup {
