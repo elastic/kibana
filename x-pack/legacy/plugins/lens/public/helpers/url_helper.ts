@@ -24,8 +24,8 @@ export function getUrlVars(url: string): Record<string, string> {
 /** *
  * Returns dashboard URL with added embeddableType and embeddableId query params
  * eg.
- * input: url: lol/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now)), embeddableId: 12345
- * output: lol/app/kibana#/dashboard?addEmbeddableType=lens&addEmbeddableId=12345&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
+ * input: url: /lol/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now)), embeddableId: 12345
+ * output: /lol/app/kibana#/dashboard?addEmbeddableType=lens&addEmbeddableId=12345&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
  * @param url dasbhoard absolute url
  * @param embeddableId id of the saved visualization
  * @param urlVars url query params

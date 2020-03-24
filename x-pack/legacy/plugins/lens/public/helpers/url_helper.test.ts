@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../../../../src/legacy/core_plugins/kibana/public/dashboard', () => ({
+jest.mock('../legacy_imports', () => ({
   DashboardConstants: {
     ADD_EMBEDDABLE_ID: 'addEmbeddableId',
     ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
@@ -14,10 +14,6 @@ jest.mock('../../../../../../src/legacy/core_plugins/kibana/public/dashboard', (
 import { addEmbeddableToDashboardUrl, getUrlVars } from './url_helper';
 
 describe('Dashboard URL Helper', () => {
-  beforeEach(() => {
-    jest.resetModules();
-  });
-
   it('addEmbeddableToDashboardUrl', () => {
     const id = '123eb456cd';
     const urlVars = {
@@ -25,11 +21,10 @@ describe('Dashboard URL Helper', () => {
       y: '2',
       z: '3',
     };
-    const basePath = '/pep';
     const url =
-      "http://localhost:5601/pep/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
-    expect(addEmbeddableToDashboardUrl(url, basePath, id, urlVars)).toEqual(
-      `http://localhost:5601/pep/app/kibana#/dashboard?addEmbeddableType=lens&addEmbeddableId=${id}&x=1&y=2&z=3`
+      "/pep/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!())";
+    expect(addEmbeddableToDashboardUrl(url, id, urlVars)).toEqual(
+      `/pep/app/kibana#/dashboard?_a=%28description%3A%27%27%2Cfilters%3A%21%28%29%29&_g=%28refreshInterval%3A%28pause%3A%21t%2Cvalue%3A0%29%2Ctime%3A%28from%3Anow-15m%2Cto%3Anow%29%29&addEmbeddableId=${id}&addEmbeddableType=lens&x=1&y=2&z=3`
     );
   });
 
