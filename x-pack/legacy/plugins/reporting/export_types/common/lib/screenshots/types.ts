@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementPosition, ConditionalHeaders } from '../../../../types';
 import { LevelLogger } from '../../../../server/lib';
+import { ConditionalHeaders, ElementPosition } from '../../../../types';
 import { LayoutInstance } from '../../layouts/layout';
 
 export interface ScreenshotObservableOpts {
@@ -35,7 +35,14 @@ export interface Screenshot {
   description: string;
 }
 
+export interface ScreenSetupData {
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
+  timeRange: TimeRange | null;
+  error?: Error;
+}
+
 export interface ScreenshotResults {
   timeRange: TimeRange | null;
   screenshots: Screenshot[];
+  error?: Error;
 }

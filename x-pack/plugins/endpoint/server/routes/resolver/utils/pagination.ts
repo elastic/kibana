@@ -11,12 +11,12 @@ import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public
 
 export interface PaginationParams {
   size: number;
-  timestamp?: Date;
+  timestamp?: number;
   eventID?: string;
 }
 
 interface PaginationCursor {
-  timestamp: Date;
+  timestamp: number;
   eventID: string;
 }
 
@@ -35,7 +35,7 @@ function urlDecodeCursor(value: string): PaginationCursor {
   const { timestamp, eventID } = JSON.parse(data);
   // take some extra care to only grab the things we want
   // convert the timestamp string to date object
-  return { timestamp: new Date(timestamp), eventID };
+  return { timestamp, eventID };
 }
 
 export function getPaginationParams(limit: number, after?: string): PaginationParams {
@@ -62,7 +62,7 @@ export function paginate(pagination: PaginationParams, field: string, query: Jso
   query.aggs = { total: { value_count: { field } } };
   query.size = size;
   if (timestamp && eventID) {
-    query.search_after = [timestamp.getTime(), eventID] as Array<number | string>;
+    query.search_after = [timestamp, eventID] as Array<number | string>;
   }
   return query;
 }

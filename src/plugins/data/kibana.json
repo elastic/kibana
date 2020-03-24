@@ -3,6 +3,9 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["uiActions"],
+  "requiredPlugins": [
+    "expressions",
+    "uiActions"
+  ],
   "optionalPlugins": ["usageCollection"]
 }

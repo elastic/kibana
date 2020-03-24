@@ -23,6 +23,7 @@ describe('of expression', () => {
     expect(wrapper.find('[data-test-subj="availablefieldsOptionsComboBox"]'))
       .toMatchInlineSnapshot(`
       <EuiComboBox
+        async={false}
         compressed={false}
         data-test-subj="availablefieldsOptionsComboBox"
         fullWidth={true}
@@ -75,35 +76,36 @@ describe('of expression', () => {
     );
     expect(wrapper.find('[data-test-subj="availablefieldsOptionsComboBox"]'))
       .toMatchInlineSnapshot(`
-    <EuiComboBox
-      compressed={false}
-      data-test-subj="availablefieldsOptionsComboBox"
-      fullWidth={true}
-      isClearable={true}
-      isInvalid={false}
-      noSuggestions={false}
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "label": "test2",
-          },
-        ]
-      }
-      placeholder="Select a field"
-      selectedOptions={
-        Array [
-          Object {
-            "label": "test",
-          },
-        ]
-      }
-      singleSelection={
-        Object {
-          "asPlainText": true,
+      <EuiComboBox
+        async={false}
+        compressed={false}
+        data-test-subj="availablefieldsOptionsComboBox"
+        fullWidth={true}
+        isClearable={true}
+        isInvalid={false}
+        noSuggestions={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "label": "test2",
+            },
+          ]
         }
-      }
-    />
+        placeholder="Select a field"
+        selectedOptions={
+          Array [
+            Object {
+              "label": "test",
+            },
+          ]
+        }
+        singleSelection={
+          Object {
+            "asPlainText": true,
+          }
+        }
+      />
     `);
   });
 

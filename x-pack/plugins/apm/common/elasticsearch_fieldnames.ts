@@ -6,12 +6,22 @@
 
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
-export const SERVICE_AGENT_NAME = 'agent.name';
+export const SERVICE_FRAMEWORK_NAME = 'service.framework.name';
+export const SERVICE_FRAMEWORK_VERSION = 'service.framework.version';
+export const SERVICE_LANGUAGE_NAME = 'service.language.name';
+export const SERVICE_LANGUAGE_VERSION = 'service.language.version';
+export const SERVICE_RUNTIME_NAME = 'service.runtime.name';
+export const SERVICE_RUNTIME_VERSION = 'service.runtime.version';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
+
+export const AGENT_NAME = 'agent.name';
+export const AGENT_VERSION = 'agent.version';
+
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
 export const USER_ID = 'user.id';
+export const USER_AGENT_ORIGINAL = 'user_agent.original';
 export const USER_AGENT_NAME = 'user_agent.name';
 
 export const DESTINATION_ADDRESS = 'destination.address';
@@ -38,6 +48,8 @@ export const SPAN_SELF_TIME_SUM = 'span.self_time.sum.us';
 export const SPAN_ACTION = 'span.action';
 export const SPAN_NAME = 'span.name';
 export const SPAN_ID = 'span.id';
+export const SPAN_DESTINATION_SERVICE_RESOURCE =
+  'span.destination.service.resource';
 
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';

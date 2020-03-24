@@ -43,16 +43,8 @@ export interface PatchRulesRequest extends LegacyRequest {
   payload: PatchRuleAlertParamsRest;
 }
 
-export interface BulkPatchRulesRequest extends LegacyRequest {
-  payload: PatchRuleAlertParamsRest[];
-}
-
 export interface UpdateRulesRequest extends LegacyRequest {
   payload: UpdateRuleAlertParamsRest;
-}
-
-export interface BulkUpdateRulesRequest extends LegacyRequest {
-  payload: UpdateRuleAlertParamsRest[];
 }
 
 export interface RuleAlertType extends Alert {
@@ -99,39 +91,32 @@ export interface IRuleStatusFindType {
 
 export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
 
-export interface RulesRequest extends LegacyRequest {
-  payload: RuleAlertParamsRest;
-}
-
-export interface BulkRulesRequest extends LegacyRequest {
-  payload: RuleAlertParamsRest[];
-}
-
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;
   };
 }
-export interface ImportRulesRequest extends Omit<LegacyRequest, 'query'> {
+export interface ImportRulesRequestParams {
   query: { overwrite: boolean };
-  payload: { file: HapiReadableStream };
+  body: { file: HapiReadableStream };
 }
 
-export interface ExportRulesRequest extends Omit<LegacyRequest, 'query'> {
-  payload: { objects: Array<{ rule_id: string }> | null | undefined };
+export interface ExportRulesRequestParams {
+  body: { objects: Array<{ rule_id: string }> | null | undefined };
   query: {
     file_name: string;
     exclude_export_details: boolean;
   };
 }
 
-export type QueryRequest = Omit<LegacyRequest, 'query'> & {
-  query: { id: string | undefined; rule_id: string | undefined };
-};
-
-export interface QueryBulkRequest extends LegacyRequest {
-  payload: Array<QueryRequest['query']>;
+export interface RuleRequestParams {
+  id: string | undefined;
+  rule_id: string | undefined;
 }
+
+export type ReadRuleRequestParams = RuleRequestParams;
+export type DeleteRuleRequestParams = RuleRequestParams;
+export type DeleteRulesRequestParams = RuleRequestParams[];
 
 export interface FindRuleParams {
   alertsClient: AlertsClient;
@@ -143,22 +128,18 @@ export interface FindRuleParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface FindRulesRequest extends Omit<LegacyRequest, 'query'> {
-  query: {
-    per_page: number;
-    page: number;
-    search?: string;
-    sort_field?: string;
-    filter?: string;
-    fields?: string[];
-    sort_order?: 'asc' | 'desc';
-  };
+export interface FindRulesRequestParams {
+  per_page: number;
+  page: number;
+  search?: string;
+  sort_field?: string;
+  filter?: string;
+  fields?: string[];
+  sort_order?: 'asc' | 'desc';
 }
 
-export interface FindRulesStatusesRequest extends Omit<LegacyRequest, 'query'> {
-  query: {
-    ids: string[];
-  };
+export interface FindRulesStatusesRequestParams {
+  ids: string[];
 }
 
 export interface Clients {

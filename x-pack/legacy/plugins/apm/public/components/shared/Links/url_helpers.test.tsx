@@ -90,9 +90,9 @@ describe('fromQuery and toQuery', () => {
     expect(
       fromQuery(
         toQuery(
-          '?name=john%20doe&rangeFrom=2019-03-03T12:00:00.000Z&path=a%2Fb'
+          '?name=john%20doe&path=a%2Fb&rangeFrom=2019-03-03T12:00:00.000Z'
         )
       )
-    ).toEqual('name=john%20doe&rangeFrom=2019-03-03T12:00:00.000Z&path=a%2Fb');
+    ).toEqual('name=john%20doe&path=a%2Fb&rangeFrom=2019-03-03T12:00:00.000Z');
   });
 });

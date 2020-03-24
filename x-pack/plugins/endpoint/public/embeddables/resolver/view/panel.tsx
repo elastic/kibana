@@ -11,7 +11,8 @@ import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { SideEffectContext } from './side_effect_context';
-import { ProcessEvent } from '../types';
+import { ResolverEvent } from '../../../../common/types';
+import * as event from '../../../../common/models/event';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
 
@@ -38,7 +39,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
   interface ProcessTableView {
     name: string;
     timestamp?: Date;
-    event: ProcessEvent;
+    event: ResolverEvent;
   }
 
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
@@ -47,11 +48,18 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
   const processTableView: ProcessTableView[] = useMemo(
     () =>
       [...processNodePositions.keys()].map(processEvent => {
-        const { data_buffer } = processEvent;
-        const date = new Date(data_buffer.timestamp_utc);
+        let dateTime;
+        const eventTime = event.eventTimestamp(processEvent);
+        const name = event.eventName(processEvent);
+        if (eventTime) {
+          const date = new Date(eventTime);
+          if (isFinite(date.getTime())) {
+            dateTime = date;
+          }
+        }
         return {
-          name: data_buffer.process_name,
-          timestamp: isFinite(date.getTime()) ? date : undefined,
+          name,
+          timestamp: dateTime,
           event: processEvent,
         };
       }),
@@ -110,9 +118,9 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         }),
         dataType: 'date',
         sortable: true,
-        render(eventTimestamp?: Date) {
-          return eventTimestamp ? (
-            formatter.format(eventTimestamp)
+        render(eventDate?: Date) {
+          return eventDate ? (
+            formatter.format(eventDate)
           ) : (
             <EuiBadge color="warning">
               {i18n.translate('xpack.endpoint.resolver.panel.tabel.row.timestampInvalidLabel', {

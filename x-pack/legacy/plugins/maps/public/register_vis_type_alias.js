@@ -23,7 +23,7 @@ The Maps app offers more functionality and is easier to use.`,
   }
 );
 
-visualizationsSetup.types.registerAlias({
+visualizationsSetup.registerAlias({
   aliasUrl: MAP_BASE_URL,
   name: APP_ID,
   title: i18n.translate('xpack.maps.visTypeAlias.title', {
@@ -37,5 +37,5 @@ visualizationsSetup.types.registerAlias({
 });
 
 if (!showMapVisualizationTypes) {
-  visualizationsSetup.types.hideTypes(['region_map', 'tile_map']);
+  visualizationsSetup.hideTypes(['region_map', 'tile_map']);
 }

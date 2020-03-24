@@ -4,8 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AppResolverWithFields, AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
 import { Note } from '../../lib/note/saved_object';
+
+export type QueryNoteResolver = AppResolverOf<QueryResolvers.GetNoteResolver>;
+
+export type QueryAllNoteResolver = AppResolverWithFields<
+  QueryResolvers.GetAllNotesResolver,
+  'totalCount' | 'Note'
+>;
+
+export type QueryNotesByTimelineIdResolver = AppResolverOf<
+  QueryResolvers.GetNotesByTimelineIdResolver
+>;
+
+export type QueryNotesByEventIdResolver = AppResolverOf<QueryResolvers.GetNotesByEventIdResolver>;
+
+export type MutationNoteResolver = AppResolverOf<
+  MutationResolvers.PersistNoteResolver<QueryNoteResolver>
+>;
+
+export type MutationDeleteNoteResolver = AppResolverOf<MutationResolvers.DeleteNoteResolver>;
+
+export type MutationDeleteNoteByTimelineIdResolver = AppResolverOf<
+  MutationResolvers.DeleteNoteByTimelineIdResolver
+>;
 
 interface NoteResolversDeps {
   note: Note;
@@ -15,15 +39,15 @@ export const createNoteResolvers = (
   libs: NoteResolversDeps
 ): {
   Query: {
-    getNote: QueryResolvers['getNote'];
-    getAllNotes: QueryResolvers['getAllNotes'];
-    getNotesByEventId: QueryResolvers['getNotesByEventId'];
-    getNotesByTimelineId: QueryResolvers['getNotesByTimelineId'];
+    getNote: QueryNoteResolver;
+    getAllNotes: QueryAllNoteResolver;
+    getNotesByEventId: QueryNotesByEventIdResolver;
+    getNotesByTimelineId: QueryNotesByTimelineIdResolver;
   };
   Mutation: {
-    deleteNote: MutationResolvers['deleteNote'];
-    deleteNoteByTimelineId: MutationResolvers['deleteNoteByTimelineId'];
-    persistNote: MutationResolvers['persistNote'];
+    deleteNote: MutationDeleteNoteResolver;
+    deleteNoteByTimelineId: MutationDeleteNoteByTimelineIdResolver;
+    persistNote: MutationNoteResolver;
   };
 } => ({
   Query: {

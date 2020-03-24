@@ -11,10 +11,14 @@ import { AppAction } from '../action';
 const initialState = (): AlertListState => {
   return {
     alerts: [],
+    alertDetails: undefined,
     pageSize: 10,
     pageIndex: 0,
     total: 0,
     location: undefined,
+    searchBar: {
+      patterns: [],
+    },
   };
 };
 
@@ -42,6 +46,19 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
     return {
       ...state,
       location: action.payload,
+    };
+  } else if (action.type === 'serverReturnedAlertDetailsData') {
+    return {
+      ...state,
+      alertDetails: action.payload,
+    };
+  } else if (action.type === 'serverReturnedSearchBarIndexPatterns') {
+    return {
+      ...state,
+      searchBar: {
+        ...state.searchBar,
+        patterns: action.payload,
+      },
     };
   }
 

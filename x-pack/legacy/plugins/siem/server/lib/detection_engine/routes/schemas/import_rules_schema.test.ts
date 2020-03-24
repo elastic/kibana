@@ -4,15 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertAction } from '../../../../../../../../plugins/alerting/common';
 import {
   importRulesSchema,
   importRulesQuerySchema,
   importRulesPayloadSchema,
 } from './import_rules_schema';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { ThreatParams, ImportRuleAlertRest } from '../../types';
-import { ImportRulesRequest } from '../../rules/types';
+import { ImportRulesRequestParams } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('import rules schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   describe('importRulesSchema', () => {
     test('empty objects do not validate', () => {
       expect(importRulesSchema.validate<Partial<ImportRuleAlertRest>>({}).error).toBeTruthy();
@@ -1331,13 +1342,14 @@ describe('import rules schema', () => {
   describe('importRulesQuerySchema', () => {
     test('overwrite gets a default value of false', () => {
       expect(
-        importRulesQuerySchema.validate<Partial<ImportRulesRequest['query']>>({}).value.overwrite
+        importRulesQuerySchema.validate<Partial<ImportRulesRequestParams['query']>>({}).value
+          .overwrite
       ).toEqual(false);
     });
 
     test('overwrite validates with a boolean true', () => {
       expect(
-        importRulesQuerySchema.validate<Partial<ImportRulesRequest['query']>>({
+        importRulesQuerySchema.validate<Partial<ImportRulesRequestParams['query']>>({
           overwrite: true,
         }).error
       ).toBeFalsy();
@@ -1347,7 +1359,7 @@ describe('import rules schema', () => {
       expect(
         importRulesQuerySchema.validate<
           Partial<
-            Omit<ImportRulesRequest['query'], 'overwrite'> & {
+            Omit<ImportRulesRequestParams['query'], 'overwrite'> & {
               overwrite: string;
             }
           >
@@ -1421,5 +1433,403 @@ describe('import rules schema', () => {
     ).toEqual(
       'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
     );
+  });
+
+  test('The default for "actions" will be an empty array', () => {
+    expect(
+      importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.actions
+    ).toEqual([]);
+  });
+
+  test('You cannot send in an array of actions that are missing "group"', () => {
+    expect(
+      importRulesSchema.validate<
+        Partial<
+          Omit<ImportRuleAlertRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'group'>>;
+          }
+        >
+      >({
+        actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'junk',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "group" fails because ["group" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "id"', () => {
+    expect(
+      importRulesSchema.validate<
+        Partial<
+          Omit<ImportRuleAlertRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'id'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "id" fails because ["id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
+    expect(
+      importRulesSchema.validate<
+        Partial<
+          Omit<ImportRuleAlertRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'action_type_id'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', id: 'id', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "params"', () => {
+    expect(
+      importRulesSchema.validate<
+        Partial<
+          Omit<ImportRuleAlertRest, 'actions'> & {
+            actions: Array<Omit<RuleAlertAction, 'params'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "params" fails because ["params" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are including "actionTypeId', () => {
+    expect(
+      importRulesSchema.validate<
+        Partial<
+          Omit<ImportRuleAlertRest, 'actions'> & {
+            actions: AlertAction[];
+          }
+        >
+      >({
+        actions: [
+          {
+            group: 'group',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
+    );
+  });
+
+  test('The default for "throttle" will be null', () => {
+    expect(
+      importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.throttle
+    ).toEqual(null);
+  });
+
+  describe('note', () => {
+    test('You can set note to a string', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: '# test header',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You can set note to an empty string', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: '',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot create note set to null', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: null,
+        }).error.message
+      ).toEqual('child "note" fails because ["note" must be a string]');
+    });
+
+    test('You cannot create note as something other than a string', () => {
+      expect(
+        importRulesSchema.validate<Partial<Omit<ImportRuleAlertRest, 'note'> & { note: object }>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: {
+            somethingMadeUp: { somethingElse: true },
+          },
+        }).error.message
+      ).toEqual('child "note" fails because ["note" must be a string]');
+    });
+  });
+
+  // TODO: (LIST-FEATURE) We can enable this once we change the schema's to not be global per module but rather functions that can create the schema
+  // on demand. Since they are per module, we have a an issue where the ENV variables do not take effect. It is better we change all the
+  // schema's to be function calls to avoid global side effects or just wait until the feature is available. If you want to test this early,
+  // you can remove the .skip and set your env variable of export ELASTIC_XPACK_SIEM_LISTS_FEATURE=true locally
+  describe.skip('lists', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and lists] does validate', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          risk_score: 50,
+          note: '# some markdown',
+          lists: [
+            {
+              field: 'source.ip',
+              boolean_operator: 'and',
+              values: [
+                {
+                  name: '127.0.0.1',
+                  type: 'value',
+                },
+              ],
+            },
+            {
+              field: 'host.name',
+              boolean_operator: 'and not',
+              values: [
+                {
+                  name: 'rock01',
+                  type: 'value',
+                },
+                {
+                  name: 'mothra',
+                  type: 'value',
+                },
+              ],
+            },
+          ],
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty lists] does validate', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          risk_score: 50,
+          note: '# some markdown',
+          lists: [],
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and invalid lists] does NOT validate and lists is empty', () => {
+      expect(
+        importRulesSchema.validate<Partial<Omit<ImportRuleAlertRest, 'lists'>>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          risk_score: 50,
+          note: '# some markdown',
+          lists: [{ invalid_value: 'invalid value' }],
+        }).error.message
+      ).toEqual(
+        'child "lists" fails because ["lists" at position 0 fails because [child "field" fails because ["field" is required]]]'
+      );
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent lists] does validate', () => {
+      expect(
+        importRulesSchema.validate<Partial<Omit<ImportRuleAlertRest, 'lists'>>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          risk_score: 50,
+          note: '# some markdown',
+        }).value.lists
+      ).toEqual([]);
+    });
   });
 });

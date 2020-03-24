@@ -6,17 +6,21 @@
 
 import { createStore, applyMiddleware, Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
+import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
 import { ResolverAction, ResolverState } from '../types';
+import { EndpointPluginServices } from '../../../plugin';
 import { resolverReducer } from './reducer';
+import { resolverMiddlewareFactory } from './middleware';
 
-export const storeFactory = (): { store: Store<ResolverState, ResolverAction> } => {
+export const storeFactory = (
+  context?: KibanaReactContextValue<EndpointPluginServices>
+): { store: Store<ResolverState, ResolverAction> } => {
   const actionsBlacklist: Array<ResolverAction['type']> = ['userMovedPointer'];
   const composeEnhancers = composeWithDevTools({
     name: 'Resolver',
     actionsBlacklist,
   });
-
-  const middlewareEnhancer = applyMiddleware();
+  const middlewareEnhancer = applyMiddleware(resolverMiddlewareFactory(context));
 
   const store = createStore(resolverReducer, composeEnhancers(middlewareEnhancer));
   return {

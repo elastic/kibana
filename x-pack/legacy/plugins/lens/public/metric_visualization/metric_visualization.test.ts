@@ -24,8 +24,8 @@ function mockFrame(): FramePublicAPI {
     ...createMockFramePublicAPI(),
     addNewLayer: () => 'l42',
     datasourceLayers: {
-      l1: createMockDatasource().publicAPIMock,
-      l42: createMockDatasource().publicAPIMock,
+      l1: createMockDatasource('l1').publicAPIMock,
+      l42: createMockDatasource('l42').publicAPIMock,
     },
   };
 }
@@ -36,10 +36,10 @@ describe('metric_visualization', () => {
       (generateId as jest.Mock).mockReturnValueOnce('test-id1');
       const initialState = metricVisualization.initialize(mockFrame());
 
-      expect(initialState.accessor).toBeDefined();
+      expect(initialState.accessor).not.toBeDefined();
       expect(initialState).toMatchInlineSnapshot(`
                 Object {
-                  "accessor": "test-id1",
+                  "accessor": undefined,
                   "layerId": "l42",
                 }
             `);
@@ -60,7 +60,7 @@ describe('metric_visualization', () => {
     it('returns a clean layer', () => {
       (generateId as jest.Mock).mockReturnValueOnce('test-id1');
       expect(metricVisualization.clearLayer(exampleState(), 'l1')).toEqual({
-        accessor: 'test-id1',
+        accessor: undefined,
         layerId: 'l1',
       });
     });
@@ -72,10 +72,87 @@ describe('metric_visualization', () => {
     });
   });
 
+  describe('#getConfiguration', () => {
+    it('can add a metric when there is no accessor', () => {
+      expect(
+        metricVisualization.getConfiguration({
+          state: {
+            accessor: undefined,
+            layerId: 'l1',
+          },
+          layerId: 'l1',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        groups: [
+          expect.objectContaining({
+            supportsMoreColumns: true,
+          }),
+        ],
+      });
+    });
+
+    it('is not allowed to add a metric once one accessor is set', () => {
+      expect(
+        metricVisualization.getConfiguration({
+          state: {
+            accessor: 'a',
+            layerId: 'l1',
+          },
+          layerId: 'l1',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        groups: [
+          expect.objectContaining({
+            supportsMoreColumns: false,
+          }),
+        ],
+      });
+    });
+  });
+
+  describe('#setDimension', () => {
+    it('sets the accessor', () => {
+      expect(
+        metricVisualization.setDimension({
+          prevState: {
+            accessor: undefined,
+            layerId: 'l1',
+          },
+          layerId: 'l1',
+          groupId: '',
+          columnId: 'newDimension',
+        })
+      ).toEqual({
+        accessor: 'newDimension',
+        layerId: 'l1',
+      });
+    });
+  });
+
+  describe('#removeDimension', () => {
+    it('removes the accessor', () => {
+      expect(
+        metricVisualization.removeDimension({
+          prevState: {
+            accessor: 'a',
+            layerId: 'l1',
+          },
+          layerId: 'l1',
+          columnId: 'a',
+        })
+      ).toEqual({
+        accessor: undefined,
+        layerId: 'l1',
+      });
+    });
+  });
+
   describe('#toExpression', () => {
     it('should map to a valid AST', () => {
       const datasource: DatasourcePublicAPI = {
-        ...createMockDatasource().publicAPIMock,
+        ...createMockDatasource('l1').publicAPIMock,
         getOperationForColumnId(_: string) {
           return {
             id: 'a',

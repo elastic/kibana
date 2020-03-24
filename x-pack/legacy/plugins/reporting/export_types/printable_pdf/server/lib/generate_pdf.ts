@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { groupBy } from 'lodash';
 import { LevelLogger } from '../../../../server/lib';
-import { ServerFacade, HeadlessChromiumDriverFactory, ConditionalHeaders } from '../../../../types';
+import { ReportingConfigType } from '../../../../server/core';
+import { ConditionalHeaders, HeadlessChromiumDriverFactory } from '../../../../types';
+import { createLayout } from '../../../common/layouts';
+import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
+import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
+import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
-import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
-import { createLayout } from '../../../common/layouts';
-import { ScreenshotResults } from '../../../common/lib/screenshots/types';
-import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
@@ -27,10 +28,10 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
 };
 
 export function generatePdfObservableFactory(
-  server: ServerFacade,
+  captureConfig: ReportingConfigType['capture'],
   browserDriverFactory: HeadlessChromiumDriverFactory
 ) {
-  const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
+  const screenshotsObservable = screenshotsObservableFactory(captureConfig, browserDriverFactory);
 
   return function generatePdfObservable(
     logger: LevelLogger,
@@ -40,8 +41,8 @@ export function generatePdfObservableFactory(
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
     logo?: string
-  ): Rx.Observable<Buffer> {
-    const layout = createLayout(server, layoutParams) as LayoutInstance;
+  ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
+    const layout = createLayout(captureConfig, layoutParams) as LayoutInstance;
     const screenshots$ = screenshotsObservable({
       logger,
       urls,
@@ -49,17 +50,17 @@ export function generatePdfObservableFactory(
       layout,
       browserTimezone,
     }).pipe(
-      mergeMap(async urlScreenshots => {
+      mergeMap(async (results: ScreenshotResults[]) => {
         const pdfOutput = pdf.create(layout, logo);
 
         if (title) {
-          const timeRange = getTimeRange(urlScreenshots);
+          const timeRange = getTimeRange(results);
           title += timeRange ? ` - ${timeRange.duration}` : '';
           pdfOutput.setTitle(title);
         }
 
-        urlScreenshots.forEach(({ screenshots }) => {
-          screenshots.forEach(screenshot => {
+        results.forEach(r => {
+          r.screenshots.forEach(screenshot => {
             pdfOutput.addImage(screenshot.base64EncodedData, {
               title: screenshot.title,
               description: screenshot.description,
@@ -68,7 +69,16 @@ export function generatePdfObservableFactory(
         });
 
         pdfOutput.generate();
-        return await pdfOutput.getBuffer();
+
+        return {
+          buffer: await pdfOutput.getBuffer(),
+          warnings: results.reduce((found, current) => {
+            if (current.error) {
+              found.push(current.error.message);
+            }
+            return found;
+          }, [] as string[]),
+        };
       })
     );
 

@@ -18,15 +18,19 @@
  */
 
 import {
+  ApplicationStart,
   Capabilities,
+  ChromeStart,
   HttpStart,
   I18nStart,
   IUiSettingsClient,
+  OverlayStart,
   SavedObjectsStart,
 } from '../../../../../../core/public';
 import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
 import {
+  DataPublicPluginStart,
   FilterManager,
   IndexPatternsContract,
   TimefilterContract,
@@ -71,3 +75,13 @@ export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('
 export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] = createGetterSetter<
   SavedVisualizationsLoader
 >('SavedVisualisationsLoader');
+
+export const [getAggs, setAggs] = createGetterSetter<DataPublicPluginStart['search']['aggs']>(
+  'AggConfigs'
+);
+
+export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
+
+export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
+
+export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');

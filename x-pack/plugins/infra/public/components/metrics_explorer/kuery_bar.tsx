@@ -16,6 +16,7 @@ interface Props {
   derivedIndexPattern: IIndexPattern;
   onSubmit: (query: string) => void;
   value?: string | null;
+  placeholder?: string;
 }
 
 function validateQuery(query: string) {
@@ -27,7 +28,12 @@ function validateQuery(query: string) {
   return true;
 }
 
-export const MetricsExplorerKueryBar = ({ derivedIndexPattern, onSubmit, value }: Props) => {
+export const MetricsExplorerKueryBar = ({
+  derivedIndexPattern,
+  onSubmit,
+  value,
+  placeholder,
+}: Props) => {
   const [draftQuery, setDraftQuery] = useState<string>(value || '');
   const [isValid, setValidation] = useState<boolean>(true);
 
@@ -48,9 +54,12 @@ export const MetricsExplorerKueryBar = ({ derivedIndexPattern, onSubmit, value }
     fields: derivedIndexPattern.fields.filter(field => isDisplayable(field)),
   };
 
-  const placeholder = i18n.translate('xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder', {
-    defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
-  });
+  const defaultPlaceholder = i18n.translate(
+    'xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder',
+    {
+      defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+    }
+  );
 
   return (
     <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
@@ -62,7 +71,7 @@ export const MetricsExplorerKueryBar = ({ derivedIndexPattern, onSubmit, value }
           loadSuggestions={loadSuggestions}
           onChange={handleChange}
           onSubmit={onSubmit}
-          placeholder={placeholder}
+          placeholder={placeholder || defaultPlaceholder}
           suggestions={suggestions}
           value={draftQuery}
         />

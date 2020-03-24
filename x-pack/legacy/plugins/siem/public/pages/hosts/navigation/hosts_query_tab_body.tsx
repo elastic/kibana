@@ -17,6 +17,7 @@ export const HostsQueryTabBody = ({
   deleteQuery,
   endDate,
   filterQuery,
+  indexPattern,
   skip,
   setQuery,
   startDate,
@@ -36,6 +37,7 @@ export const HostsQueryTabBody = ({
         data={hosts}
         fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
         id={id}
+        indexPattern={indexPattern}
         inspect={inspect}
         isInspect={isInspected}
         loading={loading}

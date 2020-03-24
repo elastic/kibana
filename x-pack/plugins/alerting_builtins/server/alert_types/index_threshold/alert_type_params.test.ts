@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ParamsSchema } from './alert_type_params';
+import { ParamsSchema, Params } from './alert_type_params';
 import { runTests } from './lib/core_query_types.test';
 
-const DefaultParams = {
+const DefaultParams: Writable<Partial<Params>> = {
   index: 'index-name',
   timeField: 'time-field',
   aggType: 'count',
-  window: '5m',
-  comparator: 'greaterThan',
+  groupBy: 'all',
+  timeWindowSize: 5,
+  timeWindowUnit: 'm',
+  thresholdComparator: '>',
   threshold: [0],
 };
 
@@ -29,28 +31,29 @@ describe('alertType Params validate()', () => {
   });
 
   it('passes for maximal valid input', async () => {
-    params.aggType = 'average';
+    params.aggType = 'avg';
     params.aggField = 'agg-field';
-    params.groupField = 'group-field';
-    params.groupLimit = 100;
+    params.groupBy = 'top';
+    params.termField = 'group-field';
+    params.termSize = 100;
     expect(validate()).toBeTruthy();
   });
 
   it('fails for invalid comparator', async () => {
-    params.comparator = '[invalid-comparator]';
+    params.thresholdComparator = '[invalid-comparator]';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[comparator]: invalid comparator specified: [invalid-comparator]"`
+      `"[thresholdComparator]: invalid thresholdComparator specified: [invalid-comparator]"`
     );
   });
 
   it('fails for invalid threshold length', async () => {
-    params.comparator = 'lessThan';
-    params.threshold = [0, 1];
+    params.thresholdComparator = '<';
+    params.threshold = [0, 1, 2];
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[threshold]: must have one element for the \\"lessThan\\" comparator"`
+      `"[threshold]: array size is [3], but cannot be greater than [2]"`
     );
 
-    params.comparator = 'between';
+    params.thresholdComparator = 'between';
     params.threshold = [0];
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
       `"[threshold]: must have two elements for the \\"between\\" comparator"`

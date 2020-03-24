@@ -10,7 +10,8 @@ import * as contexts from '../export_types/common/lib/screenshots/constants';
 import { ElementsPositionAndAttribute } from '../export_types/common/lib/screenshots/types';
 import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../server/browsers';
 import { createDriverFactory } from '../server/browsers/chromium';
-import { BrowserConfig, Logger, NetworkPolicy } from '../types';
+import { CaptureConfig } from '../server/types';
+import { Logger } from '../types';
 
 interface CreateMockBrowserDriverFactoryOpts {
   evaluate: jest.Mock<Promise<any>, any[]>;
@@ -19,7 +20,7 @@ interface CreateMockBrowserDriverFactoryOpts {
   getCreatePage: (driver: HeadlessChromiumDriver) => jest.Mock<any, any>;
 }
 
-export const mockSelectors = {
+const mockSelectors = {
   renderComplete: 'renderedSelector',
   itemsCountAttribute: 'itemsSelector',
   screenshot: 'screenshotSelector',
@@ -73,9 +74,6 @@ mockBrowserEvaluate.mockImplementation(() => {
   if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
     return Promise.resolve(getMockElementsPositionAndAttributes('Default Mock Title', 'Default '));
   }
-  if (mockCall === contexts.CONTEXT_CHECKFORTOASTMESSAGE) {
-    return Promise.resolve('Toast Message');
-  }
   throw new Error(mockCall);
 });
 const mockScreenshot = jest.fn();
@@ -96,28 +94,39 @@ export const createMockBrowserDriverFactory = async (
   logger: Logger,
   opts: Partial<CreateMockBrowserDriverFactoryOpts>
 ): Promise<HeadlessChromiumDriverFactory> => {
-  const browserConfig = {
-    inspect: true,
-    userDataDir: '/usr/data/dir',
-    viewport: { width: 12, height: 12 },
-    disableSandbox: false,
-    proxy: { enabled: false },
-  } as BrowserConfig;
+  const captureConfig = {
+    timeouts: { openUrl: 30000, waitForElements: 30000, renderComplete: 30000 },
+    browser: {
+      type: 'chromium',
+      chromium: {
+        inspect: false,
+        disableSandbox: false,
+        userDataDir: '/usr/data/dir',
+        viewport: { width: 12, height: 12 },
+        proxy: { enabled: false, server: undefined, bypass: undefined },
+      },
+      autoDownload: false,
+      inspect: true,
+      userDataDir: '/usr/data/dir',
+      viewport: { width: 12, height: 12 },
+      disableSandbox: false,
+      proxy: { enabled: false, server: undefined, bypass: undefined },
+      maxScreenshotDimension: undefined,
+    },
+    networkPolicy: { enabled: true, rules: [] },
+    viewport: { width: 800, height: 600 },
+    loadDelay: 2000,
+    zoom: 1,
+    maxAttempts: 1,
+  } as CaptureConfig;
 
   const binaryPath = '/usr/local/share/common/secure/';
-  const queueTimeout = 55;
-  const networkPolicy = {} as NetworkPolicy;
-
-  const mockBrowserDriverFactory = await createDriverFactory(
-    binaryPath,
-    logger,
-    browserConfig,
-    queueTimeout,
-    networkPolicy
-  );
-
+  const mockBrowserDriverFactory = await createDriverFactory(binaryPath, logger, captureConfig);
   const mockPage = {} as Page;
-  const mockBrowserDriver = new HeadlessChromiumDriver(mockPage, { inspect: true, networkPolicy });
+  const mockBrowserDriver = new HeadlessChromiumDriver(mockPage, {
+    inspect: true,
+    networkPolicy: captureConfig.networkPolicy,
+  });
 
   // mock the driver methods as either default mocks or passed-in
   mockBrowserDriver.waitForSelector = opts.waitForSelector ? opts.waitForSelector : defaultOpts.waitForSelector; // prettier-ignore

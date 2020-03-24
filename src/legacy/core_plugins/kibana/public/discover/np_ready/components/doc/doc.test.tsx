@@ -24,19 +24,13 @@ import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
 
-jest.mock('../doc_viewer/doc_viewer', () => ({
-  DocViewer: () => null,
-}));
-
 jest.mock('../../../kibana_services', () => {
   return {
     getServices: () => ({
       metadata: {
         branch: 'test',
       },
-      getDocViewsSorted: () => {
-        return [];
-      },
+      DocViewer: () => null,
     }),
   };
 });
@@ -45,7 +39,10 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export const waitForPromises = () => new Promise(resolve => setTimeout(resolve, 0));
+const waitForPromises = async () =>
+  act(async () => {
+    await new Promise(resolve => setTimeout(resolve));
+  });
 
 /**
  * this works but logs ugly error messages until we're using React 16.9

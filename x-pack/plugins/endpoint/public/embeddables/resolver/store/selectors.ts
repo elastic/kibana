@@ -54,6 +54,11 @@ export const processNodePositionsAndEdgeLineSegments = composeSelectors(
   dataSelectors.processNodePositionsAndEdgeLineSegments
 );
 
+export const processAdjacencies = composeSelectors(
+  dataStateSelector,
+  dataSelectors.processAdjacencies
+);
+
 /**
  * Returns the camera state from within ResolverState
  */
@@ -67,6 +72,11 @@ function cameraStateSelector(state: ResolverState) {
 function dataStateSelector(state: ResolverState) {
   return state.data;
 }
+
+/**
+ * Whether or not the resolver is pending fetching data
+ */
+export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoading);
 
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a

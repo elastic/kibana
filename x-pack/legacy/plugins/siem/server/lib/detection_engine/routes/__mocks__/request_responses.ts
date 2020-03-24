@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerInjectOptions } from 'hapi';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../../../plugins/actions/server';
-import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
+import {
+  SignalsStatusRestParams,
+  SignalsQueryRestParams,
+  SignalSearchResponse,
+} from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -18,9 +21,14 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
 import { ShardsResponse } from '../../../types';
-import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  RuleAlertType,
+  IRuleSavedAttributesSavedObjectAttributes,
+  HapiReadableStream,
+} from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
-import { TEST_BOUNDARY } from './utils';
+import { requestMock } from './request';
+import { RuleNotificationAlertType } from '../../notifications/types';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
@@ -43,6 +51,7 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
       technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
+  throttle: null,
   enabled: true,
   filters: [],
   immutable: false,
@@ -52,6 +61,7 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
   version: 1,
   false_positives: [],
   max_signals: 100,
+  note: '',
   timeline_id: 'timeline-id',
   timeline_title: 'timeline-title',
 });
@@ -101,97 +111,108 @@ export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatu
   status: 'closed',
 });
 
-export const getUpdateRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
-  url: DETECTION_ENGINE_RULES_URL,
-  payload: {
-    ...typicalPayload(),
-  },
-});
+export const getUpdateRequest = () =>
+  requestMock.create({
+    method: 'put',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: typicalPayload(),
+  });
 
-export const getPatchRequest = (): ServerInjectOptions => ({
-  method: 'PATCH',
-  url: DETECTION_ENGINE_RULES_URL,
-  payload: {
-    ...typicalPayload(),
-  },
-});
+export const getPatchRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: typicalPayload(),
+  });
 
-export const getReadRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
-});
+export const getReadRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { rule_id: 'rule-1' },
+  });
 
-export const getFindRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: `${DETECTION_ENGINE_RULES_URL}/_find`,
-});
+export const getFindRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+  });
 
-export const getReadBulkRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-  payload: [typicalPayload()],
-});
+export const getReadBulkRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+    body: [typicalPayload()],
+  });
 
-export const getUpdateBulkRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-  payload: [typicalPayload()],
-});
+export const getUpdateBulkRequest = () =>
+  requestMock.create({
+    method: 'put',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    body: [typicalPayload()],
+  });
 
-export const getPatchBulkRequest = (): ServerInjectOptions => ({
-  method: 'PATCH',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-  payload: [typicalPayload()],
-});
+export const getPatchBulkRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    body: [typicalPayload()],
+  });
 
-export const getDeleteBulkRequest = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ rule_id: 'rule-1' }],
-});
+export const getDeleteBulkRequest = () =>
+  requestMock.create({
+    method: 'delete',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ rule_id: 'rule-1' }],
+  });
 
-export const getDeleteBulkRequestById = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
-});
+export const getDeleteBulkRequestById = () =>
+  requestMock.create({
+    method: 'delete',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+  });
 
-export const getDeleteAsPostBulkRequestById = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
-});
+export const getDeleteAsPostBulkRequestById = () =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+  });
 
-export const getDeleteAsPostBulkRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-  payload: [{ rule_id: 'rule-1' }],
-});
+export const getDeleteAsPostBulkRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    body: [{ rule_id: 'rule-1' }],
+  });
 
-export const getPrivilegeRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: DETECTION_ENGINE_PRIVILEGES_URL,
-});
+export const getPrivilegeRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_PRIVILEGES_URL,
+  });
 
-export const addPrepackagedRulesRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
-  url: DETECTION_ENGINE_PREPACKAGED_URL,
-});
+export const addPrepackagedRulesRequest = () =>
+  requestMock.create({
+    method: 'put',
+    path: DETECTION_ENGINE_PREPACKAGED_URL,
+  });
 
-export const getPrepackagedRulesStatusRequest = (): ServerInjectOptions => ({
-  method: 'GET',
-  url: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
-});
+export const getPrepackagedRulesStatusRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+  });
 
-export interface FindHit {
+export interface FindHit<T = RuleAlertType> {
   page: number;
   perPage: number;
   total: number;
-  data: RuleAlertType[];
+  data: T[];
 }
 
-export const getFindResult = (): FindHit => ({
+export const getEmptyFindResult = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 0,
@@ -203,6 +224,13 @@ export const getFindResultWithSingleHit = (): FindHit => ({
   perPage: 1,
   total: 1,
   data: [getResult()],
+});
+
+export const nonRuleFindResult = (): FindHit => ({
+  page: 1,
+  perPage: 1,
+  total: 1,
+  data: [nonRuleAlert()],
 });
 
 export const getFindResultWithMultiHits = ({
@@ -224,75 +252,132 @@ export const getFindResultWithMultiHits = ({
   };
 };
 
-export const getImportRulesRequest = (payload?: Buffer): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_import`,
-  headers: {
-    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
-  },
-  payload,
-});
+export const ruleStatusRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
+    query: { ids: ['someId'] },
+  });
 
-export const getImportRulesRequestOverwriteTrue = (payload?: Buffer): ServerInjectOptions => ({
-  method: 'POST',
-  url: `${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`,
-  headers: {
-    'Content-Type': `multipart/form-data; boundary=${TEST_BOUNDARY}`,
-  },
-  payload,
-});
+export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+    body: { file: hapiStream },
+  });
 
-export const getDeleteRequest = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
-});
+export const getImportRulesRequestOverwriteTrue = (hapiStream?: HapiReadableStream) =>
+  requestMock.create({
+    method: 'post',
+    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+    body: { file: hapiStream },
+    query: { overwrite: true },
+  });
 
-export const getDeleteRequestById = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: `${DETECTION_ENGINE_RULES_URL}?id=04128c15-0d1b-4716-a4c5-46997ac7f3bd`,
-});
+export const getDeleteRequest = () =>
+  requestMock.create({
+    method: 'delete',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { rule_id: 'rule-1' },
+  });
 
-export const getCreateRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_RULES_URL,
-  payload: {
-    ...typicalPayload(),
-  },
-});
+export const getDeleteRequestById = () =>
+  requestMock.create({
+    method: 'delete',
+    path: DETECTION_ENGINE_RULES_URL,
+    query: { id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' },
+  });
 
-export const getSetSignalStatusByIdsRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-  payload: {
-    ...typicalSetStatusSignalByIdsPayload(),
-  },
-});
+export const getCreateRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: typicalPayload(),
+  });
 
-export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-  payload: {
-    ...typicalSetStatusSignalByQueryPayload(),
-  },
-});
+export const createMlRuleRequest = () => {
+  const { query, language, index, ...mlParams } = typicalPayload();
 
-export const getSignalsQueryRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  payload: { ...typicalSignalsQuery() },
-});
+  return requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: {
+      ...mlParams,
+      type: 'machine_learning',
+      anomaly_threshold: 50,
+      machine_learning_job_id: 'some-uuid',
+    },
+  });
+};
 
-export const getSignalsAggsQueryRequest = (): ServerInjectOptions => ({
-  method: 'POST',
-  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  payload: { ...typicalSignalsQueryAggs() },
-});
+export const createRuleWithActionsRequest = () => {
+  const payload = typicalPayload();
+
+  return requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: {
+      ...payload,
+      throttle: '5m',
+      actions: [
+        {
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+          params: { message: 'Rule generated {{state.signalsCount}} signals' },
+          action_type_id: '.slack',
+        },
+      ],
+    },
+  });
+};
+
+export const getSetSignalStatusByIdsRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+    body: typicalSetStatusSignalByIdsPayload(),
+  });
+
+export const getSetSignalStatusByQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+    body: typicalSetStatusSignalByQueryPayload(),
+  });
+
+export const getSignalsQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: typicalSignalsQuery(),
+  });
+
+export const getSignalsAggsQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: typicalSignalsQueryAggs(),
+  });
+
+export const getSignalsAggsAndQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
+  });
 
 export const createActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
   name: '',
   config: {},
+});
+
+export const nonRuleAlert = () => ({
+  ...getResult(),
+  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
+  name: 'Non-Rule Alert',
+  alertTypeId: 'something',
 });
 
 export const getResult = (): RuleAlertType => ({
@@ -302,6 +387,7 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
+    anomalyThreshold: undefined,
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -310,6 +396,7 @@ export const getResult = (): RuleAlertType => ({
     immutable: false,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
+    machineLearningJobId: undefined,
     outputIndex: '.siem-signals',
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',
@@ -346,7 +433,34 @@ export const getResult = (): RuleAlertType => ({
       },
     ],
     references: ['http://www.example.com', 'https://ww.example.com'],
+    note: '# Investigative notes',
     version: 1,
+    lists: [
+      {
+        field: 'source.ip',
+        boolean_operator: 'and',
+        values: [
+          {
+            name: '127.0.0.1',
+            type: 'value',
+          },
+        ],
+      },
+      {
+        field: 'host.name',
+        boolean_operator: 'and not',
+        values: [
+          {
+            name: 'rock01',
+            type: 'value',
+          },
+          {
+            name: 'mothra',
+            type: 'value',
+          },
+        ],
+      },
+    ],
   },
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
   updatedAt: new Date('2019-12-13T16:40:33.400Z'),
@@ -362,6 +476,24 @@ export const getResult = (): RuleAlertType => ({
   mutedInstanceIds: [],
   scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
 });
+
+export const getMlResult = (): RuleAlertType => {
+  const result = getResult();
+
+  return {
+    ...result,
+    params: {
+      ...result.params,
+      query: undefined,
+      language: undefined,
+      filters: undefined,
+      index: undefined,
+      type: 'machine_learning',
+      anomalyThreshold: 44,
+      machineLearningJobId: 'some_job_id',
+    },
+  };
+};
 
 export const updateActionResult = (): ActionResult => ({
   id: 'result-1',
@@ -473,10 +605,78 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttrib
   ],
 });
 
+export const getEmptySignalsResponse = (): SignalSearchResponse => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
+  aggregations: {
+    signalsByGrouping: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+  },
+});
+
+export const getSuccessfulSignalUpdateResponse = () => ({
+  took: 18,
+  timed_out: false,
+  total: 1,
+  updated: 1,
+  deleted: 0,
+  batches: 1,
+  version_conflicts: 0,
+  noops: 0,
+  retries: { bulk: 0, search: 0 },
+  throttled_millis: 0,
+  requests_per_second: -1,
+  throttled_until_millis: 0,
+  failures: [],
+});
+
 export const getIndexName = () => 'index-name';
 export const getEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
   _shards: { total: 0 },
 });
 export const getNonEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
   _shards: { total: 1 },
+});
+
+export const getNotificationResult = (): RuleNotificationAlertType => ({
+  id: '200dbf2f-b269-4bf9-aa85-11ba32ba73ba',
+  name: 'Notification for Rule Test',
+  tags: ['__internal_rule_alert_id:85b64e8a-2e40-4096-86af-5ac172c10825'],
+  alertTypeId: 'siem.notifications',
+  consumer: 'siem',
+  params: {
+    ruleAlertId: '85b64e8a-2e40-4096-86af-5ac172c10825',
+  },
+  schedule: {
+    interval: '5m',
+  },
+  enabled: true,
+  actions: [
+    {
+      actionTypeId: '.slack',
+      params: {
+        message: 'Rule generated {{state.signalsCount}} signals\n\n{{rule.name}}\n{{resultsLink}}',
+      },
+      group: 'default',
+      id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+    },
+  ],
+  throttle: null,
+  apiKey: null,
+  apiKeyOwner: 'elastic',
+  createdBy: 'elastic',
+  updatedBy: 'elastic',
+  createdAt: new Date('2020-03-21T11:15:13.530Z'),
+  muteAll: false,
+  mutedInstanceIds: [],
+  scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
+  updatedAt: new Date('2020-03-21T12:37:08.730Z'),
+});
+
+export const getFindNotificationsResultWithSingleHit = (): FindHit<RuleNotificationAlertType> => ({
+  page: 1,
+  perPage: 1,
+  total: 1,
+  data: [getNotificationResult()],
 });

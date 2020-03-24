@@ -34,7 +34,7 @@ export class CorePluginAPlugin implements Plugin {
     core.http.registerRouteHandlerContext('pluginA', context => {
       return {
         ping: () =>
-          context.core!.elasticsearch.adminClient.callAsInternalUser('ping') as Promise<string>,
+          context.core.elasticsearch.adminClient.callAsInternalUser('ping') as Promise<string>,
       };
     });
   }

@@ -7,9 +7,8 @@
 import { useQuery } from '.';
 import { mount } from 'enzyme';
 import React from 'react';
-import { useApolloClient } from '@apollo/client';
-
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { useApolloClient } from '../../utils/apollo_context';
+import { errorToToaster } from '../../components/toasters';
 import { MatrixOverTimeHistogramData, HistogramType } from '../../graphql/types';
 import { InspectQuery, Refetch } from '../../store/inputs/model';
 
@@ -26,7 +25,7 @@ const mockQuery = jest.fn().mockResolvedValue({
 });
 
 const mockRejectQuery = jest.fn().mockRejectedValue(new Error());
-jest.mock('@apollo/client', () => ({
+jest.mock('../../utils/apollo_context', () => ({
   useApolloClient: jest.fn(),
 }));
 
@@ -42,7 +41,10 @@ jest.mock('./index.gql_query', () => {
   };
 });
 
-jest.mock('../../components/ml/api/error_to_toaster');
+jest.mock('../../components/toasters/', () => ({
+  useStateToaster: () => [jest.fn(), jest.fn()],
+  errorToToaster: jest.fn(),
+}));
 
 describe('useQuery', () => {
   let result: {

@@ -21,14 +21,12 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { LineOptions, LineOptionsParams } from './line_options';
 import { NumberInputOption } from '../../common';
-import { getInterpolationModes } from '../../../utils/collections';
-import { seriesParam } from './mocks';
+import { seriesParam, vis } from './mocks';
 
 jest.mock('ui/new_platform');
 
 const LINE_WIDTH = 'lineWidth';
 const DRAW_LINES = 'drawLinesBetweenPoints';
-const interpolationModes = getInterpolationModes();
 
 describe('LineOptions component', () => {
   let setChart: jest.Mock;
@@ -39,15 +37,9 @@ describe('LineOptions component', () => {
 
     defaultProps = {
       chart: { ...seriesParam },
-      vis: {
-        type: {
-          editorConfig: {
-            collections: { interpolationModes },
-          },
-        },
-      },
+      vis,
       setChart,
-    } as any;
+    };
   });
 
   it('should init with the default set of props', () => {

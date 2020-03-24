@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { gql } from '@apollo/client';
+import gql from 'graphql-tag';
 
 const columnHeader = `
   aggregatable: Boolean
@@ -150,7 +150,7 @@ export const timelineSchema = gql`
     updated
     created
   }
-  
+
   input SortTimeline {
     sortField: SortFieldTimeline!
     sortOrder: Direction!

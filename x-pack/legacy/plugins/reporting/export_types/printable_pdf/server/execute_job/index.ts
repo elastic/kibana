@@ -5,43 +5,43 @@
  */
 
 import * as Rx from 'rxjs';
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { ReportingCore } from '../../../../server';
-import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
-import { JobDocPayloadPDF } from '../../types';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { ReportingCore } from '../../../../server';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput, Logger } from '../../../../types';
 import {
   decryptJobHeaders,
-  omitBlacklistedHeaders,
   getConditionalHeaders,
-  getFullUrls,
   getCustomLogo,
+  getFullUrls,
+  omitBlacklistedHeaders,
 } from '../../../common/execute_job/';
+import { JobDocPayloadPDF } from '../../types';
+import { generatePdfObservableFactory } from '../lib/generate_pdf';
 
 type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
 
 export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger
 ) {
+  const config = await reporting.getConfig();
+  const captureConfig = config.get('capture');
+  const encryptionKey = config.get('encryptionKey');
+
   const browserDriverFactory = await reporting.getBrowserDriverFactory();
-  const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
+  const generatePdfObservable = generatePdfObservableFactory(captureConfig, browserDriverFactory);
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
   return function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
     const jobLogger = logger.clone([jobId]);
-
-    const process$ = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders({ server, job, logger })),
+    const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
+      mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
-      map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
-      mergeMap(conditionalHeaders => getCustomLogo({ reporting, server, job, conditionalHeaders })),
+      map(filteredHeaders => getConditionalHeaders({ config, job, filteredHeaders })),
+      mergeMap(conditionalHeaders => getCustomLogo({ reporting, config, job, conditionalHeaders })),
       mergeMap(({ logo, conditionalHeaders }) => {
-        const urls = getFullUrls({ server, job });
+        const urls = getFullUrls({ config, job });
 
         const { browserTimezone, layout, title } = job;
         return generatePdfObservable(
@@ -54,10 +54,11 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
           logo
         );
       }),
-      map((buffer: Buffer) => ({
+      map(({ buffer, warnings }) => ({
         content_type: 'application/pdf',
         content: buffer.toString('base64'),
         size: buffer.byteLength,
+        warnings,
       })),
       catchError(err => {
         jobLogger.error(err);

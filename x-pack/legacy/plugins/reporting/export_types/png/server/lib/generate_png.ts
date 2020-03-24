@@ -7,16 +7,18 @@
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
-import { ServerFacade, HeadlessChromiumDriverFactory, ConditionalHeaders } from '../../../../types';
-import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
-import { PreserveLayout } from '../../../common/layouts/preserve_layout';
+import { CaptureConfig } from '../../../../server/types';
+import { ConditionalHeaders, HeadlessChromiumDriverFactory } from '../../../../types';
 import { LayoutParams } from '../../../common/layouts/layout';
+import { PreserveLayout } from '../../../common/layouts/preserve_layout';
+import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
+import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 
 export function generatePngObservableFactory(
-  server: ServerFacade,
+  captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory
 ) {
-  const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
+  const screenshotsObservable = screenshotsObservableFactory(captureConfig, browserDriverFactory);
 
   return function generatePngObservable(
     logger: LevelLogger,
@@ -24,7 +26,7 @@ export function generatePngObservableFactory(
     browserTimezone: string,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
-  ): Rx.Observable<Buffer> {
+  ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
@@ -37,12 +39,16 @@ export function generatePngObservableFactory(
       layout,
       browserTimezone,
     }).pipe(
-      map(([{ screenshots }]) => {
-        if (screenshots.length !== 1) {
-          throw new Error(`Expected there to be 1 screenshot, but there are ${screenshots.length}`);
-        }
-
-        return screenshots[0].base64EncodedData;
+      map((results: ScreenshotResults[]) => {
+        return {
+          buffer: results[0].screenshots[0].base64EncodedData,
+          warnings: results.reduce((found, current) => {
+            if (current.error) {
+              found.push(current.error.message);
+            }
+            return found;
+          }, [] as string[]),
+        };
       })
     );
 

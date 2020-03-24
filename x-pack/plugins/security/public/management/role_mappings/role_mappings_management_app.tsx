@@ -8,7 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
 import { RolesAPIClient } from '../roles';
@@ -18,7 +18,7 @@ import { RoleMappingsGridPage } from './role_mappings_grid';
 import { EditRoleMappingPage } from './edit_role_mapping';
 
 interface CreateParams {
-  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 export const roleMappingsManagementApp = Object.freeze({
@@ -48,6 +48,7 @@ export const roleMappingsManagementApp = Object.freeze({
           return (
             <RoleMappingsGridPage
               notifications={notifications}
+              rolesAPIClient={new RolesAPIClient(http)}
               roleMappingsAPI={roleMappingsAPIClient}
               docLinks={dockLinksService}
             />

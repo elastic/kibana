@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApolloClient } from '@apollo/client';
+import ApolloClient from 'apollo-client';
 import * as H from 'history';
 import { ActionCreator } from 'typescript-fsa';
 import {
@@ -60,8 +60,20 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
-  timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
-  case: [],
+  timeline: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
+  case: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
 };
 
 export type LocationTypes =
@@ -88,6 +100,9 @@ export type KeyUrlState = keyof UrlState;
 export interface UrlStateProps {
   navTabs: Record<string, NavTab>;
   indexPattern?: IIndexPattern;
+  mapToUrlState?: (value: string) => UrlState;
+  onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
+  onInitialize?: (urlState: UrlState) => void;
 }
 
 export interface UrlStateStateToPropsType {

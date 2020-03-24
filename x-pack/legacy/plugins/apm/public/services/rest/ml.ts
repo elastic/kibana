@@ -16,7 +16,7 @@ import {
 } from '../../../../../../plugins/apm/common/ml_job_constants';
 import { callApi } from './callApi';
 import { ESFilter } from '../../../../../../plugins/apm/typings/elasticsearch';
-import { createCallApmApi, APMClient } from './createCallApmApi';
+import { callApmApi } from './createCallApmApi';
 
 interface MlResponseItem {
   id: string;
@@ -36,7 +36,6 @@ interface StartedMLJobApiResponse {
 }
 
 async function getTransactionIndices(http: HttpSetup) {
-  const callApmApi: APMClient = createCallApmApi(http);
   const indices = await callApmApi({
     method: 'GET',
     pathname: `/api/apm/settings/apm-indices`

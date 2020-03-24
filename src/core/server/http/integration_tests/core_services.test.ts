@@ -50,7 +50,7 @@ describe('http service', () => {
       await root.shutdown();
     });
     describe('#isAuthenticated()', () => {
-      it('returns true if has been authorized', async () => {
+      it('returns true if has been authenticated', async () => {
         const { http } = await root.setup();
         const { registerAuth, createRouter, auth } = http;
 
@@ -65,11 +65,11 @@ describe('http service', () => {
         await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
       });
 
-      it('returns false if has not been authorized', async () => {
+      it('returns false if has not been authenticated', async () => {
         const { http } = await root.setup();
         const { registerAuth, createRouter, auth } = http;
 
-        await registerAuth((req, res, toolkit) => toolkit.authenticated());
+        registerAuth((req, res, toolkit) => toolkit.authenticated());
 
         const router = createRouter('');
         router.get(
@@ -81,13 +81,44 @@ describe('http service', () => {
         await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
       });
 
-      it('returns false if no authorization mechanism has been registered', async () => {
+      it('returns false if no authentication mechanism has been registered', async () => {
         const { http } = await root.setup();
         const { createRouter, auth } = http;
 
         const router = createRouter('');
         router.get(
           { path: '/is-auth', validate: false, options: { authRequired: false } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
+        );
+
+        await root.start();
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+      });
+
+      it('returns true if authenticated on a route with "optional" auth', async () => {
+        const { http } = await root.setup();
+        const { createRouter, auth, registerAuth } = http;
+
+        registerAuth((req, res, toolkit) => toolkit.authenticated());
+        const router = createRouter('');
+        router.get(
+          { path: '/is-auth', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
+        );
+
+        await root.start();
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
+      });
+
+      it('returns false if not authenticated on a route with "optional" auth', async () => {
+        const { http } = await root.setup();
+        const { createRouter, auth, registerAuth } = http;
+
+        registerAuth((req, res, toolkit) => toolkit.notHandled());
+
+        const router = createRouter('');
+        router.get(
+          { path: '/is-auth', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
 

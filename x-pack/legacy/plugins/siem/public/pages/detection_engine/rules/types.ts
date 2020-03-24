@@ -5,8 +5,9 @@
  */
 
 import { Filter } from '../../../../../../../../src/plugins/data/common';
+import { RuleType } from '../../../containers/detection_engine/rules/types';
 import { FieldValueQueryBar } from './components/query_bar';
-import { FormData, FormHook } from '../../shared_imports';
+import { FormData, FormHook } from '../../../shared_imports';
 import { FieldValueTimeline } from './components/pick_timeline';
 
 export interface EuiBasicTableSortTypes {
@@ -36,7 +37,7 @@ export interface RuleStepData {
 
 export interface RuleStepProps {
   addPadding?: boolean;
-  descriptionDirection?: 'row' | 'column';
+  descriptionColumns?: 'multi' | 'single' | 'singleSplit';
   setStepData?: (step: RuleStep, data: unknown, isValid: boolean) => void;
   isReadOnlyView: boolean;
   isUpdateView?: boolean;
@@ -56,13 +57,22 @@ export interface AboutStepRule extends StepRuleData {
   references: string[];
   falsePositives: string[];
   tags: string[];
-  timeline: FieldValueTimeline;
   threat: IMitreEnterpriseAttack[];
+  note: string;
+}
+
+export interface AboutStepRuleDetails {
+  note: string;
+  description: string;
 }
 
 export interface DefineStepRule extends StepRuleData {
+  anomalyThreshold: number;
   index: string[];
+  machineLearningJobId: string;
   queryBar: FieldValueQueryBar;
+  ruleType: RuleType;
+  timeline: FieldValueTimeline;
 }
 
 export interface ScheduleStepRule extends StepRuleData {
@@ -73,11 +83,16 @@ export interface ScheduleStepRule extends StepRuleData {
 }
 
 export interface DefineStepRuleJson {
-  index: string[];
-  filters: Filter[];
+  anomaly_threshold?: number;
+  index?: string[];
+  filters?: Filter[];
+  machine_learning_job_id?: string;
   saved_id?: string;
-  query: string;
-  language: string;
+  query?: string;
+  language?: string;
+  timeline_id?: string;
+  timeline_title?: string;
+  type: RuleType;
 }
 
 export interface AboutStepRuleJson {
@@ -88,9 +103,8 @@ export interface AboutStepRuleJson {
   references: string[];
   false_positives: string[];
   tags: string[];
-  timeline_id?: string;
-  timeline_title?: string;
   threat: IMitreEnterpriseAttack[];
+  note?: string;
 }
 
 export interface ScheduleStepRuleJson {
@@ -104,8 +118,6 @@ export interface ScheduleStepRuleJson {
 export type MyRule = Omit<DefineStepRule & ScheduleStepRule & AboutStepRule, 'isNew'> & {
   immutable: boolean;
 };
-
-export type FormatRuleType = 'query' | 'saved_query';
 
 export interface IMitreAttack {
   id: string;

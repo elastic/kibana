@@ -21,13 +21,17 @@ export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
-export { OIDCAuthenticationFlow, SAMLLoginStep } from './providers';
+export { OIDCLogin, SAMLLogin } from './providers';
 export {
   CreateAPIKeyResult,
   InvalidateAPIKeyResult,
   CreateAPIKeyParams,
   InvalidateAPIKeyParams,
 } from './api_keys';
+export {
+  BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
+} from './http_authentication';
 
 interface SetupAuthenticationParams {
   http: CoreSetup['http'];
@@ -127,10 +131,8 @@ export async function setupAuthentication({
       // authentication (username and password) or arbitrary external page managed by 3rd party
       // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
       // decides what location user should be redirected to.
-      return response.redirected({
-        headers: {
-          location: authenticationResult.redirectURL!,
-        },
+      return t.redirected({
+        location: authenticationResult.redirectURL!,
       });
     }
 
@@ -153,9 +155,7 @@ export async function setupAuthentication({
     }
 
     authLogger.debug('Could not handle authentication attempt');
-    return response.unauthorized({
-      headers: authenticationResult.authResponseHeaders,
-    });
+    return t.notHandled();
   });
 
   authLogger.debug('Successfully registered core authentication handler.');
@@ -169,12 +169,15 @@ export async function setupAuthentication({
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
     getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
-    isProviderEnabled: authenticator.isProviderEnabled.bind(authenticator),
+    isProviderTypeEnabled: authenticator.isProviderTypeEnabled.bind(authenticator),
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),
+    grantAPIKeyAsInternalUser: (request: KibanaRequest) => apiKeys.grantAsInternalUser(request),
     invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
       apiKeys.invalidate(request, params),
+    invalidateAPIKeyAsInternalUser: (params: InvalidateAPIKeyParams) =>
+      apiKeys.invalidateAsInternalUser(params),
     isAuthenticated: (request: KibanaRequest) => http.auth.isAuthenticated(request),
   };
 }

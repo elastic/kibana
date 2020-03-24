@@ -12,29 +12,17 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { parseDuration } from '../../../../../alerting/server';
 import { MAX_INTERVALS } from '../index';
-import {
-  CoreQueryParamsSchemaProperties,
-  validateCoreQueryBody,
-  validateDuration,
-} from './core_query_types';
+import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 import {
   getTooManyIntervalsErrorMessage,
   getDateStartAfterDateEndErrorMessage,
 } from './date_range_info';
 
-// The result is an object with a key for every field value aggregated
-// via the `aggField` property.  If `aggField` is not specified, the
-// object will have a single key of `all documents`.  The value associated
-// with each key is an array of 2-tuples of `[ ISO-date, calculated-value ]`
-
-export interface TimeSeriesResult {
-  results: TimeSeriesResultRow[];
-}
-export interface TimeSeriesResultRow {
-  group: string;
-  metrics: MetricResult[];
-}
-export type MetricResult = [string, number]; // [iso date, value]
+export {
+  TimeSeriesResult,
+  TimeSeriesResultRow,
+  MetricResult,
+} from '../../../../common/alert_types/index_threshold';
 
 // The parameters here are very similar to the alert parameters.
 // Missing are `comparator` and `threshold`, which aren't needed to generate
@@ -100,6 +88,19 @@ function validateDate(dateString: string): string | undefined {
       defaultMessage: 'invalid date {date}',
       values: {
         date: dateString,
+      },
+    });
+  }
+}
+
+export function validateDuration(duration: string): string | undefined {
+  try {
+    parseDuration(duration);
+  } catch (err) {
+    return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidDurationErrorMessage', {
+      defaultMessage: 'invalid duration: "{duration}"',
+      values: {
+        duration,
       },
     });
   }

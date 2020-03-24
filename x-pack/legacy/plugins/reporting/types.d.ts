@@ -7,14 +7,11 @@
 import { EventEmitter } from 'events';
 import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import { CallCluster } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { CancellationToken } from './common/cancellation_token';
-import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
-import { BrowserType } from './server/browsers/types';
-import { LevelLogger } from './server/lib/level_logger';
 import { ReportingCore } from './server/core';
-import { LegacySetup, ReportingStartDeps, ReportingSetup, ReportingStart } from './server/types';
+import { LevelLogger } from './server/lib/level_logger';
+import { LegacySetup } from './server/types';
 
 export type Job = EventEmitter & {
   id: string;
@@ -23,26 +20,10 @@ export type Job = EventEmitter & {
   };
 };
 
-export interface ReportingConfigOptions {
-  browser: BrowserConfig;
-  poll: {
-    jobCompletionNotifier: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-    jobsRefresh: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-  };
-  queue: QueueConfig;
-  capture: CaptureConfig;
-}
-
 export interface NetworkPolicyRule {
   allow: boolean;
-  protocol: string;
-  host: string;
+  protocol?: string;
+  host?: string;
 }
 
 export interface NetworkPolicy {
@@ -109,46 +90,6 @@ export type ReportingResponseToolkit = Legacy.ResponseToolkit;
 
 export type ESCallCluster = CallCluster;
 
-/*
- * Reporting Config
- */
-
-export interface CaptureConfig {
-  browser: {
-    type: BrowserType;
-    autoDownload: boolean;
-    chromium: BrowserConfig;
-  };
-  maxAttempts: number;
-  networkPolicy: NetworkPolicy;
-  loadDelay: number;
-}
-
-export interface BrowserConfig {
-  inspect: boolean;
-  userDataDir: string;
-  viewport: { width: number; height: number };
-  disableSandbox: boolean;
-  proxy: {
-    enabled: boolean;
-    server: string;
-    bypass?: string[];
-  };
-}
-
-export interface QueueConfig {
-  indexInterval: string;
-  pollEnabled: boolean;
-  pollInterval: number;
-  pollIntervalErrorMultiplier: number;
-  timeout: number;
-}
-
-export interface ScrollConfig {
-  duration: string;
-  size: number;
-}
-
 export interface ElementPosition {
   boundingClientRect: {
     // modern browsers support x/y, but older ones don't
@@ -208,6 +149,7 @@ export interface JobDocPayload<JobParamsType> {
 
 export interface JobSource<JobParamsType> {
   _id: string;
+  _index: string;
   _source: {
     jobtype: string;
     output: JobDocOutput;
@@ -219,8 +161,9 @@ export interface JobSource<JobParamsType> {
 export interface JobDocOutput {
   content_type: string;
   content: string | null;
-  max_size_reached: boolean;
   size: number;
+  max_size_reached?: boolean;
+  warnings?: string[];
 }
 
 export interface ESQueueWorker {
@@ -283,14 +226,10 @@ export interface ESQueueInstance {
 
 export type CreateJobFactory<CreateJobFnType> = (
   reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
   logger: LevelLogger
-) => CreateJobFnType;
+) => Promise<CreateJobFnType>;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
   reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
   logger: LevelLogger
 ) => Promise<ExecuteJobFnType>;
 

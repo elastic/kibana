@@ -24,11 +24,13 @@ import introspectionQueryResultData from './graphql/introspection.json';
 import { InfraKibanaObservableApiAdapter } from './lib/adapters/observable_api/kibana_observable_api';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
-import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/plugins/home/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
 import { LogsRouter, MetricsRouter } from './routers';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
+import { getAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -38,10 +40,10 @@ export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   dataEnhanced: DataEnhancedSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ClientPluginsStart {
-  home: HomePublicPluginStart;
   data: DataPublicPluginStart;
   dataEnhanced: DataEnhancedStart;
 }
@@ -58,6 +60,8 @@ export class Plugin
 
   setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
+
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
 
     core.application.register({
       id: 'logs',
@@ -77,7 +81,8 @@ export class Plugin
           coreStart,
           plugins,
           params,
-          LogsRouter
+          LogsRouter,
+          pluginsSetup.triggers_actions_ui
         );
       },
     });
@@ -100,7 +105,8 @@ export class Plugin
           coreStart,
           plugins,
           params,
-          MetricsRouter
+          MetricsRouter,
+          pluginsSetup.triggers_actions_ui
         );
       },
     });

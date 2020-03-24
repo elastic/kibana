@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 
 /**
  * Routes for notification settings
  */
-export function notificationRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
+export function notificationRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup NotificationSettings
    *
@@ -24,7 +23,7 @@ export function notificationRoutes({ router, getLicenseCheckResults }: RouteInit
       path: '/api/ml/notification_settings',
       validate: false,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const params = {
           includeDefaults: true,

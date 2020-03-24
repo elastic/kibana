@@ -8,7 +8,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { useWithSource } from '../../containers/source';
+import { WithSource } from '../../containers/source';
 import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
@@ -28,13 +28,11 @@ import { Timeline } from './timeline';
 
 export interface OwnProps {
   id: string;
-  flyoutHeaderHeight: number;
-  flyoutHeight: number;
+  onClose: () => void;
+  usersViewing: string[];
 }
 
 type Props = OwnProps & PropsFromRedux;
-
-const EMPTY_INDEX_TO_ADD: string[] = [];
 
 const StatefulTimelineComponent = React.memo<Props>(
   ({
@@ -44,14 +42,13 @@ const StatefulTimelineComponent = React.memo<Props>(
     eventType,
     end,
     filters,
-    flyoutHeaderHeight,
-    flyoutHeight,
     id,
     isLive,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
     kqlQueryExpression,
+    onClose,
     onDataProviderEdited,
     removeColumn,
     removeProvider,
@@ -65,6 +62,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     updateHighlightedDropAndProviderId,
     updateItemsPerPage,
     upsertColumn,
+    usersViewing,
   }) => {
     const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
 
@@ -77,7 +75,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       ) {
         return [signalIndexName];
       }
-      return EMPTY_INDEX_TO_ADD;
+      return [];
     }, [eventType, signalIndexExists, signalIndexName]);
 
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
@@ -165,48 +163,48 @@ const StatefulTimelineComponent = React.memo<Props>(
       }
     }, []);
 
-    const { indexPattern, browserFields } = useWithSource(indexToAdd);
-
     return (
-      <Timeline
-        browserFields={browserFields}
-        columns={columns}
-        dataProviders={dataProviders!}
-        end={end}
-        eventType={eventType}
-        filters={filters}
-        flyoutHeaderHeight={flyoutHeaderHeight}
-        flyoutHeight={flyoutHeight}
-        id={id}
-        indexPattern={indexPattern}
-        indexToAdd={indexToAdd}
-        isLive={isLive}
-        itemsPerPage={itemsPerPage!}
-        itemsPerPageOptions={itemsPerPageOptions!}
-        kqlMode={kqlMode}
-        kqlQueryExpression={kqlQueryExpression}
-        loadingIndexName={loading}
-        onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-        onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-        onChangeItemsPerPage={onChangeItemsPerPage}
-        onDataProviderEdited={onDataProviderEditedLocal}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-        show={show!}
-        showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-        sort={sort!}
-        start={start}
-        toggleColumn={toggleColumn}
-      />
+      <WithSource sourceId="default" indexToAdd={indexToAdd}>
+        {({ indexPattern, browserFields }) => (
+          <Timeline
+            browserFields={browserFields}
+            columns={columns}
+            dataProviders={dataProviders!}
+            end={end}
+            eventType={eventType}
+            filters={filters}
+            id={id}
+            indexPattern={indexPattern}
+            indexToAdd={indexToAdd}
+            isLive={isLive}
+            itemsPerPage={itemsPerPage!}
+            itemsPerPageOptions={itemsPerPageOptions!}
+            kqlMode={kqlMode}
+            kqlQueryExpression={kqlQueryExpression}
+            loadingIndexName={loading}
+            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onClose={onClose}
+            onDataProviderEdited={onDataProviderEditedLocal}
+            onDataProviderRemoved={onDataProviderRemoved}
+            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+            show={show!}
+            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+            sort={sort!}
+            start={start}
+            toggleColumn={toggleColumn}
+            usersViewing={usersViewing}
+          />
+        )}
+      </WithSource>
     );
   },
   (prevProps, nextProps) => {
     return (
       prevProps.eventType === nextProps.eventType &&
       prevProps.end === nextProps.end &&
-      prevProps.flyoutHeaderHeight === nextProps.flyoutHeaderHeight &&
-      prevProps.flyoutHeight === nextProps.flyoutHeight &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
@@ -219,7 +217,8 @@ const StatefulTimelineComponent = React.memo<Props>(
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.filters, nextProps.filters) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
-      deepEqual(prevProps.sort, nextProps.sort)
+      deepEqual(prevProps.sort, nextProps.sort) &&
+      deepEqual(prevProps.usersViewing, nextProps.usersViewing)
     );
   }
 );

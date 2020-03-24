@@ -63,7 +63,7 @@ you have hostname verification enabled on {es}.
 --
 {es} needs the appropriate CA certificate chain to properly establish trust when receiving connections from {kib}.
 
-If you followed the instructions above to generate a client certificate, then you will have a PKCS#12 file for {kib}. You can extract the CA
+If you followed the instructions to generate a client certificate, then you will have a PKCS#12 file for {kib}. You can extract the CA
 certificate chain from this file. For example:
 
 [source,sh]
@@ -165,6 +165,6 @@ attempt to use them to authenticate to {es} via the native realm.
 
 . Restart {kib}.
 
-NOTE: The steps above enable {kib} to authenticate to {es} using a certificate. However, end users will only be able to authenticate to
+These steps enable {kib} to authenticate to {es} using a certificate. However, end users will only be able to authenticate to
 {kib} with a username and password. To allow end users to authenticate to {kib} using a client certificate, see <<pki-authentication,{kib}
 PKI authentication>>.
