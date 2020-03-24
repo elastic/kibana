@@ -42,6 +42,7 @@ export function createFilterAction(
   return createAction<typeof ACTION_GLOBAL_APPLY_FILTER>({
     type: ACTION_GLOBAL_APPLY_FILTER,
     id: ACTION_GLOBAL_APPLY_FILTER,
+    getIconType: () => 'filter',
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',

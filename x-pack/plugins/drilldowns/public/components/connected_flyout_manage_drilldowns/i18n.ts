@@ -15,7 +15,7 @@ export const toastDrilldownCreated = {
   ),
   text: (drilldownName: string) =>
     i18n.translate('xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownCreatedText', {
-      defaultMessage: 'You created "{drilldownName}"',
+      defaultMessage: 'You created "{drilldownName}", save dashboard to test.',
       values: {
         drilldownName,
       },
@@ -31,7 +31,7 @@ export const toastDrilldownEdited = {
   ),
   text: (drilldownName: string) =>
     i18n.translate('xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownEditedText', {
-      defaultMessage: 'You edited "{drilldownName}"',
+      defaultMessage: 'You edited "{drilldownName}", save dashboard to test.',
       values: {
         drilldownName,
       },

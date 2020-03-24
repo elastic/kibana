@@ -8,10 +8,7 @@ import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
 import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
-import {
-  DASHBOARD_APP_URL_GENERATOR,
-  DashboardContainerInput,
-} from '../../../../../../../src/plugins/dashboard/public';
+import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
 import { VisualizeEmbeddableContract } from '../../../../../../../src/legacy/core_plugins/visualizations/public';
 import { PlaceContext, ActionContext, Config, CollectConfigProps } from './types';
 
