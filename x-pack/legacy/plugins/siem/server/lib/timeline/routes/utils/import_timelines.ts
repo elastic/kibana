@@ -43,7 +43,6 @@ interface ImportRegular {
 export type ImportTimelineResponse = ImportRegular | BulkError;
 export type PromiseFromStreams = ImportedTimeline;
 export interface ImportTimelinesRequestParams {
-  query: { overwrite: boolean };
   body: { file: HapiReadableStream };
 }
 

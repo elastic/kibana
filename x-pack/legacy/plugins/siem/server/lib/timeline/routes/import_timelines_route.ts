@@ -30,10 +30,7 @@ import {
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
-import {
-  importTimelinesQuerySchema,
-  importTimelinesPayloadSchema,
-} from './schemas/import_timelines_schema';
+import { importTimelinesPayloadSchema } from './schemas/import_timelines_schema';
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
 import { LegacyServices } from '../../../types';
 
@@ -55,9 +52,6 @@ export const importTimelinesRoute = (
     {
       path: `${TIMELINE_IMPORT_URL}`,
       validate: {
-        query: buildRouteValidation<ImportTimelinesRequestParams['query']>(
-          importTimelinesQuerySchema
-        ),
         body: buildRouteValidation<ImportTimelinesRequestParams['body']>(
           importTimelinesPayloadSchema
         ),

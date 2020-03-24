@@ -27,9 +27,6 @@ import {
   version,
   pinnedEventIds,
 } from './schemas';
-export const importTimelinesQuerySchema = Joi.object({
-  overwrite: Joi.boolean().default(false),
-});
 
 export const importTimelinesPayloadSchema = Joi.object({
   file: Joi.object().required(),
