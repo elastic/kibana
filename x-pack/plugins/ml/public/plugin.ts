@@ -28,7 +28,7 @@ export interface MlSetupDependencies {
   usageCollection: UsageCollectionSetup;
 }
 
-export class MlPlugin implements Plugin<Setup, Start> {
+export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   setup(core: CoreSetup<MlStartDependencies>, pluginsSetup: MlSetupDependencies) {
     core.application.register({
       id: PLUGIN_ID,
@@ -77,5 +77,5 @@ export class MlPlugin implements Plugin<Setup, Start> {
   public stop() {}
 }
 
-export type Setup = ReturnType<MlPlugin['setup']>;
-export type Start = ReturnType<MlPlugin['start']>;
+export type MlPluginSetup = ReturnType<MlPlugin['setup']>;
+export type MlPluginStart = ReturnType<MlPlugin['start']>;

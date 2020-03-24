@@ -39,8 +39,8 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
       this._choroplethLayer = null;
     }
 
-    async render(esResponse, visParams, status) {
-      await super.render(esResponse, visParams, status);
+    async render(esResponse, visParams) {
+      await super.render(esResponse, visParams);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();
       }
