@@ -19,16 +19,28 @@ export enum Comparator {
 export enum AlertStates {
   OK,
   ALERT,
+  NO_DATA,
+  ERROR,
 }
 
 export type TimeUnit = 's' | 'm' | 'h' | 'd';
 
-export interface MetricExpressionParams {
-  aggType: MetricsExplorerAggregation;
-  metric: string;
+interface BaseMetricExpressionParams {
   timeSize: number;
   timeUnit: TimeUnit;
   indexPattern: string;
   threshold: number[];
   comparator: Comparator;
 }
+
+interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
+  aggType: Exclude<MetricsExplorerAggregation, 'count'>;
+  metric: string;
+}
+
+interface CountMetricExpressionParams extends BaseMetricExpressionParams {
+  aggType: 'count';
+  metric: never;
+}
+
+export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetricExpressionParams;

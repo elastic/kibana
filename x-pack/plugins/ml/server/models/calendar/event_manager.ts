@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 
-import { GLOBAL_CALENDAR } from '../../../../../legacy/plugins/ml/common/constants/calendars';
+import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 
 export interface CalendarEvent {
   calendar_id?: string;

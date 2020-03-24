@@ -5,16 +5,13 @@
  */
 
 import { useReducer, useCallback } from 'react';
-
+import { cloneDeep } from 'lodash/fp';
 import { CaseRequest } from '../../../../../../plugins/case/common/api';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 
 import { patchCase } from './api';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
 import { Case } from './types';
-import { getTypedPayload } from './utils';
 
 type UpdateKey = keyof CaseRequest;
 
@@ -28,32 +25,33 @@ interface NewCaseState {
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CaseRequest[UpdateKey];
+  fetchCaseUserActions?: (caseId: string) => void;
 }
 
-interface Action {
-  type: string;
-  payload?: Case | UpdateKey;
-}
+type Action =
+  | { type: 'FETCH_INIT'; payload: UpdateKey }
+  | { type: 'FETCH_SUCCESS'; payload: Case }
+  | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
         ...state,
         isLoading: true,
         isError: false,
-        updateKey: getTypedPayload<UpdateKey>(action.payload),
+        updateKey: action.payload,
       };
 
-    case FETCH_SUCCESS:
+    case 'FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
         isError: false,
-        caseData: getTypedPayload<Case>(action.payload),
+        caseData: cloneDeep(action.payload),
         updateKey: null,
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
         isLoading: false,
@@ -61,12 +59,13 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         updateKey: null,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 
 interface UseUpdateCase extends NewCaseState {
   updateCaseProperty: (updates: UpdateByKey) => void;
+  updateCase: (newCase: Case) => void;
 }
 export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
@@ -77,18 +76,25 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
   });
   const [, dispatchToaster] = useStateToaster();
 
+  const updateCase = useCallback((newCase: Case) => {
+    dispatch({ type: 'FETCH_SUCCESS', payload: newCase });
+  }, []);
+
   const dispatchUpdateCaseProperty = useCallback(
-    async ({ updateKey, updateValue }: UpdateByKey) => {
+    async ({ fetchCaseUserActions, updateKey, updateValue }: UpdateByKey) => {
       let cancel = false;
       try {
-        dispatch({ type: FETCH_INIT, payload: updateKey });
+        dispatch({ type: 'FETCH_INIT', payload: updateKey });
         const response = await patchCase(
           caseId,
           { [updateKey]: updateValue },
           state.caseData.version
         );
         if (!cancel) {
-          dispatch({ type: FETCH_SUCCESS, payload: response });
+          if (fetchCaseUserActions != null) {
+            fetchCaseUserActions(caseId);
+          }
+          dispatch({ type: 'FETCH_SUCCESS', payload: response[0] });
         }
       } catch (error) {
         if (!cancel) {
@@ -97,7 +103,7 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: FETCH_FAILURE });
+          dispatch({ type: 'FETCH_FAILURE' });
         }
       }
       return () => {
@@ -107,5 +113,5 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
     [state]
   );
 
-  return { ...state, updateCaseProperty: dispatchUpdateCaseProperty };
+  return { ...state, updateCase, updateCaseProperty: dispatchUpdateCaseProperty };
 };

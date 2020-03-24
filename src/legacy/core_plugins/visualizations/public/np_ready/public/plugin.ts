@@ -39,24 +39,27 @@ import {
   setSavedVisualizationsLoader,
   setTimeFilter,
   setAggs,
+  setChrome,
+  setOverlays,
 } from './services';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../../plugins/expressions/public';
-import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
+import { EmbeddableSetup } from '../../../../../../plugins/embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-  IIndexPattern,
 } from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
-import { VisImpl } from './vis_impl';
+import { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
-import { DataStart as LegacyDataStart } from '../../../../data/public';
-import { VisState } from './types';
+import {
+  convertFromSerializedVis,
+  convertToSerializedVis,
+} from './saved_visualizations/_saved_vis';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -68,13 +71,15 @@ export type VisualizationsSetup = TypesSetup;
 
 export interface VisualizationsStart extends TypesStart {
   savedVisualizationsLoader: SavedVisualizationsLoader;
-  createVis: (indexPattern: IIndexPattern, visState?: VisState) => VisImpl;
+  createVis: (visType: string, visState?: SerializedVis) => Vis;
+  convertToSerializedVis: typeof convertToSerializedVis;
+  convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
 }
 
 export interface VisualizationsSetupDeps {
   expressions: ExpressionsSetup;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   usageCollection: UsageCollectionSetup;
   data: DataPublicPluginSetup;
 }
@@ -83,9 +88,6 @@ export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
-  __LEGACY: {
-    aggs: LegacyDataStart['search']['aggs'];
-  };
 }
 
 /**
@@ -109,7 +111,7 @@ export class VisualizationsPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<VisualizationsStartDeps>,
     { expressions, embeddable, usageCollection, data }: VisualizationsSetupDeps
   ): VisualizationsSetup {
     setUISettings(core.uiSettings);
@@ -118,7 +120,9 @@ export class VisualizationsPlugin
     expressions.registerFunction(visualizationFunction);
     expressions.registerRenderer(visualizationRenderer);
 
-    const embeddableFactory = new VisualizeEmbeddableFactory();
+    const embeddableFactory = new VisualizeEmbeddableFactory(
+      async () => (await core.getStartServices())[1].uiActions
+    );
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {
@@ -128,7 +132,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, __LEGACY: { aggs } }: VisualizationsStartDeps
+    { data, expressions, uiActions }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
@@ -141,7 +145,9 @@ export class VisualizationsPlugin
     setExpressions(expressions);
     setUiActions(uiActions);
     setTimeFilter(data.query.timefilter.timefilter);
-    setAggs(aggs);
+    setAggs(data.search.aggs);
+    setOverlays(core.overlays);
+    setChrome(core.chrome);
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
@@ -159,8 +165,9 @@ export class VisualizationsPlugin
        * @param {IIndexPattern} indexPattern - index pattern to use
        * @param {VisState} visState - visualization configuration
        */
-      createVis: (indexPattern: IIndexPattern, visState?: VisState) =>
-        new VisImpl(indexPattern, visState),
+      createVis: (visType: string, visState?: SerializedVis) => new Vis(visType, visState),
+      convertToSerializedVis,
+      convertFromSerializedVis,
       savedVisualizationsLoader,
     };
   }

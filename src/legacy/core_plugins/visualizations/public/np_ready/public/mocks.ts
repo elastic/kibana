@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../../../core/public';
+import { CoreSetup, PluginInitializerContext } from '../../../../../../core/public';
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock } from '../../../../../../core/public/mocks';
@@ -26,6 +26,7 @@ import { expressionsPluginMock } from '../../../../../../plugins/expressions/pub
 import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
 import { usageCollectionPluginMock } from '../../../../../../plugins/usage_collection/public/mocks';
 import { uiActionsPluginMock } from '../../../../../../plugins/ui_actions/public/mocks';
+import { VisualizationsStartDeps } from './plugin';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -41,15 +42,17 @@ const createStartContract = (): VisualizationsStart => ({
   savedVisualizationsLoader: {} as any,
   showNewVisModal: jest.fn(),
   createVis: jest.fn(),
+  convertFromSerializedVis: jest.fn(),
+  convertToSerializedVis: jest.fn(),
 });
 
 const createInstance = async () => {
   const plugin = new VisualizationsPlugin({} as PluginInitializerContext);
 
-  const setup = plugin.setup(coreMock.createSetup(), {
+  const setup = plugin.setup(coreMock.createSetup() as CoreSetup<VisualizationsStartDeps>, {
     data: dataPluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
-    embeddable: embeddablePluginMock.createStartContract(),
+    embeddable: embeddablePluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
   });
   const doStart = () =>
@@ -57,11 +60,6 @@ const createInstance = async () => {
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
-      __LEGACY: {
-        aggs: {
-          createAggConfigs: jest.fn(),
-        } as any,
-      },
     });
 
   return {

@@ -17,6 +17,7 @@ import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { createRulesSchema } from '../schemas/create_rules_schema';
 import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import { createNotifications } from '../../notifications/create_notifications';
 
 export const createRulesRoute = (router: IRouter): void => {
   router.post(
@@ -31,6 +32,8 @@ export const createRulesRoute = (router: IRouter): void => {
     },
     async (context, request, response) => {
       const {
+        actions,
+        anomaly_threshold: anomalyThreshold,
         description,
         enabled,
         false_positives: falsePositives,
@@ -42,6 +45,7 @@ export const createRulesRoute = (router: IRouter): void => {
         timeline_id: timelineId,
         timeline_title: timelineTitle,
         meta,
+        machine_learning_job_id: machineLearningJobId,
         filters,
         rule_id: ruleId,
         index,
@@ -52,9 +56,12 @@ export const createRulesRoute = (router: IRouter): void => {
         severity,
         tags,
         threat,
+        throttle,
         to,
         type,
         references,
+        note,
+        lists,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
@@ -92,6 +99,8 @@ export const createRulesRoute = (router: IRouter): void => {
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
+          actions,
+          anomalyThreshold,
           description,
           enabled,
           falsePositives,
@@ -104,6 +113,7 @@ export const createRulesRoute = (router: IRouter): void => {
           timelineId,
           timelineTitle,
           meta,
+          machineLearningJobId,
           filters,
           ruleId: ruleId ?? uuid.v4(),
           index,
@@ -113,12 +123,27 @@ export const createRulesRoute = (router: IRouter): void => {
           name,
           severity,
           tags,
+          throttle,
           to,
           type,
           threat,
           references,
+          note,
           version: 1,
+          lists,
         });
+
+        if (throttle && actions.length) {
+          await createNotifications({
+            alertsClient,
+            enabled,
+            name,
+            interval,
+            actions,
+            ruleAlertId: createdRule.id,
+          });
+        }
+
         const ruleStatuses = await savedObjectsClient.find<
           IRuleSavedAttributesSavedObjectAttributes
         >({

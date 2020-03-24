@@ -11,12 +11,12 @@ import {
   Plugin,
 } from '../../../../src/core/public';
 import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
-import { UiActionsStart, UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-  IEmbeddableSetup,
-  IEmbeddableStart,
+  EmbeddableSetup,
+  EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
 import {
   CustomTimeRangeAction,
@@ -32,17 +32,19 @@ import {
 import { CommonlyUsedRange } from './types';
 
 interface SetupDependencies {
-  embeddable: IEmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
+  embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
   uiActions: UiActionsSetup;
 }
 
 interface StartDependencies {
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
 }
 
-export type Setup = void;
-export type Start = void;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SetupContract extends UiActionsSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartContract extends UiActionsStart {}
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -52,12 +54,16 @@ declare module '../../../../src/plugins/ui_actions/public' {
 }
 
 export class AdvancedUiActionsPublicPlugin
-  implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: SetupDependencies): Setup {}
+  public setup(core: CoreSetup, { uiActions }: SetupDependencies): SetupContract {
+    return {
+      ...uiActions,
+    };
+  }
 
-  public start(core: CoreStart, { uiActions }: StartDependencies): Start {
+  public start(core: CoreStart, { uiActions }: StartDependencies): StartContract {
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
     const { openModal } = createReactOverlays(core);
@@ -66,16 +72,18 @@ export class AdvancedUiActionsPublicPlugin
       dateFormat,
       commonlyUsedRanges,
     });
-    uiActions.registerAction(timeRangeAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, timeRangeAction);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, timeRangeAction);
 
     const timeRangeBadge = new CustomTimeRangeBadge({
       openModal,
       dateFormat,
       commonlyUsedRanges,
     });
-    uiActions.registerAction(timeRangeBadge);
-    uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
+    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
+
+    return {
+      ...uiActions,
+    };
   }
 
   public stop() {}

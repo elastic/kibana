@@ -125,8 +125,77 @@ server    log   [17:32:10.060] [warning][actions][actions][plugins] \
 
 ## http endpoints
 
-An HTTP endpoint is provided to return the values the alertType would calculate,
-over a series of time.  This is intended to be used in the alerting UI to 
+The following endpoints are provided for this alert type:
+
+- `POST /api/alerting_builtins/index_threshold/_indices`
+- `POST /api/alerting_builtins/index_threshold/_fields`
+- `POST /api/alerting_builtins/index_threshold/_time_series_query`
+
+### `POST .../_indices`
+
+This HTTP endpoint is provided for the alerting ui to list the available
+"index names" for the user to select to use with the alert.  This API also
+returns aliases which match the supplied pattern.
+
+The request body is expected to be a JSON object in the following form, where the
+`pattern` value may include comma-separated names and wildcards.
+
+```js
+{
+  pattern: "index-name-pattern"
+}
+```
+
+The response body is a JSON object in the following form, where each element
+of the `indices` array is the name of an index or alias.  The number of elements
+returned is limited, as this API is intended to be used to help narrow down
+index names to use with the alert, and not support pagination, etc.
+
+```js
+{
+  indices: ["index-name-1", "alias-name-1", ...]
+}
+```
+
+### `POST .../_fields`
+
+This HTTP endpoint is provided for the alerting ui to list the available
+fields for the user to select to use with the alert.
+
+The request body is expected to be a JSON object in the following form, where the
+`indexPatterns` array elements may include comma-separated names and wildcards.
+
+```js
+{
+  indexPatterns: ["index-pattern-1", "index-pattern-2"]
+}
+```
+
+The response body is a JSON object in the following form, where each element
+fields array is a field object.
+
+```js
+{
+  fields: [fieldObject1, fieldObject2, ...]
+}
+```
+
+A field object is the following shape:
+
+```typescript
+{
+  name: string,           // field name
+  type: string,           // field type - eg 'keyword', 'date', 'long', etc
+  normalizedType: string, // for numeric types, this will be 'number'
+  aggregatable: true,     // value from elasticsearch field capabilities
+  searchable: true,       // value from elasticsearch field capabilities
+}
+```
+
+### `POST .../_time_series_query`
+
+This HTTP endpoint is provided to return the values the alertType would calculate,
+over a series of time.  It is intended to be used in the alerting UI to 
 provide a "preview" of the alert during creation/editing based on recent data,
 and could be used to show a "simulation" of the the alert over an arbitrary
 range of time.

@@ -21,7 +21,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { cloneDeep, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
-import { IAggConfig } from '../../../legacy_imports';
+import { IAggConfig } from 'src/plugins/data/public';
 import { BasicVislibParams, ValueAxis, SeriesParam, Axis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
@@ -299,12 +299,18 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   }, [stateParams.seriesParams]);
 
   useEffect(() => {
-    vis.setVisType(visType);
+    vis.setState({ type: visType } as any);
   }, [vis, visType]);
 
   return isTabSelected ? (
     <>
-      <SeriesPanel setParamByIndex={setParamByIndex} changeValueAxis={changeValueAxis} {...props} />
+      <SeriesPanel
+        changeValueAxis={changeValueAxis}
+        setParamByIndex={setParamByIndex}
+        seriesParams={stateParams.seriesParams}
+        valueAxes={stateParams.valueAxes}
+        vis={vis}
+      />
       <EuiSpacer size="s" />
       <ValueAxesPanel
         addValueAxis={addValueAxis}
@@ -312,14 +318,17 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         removeValueAxis={removeValueAxis}
         onValueAxisPositionChanged={onValueAxisPositionChanged}
         setParamByIndex={setParamByIndex}
-        {...props}
+        setMultipleValidity={props.setMultipleValidity}
+        seriesParams={stateParams.seriesParams}
+        valueAxes={stateParams.valueAxes}
+        vis={vis}
       />
       <EuiSpacer size="s" />
       <CategoryAxisPanel
-        {...props}
         axis={stateParams.categoryAxes[0]}
         onPositionChanged={onCategoryAxisPositionChanged}
         setCategoryAxis={setCategoryAxis}
+        vis={vis}
       />
     </>
   ) : null;

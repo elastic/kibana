@@ -8,9 +8,9 @@ import React, { useContext, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { AppState } from '../../../state';
-import { selectMonitorLocations, selectMonitorStatus } from '../../../state/selectors';
+import { monitorLocationsSelector, selectMonitorStatus } from '../../../state/selectors';
 import { MonitorStatusBarComponent } from '../../functional/monitor_status_details/monitor_status_bar';
-import { getMonitorStatus, getSelectedMonitor } from '../../../state/actions';
+import { getMonitorStatusAction, getSelectedMonitorAction } from '../../../state/actions';
 import { useUrlParams } from '../../../hooks';
 import { Ping } from '../../../../common/graphql/types';
 import { MonitorLocations } from '../../../../common/runtime_types/monitor';
@@ -22,7 +22,8 @@ interface StateProps {
 }
 
 interface DispatchProps {
-  loadMonitorStatus: (dateStart: string, dateEnd: string, monitorId: string) => void;
+  loadMonitorStatus: typeof getMonitorStatusAction;
+  loadSelectedMonitor: typeof getSelectedMonitorAction;
 }
 
 interface OwnProps {
@@ -33,6 +34,7 @@ type Props = OwnProps & StateProps & DispatchProps;
 
 const Container: React.FC<Props> = ({
   loadMonitorStatus,
+  loadSelectedMonitor,
   monitorId,
   monitorStatus,
   monitorLocations,
@@ -43,8 +45,9 @@ const Container: React.FC<Props> = ({
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = getUrlParams();
 
   useEffect(() => {
-    loadMonitorStatus(dateStart, dateEnd, monitorId);
-  }, [monitorId, dateStart, dateEnd, loadMonitorStatus, lastRefresh]);
+    loadMonitorStatus({ dateStart, dateEnd, monitorId });
+    loadSelectedMonitor({ monitorId });
+  }, [monitorId, dateStart, dateEnd, loadMonitorStatus, lastRefresh, loadSelectedMonitor]);
 
   return (
     <MonitorStatusBarComponent
@@ -57,24 +60,12 @@ const Container: React.FC<Props> = ({
 
 const mapStateToProps = (state: AppState, ownProps: OwnProps) => ({
   monitorStatus: selectMonitorStatus(state),
-  monitorLocations: selectMonitorLocations(state, ownProps.monitorId),
+  monitorLocations: monitorLocationsSelector(state, ownProps.monitorId),
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<any>): DispatchProps => ({
-  loadMonitorStatus: (dateStart: string, dateEnd: string, monitorId: string) => {
-    dispatch(
-      getMonitorStatus({
-        monitorId,
-        dateStart,
-        dateEnd,
-      })
-    );
-    dispatch(
-      getSelectedMonitor({
-        monitorId,
-      })
-    );
-  },
+  loadSelectedMonitor: params => dispatch(getSelectedMonitorAction(params)),
+  loadMonitorStatus: params => dispatch(getMonitorStatusAction(params)),
 });
 
 // @ts-ignore TODO: Investigate typescript issues here

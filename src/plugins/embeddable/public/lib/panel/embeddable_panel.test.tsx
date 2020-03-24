@@ -26,7 +26,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { Action, UiActionsStart, ActionType } from 'src/plugins/ui_actions/public';
-import { Trigger, GetEmbeddableFactory, ViewMode } from '../types';
+import { Trigger, ViewMode } from '../types';
 import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
 import { createEditModeAction } from '../test_samples/actions';
@@ -44,10 +44,10 @@ import {
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 
-const actionRegistry = new Map<string, Action<object | undefined | string | number>>();
+const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();
 const embeddableFactories = new Map<string, EmbeddableFactory>();
-const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+const getEmbeddableFactory = (id: string) => embeddableFactories.get(id);
 
 const editModeAction = createEditModeAction();
 const trigger: Trigger = {
@@ -213,13 +213,17 @@ const renderInEditModeAndOpenContextMenu = async (
 };
 
 test('HelloWorldContainer in edit mode hides disabledActions', async () => {
-  const action: Action = {
+  const action = {
     id: 'FOO',
     type: 'FOO' as ActionType,
     getIconType: () => undefined,
     getDisplayName: () => 'foo',
     isCompatible: async () => true,
     execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return undefined;
+    },
   };
   const getActions = () => Promise.resolve([action]);
 
@@ -245,13 +249,17 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
 });
 
 test('HelloWorldContainer hides disabled badges', async () => {
-  const action: Action = {
+  const action = {
     id: 'BAR',
     type: 'BAR' as ActionType,
     getIconType: () => undefined,
     getDisplayName: () => 'bar',
     isCompatible: async () => true,
     execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return undefined;
+    },
   };
   const getActions = () => Promise.resolve([action]);
 

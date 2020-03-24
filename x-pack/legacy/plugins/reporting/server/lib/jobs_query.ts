@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import Boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
-import { JobSource, ServerFacade } from '../../types';
+import { JobSource } from '../../types';
+import { ReportingConfig } from '../types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;
@@ -37,8 +40,11 @@ interface CountAggResult {
   count: number;
 }
 
-export function jobsQueryFactory(server: ServerFacade, elasticsearch: ElasticsearchServiceSetup) {
-  const index = server.config().get('xpack.reporting.index');
+export function jobsQueryFactory(
+  config: ReportingConfig,
+  elasticsearch: ElasticsearchServiceSetup
+) {
+  const index = config.get('index');
   const { callAsInternalUser } = elasticsearch.adminClient;
 
   function getUsername(user: any) {
@@ -151,6 +157,22 @@ export function jobsQueryFactory(server: ServerFacade, elasticsearch: Elasticsea
         if (hits.length !== 1) return;
         return hits[0];
       });
+    },
+
+    async delete(deleteIndex: string, id: string) {
+      try {
+        const query = { id, index: deleteIndex };
+        return callAsInternalUser('delete', query);
+      } catch (error) {
+        const wrappedError = new Error(
+          i18n.translate('xpack.reporting.jobsQuery.deleteError', {
+            defaultMessage: 'Could not delete the report: {error}',
+            values: { error: error.message },
+          })
+        );
+
+        throw Boom.boomify(wrappedError, { statusCode: error.status });
+      }
     },
   };
 }

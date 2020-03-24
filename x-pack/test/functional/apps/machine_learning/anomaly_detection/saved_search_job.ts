@@ -271,8 +271,7 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  // test failures, see #59354
-  describe.skip('saved search', function() {
+  describe('saved search', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');

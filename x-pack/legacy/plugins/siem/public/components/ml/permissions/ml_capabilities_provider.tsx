@@ -9,8 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { MlCapabilities } from '../types';
 import { getMlCapabilities } from '../api/get_ml_capabilities';
 import { emptyMlCapabilities } from '../empty_ml_capabilities';
-import { errorToToaster } from '../api/error_to_toaster';
-import { useStateToaster } from '../../toasters';
+import { errorToToaster, useStateToaster } from '../../toasters';
 
 import * as i18n from './translations';
 

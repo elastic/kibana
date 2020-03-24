@@ -28,6 +28,7 @@ import {
 } from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
 import { requestMock } from './request';
+import { RuleNotificationAlertType } from '../../notifications/types';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
@@ -50,6 +51,7 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
       technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
+  throttle: null,
   enabled: true,
   filters: [],
   immutable: false,
@@ -59,6 +61,7 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
   version: 1,
   false_positives: [],
   max_signals: 100,
+  note: '',
   timeline_id: 'timeline-id',
   timeline_title: 'timeline-title',
 });
@@ -202,11 +205,11 @@ export const getPrepackagedRulesStatusRequest = () =>
     path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
   });
 
-export interface FindHit {
+export interface FindHit<T = RuleAlertType> {
   page: number;
   perPage: number;
   total: number;
-  data: RuleAlertType[];
+  data: T[];
 }
 
 export const getEmptyFindResult = (): FindHit => ({
@@ -292,6 +295,42 @@ export const getCreateRequest = () =>
     body: typicalPayload(),
   });
 
+export const createMlRuleRequest = () => {
+  const { query, language, index, ...mlParams } = typicalPayload();
+
+  return requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: {
+      ...mlParams,
+      type: 'machine_learning',
+      anomaly_threshold: 50,
+      machine_learning_job_id: 'some-uuid',
+    },
+  });
+};
+
+export const createRuleWithActionsRequest = () => {
+  const payload = typicalPayload();
+
+  return requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: {
+      ...payload,
+      throttle: '5m',
+      actions: [
+        {
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+          params: { message: 'Rule generated {{state.signalsCount}} signals' },
+          action_type_id: '.slack',
+        },
+      ],
+    },
+  });
+};
+
 export const getSetSignalStatusByIdsRequest = () =>
   requestMock.create({
     method: 'post',
@@ -348,6 +387,7 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
+    anomalyThreshold: undefined,
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -356,6 +396,7 @@ export const getResult = (): RuleAlertType => ({
     immutable: false,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
+    machineLearningJobId: undefined,
     outputIndex: '.siem-signals',
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',
@@ -392,7 +433,34 @@ export const getResult = (): RuleAlertType => ({
       },
     ],
     references: ['http://www.example.com', 'https://ww.example.com'],
+    note: '# Investigative notes',
     version: 1,
+    lists: [
+      {
+        field: 'source.ip',
+        boolean_operator: 'and',
+        values: [
+          {
+            name: '127.0.0.1',
+            type: 'value',
+          },
+        ],
+      },
+      {
+        field: 'host.name',
+        boolean_operator: 'and not',
+        values: [
+          {
+            name: 'rock01',
+            type: 'value',
+          },
+          {
+            name: 'mothra',
+            type: 'value',
+          },
+        ],
+      },
+    ],
   },
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
   updatedAt: new Date('2019-12-13T16:40:33.400Z'),
@@ -408,6 +476,24 @@ export const getResult = (): RuleAlertType => ({
   mutedInstanceIds: [],
   scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
 });
+
+export const getMlResult = (): RuleAlertType => {
+  const result = getResult();
+
+  return {
+    ...result,
+    params: {
+      ...result.params,
+      query: undefined,
+      language: undefined,
+      filters: undefined,
+      index: undefined,
+      type: 'machine_learning',
+      anomalyThreshold: 44,
+      machineLearningJobId: 'some_job_id',
+    },
+  };
+};
 
 export const updateActionResult = (): ActionResult => ({
   id: 'result-1',
@@ -551,4 +637,46 @@ export const getEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
 });
 export const getNonEmptyIndex = (): { _shards: Partial<ShardsResponse> } => ({
   _shards: { total: 1 },
+});
+
+export const getNotificationResult = (): RuleNotificationAlertType => ({
+  id: '200dbf2f-b269-4bf9-aa85-11ba32ba73ba',
+  name: 'Notification for Rule Test',
+  tags: ['__internal_rule_alert_id:85b64e8a-2e40-4096-86af-5ac172c10825'],
+  alertTypeId: 'siem.notifications',
+  consumer: 'siem',
+  params: {
+    ruleAlertId: '85b64e8a-2e40-4096-86af-5ac172c10825',
+  },
+  schedule: {
+    interval: '5m',
+  },
+  enabled: true,
+  actions: [
+    {
+      actionTypeId: '.slack',
+      params: {
+        message: 'Rule generated {{state.signalsCount}} signals\n\n{{rule.name}}\n{{resultsLink}}',
+      },
+      group: 'default',
+      id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+    },
+  ],
+  throttle: null,
+  apiKey: null,
+  apiKeyOwner: 'elastic',
+  createdBy: 'elastic',
+  updatedBy: 'elastic',
+  createdAt: new Date('2020-03-21T11:15:13.530Z'),
+  muteAll: false,
+  mutedInstanceIds: [],
+  scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
+  updatedAt: new Date('2020-03-21T12:37:08.730Z'),
+});
+
+export const getFindNotificationsResultWithSingleHit = (): FindHit<RuleNotificationAlertType> => ({
+  page: 1,
+  perPage: 1,
+  total: 1,
+  data: [getNotificationResult()],
 });

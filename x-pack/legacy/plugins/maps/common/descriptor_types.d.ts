@@ -5,7 +5,9 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER } from './constants';
+import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from './constants';
+import { VectorStyleDescriptor } from './style_property_descriptor_types';
+import { DataRequestDescriptor } from './data_request_descriptor_types';
 
 export type AbstractSourceDescriptor = {
   id?: string;
@@ -35,11 +37,11 @@ export type AggDescriptor = {
   type: AGG_TYPE;
 };
 
-export type AbstractESAggDescriptor = AbstractESSourceDescriptor & {
+export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
 };
 
-export type ESGeoGridSourceDescriptor = AbstractESAggDescriptor & {
+export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
   requestType?: RENDER_AS;
   resolution?: GRID_RESOLUTION;
 };
@@ -49,17 +51,17 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   tooltipProperties?: string[];
   sortField?: string;
   sortOrder?: SORT_ORDER;
-  useTopHits?: boolean;
+  scalingType: SCALING_TYPES;
   topHitsSplitField?: string;
   topHitsSize?: number;
 };
 
-export type ESPewPewSourceDescriptor = AbstractESAggDescriptor & {
+export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
   sourceGeoField: string;
   destGeoField: string;
 };
 
-export type ESTermSourceDescriptor = AbstractESAggDescriptor & {
+export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   indexPatternTitle: string;
   term: string; // term field name
 };
@@ -93,14 +95,6 @@ export type JoinDescriptor = {
   right: ESTermSourceDescriptor;
 };
 
-export type DataRequestDescriptor = {
-  dataId: string;
-  dataMetaAtStart: object;
-  dataRequestToken: symbol;
-  data: object;
-  dataMeta: object;
-};
-
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
@@ -117,7 +111,7 @@ export type LayerDescriptor = {
 
 export type VectorLayerDescriptor = LayerDescriptor & {
   joins?: JoinDescriptor[];
-  style?: unknown;
+  style?: VectorStyleDescriptor;
 };
 
 export type RangeFieldMeta = {

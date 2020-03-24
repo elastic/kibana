@@ -3,6 +3,7 @@
 # For more info, see https://help.github.com/articles/about-codeowners/
 
 # App
+/x-pack/legacy/plugins/dashboard_enhanced/ @elastic/kibana-app
 /x-pack/legacy/plugins/lens/ @elastic/kibana-app
 /x-pack/legacy/plugins/graph/ @elastic/kibana-app
 /src/legacy/server/url_shortening/ @elastic/kibana-app
@@ -26,36 +27,35 @@
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
 /src/plugins/dev_tools/ @elastic/kibana-app
-/src/plugins/dashboard_embeddable_container/ @elastic/kibana-app
+/src/plugins/dashboard/ @elastic/kibana-app
 
 # App Architecture
+/examples/url_generators_examples/ @elastic/kibana-app-arch
+/examples/url_generators_explorer/ @elastic/kibana-app-arch
 /packages/kbn-interpreter/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/data/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/elasticsearch/lib/create_proxy.js @elastic/kibana-app-arch
 /src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/interpreter/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/kibana_react/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/kibana/public/management/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/kibana/server/field_formats/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/kibana/server/routes/api/management/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/kibana/server/routes/api/suggestions/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/visualizations/ @elastic/kibana-app-arch
 /src/legacy/server/index_patterns/ @elastic/kibana-app-arch
+/src/plugins/advanced_settings/ @elastic/kibana-app-arch
 /src/plugins/bfetch/ @elastic/kibana-app-arch
 /src/plugins/data/ @elastic/kibana-app-arch
 /src/plugins/embeddable/ @elastic/kibana-app-arch
 /src/plugins/expressions/ @elastic/kibana-app-arch
 /src/plugins/inspector/ @elastic/kibana-app-arch
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
+/src/plugins/kibana_react/public/code_editor @elastic/kibana-canvas
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
 /src/plugins/management/ @elastic/kibana-app-arch
 /src/plugins/navigation/ @elastic/kibana-app-arch
+/src/plugins/share/ @elastic/kibana-app-arch
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
 /src/plugins/visualizations/ @elastic/kibana-app-arch
-/src/plugins/share/ @elastic/kibana-app-arch
-/examples/url_generators_examples/ @elastic/kibana-app-arch
-/examples/url_generators_explorer/ @elastic/kibana-app-arch
 /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
+/x-pack/plugins/data_enhanced/ @elastic/kibana-app-arch
 /x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
 
 # APM
@@ -75,9 +75,9 @@
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/plugins/infra/ @elastic/logs-metrics-ui
-/x-pack/plugins/ingest_manager/ @elastic/ingest
-/x-pack/legacy/plugins/ingest_manager/ @elastic/ingest
-/x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest
+/x-pack/plugins/ingest_manager/ @elastic/ingest-management
+/x-pack/legacy/plugins/ingest_manager/ @elastic/ingest-management
+/x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest-management
 /x-pack/legacy/plugins/monitoring/ @elastic/stack-monitoring-ui
 
 # Machine Learning
@@ -88,7 +88,6 @@
 /x-pack/test/functional/services/ml.ts  @elastic/ml-ui
 # ML team owns the transform plugin, ES team added here for visibility
 # because the plugin lives in Kibana's Elasticsearch management section.
-/x-pack/legacy/plugins/transform/  @elastic/ml-ui @elastic/es-ui
 /x-pack/plugins/transform/  @elastic/ml-ui @elastic/es-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform_ui/ @elastic/ml-ui
@@ -133,7 +132,7 @@
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
 /src/legacy/server/status/ @elastic/kibana-platform
 /src/plugins/status_page/ @elastic/kibana-platform
-/src/dev/run_check_core_api_changes.ts @elastic/kibana-platform
+/src/dev/run_check_published_api_changes.ts @elastic/kibana-platform
 
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
@@ -151,8 +150,11 @@
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse
 /src/legacy/core_plugins/ui_metric/ @elastic/pulse
+/src/plugins/telemetry/ @elastic/pulse
+/src/plugins/telemetry_collection_manager/ @elastic/pulse
+/src/plugins/telemetry_management_section/ @elastic/pulse
 /src/plugins/usage_collection/ @elastic/pulse
-/x-pack/legacy/plugins/telemetry/ @elastic/pulse
+/x-pack/plugins/telemetry_collection_xpack/ @elastic/pulse
 
 # Kibana Alerting Services
 /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
@@ -183,6 +185,7 @@
 /x-pack/plugins/remote_clusters/  @elastic/es-ui
 /x-pack/legacy/plugins/rollup/  @elastic/es-ui
 /x-pack/plugins/searchprofiler/  @elastic/es-ui
+/x-pack/plugins/painless_lab/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/legacy/plugins/upgrade_assistant/  @elastic/es-ui
 /x-pack/plugins/upgrade_assistant/  @elastic/es-ui

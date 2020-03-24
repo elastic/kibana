@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { EuiComboBoxOptionOption, EuiDataGridSorting } from '@elastic/eui';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { IndexPattern, KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
 
-import { getNestedProperty } from '../../../../../../common/utils/object_utils';
-
 import {
-  PreviewRequestBody,
   DropDownLabel,
   DropDownOption,
   EsFieldName,
   GroupByConfigWithUiSupport,
+  PERCENTILES_AGG_DEFAULT_PERCENTS,
+  PivotAggsConfigWithUiSupport,
   PivotAggsConfigWithUiSupportDict,
   pivotAggsFieldSupport,
   PivotGroupByConfigWithUiSupportDict,
   pivotGroupByFieldSupport,
+  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 
@@ -26,51 +26,6 @@ export interface Field {
   name: EsFieldName;
   type: KBN_FIELD_TYPES;
 }
-
-/**
- * Helper to sort an array of objects based on an EuiDataGrid sorting configuration.
- * `sortFn()` is recursive to support sorting on multiple columns.
- *
- * @param sortingColumns - The EUI data grid sorting configuration
- * @returns The sorting function which can be used with an array's sort() function.
- */
-export const multiColumnSortFactory = (sortingColumns: EuiDataGridSorting['columns']) => {
-  const isString = (arg: any): arg is string => {
-    return typeof arg === 'string';
-  };
-
-  const sortFn = (a: any, b: any, sortingColumnIndex = 0): number => {
-    const sort = sortingColumns[sortingColumnIndex];
-    const aValue = getNestedProperty(a, sort.id, null);
-    const bValue = getNestedProperty(b, sort.id, null);
-
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      if (aValue < bValue) {
-        return sort.direction === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sort.direction === 'asc' ? 1 : -1;
-      }
-    }
-
-    if (isString(aValue) && isString(bValue)) {
-      if (aValue.localeCompare(bValue) === -1) {
-        return sort.direction === 'asc' ? -1 : 1;
-      }
-      if (aValue.localeCompare(bValue) === 1) {
-        return sort.direction === 'asc' ? 1 : -1;
-      }
-    }
-
-    if (sortingColumnIndex + 1 < sortingColumns.length) {
-      return sortFn(a, b, sortingColumnIndex + 1);
-    }
-
-    return 0;
-  };
-
-  return sortFn;
-};
 
 function getDefaultGroupByConfig(
   aggName: string,
@@ -101,6 +56,31 @@ function getDefaultGroupByConfig(
         dropDownName,
         field: fieldName,
         calendar_interval: '1m',
+      };
+  }
+}
+
+function getDefaultAggregationConfig(
+  aggName: string,
+  dropDownName: string,
+  fieldName: EsFieldName,
+  agg: PIVOT_SUPPORTED_AGGS
+): PivotAggsConfigWithUiSupport {
+  switch (agg) {
+    case PIVOT_SUPPORTED_AGGS.PERCENTILES:
+      return {
+        agg,
+        aggName,
+        dropDownName,
+        field: fieldName,
+        percents: PERCENTILES_AGG_DEFAULT_PERCENTS,
+      };
+    default:
+      return {
+        agg,
+        aggName,
+        dropDownName,
+        field: fieldName,
       };
   }
 }
@@ -153,7 +133,12 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
         // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.
         const dropDownName = `${agg}(${field.name})`;
         aggOption.options.push({ label: dropDownName });
-        aggOptionsData[dropDownName] = { agg, field: field.name, aggName, dropDownName };
+        aggOptionsData[dropDownName] = getDefaultAggregationConfig(
+          aggName,
+          dropDownName,
+          field.name,
+          agg
+        );
       });
     }
     aggOptions.push(aggOption);
@@ -166,7 +151,3 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
     aggOptionsData,
   };
 }
-
-export const getPivotPreviewDevConsoleStatement = (request: PreviewRequestBody) => {
-  return `POST _transform/_preview\n${JSON.stringify(request, null, 2)}\n`;
-};

@@ -21,13 +21,28 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings']);
-
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const a11y = getService('a11y');
 
+  // describe('Management', () => {
+  //   before(async () => {
+  //     await esArchiver.loadIfNeeded('logstash_functional');
+  //     await kibanaServer.uiSettings.update({
+  //       defaultIndex: 'logstash-*',
+  //     });
+  //     await PageObjects.common.navigateToApp('settings');
+  //   });
+
   describe('Management', () => {
     before(async () => {
-      await PageObjects.common.navigateToApp('settings');
+      await esArchiver.load('discover');
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.uiSettings.update({
+        defaultIndex: 'logstash-*',
+      });
+      await PageObjects.settings.navigateTo();
     });
 
     it('main view', async () => {
@@ -50,8 +65,16 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Saved objects view', async () => {
-      await PageObjects.settings.clickKibanaSavedObjects();
+    // index patterns page
+    it('Navigate back to logstash index page', async () => {
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
+      await a11y.testAppSnapshot();
+    });
+
+    // Issue: https://github.com/elastic/kibana/issues/60030
+    it.skip('Edit field type', async () => {
+      await PageObjects.settings.clickEditFieldFormat();
       await a11y.testAppSnapshot();
     });
 

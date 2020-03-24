@@ -10,7 +10,7 @@ import { Legacy } from 'kibana';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
 import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingSetupDeps } from '../types';
+import { ReportingConfig, ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import {
   GetRouteConfigFactoryFn,
@@ -22,6 +22,7 @@ import { HandlerErrorFunction, HandlerFunction } from './types';
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerGenerateFromJobParams(
+  config: ReportingConfig,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   handler: HandlerFunction,
@@ -30,7 +31,7 @@ export function registerGenerateFromJobParams(
 ) {
   const getRouteConfig = () => {
     const getOriginalRouteConfig: GetRouteConfigFactoryFn = getRouteConfigFactoryReportingPre(
-      server,
+      config,
       plugins,
       logger
     );
@@ -82,15 +83,20 @@ export function registerGenerateFromJobParams(
       }
 
       const { exportType } = request.params;
+      let jobParams;
       let response;
       try {
-        const jobParams = rison.decode(jobParamsRison) as object | null;
+        jobParams = rison.decode(jobParamsRison) as object | null;
         if (!jobParams) {
           throw new Error('missing jobParams!');
         }
-        response = await handler(exportType, jobParams, legacyRequest, h);
       } catch (err) {
         throw boom.badRequest(`invalid rison: ${jobParamsRison}`);
+      }
+      try {
+        response = await handler(exportType, jobParams, legacyRequest, h);
+      } catch (err) {
+        throw handleError(exportType, err);
       }
       return response;
     },
