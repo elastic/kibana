@@ -6,12 +6,12 @@
 
 /* eslint-disable import/no-extraneous-dependencies */
 
-const RANGE_FROM = '2019-09-04T18:00:00.000Z';
-const RANGE_TO = '2019-09-05T06:00:00.000Z';
+const RANGE_FROM = '2020-03-04T12:30:00.000Z';
+const RANGE_TO = '2020-03-04T13:00:00.000Z';
 const BASE_URL = Cypress.config().baseUrl;
 
 /** The default time in ms to wait for a Cypress command to complete */
-export const DEFAULT_TIMEOUT = 30 * 1000;
+export const DEFAULT_TIMEOUT = 60 * 1000;
 
 export function loginAndWaitForPage(url: string) {
   const username = Cypress.env('elasticsearch_username');
@@ -25,5 +25,7 @@ export function loginAndWaitForPage(url: string) {
   cy.viewport('macbook-15');
 
   // wait for loading spinner to disappear
-  cy.get('.kibanaLoaderWrap', { timeout: DEFAULT_TIMEOUT }).should('not.exist');
+  cy.get('#kbn_loading_message', { timeout: DEFAULT_TIMEOUT }).should(
+    'not.exist'
+  );
 }
