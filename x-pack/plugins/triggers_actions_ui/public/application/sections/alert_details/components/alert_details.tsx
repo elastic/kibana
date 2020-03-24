@@ -17,7 +17,6 @@ import {
   EuiBadge,
   EuiPage,
   EuiPageContentBody,
-  EuiButtonEmpty,
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
@@ -88,23 +87,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="pencil">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-                      defaultMessage="Edit"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
                   <ViewInApp alert={alert} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="menuLeft">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.activityLogButtonLabel"
-                      defaultMessage="Activity Log"
-                    />
-                  </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>

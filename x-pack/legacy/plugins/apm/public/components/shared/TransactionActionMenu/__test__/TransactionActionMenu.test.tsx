@@ -10,13 +10,13 @@ import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';
 import {
-  MockApmPluginContextWrapper,
   expectTextsNotInDocument,
   expectTextsInDocument
 } from '../../../../utils/testHelpers';
 import * as hooks from '../../../../hooks/useFetcher';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { License } from '../../../../../../../../plugins/licensing/common/license';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
