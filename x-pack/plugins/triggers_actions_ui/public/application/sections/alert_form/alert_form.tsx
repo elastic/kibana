@@ -24,6 +24,8 @@ import {
   EuiButtonIcon,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { some, filter, map, fold } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -408,9 +410,23 @@ export const AlertForm = ({
                   name="throttle"
                   data-test-subj="throttleInput"
                   onChange={e => {
-                    const throttle = e.target.value !== '' ? parseInt(e.target.value, 10) : null;
-                    setAlertThrottle(throttle);
-                    setAlertProperty('throttle', `${e.target.value}${alertThrottleUnit}`);
+                    pipe(
+                      some(e.target.value.trim()),
+                      filter(value => value !== ''),
+                      map(value => parseInt(value, 10)),
+                      filter(value => !isNaN(value)),
+                      fold(
+                        () => {
+                          // unset throttle
+                          setAlertThrottle(null);
+                          setAlertProperty('throttle', null);
+                        },
+                        throttle => {
+                          setAlertThrottle(throttle);
+                          setAlertProperty('throttle', `${throttle}${alertThrottleUnit}`);
+                        }
+                      )
+                    );
                   }}
                 />
               </EuiFlexItem>
