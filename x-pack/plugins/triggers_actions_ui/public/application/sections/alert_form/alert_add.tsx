@@ -150,7 +150,7 @@ export const AlertAdd = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertActionSecurityCallOut docLinks={docLinks} action={'created'} http={http} />
+        <AlertActionSecurityCallOut docLinks={docLinks} action={'creation'} http={http} />
         <EuiFlyoutBody>
           <AlertForm
             alert={alert}

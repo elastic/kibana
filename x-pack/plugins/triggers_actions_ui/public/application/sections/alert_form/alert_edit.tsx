@@ -140,7 +140,7 @@ export const AlertEdit = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertActionSecurityCallOut docLinks={docLinks} action={'edited'} http={http} />
+        <AlertActionSecurityCallOut docLinks={docLinks} action={'editing'} http={http} />
         <EuiFlyoutBody>
           {hasActionsDisabled && (
             <Fragment>

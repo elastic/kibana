@@ -63,12 +63,12 @@ describe('alert action security call out', () => {
     let component: ShallowWrapper | undefined;
     await act(async () => {
       component = shallow(
-        <AlertActionSecurityCallOut action="created" http={http} docLinks={docLinks} />
+        <AlertActionSecurityCallOut action="creation" http={http} docLinks={docLinks} />
       );
     });
 
     expect(component?.find(EuiCallOut).prop('title')).toMatchInlineSnapshot(
-      `"Alerts cannot be created while TLS is disabled."`
+      `"Alert creation requires TLS between Elasticsearch and Kibana."`
     );
 
     expect(component?.find(EuiButton).prop('href')).toMatchInlineSnapshot(

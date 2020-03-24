@@ -50,7 +50,7 @@ export const AlertActionSecurityCallOut: React.FunctionComponent<Props> = ({
             title={i18n.translate(
               'xpack.triggersActionsUI.components.alertActionSecurityCallOut.tlsDisabledTitle',
               {
-                defaultMessage: 'Alerts cannot be {action} while TLS is disabled.',
+                defaultMessage: 'Alert {action} requires TLS between Elasticsearch and Kibana.',
                 values: {
                   action,
                 },
