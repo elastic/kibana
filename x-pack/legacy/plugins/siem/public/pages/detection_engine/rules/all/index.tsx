@@ -160,6 +160,8 @@ export const AllRules = React.memo<AllRulesProps>(
       dispatchRulesInReducer: setRules,
     });
 
+    const sorting = { sort: { field: 'enabled', direction: filterOptions.sortOrder } };
+
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
       rulesInstalled,
       rulesNotInstalled,
@@ -379,7 +381,7 @@ export const AllRules = React.memo<AllRulesProps>(
                       pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
                     }}
                     ref={tableRef}
-                    sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
+                    {...sorting}
                     selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
                   />
                 )}
@@ -399,7 +401,7 @@ export const AllRules = React.memo<AllRulesProps>(
                       pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
                     }}
                     ref={tableRef}
-                    sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
+                    {...sorting}
                     selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
                   />
                 )}
