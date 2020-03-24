@@ -186,7 +186,7 @@ describe('cluster_serialization', () => {
           },
         },
       });
-    })
+    });
 
     it('should serialize a complete cluster object to only dynamic properties', () => {
       expect(
