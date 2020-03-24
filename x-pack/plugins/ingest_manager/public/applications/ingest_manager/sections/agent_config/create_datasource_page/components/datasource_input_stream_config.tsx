@@ -16,14 +16,22 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { DatasourceInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
-import { isAdvancedVar } from '../services';
+import { isAdvancedVar, DatasourceConfigValidationResults } from '../services';
 import { DatasourceInputVarField } from './datasource_input_var_field';
 
 export const DatasourceInputStreamConfig: React.FunctionComponent<{
   packageInputStream: RegistryStream;
   datasourceInputStream: DatasourceInputStream;
   updateDatasourceInputStream: (updatedStream: Partial<DatasourceInputStream>) => void;
-}> = ({ packageInputStream, datasourceInputStream, updateDatasourceInputStream }) => {
+  inputStreamValidationResults: DatasourceConfigValidationResults;
+  forceShowErrors?: boolean;
+}> = ({
+  packageInputStream,
+  datasourceInputStream,
+  updateDatasourceInputStream,
+  inputStreamValidationResults,
+  forceShowErrors,
+}) => {
   // Showing advanced options toggle state
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
@@ -83,6 +91,8 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                       },
                     });
                   }}
+                  errors={inputStreamValidationResults.config![varName]}
+                  forceShowErrors={forceShowErrors}
                 />
               </EuiFlexItem>
             );
@@ -125,6 +135,8 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                               },
                             });
                           }}
+                          errors={inputStreamValidationResults.config![varName]}
+                          forceShowErrors={forceShowErrors}
                         />
                       </EuiFlexItem>
                     );

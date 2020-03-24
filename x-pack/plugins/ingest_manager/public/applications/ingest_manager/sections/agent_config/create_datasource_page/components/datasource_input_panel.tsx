@@ -19,6 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { DatasourceInput, DatasourceInputStream, RegistryInput } from '../../../../types';
+import { DatasourceInputValidationResults } from '../services';
 import { DatasourceInputConfig } from './datasource_input_config';
 import { DatasourceInputStreamConfig } from './datasource_input_stream_config';
 
@@ -32,7 +33,15 @@ export const DatasourceInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   datasourceInput: DatasourceInput;
   updateDatasourceInput: (updatedInput: Partial<DatasourceInput>) => void;
-}> = ({ packageInput, datasourceInput, updateDatasourceInput }) => {
+  inputValidationResults: DatasourceInputValidationResults;
+  forceShowErrors?: boolean;
+}> = ({
+  packageInput,
+  datasourceInput,
+  updateDatasourceInput,
+  inputValidationResults,
+  forceShowErrors,
+}) => {
   // Showing streams toggle state
   const [isShowingStreams, setIsShowingStreams] = useState<boolean>(false);
 
@@ -122,6 +131,8 @@ export const DatasourceInputPanel: React.FunctionComponent<{
             packageInputVars={packageInput.vars}
             datasourceInput={datasourceInput}
             updateDatasourceInput={updateDatasourceInput}
+            inputVarsValidationResults={inputValidationResults}
+            forceShowErrors={forceShowErrors}
           />
           <EuiHorizontalRule margin="m" />
         </Fragment>
@@ -165,6 +176,10 @@ export const DatasourceInputPanel: React.FunctionComponent<{
 
                     updateDatasourceInput(updatedInput);
                   }}
+                  inputStreamValidationResults={
+                    inputValidationResults.streams![datasourceInputStream.id]
+                  }
+                  forceShowErrors={forceShowErrors}
                 />
                 <EuiSpacer size="m" />
                 <EuiHorizontalRule margin="none" />

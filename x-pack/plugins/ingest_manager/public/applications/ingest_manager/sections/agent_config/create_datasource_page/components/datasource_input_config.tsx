@@ -15,14 +15,22 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { DatasourceInput, RegistryVarsEntry } from '../../../../types';
-import { isAdvancedVar } from '../services';
+import { isAdvancedVar, DatasourceInputValidationResults } from '../services';
 import { DatasourceInputVarField } from './datasource_input_var_field';
 
 export const DatasourceInputConfig: React.FunctionComponent<{
   packageInputVars?: RegistryVarsEntry[];
   datasourceInput: DatasourceInput;
   updateDatasourceInput: (updatedInput: Partial<DatasourceInput>) => void;
-}> = ({ packageInputVars, datasourceInput, updateDatasourceInput }) => {
+  inputVarsValidationResults: DatasourceInputValidationResults;
+  forceShowErrors?: boolean;
+}> = ({
+  packageInputVars,
+  datasourceInput,
+  updateDatasourceInput,
+  inputVarsValidationResults,
+  forceShowErrors,
+}) => {
   // Showing advanced options toggle state
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
@@ -81,6 +89,8 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                       },
                     });
                   }}
+                  errors={inputVarsValidationResults.config![varName]}
+                  forceShowErrors={forceShowErrors}
                 />
               </EuiFlexItem>
             );
@@ -123,6 +133,8 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                               },
                             });
                           }}
+                          errors={inputVarsValidationResults.config![varName]}
+                          forceShowErrors={forceShowErrors}
                         />
                       </EuiFlexItem>
                     );

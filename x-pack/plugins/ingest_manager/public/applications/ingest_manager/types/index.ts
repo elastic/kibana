@@ -16,6 +16,7 @@ export {
   NewDatasource,
   DatasourceInput,
   DatasourceInputStream,
+  DatasourceConfigRecordEntry,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
