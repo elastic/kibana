@@ -16,8 +16,6 @@ import DragSelect from 'dragselect/dist/ds.min.js';
 import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { esKuery, esQuery, QueryStringInput } from '../../../../../../src/plugins/data/public';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -55,6 +53,10 @@ import { SelectInterval } from '../components/controls/select_interval/select_in
 import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import {
+  ExplorerQueryBar,
+  getKqlQueryValues,
+} from './components/explorer_query_bar/explorer_query_bar';
+import {
   removeFilterFromQueryString,
   getQueryPattern,
   escapeParens,
@@ -68,7 +70,7 @@ import {
   DRAG_SELECT_ACTION,
   FILTER_ACTION,
   QUERY_LANGUAGE_KUERY,
-  QUERY_LANGUAGE_LUCENE,
+  // QUERY_LANGUAGE_LUCENE,
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
@@ -88,51 +90,6 @@ function mapSwimlaneOptionsToEuiOptions(options) {
     text: option,
   }));
 }
-
-function getKqlQueryValues({ inputString, queryLanguage, indexPattern }) {
-  let influencersFilterQuery;
-  const ast = esKuery.fromKueryExpression(inputString);
-  const isAndOperator = ast.function === 'and';
-  const filteredFields = [];
-  // if ast.type == 'function' then layout of ast.arguments:
-  // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
-  if (ast && Array.isArray(ast.arguments)) {
-    ast.arguments.forEach(arg => {
-      if (arg.arguments !== undefined) {
-        arg.arguments.forEach(nestedArg => {
-          if (typeof nestedArg.value === 'string') {
-            filteredFields.push(nestedArg.value);
-          }
-        });
-      } else if (typeof arg.value === 'string') {
-        filteredFields.push(arg.value);
-      }
-    });
-  }
-  if (queryLanguage === QUERY_LANGUAGE_KUERY) {
-    influencersFilterQuery = esKuery.toElasticsearchQuery(
-      esKuery.fromKueryExpression(inputString),
-      indexPattern
-    );
-  } else if (queryLanguage === QUERY_LANGUAGE_LUCENE) {
-    influencersFilterQuery = esQuery.luceneStringToDsl(inputString);
-  }
-
-  const clearSettings =
-    influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0;
-
-  return {
-    clearSettings,
-    settings: {
-      filterQuery: influencersFilterQuery,
-      queryString: inputString,
-      tableQueryString: inputString,
-      isAndOperator,
-      filteredFields,
-    },
-  };
-}
-
 const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
   <div ref={resizeRef} data-test-subj="mlPageAnomalyExplorer">
     <NavigationMenu tabId="explorer" />
@@ -150,24 +107,6 @@ const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
   </div>
 );
 
-function getInitSearchInputState({ filterActive, queryString }) {
-  if (queryString !== undefined && filterActive === true) {
-    return {
-      searchInput: {
-        language: QUERY_LANGUAGE_KUERY,
-        query: queryString,
-      },
-    };
-  } else {
-    return {
-      searchInput: {
-        query: '',
-        language: QUERY_LANGUAGE_KUERY,
-      },
-    };
-  }
-}
-
 export class Explorer extends React.Component {
   static propTypes = {
     explorerState: PropTypes.object.isRequired,
@@ -176,10 +115,7 @@ export class Explorer extends React.Component {
     showCharts: PropTypes.bool.isRequired,
   };
 
-  state = getInitSearchInputState({
-    filterActive: this.props.explorerState?.filterActive,
-    queryString: this.props.explorerState?.queryString,
-  });
+  state = { filterIconTriggeredQuery: '' };
 
   _unsubscribeAll = new Subject();
   // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
@@ -316,16 +252,7 @@ export class Explorer extends React.Component {
       }
     }
 
-    // explorerService.setSearchInput({
-    //   language: this.props.explorerState.searchInput.language,
-    //   query: `${newQueryString}`,
-    // });
-    this.setState({
-      searchInput: {
-        language: this.props.explorerState.searchInput.language,
-        query: `${newQueryString}`,
-      },
-    });
+    this.setState({ filterIconTriggeredQuery: `${newQueryString}` });
 
     try {
       const { clearSettings, settings } = getKqlQueryValues({
@@ -352,25 +279,6 @@ export class Explorer extends React.Component {
     }
   };
 
-  searchChangeHandler = query => {
-    // explorerService.setSearchInput(query);
-    this.setState({ searchInput: query });
-  };
-
-  applyInfluencersFilterQuery = query => {
-    const { clearSettings, settings } = getKqlQueryValues({
-      inputString: query.query,
-      queryLanguage: query.language,
-      indexPattern: this.props.explorerState.indexPattern,
-    });
-
-    if (clearSettings === true) {
-      explorerService.clearInfluencerFilterSettings();
-    } else {
-      explorerService.setInfluencerFilterSettings(settings);
-    }
-  };
-
   render() {
     const { showCharts, severity } = this.props;
 
@@ -385,20 +293,17 @@ export class Explorer extends React.Component {
       maskAll,
       noInfluencersConfigured,
       overallSwimlaneData,
-      // queryString,
+      queryString,
       selectedCells,
       selectedJobs,
       swimlaneContainerWidth,
       tableData,
-      // tableQueryString,
       viewByLoadedForTimeFormatted,
       viewBySwimlaneData,
       viewBySwimlaneDataLoading,
       viewBySwimlaneFieldName,
       viewBySwimlaneOptions,
     } = this.props.explorerState;
-
-    const { searchInput } = this.state;
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
@@ -458,16 +363,12 @@ export class Explorer extends React.Component {
 
           {noInfluencersConfigured === false && influencers !== undefined && (
             <div className="mlAnomalyExplorer__filterBar">
-              <QueryStringInput
-                bubbleSubmitEvent
-                query={searchInput}
-                indexPatterns={[indexPattern]}
-                onChange={this.searchChangeHandler}
-                onSubmit={this.applyInfluencersFilterQuery}
-                placeholder={filterPlaceHolder}
-                disableAutoFocus
-                dataTestSubj="transformQueryInput"
-                languageSwitcherPopoverAnchorPosition="rightDown"
+              <ExplorerQueryBar
+                filterActive={filterActive}
+                filterPlaceHolder={filterPlaceHolder}
+                indexPattern={indexPattern}
+                queryString={queryString}
+                filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
               />
             </div>
           )}
