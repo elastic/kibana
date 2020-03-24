@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBadge,
   EuiTableFieldDataColumnType,
@@ -19,6 +19,7 @@ import { FormattedRelativePreferenceDate } from '../../../../components/formatte
 import { CaseDetailsLink } from '../../../../components/links';
 import { TruncatableText } from '../../../../components/truncatable_text';
 import * as i18n from './translations';
+import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 
 export type CasesColumns =
   | EuiTableFieldDataColumnType<Case>
@@ -60,7 +61,6 @@ export const getCasesColumns = (
       }
       return getEmptyTagValue();
     },
-    width: '25%',
   },
   {
     field: 'createdBy',
@@ -105,7 +105,6 @@ export const getCasesColumns = (
       return getEmptyTagValue();
     },
     truncateText: true,
-    width: '20%',
   },
   {
     align: 'right',
@@ -149,7 +148,35 @@ export const getCasesColumns = (
         },
       },
   {
+    name: 'ServiceNow Incident',
+    render: (theCase: Case) => {
+      if (theCase.id != null) {
+        return <ServiceNowColumn theCase={theCase} />;
+      }
+      return getEmptyTagValue();
+    },
+  },
+  {
     name: 'Actions',
     actions,
   },
 ];
+
+interface Props {
+  theCase: Case;
+}
+
+const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
+  const { hasDataToPush } = useGetCaseUserActions(theCase.id);
+  const handleRenderDataToPush = useCallback(
+    () =>
+      hasDataToPush
+        ? renderStringField('Requires update', `case-table-column-external-requiresUpdate`)
+        : renderStringField('Up to date', `case-table-column-external-upToDate`),
+    [hasDataToPush]
+  );
+  if (theCase.externalService !== null) {
+    return handleRenderDataToPush();
+  }
+  return renderStringField('Not pushed', `case-table-column-external-notPushed`);
+};
