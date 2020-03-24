@@ -150,6 +150,24 @@ const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
   </div>
 );
 
+function getInitSearchInputState({ filterActive, queryString }) {
+  if (queryString !== undefined && filterActive === true) {
+    return {
+      searchInput: {
+        language: QUERY_LANGUAGE_KUERY,
+        query: queryString,
+      },
+    };
+  } else {
+    return {
+      searchInput: {
+        query: '',
+        language: QUERY_LANGUAGE_KUERY,
+      },
+    };
+  }
+}
+
 export class Explorer extends React.Component {
   static propTypes = {
     explorerState: PropTypes.object.isRequired,
@@ -158,12 +176,10 @@ export class Explorer extends React.Component {
     showCharts: PropTypes.bool.isRequired,
   };
 
-  state = {
-    searchInput: {
-      query: '',
-      language: QUERY_LANGUAGE_KUERY,
-    },
-  };
+  state = getInitSearchInputState({
+    filterActive: this.props.explorerState?.filterActive,
+    queryString: this.props.explorerState?.queryString,
+  });
 
   _unsubscribeAll = new Subject();
   // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
@@ -370,7 +386,6 @@ export class Explorer extends React.Component {
       noInfluencersConfigured,
       overallSwimlaneData,
       // queryString,
-      // searchInput,
       selectedCells,
       selectedJobs,
       swimlaneContainerWidth,
