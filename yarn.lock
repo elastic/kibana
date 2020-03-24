@@ -1915,15 +1915,6 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@elastic/ems-client@7.7.0":
-  version "7.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.7.0.tgz#7d36d716dd941f060b9fcdae94f186a9aecc5cc2"
-  integrity sha512-JatsSyLik/8MTEOEimzEZ3NYjvGL1YzjbGujuSCgaXhPRqzu/wvMLEL8dlVpmYFZ7ALbGNsVdho4Hr8tngsIMw==
-  dependencies:
-    lodash "^4.17.15"
-    node-fetch "^1.7.3"
-    semver "^6.3.0"
-
 "@elastic/ems-client@7.7.1":
   version "7.7.1"
   resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.7.1.tgz#cda9277cb851b6d1aa0408fe2814de98f1474fb8"
