@@ -60,7 +60,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 <span>{connector.name}</span>
               </>
             ),
-            'data-test-subj': connector.id,
+            'data-test-subj': `dropdown-connector-${connector.id}`,
           },
         ],
         [noConnectorOption]
@@ -76,6 +76,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       valueOfSelected={selectedConnector}
       fullWidth
       onChange={onChange}
+      data-test-subj="dropdown-connectors"
     />
   );
 };
