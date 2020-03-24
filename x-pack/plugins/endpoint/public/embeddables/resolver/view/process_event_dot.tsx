@@ -207,7 +207,7 @@ export const ProcessEventDot = styled(
               </use>
               <use
                 role="presentation"
-                xlinkHref={`#${SymbolIds.processNode}`}
+                xlinkHref={`#${SymbolIds.processNodeLabel}`}
                 x={markerPositionOffset + markerSize - 0.5}
                 y={labelYOffset}
                 width={(markerSize / 1.7647) * 5}
