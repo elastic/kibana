@@ -154,7 +154,7 @@ describe('capabilitiesSwitcher', () => {
     expect(result).toEqual(buildCapabilities());
   });
 
-  it('logs a warning, and does not toggle capabilities if an error is encountered', async () => {
+  it('logs a debug message, and does not toggle capabilities if an error is encountered', async () => {
     const space: Space = {
       id: 'space',
       name: '',
@@ -171,7 +171,7 @@ describe('capabilitiesSwitcher', () => {
     const result = await switcher(request, capabilities);
 
     expect(result).toEqual(buildCapabilities());
-    expect(logger.warn).toHaveBeenCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       `Error toggling capabilities for request to /path: Error: Something terrible happened`
     );
   });
