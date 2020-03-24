@@ -284,7 +284,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   }
 
   private createRouteHandlerContext = (
-    coreSetup: CoreSetup,
     defaultKibanaIndex: string
   ): IContextProvider<RequestHandler<any, any, any>, 'actions'> => {
     const { actionTypeRegistry, isESOUsingEphemeralEncryptionKey } = this;
