@@ -24,6 +24,7 @@ import {
   isImportRegular,
   transformError,
   buildSiemResponse,
+  validateLicenseForRuleType,
 } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
@@ -146,6 +147,11 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                   } = parsedRule;
 
                   try {
+                    validateLicenseForRuleType({
+                      license: context.licensing.license,
+                      ruleType: type,
+                    });
+
                     const signalsIndex = siemClient.signalsIndex;
                     const indexExists = await getIndexExists(
                       clusterClient.callAsCurrentUser,
@@ -234,6 +240,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         references,
                         note,
                         version,
+                        lists,
                         anomalyThreshold,
                         machineLearningJobId,
                       });

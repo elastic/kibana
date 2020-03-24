@@ -23,6 +23,10 @@ import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUr
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
 import { TraceLink } from '../../TraceLink';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
+import {
+  EditAgentConfigurationRouteHandler,
+  CreateAgentConfigurationRouteHandler
+} from './route_handlers/agent_configuration';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics'
@@ -101,11 +105,30 @@ export const routes: BreadcrumbRoute[] = [
     ),
     breadcrumb: i18n.translate(
       'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
-      {
-        defaultMessage: 'Agent Configuration'
-      }
+      { defaultMessage: 'Agent Configuration' }
     ),
     name: RouteName.AGENT_CONFIGURATION
+  },
+
+  {
+    exact: true,
+    path: '/settings/agent-configuration/create',
+    breadcrumb: i18n.translate(
+      'xpack.apm.breadcrumb.settings.createAgentConfigurationTitle',
+      { defaultMessage: 'Create Agent Configuration' }
+    ),
+    name: RouteName.AGENT_CONFIGURATION_CREATE,
+    component: () => <CreateAgentConfigurationRouteHandler />
+  },
+  {
+    exact: true,
+    path: '/settings/agent-configuration/edit',
+    breadcrumb: i18n.translate(
+      'xpack.apm.breadcrumb.settings.editAgentConfigurationTitle',
+      { defaultMessage: 'Edit Agent Configuration' }
+    ),
+    name: RouteName.AGENT_CONFIGURATION_EDIT,
+    component: () => <EditAgentConfigurationRouteHandler />
   },
   {
     exact: true,

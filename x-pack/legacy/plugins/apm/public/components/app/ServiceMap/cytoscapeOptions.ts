@@ -7,8 +7,8 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
 import {
-  DESTINATION_ADDRESS,
-  SERVICE_NAME
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE
 } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { defaultIcon, iconForNode } from './icons';
 
@@ -59,7 +59,9 @@ const style: cytoscape.Stylesheet[] = [
       'ghost-opacity': 0.15,
       height: nodeHeight,
       label: (el: cytoscape.NodeSingular) =>
-        isService(el) ? el.data(SERVICE_NAME) : el.data(DESTINATION_ADDRESS),
+        isService(el)
+          ? el.data(SERVICE_NAME)
+          : el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
       'min-zoomed-font-size': theme.euiSizeL,
       'overlay-opacity': 0,
       shape: (el: cytoscape.NodeSingular) =>
@@ -113,23 +115,21 @@ const style: cytoscape.Stylesheet[] = [
     selector: 'edge[isInverseEdge]',
     style: { visibility: 'hidden' }
   },
-  // @ts-ignore
-  {
-    selector: '.invisible',
-    style: { visibility: 'hidden' }
-  },
   {
     selector: 'edge.nodeHover',
     style: {
-      width: 4,
+      width: 2,
       // @ts-ignore
-      'z-index': zIndexEdgeHover
+      'z-index': zIndexEdgeHover,
+      'line-color': theme.euiColorDarkShade,
+      'source-arrow-color': theme.euiColorDarkShade,
+      'target-arrow-color': theme.euiColorDarkShade
     }
   },
   {
     selector: 'node.hover',
     style: {
-      'border-width': 4
+      'border-width': 2
     }
   },
   {

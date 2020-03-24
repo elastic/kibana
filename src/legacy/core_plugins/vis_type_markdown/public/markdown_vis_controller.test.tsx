@@ -21,11 +21,6 @@ import React from 'react';
 import { render, mount } from 'enzyme';
 import { MarkdownVisWrapper } from './markdown_vis_controller';
 
-// We need Markdown to do these tests, so mock data plugin
-jest.mock('../../data/public/legacy', () => {
-  return {};
-});
-
 describe('markdown vis controller', () => {
   it('should set html from markdown params', () => {
     const vis = {
