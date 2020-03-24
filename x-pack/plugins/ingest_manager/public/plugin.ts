@@ -9,7 +9,7 @@ import {
   Plugin,
   PluginInitializerContext,
   CoreStart,
-} from 'kibana/public';
+} from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { call, put, select } from 'redux-saga/effects';
+import { call, put } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
-import { getBasePath } from '../selectors';
+import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 
 /**
  * Factory function for a fetch effect. It expects three action creators,
@@ -22,18 +22,23 @@ import { getBasePath } from '../selectors';
 export function fetchEffectFactory<T, R, S, F>(
   fetch: (request: T) => Promise<R>,
   success: (response: R) => Action<S>,
-  fail: (error: Error) => Action<F>
+  fail: (error: IHttpFetchError) => Action<F>
 ) {
   return function*(action: Action<T>) {
     try {
-      const {
-        payload: { ...params },
-      } = action;
-      const basePath = yield select(getBasePath);
-      const response = yield call(fetch, { ...params, basePath });
-      yield put(success(response));
+      const response = yield call(fetch, action.payload);
+      if (response instanceof Error) {
+        // eslint-disable-next-line no-console
+        console.error(response);
+
+        yield put(fail(response as IHttpFetchError));
+      } else {
+        yield put(success(response));
+      }
     } catch (error) {
-      yield put(fail(error));
+      // eslint-disable-next-line no-console
+      console.error(error);
+      yield put(fail(error as IHttpFetchError));
     }
   };
 }

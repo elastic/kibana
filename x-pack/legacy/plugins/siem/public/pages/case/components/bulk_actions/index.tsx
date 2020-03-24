@@ -9,46 +9,54 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface GetBulkItems {
+  caseStatus: string;
   closePopover: () => void;
   deleteCasesAction: (cases: string[]) => void;
   selectedCaseIds: string[];
-  caseStatus: string;
+  updateCaseStatus: (status: string) => void;
 }
 
 export const getBulkItems = ({
-  deleteCasesAction,
-  closePopover,
   caseStatus,
+  closePopover,
+  deleteCasesAction,
   selectedCaseIds,
+  updateCaseStatus,
 }: GetBulkItems) => {
   return [
     caseStatus === 'open' ? (
       <EuiContextMenuItem
+        data-test-subj="cases-bulk-close-button"
+        disabled={selectedCaseIds.length === 0}
         key={i18n.BULK_ACTION_CLOSE_SELECTED}
-        icon="magnet"
-        disabled={true} // TO DO
-        onClick={async () => {
+        icon="folderCheck"
+        onClick={() => {
           closePopover();
+          updateCaseStatus('closed');
         }}
       >
         {i18n.BULK_ACTION_CLOSE_SELECTED}
       </EuiContextMenuItem>
     ) : (
       <EuiContextMenuItem
+        data-test-subj="cases-bulk-open-button"
+        disabled={selectedCaseIds.length === 0}
         key={i18n.BULK_ACTION_OPEN_SELECTED}
-        icon="magnet"
-        disabled={true} // TO DO
+        icon="folderExclamation"
         onClick={() => {
           closePopover();
+          updateCaseStatus('open');
         }}
       >
         {i18n.BULK_ACTION_OPEN_SELECTED}
       </EuiContextMenuItem>
     ),
     <EuiContextMenuItem
+      data-test-subj="cases-bulk-delete-button"
       key={i18n.BULK_ACTION_DELETE_SELECTED}
       icon="trash"
-      onClick={async () => {
+      disabled={selectedCaseIds.length === 0}
+      onClick={() => {
         closePopover();
         deleteCasesAction(selectedCaseIds);
       }}

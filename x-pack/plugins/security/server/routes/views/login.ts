@@ -6,15 +6,16 @@
 
 import { schema } from '@kbn/config-schema';
 import { parseNext } from '../../../common/parse_next';
+import { LoginState } from '../../../common/login_state';
 import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for the Login view.
  */
 export function defineLoginRoutes({
+  config,
   router,
   logger,
-  authc,
   csp,
   basePath,
   license,
@@ -28,18 +29,15 @@ export function defineLoginRoutes({
             next: schema.maybe(schema.string()),
             msg: schema.maybe(schema.string()),
           },
-          { allowUnknowns: true }
+          { unknowns: 'allow' }
         ),
       },
-      options: { authRequired: false },
+      options: { authRequired: 'optional' },
     },
     async (context, request, response) => {
       // Default to true if license isn't available or it can't be resolved for some reason.
       const shouldShowLogin = license.isEnabled() ? license.getFeatures().showLogin : true;
-
-      // Authentication flow isn't triggered automatically for this route, so we should explicitly
-      // check whether user has an active session already.
-      const isUserAlreadyLoggedIn = (await authc.getSessionInfo(request)) !== null;
+      const isUserAlreadyLoggedIn = request.auth.isAuthenticated;
       if (isUserAlreadyLoggedIn || !shouldShowLogin) {
         logger.debug('User is already authenticated, redirecting...');
         return response.redirected({
@@ -57,8 +55,30 @@ export function defineLoginRoutes({
   router.get(
     { path: '/internal/security/login_state', validate: false, options: { authRequired: false } },
     async (context, request, response) => {
-      const { showLogin, allowLogin, layout = 'form' } = license.getFeatures();
-      return response.ok({ body: { showLogin, allowLogin, layout } });
+      const { allowLogin, layout = 'form' } = license.getFeatures();
+      const { sortedProviders, selector } = config.authc;
+
+      let showLoginForm = false;
+      const providers = [];
+      for (const { type, name, options } of sortedProviders) {
+        if (options.showInSelector) {
+          if (type === 'basic' || type === 'token') {
+            showLoginForm = true;
+          } else if (selector.enabled) {
+            providers.push({ type, name, description: options.description });
+          }
+        }
+      }
+
+      const loginState: LoginState = {
+        allowLogin,
+        layout,
+        requiresSecureConnection: config.secureCookies,
+        showLoginForm,
+        selector: { enabled: selector.enabled, providers },
+      };
+
+      return response.ok({ body: loginState });
     }
   );
 }

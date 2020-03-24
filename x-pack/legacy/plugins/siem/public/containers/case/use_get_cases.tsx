@@ -88,6 +88,20 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
   }
 };
 
+export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
+  search: '',
+  reporters: [],
+  status: 'open',
+  tags: [],
+};
+
+export const DEFAULT_QUERY_PARAMS: QueryParams = {
+  page: DEFAULT_TABLE_ACTIVE_PAGE,
+  perPage: DEFAULT_TABLE_LIMIT,
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+};
+
 const initialData: AllCases = {
   cases: [],
   countClosedCases: null,
@@ -109,23 +123,14 @@ interface UseGetCases extends UseGetCasesState {
   setQueryParams: (queryParams: QueryParams) => void;
   setSelectedCases: (mySelectedCases: Case[]) => void;
 }
-export const useGetCases = (): UseGetCases => {
+
+export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
-    filterOptions: {
-      search: '',
-      reporters: [],
-      status: 'open',
-      tags: [],
-    },
+    filterOptions: DEFAULT_FILTER_OPTIONS,
     isError: false,
     loading: [],
-    queryParams: {
-      page: DEFAULT_TABLE_ACTIVE_PAGE,
-      perPage: DEFAULT_TABLE_LIMIT,
-      sortField: SortFieldCase.createdAt,
-      sortOrder: 'desc',
-    },
+    queryParams: initialQueryParams ?? DEFAULT_QUERY_PARAMS,
     selectedCases: [],
   });
   const [, dispatchToaster] = useStateToaster();

@@ -21,12 +21,6 @@ import React from 'react';
 import { MetricSeries } from './series';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('plugins/data', () => {
-  return {
-    QueryStringInput: () => <div className="queryStringInput" />,
-  };
-});
-
 const defaultProps = {
   disableAdd: false,
   disableDelete: true,

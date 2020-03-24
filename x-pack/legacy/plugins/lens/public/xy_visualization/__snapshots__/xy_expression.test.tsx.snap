@@ -8,7 +8,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     legendPosition="top"
     rotation={0}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -29,24 +29,23 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="d"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -58,8 +57,8 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -75,7 +74,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     legendPosition="top"
     rotation={0}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -96,24 +95,23 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="d"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -125,8 +123,8 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -142,7 +140,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     legendPosition="top"
     rotation={90}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -163,24 +161,23 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="d"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -192,8 +189,8 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -209,7 +206,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     legendPosition="top"
     rotation={0}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -230,24 +227,23 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="d"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -259,8 +255,8 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -276,7 +272,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     legendPosition="top"
     rotation={0}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -297,24 +293,23 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="d"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -330,8 +325,8 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -347,7 +342,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     legendPosition="top"
     rotation={0}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -368,24 +363,23 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="d"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -401,8 +395,8 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"
@@ -418,7 +412,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     legendPosition="top"
     rotation={90}
     showLegend={false}
-    showLegendDisplayValue={false}
+    showLegendExtra={false}
     theme={Object {}}
   />
   <Connect(spec)
@@ -439,24 +433,23 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
-          "Label D": "Foo",
+          "a": 1,
+          "b": 2,
           "c": "I",
           "d": "Foo",
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
-          "Label D": "Bar",
+          "a": 1,
+          "b": 5,
           "c": "J",
           "d": "Bar",
         },
       ]
     }
     enableHistogramMode={false}
-    id="Label D"
+    id="d"
     key="0"
+    name={[Function]}
     splitSeriesAccessors={
       Array [
         "d",
@@ -472,8 +465,8 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     xScaleType="ordinal"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
     yScaleType="linear"

@@ -49,16 +49,19 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
 };
 const initialData: Case = {
   id: '',
+  closedAt: null,
+  closedBy: null,
   createdAt: '',
   comments: [],
-  commentIds: [],
   createdBy: {
     username: '',
   },
   description: '',
+  externalService: null,
   status: '',
   tags: [],
   title: '',
+  totalComment: 0,
   updatedAt: null,
   updatedBy: null,
   version: '',

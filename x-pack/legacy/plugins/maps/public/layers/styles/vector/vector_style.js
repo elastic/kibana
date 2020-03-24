@@ -7,12 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
-import {
-  getDefaultProperties,
-  LINE_STYLES,
-  POLYGON_STYLES,
-  VECTOR_STYLES,
-} from './vector_style_defaults';
+import { getDefaultProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
 import {
   GEO_JSON_TYPE,
@@ -21,6 +16,7 @@ import {
   SOURCE_FORMATTERS_ID_ORIGIN,
   LAYER_STYLE_TYPE,
   DEFAULT_ICON,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
@@ -49,7 +45,7 @@ const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 
 export class VectorStyle extends AbstractStyle {
   static type = LAYER_STYLE_TYPE.VECTOR;
-  static STYLE_TYPE = STYLE_TYPE;
+
   static createDescriptor(properties = {}, isTimeAware = true) {
     return {
       type: VectorStyle.type,
@@ -123,7 +119,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  _getAllStyleProperties() {
+  getAllStyleProperties() {
     return [
       this._symbolizeAsStyleProperty,
       this._iconStyleProperty,
@@ -164,7 +160,7 @@ export class VectorStyle extends AbstractStyle {
     });
 
     const styleProperties = {};
-    this._getAllStyleProperties().forEach(styleProperty => {
+    this.getAllStyleProperties().forEach(styleProperty => {
       styleProperties[styleProperty.getStyleName()] = styleProperty;
     });
 
@@ -339,7 +335,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getDynamicPropertiesArray() {
-    const styleProperties = this._getAllStyleProperties();
+    const styleProperties = this.getAllStyleProperties();
     return styleProperties.filter(
       styleProperty => styleProperty.isDynamic() && styleProperty.isComplete()
     );
@@ -390,7 +386,7 @@ export class VectorStyle extends AbstractStyle {
       return null;
     }
 
-    const formattersDataRequest = this._layer.findDataRequestById(dataRequestId);
+    const formattersDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!formattersDataRequest || !formattersDataRequest.hasData()) {
       return null;
     }
@@ -507,11 +503,19 @@ export class VectorStyle extends AbstractStyle {
         const dynamicStyleProp = dynamicStyleProps[j];
         const name = dynamicStyleProp.getField().getName();
         const computedName = getComputedFieldName(dynamicStyleProp.getStyleName(), name);
-        const styleValue = dynamicStyleProp.getMbValue(feature.properties[name]);
+        const rawValue = feature.properties[name];
         if (dynamicStyleProp.supportsMbFeatureState()) {
-          tmpFeatureState[computedName] = styleValue;
+          tmpFeatureState[name] = dynamicStyleProp.getNumericalMbFeatureStateValue(rawValue); //the same value will be potentially overridden multiple times, if the name remains identical
         } else {
-          feature.properties[computedName] = styleValue;
+          //in practice, a new system property will only be created for:
+          // - label text: this requires the value to be formatted first.
+          // - icon orientation: this is a lay-out property which do not support feature-state (but we're still coercing to a number)
+
+          const formattedValue = dynamicStyleProp.isOrdinal()
+            ? dynamicStyleProp.getNumericalMbFeatureStateValue(rawValue)
+            : dynamicStyleProp.formatField(rawValue);
+
+          feature.properties[computedName] = formattedValue;
         }
       }
       tmpFeatureIdentifier.source = mbSourceId;
