@@ -19,7 +19,6 @@
 
 import Joi from 'joi';
 import boom from 'boom';
-import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { getKibanaInfoForStats } from '../../lib';
@@ -55,8 +54,7 @@ export function registerStatsApi(usageCollection, server, config, kbnServer) {
   /* kibana_stats gets singled out from the collector set as it is used
    * for health-checking Kibana and fetch does not rely on fetching data
    * from ES */
-  server.newPlatform.setup.core.metrics.getOpsMetrics$().subscribe(_metrics => {
-    const metrics = cloneDeep(_metrics);
+  server.newPlatform.setup.core.metrics.getOpsMetrics$().subscribe(metrics => {
     lastMetrics = {
       ...metrics,
       timestamp: new Date().toISOString(),

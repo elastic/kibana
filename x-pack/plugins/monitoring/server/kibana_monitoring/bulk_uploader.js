@@ -8,7 +8,6 @@ import { defaultsDeep, uniq, compact, get } from 'lodash';
 
 import {
   TELEMETRY_COLLECTION_INTERVAL,
-  KIBANA_SETTINGS_TYPE,
   KIBANA_STATS_TYPE_MONITORING,
 } from '../../common/constants';
 
@@ -66,15 +65,10 @@ export class BulkUploader {
 
     this.kibanaStats = kibanaStats;
     this.kibanaStatusGetter = null;
-    this.kibanaLocaleGetter = null;
   }
 
   setKibanaStatusGetter(getter) {
     this.kibanaStatusGetter = getter;
-  }
-
-  setKibanaLocaleGetter(getter) {
-    this.kibanaLocaleGetter = getter;
   }
 
   filterCollectorSet(usageCollection) {
@@ -203,12 +197,9 @@ export class BulkUploader {
       status: this.kibanaStatusGetter(),
     };
 
-    if (type === KIBANA_SETTINGS_TYPE) {
-      stats.locale = this.kibanaLocaleGetter();
-    }
-
     if (type === KIBANA_STATS_TYPE_MONITORING) {
       delete stats.port;
+      delete stats.locale;
     }
 
     return stats;

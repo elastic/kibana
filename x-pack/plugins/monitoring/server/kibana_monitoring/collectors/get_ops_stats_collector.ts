@@ -5,7 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { cloneDeep, omit, set } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import moment from 'moment';
 import { OpsMetrics } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -24,13 +24,13 @@ export function getOpsStatsCollector(
 ) {
   let lastMetrics: MonitoringOpsMetrics | null = null;
   metrics$.subscribe(_metrics => {
-    const metrics = cloneDeep(_metrics);
+    const metrics: any = cloneDeep(_metrics);
     // Ensure we only include the same data that Metricbeat collection would get
     metrics.process = omit(metrics.process, 'pid');
-    set(metrics, 'response_times', {
+    metrics.response_times = {
       average: metrics.response_times.avg_in_millis,
       max: metrics.response_times.max_in_millis,
-    });
+    };
     metrics.requests = omit(metrics.requests, 'statusCodes');
     lastMetrics = {
       ...metrics,
