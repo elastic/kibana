@@ -3,6 +3,7 @@
 # For more info, see https://help.github.com/articles/about-codeowners/
 
 # App
+/x-pack/legacy/plugins/dashboard_enhanced/ @elastic/kibana-app
 /x-pack/legacy/plugins/lens/ @elastic/kibana-app
 /x-pack/legacy/plugins/graph/ @elastic/kibana-app
 /src/legacy/server/url_shortening/ @elastic/kibana-app
@@ -181,6 +182,7 @@
 /x-pack/plugins/remote_clusters/  @elastic/es-ui
 /x-pack/legacy/plugins/rollup/  @elastic/es-ui
 /x-pack/plugins/searchprofiler/  @elastic/es-ui
+/x-pack/plugins/painless_lab/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/legacy/plugins/upgrade_assistant/  @elastic/es-ui
 /x-pack/plugins/upgrade_assistant/  @elastic/es-ui
