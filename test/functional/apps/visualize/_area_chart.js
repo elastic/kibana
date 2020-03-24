@@ -26,6 +26,7 @@ export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -510,18 +511,46 @@ export default function({ getService, getPageObjects }) {
         expect(isFieldErrorMessageExists).to.be(false);
       });
 
-      it('should not fail during changing interval when the field is not selected', async () => {
-        await PageObjects.visEditor.setInterval('m');
-        const intervalValues = await PageObjects.visEditor.getInterval();
-        expect(intervalValues[0]).to.be('Millisecond');
-      });
+      describe('interval errors', () => {
+        before(async () => {
+          // to trigger displaying of error messages
+          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+        });
 
-      it.skip('should show error when interval invalid', async () => {
-        await PageObjects.visEditor.setInterval('xx');
-        const isIntervalErrorMessageExists = await find.existsByCssSelector(
-          '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
-        );
-        expect(isIntervalErrorMessageExists).to.be(true);
+        it('should not fail during changing interval when the field is not selected', async () => {
+          await PageObjects.visEditor.setInterval('m');
+          const intervalValues = await PageObjects.visEditor.getInterval();
+          expect(intervalValues[0]).to.be('Millisecond');
+        });
+
+        it('should not fail during changing custom interval when the field is not selected', async () => {
+          await PageObjects.visEditor.setInterval('4d', { type: 'custom' });
+          const isInvalidIntervalExists = await find.existsByCssSelector(
+            '.euiComboBox-isInvalid[data-test-subj="visEditorInterval"]'
+          );
+          expect(isInvalidIntervalExists).to.be(false);
+        });
+
+        it('should show error when interval invalid', async () => {
+          await PageObjects.visEditor.setInterval('xx', { type: 'custom' });
+          const isIntervalErrorMessageExists = await find.existsByCssSelector(
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+          );
+          expect(isIntervalErrorMessageExists).to.be(true);
+        });
+
+        it('should show error when calendar interval invalid', async () => {
+          await PageObjects.visEditor.setInterval('14d', { type: 'custom' });
+          const intervalErrorMessage = await find.byCssSelector(
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+          );
+          let errorMessage = await intervalErrorMessage.getVisibleText();
+          expect(errorMessage).to.be('Invalid calendar interval: 2w, value must be 1');
+
+          await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
+          errorMessage = await intervalErrorMessage.getVisibleText();
+          expect(errorMessage).to.be('Invalid calendar interval: 3w, value must be 1');
+        });
       });
     });
   });
