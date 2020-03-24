@@ -9,7 +9,7 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TelemetryCollectionManager } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
+import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
@@ -50,13 +50,13 @@ import { getLicenseExpiration } from './alerts/license_expiration';
 import { InfraPluginSetup } from '../../infra/server';
 
 export interface LegacyAPI {
-  telemetryCollectionManager: TelemetryCollectionManager;
   getServerStatus: () => string;
   infra: any;
 }
 
 interface PluginsSetup {
-  usageCollection: UsageCollectionSetup;
+  telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
+  usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
   alerting: AlertingPluginSetupContract;
@@ -120,7 +120,7 @@ export class Plugin {
       router: core.http.createRouter(),
       instanceUuid: core.uuid.getInstanceUuid(),
       esDataClient: core.elasticsearch.dataClient,
-      kibanaStatsCollector: plugins.usageCollection.getCollectorByType(
+      kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
         KIBANA_STATS_TYPE_MONITORING
       ),
     };
@@ -157,13 +157,22 @@ export class Plugin {
       );
     }
 
+    // Initialize telemetry
+    if (plugins.telemetryCollectionManager) {
+      registerMonitoringCollection(plugins.telemetryCollectionManager, this.cluster, {
+        maxBucketSize: config.ui.max_bucket_size,
+      });
+    }
+
     // Register collector objects for stats to show up in the APIs
-    registerCollectors(
-      plugins.usageCollection,
-      config,
-      core.metrics.getOpsMetrics$(),
-      get(legacyConfig, 'kibana.index')
-    );
+    if (plugins.usageCollection) {
+      registerCollectors(
+        plugins.usageCollection,
+        config,
+        core.metrics.getOpsMetrics$(),
+        get(legacyConfig, 'kibana.index')
+      );
+    }
 
     // If collection is enabled, create the bulk uploader
     const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);
@@ -275,9 +284,6 @@ export class Plugin {
   }
 
   async setupLegacy(legacyAPI: LegacyAPI) {
-    // Initialize telemetry
-    registerMonitoringCollection(this.cluster, legacyAPI.telemetryCollectionManager);
-
     // Set the stats getter
     this.bulkUploader.setKibanaStatusGetter(() => legacyAPI.getServerStatus());
   }

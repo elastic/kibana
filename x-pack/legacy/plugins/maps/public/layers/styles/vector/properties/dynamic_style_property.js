@@ -13,7 +13,6 @@ import {
   SOURCE_META_ID_ORIGIN,
   FIELD_ORIGIN,
 } from '../../../../../common/constants';
-import { scaleValue, getComputedFieldName } from '../style_util';
 import React from 'react';
 import { CategoricalLegend } from './components/categorical_legend';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
@@ -108,13 +107,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return this._field ? this._field.getName() : '';
   }
 
-  getComputedFieldName() {
-    if (!this.isComplete()) {
-      return null;
-    }
-    return getComputedFieldName(this._styleName, this.getField().getName());
-  }
-
   isDynamic() {
     return true;
   }
@@ -141,13 +133,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   supportsFieldMeta() {
-    if (this.isOrdinal()) {
-      return this.isComplete() && this.isOrdinalScaled() && this._field.supportsFieldMeta();
-    } else if (this.isCategorical()) {
-      return this.isComplete() && this._field.supportsFieldMeta();
-    } else {
-      return false;
-    }
+    return this.isComplete() && this._field.supportsFieldMeta();
   }
 
   async getFieldMetaRequest() {
@@ -161,10 +147,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   supportsMbFeatureState() {
-    return true;
-  }
-
-  isOrdinalScaled() {
     return true;
   }
 
@@ -287,19 +269,9 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  getMbValue(value) {
-    if (!this.isOrdinal()) {
-      return this.formatField(value);
-    }
-
+  getNumericalMbFeatureStateValue(value) {
     const valueAsFloat = parseFloat(value);
-    if (this.isOrdinalScaled()) {
-      return scaleValue(valueAsFloat, this.getRangeFieldMeta());
-    }
-    if (isNaN(valueAsFloat)) {
-      return 0;
-    }
-    return valueAsFloat;
+    return isNaN(valueAsFloat) ? null : valueAsFloat;
   }
 
   renderBreakedLegend() {

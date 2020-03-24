@@ -43,8 +43,6 @@ function buildRestrictedPaths(shimmedPlugins) {
           'ui/**/*',
           'src/legacy/ui/**/*',
           'src/legacy/core_plugins/kibana/public/**/*',
-          'src/legacy/core_plugins/data/public/**/*',
-          '!src/legacy/core_plugins/data/public/index.ts',
           `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
         ],
         allowSameFolder: false,

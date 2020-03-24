@@ -49,22 +49,6 @@ export function dynamicRound(value) {
   return precision === 0 ? Math.round(value) : parseFloat(value.toFixed(precision + 1));
 }
 
-export function scaleValue(value, range) {
-  if (isNaN(value) || !range) {
-    return -1; //Nothing to scale, put outside scaled range
-  }
-
-  if (range.delta === 0 || value >= range.max) {
-    return 1; //snap to end of scaled range
-  }
-
-  if (value <= range.min) {
-    return 0; //snap to beginning of scaled range
-  }
-
-  return (value - range.min) / range.delta;
-}
-
 export function assignCategoriesToPalette({ categories, paletteValues }) {
   const stops = [];
   let fallback = null;
@@ -84,4 +68,24 @@ export function assignCategoriesToPalette({ categories, paletteValues }) {
     stops,
     fallback,
   };
+}
+
+export function makeMbClampedNumberExpression({
+  lookupFunction,
+  fieldName,
+  minValue,
+  maxValue,
+  fallback,
+}) {
+  const clamp = ['max', ['min', ['to-number', [lookupFunction, fieldName]], maxValue], minValue];
+  return [
+    'coalesce',
+    [
+      'case',
+      ['==', [lookupFunction, fieldName], null],
+      minValue - 1, //== does a JS-y like check where returns true for null and undefined
+      clamp,
+    ],
+    fallback,
+  ];
 }
