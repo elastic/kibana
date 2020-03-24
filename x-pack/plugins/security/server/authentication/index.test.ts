@@ -10,7 +10,6 @@ jest.mock('./api_keys');
 jest.mock('./authenticator');
 
 import Boom from 'boom';
-import { first } from 'rxjs/operators';
 
 import {
   loggingServiceMock,
@@ -31,9 +30,9 @@ import {
   ScopedClusterClient,
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
-import { ConfigType, createConfig$ } from '../config';
+import { ConfigSchema, ConfigType, createConfig } from '../config';
 import { AuthenticationResult } from './authentication_result';
-import { setupAuthentication } from '.';
+import { Authentication, setupAuthentication } from '.';
 import {
   CreateAPIKeyResult,
   CreateAPIKeyParams,
@@ -51,24 +50,18 @@ describe('setupAuthentication()', () => {
     license: jest.Mocked<SecurityLicense>;
   };
   let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<ScopedClusterClient>>;
-  beforeEach(async () => {
-    const mockConfig$ = createConfig$(
-      coreMock.createPluginInitializerContext({
-        encryptionKey: 'ab'.repeat(16),
-        secureCookies: true,
-        session: {
-          idleTimeout: null,
-          lifespan: null,
-        },
-        cookieName: 'my-sid-cookie',
-        authc: { providers: ['basic'], http: { enabled: true } },
-        public: {},
-      }),
-      true
-    );
+  beforeEach(() => {
     mockSetupAuthenticationParams = {
       http: coreMock.createSetup().http,
-      config: await mockConfig$.pipe(first()).toPromise(),
+      config: createConfig(
+        ConfigSchema.validate({
+          encryptionKey: 'ab'.repeat(16),
+          secureCookies: true,
+          cookieName: 'my-sid-cookie',
+        }),
+        loggingServiceMock.create().get(),
+        { isTLSEnabled: false }
+      ),
       clusterClient: elasticsearchServiceMock.createClusterClient(),
       license: licenseMock.create(),
       loggers: loggingServiceMock.create(),
@@ -454,6 +447,27 @@ describe('setupAuthentication()', () => {
         success: true,
       });
       expect(apiKeysInstance.invalidate).toHaveBeenCalledWith(request, params);
+    });
+  });
+
+  describe('invalidateAPIKeyAsInternalUser()', () => {
+    let invalidateAPIKeyAsInternalUser: Authentication['invalidateAPIKeyAsInternalUser'];
+
+    beforeEach(async () => {
+      invalidateAPIKeyAsInternalUser = (await setupAuthentication(mockSetupAuthenticationParams))
+        .invalidateAPIKeyAsInternalUser;
+    });
+
+    it('calls invalidateAPIKeyAsInternalUser with given arguments', async () => {
+      const apiKeysInstance = jest.requireMock('./api_keys').APIKeys.mock.instances[0];
+      const params = {
+        id: '123',
+      };
+      apiKeysInstance.invalidateAsInternalUser.mockResolvedValueOnce({ success: true });
+      await expect(invalidateAPIKeyAsInternalUser(params)).resolves.toEqual({
+        success: true,
+      });
+      expect(apiKeysInstance.invalidateAsInternalUser).toHaveBeenCalledWith(params);
     });
   });
 });

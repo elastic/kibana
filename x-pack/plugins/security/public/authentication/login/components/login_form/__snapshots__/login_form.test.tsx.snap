@@ -1,0 +1,240 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoginForm login selector renders as expected with login form 1`] = `
+<Fragment>
+  <EuiButton
+    fullWidth={true}
+    isDisabled={false}
+    isLoading={false}
+    key="saml1"
+    onClick={[Function]}
+  >
+    Login w/SAML
+  </EuiButton>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiButton
+    fullWidth={true}
+    isDisabled={false}
+    isLoading={false}
+    key="pki1"
+    onClick={[Function]}
+  >
+    Login w/PKI
+  </EuiButton>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiText
+    color="subdued"
+    textAlign="center"
+  >
+    ―――  
+    <FormattedMessage
+      defaultMessage="OR"
+      id="xpack.security.loginPage.loginSelectorOR"
+      values={Object {}}
+    />
+      ―――
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiPanel>
+    <form
+      onSubmit={[Function]}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Username"
+            id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-required={true}
+          data-test-subj="loginUsername"
+          disabled={false}
+          id="username"
+          inputRef={[Function]}
+          isInvalid={false}
+          name="username"
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Password"
+            id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-required={true}
+          autoComplete="off"
+          data-test-subj="loginPassword"
+          disabled={false}
+          id="password"
+          isInvalid={false}
+          name="password"
+          onChange={[Function]}
+          type="password"
+          value=""
+        />
+      </EuiFormRow>
+      <EuiButton
+        color="primary"
+        data-test-subj="loginSubmit"
+        fill={true}
+        isDisabled={false}
+        isLoading={false}
+        onClick={[Function]}
+        type="submit"
+      >
+        <FormattedMessage
+          defaultMessage="Log in"
+          id="xpack.security.login.basicLoginForm.logInButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </form>
+  </EuiPanel>
+</Fragment>
+`;
+
+exports[`LoginForm login selector renders as expected without login form for providers with and without description 1`] = `
+<Fragment>
+  <EuiButton
+    fullWidth={true}
+    isDisabled={false}
+    isLoading={false}
+    key="saml1"
+    onClick={[Function]}
+  >
+    Login w/SAML
+  </EuiButton>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiButton
+    fullWidth={true}
+    isDisabled={false}
+    isLoading={false}
+    key="pki1"
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Login with {providerType}/{providerName}"
+      id="xpack.security.loginPage.loginProviderDescription"
+      values={
+        Object {
+          "providerName": "pki1",
+          "providerType": "pki",
+        }
+      }
+    />
+  </EuiButton>
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;
+
+exports[`LoginForm renders as expected 1`] = `
+<Fragment>
+  <EuiPanel>
+    <form
+      onSubmit={[Function]}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Username"
+            id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-required={true}
+          data-test-subj="loginUsername"
+          disabled={false}
+          id="username"
+          inputRef={[Function]}
+          isInvalid={false}
+          name="username"
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Password"
+            id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-required={true}
+          autoComplete="off"
+          data-test-subj="loginPassword"
+          disabled={false}
+          id="password"
+          isInvalid={false}
+          name="password"
+          onChange={[Function]}
+          type="password"
+          value=""
+        />
+      </EuiFormRow>
+      <EuiButton
+        color="primary"
+        data-test-subj="loginSubmit"
+        fill={true}
+        isDisabled={false}
+        isLoading={false}
+        onClick={[Function]}
+        type="submit"
+      >
+        <FormattedMessage
+          defaultMessage="Log in"
+          id="xpack.security.login.basicLoginForm.logInButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </form>
+  </EuiPanel>
+</Fragment>
+`;

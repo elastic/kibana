@@ -193,26 +193,51 @@ export class APIKeys {
    * @param request Request instance.
    * @param params The params to invalidate an API key.
    */
-  async invalidate(
-    request: KibanaRequest,
-    params: InvalidateAPIKeyParams
-  ): Promise<InvalidateAPIKeyResult | null> {
+  async invalidate(request: KibanaRequest, params: InvalidateAPIKeyParams) {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    this.logger.debug('Trying to invalidate an API key as current user');
+
+    let result: InvalidateAPIKeyResult;
+    try {
+      // User needs `manage_api_key` privilege to use this API
+      result = await this.clusterClient
+        .asScoped(request)
+        .callAsCurrentUser('shield.invalidateAPIKey', {
+          body: {
+            id: params.id,
+          },
+        });
+      this.logger.debug('API key was invalidated successfully as current user');
+    } catch (e) {
+      this.logger.error(`Failed to invalidate API key as current user: ${e.message}`);
+      throw e;
+    }
+
+    return result;
+  }
+
+  /**
+   * Tries to invalidate an API key by using the internal user.
+   * @param params The params to invalidate an API key.
+   */
+  async invalidateAsInternalUser(params: InvalidateAPIKeyParams) {
     if (!this.license.isEnabled()) {
       return null;
     }
 
     this.logger.debug('Trying to invalidate an API key');
 
-    // User needs `manage_api_key` privilege to use this API
     let result: InvalidateAPIKeyResult;
     try {
-      result = (await this.clusterClient
-        .asScoped(request)
-        .callAsCurrentUser('shield.invalidateAPIKey', {
-          body: {
-            id: params.id,
-          },
-        })) as InvalidateAPIKeyResult;
+      // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
+      result = await this.clusterClient.callAsInternalUser('shield.invalidateAPIKey', {
+        body: {
+          id: params.id,
+        },
+      });
       this.logger.debug('API key was invalidated successfully');
     } catch (e) {
       this.logger.error(`Failed to invalidate API key: ${e.message}`);
