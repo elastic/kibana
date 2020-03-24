@@ -81,10 +81,11 @@ export class ExprVis extends EventEmitter {
 
   private getType(type: string | VisType) {
     if (_.isString(type)) {
-      return getTypes().get(type);
-      if (!this.type) {
+      const newType = getTypes().get(type);
+      if (!newType) {
         throw new Error(`Invalid type "${type}"`);
       }
+      return newType;
     } else {
       return type;
     }

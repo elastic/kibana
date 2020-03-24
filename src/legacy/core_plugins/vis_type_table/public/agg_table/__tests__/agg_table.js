@@ -21,101 +21,18 @@ import $ from 'jquery';
 import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import {
-  metricOnly,
-  threeTermBuckets,
-  oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
-} from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
-import { npStart, npSetup } from '../../legacy_imports';
-import { search } from '../../../../../../plugins/data/public';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { npStart } from '../../legacy_imports';
 import { round } from 'lodash';
-import { tableVisTypeDefinition } from '../../table_vis_type';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tableVisResponseHandler } from '../../table_vis_response_handler';
-
-const { tabifyAggResponse } = search;
+import { tabifiedData } from './tabified_data';
 
 describe('Table Vis - AggTable Directive', function() {
   let $rootScope;
   let $compile;
-  let indexPattern;
   let settings;
-  const tabifiedData = {};
-
-  const init = () => {
-    const searchSource = {
-      getField: name => {
-        if (name === 'index') {
-          return indexPattern;
-        }
-      },
-    };
-    const vis1 = npStart.plugins.visualizations.createVis('table', {
-      type: 'table',
-      data: { searchSource, aggs: [] },
-    });
-    tabifiedData.metricOnly = tabifyAggResponse(vis1.data.aggs, metricOnly);
-
-    const vis2 = npStart.plugins.visualizations.createVis('table', {
-      type: 'table',
-      params: {
-        showMetricsAtAllLevels: true,
-      },
-      data: {
-        aggs: [
-          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-          { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
-          { type: 'terms', schema: 'bucket', params: { field: 'geo.src' } },
-          { type: 'terms', schema: 'bucket', params: { field: 'machine.os' } },
-        ],
-        searchSource,
-      },
-    });
-    vis2.data.aggs.aggs.forEach(function(agg, i) {
-      agg.id = 'agg_' + (i + 1);
-    });
-    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.data.aggs, threeTermBuckets, {
-      metricsAtAllLevels: true,
-    });
-
-    const vis3 = npStart.plugins.visualizations.createVis('table', {
-      type: 'table',
-      data: {
-        aggs: [
-          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-          { type: 'min', schema: 'metric', params: { field: '@timestamp' } },
-          { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
-          {
-            type: 'date_histogram',
-            schema: 'bucket',
-            params: { field: '@timestamp', interval: 'd' },
-          },
-          {
-            type: 'derivative',
-            schema: 'metric',
-            params: { metricAgg: 'custom', customMetric: { id: '5-orderAgg', type: 'count' } },
-          },
-          {
-            type: 'top_hits',
-            schema: 'metric',
-            params: { field: 'bytes', aggregate: { val: 'min' }, size: 1 },
-          },
-        ],
-        searchSource,
-      },
-    });
-    vis3.data.aggs.aggs.forEach(function(agg, i) {
-      agg.id = 'agg_' + (i + 1);
-    });
-
-    tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = tabifyAggResponse(
-      vis3.data.aggs,
-      oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative
-    );
-  };
 
   const initLocalAngular = () => {
     const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
@@ -124,20 +41,13 @@ describe('Table Vis - AggTable Directive', function() {
 
   beforeEach(initLocalAngular);
 
-  ngMock.inject(function() {
-    npSetup.plugins.visualizations.createBaseVisualization(tableVisTypeDefinition);
-  });
-
   beforeEach(ngMock.module('kibana/table_vis'));
   beforeEach(
-    ngMock.inject(function($injector, Private, config) {
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    ngMock.inject(function($injector, config) {
       settings = config;
 
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
-
-      init();
     })
   );
 
