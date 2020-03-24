@@ -204,7 +204,7 @@ export const validationHasErrors = (
   validationResults:
     | DatasourceValidationResults
     | DatasourceInputValidationResults
-    | ValidationEntry
+    | DatasourceConfigValidationResults
 ) => {
   const flattenedValidation = getFlattenedObject(validationResults);
   return !!Object.entries(flattenedValidation).find(([, value]) => !!value);

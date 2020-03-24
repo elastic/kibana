@@ -7,16 +7,17 @@ import React, { useState, Fragment } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
+  EuiTextColor,
+  EuiIconTip,
 } from '@elastic/eui';
 import { DatasourceInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
-import { isAdvancedVar, DatasourceConfigValidationResults } from '../services';
+import { isAdvancedVar, DatasourceConfigValidationResults, validationHasErrors } from '../services';
 import { DatasourceInputVarField } from './datasource_input_var_field';
 
 export const DatasourceInputStreamConfig: React.FunctionComponent<{
@@ -35,6 +36,9 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
   // Showing advanced options toggle state
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
+  // Errors state
+  const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
+
   const requiredVars: RegistryVarsEntry[] = [];
   const advancedVars: RegistryVarsEntry[] = [];
 
@@ -49,10 +53,33 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
   }
 
   return (
-    <EuiFlexGrid columns={2}>
-      <EuiFlexItem>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>
         <EuiSwitch
-          label={packageInputStream.title || packageInputStream.dataset}
+          label={
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
+                  {packageInputStream.title || packageInputStream.dataset}
+                </EuiTextColor>
+              </EuiFlexItem>
+              {hasErrors ? (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.ingestManager.createDatasource.stepConfigure.streamLevelErrorsTooltip"
+                        defaultMessage="Fix configuration errors"
+                      />
+                    }
+                    position="right"
+                    type="alert"
+                    iconProps={{ color: 'danger' }}
+                  />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          }
           checked={datasourceInputStream.enabled}
           onChange={e => {
             const enabled = e.target.checked;
@@ -70,7 +97,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
           </Fragment>
         ) : null}
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={1}>
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map(varDef => {
             const { name: varName, type: varType } = varDef;
@@ -146,6 +173,6 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-    </EuiFlexGrid>
+    </EuiFlexGroup>
   );
 };

@@ -6,23 +6,24 @@
 import React, { useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiTextColor,
   EuiSpacer,
   EuiButtonEmpty,
   EuiTitle,
+  EuiIconTip,
 } from '@elastic/eui';
 import { DatasourceInput, RegistryVarsEntry } from '../../../../types';
-import { isAdvancedVar, DatasourceInputValidationResults } from '../services';
+import { isAdvancedVar, DatasourceConfigValidationResults, validationHasErrors } from '../services';
 import { DatasourceInputVarField } from './datasource_input_var_field';
 
 export const DatasourceInputConfig: React.FunctionComponent<{
   packageInputVars?: RegistryVarsEntry[];
   datasourceInput: DatasourceInput;
   updateDatasourceInput: (updatedInput: Partial<DatasourceInput>) => void;
-  inputVarsValidationResults: DatasourceInputValidationResults;
+  inputVarsValidationResults: DatasourceConfigValidationResults;
   forceShowErrors?: boolean;
 }> = ({
   packageInputVars,
@@ -33,6 +34,9 @@ export const DatasourceInputConfig: React.FunctionComponent<{
 }) => {
   // Showing advanced options toggle state
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
+
+  // Errors state
+  const hasErrors = forceShowErrors && validationHasErrors(inputVarsValidationResults);
 
   const requiredVars: RegistryVarsEntry[] = [];
   const advancedVars: RegistryVarsEntry[] = [];
@@ -48,15 +52,36 @@ export const DatasourceInputConfig: React.FunctionComponent<{
   }
 
   return (
-    <EuiFlexGrid columns={2}>
-      <EuiFlexItem>
+    <EuiFlexGroup alignItems="flexStart">
+      <EuiFlexItem grow={1}>
         <EuiTitle size="s">
-          <h4>
-            <FormattedMessage
-              id="xpack.ingestManager.createDatasource.stepConfigure.inputSettingsTitle"
-              defaultMessage="Settings"
-            />
-          </h4>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <h4>
+                <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
+                  <FormattedMessage
+                    id="xpack.ingestManager.createDatasource.stepConfigure.inputSettingsTitle"
+                    defaultMessage="Settings"
+                  />
+                </EuiTextColor>
+              </h4>
+            </EuiFlexItem>
+            {hasErrors ? (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.ingestManager.createDatasource.stepConfigure.inputConfigErrorsTooltip"
+                      defaultMessage="Fix configuration errors"
+                    />
+                  }
+                  position="right"
+                  type="alert"
+                  iconProps={{ color: 'danger' }}
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiText color="subdued" size="s">
@@ -68,7 +93,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
           </p>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={1}>
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map(varDef => {
             const { name: varName, type: varType } = varDef;
@@ -144,6 +169,6 @@ export const DatasourceInputConfig: React.FunctionComponent<{
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-    </EuiFlexGrid>
+    </EuiFlexGroup>
   );
 };

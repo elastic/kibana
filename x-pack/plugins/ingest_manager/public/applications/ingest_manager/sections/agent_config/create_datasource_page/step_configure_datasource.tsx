@@ -9,7 +9,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiSteps,
   EuiPanel,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -99,8 +98,8 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   // Step A, define datasource
   const renderDefineDatasource = () => (
     <EuiPanel>
-      <EuiFlexGrid columns={2}>
-        <EuiFlexItem>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
           <DatasourceInputVarField
             varDef={{
               name: 'name',
@@ -123,7 +122,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
             forceShowErrors={submitAttempted}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={1}>
           <DatasourceInputVarField
             varDef={{
               name: 'description',
@@ -146,7 +145,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
             forceShowErrors={submitAttempted}
           />
         </EuiFlexItem>
-      </EuiFlexGrid>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiButtonEmpty
         flush="left"
@@ -163,8 +162,8 @@ export const StepConfigureDatasource: React.FunctionComponent<{
       {isShowingAdvancedDefine ? (
         <Fragment>
           <EuiSpacer size="m" />
-          <EuiFlexGrid columns={2}>
-            <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={1}>
               <EuiFormRow
                 label={
                   <FormattedMessage
@@ -190,7 +189,8 @@ export const StepConfigureDatasource: React.FunctionComponent<{
                 />
               </EuiFormRow>
             </EuiFlexItem>
-          </EuiFlexGrid>
+            <EuiFlexItem grow={1} />
+          </EuiFlexGroup>
         </Fragment>
       ) : null}
     </EuiPanel>
