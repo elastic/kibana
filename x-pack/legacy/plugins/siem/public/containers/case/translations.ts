@@ -16,3 +16,10 @@ export const TAG_FETCH_FAILURE = i18n.translate(
     defaultMessage: 'Failed to fetch Tags',
   }
 );
+
+export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = i18n.translate(
+  'xpack.siem.containers.case.pushToExterService',
+  {
+    defaultMessage: 'Successfully sent to ServiceNow',
+  }
+);
