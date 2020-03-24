@@ -7,9 +7,7 @@
 import React from 'react';
 import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 
-import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeDetail } from './redirect_to_node_detail';
-import { RedirectToNodeLogs } from './redirect_to_node_logs';
 import { RedirectToHostDetailViaIP } from './redirect_to_host_detail_via_ip';
 import { inventoryModels } from '../../../common/inventory_models';
 
@@ -19,13 +17,9 @@ interface LinkToPageProps {
 
 const ITEM_TYPES = inventoryModels.map(m => m.id).join('|');
 
-export const LinkToPage: React.FC<LinkToPageProps> = props => {
+export const LinkToMetricsPage: React.FC<LinkToPageProps> = props => {
   return (
     <Switch>
-      <Route
-        path={`${props.match.url}/:sourceId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
-        component={RedirectToNodeLogs}
-      />
       <Route
         path={`${props.match.url}/:nodeType(${ITEM_TYPES})-detail/:nodeId`}
         component={RedirectToNodeDetail}
@@ -34,8 +28,7 @@ export const LinkToPage: React.FC<LinkToPageProps> = props => {
         path={`${props.match.url}/host-detail-via-ip/:hostIp`}
         component={RedirectToHostDetailViaIP}
       />
-      <Route path={`${props.match.url}/:sourceId?/logs`} component={RedirectToLogs} />
-      <Redirect to="/infrastructure" />
+      <Redirect to="/" />
     </Switch>
   );
 };
