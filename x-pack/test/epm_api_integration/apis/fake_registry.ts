@@ -53,7 +53,7 @@ export class FakePackageRegistry {
 
   private static loadResponses(): { responses: Record<string, Package>; allSearchResp: string } {
     const responses: Record<string, Package> = {};
-    const packages = ['base-1.0.0', 'system-0.9.0', 'endpoint-1.0.0'];
+    const packages = ['base_1.0.0', 'system_0.9.0', 'endpoint_1.0.0'];
     for (const packageName of packages) {
       const packageResp = readFileSync(
         join(__dirname, 'fixtures/packages/package', packageName, 'package.json'),
@@ -67,7 +67,7 @@ export class FakePackageRegistry {
       const archive = readFileSync(
         join(__dirname, 'fixtures/packages/epr', packageName + '.tar.gz')
       );
-      const name = packageName.split('-')[0];
+      const name = packageName.split('_')[0];
       responses[name] = { packageResp, searchResp, archive };
     }
     const allSearchResp = readFileSync(
@@ -81,7 +81,7 @@ export class FakePackageRegistry {
     this.server.start(() => {});
     /**
      * Handle /search requests
-     * e.g. /search?package=endpoint-1.0.0
+     * e.g. /search?package=endpoint
      */
     this.server.on({
       method: 'GET',
