@@ -9,7 +9,7 @@ import { errors as elasticsearchErrors } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingSetupDeps, ReportingCore } from '../types';
+import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
@@ -19,12 +19,13 @@ const esErrors = elasticsearchErrors as Record<string, any>;
 
 export function registerJobGenerationRoutes(
   reporting: ReportingCore,
+  config: ReportingConfig,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const config = server.config();
-  const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
+  const DOWNLOAD_BASE_URL =
+    `${config.kbnConfig.get('server', 'basePath')}` + `${API_BASE_URL}/jobs/download`;
 
   /*
    * Generates enqueued job details to use in responses
@@ -66,11 +67,11 @@ export function registerJobGenerationRoutes(
     return err;
   }
 
-  registerGenerateFromJobParams(server, plugins, handler, handleError, logger);
+  registerGenerateFromJobParams(config, server, plugins, handler, handleError, logger);
 
   // Register beta panel-action download-related API's
-  if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(server, plugins, handler, handleError, logger);
-    registerGenerateCsvFromSavedObjectImmediate(reporting, server, plugins, logger);
+  if (config.get('csv', 'enablePanelActionDownload')) {
+    registerGenerateCsvFromSavedObject(config, server, plugins, handler, handleError, logger);
+    registerGenerateCsvFromSavedObjectImmediate(reporting, config, server, plugins, logger);
   }
 }
