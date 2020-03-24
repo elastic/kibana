@@ -294,18 +294,30 @@ export const getCreateRequest = () =>
     body: typicalPayload(),
   });
 
-export const createMlRuleRequest = () => {
+export const typicalMlRulePayload = () => {
   const { query, language, index, ...mlParams } = typicalPayload();
 
+  return {
+    ...mlParams,
+    type: 'machine_learning',
+    anomaly_threshold: 58,
+    machine_learning_job_id: 'typical-ml-job-id',
+  };
+};
+
+export const createMlRuleRequest = () => {
   return requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: {
-      ...mlParams,
-      type: 'machine_learning',
-      anomaly_threshold: 50,
-      machine_learning_job_id: 'some-uuid',
-    },
+    body: typicalMlRulePayload(),
+  });
+};
+
+export const createBulkMlRuleRequest = () => {
+  return requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: [typicalMlRulePayload()],
   });
 };
 
