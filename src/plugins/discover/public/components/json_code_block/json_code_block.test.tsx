@@ -16,20 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { getServices, wrapInI18nContext } from '../../../kibana_services';
+import React from 'react';
+import { shallow } from 'enzyme';
+import { JsonCodeBlock } from './json_code_block';
+import { IndexPattern } from '../../../../data/public';
 
-export function FieldNameDirectiveProvider(reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(FieldName),
-    [
-      ['field', { watchDepth: 'collection' }],
-      ['fieldName', { watchDepth: 'reference' }],
-      ['fieldType', { watchDepth: 'reference' }],
-    ],
-    { restrict: 'AE' },
-    {
-      useShortDots: getServices().uiSettings.get('shortDots:enable'),
-    }
-  );
-}
+it('returns the `JsonCodeEditor` component', () => {
+  const props = {
+    hit: { _index: 'test', _source: { test: 123 } },
+    columns: [],
+    indexPattern: {} as IndexPattern,
+    filter: jest.fn(),
+    onAddColumn: jest.fn(),
+    onRemoveColumn: jest.fn(),
+  };
+  expect(shallow(<JsonCodeBlock {...props} />)).toMatchSnapshot();
+});
