@@ -67,6 +67,11 @@ describe('.execute()', () => {
   ) {
     const navigateToApp = jest.fn();
     const dataPluginActions = dataPluginMock.createStartContract().actions;
+    const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
+    savedObjectsClient.get = jest
+      .fn()
+      .mockReturnValue({ attributes: { from: 'now-15m', to: 'now' } });
+
     const drilldown = new DashboardToDashboardDrilldown({
       getNavigateToApp: () => Promise.resolve(navigateToApp),
       getGetUrlGenerator: () =>
@@ -77,8 +82,7 @@ describe('.execute()', () => {
             ) as UrlGeneratorContract<string>
         ),
       getDataPluginActions: () => Promise.resolve(dataPluginActions),
-      getSavedObjectsClient: () =>
-        Promise.resolve(savedObjectsServiceMock.createStartContract().client),
+      getSavedObjectsClient: () => Promise.resolve(savedObjectsClient),
     });
     const selectRangeFiltersSpy = jest
       .spyOn(dataPluginActions, 'selectRangeActionGetFilters')
