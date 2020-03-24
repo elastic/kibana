@@ -97,9 +97,13 @@ export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_UR
 export const UNAUTHENTICATED_USER = 'Unauthenticated';
 
 /*
+  Licensing requirements
+ */
+export const MINIMUM_ML_LICENSE = 'platinum';
+
+/*
   Rule notifications options
 */
-
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
