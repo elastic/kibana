@@ -60,7 +60,6 @@ export class DashboardToDashboardDrilldown
   ) => {
     const getUrlGenerator = await this.params.getGetUrlGenerator();
     const navigateToApp = await this.params.getNavigateToApp();
-    const savedObjectsClient = await this.params.getSavedObjectsClient();
 
     const {
       selectRangeActionGetFilters,
@@ -72,16 +71,6 @@ export class DashboardToDashboardDrilldown
       filters: currentFilters,
     } = context.embeddable.getInput();
 
-    const savedDashboard = await savedObjectsClient.get<{ timeTo: string; timeFrom: string }>(
-      'dashboard',
-      config.dashboardId as string
-    );
-
-    const defaultTimeRange = {
-      to: savedDashboard.attributes.timeTo,
-      from: savedDashboard.attributes.timeFrom,
-    };
-
     // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
     // otherwise preserve only pinned
     const filters =
@@ -92,7 +81,7 @@ export class DashboardToDashboardDrilldown
     // if useCurrentDashboardDataRange is enabled, then preserve current time range
     // if undefined is passed, then destination dashboard will figure out time range itself
     // for brush event this time range would be overwritten
-    let timeRange = config.useCurrentDateRange ? currentTimeRange : defaultTimeRange;
+    let timeRange = config.useCurrentDateRange ? currentTimeRange : undefined;
 
     if (context.data.range) {
       // look up by range
