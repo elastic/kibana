@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PluginInitializerContext } from 'src/core/public';
-
-export { LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart } from './plugin';
 import { LicenseManagementUIPlugin } from './plugin';
 import './application/index.scss';
 
+export { LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart } from './plugin';
 export const plugin = (ctx: PluginInitializerContext) => new LicenseManagementUIPlugin(ctx);

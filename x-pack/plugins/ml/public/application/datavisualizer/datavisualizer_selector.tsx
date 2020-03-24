@@ -54,7 +54,10 @@ export const DatavisualizerSelector: FC = () => {
     services: { licenseManagement },
   } = useMlKibana();
 
-  const startTrialVisible = licenseManagement.enabled === true && isFullLicense() === false;
+  const startTrialVisible =
+    licenseManagement !== undefined &&
+    licenseManagement.enabled === true &&
+    isFullLicense() === false;
 
   return (
     <Fragment>

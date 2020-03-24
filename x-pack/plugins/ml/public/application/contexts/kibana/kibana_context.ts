@@ -16,7 +16,7 @@ import { LicenseManagementUIPluginSetup } from '../../../../../license_managemen
 interface StartPlugins {
   data: DataPublicPluginStart;
   security: SecurityPluginSetup;
-  licenseManagement: LicenseManagementUIPluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 export type StartServices = CoreStart & StartPlugins;
 // eslint-disable-next-line react-hooks/rules-of-hooks

@@ -27,7 +27,7 @@ export interface MlSetupDependencies {
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
   usageCollection: UsageCollectionSetup;
-  licenseManagement: LicenseManagementUIPluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
 export class MlPlugin implements Plugin<Setup, Start> {
