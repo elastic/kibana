@@ -188,7 +188,7 @@ describe('connector_add_flyout', () => {
     expect(element.exists()).toBeTruthy();
     expect(element.first().prop('betaBadgeLabel')).toEqual('Upgrade');
     expect(element.first().prop('betaBadgeTooltipContent')).toEqual(
-      'This connector is disabled because it requires a gold license.'
+      'This connector requires a Gold license.'
     );
   });
 });

@@ -49,7 +49,14 @@ export interface Operation {
   parent: Operation | null;
   children: Operation[];
 
-  // Only exists on top level
+  /**
+   * Only exists on top level.
+   *
+   * @remark
+   * For now, when we init profile data for rendering we take a top-level
+   * operation and designate it the root of the operations tree - this is not
+   * information we get from ES.
+   */
   treeRoot?: Operation;
 
   depth?: number;
