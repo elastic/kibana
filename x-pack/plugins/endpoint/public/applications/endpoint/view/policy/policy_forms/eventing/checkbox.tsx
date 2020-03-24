@@ -28,13 +28,15 @@ export const EventingCheckbox: React.FC<{
 
   const handleRadioChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newPayload = clone(policyConfig);
-      newPayload[os].eventing[protectionField] = event.target.checked;
+      if (policyConfig) {
+        const newPayload = clone(policyConfig);
+        newPayload[os].eventing[protectionField] = event.target.checked;
 
-      dispatch({
-        type: 'userChangedPolicyConfig',
-        payload: { policyConfig: newPayload },
-      });
+        dispatch({
+          type: 'userChangedPolicyConfig',
+          payload: { policyConfig: newPayload },
+        });
+      }
     },
     [dispatch, os, policyConfig, protectionField]
   );
@@ -44,7 +46,7 @@ export const EventingCheckbox: React.FC<{
       <EuiCheckbox
         id={id}
         label={name}
-        checked={eventing[protectionField]}
+        checked={eventing && eventing[protectionField]}
         onChange={handleRadioChange}
       />
     </>

@@ -12,10 +12,10 @@ import { policyDetailsMiddlewareFactory } from './middleware';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { DepsStartMock, depsStartMock } from '../../mocks';
-import { selectPolicyConfig } from './selectors';
+import { selectPolicyConfig, selectWindowsEventing } from './selectors';
 import { clone } from '../../models/policy_details_config';
 
-describe('policy details store concerns', () => {
+describe('policy details: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let store: Store<PolicyDetailsState>;
@@ -33,27 +33,24 @@ describe('policy details store concerns', () => {
     dispatch = store.dispatch;
   });
 
-  test('it updates state on `userChangesPolicyConfig` action', async () => {
-    const newPayload1 = clone(selectPolicyConfig);
-    newPayload1.windows.eventing.process = true;
-    newPayload1.windows.eventing.network = false;
+  describe('when the user has enabled windows process eventing', () => {
+    beforeEach(() => {
+      const policyConfig = selectPolicyConfig(getState());
+      if (!policyConfig) {
+        throw new Error();
+      }
 
-    dispatch({
-      type: 'userChangedPolicyConfig',
-      payload: { policyConfig: newPayload1 },
+      const newPayload1 = clone(policyConfig);
+      newPayload1.windows.eventing.process = true;
+
+      dispatch({
+        type: 'userChangedPolicyConfig',
+        payload: { policyConfig: newPayload1 },
+      });
     });
-    expect(selectPolicyConfig(getState()).windows.eventing.process).toEqual(true);
-    expect(selectPolicyConfig(getState()).windows.eventing.network).toEqual(false);
 
-    const newPayload2 = clone(selectPolicyConfig);
-    newPayload2.windows.eventing.process = false;
-    newPayload2.windows.eventing.network = true;
-
-    dispatch({
-      type: 'userChangedPolicyConfig',
-      payload: { policyConfig: newPayload2 },
+    it('windows process eventing is enabled', async () => {
+      expect(selectWindowsEventing(getState())!.process).toEqual(true);
     });
-    expect(selectPolicyConfig(getState()).windows.eventing.process).toEqual(false);
-    expect(selectPolicyConfig(getState()).windows.eventing.network).toEqual(true);
   });
 });

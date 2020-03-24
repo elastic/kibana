@@ -29,9 +29,9 @@ export const selectPolicyIdFromParams: (state: PolicyDetailsState) => string = c
   }
 );
 
-export const selectPolicyConfig = (state: Immutable<PolicyDetailsState>) =>
-  state.policyConfig as Immutable<PolicyDetailsState>;
+export const selectPolicyConfig = (state: Immutable<PolicyDetailsState>) => state.policyConfig;
 
 export const selectWindowsEventing = (state: PolicyDetailsState) => {
-  return selectPolicyConfig(state).windows.eventing;
+  const policyConfig = selectPolicyConfig(state);
+  return policyConfig && policyConfig.windows.eventing;
 };

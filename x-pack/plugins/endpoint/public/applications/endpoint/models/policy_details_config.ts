@@ -4,21 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash';
 import { PolicyDetailsConfig } from '../types';
+
+const entries = <T extends object>(o: T): Array<[keyof T, T[keyof T]]> =>
+  Object.entries(o) as Array<[keyof T, T[keyof T]]>;
+type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
+
 /**
  * Returns a deep copy of PolicyDetailsConfig
  */
 export function clone(policyDetailsConfig: PolicyDetailsConfig): PolicyDetailsConfig {
-  return cloneDeep(policyDetailsConfig);
-
-  /*
-  let clonedConfig: Partial<PolicyDetailsConfig> = {};
-  for (const [key, val] of Object.entries(policyDetailsConfig)) {
+  const clonedConfig: DeepPartial<PolicyDetailsConfig> = {};
+  for (const [key, val] of entries(policyDetailsConfig)) {
     if (typeof val === 'object') {
-      for (const [key2, val2] of Object.entries(val)) {
+      const valClone: Partial<typeof val> = {};
+      clonedConfig[key] = valClone as typeof valClone;
+      for (const [key2, val2] of entries(val)) {
         if (typeof val2 === 'object') {
-          clonedConfig[key][key2] = {
+          valClone[key2] = {
             ...val2,
           };
         } else {
@@ -31,6 +34,5 @@ export function clone(policyDetailsConfig: PolicyDetailsConfig): PolicyDetailsCo
       clonedConfig[key] = val;
     }
   }
-  return clonedConfig;
- */
+  return clonedConfig as PolicyDetailsConfig;
 }
