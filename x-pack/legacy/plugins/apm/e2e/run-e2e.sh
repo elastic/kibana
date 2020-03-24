@@ -71,7 +71,7 @@ ${APM_IT_DIR}/scripts/compose.py start master \
 if [ $? -ne 0 ]; then
     printf "⚠️  apm-integration-testing could not be started.\n"
     printf "Please see the logs in ${TMP_DIR}/apm-it.log\n\n"
-    printf "As a last resort, reset docker with:\n\n${APM_IT_DIR}/scripts/compose.py stop && system prune --all --force --volumes\n"
+    printf "As a last resort, reset docker with:\n\n cd ${APM_IT_DIR} && scripts/compose.py stop && docker system prune --all --force --volumes\n"
     exit 1
 fi
 
