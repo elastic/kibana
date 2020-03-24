@@ -55,6 +55,7 @@ import { SelectSeverity } from '../components/controls/select_severity/select_se
 import {
   ExplorerQueryBar,
   getKqlQueryValues,
+  DEFAULT_QUERY_LANG,
 } from './components/explorer_query_bar/explorer_query_bar';
 import {
   removeFilterFromQueryString,
@@ -69,8 +70,6 @@ import { getSwimlaneContainerWidth } from './legacy_utils';
 import {
   DRAG_SELECT_ACTION,
   FILTER_ACTION,
-  QUERY_LANGUAGE_KUERY,
-  // QUERY_LANGUAGE_LUCENE,
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
@@ -115,7 +114,7 @@ export class Explorer extends React.Component {
     showCharts: PropTypes.bool.isRequired,
   };
 
-  state = { filterIconTriggeredQuery: undefined };
+  state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
 
   _unsubscribeAll = new Subject();
   // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
@@ -222,7 +221,7 @@ export class Explorer extends React.Component {
       this.props.setSelectedCells(selectedCells);
     }
   };
-  // Update to kuery. Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
+  // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
   // and will cause a syntax error when called with getKqlQueryValues
   applyFilter = (fieldName, fieldValue, action) => {
     const { filterActive, indexPattern, queryString } = this.props.explorerState;
@@ -257,7 +256,7 @@ export class Explorer extends React.Component {
     try {
       const { clearSettings, settings } = getKqlQueryValues({
         inputString: `${newQueryString}`,
-        queryLanguage: QUERY_LANGUAGE_KUERY,
+        queryLanguage: this.state.language,
         indexPattern,
       });
 
@@ -278,6 +277,8 @@ export class Explorer extends React.Component {
       );
     }
   };
+
+  updateLanguage = language => this.setState({ language });
 
   render() {
     const { showCharts, severity } = this.props;
@@ -369,6 +370,7 @@ export class Explorer extends React.Component {
                 indexPattern={indexPattern}
                 queryString={queryString}
                 filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
+                updateLanguage={this.updateLanguage}
               />
             </div>
           )}

@@ -15,6 +15,8 @@ import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/i
 import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE } from '../../explorer_constants';
 import { explorerService } from '../../explorer_dashboard_service';
 
+export const DEFAULT_QUERY_LANG = QUERY_LANGUAGE_KUERY;
+
 export function getKqlQueryValues({
   inputString,
   queryLanguage,
@@ -82,7 +84,7 @@ function getInitSearchInputState({
   } else {
     return {
       query: '',
-      language: QUERY_LANGUAGE_KUERY,
+      language: DEFAULT_QUERY_LANG,
     };
   }
 }
@@ -93,6 +95,7 @@ interface ExplorerQueryBarProps {
   filterPlaceHolder: string;
   indexPattern: IIndexPattern;
   queryString?: string;
+  updateLanguage: (language: string) => void;
 }
 
 export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
@@ -101,6 +104,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   filterPlaceHolder,
   indexPattern,
   queryString,
+  updateLanguage,
 }) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(
@@ -116,7 +120,12 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
     }
   }, [filterIconTriggeredQuery]);
 
-  const searchChangeHandler = (query: Query) => setSearchInput(query);
+  const searchChangeHandler = (query: Query) => {
+    if (searchInput.language !== query.language) {
+      updateLanguage(query.language);
+    }
+    setSearchInput(query);
+  };
   const applyInfluencersFilterQuery = (query: Query) => {
     const { clearSettings, settings } = getKqlQueryValues({
       inputString: query.query,
