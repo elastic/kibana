@@ -57,7 +57,7 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('anomaly explorer', function() {
-    this.tags(['smoke', 'mlqa', 'ro']);
+    this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
       await ml.securityUI.loginAsMlPowerUser();
