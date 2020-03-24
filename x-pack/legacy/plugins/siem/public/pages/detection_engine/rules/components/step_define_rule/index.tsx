@@ -5,7 +5,6 @@
  */
 
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
 import React, { FC, memo, useCallback, useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
