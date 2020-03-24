@@ -34,7 +34,7 @@ export function openmetricsMetricsSpecProvider(context: TutorialContext): Tutori
   return {
     id: 'openmetricsMetrics',
     name: i18n.translate('home.tutorials.openmetricsMetrics.nameTitle', {
-      defaultMessage: 'STAN metrics',
+      defaultMessage: 'Openmetrics metrics',
     }),
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.openmetricsMetrics.shortDescription', {
