@@ -70,7 +70,7 @@ describe('alert action security call out', () => {
     });
 
     expect(component?.find(EuiCallOut).prop('title')).toMatchInlineSnapshot(
-      `"Alerts cannot be created while TLS is not enabled."`
+      `"Alerts cannot be created while TLS is disabled."`
     );
 
     expect(component?.find(EuiButton).prop('href')).toMatchInlineSnapshot(
