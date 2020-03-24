@@ -34,15 +34,15 @@ export function openmetricsMetricsSpecProvider(context: TutorialContext): Tutori
   return {
     id: 'openmetricsMetrics',
     name: i18n.translate('home.tutorials.openmetricsMetrics.nameTitle', {
-      defaultMessage: 'Openmetrics metrics',
+      defaultMessage: 'OpenMetrics metrics',
     }),
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.openmetricsMetrics.shortDescription', {
-      defaultMessage: 'Fetch metrics from an endpoint that serves metrics in Openmetrics format.',
+      defaultMessage: 'Fetch metrics from an endpoint that serves metrics in OpenMetrics format.',
     }),
     longDescription: i18n.translate('home.tutorials.openmetricsMetrics.longDescription', {
       defaultMessage:
-        'The `openmetrics` Metricbeat module fetches metrics from an endpoint that serves metrics in Openmetrics format. \
+        'The `openmetrics` Metricbeat module fetches metrics from an endpoint that serves metrics in OpenMetrics format. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-openmetrics.html',
