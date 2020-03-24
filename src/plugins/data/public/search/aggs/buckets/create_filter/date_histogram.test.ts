@@ -20,24 +20,32 @@
 import moment from 'moment';
 import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions } from '../_interval_options';
-import { AggConfigs } from '../../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
-import { dateHistogramBucketAgg, IBucketDateHistogramAggConfig } from '../date_histogram';
+import { AggConfigs, AggConfigsOptions } from '../../agg_configs';
+import {
+  mockDataServices,
+  mockAggTypesRegistry,
+  createMockedAggTypesDependencies,
+} from '../../test_helpers';
+import { getDateHistogramBucketAgg, IBucketDateHistogramAggConfig } from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { RangeFilter } from '../../../../../common';
+import { AggTypesDependencies } from '../../types';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
-    beforeEach(() => {
-      mockDataServices();
-    });
-
-    const typesRegistry = mockAggTypesRegistry([dateHistogramBucketAgg]);
-
+    let aggTypesDependencies: AggTypesDependencies;
+    let typesRegistry: AggConfigsOptions['typesRegistry'];
     let agg: IBucketDateHistogramAggConfig;
     let filter: RangeFilter;
     let bucketStart: any;
     let field: any;
+
+    beforeEach(() => {
+      aggTypesDependencies = createMockedAggTypesDependencies();
+      typesRegistry = mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]);
+
+      mockDataServices();
+    });
 
     const init = (interval: string = 'auto', duration: any = moment.duration(15, 'minutes')) => {
       field = {

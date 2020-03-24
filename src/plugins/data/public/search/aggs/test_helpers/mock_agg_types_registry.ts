@@ -23,7 +23,8 @@ import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { getAggTypes } from '../agg_types';
 import { BucketAggType } from '../buckets/_bucket_agg_type';
 import { MetricAggType } from '../metrics/metric_agg_type';
-
+import { queryServiceMock } from '../../../query/mocks';
+import { AggTypesDependencies } from '../types';
 /**
  * Testing utility which creates a new instance of AggTypesRegistry,
  * registers the provided agg types, and returns AggTypesRegistry.start()
@@ -51,10 +52,21 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
       }
     });
   } else {
-    const aggTypes = getAggTypes({ uiSettings: coreMock.createSetup().uiSettings });
+    const aggTypes = getAggTypes(createMockedAggTypesDependencies());
+
     aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
     aggTypes.metrics.forEach(type => registrySetup.registerMetric(type));
   }
 
   return registry.start();
 }
+
+/**
+ * Testing utility which creates a mocked instance of AggTypesDependencies,
+ *
+ * @internal
+ */
+export const createMockedAggTypesDependencies = (): AggTypesDependencies => ({
+  core: coreMock.createSetup(),
+  query: queryServiceMock.createSetupContract(),
+});

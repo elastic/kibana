@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { mockAggTypesRegistry } from './mock_agg_types_registry';
+export { mockAggTypesRegistry, createMockedAggTypesDependencies } from './mock_agg_types_registry';
 export { mockDataServices } from './mock_data_services';

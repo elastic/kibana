@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-
-import { IUiSettingsClient } from 'src/core/public';
+import { size, transform, cloneDeep } from 'lodash';
 
 import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
@@ -30,6 +28,8 @@ import { Storage } from '../../../../../../plugins/kibana_utils/public';
 
 import { getEsQueryConfig, buildEsQuery, Query } from '../../../../common';
 import { getQueryLog } from '../../../query';
+
+import { AggTypesDependencies } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',
@@ -43,9 +43,8 @@ interface FilterValue {
   id: string;
 }
 
-export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
-  const { uiSettings } = deps;
-  return new BucketAggType({
+export const getFiltersBucketAgg = ({ core: { uiSettings } }: AggTypesDependencies) =>
+  new BucketAggType({
     name: BUCKET_TYPES.FILTERS,
     title: filtersTitle,
     createFilter: createFilterFilters,
@@ -58,7 +57,7 @@ export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
         ],
         write(aggConfig, output) {
           const inFilters: FilterValue[] = aggConfig.params.filters;
-          if (!_.size(inFilters)) return;
+          if (!size(inFilters)) return;
 
           inFilters.forEach(filter => {
             const persistedLog = getQueryLog(
@@ -70,10 +69,10 @@ export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
             persistedLog.add(filter.input.query);
           });
 
-          const outFilters = _.transform(
+          const outFilters = transform(
             inFilters,
             function(filters, filter) {
-              const input = _.cloneDeep(filter.input);
+              const input = cloneDeep(filter.input);
 
               if (!input) {
                 console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
@@ -100,7 +99,7 @@ export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
             {}
           );
 
-          if (!_.size(outFilters)) return;
+          if (!size(outFilters)) return;
 
           const params = output.params || (output.params = {});
           params.filters = outFilters;
@@ -108,4 +107,3 @@ export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
       },
     ],
   });
-}
