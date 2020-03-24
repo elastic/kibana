@@ -95,12 +95,15 @@ export class Plugin {
       name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
         defaultMessage: 'SIEM',
       }),
+      order: 1100,
       icon: 'securityAnalyticsApp',
       navLinkId: 'siem',
       app: ['siem', 'kibana'],
       catalogue: ['siem'],
       privileges: {
         all: {
+          app: ['siem', 'kibana'],
+          catalogue: ['siem'],
           api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
             all: [
@@ -126,6 +129,8 @@ export class Plugin {
           ],
         },
         read: {
+          app: ['siem', 'kibana'],
+          catalogue: ['siem'],
           api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
             all: ['alert', 'action', 'action_task_params'],
