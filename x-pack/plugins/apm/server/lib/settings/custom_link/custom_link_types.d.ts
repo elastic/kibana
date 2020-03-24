@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
-import { FilterOptions } from '../../../routes/settings/custom_link';
+import { FilterOptions } from '../../../../common/custom_link_filter_options';
 
 export type CustomLink = {
   id?: string;

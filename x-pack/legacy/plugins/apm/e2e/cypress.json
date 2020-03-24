@@ -1,5 +1,6 @@
 {
-  "baseUrl": "http://localhost:5601",
+  "nodeVersion": "system",
+  "baseUrl": "http://localhost:5701",
   "video": false,
   "trashAssetsBeforeRuns": false,
   "fileServerFolder": "../",
