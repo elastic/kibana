@@ -61,7 +61,10 @@ export function filterFieldList(
   fieldList: IndexPatternField[],
   filterState: FieldFilterState,
   fieldCount: Record<string, number>
-) {
+): IndexPatternField[] {
+  if (!Array.isArray(fieldList)) {
+    return [];
+  }
   return fieldList.filter(field => isFieldFiltered(field, filterState, fieldCount));
 }
 
@@ -69,7 +72,7 @@ export function isFieldFiltered(
   field: IndexPatternField,
   filterState: FieldFilterState,
   fieldCounts: Record<string, number>
-) {
+): boolean {
   const matchFilter = filterState.type === 'any' || field.type === filterState.type;
   const isAggregatable =
     filterState.aggregatable === null || field.aggregatable === filterState.aggregatable;
