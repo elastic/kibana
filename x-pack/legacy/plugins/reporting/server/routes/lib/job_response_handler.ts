@@ -5,12 +5,11 @@
  */
 
 import Boom from 'boom';
-import { ResponseToolkit } from 'hapi';
 import { ElasticsearchServiceSetup } from 'kibana/server';
+import { ResponseToolkit } from 'hapi';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
-import { ExportTypesRegistry } from '../../../types';
+import { ExportTypesRegistry, ServerFacade } from '../../../types';
 import { jobsQueryFactory } from '../../lib/jobs_query';
-import { ReportingConfig } from '../../types';
 import { getDocumentPayloadFactory } from './get_document_payload';
 
 interface JobResponseHandlerParams {
@@ -22,12 +21,12 @@ interface JobResponseHandlerOpts {
 }
 
 export function downloadJobResponseHandlerFactory(
-  config: ReportingConfig,
+  server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   exportTypesRegistry: ExportTypesRegistry
 ) {
-  const jobsQuery = jobsQueryFactory(config, elasticsearch);
-  const getDocumentPayload = getDocumentPayloadFactory(exportTypesRegistry);
+  const jobsQuery = jobsQueryFactory(server, elasticsearch);
+  const getDocumentPayload = getDocumentPayloadFactory(server, exportTypesRegistry);
 
   return function jobResponseHandler(
     validJobTypes: string[],
@@ -71,10 +70,10 @@ export function downloadJobResponseHandlerFactory(
 }
 
 export function deleteJobResponseHandlerFactory(
-  config: ReportingConfig,
+  server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup
 ) {
-  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+  const jobsQuery = jobsQueryFactory(server, elasticsearch);
 
   return async function deleteJobResponseHander(
     validJobTypes: string[],

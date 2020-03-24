@@ -9,5 +9,5 @@
   ],
   "ui": false,
   "requiredPlugins": ["apm_oss", "data", "home", "licensing"],
-  "optionalPlugins": ["cloud", "usageCollection", "taskManager"]
+  "optionalPlugins": ["cloud", "usageCollection", "taskManager","actions", "alerting"]
 }

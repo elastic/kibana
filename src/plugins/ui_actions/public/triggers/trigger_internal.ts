@@ -72,6 +72,7 @@ export class TriggerInternal<T extends TriggerId> {
     const panel = await buildContextMenuForActions({
       actions,
       actionContext: context,
+      title: this.trigger.title,
       closeMenu: () => session.close(),
     });
     const session = openContextMenu([panel]);

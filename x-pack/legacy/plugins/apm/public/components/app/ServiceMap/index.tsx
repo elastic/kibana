@@ -23,6 +23,7 @@ import { EmptyBanner } from './EmptyBanner';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
 import { BetaBadge } from './BetaBadge';
+import { useTrackPageview } from '../../../../../../../plugins/observability/public';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -54,6 +55,9 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   }, [serviceName, uiFilters, urlParams]);
 
   const { ref, height, width } = useRefDimensions();
+
+  useTrackPageview({ app: 'apm', path: 'service_map' });
+  useTrackPageview({ app: 'apm', path: 'service_map', delay: 15000 });
 
   if (!license) {
     return null;

@@ -24,52 +24,62 @@ function getMockUsageCollection() {
     makeUsageCollector: options => {
       return new MockUsageCollector(this, options);
     },
-    registerCollector: sinon.stub(),
   };
 }
 
-function getPluginsMock(
-  { license, usageCollection = getMockUsageCollection() } = { license: 'platinum' }
-) {
-  const mockXpackMain = {
-    info: {
-      isAvailable: sinon.stub().returns(true),
-      feature: () => ({
-        getLicenseCheckResults: sinon.stub(),
-      }),
-      license: {
-        isOneOf: sinon.stub().returns(false),
-        getType: sinon.stub().returns(license),
+function getServerMock(customization) {
+  const getLicenseCheckResults = sinon.stub().returns({});
+  const defaultServerMock = {
+    plugins: {
+      security: {
+        isAuthenticated: sinon.stub().returns(true),
       },
-      toJSON: () => ({ b: 1 }),
-    },
-  };
-  return {
-    usageCollection,
-    __LEGACY: {
-      plugins: {
-        xpack_main: mockXpackMain,
+      xpack_main: {
+        info: {
+          isAvailable: sinon.stub().returns(true),
+          feature: () => ({
+            getLicenseCheckResults,
+          }),
+          license: {
+            isOneOf: sinon.stub().returns(false),
+            getType: sinon.stub().returns('platinum'),
+          },
+          toJSON: () => ({ b: 1 }),
+        },
       },
     },
+    log: () => {},
+    config: () => ({
+      get: key => {
+        if (key === 'xpack.reporting.enabled') {
+          return true;
+        } else if (key === 'xpack.reporting.index') {
+          return '.reporting-index';
+        }
+      },
+    }),
   };
+  return Object.assign(defaultServerMock, customization);
 }
 
 const getResponseMock = (customization = {}) => customization;
 
 describe('license checks', () => {
-  let mockConfig;
-  beforeAll(async () => {
-    const mockReporting = await createMockReportingCore();
-    mockConfig = await mockReporting.getConfig();
-  });
-
   describe('with a basic license', () => {
     let usageStats;
     beforeAll(async () => {
-      const plugins = getPluginsMock({ license: 'basic' });
+      const serverWithBasicLicenseMock = getServerMock();
+      serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = sinon
+        .stub()
+        .returns('basic');
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
-      const { fetch } = getReportingUsageCollector(mockConfig, plugins, exportTypesRegistry);
-      usageStats = await fetch(callClusterMock, exportTypesRegistry);
+      const usageCollection = getMockUsageCollection();
+      const { fetch: getReportingUsage } = getReportingUsageCollector(
+        serverWithBasicLicenseMock,
+        usageCollection,
+        exportTypesRegistry
+      );
+      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -88,10 +98,18 @@ describe('license checks', () => {
   describe('with no license', () => {
     let usageStats;
     beforeAll(async () => {
-      const plugins = getPluginsMock({ license: 'none' });
+      const serverWithNoLicenseMock = getServerMock();
+      serverWithNoLicenseMock.plugins.xpack_main.info.license.getType = sinon
+        .stub()
+        .returns('none');
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
-      const { fetch } = getReportingUsageCollector(mockConfig, plugins, exportTypesRegistry);
-      usageStats = await fetch(callClusterMock, exportTypesRegistry);
+      const usageCollection = getMockUsageCollection();
+      const { fetch: getReportingUsage } = getReportingUsageCollector(
+        serverWithNoLicenseMock,
+        usageCollection,
+        exportTypesRegistry
+      );
+      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -110,10 +128,18 @@ describe('license checks', () => {
   describe('with platinum license', () => {
     let usageStats;
     beforeAll(async () => {
-      const plugins = getPluginsMock({ license: 'platinum' });
+      const serverWithPlatinumLicenseMock = getServerMock();
+      serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = sinon
+        .stub()
+        .returns('platinum');
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
-      const { fetch } = getReportingUsageCollector(mockConfig, plugins, exportTypesRegistry);
-      usageStats = await fetch(callClusterMock, exportTypesRegistry);
+      const usageCollection = getMockUsageCollection();
+      const { fetch: getReportingUsage } = getReportingUsageCollector(
+        serverWithPlatinumLicenseMock,
+        usageCollection,
+        exportTypesRegistry
+      );
+      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -132,10 +158,18 @@ describe('license checks', () => {
   describe('with no usage data', () => {
     let usageStats;
     beforeAll(async () => {
-      const plugins = getPluginsMock({ license: 'basic' });
+      const serverWithBasicLicenseMock = getServerMock();
+      serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = sinon
+        .stub()
+        .returns('basic');
       const callClusterMock = jest.fn(() => Promise.resolve({}));
-      const { fetch } = getReportingUsageCollector(mockConfig, plugins, exportTypesRegistry);
-      usageStats = await fetch(callClusterMock, exportTypesRegistry);
+      const usageCollection = getMockUsageCollection();
+      const { fetch: getReportingUsage } = getReportingUsageCollector(
+        serverWithBasicLicenseMock,
+        usageCollection,
+        exportTypesRegistry
+      );
+      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -149,11 +183,21 @@ describe('license checks', () => {
 });
 
 describe('data modeling', () => {
+  let getReportingUsage;
+  beforeAll(async () => {
+    const usageCollection = getMockUsageCollection();
+    const serverWithPlatinumLicenseMock = getServerMock();
+    serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = sinon
+      .stub()
+      .returns('platinum');
+    ({ fetch: getReportingUsage } = getReportingUsageCollector(
+      serverWithPlatinumLicenseMock,
+      usageCollection,
+      exportTypesRegistry
+    ));
+  });
+
   test('with normal looking usage data', async () => {
-    const mockReporting = await createMockReportingCore();
-    const mockConfig = await mockReporting.getConfig();
-    const plugins = getPluginsMock();
-    const { fetch } = getReportingUsageCollector(mockConfig, plugins, exportTypesRegistry);
     const callClusterMock = jest.fn(() =>
       Promise.resolve(
         getResponseMock({
@@ -276,7 +320,7 @@ describe('data modeling', () => {
       )
     );
 
-    const usageStats = await fetch(callClusterMock);
+    const usageStats = await getReportingUsage(callClusterMock);
     expect(usageStats).toMatchInlineSnapshot(`
       Object {
         "PNG": Object {
@@ -371,16 +415,20 @@ describe('data modeling', () => {
 });
 
 describe('Ready for collection observable', () => {
+  let mockReporting;
+
+  beforeEach(async () => {
+    mockReporting = await createMockReportingCore();
+  });
+
   test('converts observable to promise', async () => {
-    const mockReporting = await createMockReportingCore();
-    const mockConfig = await mockReporting.getConfig();
-
-    const usageCollection = getMockUsageCollection();
+    const serverWithBasicLicenseMock = getServerMock();
     const makeCollectorSpy = sinon.spy();
-    usageCollection.makeUsageCollector = makeCollectorSpy;
-
-    const plugins = getPluginsMock({ usageCollection });
-    registerReportingUsageCollector(mockReporting, mockConfig, plugins);
+    const usageCollection = {
+      makeUsageCollector: makeCollectorSpy,
+      registerCollector: sinon.stub(),
+    };
+    registerReportingUsageCollector(mockReporting, serverWithBasicLicenseMock, usageCollection);
 
     const [args] = makeCollectorSpy.firstCall.args;
     expect(args).toMatchInlineSnapshot(`
