@@ -31,7 +31,7 @@ export const MACHINE_LEARNING_DROPDOWN = '[data-test-subj="mlJobSelect"] button'
 
 export const MACHINE_LEARNING_LIST = '.euiContextMenuItem__text';
 
-export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearning"]';
+export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
 export const MITRE_TACTIC = '.euiContextMenuItem__text';
 
