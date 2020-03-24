@@ -41,7 +41,6 @@ import {
   IExpressionLoaderParams,
   ExpressionsStart,
 } from '../../../../../../../plugins/expressions/public';
-import { PersistedState } from '../../../../../../../plugins/visualizations/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
@@ -55,8 +54,6 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
-  appState?: { save(): void };
-  uiState?: PersistedState;
   uiActions?: VisualizationsStartDeps['uiActions'];
 }
 
@@ -67,8 +64,6 @@ export interface VisualizeInput extends EmbeddableInput {
   vis?: {
     colors?: { [key: string]: string };
   };
-  appState?: { save(): void };
-  uiState?: PersistedState;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
