@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { useKibana } from '../../../../../lib/kibana';
 import { SiemJob } from '../../../../../components/ml_popover/types';
@@ -54,23 +55,27 @@ export const JobStatusBadge: React.FC<{ job: SiemJob }> = ({ job }) => {
   );
 };
 
+const JobLink = styled(EuiLink)`
+  margin-right: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
+const Wrapper = styled.div`
+  overflow: hidden;
+`;
+
 export const MlJobDescription: React.FC<{ job: SiemJob }> = ({ job }) => {
   const jobUrl = useKibana().services.application.getUrlForApp('ml#/jobs');
 
   return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiLink href={jobUrl} target="_blank">
-            {job.id}
-          </EuiLink>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AuditIcon message={job.auditMessage} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <Wrapper>
+      <div>
+        <JobLink href={jobUrl} target="_blank">
+          {job.id}
+        </JobLink>
+        <AuditIcon message={job.auditMessage} />
+      </div>
       <JobStatusBadge job={job} />
-    </>
+    </Wrapper>
   );
 };
 
