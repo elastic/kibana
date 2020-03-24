@@ -63,7 +63,7 @@ export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ docLink
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.components.securityCallOut.enableTlsCta"
-                defaultMessage="Enabled TLS"
+                defaultMessage="Enable TLS"
               />
             </EuiButton>
           </EuiCallOut>
