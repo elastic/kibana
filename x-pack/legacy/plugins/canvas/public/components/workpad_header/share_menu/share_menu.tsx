@@ -93,7 +93,7 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
   });
 
   const shareControl = (togglePopover: React.MouseEventHandler<any>) => (
-    <EuiButtonEmpty size="s" aria-label={strings.getShareWorkpadMessage()} onClick={togglePopover}>
+    <EuiButtonEmpty size="xs" aria-label={strings.getShareWorkpadMessage()} onClick={togglePopover}>
       {strings.getShareMenuButtonLabel()}
     </EuiButtonEmpty>
   );
@@ -102,7 +102,7 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
 
   return (
     <div>
-      <Popover button={shareControl} panelPaddingSize="none">
+      <Popover button={shareControl} panelPaddingSize="none" anchorPosition="downLeft">
         {({ closePopover }: { closePopover: ClosePopoverFn }) => (
           <EuiContextMenu
             initialPanelId={0}

@@ -39,7 +39,7 @@ export const ControlSettings = ({
   };
 
   const popoverButton = (handleClick: MouseEventHandler<HTMLButtonElement>) => (
-    <EuiButtonEmpty size="s" aria-label={strings.getButtonLabel()} onClick={handleClick}>
+    <EuiButtonEmpty size="xs" aria-label={strings.getButtonLabel()} onClick={handleClick}>
       {strings.getButtonLabel()}
     </EuiButtonEmpty>
   );
@@ -48,7 +48,7 @@ export const ControlSettings = ({
     <Popover
       id="auto-refresh-popover"
       button={popoverButton}
-      anchorPosition="rightUp"
+      anchorPosition="downLeft"
       panelClassName="canvasControlSettings__popover"
     >
       {() => (

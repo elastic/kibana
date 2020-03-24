@@ -85,13 +85,13 @@ export const WorkpadHeader: FunctionComponent<Props> = ({
 
   return (
     <EuiFlexGroup
-      gutterSize="s"
+      gutterSize="none"
       alignItems="center"
       justifyContent="spaceBetween"
       className="canvasLayout__stageHeaderInner"
     >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexGroup alignItems="center" gutterSize="none">
           {isWriteable && (
             <EuiFlexItem grow={false}>
               <ElementMenu />

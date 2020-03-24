@@ -171,6 +171,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
       size="s"
       aria-label={strings.getElementMenuLabel()}
       onClick={togglePopover}
+      className="canvasElementMenu__popoverButton"
     >
       {strings.getElementMenuButtonLabel()}
     </EuiButton>
@@ -178,7 +179,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
 
   return (
     <Fragment>
-      <Popover button={exportControl} panelPaddingSize="none">
+      <Popover button={exportControl} panelPaddingSize="none" anchorPosition="downLeft">
         {({ closePopover }: { closePopover: ClosePopoverFn }) => (
           <EuiContextMenu
             initialPanelId={0}
