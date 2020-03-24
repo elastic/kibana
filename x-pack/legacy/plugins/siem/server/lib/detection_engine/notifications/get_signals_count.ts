@@ -21,7 +21,7 @@ interface GetSignalsCount {
   ruleAlertId: string;
   ruleId: string;
   index: string;
-  kibanaUrl: string;
+  kibanaUrl: string | undefined;
   callCluster: NotificationExecutorOptions['services']['callCluster'];
 }
 
@@ -32,7 +32,7 @@ export const getSignalsCount = async ({
   ruleId,
   index,
   callCluster,
-  kibanaUrl,
+  kibanaUrl = '',
 }: GetSignalsCount): Promise<SignalsCountResults> => {
   const fromMoment = moment.isDate(from) ? moment(from) : parseScheduleDates(from);
   const toMoment = moment.isDate(to) ? moment(to) : parseScheduleDates(to);

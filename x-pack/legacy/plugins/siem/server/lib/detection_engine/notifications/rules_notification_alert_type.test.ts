@@ -9,40 +9,52 @@ import { loggerMock } from 'src/core/server/logging/logger.mock';
 import { getResult } from '../routes/__mocks__/request_responses';
 import { rulesNotificationAlertType } from './rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
+import { AlertInstance } from '../../../../../../../plugins/alerting/server';
+import { NotificationExecutorOptions } from './types';
 jest.mock('./build_signals_query');
 
 describe('rules_notification_alert_type', () => {
-  const savedObjectsClient = savedObjectsClientMock.create();
-  const alertInstanceMock = {
-    scheduleActions: jest.fn(),
-    replaceState: jest.fn(),
-  };
-  alertInstanceMock.replaceState.mockReturnValue(alertInstanceMock);
-  const alertInstanceFactoryMock = jest.fn().mockReturnValue(alertInstanceMock);
-  const callClusterMock = jest.fn();
-  const logger = loggerMock.create();
-  const alert = rulesNotificationAlertType({
-    logger,
-    kibanaUrl: 'https://kibana.url:5601',
-  });
+  let payload: NotificationExecutorOptions;
+  let alert: ReturnType<typeof rulesNotificationAlertType>;
+  let alertInstanceMock: Record<string, jest.Mock>;
+  let alertInstanceFactoryMock: () => AlertInstance;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let logger: ReturnType<typeof loggerMock.create>;
+  let callClusterMock: jest.Mock;
 
-  const payload = {
-    alertId: '1111',
-    services: {
-      savedObjectsClient,
-      alertInstanceFactory: alertInstanceFactoryMock,
-      callCluster: callClusterMock,
-    },
-    params: { ruleAlertId: '2222' },
-    state: {},
-    spaceId: '',
-    name: 'name',
-    tags: [],
-    startedAt: new Date('2019-12-14T16:40:33.400Z'),
-    previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
-    createdBy: 'elastic',
-    updatedBy: 'elastic',
-  };
+  beforeEach(() => {
+    alertInstanceMock = {
+      scheduleActions: jest.fn(),
+      replaceState: jest.fn(),
+    };
+    alertInstanceMock.replaceState.mockReturnValue(alertInstanceMock);
+    alertInstanceFactoryMock = jest.fn().mockReturnValue(alertInstanceMock);
+    callClusterMock = jest.fn();
+    savedObjectsClient = savedObjectsClientMock.create();
+    logger = loggerMock.create();
+
+    payload = {
+      alertId: '1111',
+      services: {
+        savedObjectsClient,
+        alertInstanceFactory: alertInstanceFactoryMock,
+        callCluster: callClusterMock,
+      },
+      params: { ruleAlertId: '2222' },
+      state: {},
+      spaceId: '',
+      name: 'name',
+      tags: [],
+      startedAt: new Date('2019-12-14T16:40:33.400Z'),
+      previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+    };
+
+    alert = rulesNotificationAlertType({
+      logger,
+    });
+  });
 
   describe('executor', () => {
     it('throws an error if rule alert was not found', async () => {
