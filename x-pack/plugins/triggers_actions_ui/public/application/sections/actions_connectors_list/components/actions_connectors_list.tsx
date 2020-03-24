@@ -114,7 +114,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionsMessage',
           {
-            defaultMessage: 'Unable to load actions',
+            defaultMessage: 'Unable to load connectors',
           }
         ),
       });
@@ -213,11 +213,11 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           description: canDelete
             ? i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
-                { defaultMessage: 'Delete this action' }
+                { defaultMessage: 'Delete this connector' }
               )
             : i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
-                { defaultMessage: 'Unable to delete actions' }
+                { defaultMessage: 'Unable to delete connectors' }
               ),
           type: 'icon',
           icon: 'trash',
@@ -290,13 +290,13 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                       ? undefined
                       : i18n.translate(
                           'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
-                          { defaultMessage: 'Unable to delete actions' }
+                          { defaultMessage: 'Unable to delete connectors' }
                         )
                   }
                 >
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
-                    defaultMessage="Delete ({count})"
+                    defaultMessage="Delete {count}"
                     values={{
                       count: selectedItems.length,
                     }}
@@ -393,7 +393,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           toastNotifications.addDanger({
             title: i18n.translate(
               'xpack.triggersActionsUI.sections.actionsConnectorsList.failedToDeleteActionsMessage',
-              { defaultMessage: 'Failed to delete action(s)' }
+              { defaultMessage: 'Failed to delete connectors(s)' }
             ),
           });
           // Refresh the actions from the server, some actions may have beend deleted

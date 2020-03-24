@@ -17,6 +17,7 @@ import {
   asyncSearchStrategyProvider,
   enhancedEsSearchStrategyProvider,
 } from './search';
+import { EnhancedSearchInterceptor } from './search/search_interceptor';
 
 export interface DataEnhancedSetupDependencies {
   data: DataPublicPluginSetup;
@@ -45,5 +46,11 @@ export class DataEnhancedPlugin implements Plugin {
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
+    const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
+      core.notifications.toasts,
+      core.application,
+      core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
+    );
+    plugins.data.search.setInterceptor(enhancedSearchInterceptor);
   }
 }
