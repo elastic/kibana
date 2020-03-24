@@ -18,8 +18,9 @@ import {
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
 import { getCaseToUpdate } from './helpers';
+import { buildCaseUserActions } from '../../../services/user_actions/helpers';
 
-export function initPatchCasesApi({ caseService, router }: RouteDeps) {
+export function initPatchCasesApi({ caseService, router, userActionService }: RouteDeps) {
   router.patch(
     {
       path: '/api/cases',
@@ -29,12 +30,13 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const query = pipe(
           CasesPatchRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
         const myCases = await caseService.getCases({
-          client: context.core.savedObjects.client,
+          client,
           caseIds: query.cases.map(q => q.id),
         });
         let nonExistingCases: CasePatchRequest[] = [];
@@ -72,11 +74,10 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
           return Object.keys(updateCaseAttributes).length > 0;
         });
         if (updateFilterCases.length > 0) {
-          const updatedBy = await caseService.getUser({ request, response });
-          const { email, full_name, username } = updatedBy;
+          const { username, full_name, email } = await caseService.getUser({ request, response });
           const updatedDt = new Date().toISOString();
           const updatedCases = await caseService.patchCases({
-            client: context.core.savedObjects.client,
+            client,
             cases: updateFilterCases.map(thisCase => {
               const { id: caseId, version, ...updateCaseAttributes } = thisCase;
               let closedInfo = {};
@@ -103,6 +104,7 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
               };
             }),
           });
+
           const returnUpdatedCase = myCases.saved_objects
             .filter(myCase =>
               updatedCases.saved_objects.some(updatedCase => updatedCase.id === myCase.id)
@@ -116,6 +118,17 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
                 references: myCase.references,
               });
             });
+
+          await userActionService.postUserActions({
+            client,
+            actions: buildCaseUserActions({
+              originalCases: myCases.saved_objects,
+              updatedCases: updatedCases.saved_objects,
+              actionDate: updatedDt,
+              actionBy: { email, full_name, username },
+            }),
+          });
+
           return response.ok({
             body: CasesResponseRt.encode(returnUpdatedCase),
           });

@@ -45,16 +45,9 @@ export const register = (deps: RouteDependencies): void => {
           ? get(clusterSettings, `persistent.cluster.remote[${clusterName}].proxy`, undefined)
           : undefined;
 
-        // server_name is not available via the GET /_remote/info API, so we get it from the cluster settings
-        // Per https://github.com/elastic/kibana/pull/26067#issuecomment-441848124, we only look at persistent settings
-        const serverName = isPersistent
-          ? get(clusterSettings, `persistent.cluster.remote[${clusterName}].server_name`, undefined)
-          : undefined;
-
         return {
           ...deserializeCluster(clusterName, cluster, deprecatedProxyAddress),
           isConfiguredByNode,
-          serverName,
         };
       });
 
