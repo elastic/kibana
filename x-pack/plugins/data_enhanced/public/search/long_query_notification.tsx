@@ -27,13 +27,16 @@ export function LongQueryNotification(props: Props) {
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="s" onClick={props.cancel}>
-            <FormattedMessage id="data.query.queryBar.cancelLongQuery" defaultMessage="Cancel" />
+            <FormattedMessage
+              id="xpack.data.query.queryBar.cancelLongQuery"
+              defaultMessage="Cancel"
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton size="s" fill onClick={props.runBeyondTimeout}>
             <FormattedMessage
-              id="data.query.queryBar.runBeyond"
+              id="xpack.data.query.queryBar.runBeyond"
               defaultMessage="Run beyond timeout"
             />
           </EuiButton>
