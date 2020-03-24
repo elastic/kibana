@@ -17,8 +17,27 @@
  * under the License.
  */
 
-import { GridData } from '../np_ready/types';
-import { Doc, DocPre700 } from '../../../migrations/types';
+import { SavedObjectReference } from 'kibana/public';
+import { GridData } from '../../../../plugins/dashboard/public';
+
+export interface SavedObjectAttributes {
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: string;
+  };
+}
+
+export interface Doc<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+  references: SavedObjectReference[];
+  attributes: Attributes;
+  id: string;
+  type: string;
+}
+
+export interface DocPre700<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+  attributes: Attributes;
+  id: string;
+  type: string;
+}
 
 export interface SavedObjectAttributes {
   kibanaSavedObjectMeta: {
