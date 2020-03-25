@@ -32,9 +32,9 @@ export const DEFINITION_INDEX_PATTERNS =
 export const DEFINITION_STEP =
   '[data-test-subj=definitionRule] [data-test-subj="listItemColumnStepRuleDescription"] .euiDescriptionList__description';
 
-export const MACHINE_LEARNING_JOB_ID = '[data-test-subj=machineLearningJobId]';
+export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJobId"]';
 
-export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj=machineLearningJobStatus]';
+export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobStatus"  ]';
 
 export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
 
