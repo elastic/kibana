@@ -44,6 +44,20 @@ export const BATCH_ACTIONS = i18n.translate(
   }
 );
 
+export const ACTIVE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.activeRuleDescription',
+  {
+    defaultMessage: 'active',
+  }
+);
+
+export const INACTIVE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.inactiveRuleDescription',
+  {
+    defaultMessage: 'inactive',
+  }
+);
+
 export const BATCH_ACTION_ACTIVATE_SELECTED = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.batchActions.activateSelectedTitle',
   {
@@ -252,6 +266,42 @@ export const COLUMN_ACTIVATE = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.columns.activateTitle',
   {
     defaultMessage: 'Activated',
+  }
+);
+
+export const COLUMN_INDEXING_TIMES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.indexingTimes',
+  {
+    defaultMessage: 'Indexing Time (ms)',
+  }
+);
+
+export const COLUMN_QUERY_TIMES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.queryTimes',
+  {
+    defaultMessage: 'Query Time (ms)',
+  }
+);
+
+export const COLUMN_GAP = i18n.translate('xpack.siem.detectionEngine.rules.allRules.columns.gap', {
+  defaultMessage: 'Gap (if any)',
+});
+
+export const COLUMN_LAST_LOOKBACK_DATE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.lastLookBackDate',
+  {
+    defaultMessage: 'Last Look-Back Date',
+  }
+);
+
+export const RULES_TAB = i18n.translate('xpack.siem.detectionEngine.rules.allRules.tabs.rules', {
+  defaultMessage: 'Rules',
+});
+
+export const MONITORING_TAB = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.tabs.monitoring',
+  {
+    defaultMessage: 'Monitoring',
   }
 );
 

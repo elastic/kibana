@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { performance } from 'perf_hooks';
 import { Logger } from 'src/core/server';
 import {
   SIGNALS_ID,
@@ -13,10 +14,13 @@ import {
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { getInputIndex } from './get_input_output_index';
-import { searchAfterAndBulkCreate } from './search_after_bulk_create';
+import {
+  searchAfterAndBulkCreate,
+  SearchAfterAndBulkCreateReturnType,
+} from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import { getGapBetweenRuns } from './utils';
+import { getGapBetweenRuns, makeFloatString } from './utils';
 import { writeSignalRuleExceptionToSavedObject } from './write_signal_rule_exception_to_saved_object';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -92,7 +96,6 @@ export const signalRulesAlertType = ({
       const updatedAt = savedObject.updated_at ?? '';
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
-
       await writeGapErrorToSavedObject({
         alertId,
         logger,
@@ -105,7 +108,12 @@ export const signalRulesAlertType = ({
       });
 
       const searchAfterSize = Math.min(params.maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-      let creationSucceeded = false;
+      let creationSucceeded: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        bulkCreateTimes: [],
+        searchAfterTimes: [],
+        lastLookBackDate: null,
+      };
 
       try {
         if (type === 'machine_learning') {
@@ -130,7 +138,7 @@ export const signalRulesAlertType = ({
             );
           }
 
-          creationSucceeded = await bulkCreateMlSignals({
+          const { success, bulkCreateDuration } = await bulkCreateMlSignals({
             actions,
             throttle,
             someResult: anomalyResults,
@@ -148,6 +156,10 @@ export const signalRulesAlertType = ({
             enabled,
             tags,
           });
+          creationSucceeded.success = success;
+          if (bulkCreateDuration) {
+            creationSucceeded.bulkCreateTimes.push(bulkCreateDuration);
+          }
         } else {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
@@ -175,7 +187,10 @@ export const signalRulesAlertType = ({
           logger.debug(
             `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
+          const start = performance.now();
           const noReIndexResult = await services.callCluster('search', noReIndex);
+          const end = performance.now();
+
           if (noReIndexResult.hits.total.value !== 0) {
             logger.info(
               `Found ${
@@ -207,9 +222,10 @@ export const signalRulesAlertType = ({
             tags,
             throttle,
           });
+          creationSucceeded.searchAfterTimes.push(makeFloatString(end - start));
         }
 
-        if (creationSucceeded) {
+        if (creationSucceeded.success) {
           if (meta?.throttle === NOTIFICATION_THROTTLE_RULE && actions.length) {
             const notificationRuleParams = {
               ...ruleParams,
@@ -242,11 +258,14 @@ export const signalRulesAlertType = ({
           }
 
           logger.debug(
-            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", output_index: "${outputIndex}"`
+            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
           await writeCurrentStatusSucceeded({
             services,
             currentStatusSavedObject,
+            bulkCreateTimes: creationSucceeded.bulkCreateTimes,
+            searchAfterTimes: creationSucceeded.searchAfterTimes,
+            lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString() ?? null,
           });
         } else {
           await writeSignalRuleExceptionToSavedObject({
@@ -254,22 +273,28 @@ export const signalRulesAlertType = ({
             alertId,
             currentStatusSavedObject,
             logger,
-            message: `Bulk Indexing signals failed. Check logs for further details Rule name: "${name}" id: "${alertId}" rule_id: "${ruleId}" output_index: "${outputIndex}"`,
+            message: `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
             services,
             ruleStatusSavedObjects,
             ruleId: ruleId ?? '(unknown rule id)',
+            bulkCreateTimes: creationSucceeded.bulkCreateTimes,
+            searchAfterTimes: creationSucceeded.searchAfterTimes,
+            lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString() ?? null,
           });
         }
-      } catch (error) {
+      } catch (err) {
         await writeSignalRuleExceptionToSavedObject({
           name,
           alertId,
           currentStatusSavedObject,
           logger,
-          message: error?.message ?? '(no error message given)',
+          message: `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
           services,
           ruleStatusSavedObjects,
           ruleId: ruleId ?? '(unknown rule id)',
+          bulkCreateTimes: creationSucceeded.bulkCreateTimes,
+          searchAfterTimes: creationSucceeded.searchAfterTimes,
+          lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString() ?? null,
         });
       }
     },
