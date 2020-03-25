@@ -28,9 +28,9 @@ export function updateSourceProp(
 ): void;
 
 export interface MapCenter {
-  lat: string;
-  lon: string;
-  zoom: unknown;
+  lat: number;
+  lon: number;
+  zoom: number;
 }
 
 export function setGotoWithCenter(config: MapCenter): AnyAction;

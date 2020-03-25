@@ -72,11 +72,11 @@ export class SearchEmbeddableFactory
     });
   }
 
-  public async createFromSavedObject(
+  public createFromSavedObject = async (
     savedObjectId: string,
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
-  ): Promise<SearchEmbeddable | ErrorEmbeddable> {
+  ): Promise<SearchEmbeddable | ErrorEmbeddable> => {
     if (!this.$injector) {
       this.$injector = await this.getInjector();
     }
@@ -110,7 +110,7 @@ export class SearchEmbeddableFactory
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
     }
-  }
+  };
 
   public async create(input: SearchInput) {
     return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);

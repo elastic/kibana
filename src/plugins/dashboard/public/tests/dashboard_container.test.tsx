@@ -52,7 +52,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   uiActionsSetup.attachAction(CONTEXT_MENU_TRIGGER, editModeAction);
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
+    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
   );
 
   const start = doStart();

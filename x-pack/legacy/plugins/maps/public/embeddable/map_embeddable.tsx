@@ -62,25 +62,26 @@ interface MapConfig {
   indexPatterns: IIndexPattern[];
   editable: boolean;
   title?: string;
-  layerList: unknown;
+  layerList: unknown[];
 }
 
 export interface MapInput extends EmbeddableInput {
   timeRange?: TimeRange;
   filters: Filter[];
   query?: Query;
-  refresh: unknown;
+  refresh?: unknown;
   refreshConfig: RefreshInterval;
   isLayerTOCOpen: boolean;
-  openTOCDetails: unknown;
-  disableTooltipControl: boolean;
-  disableInteractive: boolean;
-  hideToolbarOverlay: boolean;
-  hideLayerControl: boolean;
-  hideViewControl: boolean;
-  mapCenter: MapCenter;
-  hiddenLayers: unknown;
-  hideFilterActions: boolean;
+  openTOCDetails?: unknown;
+  disableTooltipControl?: boolean;
+  disableInteractive?: boolean;
+  hideToolbarOverlay?: boolean;
+  hideLayerControl?: boolean;
+  hideViewControl?: boolean;
+  mapCenter?: MapCenter;
+  hiddenLayers?: unknown;
+  hideFilterActions?: boolean;
+  layerList: unknown[];
 }
 
 export interface MapOutput extends EmbeddableOutput {
@@ -127,6 +128,14 @@ export class MapEmbeddable extends Embeddable<MapInput, MapOutput> {
 
     this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
   }
+
+  setRenderTooltipContent = (renderTooltipContent: unknown) => {
+    this._renderTooltipContent = renderTooltipContent;
+  };
+
+  setEventHandlers = (eventHandlers: unknown) => {
+    this._eventHandlers = eventHandlers;
+  };
 
   getInspectorAdapters() {
     return getInspectorAdapters(this._store.getState());
@@ -288,7 +297,7 @@ export class MapEmbeddable extends Embeddable<MapInput, MapOutput> {
     const center = getMapCenter(this._store.getState());
     const zoom = getMapZoom(this._store.getState());
 
-    const mapCenter = this.input.mapCenter || {};
+    const mapCenter = this.input.mapCenter || undefined;
     if (
       !mapCenter ||
       mapCenter.lat !== center.lat ||

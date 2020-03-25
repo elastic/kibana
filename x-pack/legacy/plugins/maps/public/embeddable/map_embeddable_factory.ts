@@ -12,8 +12,7 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
+  EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -30,7 +29,7 @@ import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../angular/services/gis_map_saved_object_loader';
 import { bindSetupCoreAndPlugins, bindStartCoreAndPlugins } from '../plugin';
 
-export class MapEmbeddableFactory {
+export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
   savedObjectMetaData = {
     name: i18n.translate('xpack.maps.mapSavedObjectLabel', {
@@ -96,7 +95,7 @@ export class MapEmbeddableFactory {
     return await savedObjectLoader.get(savedObjectId);
   }
 
-  async createFromSavedObject(savedObjectId: string, input: MapInput, parent?: IContainer) {
+  createFromSavedObject = async (savedObjectId: string, input: MapInput, parent?: IContainer) => {
     const savedMap = await this._fetchSavedMap(savedObjectId);
     const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
@@ -124,39 +123,23 @@ export class MapEmbeddableFactory {
     }
 
     return embeddable;
-  }
+  };
 
-  async createFromState(
-    state: { title?: string; layerList?: unknown[] },
-    input: MapInput,
-    parent: IContainer,
-    renderTooltipContent: unknown,
-    eventHandlers: unknown
-  ) {
-    const layerList = state && state.layerList ? state.layerList : getInitialLayers();
+  create = async (input: MapInput, parent?: IContainer) => {
+    const layerList = input.layerList ?? getInitialLayers();
     const indexPatterns = await this._getIndexPatterns(layerList);
 
     return new MapEmbeddable(
       {
         layerList,
-        title: state && state.title ? state.title : '',
+        title: input.title ?? '',
         indexPatterns,
         editable: false,
       },
       input,
-      parent,
-      renderTooltipContent,
-      eventHandlers
+      parent
     );
-  }
-
-  async create(input: MapInput) {
-    window.location.href = chrome.addBasePath(createMapPath(''));
-    return new ErrorEmbeddable(
-      'Maps can only be created with createFromSavedObject or createFromState',
-      input
-    );
-  }
+  };
 }
 
 setup.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());

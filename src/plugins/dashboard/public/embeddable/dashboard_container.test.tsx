@@ -20,7 +20,7 @@
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
-import { isErrorEmbeddable, ViewMode, EmbeddableFactory } from '../embeddable_plugin';
+import { isErrorEmbeddable, ViewMode } from '../embeddable_plugin';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {

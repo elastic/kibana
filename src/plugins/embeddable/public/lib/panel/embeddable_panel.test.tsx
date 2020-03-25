@@ -27,7 +27,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { Action, UiActionsStart, ActionType } from 'src/plugins/ui_actions/public';
 import { Trigger, ViewMode } from '../types';
-import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
+import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
 import { createEditModeAction } from '../test_samples/actions';
 import {

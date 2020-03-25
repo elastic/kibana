@@ -30,17 +30,15 @@
 ### Creating a Map embeddable from state
 ```
 const factory = new MapEmbeddableFactory();
-const state = {
+const input = {
   layerList: [],  // where layerList is same as saved object layerListJSON property (unstringified)
   title: 'my map',
-}
-const input = {
   hideFilterActions: true,
   isLayerTOCOpen: false,
   openTOCDetails: ['tfi3f', 'edh66'],
   mapCenter: { lat: 0.0, lon: 0.0, zoom: 7 }
 }
-const mapEmbeddable = await factory.createFromState(state, input, parent);
+const mapEmbeddable = await factory.create(input, parent);
 ```
 
 #### Customize tooltip
@@ -62,7 +60,8 @@ const renderTooltipContent = ({ addFilters, closeTooltip, features, isLocked, lo
   return <div>Custom tooltip content</div>;
 }
 
-const mapEmbeddable = await factory.createFromState(state, input, parent, renderTooltipContent);
+const mapEmbeddable = await factory.create(input, parent)
+mapEmbeddable.setRenderTooltipContent(renderTooltipContent);
 ```
 
 
@@ -80,7 +79,9 @@ const eventHandlers = {
   },
 }
 
-const mapEmbeddable = await factory.createFromState(state, input, parent, renderTooltipContent, eventHandlers);
+const mapEmbeddable = await factory.create(input, parent);
+mapEmbeddable.setRenderTooltipContent(renderTooltipContent);
+mapEmbeddable.setEventHandlers(eventHandlers);
 ```
 
 
@@ -90,8 +91,8 @@ Geojson sources will not update unless you modify `__featureCollection` property
 
 ```
 const factory = new MapEmbeddableFactory();
-const state = {
-  layerList: [
+const input = {
+    layerList: [
     {
       'id': 'gaxya',
       'label': 'My geospatial data',
@@ -131,14 +132,12 @@ const state = {
     }
   ],
   title: 'my map',
-}
-const input = {
   hideFilterActions: true,
   isLayerTOCOpen: false,
   openTOCDetails: ['tfi3f', 'edh66'],
   mapCenter: { lat: 0.0, lon: 0.0, zoom: 7 }
 }
-const mapEmbeddable = await factory.createFromState(state, input, parent);
+const mapEmbeddable = await factory.create(input, parent);
 
 mapEmbeddable.setLayerList([
   {

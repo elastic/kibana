@@ -116,7 +116,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     input: VisualizeInput,
     parent?: IContainer
   ) {
-    super(input, getOutput(input, config), parent, { uiActions: config.uiActions });
+    super(input, getOutput(input, config), parent);
     this.vis = new Vis(input.visType, input.visObject);
     this.timefilter = timefilter;
     this.vis.uiState.on('change', this.uiStateChangeHandler);

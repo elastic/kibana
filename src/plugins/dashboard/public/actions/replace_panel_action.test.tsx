@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_plugin';
+import { isErrorEmbeddable } from '../embeddable_plugin';
 import { ReplacePanelAction } from './replace_panel_action';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';

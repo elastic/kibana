@@ -23,7 +23,6 @@ import sizeMe from 'react-sizeme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
-import { EmbeddableFactory } from '../../embeddable_plugin';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
@@ -32,16 +31,20 @@ import {
   ContactCardEmbeddableFactory,
 } from '../../embeddable_plugin_test_samples';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
+// eslint-disable-next-line
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
 
 function prepare(props?: Partial<DashboardGridProps>) {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory((() => {}) as any, {} as any)
+    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
   );
-  const getEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+  const start = doStart();
+
+  const getEmbeddableFactory = start.getEmbeddableFactory;
   const initialInput = getSampleDashboardInput({
     panels: {
       '1': {
@@ -60,7 +63,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
     application: {} as any,
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
-      getEmbeddableFactories: (() => []) as any,
+      getEmbeddableFactories: start.getEmbeddableFactories,
       getEmbeddableFactory,
     } as any,
     notifications: {} as any,
