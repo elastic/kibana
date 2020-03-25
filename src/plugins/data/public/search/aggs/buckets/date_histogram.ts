@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get, noop, find, every } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
+import { IUiSettingsClient } from 'kibana/public';
 import { TimeBuckets } from './lib/time_buckets';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -33,7 +34,7 @@ import { isMetricAggType } from '../metrics/metric_agg_type';
 import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../common';
 import { TimefilterContract } from '../../../query';
 import { getFieldFormats } from '../../../../public/services';
-import { AggTypesDependencies } from '../types';
+import { QuerySetup } from '../../../query';
 
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
@@ -57,6 +58,11 @@ interface ITimeBuckets {
   getInterval: Function;
 }
 
+export interface DateHistogramBucketAggDependencies {
+  uiSettings: IUiSettingsClient;
+  query: QuerySetup;
+}
+
 export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
   buckets: ITimeBuckets;
 }
@@ -65,7 +71,10 @@ export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHist
   return Boolean(agg.buckets);
 }
 
-export const getDateHistogramBucketAgg = ({ core: { uiSettings }, query }: AggTypesDependencies) =>
+export const getDateHistogramBucketAgg = ({
+  uiSettings,
+  query,
+}: DateHistogramBucketAggDependencies) =>
   new BucketAggType<IBucketDateHistogramAggConfig>({
     name: BUCKET_TYPES.DATE_HISTOGRAM,
     title: i18n.translate('data.search.aggs.buckets.dateHistogramTitle', {
@@ -132,7 +141,7 @@ export const getDateHistogramBucketAgg = ({ core: { uiSettings }, query }: AggTy
           return agg.getIndexPattern().timeFieldName;
         },
         onChange(agg: IBucketDateHistogramAggConfig) {
-          if (_.get(agg, 'params.interval') === 'auto' && !agg.fieldIsTimeField()) {
+          if (get(agg, 'params.interval') === 'auto' && !agg.fieldIsTimeField()) {
             delete agg.params.interval;
           }
         },
@@ -140,17 +149,17 @@ export const getDateHistogramBucketAgg = ({ core: { uiSettings }, query }: AggTy
       {
         name: 'timeRange',
         default: null,
-        write: _.noop,
+        write: noop,
       },
       {
         name: 'useNormalizedEsInterval',
         default: true,
-        write: _.noop,
+        write: noop,
       },
       {
         name: 'scaleMetricValues',
         default: false,
-        write: _.noop,
+        write: noop,
         advanced: true,
       },
       {
@@ -158,10 +167,10 @@ export const getDateHistogramBucketAgg = ({ core: { uiSettings }, query }: AggTy
         deserialize(state: any, agg) {
           // For upgrading from 7.0.x to 7.1.x - intervals are now stored as key of options or custom value
           if (state === 'custom') {
-            return _.get(agg, 'params.customInterval');
+            return get(agg, 'params.customInterval');
           }
 
-          const interval = _.find(intervalOptions, { val: state });
+          const interval = find(intervalOptions, { val: state });
 
           // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
           // but this maps the old values to the new values
@@ -196,7 +205,7 @@ export const getDateHistogramBucketAgg = ({ core: { uiSettings }, query }: AggTy
           const scaleMetrics = scaleMetricValues && interval.scaled && interval.scale < 1;
           if (scaleMetrics && aggs) {
             const metrics = aggs.aggs.filter(a => isMetricAggType(a.type));
-            const all = _.every(metrics, (a: IBucketAggConfig) => {
+            const all = every(metrics, (a: IBucketAggConfig) => {
               const { type } = a;
 
               if (isMetricAggType(type)) {
@@ -216,14 +225,14 @@ export const getDateHistogramBucketAgg = ({ core: { uiSettings }, query }: AggTy
         // We don't ever want this parameter to be serialized out (when saving or to URLs)
         // since we do all the logic handling it "on the fly" in the `write` method, to prevent
         // time_zones being persisted into saved_objects
-        serialize: _.noop,
+        serialize: noop,
         write(agg, output) {
           // If a time_zone has been set explicitly always prefer this.
           let tz = agg.params.time_zone;
           if (!tz && agg.params.field) {
             // If a field has been configured check the index pattern's typeMeta if a date_histogram on that
             // field requires a specific time_zone
-            tz = _.get(agg.getIndexPattern(), [
+            tz = get(agg.getIndexPattern(), [
               'typeMeta',
               'aggs',
               'date_histogram',
@@ -242,7 +251,7 @@ export const getDateHistogramBucketAgg = ({ core: { uiSettings }, query }: AggTy
       {
         name: 'drop_partials',
         default: false,
-        write: _.noop,
+        write: noop,
         shouldShow: agg => {
           const field = agg.params.field;
           return field && field.name && field.name === agg.getIndexPattern().timeFieldName;

@@ -18,24 +18,26 @@
  */
 
 import moment from 'moment';
-import { getDateRangeBucketAgg } from '../date_range';
+import { getDateRangeBucketAgg, DateRangeBucketAggDependencies } from '../date_range';
 import { createFilterDateRange } from './date_range';
 import { FieldFormatsGetConfigFn } from '../../../../../common';
 import { DateFormat } from '../../../../field_formats';
-import { AggConfigs, AggConfigsOptions } from '../../agg_configs';
-import { mockAggTypesRegistry, createMockedAggTypesDependencies } from '../../test_helpers';
+import { AggConfigs } from '../../agg_configs';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { AggTypesDependencies } from '../../types';
+import { coreMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('Date range', () => {
-    let aggTypesDependencies: AggTypesDependencies;
-    let typesRegistry: AggConfigsOptions['typesRegistry'];
+    let aggTypesDependencies: DateRangeBucketAggDependencies;
 
     beforeEach(() => {
-      aggTypesDependencies = createMockedAggTypesDependencies();
-      typesRegistry = mockAggTypesRegistry([getDateRangeBucketAgg(aggTypesDependencies)]);
+      const { uiSettings } = coreMock.createSetup();
+
+      aggTypesDependencies = {
+        uiSettings,
+      };
     });
 
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
@@ -65,7 +67,7 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry }
+        { typesRegistry: mockAggTypesRegistry([getDateRangeBucketAgg(aggTypesDependencies)]) }
       );
     };
 

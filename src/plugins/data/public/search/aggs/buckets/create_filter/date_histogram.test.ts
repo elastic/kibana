@@ -20,29 +20,33 @@
 import moment from 'moment';
 import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions } from '../_interval_options';
-import { AggConfigs, AggConfigsOptions } from '../../agg_configs';
+import { AggConfigs } from '../../agg_configs';
+import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
 import {
-  mockDataServices,
-  mockAggTypesRegistry,
-  createMockedAggTypesDependencies,
-} from '../../test_helpers';
-import { getDateHistogramBucketAgg, IBucketDateHistogramAggConfig } from '../date_histogram';
+  getDateHistogramBucketAgg,
+  DateHistogramBucketAggDependencies,
+  IBucketDateHistogramAggConfig,
+} from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { RangeFilter } from '../../../../../common';
-import { AggTypesDependencies } from '../../types';
+import { coreMock } from '../../../../../../../core/public/mocks';
+import { queryServiceMock } from '../../../../query/mocks';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
-    let aggTypesDependencies: AggTypesDependencies;
-    let typesRegistry: AggConfigsOptions['typesRegistry'];
+    let aggTypesDependencies: DateHistogramBucketAggDependencies;
     let agg: IBucketDateHistogramAggConfig;
     let filter: RangeFilter;
     let bucketStart: any;
     let field: any;
 
     beforeEach(() => {
-      aggTypesDependencies = createMockedAggTypesDependencies();
-      typesRegistry = mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]);
+      const { uiSettings } = coreMock.createSetup();
+
+      aggTypesDependencies = {
+        uiSettings,
+        query: queryServiceMock.createSetupContract(),
+      };
 
       mockDataServices();
     });
@@ -69,7 +73,7 @@ describe('AggConfig Filters', () => {
             params: { field: field.name, interval, customInterval: '5d' },
           },
         ],
-        { typesRegistry }
+        { typesRegistry: mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]) }
       );
       const bucketKey = 1422579600000;
 

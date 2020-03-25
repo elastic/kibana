@@ -17,21 +17,23 @@
  * under the License.
  */
 
-import { getFiltersBucketAgg } from '../filters';
+import { getFiltersBucketAgg, FiltersBucketAggDependencies } from '../filters';
 import { createFilterFilters } from './filters';
-import { AggConfigs, AggConfigsOptions } from '../../agg_configs';
-import { mockAggTypesRegistry, createMockedAggTypesDependencies } from '../../test_helpers';
+import { AggConfigs } from '../../agg_configs';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { AggTypesDependencies } from '../../types';
+import { coreMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('filters', () => {
-    let aggTypesDependencies: AggTypesDependencies;
-    let typesRegistry: AggConfigsOptions['typesRegistry'];
+    let aggTypesDependencies: FiltersBucketAggDependencies;
 
     beforeEach(() => {
-      aggTypesDependencies = createMockedAggTypesDependencies();
-      typesRegistry = mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]);
+      const { uiSettings } = coreMock.createSetup();
+
+      aggTypesDependencies = {
+        uiSettings,
+      };
     });
 
     const getAggConfigs = () => {
@@ -62,7 +64,7 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry }
+        { typesRegistry: mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]) }
       );
     };
     it('should return a filters filter', () => {

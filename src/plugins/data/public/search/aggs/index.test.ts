@@ -22,19 +22,20 @@ import { getAggTypes } from './index';
 
 import { isBucketAggType } from './buckets/_bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';
-import { AggTypesDependencies } from './types';
 import { QueryStart } from '../../query';
 
-const aggTypesDependencies: AggTypesDependencies = {
-  core: coreMock.createSetup(),
-  query: {} as QueryStart,
-};
-const aggTypes = getAggTypes(aggTypesDependencies);
-const { buckets, metrics } = aggTypes;
-
 describe('AggTypesComponent', () => {
+  const core = coreMock.createSetup();
+  const aggTypes = getAggTypes({
+    uiSettings: core.uiSettings,
+    notifications: core.notifications,
+    query: {} as QueryStart,
+  });
+
+  const { buckets, metrics } = aggTypes;
+
   describe('bucket aggs', () => {
-    it('all extend BucketAggType', () => {
+    test('all extend BucketAggType', () => {
       buckets.forEach(bucketAgg => {
         expect(isBucketAggType(bucketAgg)).toBeTruthy();
       });
@@ -42,7 +43,7 @@ describe('AggTypesComponent', () => {
   });
 
   describe('metric aggs', () => {
-    it('all extend MetricAggType', () => {
+    test('all extend MetricAggType', () => {
       metrics.forEach(metricAgg => {
         expect(isMetricAggType(metricAgg)).toBeTruthy();
       });

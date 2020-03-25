@@ -144,7 +144,8 @@ const mockAggTypesRegistry = () => {
   const registry = new AggTypesRegistry();
   const registrySetup = registry.setup();
   const aggTypes = getAggTypes({
-    core: mockCore,
+    uiSettings: mockCore.uiSettings,
+    notifications: mockCore.notifications,
     query: querySetup,
   });
   aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));

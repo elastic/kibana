@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IUiSettingsClient, NotificationsSetup } from 'kibana/public';
+import { QuerySetup } from '../../query';
 
 import { countMetricAgg } from './metrics/count';
 import { avgMetricAgg } from './metrics/avg';
@@ -50,9 +52,13 @@ import { bucketAvgMetricAgg } from './metrics/bucket_avg';
 import { bucketMinMetricAgg } from './metrics/bucket_min';
 import { bucketMaxMetricAgg } from './metrics/bucket_max';
 
-import { AggTypesDependencies } from './types';
+export interface AggTypesDependencies {
+  notifications: NotificationsSetup;
+  uiSettings: IUiSettingsClient;
+  query: QuerySetup;
+}
 
-export const getAggTypes = (deps: AggTypesDependencies) => ({
+export const getAggTypes = ({ notifications, uiSettings, query }: AggTypesDependencies) => ({
   metrics: [
     countMetricAgg,
     avgMetricAgg,
@@ -77,14 +83,14 @@ export const getAggTypes = (deps: AggTypesDependencies) => ({
     geoCentroidMetricAgg,
   ],
   buckets: [
-    getDateHistogramBucketAgg(deps),
-    getHistogramBucketAgg(deps),
+    getDateHistogramBucketAgg({ uiSettings, query }),
+    getHistogramBucketAgg({ uiSettings, notifications }),
     rangeBucketAgg,
-    getDateRangeBucketAgg(deps),
+    getDateRangeBucketAgg({ uiSettings }),
     ipRangeBucketAgg,
     termsBucketAgg,
     filterBucketAgg,
-    getFiltersBucketAgg(deps),
+    getFiltersBucketAgg({ uiSettings }),
     significantTermsBucketAgg,
     geoHashBucketAgg,
     geoTileBucketAgg,

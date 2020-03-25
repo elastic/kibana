@@ -20,6 +20,8 @@
 import { get } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from 'kibana/public';
+
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
@@ -27,13 +29,16 @@ import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
 
 import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
 import { getFieldFormats } from '../../../../public/services';
-import { AggTypesDependencies } from '../types';
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
 });
 
-export const getDateRangeBucketAgg = ({ core: { uiSettings } }: AggTypesDependencies) =>
+export interface DateRangeBucketAggDependencies {
+  uiSettings: IUiSettingsClient;
+}
+
+export const getDateRangeBucketAgg = ({ uiSettings }: DateRangeBucketAggDependencies) =>
   new BucketAggType({
     name: BUCKET_TYPES.DATE_RANGE,
     title: dateRangeTitle,

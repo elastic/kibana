@@ -88,7 +88,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.registerSearchStrategyProvider(ES_SEARCH_STRATEGY, esSearchStrategyProvider);
 
     const aggTypesSetup = this.aggTypesRegistry.setup();
-    const aggTypes = getAggTypes({ core, query });
+    const aggTypes = getAggTypes({
+      query,
+      uiSettings: core.uiSettings,
+      notifications: core.notifications,
+    });
 
     aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
     aggTypes.metrics.forEach(m => aggTypesSetup.registerMetric(m));

@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup } from 'kibana/public';
-import { QuerySetup } from '../../query';
+
 import { IndexPattern } from '../../index_patterns';
 import {
   AggType,
@@ -70,10 +69,4 @@ export interface SearchAggsStart {
     schemas?: Record<string, any>
   ) => InstanceType<typeof AggConfigs>;
   types: AggTypesRegistryStart;
-}
-
-/** @internal */
-export interface AggTypesDependencies {
-  core: CoreSetup;
-  query: QuerySetup;
 }

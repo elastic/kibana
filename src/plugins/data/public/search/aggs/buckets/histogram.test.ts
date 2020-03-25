@@ -17,18 +17,28 @@
  * under the License.
  */
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry, createMockedAggTypesDependencies } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';
+import {
+  IBucketHistogramAggConfig,
+  getHistogramBucketAgg,
+  AutoBounds,
+  HistogramBucketAggDependencies,
+} from './histogram';
 import { BucketAggType } from './_bucket_agg_type';
-import { AggTypesDependencies } from '../types';
 
 describe('Histogram Agg', () => {
-  let aggTypesDependencies: AggTypesDependencies;
+  let aggTypesDependencies: HistogramBucketAggDependencies;
 
   beforeEach(() => {
-    aggTypesDependencies = createMockedAggTypesDependencies();
+    const { uiSettings, notifications } = coreMock.createSetup();
+
+    aggTypesDependencies = {
+      uiSettings,
+      notifications,
+    };
   });
 
   const getAggConfigs = (params: Record<string, any>) => {
@@ -150,12 +160,9 @@ describe('Histogram Agg', () => {
         ) => {
           aggTypesDependencies = {
             ...aggTypesDependencies,
-            core: {
-              ...aggTypesDependencies.core,
-              uiSettings: {
-                ...aggTypesDependencies.core.uiSettings,
-                get: () => maxBars as any,
-              },
+            uiSettings: {
+              ...aggTypesDependencies.uiSettings,
+              get: () => maxBars as any,
             },
           };
 

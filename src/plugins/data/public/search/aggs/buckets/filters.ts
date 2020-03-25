@@ -19,17 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { size, transform, cloneDeep } from 'lodash';
+import { IUiSettingsClient } from 'kibana/public';
 
 import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
-
 import { getEsQueryConfig, buildEsQuery, Query } from '../../../../common';
 import { getQueryLog } from '../../../query';
-
-import { AggTypesDependencies } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',
@@ -43,7 +41,11 @@ interface FilterValue {
   id: string;
 }
 
-export const getFiltersBucketAgg = ({ core: { uiSettings } }: AggTypesDependencies) =>
+export interface FiltersBucketAggDependencies {
+  uiSettings: IUiSettingsClient;
+}
+
+export const getFiltersBucketAgg = ({ uiSettings }: FiltersBucketAggDependencies) =>
   new BucketAggType({
     name: BUCKET_TYPES.FILTERS,
     title: filtersTitle,

@@ -19,16 +19,21 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient, NotificationsSetup } from 'kibana/public';
 
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { AggTypesDependencies } from '../types';
 
 export interface AutoBounds {
   min: number;
   max: number;
+}
+
+export interface HistogramBucketAggDependencies {
+  uiSettings: IUiSettingsClient;
+  notifications: NotificationsSetup;
 }
 
 export interface IBucketHistogramAggConfig extends IBucketAggConfig {
@@ -37,8 +42,9 @@ export interface IBucketHistogramAggConfig extends IBucketAggConfig {
 }
 
 export const getHistogramBucketAgg = ({
-  core: { uiSettings, notifications },
-}: AggTypesDependencies) =>
+  uiSettings,
+  notifications,
+}: HistogramBucketAggDependencies) =>
   new BucketAggType<IBucketHistogramAggConfig>({
     name: BUCKET_TYPES.HISTOGRAM,
     title: i18n.translate('data.search.aggs.buckets.histogramTitle', {
