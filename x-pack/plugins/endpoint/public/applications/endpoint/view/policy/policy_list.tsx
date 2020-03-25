@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -16,20 +16,15 @@ import {
   EuiBasicTable,
   EuiText,
   EuiTableFieldDataColumnType,
-  EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  FormattedMessage,
-  FormattedDate,
-  FormattedTime,
-  FormattedNumber,
-  FormattedRelative,
-} from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import { usePageId } from '../use_page_id';
 import {
+  selectApiError,
   selectIsLoading,
   selectPageIndex,
   selectPageSize,
@@ -39,53 +34,35 @@ import {
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../../store/policy_list';
 import { PolicyData } from '../../types';
-import { TruncateText } from '../../components/truncate_text';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
 }
 
-const TruncateTooltipText = styled(TruncateText)`
-  .euiToolTipAnchor {
-    display: block;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-`;
+const PolicyLink: React.FC<{ name: string; route: string }> = ({ name, route }) => {
+  const history = useHistory();
 
-const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
-  // If date is greater than or equal to 24h (ago), then show it as a date
-  // else, show it as relative to "now"
-  return Date.now() - date.getTime() >= 8.64e7 ? (
-    <>
-      <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
-      {' @'}
-      <FormattedTime value={date} />
-    </>
-  ) : (
-    <>
-      <FormattedRelative value={date} />
-    </>
+  return (
+    <EuiLink
+      onClick={(event: React.MouseEvent) => {
+        event.preventDefault();
+        history.push(route);
+      }}
+    >
+      {name}
+    </EuiLink>
   );
 };
 
-const renderDate = (date: string, _item: PolicyData) => (
-  <TruncateTooltipText>
-    <EuiToolTip content={date}>
-      <FormattedDateAndTime date={new Date(date)} />
-    </EuiToolTip>
-  </TruncateTooltipText>
-);
-
-const renderFormattedNumber = (value: number, _item: PolicyData) => (
-  <TruncateText>
-    <FormattedNumber value={value} />
-  </TruncateText>
-);
+const renderPolicyNameLink = (value: string, _item: PolicyData) => {
+  return <PolicyLink name={value} route={`/policy/${_item.id}`} />;
+};
 
 export const PolicyList = React.memo(() => {
   usePageId('policyListPage');
+
+  const { services, notifications } = useKibana();
 
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
   const policyItems = usePolicyListSelector(selectPolicyItems);
@@ -93,6 +70,17 @@ export const PolicyList = React.memo(() => {
   const pageSize = usePolicyListSelector(selectPageSize);
   const totalItemCount = usePolicyListSelector(selectTotal);
   const loading = usePolicyListSelector(selectIsLoading);
+  const apiError = usePolicyListSelector(selectApiError);
+
+  useEffect(() => {
+    if (apiError) {
+      notifications.toasts.danger({
+        title: apiError.error,
+        body: apiError.message,
+        toastLifeTimeMs: 10000,
+      });
+    }
+  }, [apiError, dispatch, notifications.toasts]);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -124,70 +112,56 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.endpoint.policyList.nameField', {
           defaultMessage: 'Policy Name',
         }),
+        render: renderPolicyNameLink,
         truncateText: true,
       },
       {
-        field: 'total',
-        name: i18n.translate('xpack.endpoint.policyList.totalField', {
-          defaultMessage: 'Total',
+        field: 'revision',
+        name: i18n.translate('xpack.endpoint.policyList.revisionField', {
+          defaultMessage: 'Revision',
         }),
-        render: renderFormattedNumber,
         dataType: 'number',
-        truncateText: true,
-        width: '15ch',
       },
       {
-        field: 'pending',
-        name: i18n.translate('xpack.endpoint.policyList.pendingField', {
-          defaultMessage: 'Pending',
+        field: 'package',
+        name: i18n.translate('xpack.endpoint.policyList.versionField', {
+          defaultMessage: 'Version',
         }),
-        render: renderFormattedNumber,
-        dataType: 'number',
-        truncateText: true,
-        width: '15ch',
+        render(pkg) {
+          return `${pkg.title}  v${pkg.version}`;
+        },
       },
       {
-        field: 'failed',
-        name: i18n.translate('xpack.endpoint.policyList.failedField', {
-          defaultMessage: 'Failed',
-        }),
-        render: renderFormattedNumber,
-        dataType: 'number',
-        truncateText: true,
-        width: '15ch',
-      },
-      {
-        field: 'created_by',
-        name: i18n.translate('xpack.endpoint.policyList.createdByField', {
-          defaultMessage: 'Created By',
+        field: 'description',
+        name: i18n.translate('xpack.endpoint.policyList.descriptionField', {
+          defaultMessage: 'Description',
         }),
         truncateText: true,
       },
       {
-        field: 'created',
-        name: i18n.translate('xpack.endpoint.policyList.createdField', {
-          defaultMessage: 'Created',
+        field: 'config_id',
+        name: i18n.translate('xpack.endpoint.policyList.agentConfigField', {
+          defaultMessage: 'Agent Configuration',
         }),
-        render: renderDate,
-        truncateText: true,
-      },
-      {
-        field: 'updated_by',
-        name: i18n.translate('xpack.endpoint.policyList.updatedByField', {
-          defaultMessage: 'Last Updated By',
-        }),
-        truncateText: true,
-      },
-      {
-        field: 'updated',
-        name: i18n.translate('xpack.endpoint.policyList.updatedField', {
-          defaultMessage: 'Last Updated',
-        }),
-        render: renderDate,
-        truncateText: true,
+        render(version: string) {
+          return (
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiLink
+              href={`${services.application.getUrlForApp('ingestManager')}#/configs/${version}`}
+              onClick={(ev: SyntheticEvent) => {
+                ev.preventDefault();
+                services.application.navigateToApp('ingestManager', {
+                  path: `#/configs/${version}`,
+                });
+              }}
+            >
+              {version}
+            </EuiLink>
+          );
+        },
       },
     ],
-    []
+    [services.application]
   );
 
   return (

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { VECTOR_STYLES } from '../../vector_style_defaults';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { VectorIcon } from './vector_icon';
 

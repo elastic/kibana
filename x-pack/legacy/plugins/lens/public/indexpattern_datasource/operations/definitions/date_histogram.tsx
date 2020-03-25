@@ -8,9 +8,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-// TODO: make this new-platform compatible
-import { isValidInterval } from 'ui/agg_types';
-
 import {
   EuiForm,
   EuiFormRow,
@@ -26,9 +23,12 @@ import {
 import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
-import { autoIntervalFromDateRange } from '../../auto_date';
-import { IndexPatternAggRestrictions } from '../../../../../../../../src/plugins/data/public';
+import {
+  IndexPatternAggRestrictions,
+  search,
+} from '../../../../../../../../src/plugins/data/public';
 
+const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
 
@@ -136,7 +136,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       extended_bounds: {},
     },
   }),
-  paramEditor: ({ state, setState, currentColumn: currentColumn, layerId, dateRange }) => {
+  paramEditor: ({ state, setState, currentColumn: currentColumn, layerId, dateRange, data }) => {
     const field =
       currentColumn &&
       state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
@@ -156,7 +156,10 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     );
 
     function onChangeAutoInterval(ev: EuiSwitchEvent) {
-      const value = ev.target.checked ? autoIntervalFromDateRange(dateRange) : autoInterval;
+      const { fromDate, toDate } = dateRange;
+      const value = ev.target.checked
+        ? data.search.aggs.calculateAutoTimeExpression({ from: fromDate, to: toDate }) || '1h'
+        : autoInterval;
       setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
     }
 

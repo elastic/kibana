@@ -4,26 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
-import { Module } from '../../../../../legacy/plugins/ml/common/types/modules';
+import { APICaller, SavedObjectsClientContract } from 'kibana/server';
+import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 
 describe('ML - data recognizer', () => {
-  const dr = new DataRecognizer(({
-    ml: {
-      mlClient: {
-        callAsCurrentUser: jest.fn(),
-      },
-    },
-    core: {
-      savedObjects: {
-        client: {
-          find: jest.fn(),
-          bulkCreate: jest.fn(),
-        },
-      },
-    },
-  } as unknown) as RequestHandlerContext);
+  const dr = new DataRecognizer(
+    jest.fn() as APICaller,
+    ({
+      find: jest.fn(),
+      bulkCreate: jest.fn(),
+    } as never) as SavedObjectsClientContract
+  );
 
   const moduleIds = [
     'apache_ecs',
@@ -43,6 +35,7 @@ describe('ML - data recognizer', () => {
     'siem_packetbeat',
     'siem_winlogbeat',
     'siem_winlogbeat_auth',
+    'uptime_heartbeat',
   ];
 
   // check all module IDs are the same as the list above

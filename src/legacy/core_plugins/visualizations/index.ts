@@ -24,7 +24,7 @@ export const visualizations: LegacyPluginInitializer = kibana =>
   new kibana.Plugin({
     id: 'visualizations',
     publicDir: resolve(__dirname, 'public'),
-    require: ['vis_default_editor'],
+    require: [],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },

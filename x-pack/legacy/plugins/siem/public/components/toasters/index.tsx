@@ -8,10 +8,12 @@ import { EuiButton, EuiGlobalToastList, EuiGlobalToastListToast as Toast } from 
 import { noop } from 'lodash/fp';
 import React, { createContext, Dispatch, useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
-import uuid from 'uuid';
 
 import { ModalAllErrors } from './modal_all_errors';
 import * as i18n from './translations';
+
+export * from './utils';
+export * from './errors';
 
 export interface AppToast extends Toast {
   errors?: string[];
@@ -131,50 +133,3 @@ const ErrorToastContainer = styled.div`
 `;
 
 ErrorToastContainer.displayName = 'ErrorToastContainer';
-
-/**
- * Displays an error toast for the provided title and message
- *
- * @param errorTitle Title of error to display in toaster and modal
- * @param errorMessages Message to display in error modal when clicked
- * @param dispatchToaster provided by useStateToaster()
- */
-export const displayErrorToast = (
-  errorTitle: string,
-  errorMessages: string[],
-  dispatchToaster: React.Dispatch<ActionToaster>
-): void => {
-  const toast: AppToast = {
-    id: uuid.v4(),
-    title: errorTitle,
-    color: 'danger',
-    iconType: 'alert',
-    errors: errorMessages,
-  };
-  dispatchToaster({
-    type: 'addToaster',
-    toast,
-  });
-};
-
-/**
- * Displays a success toast for the provided title and message
- *
- * @param title success message to display in toaster and modal
- * @param dispatchToaster provided by useStateToaster()
- */
-export const displaySuccessToast = (
-  title: string,
-  dispatchToaster: React.Dispatch<ActionToaster>
-): void => {
-  const toast: AppToast = {
-    id: uuid.v4(),
-    title,
-    color: 'success',
-    iconType: 'check',
-  };
-  dispatchToaster({
-    type: 'addToaster',
-    toast,
-  });
-};

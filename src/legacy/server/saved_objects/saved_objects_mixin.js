@@ -23,9 +23,9 @@ import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
-  getSortedObjectsForExport,
-  importSavedObjects,
-  resolveImportErrors,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
 } from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { convertTypesToLegacySchema } from '../../../core/server/saved_objects/utils';
@@ -43,7 +43,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.decorate(
     'server',
     'getSavedObjectsManagement',
-    () => new SavedObjectsManagement(kbnServer.uiExports.savedObjectsManagement)
+    () => new SavedObjectsManagement(typeRegistry)
   );
 
   const warn = message => server.log(['warning', 'saved-objects'], message);
@@ -95,9 +95,9 @@ export function savedObjectsMixin(kbnServer, server) {
       provider.addClientWrapperFactory(...args),
     importExport: {
       objectLimit: server.config().get('savedObjects.maxImportExportSize'),
-      importSavedObjects,
-      resolveImportErrors,
-      getSortedObjectsForExport,
+      importSavedObjects: importSavedObjectsFromStream,
+      resolveImportErrors: resolveSavedObjectsImportErrors,
+      getSortedObjectsForExport: exportSavedObjectsToStream,
     },
     schema,
   };

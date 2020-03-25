@@ -30,7 +30,7 @@ let datasourceStates: Record<
 
 beforeEach(() => {
   datasourceMap = {
-    mock: createMockDatasource(),
+    mock: createMockDatasource('a'),
   };
 
   datasourceStates = {
@@ -147,9 +147,9 @@ describe('suggestion helpers', () => {
       },
     };
     const multiDatasourceMap = {
-      mock: createMockDatasource(),
-      mock2: createMockDatasource(),
-      mock3: createMockDatasource(),
+      mock: createMockDatasource('a'),
+      mock2: createMockDatasource('a'),
+      mock3: createMockDatasource('a'),
     };
     const droppedField = {};
     getSuggestions({

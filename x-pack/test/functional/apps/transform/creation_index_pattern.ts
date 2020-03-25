@@ -57,6 +57,28 @@ export default function({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
+          pivotAdvancedEditorValue: {
+            group_by: {
+              'category.keyword': {
+                terms: {
+                  field: 'category.keyword',
+                },
+              },
+              order_date: {
+                date_histogram: {
+                  field: 'order_date',
+                  calendar_interval: '1m',
+                },
+              },
+            },
+            aggregations: {
+              'products.base_price.avg': {
+                avg: {
+                  field: 'products.base_price',
+                },
+              },
+            },
+          },
           pivotPreview: {
             column: 0,
             values: [`Men's Accessories`],
@@ -67,7 +89,61 @@ export default function({ getService }: FtrProviderContext) {
             progress: '100',
           },
           sourcePreview: {
-            columns: 6,
+            columns: 45,
+            rows: 5,
+          },
+        },
+      },
+      {
+        suiteTitle: 'batch transform with terms group and percentiles agg',
+        source: 'ecommerce',
+        groupByEntries: [
+          {
+            identifier: 'terms(geoip.country_iso_code)',
+            label: 'geoip.country_iso_code',
+          } as GroupByEntry,
+        ],
+        aggregationEntries: [
+          {
+            identifier: 'percentiles(products.base_price)',
+            label: 'products.base_price.percentiles',
+          },
+        ],
+        transformId: `ec_2_${Date.now()}`,
+        transformDescription:
+          'ecommerce batch transform with group by terms(geoip.country_iso_code) and aggregation percentiles(products.base_price)',
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          pivotAdvancedEditorValue: {
+            group_by: {
+              'geoip.country_iso_code': {
+                terms: {
+                  field: 'geoip.country_iso_code',
+                },
+              },
+            },
+            aggregations: {
+              'products.base_price.percentiles': {
+                percentiles: {
+                  field: 'products.base_price',
+                  percents: [1, 5, 25, 50, 75, 95, 99],
+                },
+              },
+            },
+          },
+          pivotPreview: {
+            column: 0,
+            values: ['AE', 'CO', 'EG', 'FR', 'GB'],
+          },
+          row: {
+            status: 'stopped',
+            mode: 'batch',
+            progress: '100',
+          },
+          sourcePreview: {
+            columns: 45,
             rows: 5,
           },
         },
@@ -150,6 +226,13 @@ export default function({ getService }: FtrProviderContext) {
         it('displays the advanced pivot editor switch', async () => {
           await transform.wizard.assertAdvancedPivotEditorSwitchExists();
           await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
+        });
+
+        it('displays the advanced configuration', async () => {
+          await transform.wizard.enabledAdvancedPivotEditor();
+          await transform.wizard.assertAdvancedPivotEditorContent(
+            testData.expected.pivotAdvancedEditorValue
+          );
         });
 
         it('loads the pivot preview', async () => {

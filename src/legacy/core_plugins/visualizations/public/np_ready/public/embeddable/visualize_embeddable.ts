@@ -34,8 +34,6 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-  selectRangeTrigger,
-  valueClickTrigger,
   EmbeddableVisTriggerContext,
 } from '../../../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
@@ -47,12 +45,12 @@ import { PersistedState } from '../../../../../../../plugins/visualizations/publ
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
-import { VisSavedObject } from '../types';
+import { VIS_EVENT_TO_TRIGGER } from './events';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export interface VisualizeEmbeddableConfiguration {
-  savedVisualization: VisSavedObject;
+  vis: Vis;
   indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
@@ -74,7 +72,6 @@ export interface VisualizeInput extends EmbeddableInput {
 export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
   indexPatterns?: IIndexPattern[];
-  savedObjectId: string;
   visTypeName: string;
 }
 
@@ -82,9 +79,7 @@ type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
-  private savedVisualization: VisSavedObject;
-  private appState: { save(): void } | undefined;
-  private uiState: PersistedState;
+  private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
   private query?: Query;
   private title?: string;
@@ -99,48 +94,24 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   constructor(
     timefilter: TimefilterContract,
-    {
-      savedVisualization,
-      editUrl,
-      indexPatterns,
-      editable,
-      appState,
-      uiState,
-    }: VisualizeEmbeddableConfiguration,
+    { vis, editUrl, indexPatterns, editable }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     parent?: Container
   ) {
     super(
       initialInput,
       {
-        defaultTitle: savedVisualization.title,
+        defaultTitle: vis.title,
         editUrl,
         indexPatterns,
         editable,
-        savedObjectId: savedVisualization.id!,
-        visTypeName: savedVisualization.vis.type.name,
+        visTypeName: vis.type.name,
       },
       parent
     );
-    this.appState = appState;
-    this.savedVisualization = savedVisualization;
-    this.vis = this.savedVisualization.vis;
-
-    this.vis.on('update', this.handleVisUpdate);
-    this.vis.on('reload', this.reload);
-
-    if (uiState) {
-      this.uiState = uiState;
-    } else {
-      const parsedUiState = savedVisualization.uiStateJSON
-        ? JSON.parse(savedVisualization.uiStateJSON)
-        : {};
-      this.uiState = new PersistedState(parsedUiState);
-
-      this.uiState.on('change', this.uiStateChangeHandler);
-    }
-
-    this.vis._setUiState(this.uiState);
+    this.timefilter = timefilter;
+    this.vis = vis;
+    this.vis.uiState.on('change', this.uiStateChangeHandler);
 
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
@@ -154,7 +125,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   }
 
   public getVisualizationDescription() {
-    return this.savedVisualization.description;
+    return this.vis.description;
   }
 
   public getInspectorAdapters = () => {
@@ -183,16 +154,16 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       if (!_.isEqual(visCustomizations, this.visCustomizations)) {
         this.visCustomizations = visCustomizations;
         // Turn this off or the uiStateChangeHandler will fire for every modification.
-        this.uiState.off('change', this.uiStateChangeHandler);
-        this.uiState.clearAllKeys();
-        this.uiState.set('vis', visCustomizations);
+        this.vis.uiState.off('change', this.uiStateChangeHandler);
+        this.vis.uiState.clearAllKeys();
+        this.vis.uiState.set('vis', visCustomizations);
         getKeys(visCustomizations).forEach(key => {
-          this.uiState.set(key, visCustomizations[key]);
+          this.vis.uiState.set(key, visCustomizations[key]);
         });
-        this.uiState.on('change', this.uiStateChangeHandler);
+        this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
-    } else if (!this.appState) {
-      this.uiState.clearAllKeys();
+    } else if (this.parent) {
+      this.vis.uiState.clearAllKeys();
     }
   }
 
@@ -226,14 +197,30 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       }
     }
 
-    if (this.savedVisualization.description && this.domNode) {
-      this.domNode.setAttribute('data-description', this.savedVisualization.description);
+    if (this.vis.description && this.domNode) {
+      this.domNode.setAttribute('data-description', this.vis.description);
     }
 
     if (this.handler && dirty) {
       this.updateHandler();
     }
   }
+
+  // this is a hack to make editor still work, will be removed once we clean up editor
+  // @ts-ignore
+  hasInspector = () => {
+    const visTypesWithoutInspector = [
+      'markdown',
+      'input_control_vis',
+      'metrics',
+      'vega',
+      'timelion',
+    ];
+    if (visTypesWithoutInspector.includes(this.vis.type.name)) {
+      return false;
+    }
+    return this.getInspectorAdapters();
+  };
 
   /**
    *
@@ -243,26 +230,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
-
-    this.savedVisualization.vis._setUiState(this.uiState);
-    this.uiState = this.savedVisualization.vis.getUiState();
-
-    // this is a hack to make editor still work, will be removed once we clean up editor
-    this.vis.hasInspector = () => {
-      const visTypesWithoutInspector = [
-        'markdown',
-        'input_control_vis',
-        'metrics',
-        'vega',
-        'timelion',
-      ];
-      if (visTypesWithoutInspector.includes(this.vis.type.name)) {
-        return false;
-      }
-      return this.getInspectorAdapters();
-    };
-
-    this.vis.openInspector = this.openInspector;
 
     const div = document.createElement('div');
     div.className = `visualize panel-content panel-content--fullWidth`;
@@ -276,12 +243,12 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.handler.events$.subscribe(async event => {
         // maps hack, remove once esaggs function is cleaned up and ready to accept variables
         if (event.name === 'bounds') {
-          const agg = this.vis.getAggConfig().aggs.find((a: any) => {
+          const agg = this.vis.data.aggs!.aggs.find((a: any) => {
             return get(a, 'type.dslName') === 'geohash_grid';
           });
           if (
-            agg.params.precision !== event.data.precision ||
-            !_.isEqual(agg.params.boundingBox, event.data.boundingBox)
+            (agg && agg.params.precision !== event.data.precision) ||
+            (agg && !_.isEqual(agg.params.boundingBox, event.data.boundingBox))
           ) {
             agg.params.boundingBox = event.data.boundingBox;
             agg.params.precision = event.data.precision;
@@ -291,11 +258,11 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const triggerId: 'SELECT_RANGE_TRIGGER' | 'VALUE_CLICK_TRIGGER' =
-            event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
+          const triggerId =
+            event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
           const context: EmbeddableVisTriggerContext = {
             embeddable: this,
-            timeFieldName: this.vis.indexPattern.timeFieldName,
+            timeFieldName: this.vis.data.indexPattern!.timeFieldName!,
             data: event.data,
           };
           getUiActions()
@@ -307,8 +274,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     div.setAttribute('data-title', this.output.title || '');
 
-    if (this.savedVisualization.description) {
-      div.setAttribute('data-description', this.savedVisualization.description);
+    if (this.vis.description) {
+      div.setAttribute('data-description', this.vis.description);
     }
 
     div.setAttribute('data-test-subj', 'visualizationLoader');
@@ -338,10 +305,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   public destroy() {
     super.destroy();
     this.subscriptions.forEach(s => s.unsubscribe());
-    this.uiState.off('change', this.uiStateChangeHandler);
-    this.savedVisualization.vis.removeListener('reload', this.reload);
-    this.savedVisualization.vis.removeListener('update', this.handleVisUpdate);
-    this.savedVisualization.destroy();
+    this.vis.uiState.off('change', this.uiStateChangeHandler);
+
     if (this.handler) {
       this.handler.destroy();
       this.handler.getElement().remove();
@@ -360,34 +325,52 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         query: this.input.query,
         filters: this.input.filters,
       },
-      uiState: this.uiState,
+      uiState: this.vis.uiState,
     };
     this.expression = await buildPipeline(this.vis, {
-      searchSource: this.savedVisualization.searchSource,
+      timefilter: this.timefilter,
       timeRange: this.timeRange,
-      savedObjectId: this.savedVisualization.id,
     });
-
-    this.vis.filters = { timeRange: this.timeRange };
 
     if (this.handler) {
       this.handler.update(this.expression, expressionParams);
     }
-
-    this.vis.emit('apply');
   }
 
   private handleVisUpdate = async () => {
-    if (this.appState) {
-      this.appState.save();
-    }
-
     this.updateHandler();
   };
 
   private uiStateChangeHandler = () => {
     this.updateInput({
-      ...this.uiState.toJSON(),
+      ...this.vis.uiState.toJSON(),
     });
   };
+
+  public supportedTriggers() {
+    // TODO: Report a correct list of triggers for each vis_type.
+    switch (this.vis.type.name) {
+      case 'area':
+      case 'heatmap':
+      case 'histogram':
+      case 'horizontal_bar':
+      case 'line':
+      case 'pie':
+      case 'table':
+      case 'tagcloud':
+        return [VIS_EVENT_TO_TRIGGER.filter];
+      case 'gauge':
+      case 'goal':
+      case 'input_control_vis':
+      case 'markdown':
+      case 'metric':
+      case 'metrics':
+      case 'region_map':
+      case 'tile_map':
+      case 'timelion':
+      case 'vega':
+      default:
+        return [];
+    }
+  }
 }

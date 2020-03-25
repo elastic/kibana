@@ -33,7 +33,7 @@ export class RenderingPlugin implements Plugin {
             {
               includeUserSettings: schema.boolean({ defaultValue: true }),
             },
-            { allowUnknowns: true }
+            { unknowns: 'allow' }
           ),
           params: schema.object({
             id: schema.maybe(schema.string()),

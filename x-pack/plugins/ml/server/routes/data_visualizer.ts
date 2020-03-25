@@ -12,7 +12,6 @@ import {
   dataVisualizerFieldStatsSchema,
   dataVisualizerOverallStatsSchema,
 } from './schemas/data_visualizer_schema';
-import { licensePreRoutingFactory } from './license_check_pre_routing_factory';
 import { RouteInitialization } from '../types';
 
 function getOverallStats(
@@ -68,7 +67,7 @@ function getStatsForFields(
 /**
  * Routes for the index data visualizer.
  */
-export function dataVisualizerRoutes({ router, getLicenseCheckResults }: RouteInitialization) {
+export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup DataVisualizer
    *
@@ -83,7 +82,7 @@ export function dataVisualizerRoutes({ router, getLicenseCheckResults }: RouteIn
       path: '/api/ml/data_visualizer/get_field_stats/{indexPatternTitle}',
       validate: dataVisualizerFieldStatsSchema,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -135,7 +134,7 @@ export function dataVisualizerRoutes({ router, getLicenseCheckResults }: RouteIn
       path: '/api/ml/data_visualizer/get_overall_stats/{indexPatternTitle}',
       validate: dataVisualizerOverallStatsSchema,
     },
-    licensePreRoutingFactory(getLicenseCheckResults, async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         const {
           params: { indexPatternTitle },

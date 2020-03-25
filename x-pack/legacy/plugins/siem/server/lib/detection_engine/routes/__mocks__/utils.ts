@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Readable } from 'stream';
+
 import { OutputRuleAlertRest } from '../../types';
-
-export const TEST_BOUNDARY = 'test_multipart_boundary';
-
-// Not parsable due to extra colon following `name` property - name::
-export const UNPARSABLE_LINE =
-  '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}';
+import { HapiReadableStream } from '../../rules/types';
 
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
@@ -24,6 +21,21 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
   severity: 'high',
   type: 'query',
   query: 'user.name: root or user.name: admin',
+});
+
+/**
+ * This is a typical ML rule for testing
+ * @param ruleId
+ */
+export const getSimpleMlRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  name: 'Simple Rule Query',
+  description: 'Simple Rule Query',
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  type: 'machine_learning',
+  anomaly_threshold: 44,
+  machine_learning_job_id: 'some_job_id',
 });
 
 /**
@@ -41,50 +53,132 @@ export const getSimpleRuleWithId = (id = 'rule-1'): Partial<OutputRuleAlertRest>
 });
 
 /**
- * Given an array of rule_id strings this will return a ndjson buffer which is useful
- * for testing uploads.
- * @param ruleIds Array of strings of rule_ids
- * @param isNdjson Boolean to determine file extension
+ * Given an array of rules, builds an NDJSON string of rules
+ * as we might import/export
+ * @param rules Array of rule objects with which to generate rule JSON
  */
-export const getSimpleRuleAsMultipartContent = (ruleIds: string[], isNdjson = true): Buffer => {
-  const arrayOfRules = ruleIds.map(ruleId => {
-    const simpleRule = getSimpleRule(ruleId);
-    return JSON.stringify(simpleRule);
-  });
-  const stringOfRules = arrayOfRules.join('\r\n');
-
-  const resultingPayload =
-    `--${TEST_BOUNDARY}\r\n` +
-    `Content-Disposition: form-data; name="file"; filename="rules.${
-      isNdjson ? 'ndjson' : 'json'
-    }\r\n` +
-    'Content-Type: application/octet-stream\r\n' +
-    '\r\n' +
-    `${stringOfRules}\r\n` +
-    `--${TEST_BOUNDARY}--\r\n`;
-
-  return Buffer.from(resultingPayload);
+export const rulesToNdJsonString = (rules: Array<Partial<OutputRuleAlertRest>>) => {
+  return rules.map(rule => JSON.stringify(rule)).join('\r\n');
 };
 
 /**
- * Given an array of rule_id strings this will return a ndjson buffer which is useful
- * for testing uploads.
- * @param count Number of rules to generate
- * @param isNdjson Boolean to determine file extension
+ * Given an array of rule IDs, builds an NDJSON string of rules
+ * as we might import/export
+ * @param ruleIds Array of ruleIds with which to generate rule JSON
  */
-export const getSimpleRuleAsMultipartContentNoRuleId = (count: number, isNdjson = true): Buffer => {
-  const arrayOfRules = Array(count).fill(JSON.stringify(getSimpleRuleWithId()));
-  const stringOfRules = arrayOfRules.join('\r\n');
-
-  const resultingPayload =
-    `--${TEST_BOUNDARY}\r\n` +
-    `Content-Disposition: form-data; name="file"; filename="rules.${
-      isNdjson ? 'ndjson' : 'json'
-    }\r\n` +
-    'Content-Type: application/octet-stream\r\n' +
-    '\r\n' +
-    `${stringOfRules}\r\n` +
-    `--${TEST_BOUNDARY}--\r\n`;
-
-  return Buffer.from(resultingPayload);
+export const ruleIdsToNdJsonString = (ruleIds: string[]) => {
+  const rules = ruleIds.map(ruleId => getSimpleRule(ruleId));
+  return rulesToNdJsonString(rules);
 };
+
+/**
+ * Given a string, builds a hapi stream as our
+ * route handler would receive it.
+ * @param string contents of the stream
+ * @param filename String to declare file extension
+ */
+export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiReadableStream => {
+  const HapiStream = class extends Readable {
+    public readonly hapi: { filename: string };
+    constructor(fileName: string) {
+      super();
+      this.hapi = { filename: fileName };
+    }
+  };
+
+  const stream = new HapiStream(filename);
+  stream.push(string);
+  stream.push(null);
+
+  return stream;
+};
+
+export const getOutputRuleAlertForRest = (): Omit<
+  OutputRuleAlertRest,
+  'machine_learning_job_id' | 'anomaly_threshold'
+> => ({
+  actions: [],
+  created_by: 'elastic',
+  created_at: '2019-12-13T16:40:33.400Z',
+  updated_at: '2019-12-13T16:40:33.400Z',
+  description: 'Detecting root and admin users',
+  enabled: true,
+  false_positives: [],
+  from: 'now-6m',
+  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+  immutable: false,
+  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  interval: '5m',
+  risk_score: 50,
+  rule_id: 'rule-1',
+  language: 'kuery',
+  max_signals: 100,
+  name: 'Detect Root/Admin Users',
+  output_index: '.siem-signals',
+  query: 'user.name: root or user.name: admin',
+  references: ['http://www.example.com', 'https://ww.example.com'],
+  severity: 'high',
+  updated_by: 'elastic',
+  tags: [],
+  threat: [
+    {
+      framework: 'MITRE ATT&CK',
+      tactic: {
+        id: 'TA0040',
+        name: 'impact',
+        reference: 'https://attack.mitre.org/tactics/TA0040/',
+      },
+      technique: [
+        {
+          id: 'T1499',
+          name: 'endpoint denial of service',
+          reference: 'https://attack.mitre.org/techniques/T1499/',
+        },
+      ],
+    },
+  ],
+  lists: [
+    {
+      field: 'source.ip',
+      boolean_operator: 'and',
+      values: [
+        {
+          name: '127.0.0.1',
+          type: 'value',
+        },
+      ],
+    },
+    {
+      field: 'host.name',
+      boolean_operator: 'and not',
+      values: [
+        {
+          name: 'rock01',
+          type: 'value',
+        },
+        {
+          name: 'mothra',
+          type: 'value',
+        },
+      ],
+    },
+  ],
+  filters: [
+    {
+      query: {
+        match_phrase: {
+          'host.name': 'some-host',
+        },
+      },
+    },
+  ],
+  meta: {
+    someMeta: 'someField',
+  },
+  timeline_id: 'some-timeline-id',
+  timeline_title: 'some-timeline-title',
+  to: 'now',
+  type: 'query',
+  note: '# Investigative notes',
+  version: 1,
+});

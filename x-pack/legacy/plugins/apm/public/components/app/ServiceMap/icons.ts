@@ -4,47 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import cytoscape from 'cytoscape';
+import {
+  AGENT_NAME,
+  SERVICE_NAME,
+  SPAN_TYPE,
+  SPAN_SUBTYPE
+} from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import databaseIcon from './icons/database.svg';
+import defaultIconImport from './icons/default.svg';
 import documentsIcon from './icons/documents.svg';
+import dotNetIcon from './icons/dot-net.svg';
+import elasticsearchIcon from './icons/elasticsearch.svg';
 import globeIcon from './icons/globe.svg';
+import goIcon from './icons/go.svg';
+import javaIcon from './icons/java.svg';
+import nodeJsIcon from './icons/nodejs.svg';
+import phpIcon from './icons/php.svg';
+import pythonIcon from './icons/python.svg';
+import rubyIcon from './icons/ruby.svg';
+import rumJsIcon from './icons/rumjs.svg';
 
-function getAvatarIcon(
-  text = '',
-  backgroundColor = 'transparent',
-  foregroundColor = 'white'
-) {
-  return (
-    'data:image/svg+xml;utf8,' +
-    encodeURIComponent(`<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
-  <circle cx="40" cy="40" fill="${backgroundColor}"  r="40" stroke-width="0" />
-  <text fill="${foregroundColor}" font-family="'Inter UI', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica', 'Arial', sans-serif" font-size="36" text-anchor="middle" x="40" xml:space="preserve" y="52">${text}</text>
-</svg>
-`)
-  );
-}
+export const defaultIcon = defaultIconImport;
 
 // The colors here are taken from the logos of the corresponding technologies
 const icons: { [key: string]: string } = {
   cache: databaseIcon,
-  database: databaseIcon,
+  db: databaseIcon,
   external: globeIcon,
   messaging: documentsIcon,
   resource: globeIcon
 };
 
-const serviceAbbreviations: { [key: string]: string } = {
-  dotnet: '.N',
-  go: 'Go',
-  java: 'Jv',
-  'js-base': 'JS',
-  nodejs: 'No',
-  python: 'Py',
-  ruby: 'Rb'
+const serviceIcons: { [key: string]: string } = {
+  dotnet: dotNetIcon,
+  go: goIcon,
+  java: javaIcon,
+  'js-base': rumJsIcon,
+  nodejs: nodeJsIcon,
+  php: phpIcon,
+  python: pythonIcon,
+  ruby: rubyIcon
 };
-
-export const defaultIcon = getAvatarIcon();
 
 // IE 11 does not properly load some SVGs, which causes a runtime error and the
 // map to not work at all. We would prefer to do some kind of feature detection
@@ -58,18 +59,20 @@ export const defaultIcon = getAvatarIcon();
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export function iconForNode(node: cytoscape.NodeSingular) {
-  const type = node.data('type');
+  const type = node.data(SPAN_TYPE);
 
-  if (type === 'service') {
-    return getAvatarIcon(
-      serviceAbbreviations[node.data('agentName') as string],
-      node.selected() || node.hasClass('primary')
-        ? theme.euiColorPrimary
-        : theme.euiColorDarkestShade
-    );
+  if (node.data(SERVICE_NAME)) {
+    return serviceIcons[node.data(AGENT_NAME) as string];
   } else if (isIE11) {
     return defaultIcon;
-  } else {
+  } else if (
+    node.data(SPAN_TYPE) === 'db' &&
+    node.data(SPAN_SUBTYPE) === 'elasticsearch'
+  ) {
+    return elasticsearchIcon;
+  } else if (icons[type]) {
     return icons[type];
+  } else {
+    return defaultIcon;
   }
 }

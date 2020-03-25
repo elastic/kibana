@@ -4,27 +4,102 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  CaseResponse,
+  CasesResponse,
+  CasesFindResponse,
+  CaseRequest,
+  CasesStatusResponse,
+  CommentRequest,
+  CommentResponse,
+  User,
+  CaseUserActionsResponse,
+  CaseExternalServiceRequest,
+  ServiceConnectorCaseParams,
+  ServiceConnectorCaseResponse,
+  ActionTypeExecutorResult,
+} from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
-import { FetchCasesProps, Case, NewCase, SortFieldCase, AllCases, CaseSnake } from './types';
-import { throwIfNotOk } from '../../hooks/api/api';
+import {
+  ActionLicense,
+  AllCases,
+  BulkUpdateStatus,
+  Case,
+  CasesStatus,
+  Comment,
+  FetchCasesProps,
+  SortFieldCase,
+  CaseUserActions,
+} from './types';
 import { CASES_URL } from './constants';
-import { convertToCamelCase, convertAllCasesToCamel } from './utils';
+import {
+  convertToCamelCase,
+  convertAllCasesToCamel,
+  convertArrayToCamelCase,
+  decodeCaseResponse,
+  decodeCasesResponse,
+  decodeCasesFindResponse,
+  decodeCasesStatusResponse,
+  decodeCommentResponse,
+  decodeCaseUserActionsResponse,
+  decodeServiceConnectorCaseResponse,
+} from './utils';
 
-export const getCase = async (caseId: string, includeComments: boolean): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
+export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}/${caseId}`, {
     method: 'GET',
-    asResponse: true,
     query: {
       includeComments,
     },
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<CaseSnake, Case>(response.body!);
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+};
+
+export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> => {
+  const response = await KibanaServices.get().http.fetch<CasesStatusResponse>(
+    `${CASES_URL}/status`,
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+  return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
+};
+
+export const getTags = async (): Promise<string[]> => {
+  const response = await KibanaServices.get().http.fetch<string[]>(`${CASES_URL}/tags`, {
+    method: 'GET',
+  });
+  return response ?? [];
+};
+
+export const getReporters = async (signal: AbortSignal): Promise<User[]> => {
+  const response = await KibanaServices.get().http.fetch<User[]>(`${CASES_URL}/reporters`, {
+    method: 'GET',
+    signal,
+  });
+  return response ?? [];
+};
+
+export const getCaseUserActions = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<CaseUserActions[]> => {
+  const response = await KibanaServices.get().http.fetch<CaseUserActionsResponse>(
+    `${CASES_URL}/${caseId}/user_actions`,
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+  return convertArrayToCamelCase(decodeCaseUserActionsResponse(response)) as CaseUserActions[];
 };
 
 export const getCases = async ({
   filterOptions = {
     search: '',
+    reporters: [],
+    status: 'open',
     tags: [],
   },
   queryParams = {
@@ -34,41 +109,119 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
 }: FetchCasesProps): Promise<AllCases> => {
-  const tags = [...(filterOptions.tags?.map(t => `case-workflow.attributes.tags: ${t}`) ?? [])];
   const query = {
+    reporters: filterOptions.reporters.map(r => r.username),
+    tags: filterOptions.tags,
+    ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
+    ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...queryParams,
-    filter: tags.join(' AND '),
-    search: filterOptions.search,
   };
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
     method: 'GET',
     query,
-    asResponse: true,
   });
-  await throwIfNotOk(response.response);
-  return convertAllCasesToCamel(response.body!);
+  return convertAllCasesToCamel(decodeCasesFindResponse(response));
 };
 
-export const createCase = async (newCase: NewCase): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
+export const postCase = async (newCase: CaseRequest): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(CASES_URL, {
     method: 'POST',
-    asResponse: true,
     body: JSON.stringify(newCase),
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<CaseSnake, Case>(response.body!);
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
-export const updateCaseProperty = async (
+export const patchCase = async (
   caseId: string,
-  updatedCase: Partial<Case>,
+  updatedCase: Partial<CaseRequest>,
   version: string
-): Promise<Partial<Case>> => {
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
+): Promise<Case[]> => {
+  const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
     method: 'PATCH',
-    asResponse: true,
-    body: JSON.stringify({ case: updatedCase, version }),
+    body: JSON.stringify({ cases: [{ ...updatedCase, id: caseId, version }] }),
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<Partial<CaseSnake>, Partial<Case>>(response.body!);
+  return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
+};
+
+export const patchCasesStatus = async (cases: BulkUpdateStatus[]): Promise<Case[]> => {
+  const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
+    method: 'PATCH',
+    body: JSON.stringify({ cases }),
+  });
+  return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
+};
+
+export const postComment = async (newComment: CommentRequest, caseId: string): Promise<Comment> => {
+  const response = await KibanaServices.get().http.fetch<CommentResponse>(
+    `${CASES_URL}/${caseId}/comments`,
+    {
+      method: 'POST',
+      body: JSON.stringify(newComment),
+    }
+  );
+  return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response));
+};
+
+export const patchComment = async (
+  caseId: string,
+  commentId: string,
+  commentUpdate: string,
+  version: string
+): Promise<Partial<Comment>> => {
+  const response = await KibanaServices.get().http.fetch<CommentResponse>(
+    `${CASES_URL}/${caseId}/comments`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ comment: commentUpdate, id: commentId, version }),
+    }
+  );
+  return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response));
+};
+
+export const deleteCases = async (caseIds: string[]): Promise<boolean> => {
+  const response = await KibanaServices.get().http.fetch<string>(CASES_URL, {
+    method: 'DELETE',
+    query: { ids: JSON.stringify(caseIds) },
+  });
+  return response === 'true' ? true : false;
+};
+
+export const pushCase = async (
+  caseId: string,
+  push: CaseExternalServiceRequest,
+  signal: AbortSignal
+): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(
+    `${CASES_URL}/${caseId}/_push`,
+    {
+      method: 'POST',
+      body: JSON.stringify(push),
+      signal,
+    }
+  );
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+};
+
+export const pushToService = async (
+  connectorId: string,
+  casePushParams: ServiceConnectorCaseParams,
+  signal: AbortSignal
+): Promise<ServiceConnectorCaseResponse> => {
+  const response = await KibanaServices.get().http.fetch<ActionTypeExecutorResult>(
+    `/api/action/${connectorId}/_execute`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ params: casePushParams }),
+      signal,
+    }
+  );
+  return decodeServiceConnectorCaseResponse(response.data);
+};
+
+export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {
+  const response = await KibanaServices.get().http.fetch<ActionLicense[]>(`/api/action/types`, {
+    method: 'GET',
+    signal,
+  });
+  return response;
 };

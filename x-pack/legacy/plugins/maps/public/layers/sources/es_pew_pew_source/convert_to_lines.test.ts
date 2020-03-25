@@ -62,6 +62,7 @@ it('Should convert elasticsearch aggregation response into feature collection of
       avg_of_FlightDelayMin: 3,
       doc_count: 1,
       terms_of_Carrier: 'ES-Air',
+      terms_of_Carrier__percentage: 100,
     },
     type: 'Feature',
   });

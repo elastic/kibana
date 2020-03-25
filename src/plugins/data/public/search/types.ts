@@ -18,9 +18,11 @@
  */
 
 import { CoreStart } from 'kibana/public';
+import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './es_client';
+import { SearchInterceptor } from './search_interceptor';
 
 export interface ISearchContext {
   core: CoreStart;
@@ -66,11 +68,16 @@ export type TRegisterSearchStrategyProvider = <T extends TStrategyTypes>(
   searchStrategyProvider: TSearchStrategyProvider<T>
 ) => void;
 
+interface ISearchStartLegacy {
+  esClient: LegacyApiCaller;
+}
+
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
  * point.
  */
 export interface ISearchSetup {
+  aggs: SearchAggsSetup;
   /**
    * Extension point exposed for other plugins to register their own search
    * strategies.
@@ -79,8 +86,8 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart {
+  aggs: SearchAggsStart;
+  setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
-  __LEGACY: {
-    esClient: LegacyApiCaller;
-  };
+  __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
 }

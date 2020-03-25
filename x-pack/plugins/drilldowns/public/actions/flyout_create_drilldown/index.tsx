@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
-import { Action } from '../../../../../../src/plugins/ui_actions/public';
+import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { FlyoutCreateDrilldown } from '../../components/flyout_create_drilldown';
@@ -22,16 +22,16 @@ export interface OpenFlyoutAddDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
 }
 
-export class FlyoutCreateDrilldownAction implements Action<FlyoutCreateDrilldownActionContext> {
+export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
-  public order = 5;
+  public order = 100;
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
   public getDisplayName() {
     return i18n.translate('xpack.drilldowns.FlyoutCreateDrilldownAction.displayName', {
-      defaultMessage: 'Create Drilldown',
+      defaultMessage: 'Create drilldown',
     });
   }
 
@@ -40,7 +40,7 @@ export class FlyoutCreateDrilldownAction implements Action<FlyoutCreateDrilldown
   }
 
   public async isCompatible({ embeddable }: FlyoutCreateDrilldownActionContext) {
-    return true;
+    return embeddable.getInput().viewMode === 'edit';
   }
 
   public async execute(context: FlyoutCreateDrilldownActionContext) {

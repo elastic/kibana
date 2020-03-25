@@ -19,17 +19,17 @@
 
 import { Action } from '../actions';
 import { uiActionsPluginMock } from '../mocks';
-import { TriggerId } from '../types';
+import { TriggerId, ActionType } from '../types';
 
 const action1: Action = {
   id: 'action1',
   order: 1,
-  type: 'type1',
+  type: 'type1' as ActionType,
 } as any;
 const action2: Action = {
   id: 'action2',
   order: 2,
-  type: 'type2',
+  type: 'type2' as ActionType,
 } as any;
 
 test('returns actions set on trigger', () => {
@@ -47,13 +47,13 @@ test('returns actions set on trigger', () => {
 
   expect(list0).toHaveLength(0);
 
-  setup.attachAction('trigger' as TriggerId, 'action1');
+  setup.attachAction('trigger' as TriggerId, action1);
   const list1 = start.getTriggerActions('trigger' as TriggerId);
 
   expect(list1).toHaveLength(1);
   expect(list1).toEqual([action1]);
 
-  setup.attachAction('trigger' as TriggerId, 'action2');
+  setup.attachAction('trigger' as TriggerId, action2);
   const list2 = start.getTriggerActions('trigger' as TriggerId);
 
   expect(list2).toHaveLength(2);

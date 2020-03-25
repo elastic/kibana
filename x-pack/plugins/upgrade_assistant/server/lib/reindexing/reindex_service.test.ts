@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+jest.mock('../es_indices_state_check', () => ({ esIndicesStateCheck: jest.fn() }));
 import { BehaviorSubject } from 'rxjs';
 import { Logger } from 'src/core/server';
 import { loggingServiceMock } from 'src/core/server/mocks';
@@ -18,6 +18,8 @@ import {
 import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
 import { licensingMock } from '../../../../licensing/server/mocks';
 import { LicensingPluginSetup } from '../../../../licensing/server';
+
+import { esIndicesStateCheck } from '../es_indices_state_check';
 
 import {
   isMlIndex,
@@ -43,6 +45,7 @@ describe('reindexService', () => {
     Promise.reject(`Mock function ${name} was not implemented!`);
 
   beforeEach(() => {
+    (esIndicesStateCheck as jest.Mock).mockResolvedValue({});
     actions = {
       createReindexOp: jest.fn(unimplemented('createReindexOp')),
       deleteReindexOp: jest.fn(unimplemented('deleteReindexOp')),
@@ -215,7 +218,7 @@ describe('reindexService', () => {
 
       await service.createReindexOperation('myIndex');
 
-      expect(actions.createReindexOp).toHaveBeenCalledWith('myIndex');
+      expect(actions.createReindexOp).toHaveBeenCalledWith('myIndex', undefined);
     });
 
     it('fails if index does not exist', async () => {
@@ -841,7 +844,10 @@ describe('reindexService', () => {
     describe('newIndexCreated', () => {
       const reindexOp = {
         id: '1',
-        attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.newIndexCreated },
+        attributes: {
+          ...defaultAttributes,
+          lastCompletedStep: ReindexStep.newIndexCreated,
+        },
       } as ReindexSavedObject;
 
       beforeEach(() => {
@@ -957,7 +963,11 @@ describe('reindexService', () => {
     describe('reindexCompleted', () => {
       const reindexOp = {
         id: '1',
-        attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.reindexCompleted },
+        attributes: {
+          ...defaultAttributes,
+          lastCompletedStep: ReindexStep.reindexCompleted,
+          reindexOptions: { openAndClose: false },
+        },
       } as ReindexSavedObject;
 
       it('switches aliases, sets as complete, and updates lastCompletedStep', async () => {

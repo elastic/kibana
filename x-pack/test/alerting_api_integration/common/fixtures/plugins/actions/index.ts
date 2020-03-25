@@ -29,7 +29,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   const allPaths = Object.values(ExternalServiceSimulator).map(service =>
     getExternalServiceSimulatorPath(service)
   );
-  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v1/table/incident`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/incident`);
   return allPaths;
 }
 
@@ -43,6 +43,7 @@ export default function(kibana: any) {
       const notEnabledActionType: ActionType = {
         id: 'test.not-enabled',
         name: 'Test: Not Enabled',
+        minimumLicenseRequired: 'gold',
         async executor() {
           return { status: 'ok', actionId: '' };
         },
@@ -56,6 +57,7 @@ export default function(kibana: any) {
         app: ['actions', 'kibana'],
         privileges: {
           all: {
+            app: ['actions', 'kibana'],
             savedObject: {
               all: ['action', 'action_task_params'],
               read: [],
@@ -64,6 +66,7 @@ export default function(kibana: any) {
             api: ['actions-read', 'actions-all'],
           },
           read: {
+            app: ['actions', 'kibana'],
             savedObject: {
               all: ['action_task_params'],
               read: ['action'],

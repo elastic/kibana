@@ -28,6 +28,8 @@ import {
   stopReportManager,
   trackUiEvent,
 } from './lens_ui_telemetry';
+
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { KibanaLegacySetup } from '../../../../../src/plugins/kibana_legacy/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../../../plugins/lens/common';
 import {
@@ -36,23 +38,26 @@ import {
   getLensUrlFromDashboardAbsoluteUrl,
 } from '../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/url_helper';
 import { FormatFactory } from './legacy_imports';
-import { IEmbeddableSetup, IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { EditorFrameStart } from './types';
-
+import { getLensAliasConfig } from './vis_type_alias';
+import { VisualizationsSetup } from './legacy_imports';
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   __LEGACY: {
     formatFactory: FormatFactory;
+    visualizations: VisualizationsSetup;
   };
 }
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
+  uiActions: UiActionsStart;
 }
 
 export const isRisonObject = (value: RisonValue): value is RisonObject => {
@@ -81,7 +86,7 @@ export class LensPlugin {
       expressions,
       data,
       embeddable,
-      __LEGACY: { formatFactory },
+      __LEGACY: { formatFactory, visualizations },
     }: LensPluginSetupDependencies
   ) {
     const editorFrameSetupInterface = this.editorFrameService.setup(core, {
@@ -100,6 +105,8 @@ export class LensPlugin {
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
 
+    visualizations.registerAlias(getLensAliasConfig());
+
     kibanaLegacy.registerLegacyApp({
       id: 'lens',
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -109,7 +116,7 @@ export class LensPlugin {
         const savedObjectsClient = coreStart.savedObjects.client;
         addHelpMenuToAppChrome(coreStart.chrome);
 
-        const instance = await this.createEditorFrame!({});
+        const instance = await this.createEditorFrame!();
 
         setReportManager(
           new LensReportManager({
@@ -212,6 +219,7 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    this.xyVisualization.start(core, startDependencies);
   }
 
   stop() {

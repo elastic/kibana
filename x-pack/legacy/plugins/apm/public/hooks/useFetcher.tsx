@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-console */
+
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IHttpFetchError } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
-import { APMClient } from '../services/rest/createCallApmApi';
-import { useCallApmApi } from './useCallApmApi';
+import { APMClient, callApmApi } from '../services/rest/createCallApmApi';
 import { useApmPluginContext } from './useApmPluginContext';
 import { useLoadingIndicator } from './useLoadingIndicator';
 
@@ -21,7 +22,7 @@ export enum FETCH_STATUS {
   PENDING = 'pending'
 }
 
-interface Result<Data> {
+export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;
   error?: Error;
@@ -41,15 +42,15 @@ export function useFetcher<TReturn>(
   options: {
     preservePreviousData?: boolean;
   } = {}
-): Result<InferResponseType<TReturn>> & { refetch: () => void } {
+): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useApmPluginContext().core;
   const { preservePreviousData = true } = options;
   const { setIsLoading } = useLoadingIndicator();
 
-  const callApmApi = useCallApmApi();
-
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
-  const [result, setResult] = useState<Result<InferResponseType<TReturn>>>({
+  const [result, setResult] = useState<
+    FetcherResult<InferResponseType<TReturn>>
+  >({
     data: undefined,
     status: FETCH_STATUS.PENDING
   });
@@ -83,11 +84,27 @@ export function useFetcher<TReturn>(
             data,
             status: FETCH_STATUS.SUCCESS,
             error: undefined
-          } as Result<InferResponseType<TReturn>>);
+          } as FetcherResult<InferResponseType<TReturn>>);
         }
       } catch (e) {
-        const err = e as IHttpFetchError;
+        const err = e as Error | IHttpFetchError;
+
         if (!didCancel) {
+          const errorDetails =
+            'response' in err ? (
+              <>
+                {err.response?.statusText} ({err.response?.status})
+                <h5>
+                  {i18n.translate('xpack.apm.fetcher.error.url', {
+                    defaultMessage: `URL`
+                  })}
+                </h5>
+                {err.response?.url}
+              </>
+            ) : (
+              err.message
+            );
+
           notifications.toasts.addWarning({
             title: i18n.translate('xpack.apm.fetcher.error.title', {
               defaultMessage: `Error while fetching resource`
@@ -99,13 +116,8 @@ export function useFetcher<TReturn>(
                     defaultMessage: `Error`
                   })}
                 </h5>
-                {err.response?.statusText} ({err.response?.status})
-                <h5>
-                  {i18n.translate('xpack.apm.fetcher.error.url', {
-                    defaultMessage: `URL`
-                  })}
-                </h5>
-                {err.response?.url}
+
+                {errorDetails}
               </div>
             )
           });

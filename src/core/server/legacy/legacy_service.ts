@@ -258,6 +258,7 @@ export class LegacyService implements CoreService {
   ) {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
+      elasticsearch: startDeps.core.elasticsearch,
       savedObjects: {
         getScopedClient: startDeps.core.savedObjects.getScopedClient,
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
@@ -296,10 +297,14 @@ export class LegacyService implements CoreService {
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
+      metrics: {
+        getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
+      },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
         registerType: setupDeps.core.savedObjects.registerType,
+        getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
