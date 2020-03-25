@@ -17,6 +17,16 @@ import { RuleType } from '../rules/types';
 jest.mock('./api');
 
 const testRule = {
+  actions: [
+    {
+      group: 'fake group',
+      id: 'fake id',
+      action_type_id: 'fake action_type_id',
+      params: {
+        someKey: 'someVal',
+      },
+    },
+  ],
   created_at: 'mm/dd/yyyyTHH:MM:sssz',
   created_by: 'mockUser',
   description: 'some desc',
@@ -45,6 +55,7 @@ const testRule = {
   severity: 'high',
   tags: ['APM'],
   threat: [],
+  throttle: null,
   to: 'now',
   type: 'query' as RuleType,
   updated_at: 'mm/dd/yyyyTHH:MM:sssz',
