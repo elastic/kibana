@@ -64,24 +64,6 @@ export const generalSettings: RawSettingDefinition[] = [
     excludeAgents: ['js-base', 'rum-js', 'dotnet']
   },
 
-  // Capture headers
-  {
-    key: 'capture_headers',
-    type: 'boolean',
-    defaultValue: 'true',
-    label: i18n.translate('xpack.apm.agentConfig.captureHeaders.label', {
-      defaultMessage: 'Capture Headers'
-    }),
-    description: i18n.translate(
-      'xpack.apm.agentConfig.captureHeaders.description',
-      {
-        defaultMessage:
-          'If set to `true`, the agent will capture request and response headers, including cookies.\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
-      }
-    ),
-    excludeAgents: ['js-base', 'rum-js']
-  },
-
   // Capture body
   {
     key: 'capture_body',
@@ -104,7 +86,25 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'transactions' },
       { text: 'all' }
     ],
-    excludeAgents: ['js-base', 'rum-js', 'dotnet']
+    excludeAgents: ['js-base', 'rum-js']
+  },
+
+  // Capture headers
+  {
+    key: 'capture_headers',
+    type: 'boolean',
+    defaultValue: 'true',
+    label: i18n.translate('xpack.apm.agentConfig.captureHeaders.label', {
+      defaultMessage: 'Capture Headers'
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.captureHeaders.description',
+      {
+        defaultMessage:
+          'If set to `true`, the agent will capture request and response headers, including cookies.\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
+      }
+    ),
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // LOG_LEVEL
@@ -175,23 +175,6 @@ export const generalSettings: RawSettingDefinition[] = [
     includeAgents: ['nodejs', 'java', 'dotnet', 'go']
   },
 
-  // Transaction sample rate
-  {
-    key: 'transaction_sample_rate',
-    type: 'float',
-    defaultValue: '1.0',
-    label: i18n.translate('xpack.apm.agentConfig.transactionSampleRate.label', {
-      defaultMessage: 'Transaction sample rate'
-    }),
-    description: i18n.translate(
-      'xpack.apm.agentConfig.transactionSampleRate.description',
-      {
-        defaultMessage:
-          'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but no context information, labels, or spans.'
-      }
-    )
-  },
-
   // Transaction max spans
   {
     key: 'transaction_max_spans',
@@ -215,5 +198,22 @@ export const generalSettings: RawSettingDefinition[] = [
     min: 0,
     max: 32000,
     excludeAgents: ['js-base', 'rum-js']
+  },
+
+  // Transaction sample rate
+  {
+    key: 'transaction_sample_rate',
+    type: 'float',
+    defaultValue: '1.0',
+    label: i18n.translate('xpack.apm.agentConfig.transactionSampleRate.label', {
+      defaultMessage: 'Transaction sample rate'
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.transactionSampleRate.description',
+      {
+        defaultMessage:
+          'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but no context information, labels, or spans.'
+      }
+    )
   }
 ];

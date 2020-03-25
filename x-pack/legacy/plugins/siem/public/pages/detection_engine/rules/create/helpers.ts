@@ -6,16 +6,24 @@
 
 import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
+import deepmerge from 'deepmerge';
 
+import {
+  NOTIFICATION_THROTTLE_RULE,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../../common/constants';
 import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
+import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 
 import {
   AboutStepRule,
   DefineStepRule,
   ScheduleStepRule,
+  ActionsStepRule,
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
+  ActionsStepRuleJson,
 } from '../types';
 import { isMlRule } from '../helpers';
 
@@ -136,12 +144,39 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
   };
 };
 
+export const getAlertThrottle = (throttle: string | null) =>
+  throttle && ![NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].includes(throttle)
+    ? throttle
+    : null;
+
+export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
+  const {
+    actions = [],
+    enabled,
+    kibanaSiemAppUrl,
+    throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
+  } = actionsStepData;
+
+  return {
+    actions: actions.map(transformAlertToRuleAction),
+    enabled,
+    throttle: actions.length ? getAlertThrottle(throttle) : null,
+    meta: {
+      throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
+      kibanaSiemAppUrl,
+    },
+  };
+};
+
 export const formatRule = (
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
-  scheduleData: ScheduleStepRule
-): NewRule => ({
-  ...formatDefineStepData(defineStepData),
-  ...formatAboutStepData(aboutStepData),
-  ...formatScheduleStepData(scheduleData),
-});
+  scheduleData: ScheduleStepRule,
+  actionsData: ActionsStepRule
+): NewRule =>
+  deepmerge.all([
+    formatDefineStepData(defineStepData),
+    formatAboutStepData(aboutStepData),
+    formatScheduleStepData(scheduleData),
+    formatActionsStepData(actionsData),
+  ]) as NewRule;

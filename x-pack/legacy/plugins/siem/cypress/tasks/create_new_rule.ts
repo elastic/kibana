@@ -21,11 +21,13 @@ import {
   REFERENCE_URLS_INPUT,
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
+  SCHEDULE_CONTINUE_BUTTON,
   SEVERITY_DROPDOWN,
   TAGS_INPUT,
 } from '../screens/create_new_rule';
 
 export const createAndActivateRule = () => {
+  cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
   cy.get(CREATE_AND_ACTIVATE_BTN).click({ force: true });
   cy.get(CREATE_AND_ACTIVATE_BTN).should('not.exist');
 };
