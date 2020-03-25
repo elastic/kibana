@@ -70,7 +70,11 @@ export {
   SavedObjectMigrationContext,
 } from './migrations';
 
-export { SavedObjectsType, SavedObjectsTypeManagementDefinition } from './types';
+export {
+  SavedObjectsNamespaceType,
+  SavedObjectsType,
+  SavedObjectsTypeManagementDefinition,
+} from './types';
 
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
 export { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';

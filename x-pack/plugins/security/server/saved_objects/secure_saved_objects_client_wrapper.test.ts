@@ -206,9 +206,9 @@ function getMockCheckPrivilegesSuccess(actions: string | string[], namespaces?: 
     hasAllRequested: true,
     username: USERNAME,
     privileges: _namespaces
-      .map(spaceId =>
+      .map(resource =>
         _actions.map(action => ({
-          spaceId,
+          resource,
           privilege: action,
           authorized: true,
         }))
@@ -230,9 +230,9 @@ function getMockCheckPrivilegesFailure(actions: string | string[], namespaces?: 
     hasAllRequested: false,
     username: USERNAME,
     privileges: _namespaces
-      .map((spaceId, idxa) =>
+      .map((resource, idxa) =>
         _actions.map((action, idxb) => ({
-          spaceId,
+          resource,
           privilege: action,
           authorized: idxa > 0 || idxb > 0,
         }))

@@ -153,8 +153,15 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       // to share an object, the user must also have the "update" permission in one or more of the source namespaces
       const preflightResult = await this.baseClient.get(type, id, { namespace });
       existingVersion = preflightResult.version;
-      const _namespaces = preflightResult.namespaces || [];
-      await this.ensureAuthorized(type, 'update', _namespaces, args, 'addNamespacesUpdate', false);
+      const existingNamespaces = preflightResult.namespaces || [];
+      await this.ensureAuthorized(
+        type,
+        'update',
+        existingNamespaces,
+        args,
+        'addNamespacesUpdate',
+        false
+      );
     } catch (error) {
       if (this.errors.isNotFoundError(error)) {
         // if the preflight request did not find a saved object, check the user's privileges at the current namespace; this will instead
@@ -227,12 +234,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const { hasAllRequested, username, privileges } = result;
     const spaceIds = uniq(
-      privileges.map(({ spaceId }) => spaceId).filter(x => x !== undefined)
+      privileges.map(({ resource }) => resource).filter(x => x !== undefined)
     ).sort() as string[];
 
     const isAuthorized =
       (requiresAll && hasAllRequested) ||
-      (!requiresAll && privileges.find(({ authorized }) => authorized));
+      (!requiresAll && privileges.some(({ authorized }) => authorized));
     if (isAuthorized) {
       this.auditLogger.savedObjectsAuthorizationSuccess(
         username,
@@ -262,7 +269,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private getMissingPrivileges(privileges: CheckPrivilegesResponse['privileges']) {
     return privileges
       .filter(({ authorized }) => !authorized)
-      .map(({ spaceId, privilege }) => ({ spaceId, privilege }));
+      .map(({ resource, privilege }) => ({ spaceId: resource, privilege }));
   }
 
   private getUniqueObjectTypes(objects: Array<{ type: string }>) {
@@ -274,11 +281,11 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const checkPrivilegesResult = await this.checkPrivileges(action, namespaces);
     // check if the user can log into each namespace
     const map = checkPrivilegesResult.privileges.reduce(
-      (acc: Record<string, boolean>, { spaceId, authorized }) => {
+      (acc: Record<string, boolean>, { resource, authorized }) => {
         // there should never be a case where more than one privilege is returned for a given space
         // if there is, fail-safe (authorized + unauthorized = unauthorized)
-        if (spaceId && (!authorized || !acc.hasOwnProperty(spaceId))) {
-          acc[spaceId] = authorized;
+        if (resource && (!authorized || !acc.hasOwnProperty(resource))) {
+          acc[resource] = authorized;
         }
         return acc;
       },

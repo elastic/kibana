@@ -81,7 +81,7 @@ function getClauseForType(
       },
     };
   }
-  // isNamespaceAgnostic
+  // isSingleNamespace in the default namespace, or isNamespaceAgnostic
   return {
     bool: {
       must: [{ term: { type } }],

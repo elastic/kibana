@@ -2084,6 +2084,9 @@ export interface SavedObjectsMigrationVersion {
 }
 
 // @public
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
+
+// @public
 export interface SavedObjectsRawDoc {
     // (undocumented)
     _id: string;
@@ -2206,7 +2209,7 @@ export interface SavedObjectsType {
     name: string;
     // @deprecated
     namespaceAgnostic?: boolean;
-    namespaceType?: 'single' | 'multiple' | 'agnostic';
+    namespaceType?: SavedObjectsNamespaceType;
 }
 
 // @public

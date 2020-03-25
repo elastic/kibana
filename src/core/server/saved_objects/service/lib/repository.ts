@@ -936,7 +936,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError(`${type} doesn't support namespaces`);
     }
 
-    if (!namespaces || !Array.isArray(namespaces) || !namespaces.length) {
+    if (!Array.isArray(namespaces) || !namespaces.length) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'namespaces must be a non-empty array of strings'
       );
@@ -1401,7 +1401,7 @@ export class SavedObjectsRepository {
       return true;
     }
 
-    const namespaces = raw._source.namespaces as string[] | undefined;
+    const namespaces = raw._source.namespaces;
     return namespaces?.includes(getNamespaceString(namespace)) ?? false;
   }
 
@@ -1413,10 +1413,15 @@ export class SavedObjectsRepository {
    * @param id The ID of the saved object.
    * @param namespace The target namespace.
    * @returns Array of namespaces that this saved object currently includes, or (if the object does not exist yet) the namespaces that a
-   * newly-created object will include.
+   * newly-created object will include. Value may be undefined if an existing saved object has no namespaces attribute; this should not
+   * happen in normal operations, but it is possible if the Elasticsearch document is manually modified.
    * @throws Will throw an error if the saved object exists and it does not include the target namespace.
    */
   private async preflightGetNamespaces(type: string, id: string, namespace?: string) {
+    if (!this._registry.isMultiNamespace(type)) {
+      throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
+    }
+
     const response = await this._callCluster('get', {
       id: this._serializer.generateRawId(undefined, type, id),
       index: this.getIndexForType(type),
@@ -1445,6 +1450,10 @@ export class SavedObjectsRepository {
    * @throws Will throw an error if the saved object is not found, or if it doesn't include the target namespace.
    */
   private async preflightCheckIncludesNamespace(type: string, id: string, namespace?: string) {
+    if (!this._registry.isMultiNamespace(type)) {
+      throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
+    }
+
     const rawId = this._serializer.generateRawId(undefined, type, id);
     const response = await this._callCluster('get', {
       id: rawId,
@@ -1500,8 +1509,9 @@ function getNamespaceString(namespace?: string) {
 }
 
 /**
- * Returns a string array of namespaces for a given saved object.
- * If the saved object is undefined, the result is an array that contains the current namespace.
+ * Returns a string array of namespaces for a given saved object. If the saved object is undefined, the result is an array that contains the
+ * current namespace. Value may be undefined if an existing saved object has no namespaces attribute; this should not happen in normal
+ * operations, but it is possible if the Elasticsearch document is manually modified.
  *
  * @param namespace The current namespace.
  * @param document Optional existing saved object that was obtained in a preflight operation.

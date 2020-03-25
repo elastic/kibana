@@ -4,10 +4,10 @@
 
 ## SavedObjectsType.namespaceType property
 
-How this type operates in relation to namespaces: \* single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces. \* agnostic: this type of saved object is global.
+The [namespace type](./kibana-plugin-core-server.savedobjectsnamespacetype.md) for the type.
 
 <b>Signature:</b>
 
 ```typescript
-namespaceType?: 'single' | 'multiple' | 'agnostic';
+namespaceType?: SavedObjectsNamespaceType;
 ```

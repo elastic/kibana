@@ -240,6 +240,7 @@ export {
   SavedObjectsMappingProperties,
   SavedObjectTypeRegistry,
   ISavedObjectTypeRegistry,
+  SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,

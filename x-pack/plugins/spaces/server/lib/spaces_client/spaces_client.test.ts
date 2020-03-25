@@ -251,8 +251,8 @@ describe('#getAll', () => {
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
             privileges: [
-              { spaceId: savedObjects[0].id, privilege, authorized: false },
-              { spaceId: savedObjects[1].id, privilege, authorized: false },
+              { resource: savedObjects[0].id, privilege, authorized: false },
+              { resource: savedObjects[1].id, privilege, authorized: false },
             ],
           });
           const maxSpaces = 1234;
@@ -311,8 +311,8 @@ describe('#getAll', () => {
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
             privileges: [
-              { spaceId: savedObjects[0].id, privilege, authorized: true },
-              { spaceId: savedObjects[1].id, privilege, authorized: false },
+              { resource: savedObjects[0].id, privilege, authorized: true },
+              { resource: savedObjects[1].id, privilege, authorized: false },
             ],
           });
           const mockInternalRepository = {

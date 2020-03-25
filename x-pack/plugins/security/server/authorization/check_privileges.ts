@@ -20,7 +20,10 @@ export interface CheckPrivilegesResponse {
   hasAllRequested: boolean;
   username: string;
   privileges: Array<{
-    spaceId?: string; // spaceId for default space is 'default', spaceId for global resource is undefined
+    /**
+     * If this attribute is undefined, this element is a privilege for the global resource.
+     */
+    resource?: string;
     privilege: string;
     authorized: boolean;
   }>;
@@ -95,10 +98,10 @@ export function checkPrivilegesWithRequestFactory(
       const privilegeArray = Object.entries(resourcePrivileges)
         .map(([key, val]) => {
           // we need to turn the resource responses back into the space ids
-          const spaceId =
+          const resource =
             key !== GLOBAL_RESOURCE ? ResourceSerializer.deserializeSpaceResource(key!) : undefined;
           return Object.entries(val).map(([privilege, authorized]) => ({
-            spaceId,
+            resource,
             privilege,
             authorized,
           }));

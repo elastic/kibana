@@ -26,5 +26,5 @@ This is only internal for now, and will only be public when we expose the regist
 |  [migrations](./kibana-plugin-core-server.savedobjectstype.migrations.md) | <code>SavedObjectMigrationMap</code> | An optional map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used to migrate the type. |
 |  [name](./kibana-plugin-core-server.savedobjectstype.name.md) | <code>string</code> | The name of the type, which is also used as the internal id. |
 |  [namespaceAgnostic](./kibana-plugin-core-server.savedobjectstype.namespaceagnostic.md) | <code>boolean</code> | Is the type global (true), or not (false). |
-|  [namespaceType](./kibana-plugin-core-server.savedobjectstype.namespacetype.md) | <code>'single' &#124; 'multiple' &#124; 'agnostic'</code> | How this type operates in relation to namespaces: \* single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces. \* agnostic: this type of saved object is global. |
+|  [namespaceType](./kibana-plugin-core-server.savedobjectstype.namespacetype.md) | <code>SavedObjectsNamespaceType</code> | The [namespace type](./kibana-plugin-core-server.savedobjectsnamespacetype.md) for the type. |
 

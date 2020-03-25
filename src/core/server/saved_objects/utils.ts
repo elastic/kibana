@@ -20,6 +20,7 @@
 import { LegacyConfig } from '../legacy';
 import { SavedObjectMigrationMap } from './migrations';
 import {
+  SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsLegacyUiExports,
   SavedObjectLegacyMigrationMap,
@@ -48,11 +49,11 @@ export const convertLegacyTypes = (
         const schema = savedObjectSchemas[type];
         const migrations = savedObjectMigrations[type];
         const management = savedObjectsManagement[type];
-        const namespaceType = schema?.isNamespaceAgnostic
+        const namespaceType = (schema?.isNamespaceAgnostic
           ? 'agnostic'
           : schema?.multiNamespace
           ? 'multiple'
-          : 'single';
+          : 'single') as SavedObjectsNamespaceType;
         return {
           name: type,
           hidden: schema?.hidden ?? false,
@@ -65,7 +66,7 @@ export const convertLegacyTypes = (
           convertToAliasScript: schema?.convertToAliasScript,
           migrations: convertLegacyMigrations(migrations ?? {}),
           management: management ? convertLegacyTypeManagement(management) : undefined,
-        } as SavedObjectsType;
+        };
       }),
     ];
   }, [] as SavedObjectsType[]);

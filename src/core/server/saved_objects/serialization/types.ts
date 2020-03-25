@@ -36,6 +36,7 @@ export interface SavedObjectsRawDoc {
 export interface SavedObjectsRawDocSource {
   type: string;
   namespace?: string;
+  namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
   updated_at?: string;
   references?: SavedObjectReference[];

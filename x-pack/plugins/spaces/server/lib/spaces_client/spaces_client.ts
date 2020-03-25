@@ -76,7 +76,7 @@ export class SpacesClient {
 
       const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
 
-      const authorized = privileges.filter(x => x.authorized).map(x => x.spaceId);
+      const authorized = privileges.filter(x => x.authorized).map(x => x.resource);
 
       this.debugLogger(
         `SpacesClient.getAll(), authorized for ${
