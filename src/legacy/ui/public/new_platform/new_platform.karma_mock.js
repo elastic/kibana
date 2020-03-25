@@ -138,6 +138,14 @@ const querySetup = {
     },
     history: sinon.fake(),
   },
+  savedQueries: {
+    saveQuery: sinon.fake(),
+    getAllSavedQueries: sinon.fake(),
+    findSavedQueries: sinon.fake(),
+    getSavedQuery: sinon.fake(),
+    deleteSavedQuery: sinon.fake(),
+    getSavedQueryCount: sinon.fake(),
+  },
 };
 
 const mockAggTypesRegistry = () => {
