@@ -7,38 +7,6 @@ import { TemplateDeserialized, TemplateSerialized, TemplateListItem } from '../t
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
-export function deserializeTemplateList(
-  indexTemplatesByName: any,
-  managedTemplatePrefix?: string
-): TemplateListItem[] {
-  const indexTemplateNames: string[] = Object.keys(indexTemplatesByName);
-
-  const deserializedTemplates: TemplateListItem[] = indexTemplateNames.map((name: string) => {
-    const {
-      version,
-      order,
-      index_patterns: indexPatterns = [],
-      settings = {},
-      aliases = {},
-      mappings = {},
-    } = indexTemplatesByName[name];
-
-    return {
-      name,
-      version,
-      order,
-      indexPatterns: indexPatterns.sort(),
-      hasSettings: hasEntries(settings),
-      hasAliases: hasEntries(aliases),
-      hasMappings: hasEntries(mappings),
-      ilmPolicy: settings && settings.index && settings.index.lifecycle,
-      isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
-    };
-  });
-
-  return deserializedTemplates;
-}
-
 export function serializeTemplate(template: TemplateDeserialized): TemplateSerialized {
   const { name, version, order, indexPatterns, settings, aliases, mappings } = template;
 
@@ -82,4 +50,22 @@ export function deserializeTemplate(
   };
 
   return deserializedTemplate;
+}
+
+export function deserializeTemplateList(
+  indexTemplatesByName: { [key: string]: TemplateSerialized },
+  managedTemplatePrefix?: string
+): TemplateListItem[] {
+  return Object.values(indexTemplatesByName).map(templateSerialized => {
+    const { mappings, settings, aliases, ...deserializedTemplate } = deserializeTemplate(
+      templateSerialized
+    );
+
+    return {
+      ...deserializedTemplate,
+      hasSettings: hasEntries(settings),
+      hasAliases: hasEntries(aliases),
+      hasMappings: hasEntries(mappings),
+    };
+  });
 }
