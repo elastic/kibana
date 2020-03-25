@@ -23,7 +23,8 @@ import {
   ABOUT_RULE_DESCRIPTION,
   RULE_TYPE,
   ANOMALY_SCORE,
-  MACHINE_LEARNING_JOB,
+  MACHINE_LEARNING_JOB_STATUS,
+  MACHINE_LEARNING_JOB_ID,
 } from '../screens/rule_details';
 import {
   CUSTOM_RULES_BTN,
@@ -165,13 +166,17 @@ describe('Signal detection rules, machine learning', () => {
     cy.get(DEFINITION_STEP)
       .eq(RULE_TYPE)
       .invoke('text')
-      .should('eql', 'machine_learning');
+      .should('eql', 'Machine Learning');
     cy.get(DEFINITION_STEP)
       .eq(ANOMALY_SCORE)
       .invoke('text')
       .should('eql', machineLearningRule.anomalyScoreThreshold);
     cy.get(DEFINITION_STEP)
-      .eq(MACHINE_LEARNING_JOB)
+      .get(MACHINE_LEARNING_JOB_STATUS)
+      .invoke('text')
+      .should('eql', 'Stopped');
+    cy.get(DEFINITION_STEP)
+      .get(MACHINE_LEARNING_JOB_ID)
       .invoke('text')
       .should('eql', machineLearningRule.machineLearningJob);
 
