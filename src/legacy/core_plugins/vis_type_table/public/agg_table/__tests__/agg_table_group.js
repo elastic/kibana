@@ -23,7 +23,6 @@ import expect from '@kbn/expect';
 import { npStart } from '../../legacy_imports';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
-import { tableVisResponseHandler } from '../../table_vis_response_handler';
 import { tabifiedData } from './tabified_data';
 
 describe('Table Vis - AggTableGroup Directive', function() {
@@ -58,7 +57,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
       metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
       buckets: [],
     };
-    $scope.group = tableVisResponseHandler(tabifiedData.metricOnly, $scope.dimensions);
+    $scope.group = tabifiedData.metricOnly;
     $scope.sort = {
       columnIndex: null,
       direction: null,
@@ -103,10 +102,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
         { accessor: 5, params: {} },
       ],
     };
-    const group = ($scope.group = tableVisResponseHandler(
-      tabifiedData.threeTermBuckets,
-      $scope.dimensions
-    ));
+    const group = ($scope.group = tabifiedData.threeTermBucketsWithSplit);
     const $el = $(
       '<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>'
     );

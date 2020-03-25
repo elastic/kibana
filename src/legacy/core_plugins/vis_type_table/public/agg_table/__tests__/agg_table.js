@@ -26,7 +26,6 @@ import { npStart } from '../../legacy_imports';
 import { round } from 'lodash';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
-import { tableVisResponseHandler } from '../../table_vis_response_handler';
 import { tabifiedData } from './tabified_data';
 
 describe('Table Vis - AggTable Directive', function() {
@@ -64,7 +63,7 @@ describe('Table Vis - AggTable Directive', function() {
       metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
       buckets: [],
     };
-    $scope.table = tableVisResponseHandler(tabifiedData.metricOnly, $scope.dimensions).tables[0];
+    $scope.table = tabifiedData.metricOnly.tables[0];
 
     const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
       $scope
@@ -100,10 +99,7 @@ describe('Table Vis - AggTable Directive', function() {
         { accessor: 5, params: {} },
       ],
     };
-    $scope.table = tableVisResponseHandler(
-      tabifiedData.threeTermBuckets,
-      $scope.dimensions
-    ).tables[0];
+    $scope.table = tabifiedData.threeTermBuckets.tables[0];
     const $el = $('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>');
     $compile($el)($scope);
     $scope.$digest();
@@ -167,11 +163,8 @@ describe('Table Vis - AggTable Directive', function() {
           { accessor: 5, format: { id: 'number' } },
         ],
       };
-      const response = tableVisResponseHandler(
-        tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
-        $scope.dimensions
-      );
-      $scope.table = response.tables[0];
+      $scope.table =
+        tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative.tables[0];
       $scope.showTotal = true;
       $scope.totalFunc = totalFunc;
       const $el = $(`<kbn-agg-table
@@ -267,10 +260,7 @@ describe('Table Vis - AggTable Directive', function() {
           { accessor: 5, params: {} },
         ],
       };
-      $scope.table = tableVisResponseHandler(
-        tabifiedData.threeTermBuckets,
-        $scope.dimensions
-      ).tables[0];
+      $scope.table = tabifiedData.threeTermBuckets.tables[0];
 
       const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
         $scope
@@ -325,10 +315,7 @@ describe('Table Vis - AggTable Directive', function() {
           { accessor: 5, params: {} },
         ],
       };
-      $scope.table = tableVisResponseHandler(
-        tabifiedData.threeTermBuckets,
-        $scope.dimensions
-      ).tables[0];
+      $scope.table = tabifiedData.threeTermBuckets.tables[0];
 
       const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
         $scope
@@ -387,11 +374,8 @@ describe('Table Vis - AggTable Directive', function() {
         { accessor: 5, format: { id: 'number' } },
       ],
     };
-    const response = tableVisResponseHandler(
-      tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
-      $scope.dimensions
-    );
-    $scope.table = response.tables[0];
+    $scope.table =
+      tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative.tables[0];
     $scope.percentageCol = 'Average bytes';
 
     const $el = $(`<kbn-agg-table
