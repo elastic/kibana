@@ -34,7 +34,8 @@ export default function({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      it('should have an Elasticsearch Cluster Summary Status with correct info', async () => {
+      // https://github.com/elastic/kibana/issues/61366
+      it.skip('should have an Elasticsearch Cluster Summary Status with correct info', async () => {
         expect(await esClusterSummaryStatus.getContent()).to.eql({
           nodesCount: 'Nodes\n2',
           indicesCount: 'Indices\n20',
