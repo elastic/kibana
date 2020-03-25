@@ -5,13 +5,16 @@
  */
 
 import { Observable, of, Subject } from 'rxjs';
+import { isEqual, cloneDeep } from 'lodash';
 import {
   catchError,
   debounceTime,
+  distinctUntilChanged,
   pluck,
   startWith,
   switchMap,
   withLatestFrom,
+  map,
 } from 'rxjs/operators';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
@@ -32,10 +35,12 @@ export const modelMemoryEstimatorProvider = (
     get updates$(): Observable<string> {
       return modelMemoryCheck$.pipe(
         debounceTime(VALIDATION_DELAY_MS + 100),
+        map(cloneDeep),
+        distinctUntilChanged(isEqual),
         withLatestFrom(validationResults$),
         switchMap(([payload, validationResults]) => {
           const isPayloadValid =
-            payload.analysisConfig.detectors.length > 0 && validationResults.bucketSpan.valid;
+            payload.analysisConfig?.detectors?.length > 0 && validationResults.bucketSpan.valid;
 
           return isPayloadValid
             ? ml.calculateModelMemoryLimit$(payload).pipe(
