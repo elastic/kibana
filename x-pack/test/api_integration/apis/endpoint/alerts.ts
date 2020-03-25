@@ -231,7 +231,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.id).to.eql(documentID);
         expect(body.prev).to.eql(`/api/endpoint/alerts/${prevDocumentID}`);
         expect(body.next).to.eql(null); // last alert, no more beyond this
-        expect(body.state.host.host.id).to.eql(body.host.id);
+        expect(body.state.host_metadata.host.id).to.eql(body.host.id);
       });
 
       it('should return alert details by id, getting first alert', async () => {

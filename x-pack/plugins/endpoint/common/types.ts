@@ -240,7 +240,7 @@ interface AlertMetadata {
 
 interface AlertState {
   state: {
-    host: HostMetadata;
+    host_metadata: HostMetadata;
   };
 }
 
