@@ -416,7 +416,7 @@ export class RemoteClusterForm extends Component {
           label={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
-              defaultMessage="Server name (optional)"
+              defaultMessage="Server name"
             />
           }
           helpText={
