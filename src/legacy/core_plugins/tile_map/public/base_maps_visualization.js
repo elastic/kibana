@@ -19,10 +19,9 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KibanaMap } from 'ui/vis/map/kibana_map';
+import { KibanaMap } from '../../../../plugins/maps_legacy/public';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
-import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 

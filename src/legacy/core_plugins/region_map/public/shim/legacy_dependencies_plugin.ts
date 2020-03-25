@@ -19,7 +19,6 @@
 
 import chrome from 'ui/chrome';
 import { CoreStart, Plugin } from 'kibana/public';
-import 'ui/vis/map/service_settings';
 import { RegionMapsConfig } from '../plugin';
 
 /** @internal */
@@ -31,7 +30,6 @@ export interface LegacyDependenciesPluginSetup {
 
 export class LegacyDependenciesPlugin
   implements Plugin<Promise<LegacyDependenciesPluginSetup>, void> {
-
   public async setup() {
     const $injector = await chrome.dangerouslyGetActiveInjector();
 

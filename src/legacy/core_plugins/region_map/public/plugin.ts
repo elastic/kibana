@@ -38,7 +38,7 @@ import { ServiceSettingsSetupContract } from '../../../../plugins/maps_legacy/pu
 interface RegionMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
-  serviceSettings: ServiceSettingsSetupContract
+  serviceSettings: ServiceSettingsSetupContract;
 }
 
 /** @internal */
@@ -65,7 +65,7 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, maps_legacy, __LEGACY  }: RegionMapPluginSetupDependencies
+    { expressions, visualizations, maps_legacy, __LEGACY }: RegionMapPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,

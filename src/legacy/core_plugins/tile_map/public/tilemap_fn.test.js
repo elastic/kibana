@@ -37,7 +37,7 @@ jest.mock('ui/vis/map/convert_to_geojson', () => ({
   }),
 }));
 
-import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
+import { convertToGeoJson } from '../../../../plugins/maps_legacy/public';
 
 describe('interpreter/functions#tilemap', () => {
   const fn = functionWrapper(createTileMapFn());

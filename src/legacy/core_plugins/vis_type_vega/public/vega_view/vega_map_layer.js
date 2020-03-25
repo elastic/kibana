@@ -19,7 +19,7 @@
 
 import L from 'leaflet';
 import 'leaflet-vega';
-import { KibanaMapLayer } from '../legacy_imports';
+import { KibanaMapLayer } from '../../../../../plugins/maps_legacy/public';
 
 export class VegaMapLayer extends KibanaMapLayer {
   constructor(spec, options) {
