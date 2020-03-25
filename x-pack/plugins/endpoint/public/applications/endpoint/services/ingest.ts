@@ -67,6 +67,12 @@ export const sendGetDatasource = (
   return http.get<GetDatasourceResponse>(`${INGEST_API_DATASOURCES}/${datasourceId}`, options);
 };
 
+/**
+ * Updates a datasources
+ * @param http
+ * @param datasourceId
+ * @param options
+ */
 export const sendPutDatasource = (
   http: HttpStart,
   datasourceId: string,

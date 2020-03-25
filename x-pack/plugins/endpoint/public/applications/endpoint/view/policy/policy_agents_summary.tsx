@@ -5,7 +5,13 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiI18nNumber } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiI18nNumber,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface AgentsSummaryProps {
@@ -19,44 +25,60 @@ export interface AgentsSummaryProps {
  * Display a summary of stats (counts) associated with a group of agents (ex. those associated with a Policy)
  */
 export const AgentsSummary = memo<AgentsSummaryProps>(props => {
-  const stats = useMemo<Array<{ key: keyof AgentsSummaryProps; title: string }>>(() => {
+  const stats = useMemo<
+    Array<{ key: keyof AgentsSummaryProps; title: string; health: string }>
+  >(() => {
     return [
       {
         key: 'total',
         title: i18n.translate('xpack.endpoint.policyDetails.agentsSummary.totalTitle', {
           defaultMessage: 'Hosts',
         }),
+        health: '',
       },
       {
         key: 'online',
         title: i18n.translate('xpack.endpoint.policyDetails.agentsSummary.onlineTitle', {
           defaultMessage: 'Online',
         }),
+        health: 'success',
       },
       {
         key: 'offline',
         title: i18n.translate('xpack.endpoint.policyDetails.agentsSummary.offlineTitle', {
           defaultMessage: 'Offline',
         }),
+        health: 'warning',
       },
       {
         key: 'error',
         title: i18n.translate('xpack.endpoint.policyDetails.agentsSummary.errorTitle', {
           defaultMessage: 'Error',
         }),
+        health: 'danger',
       },
     ];
   }, []);
 
   return (
     <EuiFlexGroup gutterSize="xl">
-      {stats.map(({ key, title }) => {
+      {stats.map(({ key, title, health }) => {
         return (
           <EuiFlexItem grow={false} key={key}>
             <EuiDescriptionList
               textStyle="reverse"
               align="center"
-              listItems={[{ title, description: <EuiI18nNumber value={props[key]} /> }]}
+              listItems={[
+                {
+                  title,
+                  description: (
+                    <>
+                      {health && <EuiHealth color={health} className="eui-alignMiddle" />}
+                      <EuiI18nNumber value={props[key]} />
+                    </>
+                  ),
+                },
+              ]}
             />
           </EuiFlexItem>
         );
