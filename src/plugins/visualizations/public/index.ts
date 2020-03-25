@@ -32,7 +32,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 /** @public static code */
 export { Vis } from './vis';
 export { TypesService } from './vis_types/types_service';
-export { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable';
+export { VISUALIZE_EMBEDDABLE_TYPE, VIS_EVENT_TO_TRIGGER } from './embeddable';
 
 /** @public types */
 export { VisualizationsSetup, VisualizationsStart };
