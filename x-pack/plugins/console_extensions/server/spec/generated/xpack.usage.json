@@ -9,6 +9,6 @@
     "patterns": [
       "_xpack/usage"
     ],
-    "documentation": "Retrieve information about xpack features usage"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/usage-api.html"
   }
 }

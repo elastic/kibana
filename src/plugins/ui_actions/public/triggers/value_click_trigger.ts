@@ -22,6 +22,6 @@ import { Trigger } from '.';
 export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
 export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
   id: VALUE_CLICK_TRIGGER,
-  title: '',
+  title: 'Value clicked',
   description: 'Value was clicked',
 };
