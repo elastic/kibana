@@ -335,7 +335,7 @@ export interface RequestHandlerContext {
  *
  * @public
  */
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
@@ -353,7 +353,7 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   /** {@link MetricsServiceSetup} */
   metrics: MetricsServiceSetup;
   /** {@link StartServicesAccessor} */
-  getStartServices: StartServicesAccessor<TPluginsStart>;
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
 
 /**
@@ -364,9 +364,10 @@ export interface CoreSetup<TPluginsStart extends object = object> {
  *
  * @public
  */
-export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<
-  [CoreStart, TPluginsStart]
->;
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
  * Context passed to the plugins `start` method.

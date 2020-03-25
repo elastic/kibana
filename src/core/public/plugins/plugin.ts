@@ -35,7 +35,7 @@ export interface Plugin<
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
 > {
-  setup(core: CoreSetup<TPluginsStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+  setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
   stop?(): void;
 }
@@ -72,7 +72,7 @@ export class PluginWrapper<
   private initializer?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
-  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart]>();
+  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
 
   constructor(
@@ -105,7 +105,7 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: CoreSetup<TPluginsStart>, plugins: TPluginsSetup) {
+  public async setup(setupContext: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup) {
     this.instance = await this.createPluginInstance();
 
     return await this.instance.setup(setupContext, plugins);
@@ -125,7 +125,7 @@ export class PluginWrapper<
 
     const startContract = await this.instance.start(startContext, plugins);
 
-    this.startDependencies$.next([startContext, plugins]);
+    this.startDependencies$.next([startContext, plugins, startContract]);
 
     return startContract;
   }

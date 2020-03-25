@@ -183,7 +183,7 @@ export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
  * navigation in the generated docs until there's a fix for
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
   /**
@@ -209,7 +209,7 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
   /** {@link StartServicesAccessor} */
-  getStartServices: StartServicesAccessor<TPluginsStart>;
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
 
 /**
@@ -219,9 +219,10 @@ export interface CoreSetup<TPluginsStart extends object = object> {
  *
  * @public
  */
-export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<
-  [CoreStart, TPluginsStart]
->;
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
