@@ -240,7 +240,7 @@ export function DiscoverSidebar({
             data-test-subj={`fieldList-popular`}
           >
             <li className="dscSidebar__item">
-              <EuiTitle size="xxxs" id="available_fields">
+              <EuiTitle size="xxxs">
                 <h4 style={{ fontWeight: 'normal' }}>
                   <FormattedMessage
                     id="kbn.discover.fieldChooser.filter.popularTitle"
