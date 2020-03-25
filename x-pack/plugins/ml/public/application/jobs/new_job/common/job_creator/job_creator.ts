@@ -84,7 +84,7 @@ export class JobCreator {
     this._datafeed_config.query = query;
   }
 
-  protected updateModelMemoryEstimation() {
+  protected _updateModelMemoryEstimation() {
     this._modelMemoryEstimationPayload$.next({
       analysisConfig: this.jobConfig.analysis_config,
       indexPattern: this._indexPatternTitle,
@@ -103,7 +103,7 @@ export class JobCreator {
     this._detectors.push(detector);
     this._aggs.push(agg);
     this._fields.push(field);
-    this.updateModelMemoryEstimation();
+    this._updateModelMemoryEstimation();
     this._updateSparseDataDetectors();
   }
 
@@ -112,7 +112,7 @@ export class JobCreator {
       this._detectors[index] = detector;
       this._aggs[index] = agg;
       this._fields[index] = field;
-      this.updateModelMemoryEstimation();
+      this._updateModelMemoryEstimation();
       this._updateSparseDataDetectors();
     }
   }
@@ -121,14 +121,14 @@ export class JobCreator {
     this._detectors.splice(index, 1);
     this._aggs.splice(index, 1);
     this._fields.splice(index, 1);
-    this.updateModelMemoryEstimation();
+    this._updateModelMemoryEstimation();
   }
 
   public removeAllDetectors() {
     this._detectors.length = 0;
     this._aggs.length = 0;
     this._fields.length = 0;
-    this.updateModelMemoryEstimation();
+    this._updateModelMemoryEstimation();
   }
 
   public get detectors(): Detector[] {
@@ -169,7 +169,7 @@ export class JobCreator {
   protected _setBucketSpanMs(bucketSpan: BucketSpan) {
     const bs = parseInterval(bucketSpan);
     this._bucketSpanMs = bs === null ? 0 : bs.asMilliseconds();
-    this.updateModelMemoryEstimation();
+    this._updateModelMemoryEstimation();
   }
 
   public get bucketSpanMs(): number {
@@ -179,7 +179,7 @@ export class JobCreator {
   public addInfluencer(influencer: string) {
     if (this._influencers.includes(influencer) === false) {
       this._influencers.push(influencer);
-      this.updateModelMemoryEstimation();
+      this._updateModelMemoryEstimation();
     }
   }
 
@@ -187,12 +187,12 @@ export class JobCreator {
     const idx = this._influencers.indexOf(influencer);
     if (idx !== -1) {
       this._influencers.splice(idx, 1);
-      this.updateModelMemoryEstimation();
+      this._updateModelMemoryEstimation();
     }
   }
 
   public removeAllInfluencers() {
-    this.updateModelMemoryEstimation();
+    this._updateModelMemoryEstimation();
     this._influencers.length = 0;
   }
 
