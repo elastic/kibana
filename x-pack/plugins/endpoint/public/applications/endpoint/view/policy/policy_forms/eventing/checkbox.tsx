@@ -39,13 +39,11 @@ export const EventingCheckbox: React.FC<{
   );
 
   return (
-    <>
-      <EuiCheckbox
-        id={id}
-        label={name}
-        checked={eventing && eventing[protectionField]}
-        onChange={handleRadioChange}
-      />
-    </>
+    <EuiCheckbox
+      id={id}
+      label={name}
+      checked={eventing && eventing[protectionField]}
+      onChange={handleRadioChange}
+    />
   );
 });
