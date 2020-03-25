@@ -5,7 +5,7 @@
  */
 
 import { getRandomString, getRandomNumber } from '../../../../test_utils';
-import { Template } from '../../common/types';
+import { TemplateDeserialized } from '../../common';
 
 export const getTemplate = ({
   name = getRandomString(),
@@ -16,7 +16,7 @@ export const getTemplate = ({
   aliases,
   mappings,
   isManaged = false,
-}: Partial<Template> = {}): Template => ({
+}: Partial<TemplateDeserialized> = {}): TemplateDeserialized => ({
   name,
   version,
   order,

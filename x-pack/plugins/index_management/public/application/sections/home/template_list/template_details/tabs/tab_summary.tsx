@@ -14,11 +14,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Template } from '../../../../../../../common/types';
+import { TemplateDeserialized } from '../../../../../../../common';
 import { getILMPolicyPath } from '../../../../../services/navigation';
 
 interface Props {
-  templateDetails: Template;
+  templateDetails: TemplateDeserialized;
 }
 
 const NoneDescriptionText = () => (

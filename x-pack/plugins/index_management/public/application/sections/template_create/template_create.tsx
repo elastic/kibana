@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { TemplateForm } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
-import { Template } from '../../../../common/types';
+import { TemplateDeserialized } from '../../../../common';
 import { saveTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 
@@ -17,7 +17,7 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const onSave = async (template: Template) => {
+  const onSave = async (template: TemplateDeserialized) => {
     const { name } = template;
 
     setIsSaving(true);

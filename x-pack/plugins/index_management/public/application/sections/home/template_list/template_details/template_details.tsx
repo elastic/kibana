@@ -30,7 +30,7 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
 } from '../../../../../../common/constants';
-import { Template } from '../../../../../../common/types';
+import { TemplateDeserialized } from '../../../../../../common';
 import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
 import { decodePath } from '../../../../services/routing';
@@ -39,10 +39,10 @@ import { useServices } from '../../../../app_context';
 import { TabSummary, TabMappings, TabSettings, TabAliases } from './tabs';
 
 interface Props {
-  templateName: Template['name'];
+  templateName: TemplateDeserialized['name'];
   onClose: () => void;
-  editTemplate: (templateName: Template['name']) => void;
-  cloneTemplate: (templateName: Template['name']) => void;
+  editTemplate: (templateName: TemplateDeserialized['name']) => void;
+  cloneTemplate: (templateName: TemplateDeserialized['name']) => void;
   reload: () => Promise<SendRequestResponse>;
 }
 
@@ -79,7 +79,7 @@ const TABS = [
 ];
 
 const tabToComponentMap: {
-  [key: string]: React.FunctionComponent<{ templateDetails: Template }>;
+  [key: string]: React.FunctionComponent<{ templateDetails: TemplateDeserialized }>;
 } = {
   [SUMMARY_TAB_ID]: TabSummary,
   [SETTINGS_TAB_ID]: TabSettings,
@@ -106,7 +106,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
   const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(decodedTemplateName);
   // TS complains if we use destructuring here. Fixed in 3.6.0 (https://github.com/microsoft/TypeScript/pull/31711).
   const isManaged = templateDetails ? templateDetails.isManaged : undefined;
-  const [templateToDelete, setTemplateToDelete] = useState<Array<Template['name']>>([]);
+  const [templateToDelete, setTemplateToDelete] = useState<Array<TemplateDeserialized['name']>>([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 

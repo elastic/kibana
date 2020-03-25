@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Template, TemplateEs, TemplateListItem } from '../types';
+import { TemplateDeserialized, TemplateSerialized, TemplateListItem } from '../types';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -39,10 +39,10 @@ export function deserializeTemplateList(
   return deserializedTemplates;
 }
 
-export function serializeTemplate(template: Template): TemplateEs {
+export function serializeTemplate(template: TemplateDeserialized): TemplateSerialized {
   const { name, version, order, indexPatterns, settings, aliases, mappings } = template;
 
-  const serializedTemplate: TemplateEs = {
+  const serializedTemplate: TemplateSerialized = {
     name,
     version,
     order,
@@ -56,9 +56,9 @@ export function serializeTemplate(template: Template): TemplateEs {
 }
 
 export function deserializeTemplate(
-  templateEs: TemplateEs,
+  templateEs: TemplateSerialized,
   managedTemplatePrefix?: string
-): Template {
+): TemplateDeserialized {
   const {
     name,
     version,
@@ -69,7 +69,7 @@ export function deserializeTemplate(
     mappings,
   } = templateEs;
 
-  const deserializedTemplate: Template = {
+  const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
     order,

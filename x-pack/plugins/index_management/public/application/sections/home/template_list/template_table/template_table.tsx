@@ -8,7 +8,7 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
-import { TemplateListItem, Template } from '../../../../../../common/types';
+import { TemplateListItem, TemplateDeserialized } from '../../../../../../common';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
 import { useServices } from '../../../../app_context';
@@ -18,8 +18,8 @@ import { SendRequestResponse } from '../../../../../shared_imports';
 interface Props {
   templates: TemplateListItem[];
   reload: () => Promise<SendRequestResponse>;
-  editTemplate: (name: Template['name']) => void;
-  cloneTemplate: (name: Template['name']) => void;
+  editTemplate: (name: TemplateDeserialized['name']) => void;
+  cloneTemplate: (name: TemplateDeserialized['name']) => void;
 }
 
 export const TemplateTable: React.FunctionComponent<Props> = ({
@@ -133,10 +133,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           }),
           icon: 'pencil',
           type: 'icon',
-          onClick: ({ name }: Template) => {
+          onClick: ({ name }: TemplateDeserialized) => {
             editTemplate(name);
           },
-          enabled: ({ isManaged }: Template) => !isManaged,
+          enabled: ({ isManaged }: TemplateDeserialized) => !isManaged,
         },
         {
           type: 'icon',
@@ -147,7 +147,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             defaultMessage: 'Clone this template',
           }),
           icon: 'copy',
-          onClick: ({ name }: Template) => {
+          onClick: ({ name }: TemplateDeserialized) => {
             cloneTemplate(name);
           },
         },
@@ -161,11 +161,11 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           icon: 'trash',
           color: 'danger',
           type: 'icon',
-          onClick: ({ name }: Template) => {
+          onClick: ({ name }: TemplateDeserialized) => {
             setTemplatesToDelete([name]);
           },
           isPrimary: true,
-          enabled: ({ isManaged }: Template) => !isManaged,
+          enabled: ({ isManaged }: TemplateDeserialized) => !isManaged,
         },
       ],
     },
@@ -185,7 +185,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
-    selectable: ({ isManaged }: Template) => !isManaged,
+    selectable: ({ isManaged }: TemplateDeserialized) => !isManaged,
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate('xpack.idxMgmt.templateList.table.deleteManagedTemplateTooltip', {

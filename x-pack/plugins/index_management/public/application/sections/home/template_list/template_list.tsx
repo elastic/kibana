@@ -19,7 +19,7 @@ import {
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { TemplateTable } from './template_table';
 import { useLoadIndexTemplates } from '../../../services/api';
-import { Template } from '../../../../../common/types';
+import { TemplateDeserialized } from '../../../../../common';
 import { useServices } from '../../../app_context';
 import {
   getTemplateEditLink,
@@ -30,7 +30,7 @@ import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateDetails } from './template_details';
 
 interface MatchParams {
-  templateName?: Template['name'];
+  templateName?: TemplateDeserialized['name'];
 }
 
 export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
@@ -49,7 +49,9 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   // Filter out system index templates
   const filteredTemplates = useMemo(
     () =>
-      templates ? templates.filter((template: Template) => !template.name.startsWith('.')) : [],
+      templates
+        ? templates.filter((template: TemplateDeserialized) => !template.name.startsWith('.'))
+        : [],
     [templates]
   );
 
@@ -57,11 +59,11 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     history.push(getTemplateListLink());
   };
 
-  const editTemplate = (name: Template['name']) => {
+  const editTemplate = (name: TemplateDeserialized['name']) => {
     history.push(getTemplateEditLink(name));
   };
 
-  const cloneTemplate = (name: Template['name']) => {
+  const cloneTemplate = (name: TemplateDeserialized['name']) => {
     history.push(getTemplateCloneLink(name));
   };
 

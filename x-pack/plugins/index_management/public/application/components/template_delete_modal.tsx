@@ -10,13 +10,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useState } from 'react';
 import { deleteTemplates } from '../services/api';
 import { notificationService } from '../services/notification';
-import { Template } from '../../../common/types';
+import { TemplateDeserialized } from '../../../common';
 
 export const TemplateDeleteModal = ({
   templatesToDelete,
   callback,
 }: {
-  templatesToDelete: Array<Template['name']>;
+  templatesToDelete: Array<TemplateDeserialized['name']>;
   callback: (data?: { hasDeletedTemplates: boolean }) => void;
 }) => {
   const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);

@@ -10,7 +10,7 @@ import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { decodePath, getTemplateDetailsLink } from '../../services/routing';
-import { Template } from '../../../../common/types';
+import { TemplateDeserialized } from '../../../../common';
 import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
 
 interface MatchParams {
@@ -31,7 +31,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
     decodedTemplateName
   );
 
-  const onSave = async (template: Template) => {
+  const onSave = async (template: TemplateDeserialized) => {
     setIsSaving(true);
     setSaveError(null);
 
@@ -85,7 +85,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
     const templateData = {
       ...templateToClone,
       name: `${decodedTemplateName}-copy`,
-    } as Template;
+    } as TemplateDeserialized;
 
     content = (
       <TemplateForm

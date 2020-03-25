@@ -10,7 +10,7 @@ import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { wrapEsError } from '../../helpers';
 
-import { Template } from '../../../../common/types';
+import { TemplateDeserialized } from '../../../../common';
 
 const paramsSchema = schema.object({
   names: schema.string(),
@@ -22,7 +22,7 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
     license.guardApiRoute(async (ctx, req, res) => {
       const { names } = req.params as typeof paramsSchema.type;
       const templateNames = names.split(',');
-      const response: { templatesDeleted: Array<Template['name']>; errors: any[] } = {
+      const response: { templatesDeleted: Array<TemplateDeserialized['name']>; errors: any[] } = {
         templatesDeleted: [],
         errors: [],
       };

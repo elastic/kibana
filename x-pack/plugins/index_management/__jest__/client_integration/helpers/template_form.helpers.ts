@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
-import { Template } from '../../../common/types';
+import { TemplateDeserialized } from '../../../common';
 import { nextTick } from './index';
 
 interface MappingField {
@@ -62,7 +62,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     indexPatterns,
     order,
     version,
-  }: Partial<Template> = {}) => {
+  }: Partial<TemplateDeserialized> = {}) => {
     const { form, find, component } = testBed;
 
     if (name) {

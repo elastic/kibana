@@ -11,7 +11,7 @@ import { breadcrumbService } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
 import { decodePath, getTemplateDetailsLink } from '../../services/routing';
 import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';
-import { Template } from '../../../../common/types';
+import { TemplateDeserialized } from '../../../../common';
 
 interface MatchParams {
   name: string;
@@ -33,7 +33,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
     breadcrumbService.setBreadcrumbs('templateEdit');
   }, []);
 
-  const onSave = async (updatedTemplate: Template) => {
+  const onSave = async (updatedTemplate: TemplateDeserialized) => {
     setIsSaving(true);
     setSaveError(null);
 

@@ -42,9 +42,13 @@ export interface TemplateV2 extends TemplateBase {
   };
 }
 
-export type Template = TemplateV1 | TemplateV2;
+export interface TemplateDeserialized extends TemplateV1 {
+  _kbnMeta?: {
+    version: 1 | 2;
+  };
+}
 
-export interface TemplateEs {
+export interface TemplateSerialized {
   name: string;
   index_patterns: string[];
   version?: number;

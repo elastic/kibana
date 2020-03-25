@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 
 import { serializers } from '../../../shared_imports';
-import { Template } from '../../../../common/types';
+import { TemplateDeserialized } from '../../../../common';
 import { TemplateSteps } from './template_steps';
 import { StepAliases, StepLogistics, StepMappings, StepSettings, StepReview } from './steps';
 import { StepProps, DataGetterFunc } from './types';
@@ -24,11 +24,11 @@ import { SectionError } from '../section_error';
 const { stripEmptyFields } = serializers;
 
 interface Props {
-  onSave: (template: Template) => void;
+  onSave: (template: TemplateDeserialized) => void;
   clearSaveError: () => void;
   isSaving: boolean;
   saveError: any;
-  defaultValue?: Template;
+  defaultValue?: TemplateDeserialized;
   isEditing?: boolean;
 }
 
@@ -63,7 +63,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     5: defaultValidation,
   });
 
-  const template = useRef<Partial<Template>>(defaultValue);
+  const template = useRef<Partial<TemplateDeserialized>>(defaultValue);
   const stepsDataGetters = useRef<Record<number, DataGetterFunc>>({});
 
   const lastStep = Object.keys(stepComponentMap).length;
@@ -222,7 +222,10 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
                     fill
                     color="secondary"
                     iconType="check"
-                    onClick={onSave.bind(null, stripEmptyFields(template.current) as Template)}
+                    onClick={onSave.bind(
+                      null,
+                      stripEmptyFields(template.current) as TemplateDeserialized
+                    )}
                     data-test-subj="submitButton"
                     isLoading={isSaving}
                   >

@@ -33,10 +33,10 @@ export interface MappingsConfiguration {
 }
 
 export interface MappingsTemplates {
-  dynamic_templates: Template[];
+  dynamic_templates: TemplateDeserialized[];
 }
 
-interface Template {
+interface TemplateDeserialized {
   [key: string]: any;
 }
 

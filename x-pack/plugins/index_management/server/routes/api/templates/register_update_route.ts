@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { Template, TemplateEs } from '../../../../common/types';
+import { TemplateDeserialized, TemplateSerialized } from '../../../../common';
 import { serializeTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
@@ -25,8 +25,8 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const { name } = req.params as typeof paramsSchema.type;
-      const template = req.body as Template;
-      const serializedTemplate = serializeTemplate(template) as TemplateEs;
+      const template = req.body as TemplateDeserialized;
+      const serializedTemplate = serializeTemplate(template) as TemplateSerialized;
 
       const { order, index_patterns, version, settings, mappings, aliases } = serializedTemplate;
 

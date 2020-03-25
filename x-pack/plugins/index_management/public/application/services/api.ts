@@ -37,7 +37,7 @@ import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import { Template } from '../../../common/types';
+import { TemplateDeserialized } from '../../../common';
 import { IndexMgmtMetricsType } from '../../types';
 
 // Temporary hack to provide the uiMetricService instance to this file.
@@ -207,7 +207,7 @@ export function useLoadIndexTemplates() {
   });
 }
 
-export async function deleteTemplates(names: Array<Template['name']>) {
+export async function deleteTemplates(names: Array<TemplateDeserialized['name']>) {
   const result = sendRequest({
     path: `${API_BASE_PATH}/templates/${names.map(name => encodeURIComponent(name)).join(',')}`,
     method: 'delete',
@@ -220,14 +220,14 @@ export async function deleteTemplates(names: Array<Template['name']>) {
   return result;
 }
 
-export function useLoadIndexTemplate(name: Template['name']) {
+export function useLoadIndexTemplate(name: TemplateDeserialized['name']) {
   return useRequest({
     path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
     method: 'get',
   });
 }
 
-export async function saveTemplate(template: Template, isClone?: boolean) {
+export async function saveTemplate(template: TemplateDeserialized, isClone?: boolean) {
   const result = await sendRequest({
     path: `${API_BASE_PATH}/templates`,
     method: 'put',
@@ -241,7 +241,7 @@ export async function saveTemplate(template: Template, isClone?: boolean) {
   return result;
 }
 
-export async function updateTemplate(template: Template) {
+export async function updateTemplate(template: TemplateDeserialized) {
   const { name } = template;
   const result = await sendRequest({
     path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,

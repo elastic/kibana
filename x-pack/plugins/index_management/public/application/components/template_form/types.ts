@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Template } from '../../../../common/types';
+import { TemplateDeserialized } from '../../../../common';
 
 export interface StepProps {
-  template: Partial<Template>;
+  template: Partial<TemplateDeserialized>;
   setDataGetter: (dataGetter: DataGetterFunc) => void;
   updateCurrentStep: (step: number) => void;
   onStepValidityChange: (isValid: boolean | undefined) => void;
