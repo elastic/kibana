@@ -16,6 +16,7 @@ const COMMON_HEADERS = {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const esSupertest = getService('esSupertest');
   const supertest = getService('supertestWithoutAuth');
   const mlSecurity = getService('mlSecurity');
 
@@ -97,8 +98,39 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('ml/ecommerce');
     });
 
-    for (const testData of testDataList) {
-      it(`estimates the bucket span ${testData.testTitleSuffix}`, async () => {
+    describe('with default settings', function() {
+      for (const testData of testDataList) {
+        it(`estimates the bucket span ${testData.testTitleSuffix}`, async () => {
+          const { body } = await supertest
+            .post('/api/ml/validate/estimate_bucket_span')
+            .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
+            .set(COMMON_HEADERS)
+            .send(testData.requestBody)
+            .expect(testData.expected.responseCode);
+
+          expect(body).to.eql(testData.expected.responseBody);
+        });
+      }
+    });
+
+    describe('with transient search.max_buckets setting', function() {
+      before(async () => {
+        await esSupertest
+          .put('/_cluster/settings')
+          .send({ transient: { 'search.max_buckets': 9000 } })
+          .expect(200);
+      });
+
+      after(async () => {
+        await esSupertest
+          .put('/_cluster/settings')
+          .send({ transient: { 'search.max_buckets': null } })
+          .expect(200);
+      });
+
+      const testData = testDataList[0];
+
+      it(`estimates the bucket span`, async () => {
         const { body } = await supertest
           .post('/api/ml/validate/estimate_bucket_span')
           .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
@@ -108,6 +140,35 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql(testData.expected.responseBody);
       });
-    }
+    });
+
+    describe('with persistent search.max_buckets setting', function() {
+      before(async () => {
+        await esSupertest
+          .put('/_cluster/settings')
+          .send({ persistent: { 'search.max_buckets': 9000 } })
+          .expect(200);
+      });
+
+      after(async () => {
+        await esSupertest
+          .put('/_cluster/settings')
+          .send({ persistent: { 'search.max_buckets': null } })
+          .expect(200);
+      });
+
+      const testData = testDataList[0];
+
+      it(`estimates the bucket span`, async () => {
+        const { body } = await supertest
+          .post('/api/ml/validate/estimate_bucket_span')
+          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
+          .set(COMMON_HEADERS)
+          .send(testData.requestBody)
+          .expect(testData.expected.responseCode);
+
+        expect(body).to.eql(testData.expected.responseBody);
+      });
+    });
   });
 };

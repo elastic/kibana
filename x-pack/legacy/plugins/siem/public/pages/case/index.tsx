@@ -11,10 +11,13 @@ import { SiemPageName } from '../home/types';
 import { CaseDetailsPage } from './case_details';
 import { CasesPage } from './case';
 import { CreateCasePage } from './create_case';
+import { ConfigureCasesPage } from './configure_cases';
 
 const casesPagePath = `/:pageName(${SiemPageName.case})`;
 const caseDetailsPagePath = `${casesPagePath}/:detailName`;
+const caseDetailsPagePathWithCommentId = `${casesPagePath}/:detailName/:commentId`;
 const createCasePagePath = `${casesPagePath}/create`;
+const configureCasesPagePath = `${casesPagePath}/configure`;
 
 const CaseContainerComponent: React.FC = () => (
   <Switch>
@@ -23,6 +26,12 @@ const CaseContainerComponent: React.FC = () => (
     </Route>
     <Route strict exact path={createCasePagePath}>
       <CreateCasePage />
+    </Route>
+    <Route strict exact path={configureCasesPagePath}>
+      <ConfigureCasesPage />
+    </Route>
+    <Route strict path={caseDetailsPagePathWithCommentId}>
+      <CaseDetailsPage />
     </Route>
     <Route strict path={caseDetailsPagePath}>
       <CaseDetailsPage />

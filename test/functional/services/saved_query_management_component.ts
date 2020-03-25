@@ -164,6 +164,10 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       if (isOpenAlready) return;
 
       await testSubjects.click('saved-query-management-popover-button');
+      await retry.waitFor('saved query management popover to have any text', async () => {
+        const queryText = await testSubjects.getVisibleText('saved-query-management-popover');
+        return queryText.length > 0;
+      });
     }
 
     async closeSavedQueryManagementComponent() {

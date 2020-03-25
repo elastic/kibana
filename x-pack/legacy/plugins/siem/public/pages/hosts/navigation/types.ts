@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '../../../../../../../../src/plugins/data/public';
+import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { NarrowDateRange } from '../../../components/ml/types';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
@@ -45,6 +45,7 @@ export interface QueryTabBodyProps {
 
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
+  indexPattern: IIndexPattern;
   pageFilters?: Filter[];
   skip: boolean;
   setQuery: SetQuery;

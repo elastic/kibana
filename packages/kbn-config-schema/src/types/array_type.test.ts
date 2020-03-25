@@ -39,7 +39,7 @@ test('fails if wrong input type', () => {
 test('fails if string input cannot be parsed', () => {
   const type = schema.arrayOf(schema.string());
   expect(() => type.validate('test')).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse array value from [test]"`
+    `"could not parse array value from json input"`
   );
 });
 
@@ -53,7 +53,7 @@ test('fails with correct type if parsed input is not an array', () => {
 test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.arrayOf(schema.string());
   expect(() => type.validate('test', {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: could not parse array value from [test]"`
+    `"[foo-namespace]: could not parse array value from json input"`
   );
 });
 

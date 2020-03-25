@@ -5,7 +5,8 @@
  */
 
 import { IScope } from 'angular';
-import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
+import { NormalizedCacheObject } from 'apollo-cache-inmemory';
+import ApolloClient from 'apollo-client';
 
 export interface AppFrontendLibs {
   apolloClient: AppApolloClient;

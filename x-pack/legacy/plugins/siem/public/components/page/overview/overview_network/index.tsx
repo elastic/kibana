@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash/fp';
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { ESQuery } from '../../../../../common/typed_json';
@@ -23,6 +23,8 @@ import { inputsModel } from '../../../../store/inputs';
 import { getOverviewNetworkStats, OverviewNetworkStats } from '../overview_network_stats';
 import { getNetworkUrl } from '../../../link_to';
 import { InspectButtonContainer } from '../../../inspect';
+import { useGetUrlSearch } from '../../../navigation/use_get_url_search';
+import { navTabs } from '../../../../pages/home/home_navigations';
 
 export interface OverviewNetworkProps {
   startDate: number;
@@ -50,10 +52,15 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   setQuery,
 }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const title = (
-    <FormattedMessage id="xpack.siem.overview.networkTitle" defaultMessage="Network events" />
+  const urlSearch = useGetUrlSearch(navTabs.network);
+  const networkPageButton = useMemo(
+    () => (
+      <EuiButton href={getNetworkUrl(urlSearch)}>
+        <FormattedMessage id="xpack.siem.overview.networkAction" defaultMessage="View network" />
+      </EuiButton>
+    ),
+    [urlSearch]
   );
-
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
@@ -92,14 +99,14 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
                         <>{''}</>
                       )
                     }
-                    title={title}
-                  >
-                    <EuiButton href={getNetworkUrl()}>
+                    title={
                       <FormattedMessage
-                        id="xpack.siem.overview.networkAction"
-                        defaultMessage="View network"
+                        id="xpack.siem.overview.networkTitle"
+                        defaultMessage="Network events"
                       />
-                    </EuiButton>
+                    }
+                  >
+                    {networkPageButton}
                   </HeaderSection>
 
                   <OverviewNetworkStatsManage

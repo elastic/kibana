@@ -20,6 +20,7 @@ export default function(kibana: any) {
         app: ['alerting', 'kibana'],
         privileges: {
           all: {
+            app: ['alerting', 'kibana'],
             savedObject: {
               all: ['alert'],
               read: [],
@@ -28,6 +29,7 @@ export default function(kibana: any) {
             api: ['alerting-read', 'alerting-all'],
           },
           read: {
+            app: ['alerting', 'kibana'],
             savedObject: {
               all: [],
               read: ['alert'],
@@ -42,6 +44,7 @@ export default function(kibana: any) {
       const noopActionType: ActionType = {
         id: 'test.noop',
         name: 'Test: Noop',
+        minimumLicenseRequired: 'gold',
         async executor() {
           return { status: 'ok', actionId: '' };
         },
@@ -49,6 +52,7 @@ export default function(kibana: any) {
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -80,6 +84,7 @@ export default function(kibana: any) {
       const failingActionType: ActionType = {
         id: 'test.failing',
         name: 'Test: Failing',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -104,6 +109,7 @@ export default function(kibana: any) {
       const rateLimitedActionType: ActionType = {
         id: 'test.rate-limit',
         name: 'Test: Rate Limit',
+        minimumLicenseRequired: 'gold',
         maxAttempts: 2,
         validate: {
           params: schema.object({
@@ -133,6 +139,7 @@ export default function(kibana: any) {
       const authorizationActionType: ActionType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),
@@ -207,6 +214,10 @@ export default function(kibana: any) {
           { id: 'other', name: 'Other' },
         ],
         defaultActionGroupId: 'default',
+        actionVariables: {
+          state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
+          context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
+        },
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const {
             services,
@@ -419,6 +430,26 @@ export default function(kibana: any) {
         defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
+      const onlyContextVariablesAlertType: AlertType = {
+        id: 'test.onlyContextVariables',
+        name: 'Test: Only Context Variables',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        actionVariables: {
+          context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
+        },
+        async executor(opts: AlertExecutorOptions) {},
+      };
+      const onlyStateVariablesAlertType: AlertType = {
+        id: 'test.onlyStateVariables',
+        name: 'Test: Only State Variables',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        actionVariables: {
+          state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
+        },
+        async executor(opts: AlertExecutorOptions) {},
+      };
       server.newPlatform.setup.plugins.alerting.registerType(alwaysFiringAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(cumulativeFiringAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(neverFiringAlertType);
@@ -426,6 +457,8 @@ export default function(kibana: any) {
       server.newPlatform.setup.plugins.alerting.registerType(validationAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(authorizationAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(noopAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(onlyContextVariablesAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(onlyStateVariablesAlertType);
     },
   });
 }

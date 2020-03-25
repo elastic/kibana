@@ -15,7 +15,7 @@ import { populateSeriesWithTSVBData } from './lib/populate_series_with_tsvb_data
 import { metricsExplorerRequestBodyRT, metricsExplorerResponseRT } from '../../../common/http_api';
 import { throwErrors } from '../../../common/runtime_types';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;

@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ProcessEvent } from '../types';
 import { CameraAction } from './camera';
 import { DataAction } from './data';
+import { ResolverEvent } from '../../../../common/types';
 
 /**
  * When the user wants to bring a process node front-and-center on the map.
@@ -16,7 +16,7 @@ interface UserBroughtProcessIntoView {
     /**
      * Used to identify the process node that should be brought into view.
      */
-    readonly process: ProcessEvent;
+    readonly process: ResolverEvent;
     /**
      * The time (since epoch in milliseconds) when the action was dispatched.
      */
@@ -24,4 +24,42 @@ interface UserBroughtProcessIntoView {
   };
 }
 
-export type ResolverAction = CameraAction | DataAction | UserBroughtProcessIntoView;
+/**
+ * Used when the alert list selects an alert and the flyout shows resolver.
+ */
+interface UserChangedSelectedEvent {
+  readonly type: 'userChangedSelectedEvent';
+  readonly payload: {
+    /**
+     * Optional because they could have unselected the event.
+     */
+    readonly selectedEvent?: ResolverEvent;
+  };
+}
+
+/**
+ * Triggered by middleware when the data for resolver needs to be loaded. Used to set state in redux to 'loading'.
+ */
+interface AppRequestedResolverData {
+  readonly type: 'appRequestedResolverData';
+}
+/**
+ * When the user switches the active descendent of the Resolver.
+ */
+interface UserFocusedOnResolverNode {
+  readonly type: 'userFocusedOnResolverNode';
+  readonly payload: {
+    /**
+     * Used to identify the process node that should be brought into view.
+     */
+    readonly nodeId: string;
+  };
+}
+
+export type ResolverAction =
+  | CameraAction
+  | DataAction
+  | UserBroughtProcessIntoView
+  | UserChangedSelectedEvent
+  | AppRequestedResolverData
+  | UserFocusedOnResolverNode;

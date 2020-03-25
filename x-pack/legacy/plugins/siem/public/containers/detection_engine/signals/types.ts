@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './errors_types';
-
 export interface BasicSignals {
   signal: AbortSignal;
 }

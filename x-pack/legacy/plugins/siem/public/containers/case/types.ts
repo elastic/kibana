@@ -4,38 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface FormData {
-  isNew?: boolean;
-}
+import { User, UserActionField, UserAction } from '../../../../../../plugins/case/common/api';
 
-export interface NewCase extends FormData {
-  description: string;
-  tags: string[];
-  title: string;
+export interface Comment {
+  id: string;
+  createdAt: string;
+  createdBy: ElasticUser;
+  comment: string;
+  pushedAt: string | null;
+  pushedBy: string | null;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
+  version: string;
 }
-
-export interface CaseSnake {
-  case_id: string;
-  created_at: string;
-  created_by: ElasticUserSnake;
-  description: string;
-  state: string;
-  tags: string[];
-  title: string;
-  updated_at: string;
-  version?: string;
-}
-
-export interface Case {
+export interface CaseUserActions {
+  actionId: string;
+  actionField: UserActionField;
+  action: UserAction;
+  actionAt: string;
+  actionBy: ElasticUser;
   caseId: string;
+  commentId: string | null;
+  newValue: string | null;
+  oldValue: string | null;
+}
+
+export interface CaseExternalService {
+  pushedAt: string;
+  pushedBy: string;
+  connectorId: string;
+  connectorName: string;
+  externalId: string;
+  externalTitle: string;
+  externalUrl: string;
+}
+export interface Case {
+  id: string;
+  closedAt: string | null;
+  closedBy: ElasticUser | null;
+  comments: Comment[];
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
-  state: string;
+  externalService: CaseExternalService | null;
+  status: string;
   tags: string[];
   title: string;
-  updatedAt: string;
-  version?: string;
+  totalComment: number;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
+  version: string;
 }
 
 export interface QueryParams {
@@ -47,39 +65,52 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
+  status: string;
   tags: string[];
+  reporters: User[];
 }
 
-export interface AllCasesSnake {
-  cases: CaseSnake[];
-  page: number;
-  per_page: number;
-  total: number;
+export interface CasesStatus {
+  countClosedCases: number | null;
+  countOpenCases: number | null;
 }
 
-export interface AllCases {
+export interface AllCases extends CasesStatus {
   cases: Case[];
   page: number;
   perPage: number;
   total: number;
 }
+
 export enum SortFieldCase {
   createdAt = 'createdAt',
-  state = 'state',
-  updatedAt = 'updatedAt',
-}
-
-export interface ElasticUserSnake {
-  readonly username: string;
-  readonly full_name?: string | null;
+  closedAt = 'closedAt',
 }
 
 export interface ElasticUser {
-  readonly username: string;
+  readonly email?: string | null;
   readonly fullName?: string | null;
+  readonly username: string;
 }
 
 export interface FetchCasesProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+}
+
+export interface ApiProps {
+  signal: AbortSignal;
+}
+
+export interface BulkUpdateStatus {
+  status: string;
+  id: string;
+  version: string;
+}
+export interface ActionLicense {
+  id: string;
+  name: string;
+  enabled: boolean;
+  enabledInConfig: boolean;
+  enabledInLicense: boolean;
 }

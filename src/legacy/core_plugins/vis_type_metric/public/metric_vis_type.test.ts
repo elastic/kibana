@@ -20,14 +20,11 @@
 import $ from 'jquery';
 
 // TODO This is an integration test and thus requires a running platform. When moving to the new platform,
-// this test has to be migrated to the newly created integration test environment.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart } from 'ui/new_platform';
+// this test has to be migrated to a real unit test.
 // @ts-ignore
 import getStubIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 import { Vis } from '../../visualizations/public';
-import { fieldFormats } from '../../../../plugins/data/public';
 import {
   setup as visualizationsSetup,
   start as visualizationsStart,
@@ -36,17 +33,25 @@ import { createMetricVisTypeDefinition } from './metric_vis_type';
 
 jest.mock('ui/new_platform');
 
+jest.mock('./services', () => ({
+  getFormatService: () => ({
+    deserialize: () => {
+      return {
+        convert: (x: unknown) => `<a href="http://ip.info?address={{${x}}">ip[${x}]</a>`,
+      };
+    },
+  }),
+}));
+
+jest.mock('../../vis_default_editor/public', () => ({
+  Schemas: class {},
+}));
+
 describe('metric_vis - createMetricVisTypeDefinition', () => {
   let vis: Vis;
 
   beforeAll(() => {
-    visualizationsSetup.types.createReactVisualization(createMetricVisTypeDefinition());
-    (npStart.plugins.data.fieldFormats.getType as jest.Mock).mockImplementation(() => {
-      return fieldFormats.UrlFormat;
-    });
-    (npStart.plugins.data.fieldFormats.deserialize as jest.Mock).mockImplementation(mapping => {
-      return new fieldFormats.UrlFormat(mapping ? mapping.params : {});
-    });
+    visualizationsSetup.createReactVisualization(createMetricVisTypeDefinition());
   });
 
   const setup = () => {
@@ -57,11 +62,22 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
       labelTemplate: 'ip[{{value}}]',
     });
 
+    const searchSource = {
+      getField: (name: string) => {
+        if (name === 'index') {
+          return stubIndexPattern;
+        }
+      },
+    };
+
     // TODO: remove when Vis is converted to typescript. Only importing Vis as type
     // @ts-ignore
-    vis = new visualizationsStart.Vis(stubIndexPattern, {
+    vis = visualizationsStart.createVis('metric', {
       type: 'metric',
-      aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
+      data: {
+        searchSource,
+        aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
+      },
     });
 
     vis.params.dimensions = {
@@ -80,7 +96,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
     };
 
     const el = document.createElement('div');
-    const metricVisType = visualizationsStart.types.get('metric');
+    const metricVisType = visualizationsStart.get('metric');
     const Controller = metricVisType.visualization;
     const controller = new Controller(el, vis);
     const render = (esResponse: any) => {

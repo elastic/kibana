@@ -49,7 +49,7 @@ module.exports = async ({ config }) => {
   // Parse props data for .tsx files
   // This is notoriously slow, and is making Storybook unusable.  Disabling for now.
   // See: https://github.com/storybookjs/storybook/issues/7998
-  // 
+  //
   // config.module.rules.push({
   //   test: /\.tsx$/,
   //   // Exclude example files, as we don't display props info for them
@@ -177,14 +177,6 @@ module.exports = async ({ config }) => {
   config.resolve.alias['ui/chrome'] = path.resolve(__dirname, '../tasks/mocks/uiChrome');
   config.resolve.alias.ui = path.resolve(KIBANA_ROOT, 'src/legacy/ui/public');
   config.resolve.alias.ng_mock$ = path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock');
-  config.resolve.alias['plugins/interpreter/interpreter'] = path.resolve(
-    KIBANA_ROOT,
-    'packages/kbn-interpreter/target/common'
-  );
-  config.resolve.alias['plugins/interpreter/registries'] = path.resolve(
-    KIBANA_ROOT,
-    'packages/kbn-interpreter/target/common/registries'
-  );
 
   return config;
 };

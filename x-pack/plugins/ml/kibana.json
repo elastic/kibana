@@ -1,0 +1,26 @@
+{
+  "id": "ml",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "xpack",
+    "ml"
+  ],
+  "requiredPlugins": [
+    "data",
+    "cloud",
+    "features",
+    "home",
+    "licensing",
+    "usageCollection",
+    "share"
+  ],
+  "optionalPlugins": [
+    "security",
+    "spaces",
+    "management",
+    "licenseManagement"
+  ],
+  "server": true,
+  "ui": true
+}

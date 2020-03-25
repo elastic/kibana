@@ -21,7 +21,7 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    alerting: {
+    alerting?: {
       getAlertsClient: () => AlertsClient;
       listTypes: AlertTypeRegistry['list'];
     };
@@ -52,6 +52,11 @@ export interface AlertExecutorOptions {
   updatedBy: string | null;
 }
 
+export interface ActionVariable {
+  name: string;
+  description: string;
+}
+
 export interface AlertType {
   id: string;
   name: string;
@@ -61,6 +66,10 @@ export interface AlertType {
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
+  actionVariables?: {
+    context?: ActionVariable[];
+    state?: ActionVariable[];
+  };
 }
 
 export interface RawAlertAction extends SavedObjectAttributes {

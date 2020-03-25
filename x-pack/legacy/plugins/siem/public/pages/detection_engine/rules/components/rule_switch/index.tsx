@@ -15,10 +15,12 @@ import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 import React, { useCallback, useState, useEffect } from 'react';
 
+import * as i18n from '../../translations';
 import { enableRules } from '../../../../../containers/detection_engine/rules';
 import { enableRulesAction } from '../../all/actions';
 import { Action } from '../../all/reducer';
-import { useStateToaster } from '../../../../../components/toasters';
+import { useStateToaster, displayErrorToast } from '../../../../../components/toasters';
+import { bucketRulesResponse } from '../../all/helpers';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -62,13 +64,29 @@ export const RuleSwitchComponent = ({
         await enableRulesAction([id], event.target.checked!, dispatch, dispatchToaster);
       } else {
         try {
-          const updatedRules = await enableRules({
+          const enabling = event.target.checked!;
+          const response = await enableRules({
             ids: [id],
-            enabled: event.target.checked!,
+            enabled: enabling,
           });
-          setMyEnabled(updatedRules[0].enabled);
-          if (onChange != null) {
-            onChange(updatedRules[0].enabled);
+          const { rules, errors } = bucketRulesResponse(response);
+
+          if (errors.length > 0) {
+            setMyIsLoading(false);
+            const title = enabling
+              ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(1)
+              : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(1);
+            displayErrorToast(
+              title,
+              errors.map(e => e.error.message),
+              dispatchToaster
+            );
+          } else {
+            const [rule] = rules;
+            setMyEnabled(rule.enabled);
+            if (onChange != null) {
+              onChange(rule.enabled);
+            }
           }
         } catch {
           setMyIsLoading(false);

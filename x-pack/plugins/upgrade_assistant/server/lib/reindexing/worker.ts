@@ -5,12 +5,12 @@
  */
 import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'src/core/server';
 import moment from 'moment';
-
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
-import { CredentialStore } from './credential_store';
+import { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 import { LicensingPluginSetup } from '../../../../licensing/server';
+import { sortAndOrderReindexOperations, queuedOpHasStarted } from './op_utils';
 
 const POLL_INTERVAL = 30000;
 // If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
@@ -105,15 +105,17 @@ export class ReindexWorker {
   private startUpdateOperationLoop = async () => {
     this.updateOperationLoopRunning = true;
 
-    while (this.inProgressOps.length > 0) {
-      this.log.debug(`Updating ${this.inProgressOps.length} reindex operations`);
+    try {
+      while (this.inProgressOps.length > 0) {
+        this.log.debug(`Updating ${this.inProgressOps.length} reindex operations`);
 
-      // Push each operation through the state machine and refresh.
-      await Promise.all(this.inProgressOps.map(this.processNextStep));
-      await this.refresh();
+        // Push each operation through the state machine and refresh.
+        await Promise.all(this.inProgressOps.map(this.processNextStep));
+        await this.refresh();
+      }
+    } finally {
+      this.updateOperationLoopRunning = false;
     }
-
-    this.updateOperationLoopRunning = false;
   };
 
   private pollForOperations = async () => {
@@ -126,14 +128,45 @@ export class ReindexWorker {
     }
   };
 
-  private refresh = async () => {
+  private getCredentialScopedReindexService = (credential: Credential) => {
+    const fakeRequest: FakeRequest = { headers: credential };
+    const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
+    const callAsCurrentUser = scopedClusterClient.callAsCurrentUser.bind(scopedClusterClient);
+    const actions = reindexActionsFactory(this.client, callAsCurrentUser);
+    return reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
+  };
+
+  private updateInProgressOps = async () => {
     try {
-      this.inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
+      const inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
+      const { parallel, queue } = sortAndOrderReindexOperations(inProgressOps);
+
+      let [firstOpInQueue] = queue;
+
+      if (firstOpInQueue && !queuedOpHasStarted(firstOpInQueue)) {
+        this.log.debug(
+          `Queue detected; current length ${queue.length}, current item ReindexOperation(id: ${firstOpInQueue.id}, indexName: ${firstOpInQueue.attributes.indexName})`
+        );
+        const credential = this.credentialStore.get(firstOpInQueue);
+        if (credential) {
+          const service = this.getCredentialScopedReindexService(credential);
+          firstOpInQueue = await service.startQueuedReindexOperation(
+            firstOpInQueue.attributes.indexName
+          );
+          // Re-associate the credentials
+          this.credentialStore.set(firstOpInQueue, credential);
+        }
+      }
+
+      this.inProgressOps = parallel.concat(firstOpInQueue ? [firstOpInQueue] : []);
     } catch (e) {
-      this.log.debug(`Could not fetch reindex operations from Elasticsearch`);
+      this.log.debug(`Could not fetch reindex operations from Elasticsearch, ${e.message}`);
       this.inProgressOps = [];
     }
+  };
 
+  private refresh = async () => {
+    await this.updateInProgressOps();
     // If there are operations in progress and we're not already updating operations, kick off the update loop
     if (!this.updateOperationLoopRunning) {
       this.startUpdateOperationLoop();
@@ -157,14 +190,7 @@ export class ReindexWorker {
       }
     }
 
-    // Setup a ReindexService specific to these credentials.
-    const fakeRequest: FakeRequest = { headers: credential };
-
-    const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
-    const callAsCurrentUser = scopedClusterClient.callAsCurrentUser.bind(scopedClusterClient);
-    const actions = reindexActionsFactory(this.client, callAsCurrentUser);
-
-    const service = reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
+    const service = this.getCredentialScopedReindexService(credential);
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.

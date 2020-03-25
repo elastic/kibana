@@ -6,19 +6,20 @@
 
 import { TileLayer } from './tile_layer';
 import { EMS_XYZ } from '../../common/constants';
-import { IXYZTMSSourceDescriptor } from '../../common/descriptor_types';
-import { ITMSSource } from './sources/tms_source';
+import { XYZTMSSourceDescriptor } from '../../common/descriptor_types';
+import { ITMSSource, AbstractTMSSource } from './sources/tms_source';
 import { ILayer } from './layer';
 
-const sourceDescriptor: IXYZTMSSourceDescriptor = {
+const sourceDescriptor: XYZTMSSourceDescriptor = {
   type: EMS_XYZ,
   urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
   id: 'foobar',
 };
 
-class MockTileSource implements ITMSSource {
-  private _descriptor: IXYZTMSSourceDescriptor;
-  constructor(descriptor: IXYZTMSSourceDescriptor) {
+class MockTileSource extends AbstractTMSSource implements ITMSSource {
+  private readonly _descriptor: XYZTMSSourceDescriptor;
+  constructor(descriptor: XYZTMSSourceDescriptor) {
+    super(descriptor, {});
     this._descriptor = descriptor;
   }
   createDefaultLayer(): ILayer {

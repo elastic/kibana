@@ -3,26 +3,84 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { EuiBadge, EuiTableFieldDataColumnType, EuiTableComputedColumnType } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import {
+  EuiBadge,
+  EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType,
+  EuiTableActionsColumnType,
+  EuiAvatar,
+  EuiLink,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import styled from 'styled-components';
+import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { CaseDetailsLink } from '../../../../components/links';
 import { TruncatableText } from '../../../../components/truncatable_text';
 import * as i18n from './translations';
+import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 
-export type CasesColumns = EuiTableFieldDataColumnType<Case> | EuiTableComputedColumnType<Case>;
+export type CasesColumns =
+  | EuiTableFieldDataColumnType<Case>
+  | EuiTableComputedColumnType<Case>
+  | EuiTableActionsColumnType<Case>;
+
+const MediumShadeText = styled.p`
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
+`;
+
+const Spacer = styled.span`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
 
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
-export const getCasesColumns = (): CasesColumns[] => [
+export const getCasesColumns = (
+  actions: Array<DefaultItemIconButtonAction<Case>>,
+  filterStatus: string
+): CasesColumns[] => [
   {
-    name: i18n.CASE_TITLE,
+    name: i18n.NAME,
     render: (theCase: Case) => {
-      if (theCase.caseId != null && theCase.title != null) {
-        return <CaseDetailsLink detailName={theCase.caseId}>{theCase.title}</CaseDetailsLink>;
+      if (theCase.id != null && theCase.title != null) {
+        const caseDetailsLinkComponent = (
+          <CaseDetailsLink detailName={theCase.id}>{theCase.title}</CaseDetailsLink>
+        );
+        return theCase.status === 'open' ? (
+          caseDetailsLinkComponent
+        ) : (
+          <>
+            <MediumShadeText>
+              {caseDetailsLinkComponent}
+              <Spacer>{i18n.CLOSED}</Spacer>
+            </MediumShadeText>
+          </>
+        );
+      }
+      return getEmptyTagValue();
+    },
+  },
+  {
+    field: 'createdBy',
+    name: i18n.REPORTER,
+    render: (createdBy: Case['createdBy']) => {
+      if (createdBy != null) {
+        return (
+          <>
+            <EuiAvatar
+              className="userAction__circle"
+              name={createdBy.fullName ? createdBy.fullName : createdBy.username}
+              size="s"
+            />
+            <Spacer data-test-subj="case-table-column-createdBy">
+              {createdBy.fullName ?? createdBy.username ?? 'N/A'}
+            </Spacer>
+          </>
+        );
       }
       return getEmptyTagValue();
     },
@@ -51,47 +109,87 @@ export const getCasesColumns = (): CasesColumns[] => [
     truncateText: true,
   },
   {
-    field: 'createdAt',
-    name: i18n.CREATED_AT,
+    align: 'right',
+    field: 'totalComment',
+    name: i18n.COMMENTS,
     sortable: true,
-    render: (createdAt: Case['createdAt']) => {
-      if (createdAt != null) {
-        return (
-          <FormattedRelativePreferenceDate
-            value={createdAt}
-            data-test-subj={`case-table-column-createdAt`}
-          />
-        );
+    render: (totalComment: Case['totalComment']) =>
+      renderStringField(`${totalComment}`, `case-table-column-commentCount`),
+  },
+  filterStatus === 'open'
+    ? {
+        field: 'createdAt',
+        name: i18n.OPENED_ON,
+        sortable: true,
+        render: (createdAt: Case['createdAt']) => {
+          if (createdAt != null) {
+            return (
+              <FormattedRelativePreferenceDate
+                value={createdAt}
+                data-test-subj={`case-table-column-createdAt`}
+              />
+            );
+          }
+          return getEmptyTagValue();
+        },
+      }
+    : {
+        field: 'closedAt',
+        name: i18n.CLOSED_ON,
+        sortable: true,
+        render: (closedAt: Case['closedAt']) => {
+          if (closedAt != null) {
+            return (
+              <FormattedRelativePreferenceDate
+                value={closedAt}
+                data-test-subj={`case-table-column-closedAt`}
+              />
+            );
+          }
+          return getEmptyTagValue();
+        },
+      },
+  {
+    name: 'ServiceNow Incident',
+    render: (theCase: Case) => {
+      if (theCase.id != null) {
+        return <ServiceNowColumn theCase={theCase} />;
       }
       return getEmptyTagValue();
     },
   },
   {
-    field: 'createdBy.username',
-    name: i18n.REPORTER,
-    render: (createdBy: Case['createdBy']['username']) =>
-      renderStringField(createdBy, `case-table-column-username`),
-  },
-  {
-    field: 'updatedAt',
-    name: i18n.LAST_UPDATED,
-    sortable: true,
-    render: (updatedAt: Case['updatedAt']) => {
-      if (updatedAt != null) {
-        return (
-          <FormattedRelativePreferenceDate
-            value={updatedAt}
-            data-test-subj={`case-table-column-updatedAt`}
-          />
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    field: 'state',
-    name: i18n.STATE,
-    sortable: true,
-    render: (state: Case['state']) => renderStringField(state, `case-table-column-state`),
+    name: 'Actions',
+    actions,
   },
 ];
+
+interface Props {
+  theCase: Case;
+}
+
+const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
+  const { hasDataToPush, isLoading } = useGetCaseUserActions(theCase.id);
+  const handleRenderDataToPush = useCallback(
+    () =>
+      isLoading ? (
+        <EuiLoadingSpinner />
+      ) : (
+        <p>
+          <EuiLink
+            data-test-subj={`case-table-column-external`}
+            href={theCase.externalService?.externalUrl}
+            target="_blank"
+          >
+            {theCase.externalService?.externalTitle}
+          </EuiLink>
+          {hasDataToPush ? i18n.REQUIRES_UPDATE : i18n.UP_TO_DATE}
+        </p>
+      ),
+    [hasDataToPush, isLoading, theCase.externalService]
+  );
+  if (theCase.externalService !== null) {
+    return handleRenderDataToPush();
+  }
+  return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
+};

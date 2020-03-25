@@ -6,11 +6,9 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 import { IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
-import { Sort } from '../body/sort';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
 import {
@@ -39,16 +37,9 @@ interface Props {
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
-  sort: Sort;
 }
 
-const TimelineHeaderContainer = styled.div`
-  width: 100%;
-`;
-
-TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
-
-export const TimelineHeaderComponent: React.FC<Props> = ({
+const TimelineHeaderComponent: React.FC<Props> = ({
   browserFields,
   id,
   indexPattern,
@@ -62,7 +53,7 @@ export const TimelineHeaderComponent: React.FC<Props> = ({
   show,
   showCallOutUnauthorizedMsg,
 }) => (
-  <TimelineHeaderContainer data-test-subj="timelineHeader">
+  <>
     {showCallOutUnauthorizedMsg && (
       <EuiCallOut
         data-test-subj="timelineCallOutUnauthorized"
@@ -89,7 +80,7 @@ export const TimelineHeaderComponent: React.FC<Props> = ({
       indexPattern={indexPattern}
       timelineId={id}
     />
-  </TimelineHeaderContainer>
+  </>
 );
 
 export const TimelineHeader = React.memo(

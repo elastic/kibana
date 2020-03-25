@@ -23,7 +23,6 @@ import {
   createMockBrowserDriverFactory,
   createMockLayoutInstance,
   createMockServer,
-  mockSelectors,
 } from '../../../../test_helpers';
 import { ConditionalHeaders, HeadlessChromiumDriver } from '../../../../types';
 import { screenshotsObservableFactory } from './observable';
@@ -61,6 +60,7 @@ describe('Screenshot Observable Pipeline', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "error": undefined,
           "screenshots": Array [
             Object {
               "base64EncodedData": "allyourBase64 of boundingClientRect,scroll",
@@ -98,6 +98,7 @@ describe('Screenshot Observable Pipeline', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "error": undefined,
           "screenshots": Array [
             Object {
               "base64EncodedData": "allyourBase64 screenshots",
@@ -108,6 +109,7 @@ describe('Screenshot Observable Pipeline', () => {
           "timeRange": "Default GetTimeRange Result",
         },
         Object {
+          "error": undefined,
           "screenshots": Array [
             Object {
               "base64EncodedData": "allyourBase64 screenshots",
@@ -122,15 +124,10 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   describe('error handling', () => {
-    it('fails if error toast message is found', async () => {
+    it('recovers if waitForSelector fails', async () => {
       // mock implementations
       const mockWaitForSelector = jest.fn().mockImplementation((selectorArg: string) => {
-        const { toastHeader } = mockSelectors;
-        if (selectorArg === toastHeader) {
-          return Promise.resolve(true);
-        }
-        // make the error toast message get found before anything else
-        return Rx.interval(100).toPromise();
+        throw new Error('Mock error!');
       });
 
       // mocks
@@ -153,12 +150,35 @@ describe('Screenshot Observable Pipeline', () => {
         }).toPromise();
       };
 
-      await expect(getScreenshot()).rejects.toMatchInlineSnapshot(
-        `[Error: Encountered an unexpected message on the page: Toast Message]`
-      );
+      await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
+                  "screenshots": Array [
+                    Object {
+                      "base64EncodedData": "allyourBase64 of boundingClientRect,scroll",
+                      "description": undefined,
+                      "title": undefined,
+                    },
+                  ],
+                  "timeRange": null,
+                },
+                Object {
+                  "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
+                  "screenshots": Array [
+                    Object {
+                      "base64EncodedData": "allyourBase64 of boundingClientRect,scroll",
+                      "description": undefined,
+                      "title": undefined,
+                    },
+                  ],
+                  "timeRange": null,
+                },
+              ]
+            `);
     });
 
-    it('fails if exit$ fires a timeout or error signal', async () => {
+    it('recovers if exit$ fires a timeout signal', async () => {
       // mocks
       const mockGetCreatePage = (driver: HeadlessChromiumDriver) =>
         jest
@@ -188,7 +208,21 @@ describe('Screenshot Observable Pipeline', () => {
         }).toPromise();
       };
 
-      await expect(getScreenshot()).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
+      await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "error": "Instant timeout has fired!",
+                  "screenshots": Array [
+                    Object {
+                      "base64EncodedData": "allyourBase64 of boundingClientRect,scroll",
+                      "description": undefined,
+                      "title": undefined,
+                    },
+                  ],
+                  "timeRange": null,
+                },
+              ]
+            `);
     });
   });
 });

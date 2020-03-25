@@ -30,8 +30,8 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
   }
 
   class DocTable {
-    public async getTable() {
-      return await testSubjects.find('docTable');
+    public async getTable(selector?: string) {
+      return await testSubjects.find(selector ? selector : 'docTable');
     }
 
     public async getRowsText() {
@@ -48,12 +48,12 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async getBodyRows(): Promise<WebElementWrapper[]> {
       const table = await this.getTable();
-      return await table.findAllByCssSelector('[data-test-subj~="docTableRow"]');
+      return await table.findAllByTestSubject('~docTableRow');
     }
 
     public async getAnchorRow(): Promise<WebElementWrapper> {
       const table = await this.getTable();
-      return await table.findByCssSelector('[data-test-subj~="docTableAnchorRow"]');
+      return await table.findByTestSubject('~docTableAnchorRow');
     }
 
     public async getRow(options: SelectOptions): Promise<WebElementWrapper> {
@@ -73,7 +73,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
     ): Promise<void> {
       const row = await this.getRow(options);
-      const toggle = await row.findByCssSelector('[data-test-subj~="docTableExpandToggleColumn"]');
+      const toggle = await row.findByTestSubject('~docTableExpandToggleColumn');
       await toggle.click();
     }
 
@@ -90,7 +90,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       const detailsRow = options.isAnchorRow
         ? await this.getAnchorDetailsRow()
         : (await this.getDetailsRows())[options.rowIndex];
-      return await detailsRow.findAllByCssSelector('[data-test-subj~="docTableRowAction"]');
+      return await detailsRow.findAllByTestSubject('~docTableRowAction');
     }
 
     public async getFields(options: { isAnchorRow: boolean } = { isAnchorRow: false }) {
@@ -106,8 +106,8 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       );
     }
 
-    public async getHeaderFields(): Promise<string[]> {
-      const table = await this.getTable();
+    public async getHeaderFields(selector?: string): Promise<string[]> {
+      const table = await this.getTable(selector);
       const $ = await table.parseDomContent();
       return $.findTestSubjects('~docTableHeaderField')
         .toArray()
@@ -122,15 +122,13 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       detailsRow: WebElementWrapper,
       fieldName: WebElementWrapper
     ): Promise<WebElementWrapper> {
-      return await detailsRow.findByCssSelector(`[data-test-subj~="tableDocViewRow-${fieldName}"]`);
+      return await detailsRow.findByTestSubject(`~tableDocViewRow-${fieldName}`);
     }
 
     public async getAddInclusiveFilterButton(
       tableDocViewRow: WebElementWrapper
     ): Promise<WebElementWrapper> {
-      return await tableDocViewRow.findByCssSelector(
-        `[data-test-subj~="addInclusiveFilterButton"]`
-      );
+      return await tableDocViewRow.findByTestSubject(`~addInclusiveFilterButton`);
     }
 
     public async addInclusiveFilter(
@@ -146,7 +144,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     public async getAddExistsFilterButton(
       tableDocViewRow: WebElementWrapper
     ): Promise<WebElementWrapper> {
-      return await tableDocViewRow.findByCssSelector(`[data-test-subj~="addExistsFilterButton"]`);
+      return await tableDocViewRow.findByTestSubject(`~addExistsFilterButton`);
     }
 
     public async addExistsFilter(
@@ -171,7 +169,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
         const detailsRow = await row.findByXpath(
           './following-sibling::*[@data-test-subj="docTableDetailsRow"]'
         );
-        return detailsRow.findByCssSelector('[data-test-subj~="docViewer"]');
+        return detailsRow.findByTestSubject('~docViewer');
       });
     }
   }

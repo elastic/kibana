@@ -22,7 +22,7 @@ import { IpOverview } from '../../../components/page/network/ip_overview';
 import { SiemSearchBar } from '../../../components/search_bar';
 import { WrapperPage } from '../../../components/wrapper_page';
 import { IpOverviewQuery } from '../../../containers/ip_overview';
-import { useWithSource } from '../../../containers/source';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { FlowTargetSourceDest, LastEventIndexKey } from '../../../graphql/types';
 import { useKibana } from '../../../lib/kibana';
 import { decodeIpv6 } from '../../../lib/helpers';
@@ -76,199 +76,202 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
     setIpDetailsTablesActivePageToZero();
   }, [detailName, setIpDetailsTablesActivePageToZero]);
 
-  const { indexPattern, contentAvailable } = useWithSource();
-  const ip = decodeIpv6(detailName);
-  const filterQuery = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern,
-    queries: [query],
-    filters,
-  });
-
   return (
-    <div data-test-subj="ip-details-page">
-      {contentAvailable ? (
-        <StickyContainer>
-          <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
-          </FiltersGlobal>
+    <>
+      <WithSource sourceId="default" data-test-subj="ip-details-page">
+        {({ indicesExist, indexPattern }) => {
+          const ip = decodeIpv6(detailName);
+          const filterQuery = convertToBuildEsQuery({
+            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+            indexPattern,
+            queries: [query],
+            filters,
+          });
 
-          <WrapperPage>
-            <HeaderPage
-              border
-              data-test-subj="ip-details-headline"
-              draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
-              subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
-              title={ip}
-            >
-              <FlowTargetSelectConnected flowTarget={flowTarget} />
-            </HeaderPage>
+          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <StickyContainer>
+              <FiltersGlobal>
+                <SiemSearchBar indexPattern={indexPattern} id="global" />
+              </FiltersGlobal>
 
-            <IpOverviewQuery
-              skip={isInitializing}
-              sourceId="default"
-              filterQuery={filterQuery}
-              type={type}
-              ip={ip}
-            >
-              {({ id, inspect, ipOverviewData, loading, refetch }) => (
-                <AnomalyTableProvider
-                  criteriaFields={networkToCriteria(detailName, flowTarget)}
-                  startDate={from}
-                  endDate={to}
-                  skip={isInitializing}
+              <WrapperPage>
+                <HeaderPage
+                  border
+                  data-test-subj="ip-details-headline"
+                  draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
+                  subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
+                  title={ip}
                 >
-                  {({ isLoadingAnomaliesData, anomaliesData }) => (
-                    <IpOverviewManage
-                      id={id}
-                      inspect={inspect}
-                      ip={ip}
-                      data={ipOverviewData}
-                      anomaliesData={anomaliesData}
-                      loading={loading}
-                      isLoadingAnomaliesData={isLoadingAnomaliesData}
-                      type={type}
-                      flowTarget={flowTarget}
-                      refetch={refetch}
-                      setQuery={setQuery}
+                  <FlowTargetSelectConnected flowTarget={flowTarget} />
+                </HeaderPage>
+
+                <IpOverviewQuery
+                  skip={isInitializing}
+                  sourceId="default"
+                  filterQuery={filterQuery}
+                  type={type}
+                  ip={ip}
+                >
+                  {({ id, inspect, ipOverviewData, loading, refetch }) => (
+                    <AnomalyTableProvider
+                      criteriaFields={networkToCriteria(detailName, flowTarget)}
                       startDate={from}
                       endDate={to}
-                      narrowDateRange={narrowDateRange}
-                    />
+                      skip={isInitializing}
+                    >
+                      {({ isLoadingAnomaliesData, anomaliesData }) => (
+                        <IpOverviewManage
+                          id={id}
+                          inspect={inspect}
+                          ip={ip}
+                          data={ipOverviewData}
+                          anomaliesData={anomaliesData}
+                          loading={loading}
+                          isLoadingAnomaliesData={isLoadingAnomaliesData}
+                          type={type}
+                          flowTarget={flowTarget}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          startDate={from}
+                          endDate={to}
+                          narrowDateRange={narrowDateRange}
+                        />
+                      )}
+                    </AnomalyTableProvider>
                   )}
-                </AnomalyTableProvider>
-              )}
-            </IpOverviewQuery>
+                </IpOverviewQuery>
 
-            <EuiHorizontalRule />
+                <EuiHorizontalRule />
 
-            <ConditionalFlexGroup direction="column">
-              <EuiFlexItem>
-                <NetworkTopNFlowQueryTable
+                <ConditionalFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <NetworkTopNFlowQueryTable
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      flowTarget={FlowTargetSourceDest.source}
+                      ip={ip}
+                      skip={isInitializing}
+                      startDate={from}
+                      type={type}
+                      setQuery={setQuery}
+                      indexPattern={indexPattern}
+                    />
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <NetworkTopNFlowQueryTable
+                      endDate={to}
+                      flowTarget={FlowTargetSourceDest.destination}
+                      filterQuery={filterQuery}
+                      ip={ip}
+                      skip={isInitializing}
+                      startDate={from}
+                      type={type}
+                      setQuery={setQuery}
+                      indexPattern={indexPattern}
+                    />
+                  </EuiFlexItem>
+                </ConditionalFlexGroup>
+
+                <EuiSpacer />
+
+                <ConditionalFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <NetworkTopCountriesQueryTable
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      flowTarget={FlowTargetSourceDest.source}
+                      ip={ip}
+                      skip={isInitializing}
+                      startDate={from}
+                      type={type}
+                      setQuery={setQuery}
+                      indexPattern={indexPattern}
+                    />
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <NetworkTopCountriesQueryTable
+                      endDate={to}
+                      flowTarget={FlowTargetSourceDest.destination}
+                      filterQuery={filterQuery}
+                      ip={ip}
+                      skip={isInitializing}
+                      startDate={from}
+                      type={type}
+                      setQuery={setQuery}
+                      indexPattern={indexPattern}
+                    />
+                  </EuiFlexItem>
+                </ConditionalFlexGroup>
+
+                <EuiSpacer />
+
+                <UsersQueryTable
                   endDate={to}
                   filterQuery={filterQuery}
-                  flowTarget={FlowTargetSourceDest.source}
+                  flowTarget={flowTarget}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
-                  indexPattern={indexPattern}
                 />
-              </EuiFlexItem>
 
-              <EuiFlexItem>
-                <NetworkTopNFlowQueryTable
+                <EuiSpacer />
+
+                <NetworkHttpQueryTable
                   endDate={to}
-                  flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
-                  indexPattern={indexPattern}
                 />
-              </EuiFlexItem>
-            </ConditionalFlexGroup>
 
-            <EuiSpacer />
+                <EuiSpacer />
 
-            <ConditionalFlexGroup direction="column">
-              <EuiFlexItem>
-                <NetworkTopCountriesQueryTable
+                <TlsQueryTable
                   endDate={to}
                   filterQuery={filterQuery}
-                  flowTarget={FlowTargetSourceDest.source}
+                  flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
                   ip={ip}
+                  setQuery={setQuery}
                   skip={isInitializing}
                   startDate={from}
                   type={type}
-                  setQuery={setQuery}
-                  indexPattern={indexPattern}
                 />
-              </EuiFlexItem>
 
-              <EuiFlexItem>
-                <NetworkTopCountriesQueryTable
-                  endDate={to}
-                  flowTarget={FlowTargetSourceDest.destination}
+                <EuiSpacer />
+
+                <AnomaliesQueryTabBody
                   filterQuery={filterQuery}
-                  ip={ip}
-                  skip={isInitializing}
-                  startDate={from}
-                  type={type}
                   setQuery={setQuery}
-                  indexPattern={indexPattern}
+                  startDate={from}
+                  endDate={to}
+                  skip={isInitializing}
+                  ip={ip}
+                  type={type}
+                  flowTarget={flowTarget}
+                  narrowDateRange={narrowDateRange}
+                  hideHistogramIfEmpty={true}
+                  AnomaliesTableComponent={AnomaliesNetworkTable}
                 />
-              </EuiFlexItem>
-            </ConditionalFlexGroup>
+              </WrapperPage>
+            </StickyContainer>
+          ) : (
+            <WrapperPage>
+              <HeaderPage border title={ip} />
 
-            <EuiSpacer />
-
-            <UsersQueryTable
-              endDate={to}
-              filterQuery={filterQuery}
-              flowTarget={flowTarget}
-              ip={ip}
-              skip={isInitializing}
-              startDate={from}
-              type={type}
-              setQuery={setQuery}
-            />
-
-            <EuiSpacer />
-
-            <NetworkHttpQueryTable
-              endDate={to}
-              filterQuery={filterQuery}
-              ip={ip}
-              skip={isInitializing}
-              startDate={from}
-              type={type}
-              setQuery={setQuery}
-            />
-
-            <EuiSpacer />
-
-            <TlsQueryTable
-              endDate={to}
-              filterQuery={filterQuery}
-              flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
-              ip={ip}
-              setQuery={setQuery}
-              skip={isInitializing}
-              startDate={from}
-              type={type}
-            />
-
-            <EuiSpacer />
-
-            <AnomaliesQueryTabBody
-              filterQuery={filterQuery}
-              setQuery={setQuery}
-              startDate={from}
-              endDate={to}
-              skip={isInitializing}
-              ip={ip}
-              type={type}
-              flowTarget={flowTarget}
-              narrowDateRange={narrowDateRange}
-              hideHistogramIfEmpty={true}
-              AnomaliesTableComponent={AnomaliesNetworkTable}
-            />
-          </WrapperPage>
-        </StickyContainer>
-      ) : (
-        <WrapperPage>
-          <HeaderPage border title={ip} />
-
-          <NetworkEmptyPage />
-        </WrapperPage>
-      )}
+              <NetworkEmptyPage />
+            </WrapperPage>
+          );
+        }}
+      </WithSource>
 
       <SpyRoute />
-    </div>
+    </>
   );
 };
 IPDetailsComponent.displayName = 'IPDetailsComponent';
@@ -288,7 +291,7 @@ const mapDispatchToProps = {
   setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
 };
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

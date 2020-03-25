@@ -38,10 +38,13 @@ import {
   setUiActions,
   setSavedVisualizationsLoader,
   setTimeFilter,
+  setAggs,
+  setChrome,
+  setOverlays,
 } from './services';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../../plugins/expressions/public';
-import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
+import { EmbeddableSetup } from '../../../../../../plugins/embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import {
@@ -50,29 +53,33 @@ import {
 } from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
-import { VisImpl, VisImplConstructor } from './vis_impl';
+import { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
+import {
+  convertFromSerializedVis,
+  convertToSerializedVis,
+} from './saved_visualizations/_saved_vis';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
  *
  * @public
  */
-export interface VisualizationsSetup {
-  types: TypesSetup;
-}
 
-export interface VisualizationsStart {
-  types: TypesStart;
+export type VisualizationsSetup = TypesSetup;
+
+export interface VisualizationsStart extends TypesStart {
   savedVisualizationsLoader: SavedVisualizationsLoader;
-  Vis: VisImplConstructor;
+  createVis: (visType: string, visState?: SerializedVis) => Vis;
+  convertToSerializedVis: typeof convertToSerializedVis;
+  convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
 }
 
 export interface VisualizationsSetupDeps {
   expressions: ExpressionsSetup;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   usageCollection: UsageCollectionSetup;
   data: DataPublicPluginSetup;
 }
@@ -117,7 +124,7 @@ export class VisualizationsPlugin
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {
-      types: this.types.setup(),
+      ...this.types.setup(),
     };
   }
 
@@ -136,6 +143,9 @@ export class VisualizationsPlugin
     setExpressions(expressions);
     setUiActions(uiActions);
     setTimeFilter(data.query.timefilter.timefilter);
+    setAggs(data.search.aggs);
+    setOverlays(core.overlays);
+    setChrome(core.chrome);
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
@@ -146,9 +156,16 @@ export class VisualizationsPlugin
     setSavedVisualizationsLoader(savedVisualizationsLoader);
 
     return {
-      types,
+      ...types,
       showNewVisModal,
-      Vis: VisImpl,
+      /**
+       * creates new instance of Vis
+       * @param {IIndexPattern} indexPattern - index pattern to use
+       * @param {VisState} visState - visualization configuration
+       */
+      createVis: (visType: string, visState?: SerializedVis) => new Vis(visType, visState),
+      convertToSerializedVis,
+      convertFromSerializedVis,
       savedVisualizationsLoader,
     };
   }

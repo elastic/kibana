@@ -4,35 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { patchRules } from '../../rules/patch_rules';
-import { PatchRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  PatchRuleAlertParamsRest,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
-import { LegacyServices } from '../../../../types';
-import { GetScopedClients } from '../../../../services';
+import {
+  buildRouteValidation,
+  transformError,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-
-import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
-  return {
-    method: 'PATCH',
-    path: DETECTION_ENGINE_RULES_URL,
-    options: {
-      tags: ['access:siem'],
+export const patchRulesRoute = (router: IRouter) => {
+  router.patch(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: patchRulesSchema,
+        body: buildRouteValidation<PatchRuleAlertParamsRest>(patchRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: PatchRulesRequest, headers) {
+    async (context, request, response) => {
       const {
+        actions,
         description,
         enabled,
         false_positives: falsePositives,
@@ -57,20 +60,36 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
         to,
         type,
         threat,
+        throttle,
         references,
+        note,
         version,
-      } = request.payload;
+        anomaly_threshold: anomalyThreshold,
+        machine_learning_job_id: machineLearningJobId,
+      } = request.body;
+      const siemResponse = buildSiemResponse(response);
 
       try {
-        const { alertsClient, actionsClient, savedObjectsClient } = await getClients(request);
+        if (type) {
+          validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+        }
+
+        if (!context.alerting || !context.actions) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const alertsClient = context.alerting.getAlertsClient();
+        const actionsClient = context.actions.getActionsClient();
+        const savedObjectsClient = context.core.savedObjects.client;
 
         if (!actionsClient || !alertsClient) {
-          return headers.response().code(404);
+          return siemResponse.error({ statusCode: 404 });
         }
 
         const rule = await patchRules({
           actionsClient,
           alertsClient,
+          actions,
           description,
           enabled,
           falsePositives,
@@ -96,8 +115,12 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
           to,
           type,
           threat,
+          throttle,
           references,
+          note,
           version,
+          anomalyThreshold,
+          machineLearningJobId,
         });
         if (rule != null) {
           const ruleStatuses = await savedObjectsClient.find<
@@ -110,39 +133,27 @@ export const createPatchRulesRoute = (getClients: GetScopedClients): Hapi.Server
             search: rule.id,
             searchFields: ['alertId'],
           });
+
           const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
           if (errors != null) {
-            return headers
-              .response({
-                message: errors,
-                status_code: 500,
-              })
-              .code(500);
+            return siemResponse.error({ statusCode: 500, body: errors });
           } else {
-            return validated;
+            return response.ok({ body: validated ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });
-          return headers
-            .response({
-              message: error.message,
-              status_code: error.statusCode,
-            })
-            .code(error.statusCode);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const patchRulesRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
-  route(createPatchRulesRoute(getClients));
+    }
+  );
 };

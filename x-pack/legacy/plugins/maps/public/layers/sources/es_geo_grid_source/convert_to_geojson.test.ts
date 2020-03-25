@@ -8,8 +8,7 @@ jest.mock('../../../kibana_services', () => {});
 
 // @ts-ignore
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
-// @ts-ignore
-import { RENDER_AS } from './render_as';
+import { RENDER_AS } from '../../../../common/constants';
 
 describe('convertCompositeRespToGeoJson', () => {
   const esResponse = {
@@ -54,6 +53,7 @@ describe('convertCompositeRespToGeoJson', () => {
         avg_of_bytes: 5359.2307692307695,
         doc_count: 65,
         'terms_of_machine.os.keyword': 'win xp',
+        'terms_of_machine.os.keyword__percentage': 25,
       },
       type: 'Feature',
     });
@@ -80,6 +80,7 @@ describe('convertCompositeRespToGeoJson', () => {
         avg_of_bytes: 5359.2307692307695,
         doc_count: 65,
         'terms_of_machine.os.keyword': 'win xp',
+        'terms_of_machine.os.keyword__percentage': 25,
       },
       type: 'Feature',
     });
@@ -126,6 +127,7 @@ describe('convertRegularRespToGeoJson', () => {
         avg_of_bytes: 5359.2307692307695,
         doc_count: 65,
         'terms_of_machine.os.keyword': 'win xp',
+        'terms_of_machine.os.keyword__percentage': 25,
       },
       type: 'Feature',
     });
@@ -152,6 +154,7 @@ describe('convertRegularRespToGeoJson', () => {
         avg_of_bytes: 5359.2307692307695,
         doc_count: 65,
         'terms_of_machine.os.keyword': 'win xp',
+        'terms_of_machine.os.keyword__percentage': 25,
       },
       type: 'Feature',
     });

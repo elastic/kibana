@@ -6,7 +6,6 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from '@apollo/client/testing';
 
 import { HookWrapper } from '../../mock';
 import { SiemPageName } from '../../pages/home/types';
@@ -73,11 +72,7 @@ describe('UrlStateContainer', () => {
               pageName,
               detailName,
             }).relativeTimeSearch.undefinedQuery;
-            mount(
-              <MockedProvider>
-                <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
-              </MockedProvider>
-            );
+            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
             expect(mockSetRelativeRangeDatePicker.mock.calls[1][0]).toEqual({
               from: 11223344556677,
@@ -106,11 +101,7 @@ describe('UrlStateContainer', () => {
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .absoluteTimeSearch.undefinedQuery;
-            mount(
-              <MockedProvider>
-                <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
-              </MockedProvider>
-            );
+            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
             expect(mockSetAbsoluteRangeDatePicker.mock.calls[1][0]).toEqual({
               from: 1556736012685,
@@ -135,11 +126,7 @@ describe('UrlStateContainer', () => {
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .relativeTimeSearch.undefinedQuery;
-            mount(
-              <MockedProvider>
-                <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
-              </MockedProvider>
-            );
+            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
             expect(mockSetFilterQuery.mock.calls[0][0]).toEqual({
               id: 'global',
@@ -163,20 +150,14 @@ describe('UrlStateContainer', () => {
               pageName,
               detailName,
             }).noSearch.definedQuery;
-            mount(
-              <MockedProvider>
-                <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
-              </MockedProvider>
-            );
+            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
             expect(
               mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
             ).toEqual({
               hash: '',
               pathname: examplePath,
-              search: [CONSTANTS.timelinePage].includes(page)
-                ? '?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))'
-                : `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+              search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
               state: '',
             });
           }
@@ -197,9 +178,7 @@ describe('UrlStateContainer', () => {
           detailName,
         }).relativeTimeSearch.undefinedQuery;
         const wrapper = mount(
-          <MockedProvider>
-            <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
-          </MockedProvider>
+          <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
         );
 
         wrapper.setProps({

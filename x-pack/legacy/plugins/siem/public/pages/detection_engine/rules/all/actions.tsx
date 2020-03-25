@@ -20,6 +20,7 @@ import {
   ActionToaster,
   displayErrorToast,
   displaySuccessToast,
+  errorToToaster,
 } from '../../../../components/toasters';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../../lib/telemetry';
 
@@ -50,9 +51,9 @@ export const duplicateRulesAction = async (
       displaySuccessToast(i18n.SUCCESSFULLY_DUPLICATED_RULES(ruleIds.length), dispatchToaster);
     }
     dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
-  } catch (e) {
+  } catch (error) {
     dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
-    displayErrorToast(i18n.DUPLICATE_RULE_ERROR, [e.message], dispatchToaster);
+    errorToToaster({ title: i18n.DUPLICATE_RULE_ERROR, error, dispatchToaster });
   }
 };
 
@@ -80,13 +81,13 @@ export const deleteRulesAction = async (
     } else if (onRuleDeleted) {
       onRuleDeleted();
     }
-  } catch (e) {
+  } catch (error) {
     dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
-    displayErrorToast(
-      i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ruleIds.length),
-      [e.message],
-      dispatchToaster
-    );
+    errorToToaster({
+      title: i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ruleIds.length),
+      error,
+      dispatchToaster,
+    });
   }
 };
 

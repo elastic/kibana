@@ -17,12 +17,13 @@ import {
   EuiBadge,
   EuiPage,
   EuiPageContentBody,
-  EuiButtonEmpty,
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { useAppDependencies } from '../../../app_context';
 import { hasSaveAlertsCapability } from '../../../lib/capabilities';
 import { Alert, AlertType, ActionType } from '../../../../types';
@@ -31,6 +32,8 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
+import { ViewInApp } from './view_in_app';
+import { PLUGIN } from '../../../constants/plugin';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -66,34 +69,29 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle size="m">
-                <h1 data-test-subj="alertDetailsTitle">{alert.name}</h1>
+                <h1>
+                  <span data-test-subj="alertDetailsTitle">{alert.name}</span>
+                  &emsp;
+                  <EuiBetaBadge
+                    label="Beta"
+                    tooltipContent={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
+                      {
+                        defaultMessage:
+                          '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                        values: {
+                          pluginName: PLUGIN.getI18nName(i18n),
+                        },
+                      }
+                    )}
+                  />
+                </h1>
               </EuiTitle>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="pencil">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-                      defaultMessage="Edit"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="popout">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-                      defaultMessage="View in app"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="menuLeft">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.activityLogButtonLabel"
-                      defaultMessage="Activity Log"
-                    />
-                  </EuiButtonEmpty>
+                  <ViewInApp alert={alert} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>
@@ -183,7 +181,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <p>
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
-                        defaultMessage="Disabled Alerts do not have an active state, hence Alert Instances cannot be displayed."
+                        defaultMessage="This alert is disabled and cannot be displayed. Toggle Enable ↑ to activate it."
                       />
                     </p>
                   </EuiCallOut>

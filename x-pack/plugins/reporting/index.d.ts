@@ -57,3 +57,19 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
+
+export interface PollerOptions {
+  functionToPoll: () => Promise<any>;
+  pollFrequencyInMillis: number;
+  trailing?: boolean;
+  continuePollingOnError?: boolean;
+  pollFrequencyErrorMultiplier?: number;
+  successFunction?: (...args: any) => any;
+  errorFunction?: (error: Error) => any;
+}
+
+export interface LicenseCheckResults {
+  enableLinks: boolean;
+  showLinks: boolean;
+  message: string;
+}

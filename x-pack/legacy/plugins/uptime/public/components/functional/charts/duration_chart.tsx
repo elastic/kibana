@@ -4,19 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
+import { SeriesIdentifier } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
 import { getChartDateLabel } from '../../../lib/helper';
-import { LocationDurationLine } from '../../../../common/graphql/types';
+import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
-import { DurationChartEmptyState } from './duration_chart_empty_state';
 import { ChartWrapper } from './chart_wrapper';
 import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
+import { ChartEmptyState } from './chart_empty_state';
+import { DurationAnomaliesBar } from './duration_line_bar_list';
+import { MLIntegrationComponent } from '../../monitor_details/ml/ml_integeration';
+import { AnomalyRecords } from '../../../state/actions';
 
 interface DurationChartProps {
   /**
@@ -24,19 +28,15 @@ interface DurationChartProps {
    * on the duration chart. One entry per location
    */
   locationDurationLines: LocationDurationLine[];
-  /**
-   * The color to be used for the average duration series.
-   */
-  meanColor: string;
-  /**
-   * The color to be used for the range duration series.
-   */
-  rangeColor: string;
 
   /**
    * To represent the loading spinner on chart
    */
   loading: boolean;
+
+  hasMLJob: boolean;
+
+  anomalies: AnomalyRecords | null;
 }
 
 /**
@@ -45,14 +45,17 @@ interface DurationChartProps {
  * milliseconds.
  * @param props The props required for this component to render properly
  */
-export const DurationChart = ({
+export const DurationChartComponent = ({
   locationDurationLines,
-  meanColor,
+  anomalies,
   loading,
+  hasMLJob,
 }: DurationChartProps) => {
   const hasLines = locationDurationLines.length > 0;
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
+
+  const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
 
   const onBrushEnd = (minX: number, maxX: number) => {
     updateUrlParams({
@@ -60,26 +63,56 @@ export const DurationChart = ({
       dateRangeEnd: moment(maxX).toISOString(),
     });
   };
+
+  const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
+    if (legendItem) {
+      setHiddenLegends(prevState => {
+        if (prevState.includes(legendItem.specId)) {
+          return [...prevState.filter(item => item !== legendItem.specId)];
+        } else {
+          return [...prevState, legendItem.specId];
+        }
+      });
+    }
+  };
+
   return (
     <>
       <EuiPanel paddingSize="m">
-        <EuiTitle size="xs">
-          <h4>
-            <FormattedMessage
-              id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-              defaultMessage="Monitor duration"
-              description="The 'ms' is an abbreviation for milliseconds."
-            />
-          </h4>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h4>
+                {hasMLJob ? (
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
+                    defaultMessage="Monitor duration (Anomalies: {noOfAnomalies})"
+                    values={{ noOfAnomalies: anomalies?.anomalies?.length ?? 0 }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+                    defaultMessage="Monitor duration"
+                  />
+                )}
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <MLIntegrationComponent />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <ChartWrapper height="400px" loading={loading}>
           {hasLines ? (
             <Chart>
               <Settings
                 xDomain={{ min, max }}
-                showLegend={true}
+                showLegend
+                showLegendExtra
                 legendPosition={Position.Bottom}
                 onBrushEnd={onBrushEnd}
+                onLegendItemClick={legendToggleVisibility}
               />
               <Axis
                 id="bottom"
@@ -99,10 +132,22 @@ export const DurationChart = ({
                   defaultMessage: 'Duration ms',
                 })}
               />
-              <DurationLineSeriesList lines={locationDurationLines} meanColor={meanColor} />
+              <DurationLineSeriesList lines={locationDurationLines} />
+              <DurationAnomaliesBar anomalies={anomalies} hiddenLegends={hiddenLegends} />
             </Chart>
           ) : (
-            <DurationChartEmptyState />
+            <ChartEmptyState
+              body={
+                <FormattedMessage
+                  id="xpack.uptime.durationChart.emptyPrompt.description"
+                  defaultMessage="This monitor has never been {emphasizedText} during the selected time range."
+                  values={{ emphasizedText: <strong>up</strong> }}
+                />
+              }
+              title={i18n.translate('xpack.uptime.durationChart.emptyPrompt.title', {
+                defaultMessage: 'No duration data available',
+              })}
+            />
           )}
         </ChartWrapper>
       </EuiPanel>

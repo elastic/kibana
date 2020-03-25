@@ -8,6 +8,7 @@ import { Store } from 'redux';
 
 import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
+import { ResolverEvent } from '../../../common/types';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -22,6 +23,21 @@ export interface ResolverState {
    * Contains the state associated with event data (process events and possibly other event types).
    */
   readonly data: DataState;
+
+  /**
+   * Contains the state needed to maintain Resolver UI elements.
+   */
+  readonly ui: ResolverUIState;
+}
+
+/**
+ * Piece of redux state that models an animation for the camera.
+ */
+export interface ResolverUIState {
+  /**
+   * The ID attribute of the resolver's aria-activedescendent.
+   */
+  readonly activeDescendentId: string | null;
 }
 
 /**
@@ -114,7 +130,8 @@ export type CameraState = {
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */
 export interface DataState {
-  readonly results: readonly ProcessEvent[];
+  readonly results: readonly ResolverEvent[];
+  isLoading: boolean;
 }
 
 export type Vector2 = readonly [number, number];
@@ -172,7 +189,24 @@ export interface ProcessEvent {
     source_id?: number;
     process_name: string;
     process_path: string;
+    signature_status?: string;
   };
+}
+
+/**
+ * A map of Process Ids that indicate which processes are adjacent to a given process along
+ * directions in two axes: up/down and previous/next.
+ */
+export interface AdjacentProcessMap {
+  readonly self: string;
+  parent: string | null;
+  firstChild: string | null;
+  previousSibling: string | null;
+  nextSibling: string | null;
+  /**
+   * To support aria-level, this must be >= 1
+   */
+  level: number;
 }
 
 /**
@@ -182,21 +216,25 @@ export interface IndexedProcessTree {
   /**
    * Map of ID to a process's children
    */
-  idToChildren: Map<number | undefined, ProcessEvent[]>;
+  idToChildren: Map<string | undefined, ResolverEvent[]>;
   /**
    * Map of ID to process
    */
-  idToProcess: Map<number, ProcessEvent>;
+  idToProcess: Map<string, ResolverEvent>;
+  /**
+   * Map of ID to adjacent processes
+   */
+  idToAdjacent: Map<string, AdjacentProcessMap>;
 }
 
 /**
  * A map of ProcessEvents (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
  */
-export type ProcessWidths = Map<ProcessEvent, number>;
+export type ProcessWidths = Map<ResolverEvent, number>;
 /**
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
-export type ProcessPositions = Map<ProcessEvent, Vector2>;
+export type ProcessPositions = Map<ResolverEvent, Vector2>;
 /**
  * An array of vectors2 forming an polyline. Used to connect process nodes in the graph.
  */
@@ -206,11 +244,11 @@ export type EdgeLineSegment = Vector2[];
  * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  process: ProcessEvent;
+  process: ResolverEvent;
   width: number;
 } & (
   | {
-      parent: ProcessEvent;
+      parent: ResolverEvent;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;
@@ -272,5 +310,16 @@ export interface SideEffectSimulator {
    */
   mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
 }
+
+/**
+ * The internal types of process events used by resolver, mapped from v0 and v1 events.
+ */
+export type ResolverProcessType =
+  | 'processCreated'
+  | 'processRan'
+  | 'processTerminated'
+  | 'unknownProcessEvent'
+  | 'processCausedAlert'
+  | 'unknownEvent';
 
 export type ResolverStore = Store<ResolverState, ResolverAction>;

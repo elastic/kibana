@@ -6,8 +6,8 @@
 
 import { memo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { timelineSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -43,11 +43,11 @@ const TimelineKqlFetchComponent = memo<OwnProps>(
   },
   (prevProps, nextProps) =>
     prevProps.id === nextProps.id &&
-    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     prevProps.inputId === nextProps.inputId &&
-    prevProps.kueryFilterQuery === nextProps.kueryFilterQuery &&
-    prevProps.kueryFilterQueryDraft === nextProps.kueryFilterQueryDraft &&
-    prevProps.setTimelineQuery === nextProps.setTimelineQuery
+    prevProps.setTimelineQuery === nextProps.setTimelineQuery &&
+    deepEqual(prevProps.kueryFilterQuery, nextProps.kueryFilterQuery) &&
+    deepEqual(prevProps.kueryFilterQueryDraft, nextProps.kueryFilterQueryDraft) &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern)
 );
 
 const makeMapStateToProps = () => {
@@ -66,7 +66,7 @@ const mapDispatchToProps = {
   setTimelineQuery: inputsActions.setQuery,
 };
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

@@ -4,328 +4,298 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
 import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiButtonToggle,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingContent,
   EuiLoadingSpinner,
+  EuiHorizontalRule,
 } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
-import styled, { css } from 'styled-components';
 import * as i18n from './translations';
-import { DescriptionMarkdown } from '../description_md_editor';
 import { Case } from '../../../../containers/case/types';
-import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
 import { HeaderPage } from '../../../../components/header_page';
 import { EditableTitle } from '../../../../components/header_page/editable_title';
-import { Markdown } from '../../../../components/markdown';
-import { PropertyActions } from '../property_actions';
 import { TagList } from '../tag_list';
 import { useGetCase } from '../../../../containers/case/use_get_case';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
+import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { WrapperPage } from '../../../../components/wrapper_page';
+import { getTypedPayload } from '../../../../containers/case/utils';
+import { WhitePageWrapper } from '../wrappers';
+import { useBasePath } from '../../../../lib/kibana';
+import { CaseStatus } from '../case_status';
+import { navTabs } from '../../../home/home_navigations';
+import { SpyRoute } from '../../../../utils/route/spy_routes';
+import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
+import { usePushToService } from './push_to_service';
 
 interface Props {
   caseId: string;
 }
 
-const MyDescriptionList = styled(EuiDescriptionList)`
-  ${({ theme }) => css`
-    & {
-      padding-right: ${theme.eui.euiSizeL};
-      border-right: ${theme.eui.euiBorderThin};
-    }
-  `}
-`;
-
 const MyWrapper = styled(WrapperPage)`
   padding-bottom: 0;
 `;
 
-const BackgroundWrapper = styled.div`
-  ${({ theme }) => css`
-    background-color: ${theme.eui.euiColorEmptyShade};
-    border-top: ${theme.eui.euiBorderThin};
-    height: 100%;
-  `}
+const MyEuiFlexGroup = styled(EuiFlexGroup)`
+  height: 100%;
+`;
+
+const MyEuiHorizontalRule = styled(EuiHorizontalRule)`
+  margin-left: 48px;
+  &.euiHorizontalRule--full {
+    width: calc(100% - 48px);
+  }
 `;
 
 export interface CaseProps {
   caseId: string;
   initialData: Case;
-  isLoading: boolean;
 }
 
-export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData, isLoading }) => {
-  const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
-  const [isEditDescription, setIsEditDescription] = useState(false);
-  const [isEditTags, setIsEditTags] = useState(false);
-  const [isCaseOpen, setIsCaseOpen] = useState(data.state === 'open');
-  const [description, setDescription] = useState(data.description);
-  const [title, setTitle] = useState(data.title);
-  const [tags, setTags] = useState(data.tags);
+export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => {
+  const basePath = window.location.origin + useBasePath();
+  const caseLink = `${basePath}/app/siem#/case/${caseId}`;
+  const search = useGetUrlSearch(navTabs.case);
 
+  const [initLoadingData, setInitLoadingData] = useState(true);
+  const {
+    caseUserActions,
+    fetchCaseUserActions,
+    firstIndexPushToService,
+    hasDataToPush,
+    isLoading: isLoadingUserActions,
+    lastIndexPushToService,
+    participants,
+  } = useGetCaseUserActions(caseId);
+  const { caseData, isLoading, updateKey, updateCase, updateCaseProperty } = useUpdateCase(
+    caseId,
+    initialData
+  );
+
+  // Update Fields
   const onUpdateField = useCallback(
-    async (updateKey: keyof Case, updateValue: string | string[]) => {
-      switch (updateKey) {
+    (newUpdateKey: keyof Case, updateValue: Case[keyof Case]) => {
+      switch (newUpdateKey) {
         case 'title':
-          if (updateValue.length > 0) {
-            dispatchUpdateCaseProperty({
+          const titleUpdate = getTypedPayload<string>(updateValue);
+          if (titleUpdate.length > 0) {
+            updateCaseProperty({
+              fetchCaseUserActions,
               updateKey: 'title',
-              updateValue,
+              updateValue: titleUpdate,
             });
           }
           break;
         case 'description':
-          if (updateValue.length > 0) {
-            dispatchUpdateCaseProperty({
+          const descriptionUpdate = getTypedPayload<string>(updateValue);
+          if (descriptionUpdate.length > 0) {
+            updateCaseProperty({
+              fetchCaseUserActions,
               updateKey: 'description',
-              updateValue,
+              updateValue: descriptionUpdate,
             });
-            setIsEditDescription(false);
           }
           break;
         case 'tags':
-          setTags(updateValue as string[]);
-          if (updateValue.length > 0) {
-            dispatchUpdateCaseProperty({
-              updateKey: 'tags',
-              updateValue,
-            });
-            setIsEditTags(false);
-          }
+          const tagsUpdate = getTypedPayload<string[]>(updateValue);
+          updateCaseProperty({
+            fetchCaseUserActions,
+            updateKey: 'tags',
+            updateValue: tagsUpdate,
+          });
           break;
+        case 'status':
+          const statusUpdate = getTypedPayload<string>(updateValue);
+          if (caseData.status !== updateValue) {
+            updateCaseProperty({
+              fetchCaseUserActions,
+              updateKey: 'status',
+              updateValue: statusUpdate,
+            });
+          }
         default:
           return null;
       }
     },
-    [dispatchUpdateCaseProperty, title]
+    [fetchCaseUserActions, updateCaseProperty, caseData.status]
+  );
+  const handleUpdateCase = useCallback(
+    (newCase: Case) => {
+      updateCase(newCase);
+      fetchCaseUserActions(newCase.id);
+    },
+    [updateCase, fetchCaseUserActions]
   );
 
-  const onSetIsCaseOpen = useCallback(() => setIsCaseOpen(!isCaseOpen), [
-    isCaseOpen,
-    setIsCaseOpen,
-  ]);
+  const { pushButton, pushCallouts } = usePushToService({
+    caseId: caseData.id,
+    caseStatus: caseData.status,
+    isNew: caseUserActions.filter(cua => cua.action === 'push-to-service').length === 0,
+    updateCase: handleUpdateCase,
+  });
+
+  const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
+  const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
+  const toggleStatusCase = useCallback(
+    e => onUpdateField('status', e.target.checked ? 'closed' : 'open'),
+    [onUpdateField]
+  );
+  const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
+
+  const caseStatusData = useMemo(
+    () =>
+      caseData.status === 'open'
+        ? {
+            'data-test-subj': 'case-view-createdAt',
+            value: caseData.createdAt,
+            title: i18n.CASE_OPENED,
+            buttonLabel: i18n.CLOSE_CASE,
+            status: caseData.status,
+            icon: 'folderCheck',
+            badgeColor: 'secondary',
+            isSelected: false,
+          }
+        : {
+            'data-test-subj': 'case-view-closedAt',
+            value: caseData.closedAt ?? '',
+            title: i18n.CASE_CLOSED,
+            buttonLabel: i18n.REOPEN_CASE,
+            status: caseData.status,
+            icon: 'folderExclamation',
+            badgeColor: 'danger',
+            isSelected: true,
+          },
+    [caseData.closedAt, caseData.createdAt, caseData.status]
+  );
+  const emailContent = useMemo(
+    () => ({
+      subject: i18n.EMAIL_SUBJECT(caseData.title),
+      body: i18n.EMAIL_BODY(caseLink),
+    }),
+    [caseLink, caseData.title]
+  );
 
   useEffect(() => {
-    const caseState = isCaseOpen ? 'open' : 'closed';
-    if (data.state !== caseState) {
-      dispatchUpdateCaseProperty({
-        updateKey: 'state',
-        updateValue: caseState,
-      });
+    if (initLoadingData && !isLoadingUserActions) {
+      setInitLoadingData(false);
     }
-  }, [isCaseOpen]);
-
-  // TO DO refactor each of these const's into their own components
-  const propertyActions = [
-    {
-      iconType: 'documentEdit',
-      label: 'Edit description',
-      onClick: () => setIsEditDescription(true),
-    },
-    {
-      iconType: 'securitySignalResolved',
-      label: 'Close case',
-      onClick: () => null,
-    },
-    {
-      iconType: 'trash',
-      label: 'Delete case',
-      onClick: () => null,
-    },
-    {
-      iconType: 'importAction',
-      label: 'Push as ServiceNow incident',
-      onClick: () => null,
-    },
-    {
-      iconType: 'popout',
-      label: 'View ServiceNow incident',
-      onClick: () => null,
-    },
-    {
-      iconType: 'importAction',
-      label: 'Update ServiceNow incident',
-      onClick: () => null,
-    },
-  ];
-  const userActions = [
-    {
-      avatarName: data.createdBy.username,
-      title: (
-        <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <p>
-              <strong>{`${data.createdBy.username}`}</strong>
-              {` ${i18n.ADDED_DESCRIPTION} `}{' '}
-              <FormattedRelativePreferenceDate value={data.createdAt} />
-              {/* STEPH FIX come back and add label `on` */}
-            </p>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <PropertyActions propertyActions={propertyActions} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      children: isEditDescription ? (
-        <>
-          <DescriptionMarkdown
-            descriptionInputHeight={200}
-            initialDescription={data.description}
-            isLoading={isLoading}
-            onChange={updatedDescription => setDescription(updatedDescription)}
-          />
-
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                isDisabled={isLoading}
-                isLoading={isLoading}
-                onClick={() => onUpdateField('description', description)}
-              >
-                {i18n.SUBMIT}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => setIsEditDescription(false)}>
-                {i18n.CANCEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ) : (
-        <Markdown raw={data.description} data-test-subj="case-view-description" />
-      ),
-    },
-  ];
-
-  const onSubmit = useCallback(
-    newTitle => {
-      onUpdateField('title', newTitle);
-      setTitle(newTitle);
-    },
-    [title]
-  );
-
-  const titleNode = <EditableTitle isLoading={isLoading} title={title} onSubmit={onSubmit} />;
+  }, [initLoadingData, isLoadingUserActions]);
 
   return (
     <>
       <MyWrapper>
         <HeaderPage
           backOptions={{
-            href: getCaseUrl(),
+            href: getCaseUrl(search),
             text: i18n.BACK_TO_ALL,
           }}
           data-test-subj="case-view-title"
-          titleNode={titleNode}
-          title={title}
+          titleNode={
+            <EditableTitle
+              isLoading={isLoading && updateKey === 'title'}
+              title={caseData.title}
+              onSubmit={onSubmitTitle}
+            />
+          }
+          title={caseData.title}
         >
-          <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <MyDescriptionList compressed>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
-                    <EuiDescriptionListDescription>
-                      <EuiBadge
-                        color={isCaseOpen ? 'secondary' : 'danger'}
-                        data-test-subj="case-view-state"
-                      >
-                        {data.state}
-                      </EuiBadge>
-                    </EuiDescriptionListDescription>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiDescriptionListTitle>{i18n.CASE_OPENED}</EuiDescriptionListTitle>
-                    <EuiDescriptionListDescription>
-                      <FormattedRelativePreferenceDate
-                        data-test-subj="case-view-createdAt"
-                        value={data.createdAt}
-                      />
-                    </EuiDescriptionListDescription>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </MyDescriptionList>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="l" alignItems="center">
-                <EuiFlexItem>
-                  <EuiButtonToggle
-                    data-test-subj="toggle-case-state"
-                    label={isCaseOpen ? 'Close case' : 'Reopen case'}
-                    iconType={isCaseOpen ? 'checkInCircleFilled' : 'magnet'}
-                    onChange={onSetIsCaseOpen}
-                    isSelected={isCaseOpen}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <PropertyActions propertyActions={propertyActions} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <CaseStatus
+            caseId={caseData.id}
+            caseTitle={caseData.title}
+            isLoading={isLoading && updateKey === 'status'}
+            toggleStatusCase={toggleStatusCase}
+            {...caseStatusData}
+          />
         </HeaderPage>
       </MyWrapper>
-      <BackgroundWrapper>
+      <WhitePageWrapper>
         <MyWrapper>
+          {pushCallouts != null && pushCallouts}
           <EuiFlexGroup>
             <EuiFlexItem grow={6}>
-              <UserActionTree userActions={userActions} />
+              {initLoadingData && <EuiLoadingContent lines={8} />}
+              {!initLoadingData && (
+                <>
+                  <UserActionTree
+                    caseUserActions={caseUserActions}
+                    data={caseData}
+                    fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
+                    firstIndexPushToService={firstIndexPushToService}
+                    isLoadingDescription={isLoading && updateKey === 'description'}
+                    isLoadingUserActions={isLoadingUserActions}
+                    lastIndexPushToService={lastIndexPushToService}
+                    onUpdateField={onUpdateField}
+                  />
+                  <MyEuiHorizontalRule margin="s" />
+                  <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonToggle
+                        data-test-subj={caseStatusData['data-test-subj']}
+                        iconType={caseStatusData.icon}
+                        isSelected={caseStatusData.isSelected}
+                        isLoading={isLoading && updateKey === 'status'}
+                        label={caseStatusData.buttonLabel}
+                        onChange={toggleStatusCase}
+                      />
+                    </EuiFlexItem>
+                    {hasDataToPush && <EuiFlexItem grow={false}>{pushButton}</EuiFlexItem>}
+                  </EuiFlexGroup>
+                </>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <UserList
-                data-test-subj="case-view-user-list"
+                data-test-subj="case-view-user-list-reporter"
+                email={emailContent}
                 headline={i18n.REPORTER}
-                users={[data.createdBy]}
+                users={[caseData.createdBy]}
+              />
+              <UserList
+                data-test-subj="case-view-user-list-participants"
+                email={emailContent}
+                headline={i18n.PARTICIPANTS}
+                users={participants}
               />
               <TagList
                 data-test-subj="case-view-tag-list"
-                tags={tags}
-                iconAction={{
-                  'aria-label': title,
-                  iconType: 'pencil',
-                  onSubmit: newTags => onUpdateField('tags', newTags),
-                  onClick: isEdit => setIsEditTags(isEdit),
-                }}
-                isEditTags={isEditTags}
+                tags={caseData.tags}
+                onSubmit={onSubmitTags}
+                isLoading={isLoading && updateKey === 'tags'}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         </MyWrapper>
-      </BackgroundWrapper>
+      </WhitePageWrapper>
+      <SpyRoute state={spyState} />
     </>
   );
 });
 
 export const CaseView = React.memo(({ caseId }: Props) => {
-  const [{ data, isLoading, isError }] = useGetCase(caseId);
+  const { data, isLoading, isError } = useGetCase(caseId);
   if (isError) {
     return null;
   }
   if (isLoading) {
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center">
+      <MyEuiFlexGroup justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </MyEuiFlexGroup>
     );
   }
 
-  return <CaseComponent caseId={caseId} initialData={data} isLoading={isLoading} />;
+  return <CaseComponent caseId={caseId} initialData={data} />;
 });
 
+CaseComponent.displayName = 'CaseComponent';
 CaseView.displayName = 'CaseView';

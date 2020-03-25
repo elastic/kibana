@@ -30,6 +30,10 @@ function LoadingSpinner() {
   );
 }
 
+const BadgeRow = styled(EuiFlexItem)`
+  padding-bottom: ${lightTheme.gutterTypes.gutterSmall};
+`;
+
 const ItemRow = styled('tr')`
   line-height: 2;
 `;
@@ -44,6 +48,7 @@ const ItemDescription = styled('td')`
 `;
 
 interface ServiceMetricListProps extends ServiceNodeMetrics {
+  frameworkName?: string;
   isLoading: boolean;
 }
 
@@ -53,6 +58,7 @@ export function ServiceMetricList({
   avgErrorsPerMinute,
   avgCpuUsage,
   avgMemoryUsage,
+  frameworkName,
   numInstances,
   isLoading
 }: ServiceMetricListProps) {
@@ -106,23 +112,27 @@ export function ServiceMetricList({
         : null
     }
   ];
+  const showBadgeRow = frameworkName || numInstances > 1;
+
   return isLoading ? (
     <LoadingSpinner />
   ) : (
     <>
-      {numInstances && numInstances > 1 && (
-        <EuiFlexItem>
-          <div>
-            <EuiBadge iconType="apps" color="hollow">
-              {i18n.translate('xpack.apm.serviceMap.numInstancesMetric', {
-                values: { numInstances },
-                defaultMessage: '{numInstances} instances'
-              })}
-            </EuiBadge>
-          </div>
-        </EuiFlexItem>
+      {showBadgeRow && (
+        <BadgeRow>
+          <EuiFlexGroup gutterSize="none">
+            {frameworkName && <EuiBadge>{frameworkName}</EuiBadge>}
+            {numInstances > 1 && (
+              <EuiBadge iconType="apps" color="hollow">
+                {i18n.translate('xpack.apm.serviceMap.numInstancesMetric', {
+                  values: { numInstances },
+                  defaultMessage: '{numInstances} instances'
+                })}
+              </EuiBadge>
+            )}
+          </EuiFlexGroup>
+        </BadgeRow>
       )}
-
       <table>
         <tbody>
           {listItems.map(

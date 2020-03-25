@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useApolloClient } from '@apollo/client';
+import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
@@ -43,6 +43,7 @@ import {
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 
 interface OwnProps<TCache = object> {
+  apolloClient: ApolloClient<TCache>;
   /** Displays open timeline in modal */
   isModal: boolean;
   closeModalTimeline?: () => void;
@@ -51,7 +52,10 @@ interface OwnProps<TCache = object> {
 }
 
 export type OpenTimelineOwnProps = OwnProps &
-  Pick<OpenTimelineProps, 'defaultPageSize' | 'title'> &
+  Pick<
+    OpenTimelineProps,
+    'defaultPageSize' | 'title' | 'importCompleteToggle' | 'setImportCompleteToggle'
+  > &
   PropsFromRedux;
 
 /** Returns a collection of selected timeline ids */
@@ -67,18 +71,20 @@ export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): str
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
 export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   ({
+    apolloClient,
     closeModalTimeline,
     createNewTimeline,
     defaultPageSize,
     hideActions = [],
     isModal = false,
+    importCompleteToggle,
     onOpenTimeline,
+    setImportCompleteToggle,
     timeline,
     title,
     updateTimeline,
     updateIsLoading,
   }) => {
-    const apolloClient = useApolloClient();
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
       Record<string, JSX.Element>
@@ -255,7 +261,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         sort={{ sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction }}
         onlyUserFavorite={onlyFavorites}
       >
-        {({ timelines, loading, totalCount }) => {
+        {({ timelines, loading, totalCount, refetch }) => {
           return !isModal ? (
             <OpenTimeline
               data-test-subj={'open-timeline'}
@@ -263,6 +269,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               defaultPageSize={defaultPageSize}
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+              importCompleteToggle={importCompleteToggle}
               onAddTimelinesToFavorites={undefined}
               onDeleteSelected={onDeleteSelected}
               onlyFavorites={onlyFavorites}
@@ -275,7 +282,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               pageIndex={pageIndex}
               pageSize={pageSize}
               query={search}
+              refetch={refetch}
               searchResults={timelines}
+              setImportCompleteToggle={setImportCompleteToggle}
               selectedItems={selectedItems}
               sortDirection={sortDirection}
               sortField={sortField}

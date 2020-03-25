@@ -50,7 +50,7 @@ export function ServicesContextProvider({ children, value }: ContextProps) {
 export const useServicesContext = () => {
   const context = useContext(ServicesContext);
   if (context === undefined) {
-    throw new Error('useAppContext must be used inside the AppContextProvider.');
+    throw new Error('useServicesContext must be used inside the ServicesContextProvider.');
   }
   return context;
 };

@@ -23,15 +23,21 @@ import { Role } from './role';
 import { User } from './user';
 import { RoleMappings } from './role_mappings';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { createTestUserService } from './test_user';
 
-export function SecurityServiceProvider({ getService }: FtrProviderContext) {
+export async function SecurityServiceProvider(context: FtrProviderContext) {
+  const { getService } = context;
   const log = getService('log');
   const config = getService('config');
   const url = formatUrl(config.get('servers.kibana'));
+  const role = new Role(url, log);
+  const user = new User(url, log);
+  const testUser = await createTestUserService(role, user, context);
 
   return new (class SecurityService {
-    role = new Role(url, log);
     roleMappings = new RoleMappings(url, log);
-    user = new User(url, log);
+    testUser = testUser;
+    role = role;
+    user = user;
   })();
 }

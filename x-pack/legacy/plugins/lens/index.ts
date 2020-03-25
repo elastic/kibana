@@ -7,19 +7,14 @@
 import * as Joi from 'joi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
-import mappings from './mappings.json';
-import {
-  PLUGIN_ID,
-  getEditPath,
-  NOT_INTERNATIONALIZED_PRODUCT_NAME,
-} from '../../../plugins/lens/common';
+import { PLUGIN_ID, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../../plugins/lens/common';
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
     configPrefix: `xpack.${PLUGIN_ID}`,
     // task_manager could be required, but is only used for telemetry
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter', 'data'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter'],
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
@@ -32,19 +27,6 @@ export const lens: LegacyPluginInitializer = kibana => {
       visualize: [`plugins/${PLUGIN_ID}/legacy`],
       embeddableFactories: [`plugins/${PLUGIN_ID}/legacy`],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      mappings,
-      visTypes: ['plugins/lens/register_vis_type_alias'],
-      savedObjectsManagement: {
-        lens: {
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,
-          getInAppUrl: (obj: { id: string }) => ({
-            path: getEditPath(obj.id),
-            uiCapabilitiesPath: 'lens.show',
-          }),
-        },
-      },
     },
 
     config: () => {

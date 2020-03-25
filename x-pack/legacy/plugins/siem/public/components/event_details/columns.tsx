@@ -20,7 +20,7 @@ import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
-import { Scalars } from '../../graphql/types';
+import { ToStringArray } from '../../graphql/types';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
@@ -115,6 +115,17 @@ export const getColumns = ({
             )}
             isDropDisabled={true}
             type={DRAG_TYPE_FIELD}
+            renderClone={provided => (
+              <div
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+                ref={provided.innerRef}
+              >
+                <DragEffects>
+                  <DraggableFieldBadge fieldId={field} />
+                </DragEffects>
+              </div>
+            )}
           >
             <Draggable
               draggableId={getDraggableFieldId({
@@ -122,30 +133,23 @@ export const getColumns = ({
                 fieldId: field,
               })}
               index={0}
-              type={DRAG_TYPE_FIELD}
             >
-              {(provided, snapshot) => (
+              {provided => (
                 <div
                   {...provided.draggableProps}
                   {...provided.dragHandleProps}
                   ref={provided.innerRef}
                 >
-                  {!snapshot.isDragging ? (
-                    <FieldName
-                      categoryId={data.category}
-                      categoryColumns={getColumnsWithTimestamp({
-                        browserFields,
-                        category: data.category,
-                      })}
-                      data-test-subj="field-name"
-                      fieldId={field}
-                      onUpdateColumns={onUpdateColumns}
-                    />
-                  ) : (
-                    <DragEffects>
-                      <DraggableFieldBadge fieldId={field} />
-                    </DragEffects>
-                  )}
+                  <FieldName
+                    categoryId={data.category}
+                    categoryColumns={getColumnsWithTimestamp({
+                      browserFields,
+                      category: data.category,
+                    })}
+                    data-test-subj="field-name"
+                    fieldId={field}
+                    onUpdateColumns={onUpdateColumns}
+                  />
                 </div>
               )}
             </Draggable>
@@ -159,7 +163,7 @@ export const getColumns = ({
     name: i18n.VALUE,
     sortable: true,
     truncateText: false,
-    render: (values: Scalars['ToStringArray'] | null | undefined, data: EventFieldsData) => (
+    render: (values: ToStringArray | null | undefined, data: EventFieldsData) => (
       <EuiFlexGroup direction="column" alignItems="flexStart" component="span" gutterSize="none">
         {values != null &&
           values.map((value, i) => (

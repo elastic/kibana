@@ -7,15 +7,13 @@
 import { EuiButtonEmpty, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useContext, useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import styled from 'styled-components';
 
 import { useKibana } from '../../lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
-import { errorToToaster } from '../ml/api/error_to_toaster';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
-import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
-import { useStateToaster } from '../toasters';
+import { errorToToaster, useStateToaster } from '../toasters';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
 import { filterJobs } from './helpers';
 import { useSiemJobs } from './hooks/use_siem_jobs';
@@ -26,6 +24,7 @@ import { PopoverDescription } from './popover_description';
 import * as i18n from './translations';
 import { JobsFilters, JobSummary, SiemJob } from './types';
 import { UpgradeContents } from './upgrade_contents';
+import { useMlCapabilities } from './hooks/use_ml_capabilities';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
@@ -98,7 +97,7 @@ export const MlPopover = React.memo(() => {
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
   const [isLoadingSiemJobs, siemJobs] = useSiemJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
-  const capabilities = useContext(MlCapabilitiesContext);
+  const capabilities = useMlCapabilities();
   const docLinks = useKibana().services.docLinks;
 
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch

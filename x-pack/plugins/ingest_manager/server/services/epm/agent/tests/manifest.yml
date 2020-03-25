@@ -1,0 +1,20 @@
+title: Nginx Acess Logs
+release: beta
+type: logs
+ingest_pipeline: default
+
+vars:
+  - name: paths
+    # Should we define this as array? How will the UI best make sense of it?
+    type: textarea
+    default:
+      - /var/log/nginx/access.log*
+    # I suggest to use ECS fields for this config options here: https://github.com/elastic/ecs/blob/master/schemas/os.yml
+    # This would need to be based on a predefined definition on what can be filtered on
+    os.darwin:
+      - /usr/local/var/log/nginx/access.log*
+    os.windows:
+      - c:/programdata/nginx/logs/*access.log*
+  - name: tags
+    default: [nginx]
+    type: text
