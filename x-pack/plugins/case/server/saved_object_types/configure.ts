@@ -19,6 +19,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       },
       created_by: {
         properties: {
+          email: {
+            type: 'keyword',
+          },
           username: {
             type: 'keyword',
           },
@@ -30,6 +33,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       connector_id: {
         type: 'keyword',
       },
+      connector_name: {
+        type: 'keyword',
+      },
       closure_type: {
         type: 'keyword',
       },
@@ -38,6 +44,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       },
       updated_by: {
         properties: {
+          email: {
+            type: 'keyword',
+          },
           username: {
             type: 'keyword',
           },

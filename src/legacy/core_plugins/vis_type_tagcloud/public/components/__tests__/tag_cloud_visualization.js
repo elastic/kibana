@@ -19,7 +19,6 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { start as visualizationsStart } from '../../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 import { ImageComparator } from 'test_utils/image_comparator';
 import { createTagCloudVisualization } from '../tag_cloud_visualization';
@@ -36,7 +35,6 @@ const PIXEL_DIFF = 64;
 
 describe('TagCloudVisualizationTest', function() {
   let domNode;
-  let indexPattern;
   let vis;
   let imageComparator;
 
@@ -66,22 +64,18 @@ describe('TagCloudVisualizationTest', function() {
   });
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(Private => {
-      indexPattern = Private(LogstashIndexPatternStubProvider);
-    })
-  );
 
   describe('TagCloudVisualization - basics', function() {
     beforeEach(async function() {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
-      vis = visualizationsStart.createVis(indexPattern, {
+      vis = visualizationsStart.createVis('tagcloud', {
         type: 'tagcloud',
         params: {
           bucket: { accessor: 0, format: {} },
           metric: { accessor: 0, format: {} },
         },
+        data: {},
       });
     });
 

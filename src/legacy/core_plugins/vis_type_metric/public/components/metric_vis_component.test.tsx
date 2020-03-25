@@ -20,8 +20,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { MetricVisComponent, MetricVisComponentProps } from './metric_vis_component';
+import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
 
 jest.mock('../services', () => ({
   getFormatService: () => ({
@@ -41,7 +41,7 @@ const baseVisData = {
 } as any;
 
 describe('MetricVisComponent', function() {
-  const vis: Vis = {
+  const vis: ExprVis = {
     params: {
       metric: {
         colorSchema: 'Green to Red',
@@ -61,7 +61,7 @@ describe('MetricVisComponent', function() {
   const getComponent = (propOverrides: Partial<Props> = {} as Partial<Props>) => {
     const props: Props = {
       vis,
-      visParams: vis.params,
+      visParams: vis.params as any,
       visData: baseVisData,
       renderComplete: jest.fn(),
       ...propOverrides,

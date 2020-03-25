@@ -28,6 +28,8 @@ import {
   stopReportManager,
   trackUiEvent,
 } from './lens_ui_telemetry';
+
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { KibanaLegacySetup } from '../../../../../src/plugins/kibana_legacy/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../../../plugins/lens/common';
 import {
@@ -39,7 +41,6 @@ import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/emb
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { VisualizationsSetup } from './legacy_imports';
-
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
   expressions: ExpressionsSetup;
@@ -54,6 +55,7 @@ export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
+  uiActions: UiActionsStart;
 }
 
 export const isRisonObject = (value: RisonValue): value is RisonObject => {
@@ -217,6 +219,7 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    this.xyVisualization.start(core, startDependencies);
   }
 
   stop() {

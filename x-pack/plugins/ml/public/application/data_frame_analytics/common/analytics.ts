@@ -56,6 +56,8 @@ export interface LoadExploreDataArg {
   direction: SortDirection;
   searchQuery: SavedSearchQuery;
   requiresKeyword?: boolean;
+  pageIndex?: number;
+  pageSize?: number;
 }
 
 export const SEARCH_SIZE = 1000;
