@@ -58,13 +58,12 @@ import {
   DEFAULT_QUERY_LANG,
 } from './components/explorer_query_bar/explorer_query_bar';
 import {
+  getDateFormatTz,
   removeFilterFromQueryString,
   getQueryPattern,
   escapeParens,
   escapeDoubleQuotes,
-} from '../components/kql_filter_bar/utils';
-
-import { getDateFormatTz } from './explorer_utils';
+} from './explorer_utils';
 import { getSwimlaneContainerWidth } from './legacy_utils';
 
 import {
