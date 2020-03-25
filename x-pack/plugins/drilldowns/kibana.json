@@ -4,5 +4,8 @@
   "server": false,
   "ui": true,
   "configPath": ["xpack", "drilldowns"],
-  "requiredPlugins": ["uiActions", "embeddable", "advancedUiActions"]
+  "requiredPlugins": [
+    "uiActions",
+    "embeddable"
+  ]
 }
