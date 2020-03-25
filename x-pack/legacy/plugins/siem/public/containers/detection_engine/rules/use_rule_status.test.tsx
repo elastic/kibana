@@ -7,8 +7,55 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useRuleStatus, ReturnRuleStatus } from './use_rule_status';
 import * as api from './api';
+import { RuleType, Rule } from '../rules/types';
 
 jest.mock('./api');
+
+const testRule: Rule = {
+  actions: [
+    {
+      group: 'fake group',
+      id: 'fake id',
+      action_type_id: 'fake action_type_id',
+      params: {
+        someKey: 'someVal',
+      },
+    },
+  ],
+  created_at: 'mm/dd/yyyyTHH:MM:sssz',
+  created_by: 'mockUser',
+  description: 'some desc',
+  enabled: true,
+  false_positives: [],
+  filters: [],
+  from: 'now-360s',
+  id: '12345678987654321',
+  immutable: false,
+  index: [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  interval: '5m',
+  language: 'kuery',
+  name: 'Test rule',
+  max_signals: 100,
+  query: "user.email: 'root@elastic.co'",
+  references: [],
+  risk_score: 75,
+  rule_id: 'bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf',
+  severity: 'high',
+  tags: ['APM'],
+  threat: [],
+  throttle: null,
+  to: 'now',
+  type: 'query' as RuleType,
+  updated_at: 'mm/dd/yyyyTHH:MM:sssz',
+  updated_by: 'mockUser',
+};
 
 describe('useRuleStatus', () => {
   test('init', async () => {
