@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
-import { UserValidator, UserValidationResult } from '../../../../lib/validate_user';
+import { LoginValidator, LoginValidationResult } from './validate_login';
 import { parseNext } from '../../../../../common/parse_next';
 import { LoginSelector } from '../../../../../common/login_state';
 
@@ -41,7 +41,7 @@ interface State {
   message:
     | { type: MessageType.None }
     | { type: MessageType.Danger | MessageType.Info; content: string };
-  formError: UserValidationResult | null;
+  formError: LoginValidationResult | null;
 }
 
 enum LoadingStateType {
@@ -57,11 +57,11 @@ enum MessageType {
 }
 
 export class LoginForm extends Component<Props, State> {
-  private readonly validator: UserValidator;
+  private readonly validator: LoginValidator;
 
   constructor(props: Props) {
     super(props);
-    this.validator = new UserValidator({ shouldValidate: false });
+    this.validator = new LoginValidator({ shouldValidate: false });
     this.state = {
       loadingState: { type: LoadingStateType.None },
       username: '',

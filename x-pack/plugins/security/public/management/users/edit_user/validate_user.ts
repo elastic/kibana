@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EditUser } from '../../common/model';
+import { User, EditUser } from '../../../../common/model';
 
 interface UserValidatorOptions {
   shouldValidate?: boolean;
@@ -34,11 +34,12 @@ export class UserValidator {
     this.shouldValidate = false;
   }
 
-  public validateUsername(username: string): UserValidationResult {
+  public validateUsername(user: User): UserValidationResult {
     if (!this.shouldValidate) {
       return valid();
     }
 
+    const { username } = user;
     if (!username) {
       return invalid(
         i18n.translate('xpack.security.management.users.editUser.requiredUsernameErrorMessage', {
@@ -60,11 +61,12 @@ export class UserValidator {
     return valid();
   }
 
-  public validateEmail(email: string): UserValidationResult {
+  public validateEmail(user: EditUser): UserValidationResult {
     if (!this.shouldValidate) {
       return valid();
     }
 
+    const { email } = user;
     if (email && !email.match(validEmailRegex)) {
       return invalid(
         i18n.translate('xpack.security.management.users.editUser.validEmailRequiredErrorMessage', {
@@ -75,11 +77,12 @@ export class UserValidator {
     return valid();
   }
 
-  public validatePassword(password: string): UserValidationResult {
+  public validatePassword(user: EditUser): UserValidationResult {
     if (!this.shouldValidate) {
       return valid();
     }
 
+    const { password } = user;
     if (!password || password.length < 6) {
       return invalid(
         i18n.translate('xpack.security.management.users.editUser.passwordLengthErrorMessage', {
@@ -90,12 +93,13 @@ export class UserValidator {
     return valid();
   }
 
-  public validateConfirmPassword(password: string, confirmPassword: string): UserValidationResult {
+  public validateConfirmPassword(user: EditUser): UserValidationResult {
     if (!this.shouldValidate) {
       return valid();
     }
 
-    if (password && password !== confirmPassword) {
+    const { password, confirmPassword } = user;
+    if (password && confirmPassword !== null && password !== confirmPassword) {
       return invalid(
         i18n.translate('xpack.security.management.users.editUser.passwordDoNotMatchErrorMessage', {
           defaultMessage: 'Passwords do not match',
@@ -106,29 +110,17 @@ export class UserValidator {
   }
 
   public validateForSave(user: EditUser, isNewUser: boolean): UserValidationResult {
-    const { isInvalid: isUsernameInvalid } = this.validateUsername(user.username);
-    const { isInvalid: isEmailInvalid } = this.validateEmail(user.email);
+    const { isInvalid: isUsernameInvalid } = this.validateUsername(user);
+    const { isInvalid: isEmailInvalid } = this.validateEmail(user);
     let isPasswordInvalid = false;
     let isConfirmPasswordInvalid = false;
 
     if (isNewUser) {
-      isPasswordInvalid = this.validatePassword(user.password).isInvalid;
-      isConfirmPasswordInvalid = this.validateConfirmPassword(user.password, user.confirmPassword)
-        .isInvalid;
+      isPasswordInvalid = this.validatePassword(user).isInvalid;
+      isConfirmPasswordInvalid = this.validateConfirmPassword(user).isInvalid;
     }
 
     if (isUsernameInvalid || isEmailInvalid || isPasswordInvalid || isConfirmPasswordInvalid) {
-      return invalid();
-    }
-
-    return valid();
-  }
-
-  public validateForLogin(username: string, password: string): UserValidationResult {
-    const { isInvalid: isUsernameInvalid } = this.validateUsername(username);
-    const { isInvalid: isPasswordInvalid } = this.validatePassword(password);
-
-    if (isUsernameInvalid || isPasswordInvalid) {
       return invalid();
     }
 

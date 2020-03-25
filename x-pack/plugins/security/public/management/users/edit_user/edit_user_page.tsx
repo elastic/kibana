@@ -33,7 +33,7 @@ import { AuthenticationServiceSetup } from '../../../authentication';
 import { USERS_PATH } from '../../management_urls';
 import { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers, ChangePasswordForm } from '../components';
-import { UserValidator, UserValidationResult } from '../../../lib/validate_user';
+import { UserValidator, UserValidationResult } from './validate_user';
 import { RoleComboBox } from '../../role_combo_box';
 import { UserAPIClient } from '..';
 
@@ -193,14 +193,13 @@ export class EditUserPage extends Component<Props, State> {
   };
 
   private passwordFields = () => {
-    const { password, confirmPassword } = this.state.user;
     return (
       <Fragment>
         <EuiFormRow
           label={i18n.translate('xpack.security.management.users.editUser.passwordFormRowLabel', {
             defaultMessage: 'Password',
           })}
-          {...this.validator.validatePassword(password)}
+          {...this.validator.validatePassword(this.state.user)}
         >
           <EuiFieldText
             autoComplete="new-password"
@@ -215,7 +214,7 @@ export class EditUserPage extends Component<Props, State> {
             'xpack.security.management.users.editUser.confirmPasswordFormRowLabel',
             { defaultMessage: 'Confirm password' }
           )}
-          {...this.validator.validateConfirmPassword(password, confirmPassword)}
+          {...this.validator.validateConfirmPassword(this.state.user)}
         >
           <EuiFieldText
             autoComplete="new-password"
@@ -448,7 +447,7 @@ export class EditUserPage extends Component<Props, State> {
 
             <EuiForm {...this.state.formError}>
               <EuiFormRow
-                {...this.validator.validateUsername(user.username)}
+                {...this.validator.validateUsername(this.state.user)}
                 helpText={
                   !isNewUser && !reserved
                     ? i18n.translate(
@@ -487,7 +486,7 @@ export class EditUserPage extends Component<Props, State> {
                     />
                   </EuiFormRow>
                   <EuiFormRow
-                    {...this.validator.validateEmail(user.email)}
+                    {...this.validator.validateEmail(this.state.user)}
                     label={i18n.translate(
                       'xpack.security.management.users.editUser.emailAddressFormRowLabel',
                       { defaultMessage: 'Email address' }
