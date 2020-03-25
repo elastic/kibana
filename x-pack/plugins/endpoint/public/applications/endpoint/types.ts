@@ -81,19 +81,26 @@ export interface PolicyDetailsState {
   /** A single policy item  */
   policyItem?: PolicyData;
   /** data is being retrieved from server */
-  policyConfig?: PolicyDetailsConfig;
+  policyConfig?: PolicyConfig;
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<EndpointAppLocation>;
 }
 
-export interface PolicyDetailsConfig {
+/**
+ * Policy Details configuration
+ */
+export interface PolicyConfig {
   windows: WindowsPolicyConfig;
   mac: MacPolicyConfig;
   linux: LinuxPolicyConfig;
 }
 
+/**
+ * Windows-specific policy configuration
+ */
 export interface WindowsPolicyConfig {
+  /** malware mode can be detect, prevent or prevent and notify user */
   malware: {
     mode: string;
   };
@@ -103,7 +110,11 @@ export interface WindowsPolicyConfig {
   };
 }
 
+/**
+ * Mac-specific policy configuration
+ */
 export interface MacPolicyConfig {
+  /** malware mode can be detect, prevent or prevent and notify user */
   malware: {
     mode: string;
   };
@@ -112,7 +123,9 @@ export interface MacPolicyConfig {
     network: boolean;
   };
 }
-
+/**
+ * Linux-specific policy configuration
+ */
 export interface LinuxPolicyConfig {
   eventing: {
     process: boolean;

@@ -20,11 +20,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { usePolicyDetailsSelector } from './policy_hooks';
-import { selectPolicyDetails } from '../../store/policy_details/selectors';
+import { policyDetails } from '../../store/policy_details/selectors';
 import { WindowsEventing } from './policy_forms/eventing/windows';
 
 export const PolicyDetails = React.memo(() => {
-  const policyItem = usePolicyDetailsSelector(selectPolicyDetails);
+  const policyItem = usePolicyDetailsSelector(policyDetails);
 
   function policyName() {
     if (policyItem) {

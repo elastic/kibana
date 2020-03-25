@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EventingCheckbox } from './checkbox';
 import { OS, EventingFields } from '../../../../types';
@@ -16,22 +16,25 @@ import {
 import { ConfigForm } from '../config_form';
 
 export const WindowsEventing = React.memo(() => {
-  const checkboxes = [
-    {
-      name: i18n.translate('xpack.endpoint.policyDetailsConfig.eventingProcess', {
-        defaultMessage: 'Process',
-      }),
-      os: OS.windows,
-      protectionField: EventingFields.process,
-    },
-    {
-      name: i18n.translate('xpack.endpoint.policyDetailsConfig.eventingNetwork', {
-        defaultMessage: 'Network',
-      }),
-      os: OS.windows,
-      protectionField: EventingFields.network,
-    },
-  ];
+  const checkboxes = useMemo(
+    () => [
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.eventingProcess', {
+          defaultMessage: 'Process',
+        }),
+        os: OS.windows,
+        protectionField: EventingFields.process,
+      },
+      {
+        name: i18n.translate('xpack.endpoint.policyDetailsConfig.eventingNetwork', {
+          defaultMessage: 'Network',
+        }),
+        os: OS.windows,
+        protectionField: EventingFields.network,
+      },
+    ],
+    []
+  );
 
   const renderCheckboxes = () => {
     return checkboxes.map((item, index) => {
@@ -52,8 +55,12 @@ export const WindowsEventing = React.memo(() => {
 
   return (
     <ConfigForm
-      type={`Event Collection`}
-      supportedOss={['Windows']}
+      type={i18n.translate('xpack.endpoint.policy.details.eventCollection', {
+        defaultMessage: 'Event Collection',
+      })}
+      supportedOss={[
+        i18n.translate('xpack.endpoint.policy.details.windows', { defaultMessage: 'Windows' }),
+      ]}
       id="windowsEventingForm"
       children={renderCheckboxes()}
       selectedEventing={selected}

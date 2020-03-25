@@ -11,7 +11,7 @@ import { policyDetailsReducer, policyDetailsMiddlewareFactory, PolicyDetailsActi
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { DepsStartMock, depsStartMock } from '../../mocks';
-import { selectPolicyConfig, selectWindowsEventing } from './selectors';
+import { policyConfig, windowsEventing } from './selectors';
 import { clone } from '../../models/policy_details_config';
 
 describe('policy details: ', () => {
@@ -82,12 +82,12 @@ describe('policy details: ', () => {
 
   describe('when the user has enabled windows process eventing', () => {
     beforeEach(() => {
-      const policyConfig = selectPolicyConfig(getState());
-      if (!policyConfig) {
+      const config = policyConfig(getState());
+      if (!config) {
         throw new Error();
       }
 
-      const newPayload1 = clone(policyConfig);
+      const newPayload1 = clone(config);
       newPayload1.windows.eventing.process = true;
 
       dispatch({
@@ -97,7 +97,7 @@ describe('policy details: ', () => {
     });
 
     it('windows process eventing is enabled', async () => {
-      expect(selectWindowsEventing(getState())!.process).toEqual(true);
+      expect(windowsEventing(getState())!.process).toEqual(true);
     });
   });
 });

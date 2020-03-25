@@ -8,10 +8,7 @@ import React, { useCallback } from 'react';
 import { EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import {
-  selectPolicyConfig,
-  selectWindowsEventing,
-} from '../../../../store/policy_details/selectors';
+import { policyConfig, windowsEventing } from '../../../../store/policy_details/selectors';
 import { PolicyDetailsAction } from '../../../../store/policy_details';
 import { OS, EventingFields } from '../../../../types';
 import { clone } from '../../../../models/policy_details_config';
@@ -22,14 +19,14 @@ export const EventingCheckbox: React.FC<{
   os: OS;
   protectionField: EventingFields;
 }> = React.memo(({ id, name, os, protectionField }) => {
-  const policyConfig = usePolicyDetailsSelector(selectPolicyConfig);
-  const eventing = usePolicyDetailsSelector(selectWindowsEventing);
+  const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
+  const eventing = usePolicyDetailsSelector(windowsEventing);
   const dispatch = useDispatch<(action: PolicyDetailsAction) => void>();
 
   const handleRadioChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (policyConfig) {
-        const newPayload = clone(policyConfig);
+      if (policyDetailsConfig) {
+        const newPayload = clone(policyDetailsConfig);
         newPayload[os].eventing[protectionField] = event.target.checked;
 
         dispatch({
@@ -38,7 +35,7 @@ export const EventingCheckbox: React.FC<{
         });
       }
     },
-    [dispatch, os, policyConfig, protectionField]
+    [dispatch, os, policyDetailsConfig, protectionField]
   );
 
   return (
