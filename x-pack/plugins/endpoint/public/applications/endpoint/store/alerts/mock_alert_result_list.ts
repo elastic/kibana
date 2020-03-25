@@ -57,7 +57,7 @@ export const mockAlertDetailsResult = (): AlertDetails => {
       prev: null,
       next: null,
       state: {
-        host: generator.generateHostMetadata(),
+        host_metadata: generator.generateHostMetadata(),
       },
     },
   };
