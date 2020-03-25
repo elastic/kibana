@@ -5,6 +5,7 @@
  */
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { AlertData } from '../../../../plugins/endpoint/common/types';
 
 /**
  * The number of alert documents in the es archive.
@@ -15,6 +16,21 @@ const numberOfAlertsInFixture = 12;
  * The default number of entries returned when no page_size is specified.
  */
 const defaultPageSize = 10;
+
+/**
+ * The below two constants are to be used together.
+ *
+ * `${NULLABLE_EVENT_FIELD}` should be a field in the fixture that exists for some alerts,
+ * but not all.
+ *
+ * `NULLABLE_EVENT_ID` is the event_id of a specific alert for which `${NULLABLE_EVENT_FIELD}`
+ * does not exist (is undefined).
+ *
+ * This allows us to test sorting and paging on mixed data that may or may not exist
+ * for each alert.
+ */
+const NULLABLE_EVENT_FIELD = 'process.parent.entity_id';
+const NULLABLE_EVENT_ID = '504dc351-5325-45ad-b406-8e4b28c63e2d';
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -173,7 +189,7 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         let valid: boolean = true;
-        body.alerts.forEach(alert => {
+        (body.alerts as AlertData[]).forEach(alert => {
           if (alert.process?.name > 'malware writer') {
             valid = false;
           }
@@ -184,18 +200,18 @@ export default function({ getService }: FtrProviderContext) {
       it('alerts api should return data using `before` on undefined primary sort values by custom sort parameter, descending', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&order=desc&sort=process.parent.entity_id&before=&before=504dc351-5325-45ad-b406-8e4b28c63e2d&empty_string_is_undefined=true`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&order=desc&sort=${NULLABLE_EVENT_FIELD}&before=&before=${NULLABLE_EVENT_ID}&empty_string_is_undefined=true`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        let lastSeen: string = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
+        let lastSeen: string | undefined = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
         let valid: boolean = true;
-        body.alerts.forEach(alert => {
+        (body.alerts as AlertData[]).forEach(alert => {
           const entityId = alert.process?.parent?.entity_id;
-          if (entityId === undefined && alert.event.id > '504dc351-5325-45ad-b406-8e4b28c63e2d') {
+          if (entityId === undefined && alert.event.id > NULLABLE_EVENT_ID) {
             valid = false;
           }
-          if (entityId > lastSeen) {
+          if (entityId !== undefined && entityId > lastSeen) {
             valid = false;
           } else {
             lastSeen = entityId;
@@ -207,18 +223,18 @@ export default function({ getService }: FtrProviderContext) {
       it('alerts api should return data using `before` on undefined primary sort values by custom sort parameter, ascending', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&page_size=25&order=asc&sort=process.parent.entity_id&before=&before=504dc351-5325-45ad-b406-8e4b28c63e2d&empty_string_is_undefined=true`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&page_size=25&order=asc&sort=${NULLABLE_EVENT_FIELD}&before=&before=${NULLABLE_EVENT_ID}&empty_string_is_undefined=true`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        let lastSeen: string = '1';
+        let lastSeen: string | undefined = '1';
         let valid: boolean = true;
-        body.alerts.forEach(alert => {
+        (body.alerts as AlertData[]).forEach(alert => {
           const entityId = alert.process?.parent?.entity_id;
-          if (entityId === undefined && alert.event.id < '504dc351-5325-45ad-b406-8e4b28c63e2d') {
+          if (entityId === undefined && alert.event.id < NULLABLE_EVENT_ID) {
             valid = false;
           }
-          if (entityId < lastSeen) {
+          if (entityId !== undefined && entityId < lastSeen) {
             valid = false;
           } else {
             lastSeen = entityId;
@@ -241,18 +257,18 @@ export default function({ getService }: FtrProviderContext) {
       it('alerts api should return data using `after` on undefined primary sort values by custom sort parameter, descending', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&sort=process.parent.entity_id&order=desc&after=&after=504dc351-5325-45ad-b406-8e4b28c63e2d&empty_string_is_undefined=true`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&sort=${NULLABLE_EVENT_FIELD}&order=desc&after=&after=${NULLABLE_EVENT_ID}&empty_string_is_undefined=true`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        let lastSeen: string = 'zzzzzzzzzzzzzzzzzzzzzzzzzzz';
+        let lastSeen: string | undefined = 'zzzzzzzzzzzzzzzzzzzzzzzzzzz';
         let valid: boolean = true;
-        body.alerts.forEach(alert => {
+        (body.alerts as AlertData[]).forEach(alert => {
           const entityId = alert.process?.parent?.entity_id;
-          if (entityId === undefined && alert.event.id < '504dc351-5325-45ad-b406-8e4b28c63e2d') {
+          if (entityId === undefined && alert.event.id < NULLABLE_EVENT_ID) {
             valid = false;
           }
-          if (entityId > lastSeen) {
+          if (entityId !== undefined && entityId > lastSeen) {
             valid = false;
           } else {
             lastSeen = entityId;
@@ -262,26 +278,20 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('alerts api should return data using `after` on undefined primary sort values by custom sort parameter, ascending', async () => {
-        const args: AlertListRequestQuery = {
-          sort: 'process.thread.id',
-          order: 'asc',
-          after: ['', 'b5b16e38-371d-43af-bd35-72da230cbde5'],
-          empty_string_is_undefined: true,
-        };
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&sort=process.parent.entity_id&order=asc&after=&after=504dc351-5325-45ad-b406-8e4b28c63e2d&empty_string_is_undefined=true`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&sort=${NULLABLE_EVENT_FIELD}&order=asc&after=&after=${NULLABLE_EVENT_ID}&empty_string_is_undefined=true`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        let lastSeen: string = '1';
+        let lastSeen: string | undefined = '1';
         let valid: boolean = true;
-        body.alerts.forEach(alert => {
+        (body.alerts as AlertData[]).forEach(alert => {
           const entityId = alert.process?.parent?.entity_id;
-          if (entityId === undefined && alert.event.id < '504dc351-5325-45ad-b406-8e4b28c63e2d') {
+          if (entityId === undefined && alert.event.id < NULLABLE_EVENT_ID) {
             valid = false;
           }
-          if (entityId < lastSeen) {
+          if (entityId !== undefined && entityId < lastSeen) {
             valid = false;
           } else {
             lastSeen = entityId;
