@@ -187,7 +187,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     core.http.registerRouteHandlerContext(
       'actions',
-      this.createRouteHandlerContext(core, await this.kibanaIndex)
+      this.createRouteHandlerContext(await this.kibanaIndex)
     );
 
     // Routes
