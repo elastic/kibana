@@ -3,37 +3,53 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { set as _set } from 'lodash/fp';
 import {
-  SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
-} from '../../../../../../../../src/core/server';
+  noteSavedObjectType,
+  pinnedEventSavedObjectType,
+  timelineSavedObjectType,
+} from '../../../../saved_objects';
+import { NoteSavedObject } from '../../../note/types';
+import { PinnedEventSavedObject } from '../../../pinned_event/types';
+import { convertSavedObjectToSavedTimeline } from '../../convert_saved_object_to_savedtimeline';
+
+import { convertSavedObjectToSavedPinnedEvent } from '../../../pinned_event/saved_object';
+import { convertSavedObjectToSavedNote } from '../../../note/saved_object';
 
 import {
+  SavedObjectsClient,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+} from '../../../../../../../../../src/core/server';
+
+import {
+  ExportedTimelines,
   ExportTimelineSavedObjectsClient,
   ExportTimelineRequest,
   ExportedNotes,
   TimelineSavedObject,
-  ExportedTimelines,
-} from '../types';
-import {
-  timelineSavedObjectType,
-  noteSavedObjectType,
-  pinnedEventSavedObjectType,
-} from '../../../saved_objects';
+} from '../../types';
 
-import { convertSavedObjectToSavedNote } from '../../note/saved_object';
-import { convertSavedObjectToSavedPinnedEvent } from '../../pinned_event/saved_object';
-import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';
-import { transformDataToNdjson } from '../../detection_engine/routes/rules/utils';
-import { NoteSavedObject } from '../../note/types';
-import { PinnedEventSavedObject } from '../../pinned_event/types';
+import { transformDataToNdjson } from '../../../detection_engine/routes/rules/utils';
+export type TimelineSavedObjectsClient = Pick<
+  SavedObjectsClient,
+  | 'get'
+  | 'errors'
+  | 'create'
+  | 'bulkCreate'
+  | 'delete'
+  | 'find'
+  | 'bulkGet'
+  | 'update'
+  | 'bulkUpdate'
+>;
 
 const getAllSavedPinnedEvents = (
   pinnedEventsSavedObjects: SavedObjectsFindResponse<PinnedEventSavedObject>
 ): PinnedEventSavedObject[] => {
   return pinnedEventsSavedObjects != null
-    ? pinnedEventsSavedObjects.saved_objects.map(savedObject =>
+    ? (pinnedEventsSavedObjects?.saved_objects ?? []).map(savedObject =>
         convertSavedObjectToSavedPinnedEvent(savedObject)
       )
     : [];

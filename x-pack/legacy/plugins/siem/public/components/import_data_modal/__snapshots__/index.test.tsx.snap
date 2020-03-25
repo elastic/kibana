@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ImportRuleModal renders correctly against snapshot 1`] = `
+exports[`ImportDataModal renders correctly against snapshot 1`] = `
 <Fragment>
   <EuiOverlayMask>
     <EuiModal
@@ -9,7 +9,7 @@ exports[`ImportRuleModal renders correctly against snapshot 1`] = `
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          Import rule
+          title
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -17,7 +17,7 @@ exports[`ImportRuleModal renders correctly against snapshot 1`] = `
           size="s"
         >
           <h4>
-            Select a SIEM rule (as exported from the Detection Engine UI) to import
+            description
           </h4>
         </EuiText>
         <EuiSpacer
@@ -28,7 +28,7 @@ exports[`ImportRuleModal renders correctly against snapshot 1`] = `
           display="large"
           fullWidth={true}
           id="rule-file-picker"
-          initialPromptText="Select or drag and drop a valid rules_export.ndjson file"
+          initialPromptText="subtitle"
           isLoading={false}
           onChange={[Function]}
         />
@@ -39,9 +39,9 @@ exports[`ImportRuleModal renders correctly against snapshot 1`] = `
           checked={false}
           compressed={false}
           disabled={false}
-          id="rule-overwrite-saved-object"
+          id="import-data-modal-checkbox-label"
           indeterminate={false}
-          label="Automatically overwrite saved objects with the same rule ID"
+          label="checkBoxLabel"
           onChange={[Function]}
         />
       </EuiModalBody>
@@ -56,7 +56,7 @@ exports[`ImportRuleModal renders correctly against snapshot 1`] = `
           fill={true}
           onClick={[Function]}
         >
-          Import rule
+          submitBtnText
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

@@ -6,17 +6,26 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { ImportRuleModalComponent } from './index';
+import { ImportDataModalComponent } from './index';
+jest.mock('../../lib/kibana');
 
-jest.mock('../../../../../lib/kibana');
-
-describe('ImportRuleModal', () => {
+describe('ImportDataModal', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <ImportRuleModalComponent
+      <ImportDataModalComponent
         showModal={true}
         closeModal={jest.fn()}
         importComplete={jest.fn()}
+        checkBoxLabel="checkBoxLabel"
+        description="description"
+        errorMessage="errorMessage"
+        failedDetailed={jest.fn()}
+        importData={jest.fn()}
+        showCheckBox={true}
+        submitBtnText="submitBtnText"
+        subtitle="subtitle"
+        successMessage={jest.fn(totalCount => 'successMessage')}
+        title="title"
       />
     );
     expect(wrapper).toMatchSnapshot();
