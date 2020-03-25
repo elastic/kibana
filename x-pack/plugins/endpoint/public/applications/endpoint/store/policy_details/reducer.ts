@@ -12,6 +12,13 @@ const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {
     policyItem: undefined,
     isLoading: false,
+    agentStatusSummary: {
+      error: 0,
+      events: 0,
+      offline: 0,
+      online: 0,
+      total: 0,
+    },
   };
 };
 
@@ -24,6 +31,13 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
       ...state,
       ...action.payload,
       isLoading: false,
+    };
+  }
+
+  if (action.type === 'serverReturnedPolicyDetailsAgentSummaryData') {
+    return {
+      ...state,
+      ...action.payload,
     };
   }
 

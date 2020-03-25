@@ -9,13 +9,18 @@ import { EuiButton, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { usePolicyDetailsSelector } from './policy_hooks';
-import { selectPolicyDetails } from '../../store/policy_details/selectors';
+import {
+  selectAgentStatusSummary,
+  selectPolicyDetails,
+} from '../../store/policy_details/selectors';
 import { AppAction } from '../../types';
 import { AgentsSummary } from './agents_summary';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const policyItem = usePolicyDetailsSelector(selectPolicyDetails);
+
+  const agentStatusSummary = usePolicyDetailsSelector(selectAgentStatusSummary);
 
   const handleSaveOnClick = useCallback(() => {
     dispatch({
@@ -51,7 +56,7 @@ export const PolicyDetails = React.memo(() => {
         <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
       </EuiTitle>
       <div style={{ margin: '4em', padding: '4em' }}>
-        <AgentsSummary error={6} offline={500} total={10000} online={950} />
+        <AgentsSummary {...agentStatusSummary} />
       </div>
       <EuiButton fill iconType="save" onClick={handleSaveOnClick}>
         Save

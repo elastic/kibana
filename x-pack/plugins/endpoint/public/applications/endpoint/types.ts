@@ -17,6 +17,7 @@ import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
 import { Datasource } from '../../../../ingest_manager/common/types/models';
+import { GetAgentStatusResponse } from '../../../../ingest_manager/common/types/rest_spec';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -84,6 +85,8 @@ export interface PolicyDetailsState {
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<EndpointAppLocation>;
+  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  agentStatusSummary: GetAgentStatusResponse['results'];
 }
 
 export interface GlobalState {

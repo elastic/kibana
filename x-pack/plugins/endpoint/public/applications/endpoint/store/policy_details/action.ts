@@ -5,11 +5,19 @@
  */
 
 import { PolicyData } from '../../types';
+import { GetAgentStatusResponse } from '../../../../../../ingest_manager/common/types/rest_spec';
 
 interface ServerReturnedPolicyDetailsData {
   type: 'serverReturnedPolicyDetailsData';
   payload: {
     policyItem: PolicyData | undefined;
+  };
+}
+
+interface ServerReturnedPolicyDetailsAgentSummaryData {
+  type: 'serverReturnedPolicyDetailsAgentSummaryData';
+  payload: {
+    agentStatusSummary: GetAgentStatusResponse['results'];
   };
 }
 
@@ -23,4 +31,5 @@ interface UserClickedPolicyDetailsSaveButton {
 
 export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsData
-  | UserClickedPolicyDetailsSaveButton;
+  | UserClickedPolicyDetailsSaveButton
+  | ServerReturnedPolicyDetailsAgentSummaryData;

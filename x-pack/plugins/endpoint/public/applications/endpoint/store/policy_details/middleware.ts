@@ -8,6 +8,7 @@ import { MiddlewareFactory, PolicyDetailsState } from '../../types';
 import { selectPolicyIdFromParams, isOnPolicyDetailsPage } from './selectors';
 import {
   sendGetDatasource,
+  sendGetFleetAgentStatusForConfig,
   sendPutDatasource,
   UpdateDatasourceResponse,
 } from '../../services/ingest';
@@ -30,6 +31,19 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
           policyItem,
         },
       });
+
+      // Agent summary is secondary data, so its ok for it to come after the details
+      // page is populated with the main content
+      // FIXME: need to only do this IF fleet is enabled
+      if (policyItem.config_id) {
+        const { results } = await sendGetFleetAgentStatusForConfig(http, policyItem.config_id);
+        dispatch({
+          type: 'serverReturnedPolicyDetailsAgentSummaryData',
+          payload: {
+            agentStatusSummary: results,
+          },
+        });
+      }
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
       const { policyId, policyData } = action.payload;
 

@@ -27,3 +27,5 @@ export const selectPolicyIdFromParams: (state: PolicyDetailsState) => string = c
     return '';
   }
 );
+
+export const selectAgentStatusSummary = (state: PolicyDetailsState) => state.agentStatusSummary;
