@@ -10,14 +10,14 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { CommentRequestRt, CommentResponseRt, throwErrors } from '../../../../../common/api';
+import { AllCommentsResponseRt, CommentRequestRt, throwErrors } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import {
   escapeHatch,
   transformNewComment,
   wrapError,
-  flattenCommentSavedObject,
+  flattenCommentSavedObjects,
 } from '../../utils';
 import { RouteDeps } from '../../types';
 
@@ -35,6 +35,7 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
+        const caseId = request.params.case_id;
         const query = pipe(
           CommentRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
@@ -42,47 +43,64 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
 
         const myCase = await caseService.getCase({
           client,
-          caseId: request.params.case_id,
+          caseId,
         });
 
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
 
-        const newComment = await caseService.postNewComment({
-          client,
-          attributes: transformNewComment({
-            createdDate,
-            ...query,
-            username,
-            full_name,
-            email,
-          }),
-          references: [
-            {
-              type: CASE_SAVED_OBJECT,
-              name: `associated-${CASE_SAVED_OBJECT}`,
-              id: myCase.id,
-            },
-          ],
-        });
-
-        await userActionService.postUserActions({
-          client,
-          actions: [
-            buildCommentUserActionItem({
-              action: 'create',
-              actionAt: createdDate,
-              actionBy: { username, full_name, email },
-              caseId: myCase.id,
-              commentId: newComment.id,
-              fields: ['comment'],
-              newValue: query.comment,
+        const [newComment] = await Promise.all([
+          caseService.postNewComment({
+            client,
+            attributes: transformNewComment({
+              createdDate,
+              ...query,
+              username,
+              full_name,
+              email,
             }),
-          ],
-        });
+            references: [
+              {
+                type: CASE_SAVED_OBJECT,
+                name: `associated-${CASE_SAVED_OBJECT}`,
+                id: myCase.id,
+              },
+            ],
+          }),
+          caseService.patchCase({
+            client,
+            caseId,
+            updatedAttributes: {
+              updated_at: createdDate,
+              updated_by: { username, full_name, email },
+            },
+            version: myCase.version,
+          }),
+        ]);
+
+        const [comments] = await Promise.all([
+          caseService.getAllCaseComments({
+            client,
+            caseId,
+          }),
+          userActionService.postUserActions({
+            client,
+            actions: [
+              buildCommentUserActionItem({
+                action: 'create',
+                actionAt: createdDate,
+                actionBy: { username, full_name, email },
+                caseId: myCase.id,
+                commentId: newComment.id,
+                fields: ['comment'],
+                newValue: query.comment,
+              }),
+            ],
+          }),
+        ]);
 
         return response.ok({
-          body: CommentResponseRt.encode(flattenCommentSavedObject(newComment)),
+          body: AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects)),
         });
       } catch (error) {
         return response.customError(wrapError(error));

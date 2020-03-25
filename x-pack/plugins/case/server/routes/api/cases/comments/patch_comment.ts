@@ -10,11 +10,16 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { CommentPatchRequestRt, CommentResponseRt, throwErrors } from '../../../../../common/api';
+import {
+  CommentPatchRequestRt,
+  CommentResponseRt,
+  throwErrors,
+  AllCommentsResponseRt,
+} from '../../../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError, flattenCommentSavedObject } from '../../utils';
+import { escapeHatch, wrapError, flattenCommentSavedObjects } from '../../utils';
 
 export function initPatchCommentApi({ caseService, router, userActionService }: RouteDeps) {
   router.patch(
@@ -30,10 +35,16 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
+        const caseId = request.params.case_id;
         const query = pipe(
           CommentPatchRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
+
+        const myCase = await caseService.getCase({
+          client,
+          caseId,
+        });
 
         const myComment = await caseService.getComment({
           client,
@@ -45,10 +56,8 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
         }
 
         const caseRef = myComment.references.find(c => c.type === CASE_SAVED_OBJECT);
-        if (caseRef == null || (caseRef != null && caseRef.id !== request.params.case_id)) {
-          throw Boom.notFound(
-            `This comment ${query.id} does not exist in ${request.params.case_id}).`
-          );
+        if (caseRef == null || (caseRef != null && caseRef.id !== caseId)) {
+          throw Boom.notFound(`This comment ${query.id} does not exist in ${caseId}).`);
         }
 
         if (query.version !== myComment.version) {
@@ -59,41 +68,52 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
 
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const updatedDate = new Date().toISOString();
-        const updatedComment = await caseService.patchComment({
-          client,
-          commentId: query.id,
-          updatedAttributes: {
-            comment: query.comment,
-            updated_at: updatedDate,
-            updated_by: { email, full_name, username },
-          },
-          version: query.version,
-        });
+        const [updatedComment] = await Promise.all([
+          caseService.patchComment({
+            client,
+            commentId: query.id,
+            updatedAttributes: {
+              comment: query.comment,
+              updated_at: updatedDate,
+              updated_by: { email, full_name, username },
+            },
+            version: query.version,
+          }),
+          caseService.patchCase({
+            client,
+            caseId,
+            updatedAttributes: {
+              updated_at: updatedDate,
+              updated_by: { username, full_name, email },
+            },
+            version: myCase.version,
+          }),
+        ]);
 
-        await userActionService.postUserActions({
-          client,
-          actions: [
-            buildCommentUserActionItem({
-              action: 'update',
-              actionAt: updatedDate,
-              actionBy: { username, full_name, email },
-              caseId: request.params.case_id,
-              commentId: updatedComment.id,
-              fields: ['comment'],
-              newValue: query.comment,
-              oldValue: myComment.attributes.comment,
-            }),
-          ],
-        });
+        const [comments] = await Promise.all([
+          caseService.getAllCaseComments({
+            client,
+            caseId: request.params.case_id,
+          }),
+          userActionService.postUserActions({
+            client,
+            actions: [
+              buildCommentUserActionItem({
+                action: 'update',
+                actionAt: updatedDate,
+                actionBy: { username, full_name, email },
+                caseId: request.params.case_id,
+                commentId: updatedComment.id,
+                fields: ['comment'],
+                newValue: query.comment,
+                oldValue: myComment.attributes.comment,
+              }),
+            ],
+          }),
+        ]);
 
         return response.ok({
-          body: CommentResponseRt.encode(
-            flattenCommentSavedObject({
-              ...updatedComment,
-              attributes: { ...myComment.attributes, ...updatedComment.attributes },
-              references: myComment.references,
-            })
-          ),
+          body: AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects)),
         });
       } catch (error) {
         return response.customError(wrapError(error));
