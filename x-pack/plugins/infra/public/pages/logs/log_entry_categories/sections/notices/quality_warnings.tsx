@@ -9,9 +9,18 @@ interface ManyCategoriesWarningReason {
   categoriesDocumentRatio: number;
 }
 
+interface ManyDeadCategoriesWarningReason {
+  type: 'manyDeadCategories';
+  deadCategoriesRatio: number;
+}
+
 interface ManyRareCategoriesWarningReason {
   type: 'manyRareCategories';
   rareCategoriesRatio: number;
+}
+
+interface NoFrequentCategoriesWarningReason {
+  type: 'noFrequentCategories';
 }
 
 interface SingleCategoryWarningReason {
@@ -20,7 +29,9 @@ interface SingleCategoryWarningReason {
 
 export type CategoryQualityWarningReason =
   | ManyCategoriesWarningReason
+  | ManyDeadCategoriesWarningReason
   | ManyRareCategoriesWarningReason
+  | NoFrequentCategoriesWarningReason
   | SingleCategoryWarningReason;
 
 export type CategoryQualityWarningReasonType = CategoryQualityWarningReason['type'];

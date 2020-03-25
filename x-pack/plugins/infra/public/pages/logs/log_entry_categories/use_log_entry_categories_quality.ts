@@ -23,16 +23,19 @@ export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: J
   };
 };
 
-const getCategoryQualityWarningReasons = (
-  jobModelSizeStats: JobModelSizeStats
-): CategoryQualityWarningReason[] => {
-  const rareCategoriesRatio =
-    jobModelSizeStats.rare_category_count / jobModelSizeStats.total_category_count;
-  const categoriesDocumentRatio =
-    jobModelSizeStats.total_category_count / jobModelSizeStats.categorized_doc_count;
+const getCategoryQualityWarningReasons = ({
+  categorized_doc_count: categorizedDocCount,
+  dead_category_count: deadCategoryCount,
+  frequent_category_count: frequentCategoryCount,
+  rare_category_count: rareCategoryCount,
+  total_category_count: totalCategoryCount,
+}: JobModelSizeStats): CategoryQualityWarningReason[] => {
+  const rareCategoriesRatio = rareCategoryCount / totalCategoryCount;
+  const categoriesDocumentRatio = totalCategoryCount / categorizedDocCount;
+  const deadCategoriesRatio = deadCategoryCount / totalCategoryCount;
 
   return [
-    ...(jobModelSizeStats.total_category_count === 1
+    ...(totalCategoryCount === 1
       ? [
           {
             type: 'singleCategory' as const,
@@ -52,6 +55,21 @@ const getCategoryQualityWarningReasons = (
           {
             type: 'manyCategories' as const,
             categoriesDocumentRatio,
+          },
+        ]
+      : []),
+    ...(frequentCategoryCount === 0
+      ? [
+          {
+            type: 'noFrequentCategories' as const,
+          },
+        ]
+      : []),
+    ...(deadCategoriesRatio >= 0.5
+      ? [
+          {
+            type: 'manyDeadCategories' as const,
+            deadCategoriesRatio,
           },
         ]
       : []),

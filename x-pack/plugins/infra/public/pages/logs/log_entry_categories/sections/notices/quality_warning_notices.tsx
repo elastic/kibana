@@ -77,5 +77,22 @@ const CategoryQualityWarningReasonDescription: React.FC<{
           }}
         />
       );
+    case 'noFrequentCategories':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.logEntryCategories.noFrequentCategoryWarningReasonDescription"
+          defaultMessage="None of the extracted categories frequently have message assigned to them."
+        />
+      );
+    case 'manyDeadCategories':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.logEntryCategories.manyDeadCategoriesWarningReasonDescription"
+          defaultMessage="{deadCategoriesRatio, number, percent} of the categories won't have new messages assigned to them because they are overshadowed by less specific categories."
+          values={{
+            deadCategoriesRatio: reason.deadCategoriesRatio,
+          }}
+        />
+      );
   }
 };
