@@ -20,12 +20,7 @@ let whitelistArtifactCache: Buffer = Buffer.from([]);
 /**
  * Registers the whitelist routes for the API
  */
-export function registerWhitelistRoutes(
-  router: IRouter,
-  endpointAppContext: EndpointAppContext,
-  cl: APICaller
-) {
-  hydrateWhitelistCache(cl);
+export function registerWhitelistRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   router.get(
     {
       path: allowlistBaseRoute,
@@ -43,7 +38,6 @@ export function registerWhitelistRoutes(
     },
     handleWhitelistManifest
   );
-
   router.get(
     {
       path: `${allowlistBaseRoute}/download/{hash}`,
@@ -221,7 +215,7 @@ async function handleWhitelistManifest(context, req, res) {
  */
 async function getWhitelistManifest(ctx) {
   if (whitelistArtifactCache.length === 0) {
-    hydrateWhitelistCache(ctx.core.elasticsearch.dataClient.callAsCurrentUser);
+    await hydrateWhitelistCache(ctx.core.elasticsearch.dataClient.callAsCurrentUser);
   }
   const hash = createHash('sha256')
     .update(whitelistArtifactCache.toString('utf8'), 'utf8')
@@ -246,20 +240,20 @@ async function getWhitelistManifest(ctx) {
  * Compresses the whitelist and puts it into the in memory cache
  */
 function cacheWhitelistArtifact(whitelist: WhitelistSet) {
-  lzma.compress(JSON.stringify(whitelist), (res: Buffer) => {
-    whitelistArtifactCache = res;
-  });
+  return new Promise(resolve =>
+    lzma.compress(JSON.stringify(whitelist), (res: Buffer) => {
+      whitelistArtifactCache = res;
+      resolve();
+    })
+  );
 }
 
 /**
  * Hydrate the in memory whitelist cache
  */
-function hydrateWhitelistCache(client: APICaller) {
-  getWhitelist(client)
-    .then((wl: WhitelistSet) => {
-      cacheWhitelistArtifact(wl);
-    })
-    .catch(e => {}); // TODO log
+async function hydrateWhitelistCache(client: APICaller) {
+  const whitelist = await getWhitelist(client);
+  await cacheWhitelistArtifact(whitelist);
 }
 
 /**

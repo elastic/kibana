@@ -77,13 +77,11 @@ export class EndpointPlugin
       },
     } as EndpointAppContext;
     const router = core.http.createRouter();
-    // const tcl = core.elasticsearch.createClient('test'); // TODO???
-    const cl = core.elasticsearch.adminClient.callAsInternalUser;
     addRoutes(router);
     registerEndpointRoutes(router, endpointContext);
     registerResolverRoutes(router, endpointContext);
     registerAlertRoutes(router, endpointContext);
-    registerWhitelistRoutes(router, endpointContext, cl);
+    registerWhitelistRoutes(router, endpointContext);
   }
 
   public start() {
