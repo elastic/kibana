@@ -41,7 +41,8 @@ import {
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 import { ConfigSchema as VisTypeXyConfigSchema } from '../../vis_type_xy';
-import { setDataActions } from './services';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { setFormatService, setDataActions } from './services';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -110,6 +111,7 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
   }
 
   public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
+    setFormatService(data.fieldFormats);
     setDataActions({ createFiltersFromEvent: data.actions.createFiltersFromEvent });
   }
 }

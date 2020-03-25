@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { search } from '../../../../plugins/data/public';
 export const { tabifyAggResponse, tabifyGetColumns } = search;
 // @ts-ignore
