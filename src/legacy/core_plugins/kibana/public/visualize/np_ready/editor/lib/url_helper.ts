@@ -28,12 +28,12 @@ import { DashboardConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../../../legacy_i
  * @param url dasbhoard absolute url
  * @param embeddableId id of the saved visualization
  */
-export function addEmbeddableToDashboardUrl(url: string, embeddableId: string) {
-  const dashboardParsedUrl = parseUrl(url);
+export function addEmbeddableToDashboardUrl(dashboardUrl: string, embeddableId: string) {
+  const { url, query } = parseUrl(dashboardUrl);
+  const [, dashboardId] = url.split(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
 
-  dashboardParsedUrl.query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = VISUALIZE_EMBEDDABLE_TYPE;
-  dashboardParsedUrl.query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
-  const query = stringify(dashboardParsedUrl.query);
+  query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = VISUALIZE_EMBEDDABLE_TYPE;
+  query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
 
-  return `${DashboardConstants.CREATE_NEW_DASHBOARD_URL}?${query}`;
+  return `${DashboardConstants.CREATE_NEW_DASHBOARD_URL}${dashboardId}?${stringify(query)}`;
 }
