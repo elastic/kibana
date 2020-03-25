@@ -7,9 +7,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiCode } from '@elastic/eui';
-export const Debug = ({ payload }) => (
+
+const LimitRows = (key: string, value: any) => {
+  if (key === 'rows') {
+    return value.slice(0, 99);
+  }
+  return value;
+};
+
+export const Debug = ({ payload }: any) => (
   <EuiCode className="canvasDebug">
-    <pre className="canvasDebug__content">{JSON.stringify(payload, null, 2)}</pre>
+    <pre className="canvasDebug__content">{JSON.stringify(payload, LimitRows, 2)}</pre>
   </EuiCode>
 );
 
