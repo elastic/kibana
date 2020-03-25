@@ -5,7 +5,7 @@
  */
 
 import { QueryParams } from '../actions/types';
-import { Ping } from '../../../common/types/ping/ping';
+import { Ping } from '../../../common/runtime_types';
 import { API_URLS } from '../../../common/constants/rest_api';
 import { apiService } from './utils';
 

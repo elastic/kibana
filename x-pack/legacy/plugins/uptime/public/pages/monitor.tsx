@@ -12,7 +12,7 @@ import { UptimeRefreshContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails } from '../components/connected';
-import { Ping } from '../../common/types/ping/ping';
+import { Ping } from '../../common/runtime_types';
 import { AppState } from '../state';
 import { selectSelectedMonitor } from '../state/selectors';
 import { getSelectedMonitorAction } from '../state/actions';

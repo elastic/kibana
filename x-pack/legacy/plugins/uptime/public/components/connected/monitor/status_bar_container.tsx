@@ -12,7 +12,7 @@ import { monitorLocationsSelector, selectMonitorStatus } from '../../../state/se
 import { MonitorStatusBarComponent } from '../../functional/monitor_status_details/monitor_status_bar';
 import { getMonitorStatusAction, getSelectedMonitorAction } from '../../../state/actions';
 import { useUrlParams } from '../../../hooks';
-import { Ping } from '../../../../common/types/ping/ping';
+import { Ping } from '../../../../common/runtime_types';
 import { MonitorLocations } from '../../../../common/runtime_types/monitor';
 import { UptimeRefreshContext } from '../../../contexts';
 

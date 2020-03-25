@@ -5,8 +5,12 @@
  */
 
 import { createAction } from 'redux-actions';
-import { GetPingHistogramParams, HistogramResult } from '../../../common/types';
-import { PingsResponse, GetPingsParams } from '../../../common/types/ping/ping';
+import {
+  GetPingHistogramParams,
+  HistogramResult,
+  PingsResponse,
+  GetPingsParams,
+} from '../../../common/runtime_types';
 
 export const getPingHistogram = createAction<GetPingHistogramParams>('GET_PING_HISTOGRAM');
 export const getPingHistogramSuccess = createAction<HistogramResult>('GET_PING_HISTOGRAM_SUCCESS');

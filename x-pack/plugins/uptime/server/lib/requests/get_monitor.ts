@@ -5,9 +5,9 @@
  */
 
 import { isRight } from 'fp-ts/lib/Either';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { PingType, Ping } from '../../../../../legacy/plugins/uptime/common/types/ping/ping';
+import { PingType, Ping } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
 export interface GetMonitorParams {
   /** @member monitorId optional limit to monitorId */
@@ -50,8 +50,6 @@ export const getMonitor: UMElasticsearchQueryFn<GetMonitorParams, Ping> = async 
   const decoded = PingType.decode(result.hits.hits[0]?._source);
   if (isRight(decoded)) {
     return decoded.right;
-  } else {
-    ThrowReporter.report(decoded);
-    throw new Error('Received invalid document');
   }
+  throw new Error(JSON.stringify(PathReporter.report(decoded)));
 };

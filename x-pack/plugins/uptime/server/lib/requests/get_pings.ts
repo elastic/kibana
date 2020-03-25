@@ -5,14 +5,14 @@
  */
 
 import { isRight } from 'fp-ts/lib/Either';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
   HttpResponseBody,
   PingsResponse,
   PingsResponseType,
   Ping,
-} from '../../../../../legacy/plugins/uptime/common/types/ping/ping';
+} from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
 export interface GetPingsParams {
   /** @member dateRangeStart timestamp bounds */
@@ -110,8 +110,6 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   });
   if (isRight(decoded)) {
     return decoded.right;
-  } else {
-    ThrowReporter.report(decoded);
-    throw new Error('Unable to parse data');
   }
+  throw new Error(JSON.stringify(PathReporter.report(decoded)));
 };
