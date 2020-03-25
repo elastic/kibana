@@ -156,7 +156,7 @@ export type PatchRuleParams = Partial<RuleAlertParams> & {
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
 
-export type UpdateRuleParams = RuleAlertParams & {
+export type UpdateRuleParams = Omit<RuleAlertParams, 'immutable'> & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
