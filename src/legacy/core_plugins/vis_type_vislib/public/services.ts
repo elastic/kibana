@@ -20,6 +20,6 @@
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
 
-export const [getDataActions, setDataActions] = createGetterSetter<DataPublicPluginStart>(
-  'actions'
-);
+export const [getDataActions, setDataActions] = createGetterSetter<
+  DataPublicPluginStart['actions']
+>('DataActions');
