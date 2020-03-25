@@ -7,7 +7,7 @@
 import { EuiFlexItem } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { useContext } from 'react';
+import React from 'react';
 
 import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
 import { DescriptionList } from '../../../../../common/utility_types';
@@ -30,7 +30,7 @@ import { DescriptionListStyled, OverviewWrapper } from '../../index';
 import { Loader } from '../../../loader';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
-import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
+import { useMlCapabilities } from '../../../ml_popover/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
 import { InspectButton, InspectButtonContainer } from '../../../inspect';
 
@@ -71,7 +71,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     anomaliesData,
     narrowDateRange,
   }) => {
-    const capabilities = useContext(MlCapabilitiesContext);
+    const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
     const typeData: Overview = data[flowTarget]!;

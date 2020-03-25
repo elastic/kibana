@@ -10,6 +10,6 @@
       "_ml/datafeeds/{datafeed_id}",
       "_ml/datafeeds"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-datafeed.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-datafeed.html"
   }
 }

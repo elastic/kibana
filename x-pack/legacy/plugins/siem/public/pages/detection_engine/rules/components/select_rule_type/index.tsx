@@ -48,14 +48,16 @@ interface SelectRuleTypeProps {
   describedByIds?: string[];
   field: FieldHook;
   hasValidLicense?: boolean;
+  isMlAdmin?: boolean;
   isReadOnly?: boolean;
 }
 
 export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   describedByIds = [],
   field,
-  hasValidLicense = false,
   isReadOnly = false,
+  hasValidLicense = false,
+  isMlAdmin = false,
 }) => {
   const ruleType = field.value as RuleType;
   const setType = useCallback(
@@ -66,7 +68,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   );
   const setMl = useCallback(() => setType('machine_learning'), [setType]);
   const setQuery = useCallback(() => setType('query'), [setType]);
-  const mlCardDisabled = isReadOnly || !hasValidLicense;
+  const mlCardDisabled = isReadOnly || !hasValidLicense || !isMlAdmin;
 
   return (
     <EuiFormRow
@@ -78,6 +80,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiCard
+            data-test-subj="customRuleType"
             title={i18n.QUERY_TYPE_TITLE}
             description={i18n.QUERY_TYPE_DESCRIPTION}
             icon={<EuiIcon size="l" type="search" />}
@@ -90,6 +93,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
+            data-test-subj="machineLearningRuleType"
             title={i18n.ML_TYPE_TITLE}
             description={<MlCardDescription hasValidLicense={hasValidLicense} />}
             icon={<EuiIcon size="l" type="machineLearningApp" />}

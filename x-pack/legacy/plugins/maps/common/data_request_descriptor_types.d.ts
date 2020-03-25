@@ -5,23 +5,39 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Query } from './map_descriptor';
+
+type Extent = {
+  maxLat: number;
+  maxLon: number;
+  minLat: number;
+  minLon: number;
+};
+
 // Global map state passed to every layer.
 export type MapFilters = {
-  buffer: unknown;
-  extent: unknown;
+  buffer: Extent; // extent with additional buffer
+  extent: Extent; // map viewport
   filters: unknown[];
-  query: unknown;
+  query: Query;
   refreshTimerLastTriggeredAt: string;
   timeFilters: unknown;
   zoom: number;
 };
 
-export type VectorLayerRequestMeta = MapFilters & {
+export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
   fieldNames: string[];
   geogridPrecision: number;
-  sourceQuery: unknown;
+  sourceQuery: Query;
   sourceMeta: unknown;
+};
+
+export type VectorStyleRequestMeta = MapFilters & {
+  dynamicStyleFields: string[];
+  isTimeAware: boolean;
+  sourceQuery: Query;
+  timeFilters: unknown;
 };
 
 export type ESSearchSourceResponseMeta = {
@@ -35,7 +51,9 @@ export type ESSearchSourceResponseMeta = {
 };
 
 // Partial because objects are justified downstream in constructors
-export type DataMeta = Partial<VectorLayerRequestMeta> & Partial<ESSearchSourceResponseMeta>;
+export type DataMeta = Partial<VectorSourceRequestMeta> &
+  Partial<VectorStyleRequestMeta> &
+  Partial<ESSearchSourceResponseMeta>;
 
 export type DataRequestDescriptor = {
   dataId: string;
