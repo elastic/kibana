@@ -18,15 +18,19 @@ import {
   ruleStatusSavedObjectType,
 } from './lib/detection_engine/rules/saved_object_mappings';
 
+import listsMapping from './lib/detection_engine/lists/mappings.json';
+
 export {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
   ruleStatusSavedObjectType,
   timelineSavedObjectType,
 };
+
 export const savedObjectMappings = {
   ...timelineSavedObjectMappings,
   ...noteSavedObjectMappings,
   ...pinnedEventSavedObjectMappings,
   ...ruleStatusSavedObjectMappings,
+  ...listsMapping,
 };

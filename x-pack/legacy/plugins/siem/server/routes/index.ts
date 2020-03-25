@@ -30,6 +30,13 @@ import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_ru
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
+import { createListsRoute } from '../lib/detection_engine/routes/lists/create_lists_route';
+import { hasListsFeature } from '../lib/detection_engine/feature_flags';
+import { readListsRoute } from '../lib/detection_engine/routes/lists/read_lists_route';
+import { readListsItemsRoute } from '../lib/detection_engine/routes/lists/read_lists_items_route';
+import { createListsItemsRoute } from '../lib/detection_engine/routes/lists/create_lists_items_route';
+import { importListsItemsRoute } from '../lib/detection_engine/routes/lists/import_lists_items_route';
+import { exportListsItemsRoute } from '../lib/detection_engine/routes/lists/export_lists_items_route';
 
 export const initRoutes = (
   router: IRouter,
@@ -76,4 +83,15 @@ export const initRoutes = (
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, usingEphemeralEncryptionKey);
+
+  if (hasListsFeature()) {
+    // list routes
+    createListsRoute(router);
+    readListsRoute(router);
+
+    createListsItemsRoute(router);
+    readListsItemsRoute(router);
+    importListsItemsRoute(router);
+    exportListsItemsRoute(router);
+  }
 };

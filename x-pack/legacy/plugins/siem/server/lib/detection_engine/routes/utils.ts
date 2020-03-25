@@ -8,12 +8,18 @@ import Boom from 'boom';
 import Joi from 'joi';
 import { has, snakeCase } from 'lodash/fp';
 
+import * as t from 'io-ts';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
+  RouteValidationError,
 } from '../../../../../../../../src/core/server';
 import { BadRequestError } from '../errors/bad_request_error';
+import { exactCheck } from './schemas/response/exact_check';
+import { formatErrors } from './schemas/response/utils';
 
 export interface OutputError {
   message: string;
@@ -112,6 +118,16 @@ export interface ImportRegular {
 }
 
 export type ImportRuleResponse = ImportRegular | BulkError;
+
+export type RouteValidationFunctionReturn<T> =
+  | {
+      value: T;
+      error?: undefined;
+    }
+  | {
+      value?: undefined;
+      error: RouteValidationError;
+    };
 
 export const isBulkError = (
   importRuleResponse: ImportRuleResponse
@@ -229,6 +245,21 @@ export const buildRouteValidation = <T>(schema: Joi.Schema): RouteValidationFunc
     return badRequest(error.message);
   }
   return ok(value);
+};
+
+export const buildRouteValidationIoTS = <T>(schema: t.Mixed): RouteValidationFunction<T> => (
+  payload: object,
+  { ok, badRequest }
+) => {
+  const decoded = schema.decode(payload);
+  const checked = exactCheck(payload, decoded);
+  const left = (errors: t.Errors): RouteValidationFunctionReturn<T> => {
+    return badRequest(formatErrors(errors).join(','));
+  };
+  const right = (output: T): RouteValidationFunctionReturn<T> => {
+    return ok(output);
+  };
+  return pipe(checked, fold(left, right));
 };
 
 const statusToErrorMessage = (statusCode: number) => {

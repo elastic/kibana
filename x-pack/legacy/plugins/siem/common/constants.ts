@@ -71,6 +71,8 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
+export const DETECTION_ENGINE_LIST_URL = `${DETECTION_ENGINE_URL}/lists`;
+export const DETECTION_ENGINE_LIST_ITEM_URL = `${DETECTION_ENGINE_URL}/lists/items`;
 
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
