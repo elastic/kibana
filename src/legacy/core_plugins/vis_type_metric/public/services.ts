@@ -17,24 +17,9 @@
  * under the License.
  */
 
-import { TelemetrySavedObject } from './types';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/common';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
-interface GetTelemetryAllowChangingOptInStatus {
-  configTelemetryAllowChangingOptInStatus: boolean;
-  telemetrySavedObject: TelemetrySavedObject;
-}
-
-export function getTelemetryAllowChangingOptInStatus({
-  telemetrySavedObject,
-  configTelemetryAllowChangingOptInStatus,
-}: GetTelemetryAllowChangingOptInStatus) {
-  if (!telemetrySavedObject) {
-    return configTelemetryAllowChangingOptInStatus;
-  }
-
-  if (typeof telemetrySavedObject.allowChangingOptInStatus === 'undefined') {
-    return configTelemetryAllowChangingOptInStatus;
-  }
-
-  return telemetrySavedObject.allowChangingOptInStatus;
-}
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('metric data.fieldFormats');
