@@ -40,6 +40,7 @@ export {
   GetAgentStatusResponse,
   // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,
+  GetEnrollmentAPIKeysRequest,
   GetOneEnrollmentAPIKeyResponse,
   // EPM types
   AssetReference,
