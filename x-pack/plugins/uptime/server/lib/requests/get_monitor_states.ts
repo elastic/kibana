@@ -24,6 +24,7 @@ export interface GetMonitorStatesParams {
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination?: CursorPagination;
+  pageSize: number;
   filters?: string | null;
   statusFilter?: string;
 }
@@ -53,12 +54,12 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   dateRangeStart,
   dateRangeEnd,
   pagination,
+  pageSize,
   filters,
   statusFilter,
 }) => {
   pagination = pagination || CONTEXT_DEFAULTS.CURSOR_PAGINATION;
   statusFilter = statusFilter === null ? undefined : statusFilter;
-  const size = 10;
 
   const queryContext = new QueryContext(
     callES,
@@ -67,7 +68,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
     dateRangeEnd,
     pagination,
     filters && filters !== '' ? JSON.parse(filters) : null,
-    size,
+    pageSize,
     statusFilter
   );
 

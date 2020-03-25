@@ -70,8 +70,15 @@ const dataFetchReducer = (state: CommentUpdateState, action: Action): CommentUpd
   }
 };
 
+interface UpdateComment {
+  caseId: string;
+  commentId: string;
+  commentUpdate: string;
+  fetchUserActions: () => void;
+}
+
 interface UseUpdateComment extends CommentUpdateState {
-  updateComment: (caseId: string, commentId: string, commentUpdate: string) => void;
+  updateComment: ({ caseId, commentId, commentUpdate, fetchUserActions }: UpdateComment) => void;
   addPostedComment: Dispatch<Comment>;
 }
 
@@ -84,7 +91,7 @@ export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
   const [, dispatchToaster] = useStateToaster();
 
   const dispatchUpdateComment = useCallback(
-    async (caseId: string, commentId: string, commentUpdate: string) => {
+    async ({ caseId, commentId, commentUpdate, fetchUserActions }: UpdateComment) => {
       let cancel = false;
       try {
         dispatch({ type: 'FETCH_INIT', payload: commentId });
@@ -98,6 +105,7 @@ export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
           currentComment.version
         );
         if (!cancel) {
+          fetchUserActions();
           dispatch({ type: 'FETCH_SUCCESS', payload: { update: response, commentId } });
         }
       } catch (error) {

@@ -80,7 +80,11 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
             // 'kibana-functional-35': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 35),
             // 'kibana-functional-36': kibanaPipeline.getFunctionalQueueWorker(queue, finishedSuites, 36),
             // 'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
-            // 'xpack-siemCypress': kibanaPipeline.functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'),
+            // 'xpack-siemCypress': { processNumber ->
+            //   whenChanged(['x-pack/legacy/plugins/siem/', 'x-pack/test/siem_cypress/']) {
+            //     kibanaPipeline.functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh')(processNumber)
+            //   }
+            // },
           ],
           postProcess: {
             catchError {
