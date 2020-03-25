@@ -10,22 +10,22 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../../../common/model/space';
 import { SectionPanel } from '../section_panel';
 import { EnabledFeatures } from './enabled_features';
-import { Feature } from '../../../../../features/public';
+import { FeatureConfig } from '../../../../../features/public';
 
-const features: Feature[] = [
+const features: FeatureConfig[] = [
   {
     id: 'feature-1',
     name: 'Feature 1',
     icon: 'spacesApp',
     app: [],
-    privileges: {},
+    privileges: null,
   },
   {
     id: 'feature-2',
     name: 'Feature 2',
     icon: 'spacesApp',
     app: [],
-    privileges: {},
+    privileges: null,
   },
 ];
 

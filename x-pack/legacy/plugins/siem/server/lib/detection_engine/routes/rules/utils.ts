@@ -19,7 +19,12 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
+import {
+  OutputRuleAlertRest,
+  ImportRuleAlertRest,
+  RuleAlertParamsRest,
+  RuleType,
+} from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
@@ -29,7 +34,7 @@ import {
   OutputError,
 } from '../utils';
 import { hasListsFeature } from '../../feature_flags';
-import { transformAlertToRuleAction } from '../../rules/transform_actions';
+import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -295,3 +300,5 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
 
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
+
+export const isMlRule = (ruleType: RuleType) => ruleType === 'machine_learning';

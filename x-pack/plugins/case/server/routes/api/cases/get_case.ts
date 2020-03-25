@@ -25,10 +25,11 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const includeComments = JSON.parse(request.query.includeComments);
 
         const theCase = await caseService.getCase({
-          client: context.core.savedObjects.client,
+          client,
           caseId: request.params.case_id,
         });
 
@@ -37,7 +38,7 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
         }
 
         const theComments = await caseService.getAllCaseComments({
-          client: context.core.savedObjects.client,
+          client,
           caseId: request.params.case_id,
         });
 

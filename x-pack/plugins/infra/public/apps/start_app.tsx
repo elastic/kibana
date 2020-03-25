@@ -12,7 +12,8 @@ import { CoreStart, AppMountParameters } from 'kibana/public';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
-import { EuiThemeProvider } from '../../../observability/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { EuiThemeProvider } from '../../../observability/public/typings/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
 import { ApolloClientContext } from '../utils/apollo_context';
 import { HistoryContext } from '../utils/history_context';
@@ -21,6 +22,8 @@ import {
   KibanaContextProvider,
 } from '../../../../../src/plugins/kibana_react/public';
 import { AppRouter } from '../routers';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
+import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 import '../index.scss';
 
 export const CONTAINER_CLASSNAME = 'infra-container-element';
@@ -30,7 +33,8 @@ export async function startApp(
   core: CoreStart,
   plugins: object,
   params: AppMountParameters,
-  Router: AppRouter
+  Router: AppRouter,
+  triggersActionsUI: TriggersAndActionsUIPublicPluginSetup
 ) {
   const { element, appBasePath } = params;
   const history = createBrowserHistory({ basename: appBasePath });
@@ -40,15 +44,17 @@ export async function startApp(
     return (
       <core.i18n.Context>
         <EuiErrorBoundary>
-          <ApolloProvider client={libs.apolloClient}>
-            <ApolloClientContext.Provider value={libs.apolloClient}>
-              <EuiThemeProvider darkMode={darkMode}>
-                <HistoryContext.Provider value={history}>
-                  <Router history={history} />
-                </HistoryContext.Provider>
-              </EuiThemeProvider>
-            </ApolloClientContext.Provider>
-          </ApolloProvider>
+          <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
+            <ApolloProvider client={libs.apolloClient}>
+              <ApolloClientContext.Provider value={libs.apolloClient}>
+                <EuiThemeProvider darkMode={darkMode}>
+                  <HistoryContext.Provider value={history}>
+                    <Router history={history} />
+                  </HistoryContext.Provider>
+                </EuiThemeProvider>
+              </ApolloClientContext.Provider>
+            </ApolloProvider>
+          </TriggersActionsProvider>
         </EuiErrorBoundary>
       </core.i18n.Context>
     );
