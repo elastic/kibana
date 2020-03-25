@@ -122,7 +122,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           indexPatterns,
           editUrl,
           editable,
-          uiActions,
         },
         input,
         parent

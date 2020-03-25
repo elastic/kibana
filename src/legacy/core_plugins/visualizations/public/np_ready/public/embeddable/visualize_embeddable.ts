@@ -53,7 +53,6 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
-  uiActions?: VisualizationsStartDeps['uiActions'];
 }
 
 export interface VisualizeInput extends EmbeddableInput {
