@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 import {
   CustomLink,
   Filter
-} from '../../../../../../../../../../plugins/apm/common/customLink/custom_link_types';
+} from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';

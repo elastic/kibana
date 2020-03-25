@@ -5,7 +5,7 @@
  */
 import * as t from 'io-ts';
 import { pick } from 'lodash';
-import { FILTER_OPTIONS } from '../../../common/customLink/custom_link_filter_options';
+import { FILTER_OPTIONS } from '../../../common/custom_link/custom_link_filter_options';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_or_update_custom_link';
 import {

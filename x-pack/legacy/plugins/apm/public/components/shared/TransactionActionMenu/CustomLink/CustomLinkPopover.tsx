@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { CustomLink } from '../../../../../../../../plugins/apm/common/customLink/custom_link_types';
+import { CustomLink } from '../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { CustomLinkSection } from './CustomLinkSection';
 import { ManageCustomLink } from './ManageCustomLink';

@@ -7,7 +7,7 @@
 import {
   CustomLink,
   CustomLinkES
-} from '../../../../common/customLink/custom_link_types';
+} from '../../../../common/custom_link/custom_link_types';
 import { APMIndexDocumentParams } from '../../helpers/es_client';
 import { Setup } from '../../helpers/setup_request';
 import { toESFormat } from './helper';

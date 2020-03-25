@@ -9,7 +9,7 @@ import {
   CustomLink,
   Filter,
   FilterKey
-} from '../../../../common/customLink/custom_link_types';
+} from '../../../../common/custom_link/custom_link_types';
 
 export function fromESFormat(customLinkES: CustomLinkES): CustomLink {
   const { id, label, url, '@timestamp': timestamp, ...filters } = customLinkES;

@@ -10,7 +10,7 @@ import React, { FunctionComponent, useMemo, useState } from 'react';
 import {
   CustomLink as CustomLinkType,
   Filter
-} from '../../../../../../../plugins/apm/common/customLink/custom_link_types';
+} from '../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   ActionMenu,

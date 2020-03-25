@@ -7,7 +7,7 @@ import * as t from 'io-ts';
 import {
   CustomLink,
   CustomLinkES
-} from '../../../../common/customLink/custom_link_types';
+} from '../../../../common/custom_link/custom_link_types';
 import { Setup } from '../../helpers/setup_request';
 import { fromESFormat } from './helper';
 import { filterOptionsRt } from './custom_link_types';
