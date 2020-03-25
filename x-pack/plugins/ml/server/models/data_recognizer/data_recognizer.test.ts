@@ -36,6 +36,7 @@ describe.skip('ML - data recognizer', () => {
     'siem_packetbeat',
     'siem_winlogbeat',
     'siem_winlogbeat_auth',
+    'uptime_heartbeat',
   ];
 
   // check all module IDs are the same as the list above
