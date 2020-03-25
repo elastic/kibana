@@ -222,7 +222,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   // TODO: elastic/kibana#44822 Disabling pending filters work
   // @ts-ignore
   savedSearch,
-  // @ts-ignore
   savedVisualization,
   seriesStyle,
   shape,

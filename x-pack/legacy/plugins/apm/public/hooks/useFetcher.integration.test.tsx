@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { render, wait } from '@testing-library/react';
-import { delay, MockApmPluginContextWrapper } from '../utils/testHelpers';
+import React from 'react';
+import { delay } from '../utils/testHelpers';
 import { useFetcher } from './useFetcher';
+import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
 
 const wrapper = MockApmPluginContextWrapper;
 
