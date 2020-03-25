@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useReducer } from 'react';
-import { errorToToaster, useStateToaster, displaySuccessToast } from '../../components/toasters';
+import { displaySuccessToast, errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { deleteCases } from './api';
 import { DeleteCase } from './types';

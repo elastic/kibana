@@ -7,7 +7,7 @@
 import { useReducer, useCallback } from 'react';
 import { cloneDeep } from 'lodash/fp';
 import { CaseRequest } from '../../../../../../plugins/case/common/api';
-import { errorToToaster, useStateToaster } from '../../components/toasters';
+import { displaySuccessToast, errorToToaster, useStateToaster } from '../../components/toasters';
 
 import { patchCase } from './api';
 import * as i18n from './translations';
@@ -78,6 +78,7 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
 
   const updateCase = useCallback((newCase: Case) => {
     dispatch({ type: 'FETCH_SUCCESS', payload: newCase });
+    displaySuccessToast(i18n.UPDATED_CASE(newCase.title), dispatchToaster);
   }, []);
 
   const dispatchUpdateCaseProperty = useCallback(
@@ -94,7 +95,9 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
           if (fetchCaseUserActions != null) {
             fetchCaseUserActions(caseId);
           }
+          console.log('case updated', response[0]);
           dispatch({ type: 'FETCH_SUCCESS', payload: response[0] });
+          displaySuccessToast(i18n.UPDATED_CASE(response[0].title), dispatchToaster);
         }
       } catch (error) {
         if (!cancel) {

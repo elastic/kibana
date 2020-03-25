@@ -14,6 +14,12 @@ export const ERROR_DELETING = i18n.translate('xpack.siem.containers.case.errorDe
   defaultMessage: 'Error deleting data',
 });
 
+export const UPDATED_CASE = (caseTitle: string) =>
+  i18n.translate('xpack.siem.containers.case.updatedCase', {
+    values: { caseTitle },
+    defaultMessage: 'Updated "{caseTitle}"',
+  });
+
 export const DELETED_CASES = (totalCases: number, caseTitle?: string) =>
   i18n.translate('xpack.siem.containers.case.deletedCases', {
     values: { caseTitle, totalCases },

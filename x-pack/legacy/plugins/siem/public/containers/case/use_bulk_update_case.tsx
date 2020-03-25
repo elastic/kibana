@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useReducer } from 'react';
-import { errorToToaster, useStateToaster } from '../../components/toasters';
+import { displaySuccessToast, errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { patchCasesStatus } from './api';
 import { BulkUpdateStatus, Case } from './types';
@@ -69,9 +69,22 @@ export const useUpdateCases = (): UseUpdateCase => {
     const patchData = async () => {
       try {
         dispatch({ type: 'FETCH_INIT' });
-        await patchCasesStatus(cases);
+        const patchResponse = await patchCasesStatus(cases);
         if (!cancel) {
+          console.log('patchResponse', patchResponse);
           dispatch({ type: 'FETCH_SUCCESS', payload: true });
+          if (patchResponse.length && patchResponse[0].status === 'open') {
+
+            displaySuccessToast(
+              i18n.CLOSED_CASES(cases.length, cases.length === 1 ? cases[0].title : ''),
+              dispatchToaster
+            );
+          } else {
+            displaySuccessToast(
+              i18n.REOPENED_CASES(cases.length, cases.length === 1 ? cases[0].title : ''),
+              dispatchToaster
+            );
+          }
         }
       } catch (error) {
         if (!cancel) {
