@@ -40,8 +40,3 @@ export const legacyRegistries = {
   templates: new LegacyRegistry(),
   tagUIs: new LegacyRegistry(),
 };
-
-(global as any).kbnInterpreter = Object.assign(
-  (global as any).kbnInterpreter || {},
-  registryFactory(legacyRegistries)
-);

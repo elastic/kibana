@@ -48,7 +48,7 @@ Open your plugin's `index.js` file, and modify it to look something like this (b
 export default function (kibana) {
   return new kibana.Plugin({
     // Tell Kibana that this plugin needs canvas and the Kibana interpreter
-    require: ['interpreter', 'canvas'],
+    require: ['canvas'],
 
     // The name of your plugin. Make this whatever you want.
     name: 'canvas_example',
@@ -74,8 +74,6 @@ Now that the Kibana plugin boilerplate is out of the way, you can write a Canvas
 Create a new file: `public/index.js` and make it look like this:
 
 ```js
-/*global kbnInterpreter */
-
 // Elements show up in the Canvas elements menu and can be visually added to a canvas
 const elements = [
   () => ({
@@ -99,13 +97,6 @@ const browserFunctions = [
     }
   }),
 ];
-
-// Register our elements and browserFunctions with the Canvas interpreter.
-kbnInterpreter.register({
-  elements,
-  browserFunctions,
-});
-
 ```
 
 #### Trying out your new plugin
@@ -132,7 +123,7 @@ In your plugin's root `index.js` file, modify the `kibana.Plugin` definition to 
 export default function (kibana) {
   return new kibana.Plugin({
     // Tell Kibana that this plugin needs canvas and the Kibana interpreter
-    require: ['interpreter', 'canvas'],
+    require: ['canvas'],
 
     // The name of your plugin. Make this whatever you want.
     name: 'canvas_example',
