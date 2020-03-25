@@ -10,15 +10,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { AllCommentsResponseRt, CommentRequestRt, throwErrors } from '../../../../../common/api';
+import { CaseResponseRt, CommentRequestRt, throwErrors } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
-import {
-  escapeHatch,
-  transformNewComment,
-  wrapError,
-  flattenCommentSavedObjects,
-} from '../../utils';
+import { escapeHatch, transformNewComment, wrapError, flattenCaseSavedObject } from '../../utils';
 import { RouteDeps } from '../../types';
 
 export function initPostCommentApi({ caseService, router, userActionService }: RouteDeps) {
@@ -49,7 +44,7 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
 
-        const [newComment] = await Promise.all([
+        const [newComment, updatedCase] = await Promise.all([
           caseService.postNewComment({
             client,
             attributes: transformNewComment({
@@ -78,10 +73,25 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
           }),
         ]);
 
+        const totalCommentsFindByCases = await caseService.getAllCaseComments({
+          client,
+          caseId,
+          options: {
+            fields: [],
+            page: 1,
+            perPage: 1,
+          },
+        });
+
         const [comments] = await Promise.all([
           caseService.getAllCaseComments({
             client,
             caseId,
+            options: {
+              fields: [],
+              page: 1,
+              perPage: totalCommentsFindByCases.total,
+            },
           }),
           userActionService.postUserActions({
             client,
@@ -100,7 +110,18 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
         ]);
 
         return response.ok({
-          body: AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects)),
+          body: CaseResponseRt.encode(
+            flattenCaseSavedObject(
+              {
+                ...myCase,
+                ...updatedCase,
+                attributes: { ...myCase.attributes, ...updatedCase.attributes },
+                version: updatedCase.version ?? myCase.version,
+                references: myCase.references,
+              },
+              comments.saved_objects
+            )
+          ),
         });
       } catch (error) {
         return response.customError(wrapError(error));

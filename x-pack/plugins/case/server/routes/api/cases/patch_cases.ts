@@ -116,6 +116,7 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
                 ...updatedCase,
                 attributes: { ...myCase.attributes, ...updatedCase?.attributes },
                 references: myCase.references,
+                version: updatedCase?.version ?? myCase.version,
               });
             });
 

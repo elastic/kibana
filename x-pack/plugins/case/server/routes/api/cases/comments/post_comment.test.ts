@@ -42,7 +42,9 @@ describe('POST comment', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload[response.payload.length - 1].id).toEqual('mock-comment');
+    expect(response.payload.comments[response.payload.comments.length - 1].id).toEqual(
+      'mock-comment'
+    );
   });
   it(`Returns an error if the case does not exist`, async () => {
     const request = httpServerMock.createKibanaRequest({

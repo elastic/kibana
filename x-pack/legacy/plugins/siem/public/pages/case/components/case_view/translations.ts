@@ -34,6 +34,14 @@ export const REMOVED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabe
   defaultMessage: 'removed',
 });
 
+export const VIEW_INCIDENT = (incidentNumber: string) =>
+  i18n.translate('xpack.siem.case.caseView.actionLabel.pushedNewIncident', {
+    defaultMessage: 'View {incidentNumber}',
+    values: {
+      incidentNumber,
+    },
+  });
+
 export const PUSHED_NEW_INCIDENT = i18n.translate(
   'xpack.siem.case.caseView.actionLabel.pushedNewIncident',
   {
@@ -93,6 +101,10 @@ export const CASE_OPENED = i18n.translate('xpack.siem.case.caseView.caseOpened',
 
 export const CASE_CLOSED = i18n.translate('xpack.siem.case.caseView.caseClosed', {
   defaultMessage: 'Case closed',
+});
+
+export const CASE_REFRESH = i18n.translate('xpack.siem.case.caseView.caseRefresh', {
+  defaultMessage: 'Refresh case',
 });
 
 export const EMAIL_SUBJECT = (caseTitle: string) =>

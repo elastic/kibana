@@ -10,16 +10,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  CommentPatchRequestRt,
-  CommentResponseRt,
-  throwErrors,
-  AllCommentsResponseRt,
-} from '../../../../../common/api';
+import { CommentPatchRequestRt, CaseResponseRt, throwErrors } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError, flattenCommentSavedObjects } from '../../utils';
+import { escapeHatch, wrapError, flattenCaseSavedObject } from '../../utils';
 
 export function initPatchCommentApi({ caseService, router, userActionService }: RouteDeps) {
   router.patch(
@@ -68,7 +63,7 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
 
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const updatedDate = new Date().toISOString();
-        const [updatedComment] = await Promise.all([
+        const [updatedComment, updatedCase] = await Promise.all([
           caseService.patchComment({
             client,
             commentId: query.id,
@@ -90,10 +85,25 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
           }),
         ]);
 
+        const totalCommentsFindByCases = await caseService.getAllCaseComments({
+          client,
+          caseId,
+          options: {
+            fields: [],
+            page: 1,
+            perPage: 1,
+          },
+        });
+
         const [comments] = await Promise.all([
           caseService.getAllCaseComments({
             client,
             caseId: request.params.case_id,
+            options: {
+              fields: [],
+              page: 1,
+              perPage: totalCommentsFindByCases.total,
+            },
           }),
           userActionService.postUserActions({
             client,
@@ -113,7 +123,18 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
         ]);
 
         return response.ok({
-          body: AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects)),
+          body: CaseResponseRt.encode(
+            flattenCaseSavedObject(
+              {
+                ...myCase,
+                ...updatedCase,
+                attributes: { ...myCase.attributes, ...updatedCase.attributes },
+                version: updatedCase.version ?? myCase.version,
+                references: myCase.references,
+              },
+              comments.saved_objects
+            )
+          ),
         });
       } catch (error) {
         return response.customError(wrapError(error));

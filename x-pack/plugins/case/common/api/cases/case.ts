@@ -54,7 +54,11 @@ export const CaseAttributesRt = rt.intersection([
   }),
 ]);
 
-export const CaseRequestRt = CaseBasicRt;
+export const CasePostRequestRt = rt.type({
+  description: rt.string,
+  tags: rt.array(rt.string),
+  title: rt.string,
+});
 
 export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
 
@@ -95,7 +99,7 @@ export const CasesFindResponseRt = rt.intersection([
 ]);
 
 export const CasePatchRequestRt = rt.intersection([
-  rt.partial(CaseRequestRt.props),
+  rt.partial(CaseBasicRt.props),
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
@@ -157,7 +161,7 @@ export const ServiceConnectorCaseResponseRt = rt.intersection([
 ]);
 
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
-export type CaseRequest = rt.TypeOf<typeof CaseRequestRt>;
+export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
