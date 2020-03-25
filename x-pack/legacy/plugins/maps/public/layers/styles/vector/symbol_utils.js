@@ -101,6 +101,16 @@ const ICON_PALETTES = [
   },
 ];
 
+// PREFERRED_ICONS is used to provide less random default icon values for forms that need default icon values
+export const PREFERRED_ICONS = [];
+ICON_PALETTES.forEach(iconPalette => {
+  iconPalette.icons.forEach(iconId => {
+    if (!PREFERRED_ICONS.includes(iconId)) {
+      PREFERRED_ICONS.push(iconId);
+    }
+  });
+});
+
 export function getIconPaletteOptions(isDarkMode) {
   return ICON_PALETTES.map(({ id, icons }) => {
     const iconsDisplay = icons.map(iconId => {
