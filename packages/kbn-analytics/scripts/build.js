@@ -55,7 +55,7 @@ run(
               '--extensions',
               '.ts,.js,.tsx',
               ...(flags.watch ? ['--watch'] : ['--quiet']),
-              ...(flags['source-maps'] ? ['--source-map', 'inline'] : []),
+              ...(flags['source-maps'] ? ['--source-maps', 'inline'] : []),
             ],
             wait: true,
             env: {
