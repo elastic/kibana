@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/common';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('metric data.fieldFormats');

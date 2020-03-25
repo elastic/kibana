@@ -17,25 +17,9 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/common';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
-// eslint-disable-next-line import/no-default-export
-export default function DataPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'kibana_react',
-    require: [],
-    config: (Joi: any) => {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-    init: (server: Legacy.Server) => ({}),
-    uiExports: {
-      injectDefaultVars: () => ({}),
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
-  };
-
-  return new kibana.Plugin(config);
-}
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('vislib data.fieldFormats');

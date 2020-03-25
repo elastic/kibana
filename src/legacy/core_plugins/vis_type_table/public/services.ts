@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { Markdown, MarkdownSimple } from '../../../../plugins/kibana_react/public';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/common';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('table data.fieldFormats');
