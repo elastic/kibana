@@ -40,11 +40,3 @@ test('should enable sort order select when sort field provided', async () => {
 
   expect(component).toMatchSnapshot();
 });
-
-test('should render top hits form when scaling type is TOP_HITS', async () => {
-  const component = shallow(
-    <UpdateSourceEditor {...defaultProps} scalingType={SCALING_TYPES.TOP_HITS} />
-  );
-
-  expect(component).toMatchSnapshot();
-});

@@ -26,6 +26,8 @@ import { IP_REPUTATION_LINKS_SETTING } from '../../../common/constants';
 import * as i18n from '../page/network/ip_overview/translations';
 import { isUrlInvalid } from '../../pages/detection_engine/rules/components/step_about_rule/helpers';
 import { ExternalLinkIcon } from '../external_link_icon';
+import { navTabs } from '../../pages/home/home_navigations';
+import { useGetUrlSearch } from '../navigation/use_get_url_search';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
@@ -89,20 +91,25 @@ export const IPDetailsLink = React.memo(IPDetailsLinkComponent);
 const CaseDetailsLinkComponent: React.FC<{ children?: React.ReactNode; detailName: string }> = ({
   children,
   detailName,
-}) => (
-  <EuiLink
-    href={getCaseDetailsUrl(encodeURIComponent(detailName))}
-    data-test-subj="case-details-link"
-  >
-    {children ? children : detailName}
-  </EuiLink>
-);
+}) => {
+  const search = useGetUrlSearch(navTabs.case);
+
+  return (
+    <EuiLink
+      href={getCaseDetailsUrl({ id: detailName, search })}
+      data-test-subj="case-details-link"
+    >
+      {children ? children : detailName}
+    </EuiLink>
+  );
+};
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);
 CaseDetailsLink.displayName = 'CaseDetailsLink';
 
-export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ children }) => (
-  <EuiLink href={getCreateCaseUrl()}>{children}</EuiLink>
-));
+export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ children }) => {
+  const search = useGetUrlSearch(navTabs.case);
+  return <EuiLink href={getCreateCaseUrl(search)}>{children}</EuiLink>;
+});
 
 CreateCaseLink.displayName = 'CreateCaseLink';
 

@@ -31,6 +31,7 @@ describe('useRule', () => {
       expect(result.current).toEqual([
         false,
         {
+          actions: [],
           created_at: 'mm/dd/yyyyTHH:MM:sssz',
           created_by: 'mockUser',
           description: 'some desc',
@@ -59,6 +60,7 @@ describe('useRule', () => {
           severity: 'high',
           tags: ['APM'],
           threat: [],
+          throttle: null,
           to: 'now',
           type: 'query',
           updated_at: 'mm/dd/yyyyTHH:MM:sssz',
