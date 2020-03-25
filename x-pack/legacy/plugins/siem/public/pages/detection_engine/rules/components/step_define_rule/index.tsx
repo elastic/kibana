@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -23,7 +16,6 @@ import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/trans
 import { MlCapabilitiesContext } from '../../../../../components/ml/permissions/ml_capabilities_provider';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { setFieldValue, isMlRule } from '../../helpers';
-import * as RuleI18n from '../../translations';
 import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
@@ -32,6 +24,7 @@ import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 import { MlJobSelect } from '../ml_job_select';
 import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
+import { NextStep } from '../next_step';
 import {
   Field,
   Form,
@@ -269,22 +262,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </FormDataProvider>
         </Form>
       </StepContentWrapper>
+
       {!isUpdateView && (
-        <>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="xs"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onSubmit} isDisabled={isLoading} data-test-subj="continue">
-                {RuleI18n.CONTINUE}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        <NextStep dataTestSubj="define-continue" onClick={onSubmit} isDisabled={isLoading} />
       )}
     </>
   );

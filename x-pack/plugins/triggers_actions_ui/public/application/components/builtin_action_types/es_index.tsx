@@ -42,6 +42,12 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Index data into Elasticsearch.',
       }
     ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.actionTypeTitle',
+      {
+        defaultMessage: 'Index data',
+      }
+    ),
     validateConnector: (action: EsIndexActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
@@ -179,7 +185,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           <>
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshLabel"
-              defaultMessage="Refresh"
+              defaultMessage="Refresh index"
             />{' '}
             <EuiIconTip
               position="right"
