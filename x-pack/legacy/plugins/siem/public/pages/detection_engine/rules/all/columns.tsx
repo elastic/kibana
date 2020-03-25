@@ -139,8 +139,8 @@ export const getColumns = ({
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip date={new Date(value)}>
-            <FormattedRelative fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} value={value} />
+          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} date={new Date(value)}>
+            <FormattedRelative value={value} />
           </LocalizedDateTooltip>
         );
       },
@@ -278,8 +278,8 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip date={new Date(value)}>
-            <FormattedRelative fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} value={value} />
+          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} date={new Date(value)}>
+            <FormattedRelative value={value} />
           </LocalizedDateTooltip>
         );
       },
