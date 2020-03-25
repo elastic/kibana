@@ -194,7 +194,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshTooltip',
                 {
                   defaultMessage:
-                    'Should Elasticsearch refresh the affected shards to make this operation visible to search.',
+                    'Should Elasticsearch refresh the affected shards to make this operation visible to search',
                 }
               )}
             />
@@ -225,7 +225,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               content={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.definedateFieldTooltip',
                 {
-                  defaultMessage: `Should a time field be added to each document automatically when it's indexed?`,
+                  defaultMessage: `Should a time field be added to each document automatically when it's indexed`,
                 }
               )}
             />
