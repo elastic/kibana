@@ -133,17 +133,14 @@ interface LinuxPolicyConfig {
   };
 }
 
+/** OS used in Policy */
 export enum OS {
   windows = 'windows',
   mac = 'mac',
   linux = 'linux',
 }
 
-export enum Protections {
-  malware = 'malware',
-  eventing = 'eventing',
-}
-
+/** Used in Policy */
 export enum EventingFields {
   process = 'process',
   network = 'network',
