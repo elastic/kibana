@@ -389,15 +389,12 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           }
           setConnectorsToDelete([]);
         }}
-        onCancel={async () => {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.actionsConnectorsList.failedToDeleteActionsMessage',
-              { defaultMessage: 'Failed to delete connectors(s)' }
-            ),
-          });
+        onErrors={async () => {
           // Refresh the actions from the server, some actions may have beend deleted
           await loadActions();
+          setConnectorsToDelete([]);
+        }}
+        onCancel={async () => {
           setConnectorsToDelete([]);
         }}
         apiDeleteCall={deleteActions}
