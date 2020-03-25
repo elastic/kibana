@@ -136,7 +136,20 @@
               "service": {
                 "properties": {
                   "framework": {
-                    "type": "object"
+                    "properties": {
+                      "composite": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "name": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "version": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
                   },
                   "language": {
                     "properties": {
@@ -187,18 +200,52 @@
               "service": {
                 "properties": {
                   "framework": {
-                    "type": "object"
+                    "properties": {
+                      "composite": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "name": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "version": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
                   },
                   "language": {
                     "properties": {
+                      "composite": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
                       "name": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "version": {
                         "type": "keyword",
                         "ignore_above": 256
                       }
                     }
                   },
                   "runtime": {
-                    "type": "object"
+                    "properties": {
+                      "composite": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "name": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "version": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
                   }
                 }
               }
@@ -234,7 +281,15 @@
                   },
                   "language": {
                     "properties": {
+                      "composite": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
                       "name": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "version": {
                         "type": "keyword",
                         "ignore_above": 256
                       }
@@ -391,18 +446,62 @@
           "rum-js": {
             "properties": {
               "agent": {
-                "type": "object"
+                "properties": {
+                  "version": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
               },
               "service": {
                 "properties": {
                   "framework": {
-                    "type": "object"
+                    "properties": {
+                      "composite": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "name": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "version": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
                   },
                   "language": {
-                    "type": "object"
+                    "properties": {
+                      "composite": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "name": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "version": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
                   },
                   "runtime": {
-                    "type": "object"
+                    "properties": {
+                      "composite": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "name": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      },
+                      "version": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
                   }
                 }
               }
