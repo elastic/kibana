@@ -19,7 +19,6 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { npSetup } from '../../legacy_imports';
 import { ImageComparator } from 'test_utils/image_comparator';
 import { createTagCloudVisualization } from '../tag_cloud_visualization';
 import basicdrawPng from './basicdraw.png';
@@ -31,10 +30,12 @@ import { ExprVis } from '../../../../../../plugins/visualizations/public/express
 // Replace with mock when converting to jest tests
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { seedColors } from '../../../../../../plugins/charts/public/services/colors/seed_colors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BaseVisType } from '../../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+import { createTagCloudVisTypeDefinition } from '../../tag_cloud_type';
 
 const THRESHOLD = 0.65;
 const PIXEL_DIFF = 64;
-let visRegComplete = false;
 describe('TagCloudVisualizationTest', function() {
   let domNode;
   let vis;
@@ -69,18 +70,11 @@ describe('TagCloudVisualizationTest', function() {
 
   describe('TagCloudVisualization - basics', function() {
     beforeEach(async function() {
-      const dependencies = {};
-      if (!visRegComplete) {
-        visRegComplete = true;
-        npSetup.plugins.visualizations.createBaseVisualization(
-          createTagCloudVisualization(dependencies)
-        );
-      }
-
+      const visType = new BaseVisType(createTagCloudVisTypeDefinition({ colors: seedColors }));
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
       vis = new ExprVis({
-        type: 'tagcloud',
+        type: visType,
         params: {
           bucket: { accessor: 0, format: {} },
           metric: { accessor: 0, format: {} },

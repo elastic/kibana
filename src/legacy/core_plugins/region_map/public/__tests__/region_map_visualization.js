@@ -42,7 +42,8 @@ import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
-import { npSetup } from '../../../../ui/public/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
@@ -51,6 +52,7 @@ describe('RegionMapsVisualizationTests', function() {
   let domNode;
   let RegionMapsVisualization;
   let vis;
+  let regionMapVisType;
   let dependencies;
 
   let imageComparator;
@@ -85,8 +87,6 @@ describe('RegionMapsVisualizationTests', function() {
     ],
   };
 
-  let visRegComplete = false;
-
   beforeEach(ngMock.module('kibana'));
 
   let getManifestStub;
@@ -106,13 +106,7 @@ describe('RegionMapsVisualizationTests', function() {
         uiSettings,
       };
 
-      if (!visRegComplete) {
-        visRegComplete = true;
-        npSetup.plugins.visualizations.createBaseVisualization(
-          createRegionMapTypeDefinition(dependencies)
-        );
-      }
-
+      regionMapVisType = new BaseVisType(createRegionMapTypeDefinition(dependencies));
       RegionMapsVisualization = createRegionMapVisualization(dependencies);
 
       ChoroplethLayer.prototype._makeJsonAjaxCall = async function() {
@@ -157,7 +151,7 @@ describe('RegionMapsVisualizationTests', function() {
       imageComparator = new ImageComparator();
 
       vis = new ExprVis({
-        type: 'region_map',
+        type: regionMapVisType,
       });
 
       vis.params.bucket = {

@@ -36,7 +36,8 @@ import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
-import { npSetup } from '../../../../ui/public/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -60,13 +61,13 @@ mockRawData();
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 64;
-let visRegComplete = false;
 
 describe('CoordinateMapsVisualizationTest', function() {
   let domNode;
   let CoordinateMapsVisualization;
   let vis;
   let dependencies;
+  let visType;
 
   let imageComparator;
 
@@ -83,12 +84,7 @@ describe('CoordinateMapsVisualizationTest', function() {
         $injector,
       };
 
-      if (!visRegComplete) {
-        visRegComplete = true;
-        npSetup.plugins.visualizations.createBaseVisualization(
-          createTileMapTypeDefinition(dependencies)
-        );
-      }
+      visType = new BaseVisType(createTileMapTypeDefinition(dependencies));
 
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);
 
@@ -123,7 +119,7 @@ describe('CoordinateMapsVisualizationTest', function() {
 
       imageComparator = new ImageComparator();
       vis = new ExprVis({
-        type: 'tile_map',
+        type: visType,
       });
       vis.params = {
         mapType: 'Scaled Circle Markers',
