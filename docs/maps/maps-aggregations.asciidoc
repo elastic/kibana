@@ -48,6 +48,16 @@ The circle is centered at the weighted centroid for all geo-points in the gridde
 
 *Heat map*:: Creates a <<heatmap-layer, heat map layer>> that clusters the weighted centroids for each gridded cell.
 
+To enable clusters:
+
+. Click *Add layer* button and select *Grid aggregation* source.
+
+To enable a blended layer that dynamically shows clusters or documents:
+
+. Click *Add layer* button and select *Documents* source.
+. Configure *Index pattern* and *Geospatial field*. To enable clustering, *Geospatial field* must be set to a field mapped as {ref}/geo-point.html[geo_point].
+. In *Scaling*, select the *Show clusters when results exceed 10000*.
+
 
 [role="xpack"]
 [[maps-top-hits-aggregation]]
@@ -59,7 +69,7 @@ then accumulates the most relevant documents based on sort order for each entry 
 
 To enable top hits:
 
-. Add a *Documents* layer by clicking *Add layer* button and then select *Documents*.
+. Click *Add layer* button and select *Documents* source.
 . Configure *Index pattern* and *Geospatial field*.
 . In *Scaling*, select the *Show top hits per entity*.
 . Set *Entity* to the field that identifies entities in your documents.
