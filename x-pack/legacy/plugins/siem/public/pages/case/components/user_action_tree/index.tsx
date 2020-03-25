@@ -57,6 +57,7 @@ export const UserActionTree = React.memo(
     );
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+    const [insertQuote, setInsertQuote] = useState<string | null>(null);
 
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
@@ -92,6 +93,9 @@ export const UserActionTree = React.memo(
             top: y,
             behavior: 'smooth',
           });
+          if (id === 'add-comment') {
+            moveToTarget.getElementsByTagName('textarea')[0].focus();
+          }
         }
         window.clearTimeout(handlerTimeoutId.current);
         setSelectedOutlineCommentId(id);
@@ -101,6 +105,15 @@ export const UserActionTree = React.memo(
         }, 2400);
       },
       [handlerTimeoutId.current]
+    );
+
+    const handleManageQuote = useCallback(
+      (quote: string) => {
+        const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '  \n> ');
+        setInsertQuote(`> ${addCarrots} \n`);
+        handleOutlineComment('add-comment');
+      },
+      [handleOutlineComment]
     );
 
     const handleUpdate = useCallback(
@@ -131,12 +144,13 @@ export const UserActionTree = React.memo(
       () => (
         <AddComment
           caseId={caseData.id}
+          insertQuote={insertQuote}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
         />
       ),
-      [caseData.id, handleUpdate]
+      [caseData.id, handleUpdate, insertQuote]
     );
 
     useEffect(() => {
@@ -156,10 +170,12 @@ export const UserActionTree = React.memo(
           isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
           isLoading={isLoadingDescription}
           labelEditAction={i18n.EDIT_DESCRIPTION}
+          labelQuoteAction={i18n.QUOTE}
           labelTitle={<>{i18n.ADDED_DESCRIPTION}</>}
           fullName={caseData.createdBy.fullName ?? caseData.createdBy.username}
           markdown={MarkdownDescription}
           onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
+          onQuote={handleManageQuote.bind(null, caseData.description)}
           userName={caseData.createdBy.username}
         />
 
@@ -176,6 +192,7 @@ export const UserActionTree = React.memo(
                   isEditable={manageMarkdownEditIds.includes(comment.id)}
                   isLoading={isLoadingIds.includes(comment.id)}
                   labelEditAction={i18n.EDIT_COMMENT}
+                  labelQuoteAction={i18n.QUOTE}
                   labelTitle={<>{i18n.ADDED_COMMENT}</>}
                   fullName={comment.createdBy.fullName ?? comment.createdBy.username}
                   markdown={
@@ -188,6 +205,7 @@ export const UserActionTree = React.memo(
                     />
                   }
                   onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
+                  onQuote={handleManageQuote.bind(null, comment.comment)}
                   outlineComment={handleOutlineComment}
                   userName={comment.createdBy.username}
                   updatedAt={comment.updatedAt}
