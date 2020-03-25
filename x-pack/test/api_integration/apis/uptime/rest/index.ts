@@ -44,8 +44,8 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dynamic_settings'));
     });
     describe('with real-world data', () => {
-      before('load heartbeat data', async () => await esArchiver.load('uptime/full_heartbeat'));
-      after('unload', async () => await esArchiver.unload('uptime/full_heartbeat'));
+      beforeEach('load heartbeat data', async () => await esArchiver.load('uptime/full_heartbeat'));
+      afterEach('unload', async () => await esArchiver.unload('uptime/full_heartbeat'));
       loadTestFile(require.resolve('./monitor_latest_status'));
       loadTestFile(require.resolve('./selected_monitor'));
       loadTestFile(require.resolve('./ping_histogram'));

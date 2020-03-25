@@ -8,11 +8,12 @@ export default function({ getService, loadTestFile }) {
   const es = getService('legacyEs');
 
   describe('uptime', () => {
-    before(() =>
-      es.indices.delete({
-        index: 'heartbeat*',
-        ignore: [404],
-      })
+    before(
+      async () =>
+        await es.indices.delete({
+          index: 'heartbeat*',
+          ignore: [404],
+        })
     );
 
     loadTestFile(require.resolve('./feature_controls'));

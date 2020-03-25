@@ -13,7 +13,7 @@ export default function({ getService }: FtrProviderContext) {
 
     const supertest = getService('supertest');
 
-    it('returns the monitor for give ID', async () => {
+    it('returns the monitor for given ID', async () => {
       const apiResponse = await supertest.get(
         `/api/uptime/monitor/selected?monitorId=${monitorId}`
       );
