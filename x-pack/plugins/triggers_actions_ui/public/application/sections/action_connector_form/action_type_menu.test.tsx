@@ -184,11 +184,6 @@ describe('connector_add_flyout', () => {
       </ActionsConnectorsContextProvider>
     );
 
-    const element = wrapper.find('[data-test-subj="my-action-type-card"]');
-    expect(element.exists()).toBeTruthy();
-    expect(element.first().prop('betaBadgeLabel')).toEqual('Upgrade');
-    expect(element.first().prop('betaBadgeTooltipContent')).toEqual(
-      'This connector requires a Gold license.'
-    );
+    expect(wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
   });
 });
