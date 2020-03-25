@@ -39,7 +39,7 @@ describe('buildSignalsSearchQuery', () => {
               {
                 range: {
                   '@timestamp': {
-                    gte: from,
+                    gt: from,
                     lte: to,
                   },
                 },

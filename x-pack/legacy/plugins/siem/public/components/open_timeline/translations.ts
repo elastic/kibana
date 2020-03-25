@@ -145,3 +145,61 @@ export const SUCCESSFULLY_EXPORTED_TIMELINES = (totalTimelines: number) =>
     defaultMessage:
       'Successfully exported {totalTimelines, plural, =0 {all timelines} =1 {{totalTimelines} timeline} other {{totalTimelines} timelines}}',
   });
+
+export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.importTimelineTitle',
+  {
+    defaultMessage: 'Import timeline',
+  }
+);
+
+export const SELECT_TIMELINE = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.selectTimelineDescription',
+  {
+    defaultMessage: 'Select a SIEM timeline (as exported from the Timeline view) to import',
+  }
+);
+
+export const INITIAL_PROMPT_TEXT = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.initialPromptTextDescription',
+  {
+    defaultMessage: 'Select or drag and drop a valid timelines_export.ndjson file',
+  }
+);
+
+export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.overwriteDescription',
+  {
+    defaultMessage: 'Automatically overwrite saved objects with the same timeline ID',
+  }
+);
+
+export const SUCCESSFULLY_IMPORTED_TIMELINES = (totalCount: number) =>
+  i18n.translate(
+    'xpack.siem.timelines.components.importTimelineModal.successfullyImportedTimelinesTitle',
+    {
+      values: { totalCount },
+      defaultMessage:
+        'Successfully imported {totalCount} {totalCount, plural, =1 {timeline} other {timelines}}',
+    }
+  );
+
+export const IMPORT_FAILED = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.importFailedTitle',
+  {
+    defaultMessage: 'Failed to import timelines',
+  }
+);
+
+export const IMPORT_TIMELINE = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.importTitle',
+  {
+    defaultMessage: 'Import timeline…',
+  }
+);
+
+export const IMPORT_FAILED_DETAILED = (id: string, statusCode: number, message: string) =>
+  i18n.translate('xpack.siem.timelines.components.importTimelineModal.importFailedDetailedTitle', {
+    values: { id, statusCode, message },
+    defaultMessage: 'Timeline ID: {id}\n Status Code: {statusCode}\n Message: {message}',
+  });
