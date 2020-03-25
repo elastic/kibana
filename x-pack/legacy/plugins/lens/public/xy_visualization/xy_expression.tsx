@@ -15,10 +15,11 @@ import {
   BarSeries,
   Position,
   PartialTheme,
+  GeometryValue,
+  XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
-  KibanaDatatable,
   IInterpreterRenderHandlers,
   ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
@@ -27,11 +28,20 @@ import {
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { FormatFactory } from '../legacy_imports';
+import { EmbeddableVisTriggerContext } from '../../../../../../src/plugins/embeddable/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/embeddable/events';
+import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { getExecuteTriggerActions } from './services';
+
+type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
+type SeriesSpec = InferPropType<typeof LineSeries> &
+  InferPropType<typeof BarSeries> &
+  InferPropType<typeof AreaSeries>;
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -48,6 +58,7 @@ type XYChartRenderProps = XYChartProps & {
   chartTheme: PartialTheme;
   formatFactory: FormatFactory;
   timeZone: string;
+  executeTriggerActions: UiActionsStart['executeTriggerActions'];
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -109,10 +120,15 @@ export const getXyChartRenderer = (dependencies: {
   validate: () => undefined,
   reuseDomNode: true,
   render: (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
+    const executeTriggerActions = getExecuteTriggerActions();
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     ReactDOM.render(
       <I18nProvider>
-        <XYChartReportable {...config} {...dependencies} />
+        <XYChartReportable
+          {...config}
+          {...dependencies}
+          executeTriggerActions={executeTriggerActions}
+        />
       </I18nProvider>,
       domNode,
       () => handlers.done()
@@ -144,7 +160,14 @@ export function XYChartReportable(props: XYChartRenderProps) {
   );
 }
 
-export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYChartRenderProps) {
+export function XYChart({
+  data,
+  args,
+  formatFactory,
+  timeZone,
+  chartTheme,
+  executeTriggerActions,
+}: XYChartRenderProps) {
   const { legend, layers } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
@@ -185,7 +208,13 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
   const shouldRotate = isHorizontalChart(layers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
-
+  const xDomain =
+    data.dateRange && layers.every(l => l.xScaleType === 'time')
+      ? {
+          min: data.dateRange.fromDate.getTime(),
+          max: data.dateRange.toDate.getTime(),
+        }
+      : undefined;
   return (
     <Chart>
       <Settings
@@ -194,14 +223,63 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
         showLegendExtra={false}
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
-        xDomain={
-          data.dateRange && layers.every(l => l.xScaleType === 'time')
-            ? {
-                min: data.dateRange.fromDate.getTime(),
-                max: data.dateRange.toDate.getTime(),
-              }
-            : undefined
-        }
+        xDomain={xDomain}
+        onElementClick={([[geometry, series]]) => {
+          // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
+          const xySeries = series as XYChartSeriesIdentifier;
+          const xyGeometry = geometry as GeometryValue;
+
+          const layer = layers.find(l =>
+            xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
+          );
+          if (!layer) {
+            return;
+          }
+
+          const table = data.tables[layer.layerId];
+
+          const points = [
+            {
+              row: table.rows.findIndex(
+                row => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
+              ),
+              column: table.columns.findIndex(col => col.id === layer.xAccessor),
+              value: xyGeometry.x,
+            },
+          ];
+
+          if (xySeries.seriesKeys.length > 1) {
+            const pointValue = xySeries.seriesKeys[0];
+
+            points.push({
+              row: table.rows.findIndex(
+                row => layer.splitAccessor && row[layer.splitAccessor] === pointValue
+              ),
+              column: table.columns.findIndex(col => col.id === layer.splitAccessor),
+              value: pointValue,
+            });
+          }
+
+          const xAxisFieldName: string | undefined = table.columns.find(
+            col => col.id === layer.xAccessor
+          )?.meta?.aggConfigParams?.field;
+
+          const timeFieldName = xDomain && xAxisFieldName;
+
+          const context: EmbeddableVisTriggerContext = {
+            data: {
+              data: points.map(point => ({
+                row: point.row,
+                column: point.column,
+                value: point.value,
+                table,
+              })),
+            },
+            timeFieldName,
+          };
+
+          executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+        }}
       />
 
       <Axis
@@ -247,80 +325,53 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
             return;
           }
 
-          const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
-          const splitAccessorLabel = splitAccessor ? columnToLabelMap[splitAccessor] : '';
-          const yAccessors = accessors.map(accessor => columnToLabelMap[accessor] || accessor);
-          const idForLegend = splitAccessorLabel || yAccessors;
-          const sanitized = sanitizeRows({
-            splitAccessor,
-            formatFactory,
-            columnToLabelMap,
-            table: data.tables[layerId],
-          });
+          const columnToLabelMap: Record<string, string> = columnToLabel
+            ? JSON.parse(columnToLabel)
+            : {};
 
-          const seriesProps = {
-            key: index,
-            splitSeriesAccessors: sanitized.splitAccessor ? [sanitized.splitAccessor] : [],
+          const table = data.tables[layerId];
+
+          // For date histogram chart type, we're getting the rows that represent intervals without data.
+          // To not display them in the legend, they need to be filtered out.
+          const rows = table.rows.filter(
+            row =>
+              !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
+          );
+
+          const seriesProps: SeriesSpec = {
+            splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
-            id: idForLegend,
+            id: splitAccessor || accessors.join(','),
             xAccessor,
-            yAccessors,
-            data: sanitized.rows,
+            yAccessors: accessors,
+            data: rows,
             xScaleType,
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
+            name(d) {
+              if (accessors.length > 1) {
+                return d.seriesKeys
+                  .map((key: string | number) => columnToLabelMap[key] || key)
+                  .join(' - ');
+              }
+              return columnToLabelMap[d.seriesKeys[0]] ?? d.seriesKeys[0];
+            },
           };
 
-          return seriesType === 'line' ? (
-            <LineSeries {...seriesProps} />
-          ) : seriesType === 'bar' ||
-            seriesType === 'bar_stacked' ||
-            seriesType === 'bar_horizontal' ||
-            seriesType === 'bar_horizontal_stacked' ? (
-            <BarSeries {...seriesProps} />
-          ) : (
-            <AreaSeries {...seriesProps} />
-          );
+          switch (seriesType) {
+            case 'line':
+              return <LineSeries key={index} {...seriesProps} />;
+            case 'bar':
+            case 'bar_stacked':
+            case 'bar_horizontal':
+            case 'bar_horizontal_stacked':
+              return <BarSeries key={index} {...seriesProps} />;
+            default:
+              return <AreaSeries key={index} {...seriesProps} />;
+          }
         }
       )}
     </Chart>
   );
-}
-
-/**
- * Renames the columns to match the user-configured accessors in
- * columnToLabelMap. If a splitAccessor is provided, formats the
- * values in that column.
- */
-function sanitizeRows({
-  splitAccessor,
-  table,
-  formatFactory,
-  columnToLabelMap,
-}: {
-  splitAccessor?: string;
-  table: KibanaDatatable;
-  formatFactory: FormatFactory;
-  columnToLabelMap: Record<string, string | undefined>;
-}) {
-  const column = table.columns.find(c => c.id === splitAccessor);
-  const formatter = formatFactory(column && column.formatHint);
-
-  return {
-    splitAccessor: column && column.id,
-    rows: table.rows.map(r => {
-      const newRow: typeof r = {};
-
-      if (column) {
-        newRow[column.id] = formatter.convert(r[column.id]);
-      }
-
-      Object.keys(r).forEach(key => {
-        const newKey = columnToLabelMap[key] || key;
-        newRow[newKey] = r[key];
-      });
-      return newRow;
-    }),
-  };
 }

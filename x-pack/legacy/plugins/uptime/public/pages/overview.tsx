@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -40,9 +40,26 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
+// TODO: these values belong deeper down in the monitor
+// list pagination control, but are here temporarily until we
+// are done removing GraphQL
+const DEFAULT_PAGE_SIZE = 10;
+const LOCAL_STORAGE_KEY = 'xpack.uptime.monitorList.pageSize';
+const getMonitorListPageSizeValue = () => {
+  const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
+  if (isNaN(value)) {
+    return DEFAULT_PAGE_SIZE;
+  }
+  return value;
+};
+
 export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFilters }: Props) => {
   const { colors } = useContext(UptimeThemeContext);
   const [getUrlParams] = useUrlParams();
+  // TODO: this is temporary until we migrate the monitor list to our Redux implementation
+  const [monitorListPageSize, setMonitorListPageSize] = useState<number>(
+    getMonitorListPageSizeValue()
+  );
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const {
     dateRangeStart,
@@ -106,10 +123,13 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
           hasActiveFilters={!!esFilters}
           implementsCustomErrorState={true}
           linkParameters={linkParameters}
+          pageSize={monitorListPageSize}
+          setPageSize={setMonitorListPageSize}
           successColor={colors.success}
           variables={{
             ...sharedProps,
             pagination,
+            pageSize: monitorListPageSize,
           }}
         />
       </EmptyState>

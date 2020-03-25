@@ -14,6 +14,7 @@ export const DeleteModalConfirmation = ({
   apiDeleteCall,
   onDeleted,
   onCancel,
+  onErrors,
   singleTitle,
   multipleTitle,
 }: {
@@ -27,6 +28,7 @@ export const DeleteModalConfirmation = ({
   }) => Promise<{ successes: string[]; errors: string[] }>;
   onDeleted: (deleted: string[]) => void;
   onCancel: () => void;
+  onErrors: () => void;
   singleTitle: string;
   multipleTitle: string;
 }) => {
@@ -93,6 +95,7 @@ export const DeleteModalConfirmation = ({
                 }
               )
             );
+            onErrors();
           }
         }}
         cancelButtonText={cancelButtonText}
