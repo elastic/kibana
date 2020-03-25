@@ -59,6 +59,10 @@ export const EDIT_DESCRIPTION = i18n.translate('xpack.siem.case.caseView.edit.de
   defaultMessage: 'Edit description',
 });
 
+export const QUOTE = i18n.translate('xpack.siem.case.caseView.edit.quote', {
+  defaultMessage: 'Quote',
+});
+
 export const EDIT_COMMENT = i18n.translate('xpack.siem.case.caseView.edit.comment', {
   defaultMessage: 'Edit comment',
 });

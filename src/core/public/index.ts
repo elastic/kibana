@@ -208,14 +208,20 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
-
-  /**
-   * Allows plugins to get access to APIs available in start inside async
-   * handlers, such as {@link App.mount}. Promise will not resolve until Core
-   * and plugin dependencies have completed `start`.
-   */
-  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart>;
 }
+
+/**
+ * Allows plugins to get access to APIs available in start inside async
+ * handlers, such as {@link App.mount}. Promise will not resolve until Core
+ * and plugin dependencies have completed `start`.
+ *
+ * @public
+ */
+export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<
+  [CoreStart, TPluginsStart]
+>;
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
