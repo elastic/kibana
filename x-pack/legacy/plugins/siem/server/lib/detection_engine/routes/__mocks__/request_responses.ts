@@ -295,18 +295,30 @@ export const getCreateRequest = () =>
     body: typicalPayload(),
   });
 
-export const createMlRuleRequest = () => {
+export const typicalMlRulePayload = () => {
   const { query, language, index, ...mlParams } = typicalPayload();
 
+  return {
+    ...mlParams,
+    type: 'machine_learning',
+    anomaly_threshold: 58,
+    machine_learning_job_id: 'typical-ml-job-id',
+  };
+};
+
+export const createMlRuleRequest = () => {
   return requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: {
-      ...mlParams,
-      type: 'machine_learning',
-      anomaly_threshold: 50,
-      machine_learning_job_id: 'some-uuid',
-    },
+    body: typicalMlRulePayload(),
+  });
+};
+
+export const createBulkMlRuleRequest = () => {
+  return requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: [typicalMlRulePayload()],
   });
 };
 
@@ -323,7 +335,7 @@ export const createRuleWithActionsRequest = () => {
         {
           group: 'default',
           id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-          params: { message: 'Rule generated {{state.signalsCount}} signals' },
+          params: { message: 'Rule generated {{state.signals_count}} signals' },
           action_type_id: '.slack',
         },
       ],
@@ -656,7 +668,8 @@ export const getNotificationResult = (): RuleNotificationAlertType => ({
     {
       actionTypeId: '.slack',
       params: {
-        message: 'Rule generated {{state.signalsCount}} signals\n\n{{rule.name}}\n{{resultsLink}}',
+        message:
+          'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
       },
       group: 'default',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',

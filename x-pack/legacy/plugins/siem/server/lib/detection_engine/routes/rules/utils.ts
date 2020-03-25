@@ -19,7 +19,12 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
+import {
+  OutputRuleAlertRest,
+  ImportRuleAlertRest,
+  RuleAlertParamsRest,
+  RuleType,
+} from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
@@ -295,3 +300,5 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
 
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
+
+export const isMlRule = (ruleType: RuleType) => ruleType === 'machine_learning';
