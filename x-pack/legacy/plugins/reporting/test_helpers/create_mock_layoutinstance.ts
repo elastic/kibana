@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayoutTypes } from '../export_types/common/constants';
 import { createLayout } from '../export_types/common/layouts';
+import { LayoutTypes } from '../export_types/common/constants';
 import { LayoutInstance } from '../export_types/common/layouts/layout';
-import { CaptureConfig } from '../server/types';
+import { ServerFacade } from '../types';
 
-export const createMockLayoutInstance = (captureConfig: CaptureConfig) => {
-  const mockLayout = createLayout(captureConfig, {
+export const createMockLayoutInstance = (__LEGACY: ServerFacade) => {
+  const mockLayout = createLayout(__LEGACY, {
     id: LayoutTypes.PRESERVE_LAYOUT,
     dimensions: { height: 12, width: 12 },
   }) as LayoutInstance;

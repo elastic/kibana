@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../../server';
 import { cryptoFactory } from '../../../server/lib';
@@ -14,6 +15,7 @@ import {
   JobDocOutput,
   Logger,
   RequestFacade,
+  ServerFacade,
 } from '../../../types';
 import { CsvResultFromSearch } from '../../csv/types';
 import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
@@ -21,11 +23,15 @@ import { createGenerateCsv } from './lib';
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
-  const config = await reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
+>> = async function executeJobFactoryFn(
+  reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
+) {
+  const crypto = cryptoFactory(server);
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
-  const generateCsv = await createGenerateCsv(reporting, parentLogger);
+  const generateCsv = createGenerateCsv(reporting, server, elasticsearch, parentLogger);
 
   return async function executeJob(
     jobId: string | null,
@@ -51,11 +57,11 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
 
     let requestObject: RequestFacade | FakeRequest;
     if (isImmediate && realRequest) {
-      jobLogger.info(`Executing job from Immediate API using request context`);
+      jobLogger.info(`Executing job from immediate API`);
       requestObject = realRequest;
     } else {
       jobLogger.info(`Executing job async using encrypted headers`);
-      let decryptedHeaders: Record<string, unknown>;
+      let decryptedHeaders;
       const serializedEncryptedHeaders = job.headers;
       try {
         decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
@@ -73,7 +79,10 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
         );
       }
 
-      requestObject = { headers: decryptedHeaders };
+      requestObject = {
+        headers: decryptedHeaders,
+        server,
+      };
     }
 
     let content: string;

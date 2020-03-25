@@ -44,7 +44,6 @@ import {
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
-import { VisualizationsStartDeps } from '../plugin';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -91,7 +90,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editUrl, indexPatterns, editable, uiActions }: VisualizeEmbeddableConfiguration,
+    { vis, editUrl, indexPatterns, editable }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     parent?: Container
   ) {
@@ -104,8 +103,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         editable,
         visTypeName: vis.type.name,
       },
-      parent,
-      { uiActions }
+      parent
     );
     this.timefilter = timefilter;
     this.vis = vis;
@@ -263,7 +261,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
             timeFieldName: this.vis.data.indexPattern!.timeFieldName!,
             data: event.data,
           };
-
           getUiActions()
             .getTrigger(triggerId)
             .exec(context);
