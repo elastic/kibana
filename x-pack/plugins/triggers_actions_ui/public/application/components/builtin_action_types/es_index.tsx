@@ -193,7 +193,8 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               content={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshTooltip',
                 {
-                  defaultMessage: 'This checkbox set refresh index value.',
+                  defaultMessage:
+                    'Should Elasticsearch refresh the affected shards to make this operation visible to search.',
                 }
               )}
             />
@@ -224,8 +225,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               content={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.definedateFieldTooltip',
                 {
-                  defaultMessage:
-                    'This is checkbox allows to define execution time field for index.',
+                  defaultMessage: `Should a time field be added to each document automatically when it's indexed?`,
                 }
               )}
             />
