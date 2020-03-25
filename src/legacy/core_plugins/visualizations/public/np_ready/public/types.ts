@@ -27,6 +27,7 @@ export interface VisualizationController {
   render(visData: any, visParams: any): Promise<void>;
   destroy(): void;
   isLoaded?(): Promise<void> | void;
+  updateVis?(vis: any): void;
 }
 
 export interface SavedVisState {

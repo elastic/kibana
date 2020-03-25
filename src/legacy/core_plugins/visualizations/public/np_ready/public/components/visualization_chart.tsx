@@ -63,6 +63,10 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
           throw new Error('Visualization implementation was not initialized on first render.');
         }
 
+        if (this.visualization.updateVis) {
+          this.visualization.updateVis(vis);
+        }
+
         return this.visualization.render(visData, visParams);
       })
     );

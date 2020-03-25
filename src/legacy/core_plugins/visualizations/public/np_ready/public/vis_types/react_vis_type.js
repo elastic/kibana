@@ -28,6 +28,10 @@ class ReactVisController {
     this.vis = vis;
   }
 
+  updateVis(vis) {
+    this.vis = vis;
+  }
+
   render(visData, visParams, updateStatus) {
     this.visData = visData;
 
