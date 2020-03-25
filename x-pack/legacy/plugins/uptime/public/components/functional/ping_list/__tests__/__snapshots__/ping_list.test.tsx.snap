@@ -149,7 +149,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "duration": Object {
               "us": 1430,
             },
-            "id": "auto-tcp-0X81440A68E839814C",
+            "id": "auto-tcp-0X81440A68E839814F",
             "ip": "127.0.0.1",
             "name": "",
             "status": "down",
@@ -179,7 +179,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "duration": Object {
               "us": 1452,
             },
-            "id": "auto-tcp-0X81440A68E839814E",
+            "id": "auto-tcp-0X81440A68E839814D",
             "ip": "127.0.0.1",
             "name": "",
             "status": "up",
@@ -196,7 +196,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "duration": Object {
               "us": 1094,
             },
-            "id": "auto-tcp-0X81440A68E839814F",
+            "id": "auto-tcp-0X81440A68E839814E",
             "ip": "127.0.0.1",
             "name": "",
             "status": "down",
@@ -282,7 +282,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "duration": Object {
               "us": 127511,
             },
-            "id": "auto-http-0X131221E73F825974",
+            "id": "auto-tcp-0X81440A68E839814C",
             "ip": "172.217.7.4",
             "name": "",
             "status": "up",
@@ -300,7 +300,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "duration": Object {
               "us": 287543,
             },
-            "id": "auto-http-0X9CB71300ABD5A2A8",
+            "id": "auto-http-0X131221E73F825974",
             "ip": "192.30.253.112",
             "name": "",
             "status": "up",

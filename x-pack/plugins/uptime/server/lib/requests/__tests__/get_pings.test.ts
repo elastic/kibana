@@ -17,16 +17,34 @@ describe('getAll', () => {
       {
         _source: {
           '@timestamp': '2018-10-30T18:51:59.792Z',
+          monitor: {
+            duration: { us: 2134 },
+            id: 'foo',
+            status: 'up',
+            type: 'http',
+          },
         },
       },
       {
         _source: {
           '@timestamp': '2018-10-30T18:53:59.792Z',
+          monitor: {
+            duration: { us: 2131 },
+            id: 'foo',
+            status: 'up',
+            type: 'http',
+          },
         },
       },
       {
         _source: {
           '@timestamp': '2018-10-30T18:55:59.792Z',
+          monitor: {
+            duration: { us: 2132 },
+            id: 'foo',
+            status: 'up',
+            type: 'http',
+          },
         },
       },
     ];
@@ -83,9 +101,9 @@ describe('getAll', () => {
 
     const pings = result.pings!;
     expect(pings).toHaveLength(count);
-    expect(pings[0].timestamp).toBe('2018-10-30T18:51:59.792Z');
-    expect(pings[1].timestamp).toBe('2018-10-30T18:53:59.792Z');
-    expect(pings[2].timestamp).toBe('2018-10-30T18:55:59.792Z');
+    expect(pings[0]['@timestamp']).toBe('2018-10-30T18:51:59.792Z');
+    expect(pings[1]['@timestamp']).toBe('2018-10-30T18:53:59.792Z');
+    expect(pings[2]['@timestamp']).toBe('2018-10-30T18:55:59.792Z');
     expect(mockEsClient).toHaveBeenCalledTimes(1);
   });
 

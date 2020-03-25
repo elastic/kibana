@@ -215,7 +215,7 @@ describe('PingList component', () => {
                   "duration": Object {
                     "us": 1430,
                   },
-                  "id": "auto-tcp-0X81440A68E839814C",
+                  "id": "auto-tcp-0X81440A68E839814F",
                   "ip": "127.0.0.1",
                   "name": "",
                   "status": "down",
