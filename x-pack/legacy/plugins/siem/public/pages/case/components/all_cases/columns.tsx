@@ -175,15 +175,18 @@ const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
       isLoading ? (
         <EuiLoadingSpinner />
       ) : (
-        <EuiLink
-          data-test-subj={`case-table-column-external`}
-          href={theCase.externalService?.externalUrl}
-          target="_blank"
-        >
-          {hasDataToPush ? i18n.REQUIRES_UPDATE : i18n.UP_TO_DATE}
-        </EuiLink>
+        <p>
+          <EuiLink
+            data-test-subj={`case-table-column-external`}
+            href={theCase.externalService?.externalUrl}
+            target="_blank"
+          >
+            {theCase.externalService?.externalTitle}
+          </EuiLink>
+          {i18n.EXTERNAL_STATUS(hasDataToPush)}
+        </p>
       ),
-    [hasDataToPush, isLoading, theCase.externalService?.externalUrl]
+    [hasDataToPush, isLoading, theCase.externalService]
   );
   if (theCase.externalService !== null) {
     return handleRenderDataToPush();
