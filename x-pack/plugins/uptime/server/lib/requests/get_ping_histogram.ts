@@ -7,8 +7,10 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { QUERY } from '../../../../../legacy/plugins/uptime/common/constants';
 import { getFilterClause } from '../helper';
-import { HistogramQueryResult } from './types';
-import { HistogramResult } from '../../../../../legacy/plugins/uptime/common/types';
+import {
+  HistogramResult,
+  HistogramQueryResult,
+} from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
 export interface GetPingHistogramParams {
   /** @member dateRangeStart timestamp bounds */

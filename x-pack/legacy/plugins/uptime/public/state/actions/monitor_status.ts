@@ -5,7 +5,7 @@
  */
 import { createAction } from 'redux-actions';
 import { QueryParams } from './types';
-import { Ping } from '../../../common/graphql/types';
+import { Ping } from '../../../common/runtime_types';
 
 export const getSelectedMonitorAction = createAction<{ monitorId: string }>('GET_SELECTED_MONITOR');
 export const getSelectedMonitorActionSuccess = createAction<Ping>('GET_SELECTED_MONITOR_SUCCESS');
