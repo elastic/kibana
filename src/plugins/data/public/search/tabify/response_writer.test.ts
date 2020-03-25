@@ -124,13 +124,15 @@ describe('TabbedAggResponseWriter class', () => {
       test('doesnt add a partial row', () => {
         responseWriter.bucketBuffer = [{ id: 'col-0-1', value: 'US' }];
         responseWriter.row();
+
         expect(responseWriter.rows.length).toEqual(0);
       });
 
       test('adds partial row if partialRows is set to true', () => {
+        responseWriter = createResponseWritter(splitAggConfig, { partialRows: true });
         responseWriter.bucketBuffer = [{ id: 'col-0-1', value: 'US' }];
-        responseWriter.partialRows = true;
         responseWriter.row();
+
         expect(responseWriter.rows.length).toEqual(1);
       });
     });
