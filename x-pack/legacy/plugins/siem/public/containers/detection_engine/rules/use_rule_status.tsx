@@ -76,7 +76,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
  *
  */
 export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
-  const [rulesStatuses, setRuleStatuses] = useState<RuleStatusRowItemType[] | null>(null);
+  const [rulesStatuses, setRuleStatuses] = useState<RuleStatusRowItemType[]>([]);
   const [loading, setLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();
 

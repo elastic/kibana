@@ -124,7 +124,7 @@ describe('useRuleStatus', () => {
         useRulesStatuses(payload)
       );
       await waitForNextUpdate();
-      expect(result.current).toEqual({ loading: false, rulesStatuses: null });
+      expect(result.current).toEqual({ loading: false, rulesStatuses: [] });
     });
   });
 
