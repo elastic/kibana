@@ -13,9 +13,9 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
 echo " -> running visual regression tests from x-pack directory"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack visual regression tests" \
-  yarn percy exec -t 500 \
-  node scripts/functional_tests \
-    --debug --bail \
-    --kibana-install-dir "$installDir" \
-    --config test/visual_regression/config.ts;
+# checks-reporter-with-killswitch "X-Pack visual regression tests" \
+#   yarn percy exec -t 500 \
+#   node scripts/functional_tests \
+#     --debug --bail \
+#     --kibana-install-dir "$installDir" \
+#     --config test/visual_regression/config.ts;
