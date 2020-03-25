@@ -38,7 +38,9 @@ export function isStartable(jobs) {
 }
 
 export function isStoppable(jobs) {
-  return jobs.some(j => j.datafeedState === DATAFEED_STATE.STARTED);
+  return jobs.some(
+    j => j.datafeedState === DATAFEED_STATE.STARTED || j.datafeedState === DATAFEED_STATE.STARTING
+  );
 }
 
 export function isClosable(jobs) {

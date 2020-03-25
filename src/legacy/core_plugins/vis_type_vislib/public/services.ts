@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { npSetup, npStart } from 'ui/new_platform';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/common';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('vislib data.fieldFormats');
