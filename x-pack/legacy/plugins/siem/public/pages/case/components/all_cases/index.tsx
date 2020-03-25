@@ -109,19 +109,21 @@ export const AllCases = React.memo(() => {
 
   const { dispatchResetIsUpdated, isUpdated, updateBulkStatus } = useUpdateCases();
 
+  const refreshCases = useCallback(() => {
+    refetchCases(filterOptions, queryParams);
+    fetchCasesStatus();
+  }, [filterOptions, queryParams]);
+
   useEffect(() => {
     if (isDeleted) {
-      refetchCases(filterOptions, queryParams);
-      fetchCasesStatus();
+      refreshCases();
       dispatchResetIsDeleted();
     }
     if (isUpdated) {
-      refetchCases(filterOptions, queryParams);
-      fetchCasesStatus();
+      refreshCases();
       dispatchResetIsUpdated();
     }
-  }, [isDeleted, isUpdated, filterOptions, queryParams]);
-
+  }, [isDeleted, isUpdated]);
   const [deleteThisCase, setDeleteThisCase] = useState({
     title: '',
     id: '',
@@ -326,6 +328,10 @@ export const AllCases = React.memo(() => {
                     popoverContent={getBulkItemsPopoverContent}
                   >
                     {i18n.BULK_ACTIONS}
+                  </UtilityBarAction>
+
+                  <UtilityBarAction iconSide="left" iconType="refresh" onClick={refreshCases}>
+                    {i18n.REFRESH}
                   </UtilityBarAction>
                 </UtilityBarGroup>
               </UtilityBarSection>
