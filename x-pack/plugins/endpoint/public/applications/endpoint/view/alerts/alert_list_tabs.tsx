@@ -38,14 +38,23 @@ export const AlertListTabs = memo(() => {
   const location = useLocation();
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
 
-  const onTabClick = useCallback(() => {
-    history.push(urlFromQueryParams({ ...queryParams, closed_alerts: row.id }));
-  }, [history, queryParams]);
+  const onTabClick = useCallback(
+    (tab: NavTabs) => {
+      history.push(
+        urlFromQueryParams({ ...queryParams, closed_alerts: tab.id === 'open' ? 'true' : 'false' }) // TODO: change this
+      );
+    },
+    [history, queryParams]
+  );
 
   const renderNavTabs = useMemo(() => {
     return navTabs.map((tab, index) => {
       return (
-        <EuiTab key={index} onClick={onTabClick} isSelected={tab.href === location.pathname}>
+        <EuiTab
+          key={index}
+          onClick={() => onTabClick(tab)} // TODO: change this
+          isSelected={tab.href === location.pathname} // TODO: this will need to happen in a selector or change the format entirely idk
+        >
           {tab.name}
         </EuiTab>
       );
