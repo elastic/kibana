@@ -75,7 +75,7 @@ function validateInterval(
   }
 
   if (!value) {
-    return { isValid: false, error: errorMessage };
+    return { isValid: false };
   }
 
   // we check if Elasticsearch interval is valid ES interval to show a user appropriate error message
