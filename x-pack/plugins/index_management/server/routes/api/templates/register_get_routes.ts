@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { deserializeTemplate, deserializeTemplateList } from '../../../../common/lib';
+import { deserializeV1Template, deserializeTemplateList } from '../../../../common/lib';
 import { getManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
@@ -41,7 +41,7 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
 
         if (indexTemplateByName[name]) {
           return res.ok({
-            body: deserializeTemplate(
+            body: deserializeV1Template(
               { ...indexTemplateByName[name], name },
               managedTemplatePrefix
             ),

@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { TemplateDeserialized, TemplateSerialized } from '../../../../common';
-import { serializeTemplate } from '../../../../common/lib';
+import { TemplateDeserialized } from '../../../../common';
+import { serializeV1Template } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { templateSchema } from './validate_schemas';
@@ -20,7 +20,7 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const template = req.body as TemplateDeserialized;
-      const serializedTemplate = serializeTemplate(template) as TemplateSerialized;
+      const serializedTemplate = serializeV1Template(template);
 
       const {
         name,

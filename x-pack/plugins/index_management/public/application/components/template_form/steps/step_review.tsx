@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { serializers } from '../../../../shared_imports';
 
-import { serializeTemplate } from '../../../../../common/lib/template_serialization';
+import { serializeV1Template } from '../../../../../common/lib/template_serialization';
 import { TemplateDeserialized } from '../../../../../common';
 import { StepProps } from '../types';
 
@@ -54,7 +54,9 @@ const getDescriptionText = (data: any) => {
 export const StepReview: React.FunctionComponent<StepProps> = ({ template, updateCurrentStep }) => {
   const { name, indexPatterns, version, order } = template;
 
-  const serializedTemplate = serializeTemplate(stripEmptyFields(template) as TemplateDeserialized);
+  const serializedTemplate = serializeV1Template(
+    stripEmptyFields(template) as TemplateDeserialized
+  );
   // Name not included in ES request body
   delete serializedTemplate.name;
   const {
