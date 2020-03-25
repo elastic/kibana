@@ -5,29 +5,18 @@
  */
 
 import { PolicyDetailsState } from '../../types';
-import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
-import { policyDetailsReducer, policyDetailsMiddlewareFactory, PolicyDetailsAction } from './index';
-
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { CoreStart } from 'kibana/public';
-import { DepsStartMock, depsStartMock } from '../../mocks';
+import { createStore, Dispatch, Store } from 'redux';
+import { policyDetailsReducer, PolicyDetailsAction } from './index';
 import { policyConfig, windowsEventing } from './selectors';
 import { clone } from '../../models/policy_details_config';
 
 describe('policy details: ', () => {
-  let fakeCoreStart: jest.Mocked<CoreStart>;
-  let depsStart: DepsStartMock;
   let store: Store<PolicyDetailsState>;
   let getState: typeof store['getState'];
   let dispatch: Dispatch<PolicyDetailsAction>;
 
   beforeEach(() => {
-    fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
-    depsStart = depsStartMock();
-    store = createStore(
-      policyDetailsReducer,
-      applyMiddleware(policyDetailsMiddlewareFactory(fakeCoreStart, depsStart))
-    );
+    store = createStore(policyDetailsReducer);
     getState = store.getState;
     dispatch = store.dispatch;
 

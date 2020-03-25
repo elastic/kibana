@@ -65,7 +65,11 @@ export const ConfigForm: React.FC<{
         </EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            {selectedEventing} / {totalEventing} event collections enabled
+            {selectedEventing} / {totalEventing}
+            <FormattedMessage
+              id="xpack.endpoint.policy.details.eventCollectionsEnabled"
+              defaultMessage=" event collections enabled"
+            />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

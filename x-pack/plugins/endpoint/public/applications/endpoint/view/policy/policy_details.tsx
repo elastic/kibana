@@ -52,17 +52,27 @@ export const PolicyDetails = React.memo(() => {
           </EuiPageHeaderSection>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty>Cancel</EuiButtonEmpty>
+              <EuiButtonEmpty>
+                <FormattedMessage
+                  id="xpack.endpoint.policy.details.cancel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton fill={true} iconType="save">
-                Save
+                <FormattedMessage id="xpack.endpoint.policy.details.save" defaultMessage="Save" />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageHeader>
         <EuiText size="xs" color="subdued">
-          <h4>Settings</h4>
+          <h4>
+            <FormattedMessage
+              id="xpack.endpoint.policy.details.settings"
+              defaultMessage="Settings"
+            />
+          </h4>
         </EuiText>
         <EuiSpacer size="xs" />
         <WindowsEventing />

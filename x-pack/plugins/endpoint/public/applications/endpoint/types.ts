@@ -99,7 +99,7 @@ export interface PolicyConfig {
 /**
  * Windows-specific policy configuration
  */
-export interface WindowsPolicyConfig {
+interface WindowsPolicyConfig {
   /** malware mode can be detect, prevent or prevent and notify user */
   malware: {
     mode: string;
@@ -113,7 +113,7 @@ export interface WindowsPolicyConfig {
 /**
  * Mac-specific policy configuration
  */
-export interface MacPolicyConfig {
+interface MacPolicyConfig {
   /** malware mode can be detect, prevent or prevent and notify user */
   malware: {
     mode: string;
@@ -126,7 +126,7 @@ export interface MacPolicyConfig {
 /**
  * Linux-specific policy configuration
  */
-export interface LinuxPolicyConfig {
+interface LinuxPolicyConfig {
   eventing: {
     process: boolean;
     network: boolean;
