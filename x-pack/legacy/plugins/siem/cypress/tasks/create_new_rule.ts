@@ -24,6 +24,7 @@ import {
   SCHEDULE_CONTINUE_BUTTON,
   SEVERITY_DROPDOWN,
   TAGS_INPUT,
+  INVESTIGATION_NOTES_TEXTAREA,
 } from '../screens/create_new_rule';
 
 export const createAndActivateRule = () => {
@@ -77,6 +78,8 @@ export const fillAboutRuleAndContinue = (rule: Rule) => {
 
     cy.get(MITRE_BTN).click({ force: true });
   });
+
+  cy.get(INVESTIGATION_NOTES_TEXTAREA).type(rule.note, { force: true });
 
   cy.get(ABOUT_CONTINUE_BTN)
     .should('exist')

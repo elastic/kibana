@@ -5,13 +5,20 @@
  */
 import { cloneDeep, omit } from 'lodash/fp';
 
-import { mockTimelineResults } from '../../mock/timeline_results';
+import {
+  mockTimelineResults,
+  mockTimelineResult,
+  mockTimelineModel,
+} from '../../mock/timeline_results';
+import { TimelineResult } from '../../graphql/types';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import {
   defaultTimelineToTimelineModel,
   getNotesCount,
   getPinnedEventCount,
   isUntitled,
+  omitTypenameInTimeline,
+  formatTimelineResultToModel,
 } from './helpers';
 import { OpenTimelineResult } from './types';
 
@@ -618,6 +625,56 @@ describe('helpers', () => {
         width: 1100,
         id: 'savedObject-1',
       });
+    });
+  });
+
+  describe('omitTypenameInTimeline', () => {
+    test('it does not modify the passed in timeline if no __typename exists', () => {
+      const result = omitTypenameInTimeline(mockTimelineResult);
+
+      expect(result).toEqual(mockTimelineResult);
+    });
+
+    test('it returns timeline with __typename removed when it exists', () => {
+      const mockTimeline = {
+        ...mockTimelineResult,
+        __typename: 'something, something',
+      };
+      const result = omitTypenameInTimeline(mockTimeline);
+      const expectedTimeline = {
+        ...mockTimeline,
+        __typename: undefined,
+      };
+
+      expect(result).toEqual(expectedTimeline);
+    });
+  });
+
+  xdescribe('formatTimelineResultToModel', () => {
+    test('returns object with notes and timeline if timelineToOpen contains notes', () => {
+      const mockTimeline: TimelineResult = {
+        ...mockTimelineResult,
+        notes: [
+          {
+            noteId: '123',
+            note: 'some note',
+          },
+        ],
+      };
+      const { notes, timeline } = formatTimelineResultToModel(mockTimeline, false);
+
+      expect(notes).toEqual([{ note: 'some note', noteId: '123' }]);
+      expect(timeline).toEqual(mockTimelineModel);
+    });
+
+    test('returns object with notes as "undefined" and timeline of type TimelineModel if timelineToOpen contains notes', () => {
+      const { notes, ...mockTimeline }: TimelineResult = {
+        ...mockTimelineResult,
+      };
+      const { notes: resultingNotes, timeline } = formatTimelineResultToModel(mockTimeline, false);
+
+      expect(resultingNotes).toBeUndefined();
+      expect(timeline).toEqual(mockTimelineModel);
     });
   });
 });

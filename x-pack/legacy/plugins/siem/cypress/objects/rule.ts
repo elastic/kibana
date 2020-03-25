@@ -20,6 +20,7 @@ export interface Rule {
   referenceUrls: string[];
   falsePositivesExamples: string[];
   mitre: Mitre[];
+  note: string;
 }
 
 const mitre1: Mitre = {
@@ -42,4 +43,5 @@ export const newRule: Rule = {
   referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
+  note: '# test markdown',
 };

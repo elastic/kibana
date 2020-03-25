@@ -50,3 +50,6 @@ export const SEVERITY_DROPDOWN =
 
 export const TAGS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxSearchInput"]';
+
+export const INVESTIGATION_NOTES_TEXTAREA =
+  '[data-test-subj="detectionEngineStepAboutRuleNote"] textarea';
