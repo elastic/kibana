@@ -8,6 +8,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EventingCheckbox } from './checkbox';
 import { OS, EventingFields } from '../../../../types';
+import { usePolicyDetailsSelector } from '../../policy_hooks';
+import {
+  selectedWindowsEventing,
+  totalWindowsEventing,
+} from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
 
 export const WindowsEventing = React.memo(() => {
@@ -41,12 +46,18 @@ export const WindowsEventing = React.memo(() => {
       );
     });
   };
+
+  const selected = usePolicyDetailsSelector(selectedWindowsEventing);
+  const total = usePolicyDetailsSelector(totalWindowsEventing);
+
   return (
     <ConfigForm
       type={`Event Collection`}
       supportedOss={['Windows']}
       id="windowsEventingForm"
       children={renderCheckboxes()}
+      selectedEventing={selected}
+      totalEventing={total}
     />
   );
 });

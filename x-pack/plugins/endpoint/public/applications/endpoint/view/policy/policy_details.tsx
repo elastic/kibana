@@ -5,7 +5,19 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiPage, EuiPageBody, EuiPageHeader, EuiPageHeaderSection } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiPage,
+  EuiPageBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { selectPolicyDetails } from '../../store/policy_details/selectors';
@@ -38,7 +50,21 @@ export const PolicyDetails = React.memo(() => {
               <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
             </EuiTitle>
           </EuiPageHeaderSection>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty>Cancel</EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill={true} iconType="save">
+                Save
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPageHeader>
+        <EuiText size="xs" color="subdued">
+          <h4>Settings</h4>
+        </EuiText>
+        <EuiSpacer size="xs" />
         <WindowsEventing />
       </EuiPageBody>
     </EuiPage>

@@ -35,3 +35,21 @@ export const selectWindowsEventing = (state: PolicyDetailsState) => {
   const policyConfig = selectPolicyConfig(state);
   return policyConfig && policyConfig.windows.eventing;
 };
+
+export const totalWindowsEventing = (state: PolicyDetailsState) => {
+  const policyConfig = selectPolicyConfig(state);
+  if (policyConfig) {
+    return Object.keys(policyConfig.windows.eventing).length;
+  }
+  return 0;
+};
+
+export const selectedWindowsEventing = (state: PolicyDetailsState) => {
+  const policyConfig = selectPolicyConfig(state);
+  if (policyConfig) {
+    return Object.values(policyConfig.windows.eventing).reduce((count, event) => {
+      return event === true ? count + 1 : count;
+    }, 0);
+  }
+  return 0;
+};

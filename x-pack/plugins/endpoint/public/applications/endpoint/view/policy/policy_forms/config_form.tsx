@@ -12,6 +12,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
@@ -20,18 +21,8 @@ const PolicyDetailCard = styled.div`
   .policyDetailTitleOS {
     flex-grow: 2;
   }
-  .policyDetailTitleValue {
-    font-size: 16px;
-    font-weight: normal;
-    line-height: normal;
-  }
   .policyDetailTitleFlexItem {
     margin: 0;
-  }
-  .eventCollectionsEnabled {
-    color: ${props => props.theme.eui.euiColorMediumShade};
-    font-size: 14px;
-    font-weight: normal;
   }
 `;
 export const ConfigForm: React.FC<{
@@ -39,7 +30,9 @@ export const ConfigForm: React.FC<{
   supportedOss: string[];
   children: React.ReactNode;
   id: string;
-}> = React.memo(({ type, supportedOss, children, id }) => {
+  selectedEventing: number;
+  totalEventing: number;
+}> = React.memo(({ type, supportedOss, children, id, selectedEventing, totalEventing }) => {
   const typeTitle = () => {
     return (
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
@@ -52,7 +45,7 @@ export const ConfigForm: React.FC<{
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem className="policyDetailTitleFlexItem">
-            <p className="policyDetailTitleValue">{type}</p>
+            <EuiText size="m">{type}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="column" gutterSize="none" className="policyDetailTitleOS">
@@ -67,11 +60,13 @@ export const ConfigForm: React.FC<{
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem className="policyDetailTitleFlexItem">
-            <p className="policyDetailTitleValue">{supportedOss.join(', ')}</p>
+            <EuiText>{supportedOss.join(', ')}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <p className="eventCollectionsEnabled">#/# event collections enabled</p>
+          <EuiText size="s" color="subdued">
+            {selectedEventing} / {totalEventing} event collections enabled
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

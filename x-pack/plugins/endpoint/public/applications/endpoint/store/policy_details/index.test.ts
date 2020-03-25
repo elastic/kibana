@@ -6,9 +6,8 @@
 
 import { PolicyDetailsState } from '../../types';
 import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
-import { AppAction } from '../action';
-import { policyDetailsReducer } from './reducer';
-import { policyDetailsMiddlewareFactory } from './middleware';
+import { policyDetailsReducer, policyDetailsMiddlewareFactory, PolicyDetailsAction } from './index';
+
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { DepsStartMock, depsStartMock } from '../../mocks';
@@ -20,7 +19,7 @@ describe('policy details: ', () => {
   let depsStart: DepsStartMock;
   let store: Store<PolicyDetailsState>;
   let getState: typeof store['getState'];
-  let dispatch: Dispatch<AppAction>;
+  let dispatch: Dispatch<PolicyDetailsAction>;
 
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
@@ -31,6 +30,54 @@ describe('policy details: ', () => {
     );
     getState = store.getState;
     dispatch = store.dispatch;
+
+    dispatch({
+      type: 'serverReturnedPolicyDetailsData',
+      payload: {
+        policyItem: {
+          id: '',
+          name: '',
+          description: '',
+          config_id: '',
+          enabled: true,
+          output_id: '',
+          inputs: [],
+          namespace: '',
+          package: {
+            name: '',
+            title: '',
+            version: '',
+          },
+          revision: 1,
+        },
+        policyConfig: {
+          windows: {
+            malware: {
+              mode: 'detect',
+            },
+            eventing: {
+              process: false,
+              network: false,
+            },
+          },
+          mac: {
+            malware: {
+              mode: '',
+            },
+            eventing: {
+              process: false,
+              network: false,
+            },
+          },
+          linux: {
+            eventing: {
+              process: false,
+              network: false,
+            },
+          },
+        },
+      },
+    });
   });
 
   describe('when the user has enabled windows process eventing', () => {
