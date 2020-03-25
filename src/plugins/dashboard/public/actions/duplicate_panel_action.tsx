@@ -21,13 +21,11 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 import {
   VisualizeEmbeddable,
-  VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeInput,
 } from '../../../../legacy/core_plugins/visualizations/public/np_ready/public/embeddable';
 import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
-import { ViewMode, IContainer, EmbeddableStart } from '../embeddable_plugin';
+import { ViewMode, IContainer } from '../embeddable_plugin';
 import { VisSavedObject } from '../../../../legacy/core_plugins/visualizations/public';
-import { EmbeddableInput } from '../../../embeddable/public';
 import { DashboardPanelState } from '..';
 
 export const ACTION_DUPLICATE_PANEL = 'duplicatePanel';
@@ -87,15 +85,15 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
         panelToDuplicate.savedObjectId
       );
 
-      const duplicationAppend = i18n.translate('dashboard.panel.duplicatedAppendMessage', {
+      const duplicationAppend = i18n.translate('dashboard.panel.title.duplicatedAppendMessage', {
         defaultMessage: '- copy',
       });
-
+      const newTitle = savedObjectToDuplicate.attributes.title + duplicationAppend;
       const duplicatedSavedObject = await this.core.savedObjects.client.create(
         embeddable.type,
         {
           ..._.cloneDeep(savedObjectToDuplicate.attributes),
-          title: savedObjectToDuplicate.attributes.title + duplicationAppend,
+          title: newTitle,
         },
         { references: _.cloneDeep(savedObjectToDuplicate.references) }
       );
@@ -115,18 +113,15 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
       duplicatedPanel.gridData.x = panelToDuplicate.gridData.x + panelToDuplicate.gridData.w;
       duplicatedPanel.gridData.y = panelToDuplicate.gridData.y;
 
-      const originalPanel = finalPanels[embeddable.id] as DashboardPanelState;
-      _.forOwn(finalPanels, (panel: DashboardPanelState<EmbeddableInput>) => {
-        if (
-          (panel.gridData.y === originalPanel.gridData.y &&
-            panel.gridData.x > originalPanel.gridData.x &&
-            panel.savedObjectId !== duplicatedPanel.savedObjectId) ||
-          panel.gridData.y > originalPanel.gridData.y
-        ) {
-          panel.gridData.y += duplicatedPanel.gridData.h;
-        }
+      this.core.notifications.toasts.addSuccess({
+        title: i18n.translate('dashboard.panel.duplicationSuccessMessage', {
+          defaultMessage: 'Added duplicate panel {newTitle}',
+          values: {
+            newTitle,
+          },
+        }),
+        'data-test-subj': 'panelDuplicateSuccess',
       });
-
       dashboard.updateInput({ panels: finalPanels });
       dashboard.reload();
     }
