@@ -47,11 +47,13 @@ const AuditIcon: React.FC<{
 
 export const JobStatusBadge: React.FC<{ job: SiemJob }> = ({ job }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
+  const color = isStarted ? 'secondary' : 'danger';
+  const text = isStarted ? ML_JOB_STARTED : ML_JOB_STOPPED;
 
-  return isStarted ? (
-    <EuiBadge color="secondary">{ML_JOB_STARTED}</EuiBadge>
-  ) : (
-    <EuiBadge color="danger">{ML_JOB_STOPPED}</EuiBadge>
+  return (
+    <EuiBadge data-test-subj="machineLearningJobStatus" color={color}>
+      {text}
+    </EuiBadge>
   );
 };
 
