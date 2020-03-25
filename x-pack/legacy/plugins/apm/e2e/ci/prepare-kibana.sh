@@ -6,7 +6,7 @@ E2E_DIR="x-pack/legacy/plugins/apm/e2e"
 echo "1/3 Install dependencies ..."
 # shellcheck disable=SC1091
 source src/dev/ci_setup/setup_env.sh true
-yarn kbn bootstrap
+yarn kbn clean && yarn kbn bootstrap
 
 echo "2/3 Ingest test data ..."
 pushd ${E2E_DIR}
