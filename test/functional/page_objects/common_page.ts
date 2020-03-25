@@ -256,28 +256,56 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       log.debug(`... sleep(${sleepMilliseconds}) end`);
     }
 
+    // kibServerConf(config: any) {
+    //   config.get('servers').kibana;
+    // }
+    //
+    // buildLegacyUrl(getKibServerUrl: any, basePath: String) {
+    //   return ({ pathName, hashName }: LegacyUrl) => {
+    //     getKibServerUrl({ pathname: `${basePath}${pathName}`, hashName });
+    //   }
+    // }
+    //
+    // buildUrl(getKibServerUrl:any , buildLegacyUrlWithPath: any, basePath:any, hash: any, appName: any) {
+    //
+    //   debugger;
+    //   return config.has(['apps', appName])
+    //     ? buildLegacyUrlWithPath(config.get(['apps', appName]))
+    //     : getKibServerUrl({ pathname: `${basePath}/app/${appName}`, hash });
+    //
+    // }
+    // kibServerUrl(getUrlNoAuth: any, config: any) {
+    //   return this.kibServerConf(config)
+    // }
+
     async navigateToApp(
       appName: string,
       { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}
     ) {
-      const kibServerConf = config.get('servers.kibana');
-      const getKibServerUrl = getUrl.noAuth.bind(null, kibServerConf);
-      const buildLegacyUrl = ({ pathName, hashName }: LegacyUrl) =>
-        getKibServerUrl({ pathname: `${basePath}${pathName}`, hashName });
-      const buildUrl = () =>
-        config.has(['apps', appName])
-          ? buildLegacyUrl(config.get(['apps', appName]))
-          : getKibServerUrl({ pathname: `${basePath}/app/${appName}`, hash });
-      const appUrl: string = buildUrl();
+      let appUrl: string;
+      if (config.has(['apps', appName])) {
+        // Legacy applications
+        const appConfig = config.get(['apps', appName]);
+        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+          pathname: `${basePath}${appConfig.pathname}`,
+          hash: hash || appConfig.hash,
+        });
+      } else {
+        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+          pathname: `${basePath}/app/${appName}`,
+          hash,
+        });
+      }
 
-      const navToAppSuccess = async () => {
+      log.debug('navigating to ' + appName + ' url: ' + appUrl);
+
+      await retry.tryForTime(defaultTryTimeout * 2, async () => {
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
           await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
           await this.sleep(700);
-          // TODO-TRE: Uncomment
-          // log.debug('returned from get, calling refresh');
-          // await browser.refresh();
+          log.debug('returned from get, calling refresh');
+          await browser.refresh();
           let currentUrl = shouldLoginIfPrompted
             ? await this.loginIfPrompted(appUrl)
             : await browser.getCurrentUrl();
@@ -299,22 +327,23 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           // Navigating to Settings when there is a default index pattern has a URL length of 196
           // (from debug output). Some other tabs may also be long. But a rather simple configured
           // visualization is about 1000 chars long. So at least we catch that case.
-          const replace = (a: string, b: string, c: string) => a.replace(b, c);
+
           // Browsers don't show the ':port' if it's 80 or 443 so we have to
           // remove that part so we can get a match in the tests.
-          const no80 = replace(appUrl, ':80/', '/');
-          const no443 = replace(no80, ':443/', '/');
-          const replaced = `${no443}.{0,${maxAdditionalLengthOnNavUrl}}$`;
-          const navSuccessful = new RegExp(replaced).test(currentUrl);
+          const navSuccessful = new RegExp(
+            appUrl.replace(':80/', '/').replace(':443/', '/') +
+              `.{0,${maxAdditionalLengthOnNavUrl}}$`
+          ).test(currentUrl);
 
-          if (!navSuccessful)
-            throw new Error(
-              `Failed to load: ${appName} app in ${defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`
-            );
+          if (!navSuccessful) {
+            const msg = `App failed to load: ${appName} in ${defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
+            log.debug(msg);
+            throw new Error(msg);
+          }
           return currentUrl;
         });
 
-        const waitUntilSettled = async () => {
+        await retry.try(async () => {
           await this.sleep(501);
           const currentUrl = await browser.getCurrentUrl();
           log.debug('in navigateTo url = ' + currentUrl);
@@ -322,13 +351,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
             lastUrl = currentUrl;
             throw new Error('URL changed, waiting for it to settle');
           }
-        };
-        await retry.try(waitUntilSettled);
+        });
         if (appName === 'status_page') return;
-        if (await testSubjects.exists('statusPageContainer'))
+        if (await testSubjects.exists('statusPageContainer')) {
           throw new Error('Navigation ended up at the status page.');
-      };
-      await retry.tryForTime(defaultTryTimeout * 2, navToAppSuccess);
+        }
+      });
     }
 
     async waitUntilUrlIncludes(path: string) {
