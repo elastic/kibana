@@ -203,8 +203,7 @@ export default class KbnServer {
   }
 
   applyLoggingConfiguration(settings) {
-    const config = new Config(this.config.getSchema(), settings);
-
+    const config = Config.withDefaultSchema(settings);
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),
