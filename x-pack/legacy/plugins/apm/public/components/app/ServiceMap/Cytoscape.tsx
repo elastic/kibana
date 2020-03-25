@@ -172,7 +172,7 @@ export function Cytoscape({
       });
     };
     const mouseoverHandler: cytoscape.EventHandler = event => {
-      trackApmEvent({ metric: 'service_map_object_hover' });
+      trackApmEvent({ metric: 'service_map_node_or_edge_hover' });
       event.target.addClass('hover');
       event.target.connectedEdges().addClass('nodeHover');
     };

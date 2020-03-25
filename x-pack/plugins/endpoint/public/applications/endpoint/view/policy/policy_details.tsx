@@ -5,14 +5,27 @@
  */
 
 import React from 'react';
-import { EuiTitle } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiPage,
+  EuiPageBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { usePolicyDetailsSelector } from './policy_hooks';
-import { selectPolicyDetails } from '../../store/policy_details/selectors';
-import { PageView } from '../../components/page_view';
+import { policyDetails } from '../../store/policy_details/selectors';
+import { WindowsEventing } from './policy_forms/eventing/windows';
+// import { PageView } from '../../components/page_view';
 
 export const PolicyDetails = React.memo(() => {
-  const policyItem = usePolicyDetailsSelector(selectPolicyDetails);
+  const policyItem = usePolicyDetailsSelector(policyDetails);
 
   function policyName() {
     if (policyItem) {
@@ -30,12 +43,48 @@ export const PolicyDetails = React.memo(() => {
   }
 
   return (
-    <PageView
-      headerLeft={
-        <EuiTitle size="l">
-          <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
-        </EuiTitle>
-      }
-    />
+    <EuiPage data-test-subj="policyDetailsPage">
+      <EuiPageBody>
+        <EuiPageHeader>
+          <EuiPageHeaderSection>
+            <EuiTitle size="m">
+              <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
+            </EuiTitle>
+          </EuiPageHeaderSection>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty>
+                <FormattedMessage
+                  id="xpack.endpoint.policy.details.cancel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill={true} iconType="save">
+                <FormattedMessage id="xpack.endpoint.policy.details.save" defaultMessage="Save" />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageHeader>
+        <EuiText size="xs" color="subdued">
+          <h4>
+            <FormattedMessage
+              id="xpack.endpoint.policy.details.settings"
+              defaultMessage="Settings"
+            />
+          </h4>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <WindowsEventing />
+      </EuiPageBody>
+    </EuiPage>
+    // <PageView
+    //   headerLeft={
+    //     <EuiTitle size="l">
+    //       <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
+    //     </EuiTitle>
+    //   }
+    // />
   );
 });

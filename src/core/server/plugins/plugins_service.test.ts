@@ -516,28 +516,29 @@ describe('PluginsService', () => {
   });
 
   describe('#setup()', () => {
+    beforeEach(() => {
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([
+          createPlugin('plugin-1', {
+            path: 'path-1',
+            version: 'some-version',
+            configPath: 'plugin1',
+          }),
+          createPlugin('plugin-2', {
+            path: 'path-2',
+            version: 'some-version',
+            configPath: 'plugin2',
+          }),
+        ]),
+      });
+
+      mockPluginSystem.uiPlugins.mockReturnValue(new Map());
+    });
+
     describe('uiPlugins.internal', () => {
       it('includes disabled plugins', async () => {
-        mockDiscover.mockReturnValue({
-          error$: from([]),
-          plugin$: from([
-            createPlugin('plugin-1', {
-              path: 'path-1',
-              version: 'some-version',
-              configPath: 'plugin1',
-            }),
-            createPlugin('plugin-2', {
-              path: 'path-2',
-              version: 'some-version',
-              configPath: 'plugin2',
-            }),
-          ]),
-        });
-
-        mockPluginSystem.uiPlugins.mockReturnValue(new Map());
-
         config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
-
         await pluginsService.discover();
         const { uiPlugins } = await pluginsService.setup({} as any);
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
@@ -550,6 +551,24 @@ describe('PluginsService', () => {
             },
           }
         `);
+      });
+    });
+
+    describe('plugin initialization', () => {
+      it('does initialize if plugins.initialize is true', async () => {
+        config$.next({ plugins: { initialize: true } });
+        await pluginsService.discover();
+        const { initialized } = await pluginsService.setup({} as any);
+        expect(mockPluginSystem.setupPlugins).toHaveBeenCalled();
+        expect(initialized).toBe(true);
+      });
+
+      it('does not initialize if plugins.initialize is false', async () => {
+        config$.next({ plugins: { initialize: false } });
+        await pluginsService.discover();
+        const { initialized } = await pluginsService.setup({} as any);
+        expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+        expect(initialized).toBe(false);
       });
     });
   });

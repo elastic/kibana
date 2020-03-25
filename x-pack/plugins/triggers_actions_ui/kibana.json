@@ -4,5 +4,6 @@
   "server": false,
   "ui": true,
   "optionalPlugins": ["alerting", "alertingBuiltins"],
-  "requiredPlugins": ["management", "charts", "data"]
+  "requiredPlugins": ["management", "charts", "data"],
+  "configPath": ["xpack", "trigger_actions_ui"]
 }

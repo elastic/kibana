@@ -37,6 +37,7 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     appName: 'ML',
     data: deps.data,
     security: deps.security,
+    licenseManagement: deps.licenseManagement,
     storage: localStorage,
     ...coreStart,
   };
