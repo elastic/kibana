@@ -5,29 +5,23 @@
  */
 
 import { ICustomClusterClient } from 'kibana/server';
-import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
-// @ts-ignore
-import { getAllStats } from './get_all_stats';
+import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import { getAllStats, CustomContext } from './get_all_stats';
 import { getClusterUuids } from './get_cluster_uuids';
 import { getLicenses } from './get_licenses';
 
 export function registerMonitoringCollection(
-  cluster: ICustomClusterClient,
-  telemetryCollectionManager: any
+  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
+  esCluster: ICustomClusterClient,
+  customContext: CustomContext
 ) {
-  // Create a legacy wrapper since telemetry is still in the legacy plugins
-  const legacyCluster: Cluster = {
-    callWithRequest: async (req: any, endpoint: string, params: any) =>
-      cluster.asScoped(req).callAsCurrentUser(endpoint, params),
-    callWithInternalUser: (endpoint: string, params: any) =>
-      cluster.callAsInternalUser(endpoint, params),
-  };
   telemetryCollectionManager.setCollection({
-    esCluster: legacyCluster,
+    esCluster,
     title: 'monitoring',
     priority: 2,
     statsGetter: getAllStats,
     clusterDetailsGetter: getClusterUuids,
     licenseGetter: getLicenses,
+    customContext,
   });
 }

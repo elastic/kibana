@@ -18,9 +18,10 @@ export interface ClusterEs {
     ping_schedule?: string;
     compress?: boolean;
   };
-  address?: string;
-  max_socket_connections?: number;
-  num_sockets_connected?: number;
+  proxy_address?: string;
+  max_proxy_socket_connections?: number;
+  num_proxy_sockets_connected?: number;
+  server_name?: string;
 }
 
 export interface Cluster {
@@ -77,9 +78,10 @@ export function deserializeCluster(
     initial_connect_timeout: initialConnectTimeout,
     skip_unavailable: skipUnavailable,
     transport,
-    address: proxyAddress,
-    max_socket_connections: proxySocketConnections,
-    num_sockets_connected: connectedSocketsCount,
+    proxy_address: proxyAddress,
+    max_proxy_socket_connections: proxySocketConnections,
+    num_proxy_sockets_connected: connectedSocketsCount,
+    server_name: serverName,
   } = esClusterObject;
 
   let deserializedClusterObject: Cluster = {
@@ -94,6 +96,7 @@ export function deserializeCluster(
     proxyAddress,
     proxySocketConnections,
     connectedSocketsCount,
+    serverName,
   };
 
   if (transport) {
@@ -150,13 +153,13 @@ export function serializeCluster(deserializedClusterObject: Cluster): ClusterPay
       cluster: {
         remote: {
           [name]: {
-            skip_unavailable: skipUnavailable !== undefined ? skipUnavailable : null,
-            mode: mode ?? null,
-            proxy_address: proxyAddress ?? null,
-            proxy_socket_connections: proxySocketConnections ?? null,
-            server_name: serverName ?? null,
-            seeds: seeds ?? null,
-            node_connections: nodeConnections ?? null,
+            skip_unavailable: typeof skipUnavailable === 'boolean' ? skipUnavailable : null,
+            mode: mode || null,
+            proxy_address: proxyAddress || null,
+            proxy_socket_connections: proxySocketConnections || null,
+            server_name: serverName || null,
+            seeds: seeds || null,
+            node_connections: nodeConnections || null,
           },
         },
       },
