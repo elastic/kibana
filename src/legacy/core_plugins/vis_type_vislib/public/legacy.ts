@@ -39,6 +39,7 @@ const setupPlugins: Readonly<VisTypeVislibPluginSetupDependencies> = {
 const startPlugins: Readonly<VisTypeVislibPluginStartDependencies> = {
   expressions: npStart.plugins.expressions,
   visualizations: visualizationsStart,
+  data: npStart.plugins.data,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

@@ -23,6 +23,8 @@ export const RISK_SCORE = '[data-test-subj="riskScore"]';
 
 export const RULE_NAME = '[data-test-subj="ruleName"]';
 
+export const RULE_SWITCH = '[data-test-subj="rule-switch"]';
+
 export const RULES_TABLE = '[data-test-subj="rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
