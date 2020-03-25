@@ -44,6 +44,20 @@ export const BATCH_ACTIONS = i18n.translate(
   }
 );
 
+export const ACTIVE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.activeRuleDescription',
+  {
+    defaultMessage: 'active',
+  }
+);
+
+export const INACTIVE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.inactiveRuleDescription',
+  {
+    defaultMessage: 'inactive',
+  }
+);
+
 export const BATCH_ACTION_ACTIVATE_SELECTED = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.batchActions.activateSelectedTitle',
   {

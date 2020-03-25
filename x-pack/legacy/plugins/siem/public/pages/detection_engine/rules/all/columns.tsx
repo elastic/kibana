@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiHealth,
 } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n/react';
 import * as H from 'history';
 import React, { Dispatch } from 'react';
 
@@ -34,6 +35,7 @@ import {
   exportRulesAction,
 } from './actions';
 import { Action } from './reducer';
+import { LocalizedDateTooltip } from '../../../../components/localized_date_tooltip';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -137,7 +139,9 @@ export const getColumns = ({
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <FormattedDate value={value} fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} />
+          <LocalizedDateTooltip date={new Date(value)}>
+            <FormattedRelative fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} value={value} />
+          </LocalizedDateTooltip>
         );
       },
       sortable: true,
@@ -222,7 +226,9 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
       name: i18n.COLUMN_INDEXING_TIMES,
       render: (value: RuleStatus['current_status']['bulk_create_time_durations']) => (
         <EuiText data-test-subj="bulk_create_time_durations" size="s">
-          {value?.join(',')}
+          {value != null && value.length > 0
+            ? Math.max(...value?.map(item => Number.parseFloat(item)))
+            : null}
         </EuiText>
       ),
       truncateText: true,
@@ -233,7 +239,9 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
       name: i18n.COLUMN_QUERY_TIMES,
       render: (value: RuleStatus['current_status']['search_after_time_durations']) => (
         <EuiText data-test-subj="search_after_time_durations" size="s">
-          {value?.join(',')}
+          {value != null && value.length > 0
+            ? Math.max(...value?.map(item => Number.parseFloat(item)))
+            : null}
         </EuiText>
       ),
       truncateText: true,
@@ -270,7 +278,9 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <FormattedDate value={value} fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} />
+          <LocalizedDateTooltip date={new Date(value)}>
+            <FormattedRelative fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} value={value} />
+          </LocalizedDateTooltip>
         );
       },
       sortable: true,
@@ -291,6 +301,16 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
       },
       width: '16%',
       truncateText: true,
+    },
+    {
+      field: 'activate',
+      name: i18n.COLUMN_ACTIVATE,
+      render: (value: Rule['enabled']) => (
+        <EuiText data-test-subj="search_after_time_durations" size="s">
+          {value ? i18n.ACTIVE : i18n.INACTIVE}
+        </EuiText>
+      ),
+      width: '95px',
     },
   ];
 

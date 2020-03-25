@@ -77,7 +77,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
  */
 export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
   const [rulesStatuses, setRuleStatuses] = useState<RuleStatusRowItemType[] | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
@@ -94,7 +94,12 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
 
         if (isSubscribed) {
           setRuleStatuses(
-            rules.map(rule => ({ id: rule.id, name: rule.name, ...ruleStatusesResponse[rule.id] }))
+            rules.map(rule => ({
+              id: rule.id,
+              activate: rule.enabled,
+              name: rule.name,
+              ...ruleStatusesResponse[rule.id],
+            }))
           );
         }
       } catch (error) {
@@ -107,7 +112,7 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
         setLoading(false);
       }
     };
-    if (rules) {
+    if (rules != null && rules.length > 0) {
       fetchData(rules.map(r => r.id));
     }
     return () => {
