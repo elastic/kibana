@@ -225,4 +225,56 @@ describe('API Keys', () => {
       );
     });
   });
+
+  describe('invalidateAsInternalUser()', () => {
+    it('returns null when security feature is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const result = await apiKeys.invalidateAsInternalUser({ id: '123' });
+      expect(result).toBeNull();
+      expect(mockClusterClient.callAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('calls callCluster with proper parameters', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.callAsInternalUser.mockResolvedValueOnce({
+        invalidated_api_keys: ['api-key-id-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      const result = await apiKeys.invalidateAsInternalUser({ id: '123' });
+      expect(result).toEqual({
+        invalidated_api_keys: ['api-key-id-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.invalidateAPIKey', {
+        body: {
+          id: '123',
+        },
+      });
+    });
+
+    it('Only passes id as a parameter', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.callAsInternalUser.mockResolvedValueOnce({
+        invalidated_api_keys: ['api-key-id-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      const result = await apiKeys.invalidateAsInternalUser({
+        id: '123',
+        name: 'abc',
+      } as any);
+      expect(result).toEqual({
+        invalidated_api_keys: ['api-key-id-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.invalidateAPIKey', {
+        body: {
+          id: '123',
+        },
+      });
+    });
+  });
 });

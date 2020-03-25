@@ -1,6 +1,7 @@
 {
   "indices.put_mapping": {
     "url_params": {
+      "include_type_name": "__flag__",
       "timeout": "",
       "master_timeout": "",
       "ignore_unavailable": "__flag__",
@@ -8,6 +9,7 @@
       "expand_wildcards": [
         "open",
         "closed",
+        "hidden",
         "none",
         "all"
       ]

@@ -5,7 +5,6 @@
  */
 
 import { extractReferences, injectReferences } from './saved_workspace_references';
-import { SavedWorkspace } from './saved_workspace';
 
 describe('extractReferences', () => {
   test('extracts references from wsState', () => {
@@ -67,7 +66,7 @@ describe('injectReferences', () => {
         indexPatternRefName: 'indexPattern_0',
         bar: true,
       }),
-    } as SavedWorkspace;
+    };
     const references = [
       {
         name: 'indexPattern_0',
@@ -89,7 +88,7 @@ Object {
     const context = {
       id: '1',
       title: 'test',
-    } as SavedWorkspace;
+    } as any;
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
 Object {
@@ -103,7 +102,7 @@ Object {
     const context = {
       id: '1',
       wsState: JSON.stringify({ bar: true }),
-    } as SavedWorkspace;
+    };
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
 Object {
@@ -119,7 +118,7 @@ Object {
       wsState: JSON.stringify({
         indexPatternRefName: 'indexPattern_0',
       }),
-    } as SavedWorkspace;
+    };
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
       `"Could not find reference \\"indexPattern_0\\""`
     );
