@@ -3,13 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBadge,
   EuiTableFieldDataColumnType,
   EuiTableComputedColumnType,
   EuiTableActionsColumnType,
   EuiAvatar,
+  EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
@@ -19,6 +21,7 @@ import { FormattedRelativePreferenceDate } from '../../../../components/formatte
 import { CaseDetailsLink } from '../../../../components/links';
 import { TruncatableText } from '../../../../components/truncatable_text';
 import * as i18n from './translations';
+import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 
 export type CasesColumns =
   | EuiTableFieldDataColumnType<Case>
@@ -60,7 +63,6 @@ export const getCasesColumns = (
       }
       return getEmptyTagValue();
     },
-    width: '25%',
   },
   {
     field: 'createdBy',
@@ -105,7 +107,6 @@ export const getCasesColumns = (
       return getEmptyTagValue();
     },
     truncateText: true,
-    width: '20%',
   },
   {
     align: 'right',
@@ -149,7 +150,46 @@ export const getCasesColumns = (
         },
       },
   {
+    name: 'ServiceNow Incident',
+    render: (theCase: Case) => {
+      if (theCase.id != null) {
+        return <ServiceNowColumn theCase={theCase} />;
+      }
+      return getEmptyTagValue();
+    },
+  },
+  {
     name: 'Actions',
     actions,
   },
 ];
+
+interface Props {
+  theCase: Case;
+}
+
+const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
+  const { hasDataToPush, isLoading } = useGetCaseUserActions(theCase.id);
+  const handleRenderDataToPush = useCallback(
+    () =>
+      isLoading ? (
+        <EuiLoadingSpinner />
+      ) : (
+        <p>
+          <EuiLink
+            data-test-subj={`case-table-column-external`}
+            href={theCase.externalService?.externalUrl}
+            target="_blank"
+          >
+            {theCase.externalService?.externalTitle}
+          </EuiLink>
+          {hasDataToPush ? i18n.REQUIRES_UPDATE : i18n.UP_TO_DATE}
+        </p>
+      ),
+    [hasDataToPush, isLoading, theCase.externalService]
+  );
+  if (theCase.externalService !== null) {
+    return handleRenderDataToPush();
+  }
+  return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
+};
