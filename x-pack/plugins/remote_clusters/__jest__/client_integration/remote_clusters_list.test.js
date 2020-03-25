@@ -17,8 +17,6 @@ import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 
 import { PROXY_MODE } from '../../common/constants';
 
-jest.mock('ui/new_platform');
-
 const { setup } = pageHelpers.remoteClustersList;
 
 describe('<RemoteClusterList />', () => {
