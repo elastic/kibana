@@ -5,7 +5,7 @@
  */
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPopoverTitle } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { GroupByExpression } from './group_by_over';
 
 describe('group by expression', () => {
@@ -97,6 +97,6 @@ describe('group by expression', () => {
     );
     wrapper.simulate('click');
     expect(wrapper.find('[value="all"]').length > 0).toBeTruthy();
-    expect(wrapper.contains(<EuiPopoverTitle>over</EuiPopoverTitle>)).toBeTruthy();
+    expect(wrapper.contains(<EuiFlexItem>over</EuiFlexItem>)).toBeTruthy();
   });
 });

@@ -5,7 +5,7 @@
  */
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPopoverTitle } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { OfExpression } from './of';
 
 describe('of expression', () => {
@@ -121,6 +121,6 @@ describe('of expression', () => {
       />
     );
     wrapper.simulate('click');
-    expect(wrapper.contains(<EuiPopoverTitle>of</EuiPopoverTitle>)).toBeTruthy();
+    expect(wrapper.contains(<EuiFlexItem>of</EuiFlexItem>)).toBeTruthy();
   });
 });

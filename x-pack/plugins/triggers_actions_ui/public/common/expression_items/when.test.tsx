@@ -5,7 +5,7 @@
  */
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPopoverTitle } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { WhenExpression } from './when';
 
 describe('when expression', () => {
@@ -100,6 +100,6 @@ describe('when expression', () => {
     );
     wrapper.simulate('click');
     expect(wrapper.find('[value="avg"]').length > 0).toBeTruthy();
-    expect(wrapper.contains(<EuiPopoverTitle>when</EuiPopoverTitle>)).toBeTruthy();
+    expect(wrapper.contains(<EuiFlexItem>when</EuiFlexItem>)).toBeTruthy();
   });
 });
