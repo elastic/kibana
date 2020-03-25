@@ -32,7 +32,7 @@ function expectAuthenticateCall(
 describe('HTTPAuthenticationProvider', () => {
   let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
-    mockOptions = mockAuthenticationProviderOptions();
+    mockOptions = mockAuthenticationProviderOptions({ name: 'http' });
   });
 
   it('throws if `schemes` are not specified', () => {
