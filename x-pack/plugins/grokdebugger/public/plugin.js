@@ -25,7 +25,7 @@ export class Plugin {
         title: i18n.translate('xpack.grokDebugger.displayName', {
           defaultMessage: 'Grok Debugger',
         }),
-        id: PLUGIN,
+        id: PLUGIN.ID,
         enableRouting: false,
         disabled: !license.isActive,
         tooltipContent: !license.isActive ? inactiveLicenseMessage : null,
@@ -40,7 +40,7 @@ export class Plugin {
 
   start(coreStart) {
     this.licensing.license$.subscribe(license => {
-      coreStart.chrome.navLinks.update(PLUGIN, {
+      coreStart.chrome.navLinks.update(PLUGIN.ID, {
         hidden: !license.isActive,
       });
     });
