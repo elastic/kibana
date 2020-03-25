@@ -22,7 +22,6 @@ import { CaseDetailsLink } from '../../../../components/links';
 import { TruncatableText } from '../../../../components/truncatable_text';
 import * as i18n from './translations';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
-import { getCaseDetailsUrl } from '../../../../components/link_to';
 
 export type CasesColumns =
   | EuiTableFieldDataColumnType<Case>
