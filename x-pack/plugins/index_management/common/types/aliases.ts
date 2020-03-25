@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export {
-  deserializeTemplateList,
-  deserializeV1Template,
-  serializeV1Template,
-} from './template_serialization';
+
+export interface Aliases {
+  [key: string]: any;
+}

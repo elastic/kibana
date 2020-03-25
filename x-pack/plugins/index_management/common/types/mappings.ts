@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export {
-  deserializeTemplateList,
-  deserializeV1Template,
-  serializeV1Template,
-} from './template_serialization';
+
+// TODO: Move mappings type from Mappings editor here
+
+export interface Mappings {
+  [key: string]: any;
+}

@@ -4,6 +4,67 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IndexSettings } from './indices';
+import { Aliases } from './aliases';
+import { Mappings } from './mappings';
+
+// Template serialized (from Elasticsearch)
+interface TemplateBaseSerialized {
+  name: string;
+  index_patterns: string[];
+  version?: number;
+  order?: number;
+}
+
+export interface TemplateV1Serialized extends TemplateBaseSerialized {
+  settings?: IndexSettings;
+  aliases?: Aliases;
+  mappings?: Mappings;
+}
+
+export interface TemplateV2Serialized {
+  name: string;
+  index_patterns: string[];
+  version?: number;
+  order?: number;
+  template: {
+    settings?: IndexSettings;
+    aliases?: Aliases;
+    mappings?: Mappings;
+  };
+}
+
+// Template Deserialized
+interface TemplateBaseDeserialized {
+  name: string;
+  indexPatterns: string[];
+  version?: number;
+  order?: number;
+  ilmPolicy?: {
+    name: string;
+  };
+  isManaged: boolean;
+}
+
+export interface TemplateV1Deserialized extends TemplateBaseDeserialized {
+  settings?: IndexSettings;
+  aliases?: Aliases;
+  mappings?: Mappings;
+}
+
+export interface TemplateV2Deserialized extends TemplateBaseDeserialized {
+  template: {
+    settings?: IndexSettings;
+    aliases?: Aliases;
+    mappings?: Mappings;
+  };
+}
+
+/**
+ * Interface for the template list in our UI table
+ * we don't include the mappings, settings and aliases
+ * to reduce the payload size sent back to the client.
+ */
 export interface TemplateListItem {
   name: string;
   indexPatterns: string[];
@@ -17,53 +78,14 @@ export interface TemplateListItem {
   };
   isManaged: boolean;
 }
-interface TemplateBase {
-  name: string;
-  indexPatterns: string[];
-  version?: number;
-  order?: number;
-  ilmPolicy?: {
-    name: string;
-  };
-  isManaged: boolean;
-}
 
-export interface TemplateV1 extends TemplateBase {
-  settings?: object;
-  aliases?: object;
-  mappings?: object;
-}
-
-export interface TemplateV2 extends TemplateBase {
-  template: {
-    settings?: object;
-    aliases?: object;
-    mappings?: object;
+/**
+ * TemplateDeserialized falls back to index template V2 format
+ * The UI will only be dealing with this interface, conversion from and to V1 format
+ * is done server side.
+ */
+export interface TemplateDeserialized extends TemplateV2Deserialized {
+  _kbnMeta: {
+    formatVersion: 1 | 2;
   };
-}
-
-export interface TemplateDeserialized extends TemplateV1 {
-  _kbnMeta?: {
-    version: 1 | 2;
-  };
-}
-
-export interface TemplateSerialized {
-  name: string;
-  index_patterns: string[];
-  version?: number;
-  order?: number;
-  settings?: {
-    [key: string]: any;
-    index?: {
-      [key: string]: any;
-      lifecycle?: {
-        name: string;
-      };
-    };
-  };
-  aliases?: {
-    [key: string]: any;
-  };
-  mappings?: object;
 }
