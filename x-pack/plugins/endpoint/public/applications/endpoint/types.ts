@@ -86,8 +86,6 @@ export interface PolicyListState {
   policyItems: PolicyData[];
   /** API error if loading data failed */
   apiError?: ServerApiError;
-  /** API error if updating policy failed */
-  updateApiError?: ServerApiError;
   /** total number of policies */
   total: number;
   /** Number of policies per page */
@@ -110,6 +108,8 @@ export interface PolicyDetailsState {
   location?: Immutable<EndpointAppLocation>;
   /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
   agentStatusSummary: GetAgentStatusResponse['results'];
+  /** API error if updating policy failed */
+  updateApiError?: ServerApiError;
 }
 
 export interface GlobalState {

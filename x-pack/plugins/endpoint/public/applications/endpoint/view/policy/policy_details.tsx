@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiButton, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
@@ -12,15 +12,28 @@ import { usePolicyDetailsSelector } from './policy_hooks';
 import {
   selectAgentStatusSummary,
   selectPolicyDetails,
+  selectUpdateApiError,
 } from '../../store/policy_details/selectors';
 import { AppAction } from '../../types';
 import { AgentsSummary } from './agents_summary';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const policyItem = usePolicyDetailsSelector(selectPolicyDetails);
 
   const agentStatusSummary = usePolicyDetailsSelector(selectAgentStatusSummary);
+  const updateApiError = usePolicyDetailsSelector(selectUpdateApiError);
+  const { notifications } = useKibana();
+
+  useEffect(() => {
+    if (updateApiError) {
+      notifications.toasts.danger({
+        toastLifeTimeMs: 10000,
+        body: <>{updateApiError?.message}</>,
+      });
+    }
+  }, [notifications.toasts, updateApiError]);
 
   const handleSaveOnClick = useCallback(() => {
     dispatch({

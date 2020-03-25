@@ -29,3 +29,5 @@ export const selectPolicyIdFromParams: (state: PolicyDetailsState) => string = c
 );
 
 export const selectAgentStatusSummary = (state: PolicyDetailsState) => state.agentStatusSummary;
+
+export const selectUpdateApiError = (state: PolicyDetailsState) => state.updateApiError;

@@ -143,7 +143,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
 
       let apiResponse: UpdateDatasourceResponse;
       try {
-        apiResponse = await sendPutDatasource(http, id, updatedPolicyItem);
+        apiResponse = await sendPutDatasource(http, id + '73847584758475834', updatedPolicyItem);
       } catch (error) {
         dispatch({
           type: 'serverReturnedPolicyDetailsUpdateFailure',
