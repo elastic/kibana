@@ -332,7 +332,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
   if (!_.isEqual(stateContainer.getState().vis, stateDefaults.vis)) {
     try {
       const { aggs, ...visState } = stateContainer.getState().vis;
-      vis.setState({ ...visState, data: { aggs: _.cloneDeep(aggs) } });
+      vis.setState({ ...visState, data: { aggs } });
     } catch (error) {
       // stop syncing url updtes with the state to prevent extra syncing
       stopAllSyncing();
