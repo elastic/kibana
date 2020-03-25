@@ -11,7 +11,12 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import {
+  buildRouteValidation,
+  transformError,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -67,6 +72,8 @@ export const updateRulesRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
+        validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+
         if (!context.alerting || !context.actions) {
           return siemResponse.error({ statusCode: 404 });
         }

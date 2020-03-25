@@ -1,3 +1,8 @@
+.auaActionWizard__selectedActionFactoryContainer {
+  background-color: $euiColorLightestShade;
+  padding: $euiSize;
+}
+
 .auaActionWizard__actionFactoryItem {
   .euiKeyPadMenuItem__label {
     height: #{$euiSizeXL};
