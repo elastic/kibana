@@ -21,9 +21,7 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async apiKeysPermissionDeniedMessage() {
-      const messageElement = await testSubjects.find('apiKeysPermissionDeniedMessage');
-      const message = await messageElement.getVisibleText();
-      return message;
+      return await testSubjects.getVisibleText('apiKeysPermissionDeniedMessage');
     },
   };
 }

@@ -31,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Loads the app', async () => {
-      await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
+      await security.testUser.setRoles(['test_api_keys']);
       log.debug('Checking for section header');
       const headerText = await pageObjects.apiKeys.noAPIKeysHeading();
       expect(headerText).to.be('No API keys');
