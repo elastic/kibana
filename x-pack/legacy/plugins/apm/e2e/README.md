@@ -17,10 +17,6 @@ The Jenkins CI uses a shell script to prepare Kibana:
 ```shell
 # Prepare and run Kibana locally
 $ x-pack/legacy/plugins/apm/e2e/ci/prepare-kibana.sh
-# Build Docker image for Kibana
-$ docker build --tag cypress --build-arg NODE_VERSION=$(cat .node-version) x-pack/legacy/plugins/apm/e2e/ci
-# Run Docker image
-$ docker run --rm -t --user "$(id -u):$(id -g)" \
-    -v `pwd`:/app --network="host" \
-    --name cypress cypress
+# Run cypress
+$ x-pack/legacy/plugins/apm/e2e/ci/run-test.sh
 ```

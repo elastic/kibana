@@ -13,16 +13,6 @@ export CYPRESS_BASE_URL=http://${kibana}:5701
 export HOME=/tmp
 npm config set cache ${HOME}
 
-## To avoid issues with volumes.
-#rsync -rv --exclude=.git --exclude=docs \
-#      --exclude=.cache --exclude=node_modules \
-#      --exclude=test/ \
-#      --exclude=src/ \
-#      --exclude=packages/ \
-#      --exclude=built_assets  --exclude=target \
-#      --exclude=data /app ${HOME}/
-#cd ${HOME}/app/x-pack/legacy/plugins/apm/e2e/cypress
-
 cd /app/x-pack/legacy/plugins/apm/e2e
 ## Install dependencies for cypress
 CI=true npm install
