@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useReducer, useCallback, useEffect, useState } from 'react';
+import React, {
+  useReducer,
+  useCallback,
+  useEffect,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from 'react';
 import styled, { css } from 'styled-components';
 
 import {
@@ -146,16 +153,6 @@ const ConfigureCasesComponent: React.FC = () => {
     [connectorId, connectors, closureType, mapping]
   );
 
-  const onChangeConnector = useCallback((newConnectorId: string) => {
-    setActionBarVisible(true);
-    setConnectorId(newConnectorId);
-  }, []);
-
-  const onChangeClosureType = useCallback((newClosureType: ClosureType) => {
-    setActionBarVisible(true);
-    setClosureType(newClosureType);
-  }, []);
-
   const onClickAddConnector = useCallback(() => {
     setActionBarVisible(false);
     setAddFlyoutVisibility(true);
@@ -165,6 +162,37 @@ const ConfigureCasesComponent: React.FC = () => {
     setActionBarVisible(false);
     setEditFlyoutVisibility(true);
   }, []);
+
+  const handleActionBar = useCallback(() => {
+    const unsavedChanges = difference(Object.values(currentConfiguration), [
+      connectorId,
+      closureType,
+    ]).length;
+
+    if (unsavedChanges === 0) {
+      setActionBarVisible(false);
+    } else {
+      setActionBarVisible(true);
+    }
+
+    setTotalConfigurationChanges(unsavedChanges);
+  }, [currentConfiguration, connectorId, closureType]);
+
+  const handleSetAddFlyoutVisibility = useCallback(
+    (isVisible: boolean) => {
+      handleActionBar();
+      setAddFlyoutVisibility(isVisible);
+    },
+    [currentConfiguration, connectorId, closureType]
+  );
+
+  const handleSetEditFlyoutVisibility = useCallback(
+    (isVisible: boolean) => {
+      handleActionBar();
+      setEditFlyoutVisibility(isVisible);
+    },
+    [currentConfiguration, connectorId, closureType]
+  );
 
   useEffect(() => {
     if (
@@ -208,16 +236,7 @@ const ConfigureCasesComponent: React.FC = () => {
   }, [connectors, connectorId]);
 
   useEffect(() => {
-    const unsavedChanges = difference(Object.values(currentConfiguration), [
-      connectorId,
-      closureType,
-    ]).length;
-
-    if (unsavedChanges === 0) {
-      setActionBarVisible(false);
-    }
-
-    setTotalConfigurationChanges(unsavedChanges);
+    handleActionBar();
   }, [connectors, connectorId, closureType, currentConfiguration]);
 
   return (
@@ -234,7 +253,7 @@ const ConfigureCasesComponent: React.FC = () => {
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors}
           isLoading={isLoadingConnectors}
-          onChangeConnector={onChangeConnector}
+          onChangeConnector={setConnectorId}
           handleShowAddFlyout={onClickAddConnector}
           selectedConnector={connectorId}
         />
@@ -243,7 +262,7 @@ const ConfigureCasesComponent: React.FC = () => {
         <ClosureOptions
           closureTypeSelected={closureType}
           disabled={persistLoading || isLoadingConnectors || connectorId === 'none'}
-          onChangeClosureType={onChangeClosureType}
+          onChangeClosureType={setClosureType}
         />
       </SectionWrapper>
       <SectionWrapper>
@@ -306,7 +325,7 @@ const ConfigureCasesComponent: React.FC = () => {
       >
         <ConnectorAddFlyout
           addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
+          setAddFlyoutVisibility={handleSetAddFlyoutVisibility as Dispatch<SetStateAction<boolean>>}
           actionTypes={actionTypes}
         />
         {editedConnectorItem && (
@@ -314,7 +333,9 @@ const ConfigureCasesComponent: React.FC = () => {
             key={editedConnectorItem.id}
             initialConnector={editedConnectorItem}
             editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
+            setEditFlyoutVisibility={
+              handleSetEditFlyoutVisibility as Dispatch<SetStateAction<boolean>>
+            }
           />
         )}
       </ActionsConnectorsContextProvider>
