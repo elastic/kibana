@@ -17,19 +17,32 @@ export interface TemplateListItem {
   };
   isManaged: boolean;
 }
-export interface Template {
+interface TemplateBase {
   name: string;
   indexPatterns: string[];
   version?: number;
   order?: number;
-  settings?: object;
-  aliases?: object;
-  mappings?: object;
   ilmPolicy?: {
     name: string;
   };
   isManaged: boolean;
 }
+
+export interface TemplateV1 extends TemplateBase {
+  settings?: object;
+  aliases?: object;
+  mappings?: object;
+}
+
+export interface TemplateV2 extends TemplateBase {
+  template: {
+    settings?: object;
+    aliases?: object;
+    mappings?: object;
+  };
+}
+
+export type Template = TemplateV1 | TemplateV2;
 
 export interface TemplateEs {
   name: string;

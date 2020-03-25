@@ -5,3 +5,5 @@
  */
 
 export { PLUGIN, API_BASE_PATH } from './constants';
+
+export * from './types';
