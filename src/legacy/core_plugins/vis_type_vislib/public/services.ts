@@ -18,16 +18,8 @@
  */
 
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
 
-let dataActions: DataPublicPluginStart['actions'] | null = null;
-
-export function setDataActions(actions: DataPublicPluginStart['actions']) {
-  dataActions = actions;
-}
-
-export function getDataActions() {
-  if (!dataActions) {
-    throw new Error('Data Actions weren not set');
-  }
-  return dataActions;
-}
+export const [getDataActions, setDataActions] = createGetterSetter<DataPublicPluginStart>(
+  'actions'
+);
