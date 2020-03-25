@@ -71,7 +71,7 @@ export const MlJobDescription: React.FC<{ job: SiemJob }> = ({ job }) => {
   return (
     <Wrapper>
       <div>
-        <JobLink href={jobUrl} target="_blank">
+        <JobLink data-test-subj="machineLearningJobId" href={jobUrl} target="_blank">
           {job.id}
         </JobLink>
         <AuditIcon message={job.auditMessage} />
