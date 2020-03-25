@@ -211,7 +211,7 @@ export default function({ getService }: FtrProviderContext) {
           if (entityId === undefined && alert.event.id > NULLABLE_EVENT_ID) {
             valid = false;
           }
-          if (entityId !== undefined && entityId > lastSeen) {
+          if (entityId !== undefined && lastSeen !== undefined && entityId > lastSeen) {
             valid = false;
           } else {
             lastSeen = entityId;
@@ -234,7 +234,7 @@ export default function({ getService }: FtrProviderContext) {
           if (entityId === undefined && alert.event.id < NULLABLE_EVENT_ID) {
             valid = false;
           }
-          if (entityId !== undefined && entityId < lastSeen) {
+          if (entityId !== undefined && lastSeen !== undefined && entityId < lastSeen) {
             valid = false;
           } else {
             lastSeen = entityId;
@@ -268,7 +268,7 @@ export default function({ getService }: FtrProviderContext) {
           if (entityId === undefined && alert.event.id < NULLABLE_EVENT_ID) {
             valid = false;
           }
-          if (entityId !== undefined && entityId > lastSeen) {
+          if (entityId !== undefined && lastSeen !== undefined && entityId > lastSeen) {
             valid = false;
           } else {
             lastSeen = entityId;
@@ -291,7 +291,7 @@ export default function({ getService }: FtrProviderContext) {
           if (entityId === undefined && alert.event.id < NULLABLE_EVENT_ID) {
             valid = false;
           }
-          if (entityId !== undefined && entityId < lastSeen) {
+          if (entityId !== undefined && lastSeen !== undefined && entityId < lastSeen) {
             valid = false;
           } else {
             lastSeen = entityId;
