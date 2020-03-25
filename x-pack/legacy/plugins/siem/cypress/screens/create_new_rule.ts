@@ -22,7 +22,9 @@ export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
-export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="continue"]';
+export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
+
+export const SCHEDULE_CONTINUE_BUTTON = '[data-test-subj="schedule-continue"]';
 
 export const FALSE_POSITIVES_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input';
@@ -51,7 +53,8 @@ export const RULE_DESCRIPTION_INPUT =
 export const RULE_NAME_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleName"] [data-test-subj="input"]';
 
-export const SEVERITY_DROPDOWN = '[data-test-subj="select"]';
+export const SEVERITY_DROPDOWN =
+  '[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]';
 
 export const TAGS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxSearchInput"]';

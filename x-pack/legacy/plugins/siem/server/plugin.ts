@@ -21,6 +21,7 @@ import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/featur
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../../../plugins/encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../../../plugins/spaces/server';
 import { PluginStartContract as ActionsStart } from '../../../../plugins/actions/server';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { LegacyServices } from './types';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -41,11 +42,12 @@ import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine
 export { CoreSetup, CoreStart };
 
 export interface SetupPlugins {
+  alerting: AlertingSetup;
   encryptedSavedObjects: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
+  licensing: LicensingPluginSetup;
   security: SecuritySetup;
   spaces?: SpacesSetup;
-  alerting: AlertingSetup;
 }
 
 export interface StartPlugins {
@@ -89,7 +91,8 @@ export class Plugin {
     initRoutes(
       router,
       __legacy.config,
-      plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false
+      plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false,
+      plugins.security
     );
 
     plugins.features.registerFeature({
