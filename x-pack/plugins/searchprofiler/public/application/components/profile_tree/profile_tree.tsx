@@ -17,9 +17,10 @@ export interface Props {
   target: Targets;
   data: ShardSerialized[] | null;
   onHighlight: (args: OnHighlightChangeArgs) => void;
+  onDataInitError: (error: Error) => void;
 }
 
-export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
+export const ProfileTree = memo(({ data, target, onHighlight, onDataInitError }: Props) => {
   if (!data || data.length === 0) {
     return null;
   }
@@ -28,8 +29,7 @@ export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
   try {
     sortedIndices = initDataFor(target)(data);
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(e);
+    onDataInitError(e);
     return null;
   }
 
