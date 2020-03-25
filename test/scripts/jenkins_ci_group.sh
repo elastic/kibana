@@ -6,7 +6,7 @@ if [[ -z "$CODE_COVERAGE" ]]; then
   checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
 
   if [ "$CI_GROUP" == "1" ]; then
-    source test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh
+    source test/scripts/jenkins_build_kbn_sample_panel_action.sh
     yarn run grunt run:pluginFunctionalTestsRelease --from=source;
     yarn run grunt run:exampleFunctionalTestsRelease --from=source;
     yarn run grunt run:interpreterFunctionalTestsRelease;
