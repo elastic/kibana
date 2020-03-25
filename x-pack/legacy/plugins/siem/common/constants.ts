@@ -65,6 +65,8 @@ export const INTERNAL_IDENTIFIER = '__internal';
 export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id`;
 export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id`;
 export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable`;
+export const INTERNAL_NOTIFICATION_ID_KEY = `${INTERNAL_IDENTIFIER}_notification_id`;
+export const INTERNAL_NOTIFICATION_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_notification_rule_id`;
 
 /**
  * Detection engine routes
@@ -94,4 +96,19 @@ export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_UR
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated';
 
+/*
+  Licensing requirements
+ */
+export const MINIMUM_ML_LICENSE = 'platinum';
+
+/*
+  Rule notifications options
+*/
+export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
+  '.email',
+  '.slack',
+  '.pagerduty',
+  '.webhook',
+];
+export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';

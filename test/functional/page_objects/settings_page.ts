@@ -169,7 +169,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async getIndexPageHeading() {
-      return await testSubjects.find('indexPatternTitle');
+      return await testSubjects.getVisibleText('indexPatternTitle');
     }
 
     async getConfigureHeader() {

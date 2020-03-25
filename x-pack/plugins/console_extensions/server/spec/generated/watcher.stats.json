@@ -19,6 +19,6 @@
         "queued_watches"
       ]
     },
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-stats.html"
   }
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, PluginInitializerContext } from '../../../../../../core/public';
+import { PluginInitializerContext } from '../../../../../../core/public';
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock } from '../../../../../../core/public/mocks';
@@ -26,7 +26,6 @@ import { expressionsPluginMock } from '../../../../../../plugins/expressions/pub
 import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
 import { usageCollectionPluginMock } from '../../../../../../plugins/usage_collection/public/mocks';
 import { uiActionsPluginMock } from '../../../../../../plugins/ui_actions/public/mocks';
-import { VisualizationsStartDeps } from './plugin';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -49,7 +48,7 @@ const createStartContract = (): VisualizationsStart => ({
 const createInstance = async () => {
   const plugin = new VisualizationsPlugin({} as PluginInitializerContext);
 
-  const setup = plugin.setup(coreMock.createSetup() as CoreSetup<VisualizationsStartDeps>, {
+  const setup = plugin.setup(coreMock.createSetup(), {
     data: dataPluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createSetupContract(),
