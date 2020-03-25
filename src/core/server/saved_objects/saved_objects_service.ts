@@ -378,9 +378,11 @@ export class SavedObjectsService
      * However, our build system optimize step and some tests depend on the
      * HTTP server running without an Elasticsearch server being available.
      * So, when the `migrations.skip` is true, we skip migrations altogether.
+     *
+     * We also cannot safely run migrations if plugins are not initialized since
+     * not plugin migrations won't be registered.
      */
-    const skipMigrations =
-      this.config.migration.skip || this.coreContext.env.isDevClusterMaster || !pluginsInitialized;
+    const skipMigrations = this.config.migration.skip || !pluginsInitialized;
 
     if (skipMigrations) {
       this.logger.warn(
