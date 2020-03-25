@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../../server/types';
-import { ESCallCluster, ExportTypesRegistry } from '../../types';
+import { ReportingCore } from '../../server';
+import { ESCallCluster, ExportTypesRegistry, ServerFacade } from '../../types';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
 
@@ -14,19 +15,19 @@ import { RangeStats } from './types';
 const METATYPE = 'kibana_stats';
 
 /*
+ * @param {Object} server
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(
-  config: ReportingConfig,
-  plugins: ReportingSetupDeps,
+  server: ServerFacade,
+  usageCollection: UsageCollectionSetup,
   exportTypesRegistry: ExportTypesRegistry,
   isReady: () => Promise<boolean>
 ) {
-  const { usageCollection } = plugins;
   return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
     fetch: (callCluster: ESCallCluster) =>
-      getReportingUsage(config, plugins, callCluster, exportTypesRegistry),
+      getReportingUsage(server, callCluster, exportTypesRegistry),
     isReady,
 
     /*
@@ -51,17 +52,17 @@ export function getReportingUsageCollector(
 
 export function registerReportingUsageCollector(
   reporting: ReportingCore,
-  config: ReportingConfig,
-  plugins: ReportingSetupDeps
+  server: ServerFacade,
+  usageCollection: UsageCollectionSetup
 ) {
   const exportTypesRegistry = reporting.getExportTypesRegistry();
   const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
 
   const collector = getReportingUsageCollector(
-    config,
-    plugins,
+    server,
+    usageCollection,
     exportTypesRegistry,
     collectionIsReady
   );
-  plugins.usageCollection.registerCollector(collector);
+  usageCollection.registerCollector(collector);
 }

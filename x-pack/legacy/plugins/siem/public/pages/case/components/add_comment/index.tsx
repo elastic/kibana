@@ -30,13 +30,14 @@ const initialCommentValue: CommentRequest = {
 
 interface AddCommentProps {
   caseId: string;
+  insertQuote: string | null;
   onCommentSaving?: () => void;
   onCommentPosted: (commentResponse: Comment) => void;
   showLoading?: boolean;
 }
 
 export const AddComment = React.memo<AddCommentProps>(
-  ({ caseId, showLoading = true, onCommentPosted, onCommentSaving }) => {
+  ({ caseId, insertQuote, showLoading = true, onCommentPosted, onCommentSaving }) => {
     const { commentData, isLoading, postComment, resetCommentData } = usePostComment(caseId);
     const { form } = useForm<CommentRequest>({
       defaultValue: initialCommentValue,
@@ -47,6 +48,16 @@ export const AddComment = React.memo<AddCommentProps>(
       form,
       'comment'
     );
+
+    useEffect(() => {
+      if (insertQuote !== null) {
+        const { comment } = form.getFormData();
+        form.setFieldValue(
+          'comment',
+          `${comment}${comment.length > 0 ? '\n\n' : ''}${insertQuote}`
+        );
+      }
+    }, [insertQuote]);
 
     useEffect(() => {
       if (commentData !== null) {
@@ -67,7 +78,7 @@ export const AddComment = React.memo<AddCommentProps>(
     }, [form]);
 
     return (
-      <>
+      <span id="add-comment-permLink">
         {isLoading && showLoading && <MySpinner size="xl" />}
         <Form form={form}>
           <UseField
@@ -100,7 +111,7 @@ export const AddComment = React.memo<AddCommentProps>(
             }}
           />
         </Form>
-      </>
+      </span>
     );
   }
 );
