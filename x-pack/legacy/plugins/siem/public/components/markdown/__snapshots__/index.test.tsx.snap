@@ -6,10 +6,12 @@ exports[`Markdown markdown links it renders the expected content containing a li
   data-test-subj="markdown"
   escapeHtml={true}
   linkTarget="_blank"
+  parserOptions={Object {}}
   plugins={Array []}
   rawSourcePos={false}
   renderers={
     Object {
+      "blockquote": [Function],
       "link": [Function],
       "root": [Function],
       "table": [Function],
@@ -31,10 +33,12 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
   data-test-subj="markdown"
   escapeHtml={true}
   linkTarget="_blank"
+  parserOptions={Object {}}
   plugins={Array []}
   rawSourcePos={false}
   renderers={
     Object {
+      "blockquote": [Function],
       "link": [Function],
       "root": [Function],
       "table": [Function],

@@ -10,6 +10,8 @@ import {
   EuiTableComputedColumnType,
   EuiTableActionsColumnType,
   EuiAvatar,
+  EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
@@ -20,6 +22,7 @@ import { CaseDetailsLink } from '../../../../components/links';
 import { TruncatableText } from '../../../../components/truncatable_text';
 import * as i18n from './translations';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
+import { getCaseDetailsUrl } from '../../../../components/link_to';
 
 export type CasesColumns =
   | EuiTableFieldDataColumnType<Case>
@@ -167,13 +170,21 @@ interface Props {
 }
 
 const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
-  const { hasDataToPush } = useGetCaseUserActions(theCase.id);
+  const { hasDataToPush, isLoading } = useGetCaseUserActions(theCase.id);
   const handleRenderDataToPush = useCallback(
     () =>
-      hasDataToPush
-        ? renderStringField(i18n.REQUIRES_UPDATE, `case-table-column-external-requiresUpdate`)
-        : renderStringField(i18n.UP_TO_DATE, `case-table-column-external-upToDate`),
-    [hasDataToPush]
+      isLoading ? (
+        <EuiLoadingSpinner />
+      ) : (
+        <EuiLink
+          data-test-subj={`case-table-column-external`}
+          href={theCase.externalService?.externalUrl}
+          target="_blank"
+        >
+          {hasDataToPush ? i18n.REQUIRES_UPDATE : i18n.UP_TO_DATE}
+        </EuiLink>
+      ),
+    [hasDataToPush, isLoading, theCase.externalService?.externalUrl]
   );
   if (theCase.externalService !== null) {
     return handleRenderDataToPush();
