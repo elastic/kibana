@@ -8,8 +8,7 @@ import { APICaller, SavedObjectsClientContract } from 'kibana/server';
 import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 
-// FLAKY: https://github.com/elastic/kibana/issues/59541
-describe.skip('ML - data recognizer', () => {
+describe('ML - data recognizer', () => {
   const dr = new DataRecognizer(
     jest.fn() as APICaller,
     ({
