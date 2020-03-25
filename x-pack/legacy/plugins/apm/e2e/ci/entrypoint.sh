@@ -26,7 +26,7 @@ npm config set cache ${HOME}
 cd /app/x-pack/legacy/plugins/apm/e2e
 ## Install dependencies for cypress
 CI=true npm install
-yarn install
+yarn
 
 # Wait for the kibana to be up and running
 npm install wait-on
