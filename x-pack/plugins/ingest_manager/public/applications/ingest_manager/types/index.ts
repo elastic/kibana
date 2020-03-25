@@ -56,6 +56,7 @@ export {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
+  RegistryDatasource,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,
@@ -70,4 +71,5 @@ export {
   DeletePackageResponse,
   DetailViewPanelName,
   InstallStatus,
+  InstallationStatus,
 } from '../../../../common';
