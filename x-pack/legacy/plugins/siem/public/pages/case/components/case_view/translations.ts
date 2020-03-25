@@ -35,7 +35,7 @@ export const REMOVED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabe
 });
 
 export const VIEW_INCIDENT = (incidentNumber: string) =>
-  i18n.translate('xpack.siem.case.caseView.actionLabel.pushedNewIncident', {
+  i18n.translate('xpack.siem.case.caseView.actionLabel.viewIncident', {
     defaultMessage: 'View {incidentNumber}',
     values: {
       incidentNumber,
