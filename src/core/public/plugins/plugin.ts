@@ -30,8 +30,8 @@ import { CoreStart, CoreSetup } from '..';
  * @public
  */
 export interface Plugin<
-  TSetup = void,
-  TStart = void,
+  TSetup = unknown,
+  TStart = unknown,
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
 > {

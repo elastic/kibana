@@ -275,7 +275,7 @@ export interface CoreStart {
  * @public
  * @deprecated
  */
-export interface LegacyCoreSetup extends CoreSetup<any> {
+export interface LegacyCoreSetup extends CoreSetup<any, any> {
   /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }

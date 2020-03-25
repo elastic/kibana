@@ -57,7 +57,7 @@ function createCoreSetupMock({
   basePath?: string;
   pluginStartDeps?: object;
   pluginStartContract?: object;
-}) {
+} = {}) {
   const mock = {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),

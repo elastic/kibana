@@ -102,7 +102,7 @@ function createCoreSetupMock({
 }: {
   pluginStartDeps?: object;
   pluginStartContract?: object;
-}) {
+} = {}) {
   const httpService = httpServiceMock.createSetupContract();
   const httpMock: jest.Mocked<CoreSetup['http']> = {
     createCookieSessionStorageFactory: httpService.createCookieSessionStorageFactory,
