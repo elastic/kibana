@@ -4,11 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ELASTIC_RULES_BTN, RULES_ROW, RULES_TABLE } from '../screens/signal_detection_rules';
+import {
+  COLLAPSED_ACTION_BTN,
+  ELASTIC_RULES_BTN,
+  RELOAD_PREBUILT_RULES_BTN,
+  RULES_ROW,
+  RULES_TABLE,
+} from '../screens/signal_detection_rules';
 
 import {
   changeToThreeHundredRowsPerPage,
+  deleteFirstRule,
+  deleteSelectedRules,
   loadPrebuiltDetectionRules,
+  reloadDeletedRules,
+  selectNumberOfRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRulesToBeLoaded,
@@ -27,9 +37,8 @@ import {
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
-import { SIGNALS } from '../screens/detections';
 
-/* describe('Signal detection rules, prebuilt rules', () => {
+describe('Signal detection rules, prebuilt rules', () => {
   before(() => {
     esArchiverLoadEmptyKibana();
   });
@@ -60,12 +69,11 @@ import { SIGNALS } from '../screens/detections';
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
   });
-});*/
+});
 
 describe('Deleting prebuilt rules', () => {
   beforeEach(() => {
-    // esArchiverLoad('prebuilt_rules_loaded')
-    loginAndWaitForPageWithoutDateRange(DETECTIONS);
+    esArchiverLoad('prebuilt_rules_loaded');
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     waitForSignalsPanelToBeLoaded();
     waitForSignalsIndexToBeCreated();
@@ -73,105 +81,89 @@ describe('Deleting prebuilt rules', () => {
   });
 
   afterEach(() => {
-    // esArchiverUnload('prebuilt_rules_loaded')
+    esArchiverUnload('prebuilt_rules_loaded');
   });
 
   it('Does not allow to delete one rule when more than one is selected', () => {
-    cy.get('.euiTableRow .euiCheckbox__input')
-      .first()
-      .click({ force: true });
-    cy.get('.euiTableRow .euiCheckbox__input')
-      .eq(1)
-      .click({ force: true });
+    const numberOfRulesToBeSelected = 2;
+    selectNumberOfRules(numberOfRulesToBeSelected);
 
-    cy.get('[data-test-subj="euiCollapsedItemActionsButton"]').each(collapsedItemActionBtn => {
+    cy.get(COLLAPSED_ACTION_BTN).each(collapsedItemActionBtn => {
       cy.wrap(collapsedItemActionBtn).should('have.attr', 'disabled');
     });
   });
 
   it('Deletes and recovers one rule', () => {
-    cy.get('[data-test-subj="euiCollapsedItemActionsButton"]')
-      .first()
-      .click({ force: true });
-    cy.get('[data-test-subj="deleteRuleAction"]').click();
+    const expectedNumberOfRulesAfterDeletion = 91;
+    const expectedNumberOfRulesAfterRecovering = 92;
+
+    deleteFirstRule();
+    cy.reload();
+    changeToThreeHundredRowsPerPage();
+    waitForRulesToBeLoaded();
+
+    cy.get(ELASTIC_RULES_BTN)
+      .invoke('text')
+      .should('eql', `Elastic rules (${expectedNumberOfRulesAfterDeletion})`);
+    cy.get(RULES_TABLE).then($table => {
+      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
+    });
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
+    cy.get(RELOAD_PREBUILT_RULES_BTN)
+      .invoke('text')
+      .should('eql', 'Reload 1 deleted Elastic prebuilt rule ');
+
+    reloadDeletedRules();
+
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
 
     cy.reload();
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    cy.get('[data-test-subj="reloadPrebuiltRulesBtn"]').should('exist');
-
-    const expectedNumberOfRules = 91;
-
-    const expectedElasticRulesBtnText = 'Elastic rules (91)';
+    cy.get(RULES_TABLE).then($table => {
+      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterRecovering);
+    });
     cy.get(ELASTIC_RULES_BTN)
       .invoke('text')
-      .should('eql', expectedElasticRulesBtnText);
-
-    cy.get(RULES_TABLE).then($table => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
-
-    cy.get('[data-test-subj="reloadPrebuiltRulesBtn"]').click({ force: true });
-    cy.get('[data-test-subj="reloadPrebuiltRulesBtn"]').should('not.exist');
-
-    cy.reload();
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
-
-    const finalExpectedNumberOfRules = 92;
-    cy.get(RULES_TABLE).then($table => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', finalExpectedNumberOfRules);
-    });
-
-    const finalExpectedElasticRulesBtnText = 'Elastic rules (92)';
-    cy.get(ELASTIC_RULES_BTN)
-      .invoke('text')
-      .should('eql', finalExpectedElasticRulesBtnText);
+      .should('eql', `Elastic rules (${expectedNumberOfRulesAfterRecovering})`);
   });
 
   it('Deletes and recovers more than one rule', () => {
-    cy.get('.euiTableRow .euiCheckbox__input')
-      .first()
-      .click({ force: true });
-    cy.get('.euiTableRow .euiCheckbox__input')
-      .eq(1)
-      .click({ force: true });
-    cy.get('[data-test-subj="bulkActions"] span').click({ force: true });
-    cy.get('[data-test-subj="deleteRuleBulk"]').click();
+    const numberOfRulesToBeSelected = 2;
+    const expectedNumberOfRulesAfterDeletion = 90;
+    const expectedNumberOfRulesAfterRecovering = 92;
+
+    selectNumberOfRules(numberOfRulesToBeSelected);
+    deleteSelectedRules();
+    cy.reload();
+    changeToThreeHundredRowsPerPage();
+    waitForRulesToBeLoaded();
+
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
+    cy.get(RELOAD_PREBUILT_RULES_BTN)
+      .invoke('text')
+      .should('eql', `Reload ${numberOfRulesToBeSelected} deleted Elastic prebuilt rules `);
+    cy.get(ELASTIC_RULES_BTN)
+      .invoke('text')
+      .should('eql', `Elastic rules (${expectedNumberOfRulesAfterDeletion})`);
+    cy.get(RULES_TABLE).then($table => {
+      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
+    });
+
+    reloadDeletedRules();
+
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should('not.exist');
 
     cy.reload();
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    cy.get('[data-test-subj="reloadPrebuiltRulesBtn"]').should('exist');
-
-    const expectedNumberOfRules = 90;
-
-    const expectedElasticRulesBtnText = 'Elastic rules (90)';
+    cy.get(RULES_TABLE).then($table => {
+      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterRecovering);
+    });
     cy.get(ELASTIC_RULES_BTN)
       .invoke('text')
-      .should('eql', expectedElasticRulesBtnText);
-
-    cy.get(RULES_TABLE).then($table => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
-
-    cy.get('[data-test-subj="reloadPrebuiltRulesBtn"]').click({ force: true });
-    cy.get('[data-test-subj="reloadPrebuiltRulesBtn"]').should('not.exist');
-
-    cy.reload();
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
-
-    const finalExpectedNumberOfRules = 92;
-    cy.get(RULES_TABLE).then($table => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', finalExpectedNumberOfRules);
-    });
-
-    const finalExpectedElasticRulesBtnText = 'Elastic rules (92)';
-    cy.get(ELASTIC_RULES_BTN)
-      .invoke('text')
-      .should('eql', finalExpectedElasticRulesBtnText);
+      .should('eql', `Elastic rules (${expectedNumberOfRulesAfterRecovering})`);
   });
 });
