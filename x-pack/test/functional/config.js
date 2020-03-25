@@ -92,7 +92,6 @@ export default async function({ readConfigFile }) {
         '--xpack.ingestManager.enabled=true',
         '--xpack.ingestManager.fleet.enabled=true',
         '--xpack.ingestManager.epm.enabled=true',
-        '--xpack.ingestManager.epm.registryUrl=http://localhost:6666',
       ],
     },
     uiSettings: {

@@ -26,7 +26,11 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
-      serverArgs: [...xPackAPITestsConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.ingestManager.epm.enabled=true',
+        '--xpack.ingestManager.epm.registryUrl=http://localhost:6666',
+      ],
     },
   };
 }

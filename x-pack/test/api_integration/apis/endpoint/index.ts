@@ -20,13 +20,6 @@ export default function endpointAPIIntegrationTests(context: FtrProviderContext)
       await ingestManager.before();
     });
 
-    after(() => {
-      /**
-       * Shutdown the ingest manager package registry mocks
-       */
-      ingestManager.after();
-    });
-
     this.tags(['endpoint']);
     loadTestFile(require.resolve('./index_pattern'));
     loadTestFile(require.resolve('./resolver'));
