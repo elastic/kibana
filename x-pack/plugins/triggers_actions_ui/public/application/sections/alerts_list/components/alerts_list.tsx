@@ -446,15 +446,13 @@ export const AlertsList: React.FunctionComponent = () => {
           }
           setAlertsToDelete([]);
         }}
-        onCancel={async () => {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertsList.failedToDeleteAlertsMessage',
-              { defaultMessage: 'Failed to delete alert(s)' }
-            ),
-          });
+        onErrors={async () => {
           // Refresh the alerts from the server, some alerts may have beend deleted
           await loadAlertsData();
+          setAlertsToDelete([]);
+        }}
+        onCancel={async () => {
+          setAlertsToDelete([]);
         }}
         apiDeleteCall={deleteAlerts}
         idsToDelete={alertsToDelete}
