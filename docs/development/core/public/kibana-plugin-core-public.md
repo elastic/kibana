@@ -38,7 +38,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) to execute the default behaviour when leaving the application.<!-- -->See  |
 |  [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |  |
 |  [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |  |
-|  [AppMountContext](./kibana-plugin-core-public.appmountcontext.md) | The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices()](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->. |
+|  [AppMountContext](./kibana-plugin-core-public.appmountcontext.md) | The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->. |
 |  [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) |  |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-core-public.chromebadge.md) |  |
@@ -57,7 +57,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
 |  [EnvironmentMode](./kibana-plugin-core-public.environmentmode.md) |  |
-|  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs. |
+|  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpFetchOptions](./kibana-plugin-core-public.httpfetchoptions.md) | All options that may be used with a [HttpHandler](./kibana-plugin-core-public.httphandler.md)<!-- -->. |
@@ -115,6 +115,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsUpdateOptions](./kibana-plugin-core-public.savedobjectsupdateoptions.md) |  |
 |  [StringValidationRegex](./kibana-plugin-core-public.stringvalidationregex.md) | StringValidation with regex object |
 |  [StringValidationRegexString](./kibana-plugin-core-public.stringvalidationregexstring.md) | StringValidation as regex string |
+|  [ToastOptions](./kibana-plugin-core-public.toastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs. |
 |  [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsState](./kibana-plugin-core-public.uisettingsstate.md) |  |
 |  [UserProvidedValues](./kibana-plugin-core-public.userprovidedvalues.md) | Describes the values explicitly set by user. |
@@ -147,10 +148,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [MountPoint](./kibana-plugin-core-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-core-public.pluginopaqueid.md) |  |
+|  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
 |  [RecursiveReadonly](./kibana-plugin-core-public.recursivereadonly.md) |  |
 |  [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-core-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) |
 |  [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md) |
+|  [StartServicesAccessor](./kibana-plugin-core-public.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers, such as [App.mount](./kibana-plugin-core-public.app.mount.md)<!-- -->. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. |
 |  [StringValidation](./kibana-plugin-core-public.stringvalidation.md) | Allows regex objects or a regex string |
 |  [Toast](./kibana-plugin-core-public.toast.md) |  |
 |  [ToastInput](./kibana-plugin-core-public.toastinput.md) | Inputs for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs. |

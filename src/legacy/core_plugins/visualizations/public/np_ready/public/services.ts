@@ -18,15 +18,19 @@
  */
 
 import {
+  ApplicationStart,
   Capabilities,
+  ChromeStart,
   HttpStart,
   I18nStart,
   IUiSettingsClient,
+  OverlayStart,
   SavedObjectsStart,
 } from '../../../../../../core/public';
 import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
 import {
+  DataPublicPluginStart,
   FilterManager,
   IndexPatternsContract,
   TimefilterContract,
@@ -35,7 +39,6 @@ import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection
 import { ExpressionsStart } from '../../../../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
 import { SavedVisualizationsLoader } from './saved_visualizations';
-import { DataStart as LegacyDataStart } from '../../../../data/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -73,6 +76,12 @@ export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] = crea
   SavedVisualizationsLoader
 >('SavedVisualisationsLoader');
 
-export const [getAggs, setAggs] = createGetterSetter<LegacyDataStart['search']['aggs']>(
+export const [getAggs, setAggs] = createGetterSetter<DataPublicPluginStart['search']['aggs']>(
   'AggConfigs'
 );
+
+export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
+
+export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
+
+export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');

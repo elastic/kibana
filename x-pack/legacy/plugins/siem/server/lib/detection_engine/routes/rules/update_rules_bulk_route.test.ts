@@ -11,15 +11,25 @@ import {
   getFindResultWithSingleHit,
   getUpdateBulkRequest,
   getFindResultStatus,
+  typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('update_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -74,6 +84,27 @@ describe('update_rules_bulk', () => {
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(expected);
     });
+
+    it('returns an error object if creating an ML rule with an insufficient license', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const request = requestMock.create({
+        method: 'put',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        body: [typicalMlRulePayload()],
+      });
+
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: {
+            message: 'Your license does not support machine learning. Please upgrade your license.',
+            status_code: 400,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
+    });
   });
 
   describe('request validation', () => {
@@ -110,7 +141,7 @@ describe('update_rules_bulk', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query]]]'
+        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]]'
       );
     });
   });

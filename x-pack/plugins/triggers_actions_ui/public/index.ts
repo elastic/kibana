@@ -11,7 +11,7 @@ export { AlertsContextProvider } from './application/context/alerts_context';
 export { ActionsConnectorsContextProvider } from './application/context/actions_connectors_context';
 export { AlertAdd } from './application/sections/alert_form';
 export { ActionForm } from './application/sections/action_connector_form';
-export { AlertAction, Alert } from './types';
+export { AlertAction, Alert, AlertTypeModel, ActionType } from './types';
 export {
   ConnectorAddFlyout,
   ConnectorEditFlyout,
@@ -23,3 +23,7 @@ export function plugin(ctx: PluginInitializerContext) {
 
 export { Plugin };
 export * from './plugin';
+
+export { TIME_UNITS } from './application/constants';
+export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
+export { ForLastExpression } from './common/expression_items/for_the_last';

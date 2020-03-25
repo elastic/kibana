@@ -6,4 +6,7 @@
 export { registerRoutes as registerAgentConfigRoutes } from './agent_config';
 export { registerRoutes as registerDatasourceRoutes } from './datasource';
 export { registerRoutes as registerEPMRoutes } from './epm';
-export { registerRoutes as registerFleetSetupRoutes } from './fleet_setup';
+export { registerRoutes as registerSetupRoutes } from './setup';
+export { registerRoutes as registerAgentRoutes } from './agent';
+export { registerRoutes as registerEnrollmentApiKeyRoutes } from './enrollment_api_key';
+export { registerRoutes as registerInstallScriptRoutes } from './install_script';

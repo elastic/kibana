@@ -23,6 +23,15 @@ import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('TopNavMenu', () => {
+  const ensureMenuItemDisabled = (data: TopNavMenuData) => {
+    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
+    expect(component.prop('isDisabled')).toEqual(true);
+
+    const event = { currentTarget: { value: 'a' } };
+    component.simulate('click', event);
+    expect(data.run).toHaveBeenCalledTimes(0);
+  };
+
   it('Should render and click an item', () => {
     const data: TopNavMenuData = {
       id: 'test',
@@ -60,35 +69,62 @@ describe('TopNavMenu', () => {
     expect(data.run).toHaveBeenCalled();
   });
 
-  it('Should render disabled item and it shouldnt be clickable', () => {
+  it('Should render emphasized item which should be clickable', () => {
     const data: TopNavMenuData = {
+      id: 'test',
+      label: 'test',
+      iconType: 'beaker',
+      iconSide: 'right',
+      emphasize: true,
+      run: jest.fn(),
+    };
+
+    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
+    const event = { currentTarget: { value: 'a' } };
+    component.simulate('click', event);
+    expect(data.run).toHaveBeenCalledTimes(1);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('Should render disabled item and it shouldnt be clickable', () => {
+    ensureMenuItemDisabled({
       id: 'test',
       label: 'test',
       disableButton: true,
       run: jest.fn(),
-    };
-
-    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
-    expect(component.prop('isDisabled')).toEqual(true);
-
-    const event = { currentTarget: { value: 'a' } };
-    component.simulate('click', event);
-    expect(data.run).toHaveBeenCalledTimes(0);
+    });
   });
 
   it('Should render item with disable function and it shouldnt be clickable', () => {
-    const data: TopNavMenuData = {
+    ensureMenuItemDisabled({
       id: 'test',
       label: 'test',
       disableButton: () => true,
       run: jest.fn(),
-    };
+    });
+  });
 
-    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
-    expect(component.prop('isDisabled')).toEqual(true);
+  it('Should render disabled emphasized item which shouldnt be clickable', () => {
+    ensureMenuItemDisabled({
+      id: 'test',
+      label: 'test',
+      iconType: 'beaker',
+      iconSide: 'right',
+      emphasize: true,
+      disableButton: true,
+      run: jest.fn(),
+    });
+  });
 
-    const event = { currentTarget: { value: 'a' } };
-    component.simulate('click', event);
-    expect(data.run).toHaveBeenCalledTimes(0);
+  it('Should render emphasized item with disable function and it shouldnt be clickable', () => {
+    ensureMenuItemDisabled({
+      id: 'test',
+      label: 'test',
+      iconType: 'beaker',
+      iconSide: 'right',
+      emphasize: true,
+      disableButton: () => true,
+      run: jest.fn(),
+    });
   });
 });

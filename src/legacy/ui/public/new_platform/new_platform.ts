@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { IScope } from 'angular';
 
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
+import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
+import { DashboardStart } from '../../../../plugins/dashboard/public';
 import {
   LegacyCoreSetup,
   LegacyCoreStart,
@@ -29,6 +31,18 @@ import {
   ScopedHistory,
 } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
+import {
+  setFieldFormats,
+  setIndexPatterns,
+  setInjectedMetadata,
+  setHttp,
+  setNotifications,
+  setOverlays,
+  setQueryService,
+  setSearchService,
+  setUiSettings,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
 import {
   Setup as InspectorSetup,
@@ -52,12 +66,13 @@ import {
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
   charts: ChartsPluginSetup;
   data: ReturnType<DataPlugin['setup']>;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
@@ -70,6 +85,7 @@ export interface PluginsSetup {
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
   visTypeVega: VisTypeVegaSetup;
+  discover: DiscoverSetup;
   telemetry?: TelemetryPluginSetup;
 }
 
@@ -77,7 +93,7 @@ export interface PluginsStart {
   bfetch: BfetchPublicStart;
   charts: ChartsPluginStart;
   data: ReturnType<DataPlugin['start']>;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
@@ -87,7 +103,9 @@ export interface PluginsStart {
   share: SharePluginStart;
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
+  discover: DiscoverStart;
   telemetry?: TelemetryPluginStart;
+  dashboard: DashboardStart;
 }
 
 export const npSetup = {
@@ -118,11 +136,26 @@ export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
 
   // Setup compatibility layer for AppService in legacy platform
   npSetup.core.application.register = legacyAppRegister;
+
+  // Services that need to be set in the legacy platform since the legacy data plugin
+  // which previously provided them has been removed.
+  setInjectedMetadata(npSetup.core.injectedMetadata);
 }
 
 export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
+
+  // Services that need to be set in the legacy platform since the legacy data plugin
+  // which previously provided them has been removed.
+  setHttp(npStart.core.http);
+  setNotifications(npStart.core.notifications);
+  setOverlays(npStart.core.overlays);
+  setUiSettings(npStart.core.uiSettings);
+  setFieldFormats(npStart.plugins.data.fieldFormats);
+  setIndexPatterns(npStart.plugins.data.indexPatterns);
+  setQueryService(npStart.plugins.data.query);
+  setSearchService(npStart.plugins.data.search);
 }
 
 /** Flag used to ensure `legacyAppRegister` is only called once. */

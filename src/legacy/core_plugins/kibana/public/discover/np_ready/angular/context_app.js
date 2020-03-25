@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { getAngularModule } from '../../kibana_services';
+import { getAngularModule, getServices } from '../../kibana_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
 import { getFirstSortableField } from './context/api/utils/sorting';
@@ -57,12 +57,13 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, config, Private) {
-  const queryParameterActions = getQueryParameterActions();
+function ContextAppController($scope, Private) {
+  const { filterManager, indexpatterns, uiSettings } = getServices();
+  const queryParameterActions = getQueryParameterActions(filterManager, indexpatterns);
   const queryActions = Private(QueryActionsProvider);
   this.state = createInitialState(
-    parseInt(config.get('context:step'), 10),
-    getFirstSortableField(this.indexPattern, config.get('context:tieBreakerFields')),
+    parseInt(uiSettings.get('context:step'), 10),
+    getFirstSortableField(this.indexPattern, uiSettings.get('context:tieBreakerFields')),
     this.discoverUrl
   );
 

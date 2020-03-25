@@ -41,6 +41,8 @@ const createStartContract = (): VisualizationsStart => ({
   savedVisualizationsLoader: {} as any,
   showNewVisModal: jest.fn(),
   createVis: jest.fn(),
+  convertFromSerializedVis: jest.fn(),
+  convertToSerializedVis: jest.fn(),
 });
 
 const createInstance = async () => {
@@ -49,7 +51,7 @@ const createInstance = async () => {
   const setup = plugin.setup(coreMock.createSetup(), {
     data: dataPluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
-    embeddable: embeddablePluginMock.createStartContract(),
+    embeddable: embeddablePluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
   });
   const doStart = () =>
@@ -57,11 +59,6 @@ const createInstance = async () => {
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
-      __LEGACY: {
-        aggs: {
-          createAggConfigs: jest.fn(),
-        } as any,
-      },
     });
 
   return {

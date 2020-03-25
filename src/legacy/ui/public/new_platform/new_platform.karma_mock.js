@@ -20,6 +20,26 @@
 import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  setFieldFormats,
+  setIndexPatterns,
+  setInjectedMetadata,
+  setHttp,
+  setNotifications,
+  setOverlays,
+  setQueryService,
+  setSearchService,
+  setUiSettings,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setAggs } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/services';
+import {
+  AggTypesRegistry,
+  getAggTypes,
+  AggConfigs,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../src/plugins/data/public/search/aggs';
 import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
 
 const mockObservable = () => {
@@ -60,6 +80,18 @@ const mockCore = {
     },
   },
 };
+
+const mockAggTypesRegistry = () => {
+  const registry = new AggTypesRegistry();
+  const registrySetup = registry.setup();
+  const aggTypes = getAggTypes({ uiSettings: mockCore.uiSettings });
+  aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
+  aggTypes.metrics.forEach(type => registrySetup.registerMetric(type));
+
+  return registry;
+};
+
+const aggTypesRegistry = mockAggTypesRegistry();
 
 let refreshInterval = undefined;
 let isTimeRangeSelectorEnabled = true;
@@ -169,10 +201,16 @@ export const npSetup = {
           getSavedQueryCount: sinon.fake(),
         },
       },
-      __LEGACY: {
-        esClient: {
-          search: sinon.fake(),
-          msearch: sinon.fake(),
+      search: {
+        aggs: {
+          calculateAutoTimeExpression: sinon.fake(),
+          types: aggTypesRegistry.setup(),
+        },
+        __LEGACY: {
+          esClient: {
+            search: sinon.fake(),
+            msearch: sinon.fake(),
+          },
         },
       },
       fieldFormats: getFieldFormatsRegistry(mockCore),
@@ -233,6 +271,15 @@ export const npSetup = {
         }),
       },
     },
+    discover: {
+      docViews: {
+        addDocView: sinon.fake(),
+        setAngularInjectorGetter: sinon.fake(),
+      },
+    },
+    visTypeVega: {
+      config: sinon.fake(),
+    },
   },
 };
 
@@ -283,7 +330,13 @@ export const npStart = {
         getHideWriteControls: sinon.fake(),
       },
     },
+    dashboard: {
+      getSavedDashboardLoader: sinon.fake(),
+    },
     data: {
+      actions: {
+        createFiltersFromEvent: Promise.resolve(['yes']),
+      },
       autocomplete: {
         getProvider: sinon.fake(),
       },
@@ -355,7 +408,27 @@ export const npStart = {
         },
       },
       search: {
+        aggs: {
+          calculateAutoTimeExpression: sinon.fake(),
+          createAggConfigs: sinon.fake(),
+          createAggConfigs: (indexPattern, configStates = []) => {
+            return new AggConfigs(indexPattern, configStates, {
+              typesRegistry: aggTypesRegistry.start(),
+            });
+          },
+          types: aggTypesRegistry.start(),
+        },
         __LEGACY: {
+          AggConfig: sinon.fake(),
+          AggType: sinon.fake(),
+          aggTypeFieldFilters: {
+            addFilter: sinon.fake(),
+            filter: sinon.fake(),
+          },
+          FieldParamType: sinon.fake(),
+          MetricAggType: sinon.fake(),
+          parentPipelineAggHelper: sinon.fake(),
+          siblingPipelineAggHelper: sinon.fake(),
           esClient: {
             search: sinon.fake(),
             msearch: sinon.fake(),
@@ -395,6 +468,11 @@ export const npStart = {
         useChartsTheme: sinon.fake(),
       },
     },
+    discover: {
+      docViews: {
+        DocViewer: () => null,
+      },
+    },
   },
 };
 
@@ -404,8 +482,24 @@ export function __setup__(coreSetup) {
   // no-op application register calls (this is overwritten to
   // bootstrap an LP plugin outside of tests)
   npSetup.core.application.register = () => {};
+
+  // Services that need to be set in the legacy platform since the legacy data plugin
+  // which previously provided them has been removed.
+  setInjectedMetadata(npSetup.core.injectedMetadata);
 }
 
 export function __start__(coreStart) {
   npStart.core = coreStart;
+
+  // Services that need to be set in the legacy platform since the legacy data plugin
+  // which previously provided them has been removed.
+  setHttp(npStart.core.http);
+  setNotifications(npStart.core.notifications);
+  setOverlays(npStart.core.overlays);
+  setUiSettings(npStart.core.uiSettings);
+  setFieldFormats(npStart.plugins.data.fieldFormats);
+  setIndexPatterns(npStart.plugins.data.indexPatterns);
+  setQueryService(npStart.plugins.data.query);
+  setSearchService(npStart.plugins.data.search);
+  setAggs(npStart.plugins.data.search.aggs);
 }

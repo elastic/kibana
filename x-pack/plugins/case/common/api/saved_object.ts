@@ -8,7 +8,7 @@ import * as rt from 'io-ts';
 
 import { either } from 'fp-ts/lib/Either';
 
-const NumberFromString = new rt.Type<number, string, unknown>(
+export const NumberFromString = new rt.Type<number, string, unknown>(
   'NumberFromString',
   rt.number.is,
   (u, c) =>

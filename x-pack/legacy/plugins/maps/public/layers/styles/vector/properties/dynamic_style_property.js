@@ -13,11 +13,11 @@ import {
   SOURCE_META_ID_ORIGIN,
   FIELD_ORIGIN,
 } from '../../../../../common/constants';
-import { scaleValue, getComputedFieldName } from '../style_util';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
-import { OrdinalFieldMetaOptionsPopover } from '../components/ordinal_field_meta_options_popover';
+import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
+import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
@@ -31,7 +31,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   getValueSuggestions = query => {
     const field = this.getField();
-    const fieldSource = this.getFieldSource();
+    const fieldSource = this._getFieldSource();
     return fieldSource && field ? fieldSource.getValueSuggestions(field, query) : [];
   };
 
@@ -52,12 +52,16 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     const fieldName = this.getFieldName();
     const rangeFieldMetaFromLocalFeatures = styleMeta.getRangeFieldMetaDescriptor(fieldName);
 
+    if (!this.isFieldMetaEnabled()) {
+      return rangeFieldMetaFromLocalFeatures;
+    }
+
     const dataRequestId = this._getStyleMetaDataRequestId(fieldName);
     if (!dataRequestId) {
       return rangeFieldMetaFromLocalFeatures;
     }
 
-    const styleMetaDataRequest = this._layer.findDataRequestById(dataRequestId);
+    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return rangeFieldMetaFromLocalFeatures;
     }
@@ -71,40 +75,37 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     const style = this._layer.getStyle();
     const styleMeta = style.getStyleMeta();
     const fieldName = this.getFieldName();
-    const rangeFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);
+    const categoryFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);
+
+    if (!this.isFieldMetaEnabled()) {
+      return categoryFieldMetaFromLocalFeatures;
+    }
 
     const dataRequestId = this._getStyleMetaDataRequestId(fieldName);
     if (!dataRequestId) {
-      return rangeFieldMetaFromLocalFeatures;
+      return categoryFieldMetaFromLocalFeatures;
     }
 
-    const styleMetaDataRequest = this._layer.findDataRequestById(dataRequestId);
+    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
-      return rangeFieldMetaFromLocalFeatures;
+      return categoryFieldMetaFromLocalFeatures;
     }
 
     const data = styleMetaDataRequest.getData();
     const rangeFieldMeta = this.pluckCategoricalStyleMetaFromFieldMetaData(data);
-    return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
+    return rangeFieldMeta ? rangeFieldMeta : categoryFieldMetaFromLocalFeatures;
   }
 
   getField() {
     return this._field;
   }
 
-  getFieldSource() {
+  _getFieldSource() {
     return this._field ? this._field.getSource() : null;
   }
 
   getFieldName() {
     return this._field ? this._field.getName() : '';
-  }
-
-  getComputedFieldName() {
-    if (!this.isComplete()) {
-      return null;
-    }
-    return getComputedFieldName(this._styleName, this.getField().getName());
   }
 
   isDynamic() {
@@ -141,13 +142,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   supportsFieldMeta() {
-    if (this.isOrdinal()) {
-      return this.isComplete() && this.isOrdinalScaled() && this._field.supportsFieldMeta();
-    } else if (this.isCategorical()) {
-      return this.isComplete() && this._field.supportsFieldMeta();
-    } else {
-      return false;
-    }
+    return this.isComplete() && this._field.supportsFieldMeta();
   }
 
   async getFieldMetaRequest() {
@@ -160,11 +155,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  supportsFeatureState() {
-    return true;
-  }
-
-  isOrdinalScaled() {
+  supportsMbFeatureState() {
     return true;
   }
 
@@ -287,19 +278,9 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  getMbValue(value) {
-    if (!this.isOrdinal()) {
-      return this.formatField(value);
-    }
-
+  getNumericalMbFeatureStateValue(value) {
     const valueAsFloat = parseFloat(value);
-    if (this.isOrdinalScaled()) {
-      return scaleValue(valueAsFloat, this.getRangeFieldMeta());
-    }
-    if (isNaN(valueAsFloat)) {
-      return 0;
-    }
-    return valueAsFloat;
+    return isNaN(valueAsFloat) ? null : valueAsFloat;
   }
 
   renderBreakedLegend() {
@@ -338,12 +319,14 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   renderFieldMetaPopover(onFieldMetaOptionsChange) {
-    if (!this.isOrdinal() || !this.supportsFieldMeta()) {
+    if (!this.supportsFieldMeta()) {
       return null;
     }
 
-    return (
-      <OrdinalFieldMetaOptionsPopover styleProperty={this} onChange={onFieldMetaOptionsChange} />
+    return this.isCategorical() ? (
+      <CategoricalFieldMetaPopover styleProperty={this} onChange={onFieldMetaOptionsChange} />
+    ) : (
+      <OrdinalFieldMetaPopover styleProperty={this} onChange={onFieldMetaOptionsChange} />
     );
   }
 }

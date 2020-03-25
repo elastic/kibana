@@ -175,7 +175,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(version).to.not.be.empty();
       });
 
-      it('Update a timeline with a new title', async () => {
+      it.skip('Update a timeline with a new title', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(client, titleToSaved);
         const { savedObjectId, version } = response.data && response.data.persistTimeline.timeline;
@@ -192,7 +192,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         });
 
-        expect(responseToTest.data!.persistTimeline.timeline.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.data!.persistTimeline.timeline.savedObjectId).to.eql(savedObjectId);
         expect(responseToTest.data!.persistTimeline.timeline.title).to.be(newTitle);
         expect(responseToTest.data!.persistTimeline.timeline.version).to.not.be.eql(version);
       });

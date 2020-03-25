@@ -9,8 +9,6 @@ import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { CaseAttributes } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../saved_object_types';
 
-const DEFAULT_PER_PAGE: number = 1000;
-
 export const convertToTags = (tagObjects: Array<SavedObject<CaseAttributes>>): string[] =>
   tagObjects.reduce<string[]>((accum, tagObj) => {
     if (tagObj && tagObj.attributes && tagObj.attributes.tags) {
@@ -31,27 +29,24 @@ export const convertTagsToSet = (tagObjects: Array<SavedObject<CaseAttributes>>)
 // Ref: https://www.elastic.co/guide/en/kibana/master/saved-objects-api.html
 export const readTags = async ({
   client,
-  perPage = DEFAULT_PER_PAGE,
 }: {
   client: SavedObjectsClientContract;
   perPage?: number;
 }): Promise<string[]> => {
-  const tags = await readRawTags({ client, perPage });
+  const tags = await readRawTags({ client });
   return tags;
 };
 
 export const readRawTags = async ({
   client,
-  perPage = DEFAULT_PER_PAGE,
 }: {
   client: SavedObjectsClientContract;
-  perPage?: number;
 }): Promise<string[]> => {
   const firstTags = await client.find({
     type: CASE_SAVED_OBJECT,
     fields: ['tags'],
     page: 1,
-    perPage,
+    perPage: 1,
   });
   const tags = await client.find<CaseAttributes>({
     type: CASE_SAVED_OBJECT,

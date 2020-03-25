@@ -49,9 +49,9 @@ const ELASTIC_LICENSE_HEADER = `
  */
 `;
 
-const allMochaRules = {};
+const allMochaRulesOff = {};
 Object.keys(require('eslint-plugin-mocha').rules).forEach(k => {
-  allMochaRules['mocha/' + k] = 'off';
+  allMochaRulesOff['mocha/' + k] = 'off';
 });
 
 module.exports = {
@@ -67,12 +67,6 @@ module.exports = {
       files: ['packages/kbn-ui-framework/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/no-onchange': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/data/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
       },
     },
     {
@@ -142,7 +136,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/ml/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/ml/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -322,6 +316,7 @@ module.exports = {
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
+        'test/*/config_open.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
@@ -524,7 +519,7 @@ module.exports = {
      */
     {
       files: ['test/harden/*.js'],
-      rules: allMochaRules,
+      rules: allMochaRulesOff,
     },
 
     /**

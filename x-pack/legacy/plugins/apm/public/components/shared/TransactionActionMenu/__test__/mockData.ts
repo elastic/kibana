@@ -8,7 +8,10 @@ import { Location } from 'history';
 
 const bareTransaction = {
   '@metadata': 'whatever',
-  observer: 'whatever',
+  observer: {
+    version: '8.0.0',
+    version_major: 8
+  },
   agent: {
     name: 'java',
     version: '7.0.0'
