@@ -48,14 +48,16 @@ interface SelectRuleTypeProps {
   describedByIds?: string[];
   field: FieldHook;
   hasValidLicense?: boolean;
+  isMlAdmin?: boolean;
   isReadOnly?: boolean;
 }
 
 export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   describedByIds = [],
   field,
-  hasValidLicense = false,
   isReadOnly = false,
+  hasValidLicense = false,
+  isMlAdmin = false,
 }) => {
   const ruleType = field.value as RuleType;
   const setType = useCallback(
@@ -66,7 +68,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   );
   const setMl = useCallback(() => setType('machine_learning'), [setType]);
   const setQuery = useCallback(() => setType('query'), [setType]);
-  const mlCardDisabled = isReadOnly || !hasValidLicense;
+  const mlCardDisabled = isReadOnly || !hasValidLicense || !isMlAdmin;
 
   return (
     <EuiFormRow
