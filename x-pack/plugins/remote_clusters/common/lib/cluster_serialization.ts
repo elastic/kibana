@@ -158,13 +158,13 @@ export function serializeCluster(deserializedClusterObject: Cluster): ClusterSet
   } = deserializedClusterObject;
 
   const clusterData: ClusterPayloadEs = {
-    skip_unavailable: skipUnavailable !== undefined ? skipUnavailable : null,
-    mode: mode ?? null,
-    proxy_address: proxyAddress ?? null,
-    proxy_socket_connections: proxySocketConnections ?? null,
-    server_name: serverName ?? null,
-    seeds: seeds ?? null,
-    node_connections: nodeConnections ?? null,
+    skip_unavailable: typeof skipUnavailable === 'boolean' ? skipUnavailable : null,
+    mode: mode || null,
+    proxy_address: proxyAddress || null,
+    proxy_socket_connections: proxySocketConnections || null,
+    server_name: serverName || null,
+    seeds: seeds || null,
+    node_connections: nodeConnections || null,
   };
 
   // This is only applicable in edit mode

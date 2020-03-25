@@ -12,14 +12,14 @@ import {
   CreateJobFactory,
   ESQueueCreateJobFn,
   RequestFacade,
+  ServerFacade,
 } from '../../../../types';
 import { JobParamsPDF } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = async function createJobFactoryFn(reporting: ReportingCore) {
-  const config = await reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
+>> = function createJobFactoryFn(reporting: ReportingCore, server: ServerFacade) {
+  const crypto = cryptoFactory(server);
 
   return async function createJobFn(
     { title, relativeUrls, browserTimezone, layout, objectType }: JobParamsPDF,

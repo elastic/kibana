@@ -6,8 +6,8 @@
 
 import Joi from 'joi';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { Logger } from '../../../types';
-import { ReportingConfig, ReportingSetupDeps } from '../../types';
+import { Logger, ServerFacade } from '../../../types';
+import { ReportingSetupDeps } from '../../types';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 import {
   GetReportingFeatureIdFn,
@@ -29,12 +29,12 @@ export type GetRouteConfigFactoryFn = (
 ) => RouteConfigFactory;
 
 export function getRouteConfigFactoryReportingPre(
-  config: ReportingConfig,
+  server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger
 ): GetRouteConfigFactoryFn {
-  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(config, plugins, logger);
-  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(config, plugins, logger);
+  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server, plugins, logger);
+  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server, plugins, logger);
 
   return (getFeatureId?: GetReportingFeatureIdFn): RouteConfigFactory => {
     const preRouting: any[] = [{ method: authorizedUserPreRouting, assign: 'user' }];
@@ -50,11 +50,11 @@ export function getRouteConfigFactoryReportingPre(
 }
 
 export function getRouteOptionsCsv(
-  config: ReportingConfig,
+  server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const getRouteConfig = getRouteConfigFactoryReportingPre(config, plugins, logger);
+  const getRouteConfig = getRouteConfigFactoryReportingPre(server, plugins, logger);
   return {
     ...getRouteConfig(() => CSV_FROM_SAVEDOBJECT_JOB_TYPE),
     validate: {
@@ -75,12 +75,12 @@ export function getRouteOptionsCsv(
 }
 
 export function getRouteConfigFactoryManagementPre(
-  config: ReportingConfig,
+  server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger
 ): GetRouteConfigFactoryFn {
-  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(config, plugins, logger);
-  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(config, plugins, logger);
+  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server, plugins, logger);
+  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server, plugins, logger);
   const managementPreRouting = reportingFeaturePreRouting(() => 'management');
 
   return (): RouteConfigFactory => {
@@ -99,11 +99,11 @@ export function getRouteConfigFactoryManagementPre(
 // Additionally, the range-request doesn't alleviate any performance issues on the server as the entire
 // download is loaded into memory.
 export function getRouteConfigFactoryDownloadPre(
-  config: ReportingConfig,
+  server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger
 ): GetRouteConfigFactoryFn {
-  const getManagementRouteConfig = getRouteConfigFactoryManagementPre(config, plugins, logger);
+  const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
   return (): RouteConfigFactory => ({
     ...getManagementRouteConfig(),
     tags: [API_TAG, 'download'],
@@ -114,11 +114,11 @@ export function getRouteConfigFactoryDownloadPre(
 }
 
 export function getRouteConfigFactoryDeletePre(
-  config: ReportingConfig,
+  server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger
 ): GetRouteConfigFactoryFn {
-  const getManagementRouteConfig = getRouteConfigFactoryManagementPre(config, plugins, logger);
+  const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
   return (): RouteConfigFactory => ({
     ...getManagementRouteConfig(),
     tags: [API_TAG, 'delete'],
