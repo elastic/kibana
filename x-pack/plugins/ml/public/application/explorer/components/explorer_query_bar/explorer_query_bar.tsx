@@ -12,10 +12,10 @@ import {
   QueryStringInput,
 } from '../../../../../../../../src/plugins/data/public';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
-import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE } from '../../explorer_constants';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { explorerService } from '../../explorer_dashboard_service';
 
-export const DEFAULT_QUERY_LANG = QUERY_LANGUAGE_KUERY;
+export const DEFAULT_QUERY_LANG = SEARCH_QUERY_LANGUAGE.KUERY;
 
 export function getKqlQueryValues({
   inputString,
@@ -45,12 +45,12 @@ export function getKqlQueryValues({
       }
     });
   }
-  if (queryLanguage === QUERY_LANGUAGE_KUERY) {
+  if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
     influencersFilterQuery = esKuery.toElasticsearchQuery(
       esKuery.fromKueryExpression(inputString),
       indexPattern
     );
-  } else if (queryLanguage === QUERY_LANGUAGE_LUCENE) {
+  } else if (queryLanguage === SEARCH_QUERY_LANGUAGE.LUCENE) {
     influencersFilterQuery = esQuery.luceneStringToDsl(inputString);
   }
 
@@ -78,7 +78,7 @@ function getInitSearchInputState({
 }) {
   if (queryString !== undefined && filterActive === true) {
     return {
-      language: QUERY_LANGUAGE_KUERY,
+      language: SEARCH_QUERY_LANGUAGE.KUERY,
       query: queryString,
     };
   } else {
