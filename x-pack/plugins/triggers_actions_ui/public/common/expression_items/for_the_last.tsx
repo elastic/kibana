@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiFieldNumber,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import { TIME_UNITS } from '../../application/constants';
@@ -83,10 +84,29 @@ export const ForLastExpression = ({
     >
       <div>
         <EuiPopoverTitle>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
-            defaultMessage="For the last"
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
+                defaultMessage="For the last"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                color="danger"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.common.expressionItems.forTheLast.closePopoverLabel',
+                  {
+                    defaultMessage: 'Close',
+                  }
+                )}
+                onClick={() => {
+                  setAlertDurationPopoverOpen(false);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>

@@ -6,7 +6,15 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiExpression, EuiPopover, EuiPopoverTitle, EuiSelect } from '@elastic/eui';
+import {
+  EuiExpression,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
 
@@ -65,9 +73,29 @@ export const WhenExpression = ({
     >
       <div>
         <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle', {
-            defaultMessage: 'when',
-          })}
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem>
+              {i18n.translate(
+                'xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle',
+                { defaultMessage: 'when' }
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                color="danger"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.common.expressionItems.threshold.closePopoverLabel',
+                  {
+                    defaultMessage: 'Close',
+                  }
+                )}
+                onClick={() => {
+                  setAggTypePopoverOpen(false);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPopoverTitle>
         <EuiSelect
           data-test-subj="whenExpressionSelect"

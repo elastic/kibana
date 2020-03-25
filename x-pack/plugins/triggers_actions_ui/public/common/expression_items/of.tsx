@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
@@ -101,9 +102,28 @@ export const OfExpression = ({
     >
       <div>
         <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.common.expressionItems.of.popoverTitle', {
-            defaultMessage: 'of',
-          })}
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem>
+              {i18n.translate('xpack.triggersActionsUI.common.expressionItems.of.popoverTitle', {
+                defaultMessage: 'of',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                color="danger"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.common.expressionItems.of.closePopoverLabel',
+                  {
+                    defaultMessage: 'Close',
+                  }
+                )}
+                onClick={() => {
+                  setAggFieldPopoverOpen(false);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">

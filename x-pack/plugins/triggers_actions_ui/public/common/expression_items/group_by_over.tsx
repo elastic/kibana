@@ -15,6 +15,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiFieldNumber,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { builtInGroupByTypes } from '../constants';
 import { GroupByType } from '../types';
@@ -113,12 +114,31 @@ export const GroupByExpression = ({
     >
       <div>
         <EuiPopoverTitle>
-          {i18n.translate(
-            'xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel',
-            {
-              defaultMessage: 'over',
-            }
-          )}
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem>
+              {i18n.translate(
+                'xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel',
+                {
+                  defaultMessage: 'over',
+                }
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                color="danger"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.common.expressionItems.groupByType.closePopoverLabel',
+                  {
+                    defaultMessage: 'Close',
+                  }
+                )}
+                onClick={() => {
+                  setGroupByPopoverOpen(false);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPopoverTitle>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

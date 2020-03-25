@@ -16,6 +16,7 @@ import {
   EuiSelect,
   EuiFieldNumber,
   EuiText,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { builtInComparators } from '../constants';
 import { Comparator } from '../types';
@@ -97,7 +98,26 @@ export const ThresholdExpression = ({
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>{comparators[thresholdComparator].text}</EuiPopoverTitle>
+        <EuiPopoverTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem>{comparators[thresholdComparator].text}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                color="danger"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.common.expressionItems.threshold.closePopoverLabel',
+                  {
+                    defaultMessage: 'Close',
+                  }
+                )}
+                onClick={() => {
+                  setAlertThresholdPopoverOpen(false);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiSelect
