@@ -18,21 +18,33 @@
  */
 
 import { SavedObject } from '../../../../../../plugins/saved_objects/public';
-import { Vis, VisState, VisParams, VisualizationController } from './vis';
-import { ISearchSource } from '../../../../../../plugins/data/public/';
-import { SavedSearch } from '../../../../../../plugins/discover/public';
+import { ISearchSource, AggConfigOptions } from '../../../../../../plugins/data/public';
+import { SerializedVis, Vis, VisParams } from './vis';
 
-export { Vis, VisState, VisParams, VisualizationController };
+export { Vis, SerializedVis, VisParams };
 
-export interface VisSavedObject extends SavedObject {
-  vis: Vis;
-  description?: string;
-  searchSource: ISearchSource;
+export interface VisualizationController {
+  render(visData: any, visParams: any): Promise<void>;
+  destroy(): void;
+  isLoaded?(): Promise<void> | void;
+}
+
+export interface SavedVisState {
+  type: string;
+  params: VisParams;
+  aggs: AggConfigOptions[];
+}
+
+export interface ISavedVis {
+  id: string;
   title: string;
+  description?: string;
+  visState: SavedVisState;
+  searchSource?: ISearchSource;
   uiStateJSON?: string;
-  destroy: () => void;
   savedSearchRefName?: string;
   savedSearchId?: string;
-  savedSearch?: SavedSearch;
-  visState: VisState;
 }
+
+// @ts-ignore-next-line
+export interface VisSavedObject extends SavedObject, ISavedVis {}

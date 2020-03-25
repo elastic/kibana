@@ -1,8 +1,0 @@
-{
-  "indices.get_template": {
-    "patterns": [
-      "_template",
-      "_template/{template}"
-    ]
-  }
-}
