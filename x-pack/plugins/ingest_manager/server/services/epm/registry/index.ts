@@ -52,8 +52,10 @@ export async function fetchFindLatestPackage(
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
     // sort by version, then get the last (most recent)
-    const latestPackage = sortBy(searchResults, ['version'])[searchResults.length - 1];
-    return latestPackage as RegistrySearchResult;
+    const latestPackage = sortBy<string[], RegistrySearchResult>(searchResults, ['version'])[
+      searchResults.length - 1
+    ];
+    return latestPackage;
   } else {
     throw new Error('package not found');
   }
