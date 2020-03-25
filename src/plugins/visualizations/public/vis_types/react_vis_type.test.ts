@@ -17,57 +17,30 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
-import { ReactVisType } from '../../../vis_types/react_vis_type';
+import { cloneDeep } from 'lodash';
+import { ReactVisType } from './react_vis_type';
 
-describe('React Vis Type', function() {
+describe('React Vis Type', () => {
   const visConfig = {
     name: 'test',
     title: 'test',
     description: 'test',
     icon: 'test',
     visConfig: { component: 'test' },
-    type: { visConfig: { component: 'test' } },
   };
-
-  beforeEach(ngMock.module('kibana'));
 
   describe('initialization', () => {
     it('should throw if component is not set', () => {
       expect(() => {
-        new ReactVisType({});
-      }).to.throwError();
+        const missingConfig = cloneDeep(visConfig);
+        delete missingConfig.visConfig.component;
+        new ReactVisType(missingConfig);
+      }).toThrow();
     });
 
     it('creates react controller', () => {
       const visType = new ReactVisType(visConfig);
-      expect(visType.visualization).to.not.be.an('undefined');
-    });
-  });
-
-  describe('controller render method', () => {
-    let vis;
-    beforeEach(() => {
-      const visType = new ReactVisType(visConfig);
-      const Vis = visType.visualization;
-
-      vis = new Vis(window.document.body, {});
-    });
-
-    it('rejects if data is not provided', () => {
-      vis
-        .render()
-        .then(() => {
-          expect('promise was not rejected').to.equal(false);
-        })
-        .catch(() => {});
-    });
-
-    it('renders the component', () => {
-      expect(() => {
-        vis.render({});
-      }).to.not.throwError();
+      expect(visType.visualization).not.toBeUndefined();
     });
   });
 });

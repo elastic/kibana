@@ -29,6 +29,11 @@ export interface VisualizationController {
   isLoaded?(): Promise<void> | void;
 }
 
+export type VisualizationControllerConstructor = new (
+  el: HTMLElement,
+  vis: Vis
+) => VisualizationController;
+
 export interface SavedVisState {
   type: string;
   params: VisParams;

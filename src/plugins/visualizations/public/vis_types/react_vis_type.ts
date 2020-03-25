@@ -17,48 +17,11 @@
  * under the License.
  */
 
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { getUISettings, getI18n } from '../services';
-import { BaseVisType } from './base_vis_type';
-
-class ReactVisController {
-  constructor(element, vis) {
-    this.el = element;
-    this.vis = vis;
-  }
-
-  render(visData, visParams, updateStatus) {
-    this.visData = visData;
-
-    const I18nContext = getI18n().Context;
-
-    return new Promise(resolve => {
-      const Component = this.vis.type.visConfig.component;
-      const config = getUISettings();
-      render(
-        <I18nContext>
-          <Component
-            config={config}
-            vis={this.vis}
-            visData={visData}
-            visParams={visParams}
-            renderComplete={resolve}
-            updateStatus={updateStatus}
-          />
-        </I18nContext>,
-        this.el
-      );
-    });
-  }
-
-  destroy() {
-    unmountComponentAtNode(this.el);
-  }
-}
+import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
+import { ReactVisController } from './react_vis_controller';
 
 export class ReactVisType extends BaseVisType {
-  constructor(opts) {
+  constructor(opts: Omit<BaseVisTypeOptions, 'visualization'>) {
     super({
       ...opts,
       visualization: ReactVisController,

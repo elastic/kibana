@@ -30,8 +30,8 @@ export interface VisType {
   description?: string;
   visualization: any;
   isAccessible?: boolean;
-  requestHandler: string;
-  responseHandler: string;
+  requestHandler: string | unknown;
+  responseHandler: string | unknown;
   icon?: IconType;
   image?: string;
   stage: 'experimental' | 'beta' | 'production';
