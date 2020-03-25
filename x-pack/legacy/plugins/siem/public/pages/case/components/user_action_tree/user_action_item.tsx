@@ -25,11 +25,13 @@ interface UserActionItemProps {
   isEditable: boolean;
   isLoading: boolean;
   labelEditAction?: string;
+  labelQuoteAction?: string;
   labelTitle?: JSX.Element;
   linkId?: string | null;
   fullName: string;
   markdown?: React.ReactNode;
   onEdit?: (id: string) => void;
+  onQuote?: (id: string) => void;
   userName: string;
   updatedAt?: string | null;
   outlineComment?: (id: string) => void;
@@ -113,11 +115,13 @@ export const UserActionItem = ({
   isEditable,
   isLoading,
   labelEditAction,
+  labelQuoteAction,
   labelTitle,
   linkId,
   fullName,
   markdown,
   onEdit,
+  onQuote,
   outlineComment,
   showBottomFooter,
   showTopFooter,
@@ -147,11 +151,13 @@ export const UserActionItem = ({
                 id={id}
                 isLoading={isLoading}
                 labelEditAction={labelEditAction}
+                labelQuoteAction={labelQuoteAction}
                 labelTitle={labelTitle ?? <></>}
                 linkId={linkId}
                 userName={userName}
                 updatedAt={updatedAt}
                 onEdit={onEdit}
+                onQuote={onQuote}
                 outlineComment={outlineComment}
               />
               {markdown}

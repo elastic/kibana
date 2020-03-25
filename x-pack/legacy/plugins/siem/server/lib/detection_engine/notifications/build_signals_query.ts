@@ -30,7 +30,7 @@ export const buildSignalsSearchQuery = ({ ruleId, index, from, to }: BuildSignal
           {
             range: {
               '@timestamp': {
-                gte: from,
+                gt: from,
                 lte: to,
               },
             },
