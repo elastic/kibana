@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  deserializeCluster,
-  serializeCluster,
-  Cluster,
-  ClusterInfoEs,
-} from './cluster_serialization';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export * from '../../../../plugins/maps/common/descriptor_types';

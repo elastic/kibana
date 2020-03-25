@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  deserializeCluster,
-  serializeCluster,
-  Cluster,
-  ClusterInfoEs,
-} from './cluster_serialization';
+export * from './data_request_descriptor_types';
+export * from './descriptor_types';
+export * from './map_descriptor';
+export * from './style_property_descriptor_types';
