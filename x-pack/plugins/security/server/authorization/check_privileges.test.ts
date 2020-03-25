@@ -104,7 +104,7 @@ describe('#atSpace', () => {
           Object {
             "authorized": true,
             "privilege": "mock-action:login",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
         ],
         "username": "foo-username",
@@ -136,7 +136,7 @@ describe('#atSpace', () => {
           Object {
             "authorized": false,
             "privilege": "mock-action:login",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
         ],
         "username": "foo-username",
@@ -195,12 +195,12 @@ describe('#atSpace', () => {
           Object {
             "authorized": true,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": true,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
         ],
         "username": "foo-username",
@@ -237,12 +237,12 @@ describe('#atSpace', () => {
           Object {
             "authorized": false,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": true,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
         ],
         "username": "foo-username",
@@ -380,12 +380,12 @@ describe('#atSpaces', () => {
           Object {
             "authorized": true,
             "privilege": "mock-action:login",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": true,
             "privilege": "mock-action:login",
-            "spaceId": "space_2",
+            "resource": "space_2",
           },
         ],
         "username": "foo-username",
@@ -421,12 +421,12 @@ describe('#atSpaces', () => {
           Object {
             "authorized": true,
             "privilege": "mock-action:login",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": false,
             "privilege": "mock-action:login",
-            "spaceId": "space_2",
+            "resource": "space_2",
           },
         ],
         "username": "foo-username",
@@ -524,22 +524,22 @@ describe('#atSpaces', () => {
           Object {
             "authorized": true,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": true,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": true,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": "space_2",
+            "resource": "space_2",
           },
           Object {
             "authorized": true,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": "space_2",
+            "resource": "space_2",
           },
         ],
         "username": "foo-username",
@@ -582,22 +582,22 @@ describe('#atSpaces', () => {
           Object {
             "authorized": true,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": false,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": false,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": "space_2",
+            "resource": "space_2",
           },
           Object {
             "authorized": false,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": "space_2",
+            "resource": "space_2",
           },
         ],
         "username": "foo-username",
@@ -640,22 +640,22 @@ describe('#atSpaces', () => {
           Object {
             "authorized": true,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": true,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": false,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": "space_2",
+            "resource": "space_2",
           },
           Object {
             "authorized": false,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": "space_2",
+            "resource": "space_2",
           },
         ],
         "username": "foo-username",
@@ -698,22 +698,22 @@ describe('#atSpaces', () => {
           Object {
             "authorized": true,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": true,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": "space_1",
+            "resource": "space_1",
           },
           Object {
             "authorized": true,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": "space_2",
+            "resource": "space_2",
           },
           Object {
             "authorized": false,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": "space_2",
+            "resource": "space_2",
           },
         ],
         "username": "foo-username",
@@ -910,7 +910,7 @@ describe('#globally', () => {
           Object {
             "authorized": true,
             "privilege": "mock-action:login",
-            "spaceId": undefined,
+            "resource": undefined,
           },
         ],
         "username": "foo-username",
@@ -941,7 +941,7 @@ describe('#globally', () => {
           Object {
             "authorized": false,
             "privilege": "mock-action:login",
-            "spaceId": undefined,
+            "resource": undefined,
           },
         ],
         "username": "foo-username",
@@ -1022,12 +1022,12 @@ describe('#globally', () => {
           Object {
             "authorized": true,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": undefined,
+            "resource": undefined,
           },
           Object {
             "authorized": true,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": undefined,
+            "resource": undefined,
           },
         ],
         "username": "foo-username",
@@ -1063,12 +1063,12 @@ describe('#globally', () => {
           Object {
             "authorized": false,
             "privilege": "saved_object:foo-type/get",
-            "spaceId": undefined,
+            "resource": undefined,
           },
           Object {
             "authorized": true,
             "privilege": "saved_object:bar-type/get",
-            "spaceId": undefined,
+            "resource": undefined,
           },
         ],
         "username": "foo-username",
