@@ -13,17 +13,6 @@ import {
 
 describe('get_es_stats', () => {
   const callWith = sinon.stub();
-  const size = 123;
-  const server = {
-    config: sinon.stub().returns({
-      get: sinon
-        .stub()
-        .withArgs('xpack.monitoring.elasticsearch.index_pattern')
-        .returns('.monitoring-es-N-*')
-        .withArgs('xpack.monitoring.max_bucket_size')
-        .returns(size),
-    }),
-  };
   const response = {
     hits: {
       hits: [
@@ -35,12 +24,13 @@ describe('get_es_stats', () => {
   };
   const expectedClusters = response.hits.hits.map(hit => hit._source);
   const clusterUuids = expectedClusters.map(cluster => cluster.cluster_uuid);
+  const maxBucketSize = 1;
 
   describe('getElasticsearchStats', () => {
     it('returns clusters', async () => {
       callWith.withArgs('search').returns(Promise.resolve(response));
 
-      expect(await getElasticsearchStats(server, callWith, clusterUuids)).toStrictEqual(
+      expect(await getElasticsearchStats(callWith, clusterUuids, maxBucketSize)).toStrictEqual(
         expectedClusters
       );
     });
@@ -50,7 +40,9 @@ describe('get_es_stats', () => {
     it('searches for clusters', async () => {
       callWith.returns(response);
 
-      expect(await fetchElasticsearchStats(server, callWith, clusterUuids)).toStrictEqual(response);
+      expect(await fetchElasticsearchStats(callWith, clusterUuids, maxBucketSize)).toStrictEqual(
+        response
+      );
     });
   });
 
