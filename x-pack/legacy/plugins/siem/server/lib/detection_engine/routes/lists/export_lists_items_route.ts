@@ -12,7 +12,7 @@ import {
   exportListsItemsQuerySchema,
   ExportListsItemsQuerySchema,
 } from '../schemas/request/export_lists_items_query_schema';
-import { getList } from '../../lists/get_list';
+import { getListByListId } from '../../lists/get_list_by_list_id';
 import { writeListItemsToStream } from '../../lists/write_list_items_to_stream';
 
 export const exportListsItemsRoute = (router: IRouter): void => {
@@ -35,7 +35,7 @@ export const exportListsItemsRoute = (router: IRouter): void => {
         // TODO: Make list_id optional and default to the file name with the upload
         // TODO: Make an overwrite flag and set its default to false and implement overwrite
         const { list_id: listId } = request.query;
-        const list = await getList({ listId, savedObjectsClient });
+        const list = await getListByListId({ listId, savedObjectsClient });
         if (list == null) {
           return siemResponse.error({
             statusCode: 400,

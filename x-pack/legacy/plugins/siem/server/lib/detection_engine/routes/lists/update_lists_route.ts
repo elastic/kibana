@@ -8,8 +8,7 @@ import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_LIST_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
 import { createListsSchema, CreateListsSchema } from '../schemas/request/create_lists_schema';
-import { getList } from '../../lists/get_list';
-import { createList } from '../../lists/create_list';
+import { updateListByListId } from '../../lists/update_list_by_list_id';
 
 export const updateListsRoute = (router: IRouter): void => {
   router.put(
@@ -27,14 +26,13 @@ export const updateListsRoute = (router: IRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const savedObjectsClient = context.core.savedObjects.client;
-        const savedList = await getList({ listId, savedObjectsClient });
-        if (savedList != null) {
+        const list = await updateListByListId({ name, description, listId, savedObjectsClient });
+        if (list == null) {
           return siemResponse.error({
-            statusCode: 409,
-            body: `list_id: "${listId}" already exists`,
+            statusCode: 404,
+            body: `list_id: "${listId}" found found`,
           });
         } else {
-          const list = await createList({ name, description, listId, savedObjectsClient });
           // TODO: Transform and check the list on exit as well as validate it
           return response.ok({ body: list });
         }

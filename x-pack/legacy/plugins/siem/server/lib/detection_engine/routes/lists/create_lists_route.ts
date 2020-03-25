@@ -8,7 +8,7 @@ import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_LIST_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
 import { createListsSchema, CreateListsSchema } from '../schemas/request/create_lists_schema';
-import { getList } from '../../lists/get_list';
+import { getListByListId } from '../../lists/get_list_by_list_id';
 import { createList } from '../../lists/create_list';
 
 export const createListsRoute = (router: IRouter): void => {
@@ -27,7 +27,7 @@ export const createListsRoute = (router: IRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const savedObjectsClient = context.core.savedObjects.client;
-        const savedList = await getList({ listId, savedObjectsClient });
+        const savedList = await getListByListId({ listId, savedObjectsClient });
         if (savedList != null) {
           return siemResponse.error({
             statusCode: 409,

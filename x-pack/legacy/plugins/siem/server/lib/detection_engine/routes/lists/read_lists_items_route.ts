@@ -7,7 +7,7 @@
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_LIST_ITEM_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
-import { getListItem } from '../../lists/get_list_item';
+import { getListItemByListId } from '../../lists/get_list_item_by_list_id';
 import {
   ListsItemsQuerySchema,
   listsItemsQuerySchema,
@@ -29,7 +29,7 @@ export const readListsItemsRoute = (router: IRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const savedObjectsClient = context.core.savedObjects.client;
-        const listItem = await getListItem({ listId, ip, savedObjectsClient });
+        const listItem = await getListItemByListId({ listId, ip, savedObjectsClient });
         if (listItem == null) {
           return siemResponse.error({
             statusCode: 404,

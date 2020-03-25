@@ -5,7 +5,7 @@
  */
 
 import { PassThrough } from 'stream';
-import { findListItems } from './find_list_items';
+import { findListItemsByListId } from './find_list_items_by_list_id';
 import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
 
 export const PER_PAGE = 10;
@@ -26,8 +26,7 @@ export const writeListItemsToStream = ({
     let moreData = true;
     while (moreData) {
       page++;
-      // TODO: Loop over all the items
-      const items = await findListItems({
+      const items = await findListItemsByListId({
         page,
         listId,
         savedObjectsClient,

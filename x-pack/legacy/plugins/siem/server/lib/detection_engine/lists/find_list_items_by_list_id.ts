@@ -10,7 +10,7 @@ import {
 } from '../../../../../../../../src/core/server';
 import { SiemListItemSchema } from '../routes/schemas/saved_objects/siem_list_item_schema';
 
-export const findListItems = async ({
+export const findListItemsByListId = async ({
   listId,
   perPage,
   page,

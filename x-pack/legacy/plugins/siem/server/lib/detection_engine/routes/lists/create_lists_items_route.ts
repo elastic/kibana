@@ -9,8 +9,8 @@ import { DETECTION_ENGINE_LIST_ITEM_URL } from '../../../../../common/constants'
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
 import { listsItemsSchema, ListsItemsSchema } from '../schemas/request/lists_items_schema';
 import { createListItem } from '../../lists/create_list_item';
-import { getList } from '../../lists/get_list';
-import { getListItem } from '../../lists/get_list_item';
+import { getListByListId } from '../../lists/get_list_by_list_id';
+import { getListItemByListId } from '../../lists/get_list_item_by_list_id';
 
 export const createListsItemsRoute = (router: IRouter): void => {
   router.post(
@@ -28,14 +28,14 @@ export const createListsItemsRoute = (router: IRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const savedObjectsClient = context.core.savedObjects.client;
-        const savedList = await getList({ listId, savedObjectsClient });
+        const savedList = await getListByListId({ listId, savedObjectsClient });
         if (savedList == null) {
           return siemResponse.error({
             statusCode: 404,
             body: `list_id: "${listId}" does not exist`,
           });
         } else {
-          const savedListItem = await getListItem({ listId, ip, savedObjectsClient });
+          const savedListItem = await getListItemByListId({ listId, ip, savedObjectsClient });
           if (savedListItem != null) {
             return siemResponse.error({
               statusCode: 409,
