@@ -50,7 +50,7 @@ const getCategoryQualityWarningReasons = ({
           },
         ]
       : []),
-    ...(categoriesDocumentRatio >= 0.5
+    ...(categorizedDocCount > 100 && categoriesDocumentRatio >= 0.5
       ? [
           {
             type: 'manyCategories' as const,
