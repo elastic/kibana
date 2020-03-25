@@ -22,7 +22,6 @@ import { constant, once, compact, flatten } from 'lodash';
 import { isWorker } from 'cluster';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot, pkg } from '../../core/server/utils';
-import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
 import httpMixin from './http';
 import { coreMixin } from './core';
@@ -202,9 +201,7 @@ export default class KbnServer {
     return await this.server.inject(opts);
   }
 
-  applyLoggingConfiguration(settings) {
-    const config = new Config(this.config.getSchema(), settings);
-
+  applyLoggingConfiguration(config) {
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),
