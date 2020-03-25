@@ -92,7 +92,7 @@ export class Header extends Component<HeaderProps, State> {
   constructor(props: HeaderProps) {
     super(props);
 
-    let isLocked;
+    let isLocked = false;
     props.isLocked$.subscribe(initialIsLocked => (isLocked = initialIsLocked));
 
     this.state = {
