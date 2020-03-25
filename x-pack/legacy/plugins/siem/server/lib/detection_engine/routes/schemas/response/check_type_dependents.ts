@@ -15,6 +15,7 @@ import {
   requiredRulesSchema,
 } from './rules_schema';
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
+import { isMlRule } from '../../../rules/utils';
 
 export const addSavedId = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'saved_query') {
@@ -47,7 +48,7 @@ export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixe
 };
 
 export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (typeAndTimelineOnly.type === 'machine_learning') {
+  if (isMlRule(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ anomaly_threshold: dependentRulesSchema.props.anomaly_threshold })),
       t.exact(

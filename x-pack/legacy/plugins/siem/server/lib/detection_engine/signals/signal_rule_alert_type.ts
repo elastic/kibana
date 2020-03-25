@@ -32,6 +32,7 @@ import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { getSignalsCount } from '../notifications/get_signals_count';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
+import { isMlRule } from '../rules/utils';
 
 export const signalRulesAlertType = ({
   logger,
@@ -116,7 +117,7 @@ export const signalRulesAlertType = ({
       };
 
       try {
-        if (type === 'machine_learning') {
+        if (isMlRule(type)) {
           if (machineLearningJobId == null || anomalyThreshold == null) {
             throw new Error(
               `Attempted to execute machine learning rule, but it is missing job id and/or anomaly threshold for rule id: "${ruleId}", name: "${name}", signals index: "${outputIndex}", job id: "${machineLearningJobId}", anomaly threshold: "${anomalyThreshold}"`
