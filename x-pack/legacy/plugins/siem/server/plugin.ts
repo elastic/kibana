@@ -46,7 +46,7 @@ export interface SetupPlugins {
   encryptedSavedObjects: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
   licensing: LicensingPluginSetup;
-  security: SecuritySetup;
+  security?: SecuritySetup;
   spaces?: SpacesSetup;
 }
 
