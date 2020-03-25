@@ -12,7 +12,10 @@ import { REMOTE_CLUSTER_EDIT, REMOTE_CLUSTER_EDIT_NAME } from './helpers/constan
 const { setup } = pageHelpers.remoteClustersEdit;
 const { setup: setupRemoteClustersAdd } = pageHelpers.remoteClustersAdd;
 
-describe('Edit Remote cluster', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/57762
+// FLAKY: https://github.com/elastic/kibana/issues/57997
+// FLAKY: https://github.com/elastic/kibana/issues/57998
+describe.skip('Edit Remote cluster', () => {
   let server;
   let httpRequestsMockHelpers;
   let component;
