@@ -28,21 +28,6 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
             "title": "Risk score",
           },
           Object {
-            "description": "Titled timeline",
-            "title": "Timeline template",
-          },
-        ]
-      }
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    data-test-subj="listItemColumnStepRuleDescription"
-    key="description-step-rule-1"
-  >
-    <EuiDescriptionList
-      listItems={
-        Array [
-          Object {
             "description": <EuiText
               size="s"
             >
@@ -62,6 +47,17 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
             </EuiText>,
             "title": "Reference URLs",
           },
+        ]
+      }
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    data-test-subj="listItemColumnStepRuleDescription"
+    key="description-step-rule-1"
+  >
+    <EuiDescriptionList
+      listItems={
+        Array [
           Object {
             "description": <EuiText
               size="s"
@@ -183,10 +179,6 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
           Object {
             "description": 21,
             "title": "Risk score",
-          },
-          Object {
-            "description": "Titled timeline",
-            "title": "Timeline template",
           },
           Object {
             "description": <EuiText
@@ -330,10 +322,6 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
           Object {
             "description": 21,
             "title": "Risk score",
-          },
-          Object {
-            "description": "Titled timeline",
-            "title": "Timeline template",
           },
           Object {
             "description": <EuiText

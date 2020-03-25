@@ -42,7 +42,7 @@ describe('singleSearchAfter', () => {
   test('if singleSearchAfter works with a given sort id', async () => {
     const searchAfterSortId = '1234567891111';
     mockService.callCluster.mockReturnValue(sampleDocSearchResultsWithSortId);
-    const searchAfterResult = await singleSearchAfter({
+    const { searchResult } = await singleSearchAfter({
       searchAfterSortId,
       index: [],
       from: 'now-360s',
@@ -52,7 +52,7 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: undefined,
     });
-    expect(searchAfterResult).toEqual(sampleDocSearchResultsWithSortId);
+    expect(searchResult).toEqual(sampleDocSearchResultsWithSortId);
   });
   test('if singleSearchAfter throws error', async () => {
     const searchAfterSortId = '1234567891111';

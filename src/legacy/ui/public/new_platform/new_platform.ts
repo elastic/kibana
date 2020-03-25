@@ -22,6 +22,7 @@ import { IScope } from 'angular';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
+import { DashboardStart } from '../../../../plugins/dashboard/public';
 import { setSetupServices, setStartServices } from './set_services';
 import {
   LegacyCoreSetup,
@@ -54,6 +55,7 @@ import {
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
 import {
   VisualizationsSetup,
   VisualizationsStart,
@@ -76,6 +78,7 @@ export interface PluginsSetup {
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
   visTypeVega: VisTypeVegaSetup;
+  discover: DiscoverSetup;
   visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
 }
@@ -94,8 +97,10 @@ export interface PluginsStart {
   share: SharePluginStart;
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
+  discover: DiscoverStart;
   visualizations: VisualizationsStart;
   telemetry?: TelemetryPluginStart;
+  dashboard: DashboardStart;
 }
 
 export const npSetup = {
