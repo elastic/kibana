@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { selectPolicyDetails } from '../../store/policy_details/selectors';
 import { AppAction } from '../../types';
+import { AgentsSummary } from './policy_agents_summary';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -49,8 +50,12 @@ export const PolicyDetails = React.memo(() => {
       <EuiTitle size="l">
         <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
       </EuiTitle>
-
-      <EuiButton onClick={handleSaveOnClick}>Save</EuiButton>
+      <div style={{ margin: '4em', padding: '4em' }}>
+        <AgentsSummary error={6} offline={500} total={10000} online={950} />
+      </div>
+      <EuiButton fill iconType="save" onClick={handleSaveOnClick}>
+        Save
+      </EuiButton>
     </>
   );
 });
