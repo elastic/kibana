@@ -27,33 +27,23 @@ import { search, AggParamOption } from '../../../../../../plugins/data/public';
 import { AggParamEditorProps } from '../agg_param_props';
 const { parseEsInterval, InvalidEsCalendarIntervalError } = search.aggs;
 
-function getInvalidEsMessage(interval: string) {
-  return i18n.translate(
-    'visDefaultEditor.controls.timeInterval.invalidCalendarIntervalErrorMessage',
-    {
-      defaultMessage: 'Invalid calendar interval: {interval}, value must be 1',
-      values: { interval },
-    }
-  );
-}
-
 // we check if Elasticsearch interval is valid to show a user appropriate error message
 // e.g. there is the case when a user inputs '14d' but it's '2w' in expression equivalent and the request will fail
 // we don't check it for 0ms because the overall time range has not yet been set
 function isValidCalendarInterval(interval: string) {
   if (interval === '0ms') {
-    return true;
+    return { isValidCalendarValue: true };
   }
 
   try {
     parseEsInterval(interval);
-    return true;
+    return { isValidCalendarValue: true };
   } catch (e) {
     if (e instanceof InvalidEsCalendarIntervalError) {
-      return false;
+      return { isValidCalendarValue: false, error: e.message };
     }
 
-    return true;
+    return { isValidCalendarValue: true };
   }
 }
 
@@ -78,12 +68,13 @@ function validateInterval(
     return { isValid: false };
   }
 
-  // we check if Elasticsearch interval is valid ES interval to show a user appropriate error message
-  // we don't check if there is timeBase
-  const isValidCalendarValue = !!timeBase || isValidCalendarInterval(value);
-
-  if (!isValidCalendarValue) {
-    return { isValid: false, error: getInvalidEsMessage(value) };
+  if (!timeBase) {
+    // we check if Elasticsearch interval is valid ES interval to show a user appropriate error message
+    // we don't check if there is timeBase
+    const { isValidCalendarValue, error } = isValidCalendarInterval(value);
+    if (!isValidCalendarValue) {
+      return { isValid: false, error };
+    }
   }
 
   const isValid = search.aggs.isValidInterval(value, timeBase);
@@ -94,8 +85,9 @@ function validateInterval(
 
   const interval = agg.buckets?.getInterval();
 
-  if (!isValidCalendarInterval(interval.expression)) {
-    return { isValid: false, error: getInvalidEsMessage(interval.expression) };
+  const { isValidCalendarValue, error } = isValidCalendarInterval(interval.expression);
+  if (!isValidCalendarValue) {
+    return { isValid: false, error };
   }
 
   return { isValid, interval };
