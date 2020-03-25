@@ -265,7 +265,7 @@ export class Explorer extends React.Component {
         explorerService.setInfluencerFilterSettings(settings);
       }
     } catch (e) {
-      console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
+      console.log('Invalid query syntax from table', e); // eslint-disable-line no-console
 
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
