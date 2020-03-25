@@ -79,7 +79,7 @@ export const PageView = memo<
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection data-test-subj="pageViewBodyTitle">
                 {isStringOrNumber.test(typeof bodyHeader) ? (
-                  <EuiTitle size="l">
+                  <EuiTitle>
                     <h2>{bodyHeader}</h2>
                   </EuiTitle>
                 ) : (
