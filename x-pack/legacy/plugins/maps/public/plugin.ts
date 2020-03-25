@@ -80,7 +80,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
   setIndexPatternService(data.indexPatterns);
-  setAutocompleteService(data.autocompleteService);
+  setAutocompleteService(data.autocomplete);
 };
 
 /** @internal */
