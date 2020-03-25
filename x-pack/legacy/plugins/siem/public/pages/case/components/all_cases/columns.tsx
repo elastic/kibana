@@ -183,7 +183,7 @@ const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
           >
             {theCase.externalService?.externalTitle}
           </EuiLink>
-          {i18n.EXTERNAL_STATUS(hasDataToPush)}
+          {hasDataToPush ? i18n.REQUIRES_UPDATE : i18n.UP_TO_DATE}
         </p>
       ),
     [hasDataToPush, isLoading, theCase.externalService]
