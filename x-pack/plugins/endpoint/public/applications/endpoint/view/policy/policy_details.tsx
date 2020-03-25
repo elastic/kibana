@@ -25,15 +25,8 @@ export const PolicyDetails = React.memo(() => {
   const handleSaveOnClick = useCallback(() => {
     dispatch({
       type: 'userClickedPolicyDetailsSaveButton',
-      payload: {
-        policyId: policyItem!.id,
-        policyData: {
-          type: 'endpoint policy',
-          test: true,
-        },
-      },
     });
-  }, [dispatch, policyItem]);
+  }, [dispatch]);
 
   function policyName() {
     if (policyItem) {

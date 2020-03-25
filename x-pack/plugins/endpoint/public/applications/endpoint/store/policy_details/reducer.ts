@@ -41,6 +41,22 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
     };
   }
 
+  if (action.type === 'serverReturnedPolicyDetailsUpdateFailure') {
+    return {
+      ...state,
+      isLoading: false,
+      updateApiError: action.payload,
+    };
+  }
+
+  if (action.type === 'userClickedPolicyDetailsSaveButton') {
+    return {
+      ...state,
+      isLoading: true,
+      updateApiError: undefined,
+    };
+  }
+
   if (action.type === 'userChangedUrl') {
     return {
       ...state,

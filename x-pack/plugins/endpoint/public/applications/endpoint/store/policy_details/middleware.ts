@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory, PolicyDetailsState } from '../../types';
-import { selectPolicyIdFromParams, isOnPolicyDetailsPage } from './selectors';
+import { MiddlewareFactory, PolicyData, PolicyDetailsState } from '../../types';
+import { selectPolicyIdFromParams, isOnPolicyDetailsPage, selectPolicyDetails } from './selectors';
 import {
   sendGetDatasource,
   sendGetFleetAgentStatusForConfig,
@@ -22,8 +22,25 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
 
     if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
       const id = selectPolicyIdFromParams(state);
-
       const { item: policyItem } = await sendGetDatasource(http, id);
+
+      // FIXME: remove this code once the Default Policy is available in the endpoint package
+      // Until we get the Default configuration into the Enpoint package so that the datasource has
+      // the expected data structure, we will add it here manually.
+      if (!policyItem.inputs.length) {
+        policyItem.inputs = [
+          {
+            type: 'endpoint',
+            enabled: true,
+            streams: [],
+            config: {
+              policy: {
+                value: {},
+              },
+            },
+          },
+        ];
+      }
 
       dispatch({
         type: 'serverReturnedPolicyDetailsData',
@@ -45,43 +62,102 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
         });
       }
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
-      const { policyId, policyData } = action.payload;
+      const { id, revision, ...updatedPolicyItem } = selectPolicyDetails(state) as PolicyData;
+      const updatedPolicyConfig = {
+        // FIXME: use Candace's selector here
+        windows: {
+          events: {
+            process: true,
+          },
+          malware: {
+            mode: 'prevent',
+          },
+          logging: {
+            stdout: 'debug',
+            file: 'info',
+          },
+          advanced: {
+            elasticsearch: {
+              indices: {
+                control: 'control-index',
+                event: 'event-index',
+                logging: 'logging-index',
+              },
+              kernel: {
+                connect: true,
+                process: true,
+              },
+            },
+          },
+        },
+        mac: {
+          events: {
+            process: true,
+          },
+          malware: {
+            mode: 'detect',
+          },
+          logging: {
+            stdout: 'debug',
+            file: 'info',
+          },
+          advanced: {
+            elasticsearch: {
+              indices: {
+                control: 'control-index',
+                event: 'event-index',
+                logging: 'logging-index',
+              },
+              kernel: {
+                connect: true,
+                process: true,
+              },
+            },
+          },
+        },
+        linux: {
+          events: {
+            process: true,
+          },
+          logging: {
+            stdout: 'debug',
+            file: 'info',
+          },
+          advanced: {
+            elasticsearch: {
+              indices: {
+                control: 'control-index',
+                event: 'event-index',
+                logging: 'logging-index',
+              },
+              kernel: {
+                connect: true,
+                process: true,
+              },
+            },
+          },
+        },
+      };
+
+      updatedPolicyItem.inputs[0].config.policy.value = updatedPolicyConfig;
 
       let apiResponse: UpdateDatasourceResponse;
-
       try {
-        apiResponse = await sendPutDatasource(http, policyId, {
-          body: JSON.stringify({
-            // "id": "8cbe3310-6aed-11ea-9523-4d4b019fef9b",
-            name: 'endpoint-1',
-            description: '',
-            config_id: '53f9e1a0-6aed-11ea-9523-4d4b019fef9b',
-            enabled: true,
-            output_id: '',
-            inputs: [
-              {
-                type: 'endpoint',
-                enabled: true,
-                config: {
-                  policy: {
-                    value: policyData,
-                  },
-                },
-                streams: [],
-              },
-            ],
-            namespace: 'default',
-            package: {
-              name: 'endpoint',
-              title: 'Elastic Endpoint',
-              version: '0.0.1',
-            },
-            // revision: 1,
-          }),
-        });
+        apiResponse = await sendPutDatasource(http, id, updatedPolicyItem);
       } catch (error) {
-        // FIXME: handle errors
+        dispatch({
+          type: 'serverReturnedPolicyDetailsUpdateFailure',
+          payload: error.body || error,
+        });
+        return;
       }
+
+      dispatch({
+        type: 'serverReturnedPolicyDetailsData',
+        payload: {
+          policyItem: apiResponse.item,
+        },
+      });
     }
   };
 };

@@ -10,7 +10,7 @@ import {
   GetAgentStatusResponse,
   GetDatasourcesRequest,
 } from '../../../../../ingest_manager/common/types/rest_spec';
-import { PolicyData } from '../types';
+import { NewPolicyData, PolicyData } from '../types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
 const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
@@ -33,7 +33,9 @@ export interface GetDatasourceResponse {
 }
 
 // FIXME: Import from Ingest after - https://github.com/elastic/kibana/issues/60677
-export type UpdateDatasourceResponse = CreateDatasourceResponse;
+export type UpdateDatasourceResponse = CreateDatasourceResponse & {
+  item: PolicyData;
+};
 
 /**
  * Retrieves a list of endpoint specific datasources (those created with a `package.name` of
@@ -66,22 +68,28 @@ export const sendGetDatasource = (
   http: HttpStart,
   datasourceId: string,
   options?: HttpFetchOptions
-): Promise<UpdateDatasourceResponse> => {
+) => {
   return http.get<GetDatasourceResponse>(`${INGEST_API_DATASOURCES}/${datasourceId}`, options);
 };
 
 /**
  * Updates a datasources
+ *
  * @param http
  * @param datasourceId
+ * @param datasource
  * @param options
  */
 export const sendPutDatasource = (
   http: HttpStart,
   datasourceId: string,
-  options: HttpFetchOptions // FIXME: need to define the `body` type as required
-) => {
-  return http.put(`${INGEST_API_DATASOURCES}/${datasourceId}`, options);
+  datasource: NewPolicyData,
+  options: Exclude<HttpFetchOptions, 'body'> = {}
+): Promise<UpdateDatasourceResponse> => {
+  return http.put(`${INGEST_API_DATASOURCES}/${datasourceId}`, {
+    ...options,
+    body: JSON.stringify(datasource),
+  });
 };
 
 /**

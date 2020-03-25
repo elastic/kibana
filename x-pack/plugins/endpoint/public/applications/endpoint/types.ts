@@ -16,7 +16,7 @@ import {
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
-import { Datasource } from '../../../../ingest_manager/common/types/models';
+import { Datasource, NewDatasource } from '../../../../ingest_manager/common/types/models';
 import { GetAgentStatusResponse } from '../../../../ingest_manager/common/types/rest_spec';
 
 export { AppAction };
@@ -53,9 +53,30 @@ export interface ServerApiError {
 }
 
 /**
- * An Endpoint Policy.
+ * New policy data. Used when updating the policy record via ingest APIs
  */
-export type PolicyData = Datasource;
+export type NewPolicyData = NewDatasource & {
+  inputs: [
+    {
+      type: 'endpoint';
+      enabled: boolean;
+      streams: [];
+      config: {
+        policy: {
+          // FIXME: replace with Candice's PR type `PolicyConfig`
+          value: {
+            [key: string]: any;
+          };
+        };
+      };
+    }
+  ];
+};
+
+/**
+ * Endpoint Policy data, which extends Ingest's `Datasource` type
+ */
+export type PolicyData = NewPolicyData & Datasource;
 
 /**
  * Policy list store state
@@ -65,6 +86,8 @@ export interface PolicyListState {
   policyItems: PolicyData[];
   /** API error if loading data failed */
   apiError?: ServerApiError;
+  /** API error if updating policy failed */
+  updateApiError?: ServerApiError;
   /** total number of policies */
   total: number;
   /** Number of policies per page */

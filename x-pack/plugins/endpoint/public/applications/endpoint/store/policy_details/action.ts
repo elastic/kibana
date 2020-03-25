@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyData } from '../../types';
+import { PolicyData, ServerApiError } from '../../types';
 import { GetAgentStatusResponse } from '../../../../../../ingest_manager/common/types/rest_spec';
 
 interface ServerReturnedPolicyDetailsData {
@@ -21,15 +21,17 @@ interface ServerReturnedPolicyDetailsAgentSummaryData {
   };
 }
 
+interface ServerReturnedPolicyDetailsUpdateFailure {
+  type: 'serverReturnedPolicyDetailsUpdateFailure';
+  payload: ServerApiError;
+}
+
 interface UserClickedPolicyDetailsSaveButton {
   type: 'userClickedPolicyDetailsSaveButton';
-  payload: {
-    policyId: string;
-    policyData: { [key: string]: any }; // FIXME: define payload type
-  };
 }
 
 export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsData
   | UserClickedPolicyDetailsSaveButton
-  | ServerReturnedPolicyDetailsAgentSummaryData;
+  | ServerReturnedPolicyDetailsAgentSummaryData
+  | ServerReturnedPolicyDetailsUpdateFailure;
