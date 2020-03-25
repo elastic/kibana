@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { selectPolicyDetails } from '../../store/policy_details/selectors';
 import { AppAction } from '../../types';
-import { AgentsSummary } from './policy_agents_summary';
+import { AgentsSummary } from './agents_summary';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
