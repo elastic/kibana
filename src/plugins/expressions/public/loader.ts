@@ -158,11 +158,7 @@ export class ExpressionLoader {
       inspectorAdapters: params.inspectorAdapters,
     });
     if (!params.inspectorAdapters) params.inspectorAdapters = this.execution.inspect() as Adapters;
-    const prevDataHandler = this.execution;
-    const data = await prevDataHandler.getData();
-    if (this.execution !== prevDataHandler) {
-      return;
-    }
+    const data = await this.execution.getData();
     this.dataSubject.next(data);
   };
 
