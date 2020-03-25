@@ -4,20 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBasicTable,
-  EuiContextMenuPanel,
-  EuiEmptyPrompt,
-  EuiLoadingContent,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiContextMenuPanel, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import uuid from 'uuid';
 
 import {
   useRules,
+  useRulesStatuses,
   CreatePreBuiltRules,
   FilterOptions,
   Rule,
@@ -37,19 +31,15 @@ import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
 import { PrePackagedRulesPrompt } from '../components/pre_packaged_rules/load_empty_prompt';
 import { GenericDownloader } from '../../../../components/generic_downloader';
+import { AllRulesTables } from '../components/all_rules_tables';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
 import { getBatchItems } from './batch_actions';
-import { getColumns } from './columns';
+import { getColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-
-// EuiBasicTable give me a hardtime with adding the ref attributes so I went the easy way
-// after few hours of fight with typescript !!!! I lost :(
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
 const initialState: State = {
   exportRuleIds: [],
@@ -117,6 +107,7 @@ export const AllRules = React.memo<AllRulesProps>(
       },
       dispatch,
     ] = useReducer(allRulesReducer(tableRef), initialState);
+    const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
 
@@ -134,6 +125,13 @@ export const AllRules = React.memo<AllRulesProps>(
       refetchPrePackagedRulesStatus,
       dispatchRulesInReducer: setRules,
     });
+
+    const sorting = useMemo(
+      () => ({
+        sort: { field: 'enabled', direction: filterOptions.sortOrder },
+      }),
+      [filterOptions.sortOrder]
+    );
 
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
       rulesInstalled,
@@ -158,6 +156,16 @@ export const AllRules = React.memo<AllRulesProps>(
       [dispatch, dispatchToaster, loadingRuleIds, reFetchRulesData, rules, selectedRuleIds]
     );
 
+    const paginationMemo = useMemo(
+      () => ({
+        pageIndex: pagination.page - 1,
+        pageSize: pagination.perPage,
+        totalItemCount: pagination.total,
+        pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+      }),
+      [pagination]
+    );
+
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
         dispatch({
@@ -172,7 +180,7 @@ export const AllRules = React.memo<AllRulesProps>(
       [dispatch]
     );
 
-    const columns = useMemo(() => {
+    const rulesColumns = useMemo(() => {
       return getColumns({
         dispatch,
         dispatchToaster,
@@ -187,6 +195,8 @@ export const AllRules = React.memo<AllRulesProps>(
       });
     }, [dispatch, dispatchToaster, history, loadingRuleIds, loadingRulesAction, reFetchRulesData]);
 
+    const monitoringColumns = useMemo(() => getMonitoringColumns(), []);
+
     useEffect(() => {
       if (reFetchRulesData != null) {
         setRefreshRulesData(reFetchRulesData);
@@ -194,10 +204,10 @@ export const AllRules = React.memo<AllRulesProps>(
     }, [reFetchRulesData, setRefreshRulesData]);
 
     useEffect(() => {
-      if (initLoading && !loading && !isLoadingRules) {
+      if (initLoading && !loading && !isLoadingRules && !isLoadingRulesStatuses) {
         setInitLoading(false);
       }
-    }, [initLoading, loading, isLoadingRules]);
+    }, [initLoading, loading, isLoadingRules, isLoadingRulesStatuses]);
 
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null && reFetchRulesData != null) {
@@ -223,12 +233,6 @@ export const AllRules = React.memo<AllRulesProps>(
         },
         pagination: { page: 1 },
       });
-    }, []);
-
-    const emptyPrompt = useMemo(() => {
-      return (
-        <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
-      );
     }, []);
 
     const isLoadingAnActionOnRule = useMemo(() => {
@@ -264,7 +268,7 @@ export const AllRules = React.memo<AllRulesProps>(
         />
         <EuiSpacer />
 
-        <Panel loading={loading || isLoadingRules}>
+        <Panel loading={loading || isLoadingRules || isLoadingRulesStatuses}>
           <>
             <HeaderSection split title={i18n.ALL_RULES}>
               <RulesTableFilters
@@ -274,12 +278,14 @@ export const AllRules = React.memo<AllRulesProps>(
               />
             </HeaderSection>
 
-            {(loading || isLoadingRules || isLoadingAnActionOnRule) && !initLoading && (
-              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-            )}
+            {(loading || isLoadingRules || isLoadingAnActionOnRule || isLoadingRulesStatuses) &&
+              !initLoading && (
+                <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+              )}
             {rulesCustomInstalled != null &&
               rulesCustomInstalled === 0 &&
-              prePackagedRuleStatus === 'ruleNotInstalled' && (
+              prePackagedRuleStatus === 'ruleNotInstalled' &&
+              !initLoading && (
                 <PrePackagedRulesPrompt
                   createPrePackagedRules={handleCreatePrePackagedRules}
                   loading={loadingCreatePrePackagedRules}
@@ -318,23 +324,17 @@ export const AllRules = React.memo<AllRulesProps>(
                     </UtilityBarGroup>
                   </UtilityBarSection>
                 </UtilityBar>
-                <MyEuiBasicTable
-                  data-test-subj="rules-table"
-                  columns={columns}
-                  isSelectable={!hasNoPermissions ?? false}
-                  itemId="id"
-                  items={rules ?? []}
-                  noItemsMessage={emptyPrompt}
-                  onChange={tableOnChangeCallback}
-                  pagination={{
-                    pageIndex: pagination.page - 1,
-                    pageSize: pagination.perPage,
-                    totalItemCount: pagination.total,
-                    pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
-                  }}
-                  ref={tableRef}
-                  sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
-                  selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
+                <AllRulesTables
+                  euiBasicTableSelectionProps={euiBasicTableSelectionProps}
+                  hasNoPermissions={hasNoPermissions}
+                  monitoringColumns={monitoringColumns}
+                  paginationMemo={paginationMemo}
+                  rules={rules}
+                  rulesColumns={rulesColumns}
+                  rulesStatuses={rulesStatuses}
+                  sorting={sorting}
+                  tableOnChangeCallback={tableOnChangeCallback}
+                  tableRef={tableRef}
                 />
               </>
             )}

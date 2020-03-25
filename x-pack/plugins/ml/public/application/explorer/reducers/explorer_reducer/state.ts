@@ -20,6 +20,8 @@ import {
   TimeRangeBounds,
 } from '../../explorer_utils';
 
+import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE } from '../../explorer_constants'; // QUERY_LANGUAGE_LUCENE
+
 export interface ExplorerState {
   annotationsData: any[];
   bounds: TimeRangeBounds | undefined;
@@ -37,6 +39,10 @@ export interface ExplorerState {
   noInfluencersConfigured: boolean;
   overallSwimlaneData: SwimlaneData;
   queryString: string;
+  searchInput: {
+    query: string;
+    language: QUERY_LANGUAGE;
+  };
   selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
   swimlaneBucketInterval: any;
@@ -73,6 +79,10 @@ export function getExplorerDefaultState(): ExplorerState {
     noInfluencersConfigured: true,
     overallSwimlaneData: getDefaultSwimlaneData(),
     queryString: '',
+    searchInput: {
+      query: '',
+      language: QUERY_LANGUAGE_KUERY,
+    },
     selectedCells: undefined,
     selectedJobs: null,
     swimlaneBucketInterval: undefined,

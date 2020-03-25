@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NotificationsStart, HttpStart } from 'kibana/public';
+import {
+  NotificationsStart,
+  HttpStart,
+  OverlayStart,
+  SavedObjectsClientContract,
+} from 'kibana/public';
 import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
 import { ChromeStart } from 'kibana/public';
@@ -79,6 +84,13 @@ export function createMockGraphStore({
     setLiveResponseFields: jest.fn(),
     setUrlTemplates: jest.fn(),
     setWorkspaceInitialized: jest.fn(),
+    overlays: ({
+      openModal: jest.fn(),
+    } as unknown) as OverlayStart,
+    savedObjectsClient: ({
+      find: jest.fn(),
+      get: jest.fn(),
+    } as unknown) as SavedObjectsClientContract,
     ...mockedDepsOverwrites,
   };
   const sagaMiddleware = createSagaMiddleware();
