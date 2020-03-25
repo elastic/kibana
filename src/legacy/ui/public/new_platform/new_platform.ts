@@ -187,6 +187,18 @@ export const legacyAppRegister = (app: App<any>) => {
         ),
         onAppLeave: () => undefined,
       };
+
+      if (app.updater$) {
+        app.updater$.subscribe(updater => {
+          const updatedFields = updater(app);
+          if (updatedFields && updatedFields.activeUrl) {
+            npStart.core.chrome.navLinks.update(app.id, {
+              url: updatedFields.activeUrl,
+            });
+          }
+        });
+      }
+
       const unmount = isAppMountDeprecated(app.mount)
         ? await app.mount({ core: npStart.core }, params)
         : await app.mount(params);
