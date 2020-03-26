@@ -16,11 +16,11 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
 import { useAppDependencies } from '../../../app_context';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
