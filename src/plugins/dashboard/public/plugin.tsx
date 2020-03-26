@@ -33,6 +33,7 @@ import { ExpandPanelAction, ReplacePanelAction } from './actions';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
 import { getSavedObjectFinder, SavedObjectLoader } from '../../../plugins/saved_objects/public';
+import { GetStartServicesSync } from '../../../plugins/kibana_utils/public';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
@@ -90,6 +91,15 @@ export class DashboardEmbeddableContainerPublicPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
     const startServices = core.getStartServices();
 
+    const [startCore, startPlugins] = GetStartServicesSync(core.getStartServices);
+
+    const changeViewAction = new ReplacePanelAction({
+      core: startCore,
+      embeddable: startPlugins.embeddable,
+    });
+    uiActions.registerAction(changeViewAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
+
     if (share) {
       share.urlGenerators.registerUrlGenerator(
         createDirectAccessDashboardLinkGenerator(async () => ({
@@ -131,22 +141,10 @@ export class DashboardEmbeddableContainerPublicPlugin
   }
 
   public start(core: CoreStart, plugins: StartDependencies): DashboardStart {
-    const { notifications } = core;
     const {
-      uiActions,
       data: { indexPatterns },
     } = plugins;
 
-    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
-
-    const changeViewAction = new ReplacePanelAction(
-      core,
-      SavedObjectFinder,
-      notifications,
-      plugins.embeddable.getEmbeddableFactories
-    );
-    uiActions.registerAction(changeViewAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,

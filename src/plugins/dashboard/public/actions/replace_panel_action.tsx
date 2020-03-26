@@ -23,6 +23,7 @@ import { IEmbeddable, ViewMode, EmbeddableStart } from '../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
+import { getSavedObjectFinder } from '../../../saved_objects/public';
 
 export const ACTION_REPLACE_PANEL = 'replacePanel';
 
@@ -34,17 +35,17 @@ export interface ReplacePanelActionContext {
   embeddable: IEmbeddable;
 }
 
+export interface ReplacePanelActionParams {
+  readonly core?: Partial<CoreStart>;
+  readonly embeddable?: Pick<EmbeddableStart, 'getEmbeddableFactories'>;
+}
+
 export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PANEL> {
   public readonly type = ACTION_REPLACE_PANEL;
   public readonly id = ACTION_REPLACE_PANEL;
   public order = 11;
 
-  constructor(
-    private core: CoreStart,
-    private savedobjectfinder: React.ComponentType<any>,
-    private notifications: CoreStart['notifications'],
-    private getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories']
-  ) {}
+  constructor(private readonly params: ReplacePanelActionParams) {}
 
   public getDisplayName({ embeddable }: ReplacePanelActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
@@ -81,11 +82,14 @@ export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PA
     const dash = embeddable.parent;
     openReplacePanelFlyout({
       embeddable: dash,
-      core: this.core,
-      savedObjectFinder: this.savedobjectfinder,
-      notifications: this.notifications,
+      core: this.params.core! as CoreStart,
+      savedObjectFinder: getSavedObjectFinder(
+        this.params.core!.savedObjects!,
+        this.params.core!.uiSettings!
+      ),
+      notifications: this.params.core!.notifications!,
       panelToRemove: view,
-      getEmbeddableFactories: this.getEmbeddableFactories,
+      getEmbeddableFactories: this.params.embeddable!.getEmbeddableFactories,
     });
   }
 }

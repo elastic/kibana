@@ -75,3 +75,4 @@ export {
 } from './state_sync';
 export { removeQueryParam, redirectWhenMissing, ensureDefaultIndexPattern } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
+export { GetStartServicesSync } from './get_start_services_sync';
