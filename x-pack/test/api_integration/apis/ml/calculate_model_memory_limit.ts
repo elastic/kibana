@@ -147,7 +147,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('calculate model memory limit', function() {
+  // failing test, see https://github.com/elastic/kibana/issues/61400
+  describe.skip('calculate model memory limit', function() {
     before(async () => {
       await esArchiver.load('ml/ecommerce');
     });
