@@ -38,6 +38,7 @@ export const transformNewCase = ({
   newCase: CasePostRequest;
   username: string;
 }): CaseAttributes => ({
+  ...newCase,
   closed_at: null,
   closed_by: null,
   created_at: createdDate,
@@ -46,7 +47,6 @@ export const transformNewCase = ({
   status: 'open',
   updated_at: null,
   updated_by: null,
-  ...newCase,
 });
 
 interface NewCommentArgs {

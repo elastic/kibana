@@ -33,7 +33,7 @@ interface AddCommentProps {
   caseId: string;
   insertQuote: string | null;
   onCommentSaving?: () => void;
-  onCommentPosted: (newcase: Case) => void;
+  onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
 }
 
@@ -69,7 +69,7 @@ export const AddComment = React.memo<AddCommentProps>(
         await postComment(data, onCommentPosted);
         form.reset();
       }
-    }, [form, onCommentPosted]);
+    }, [form, onCommentPosted, onCommentSaving]);
 
     return (
       <span id="add-comment-permLink">
