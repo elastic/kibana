@@ -5,6 +5,15 @@
  */
 
 import { PluginInitializer } from 'kibana/public';
-import { ResolverTestPlugin } from './plugin';
+import {
+  ResolverTestPlugin,
+  ResolverTestPluginSetupDependencies,
+  ResolverTestPluginStartDependencies,
+} from './plugin';
 
-export const plugin: PluginInitializer<void, void> = () => new ResolverTestPlugin();
+export const plugin: PluginInitializer<
+  void,
+  void,
+  ResolverTestPluginSetupDependencies,
+  ResolverTestPluginStartDependencies
+> = () => new ResolverTestPlugin();

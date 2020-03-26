@@ -622,7 +622,7 @@ export interface ContextSetup {
 export type CoreId = symbol;
 
 // @public
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
@@ -630,7 +630,7 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
-    getStartServices: StartServicesAccessor<TPluginsStart>;
+    getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
@@ -2270,7 +2270,7 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
 }>;
 
 // @public
-export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<[CoreStart, TPluginsStart]>;
+export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 // @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
