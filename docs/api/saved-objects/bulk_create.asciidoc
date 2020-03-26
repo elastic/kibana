@@ -19,6 +19,15 @@ experimental[] Create multiple {kib} saved objects.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
 
+`POST /s/<space_id>/api/saved_objects/_bulk_create`
+
+
+[[saved-objects-api-bulk-create-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
+
 [[saved-objects-api-bulk-create-query-params]]
 ==== Query parameters
 
@@ -75,7 +84,7 @@ $ curl -X POST "localhost:5601/api/saved_objects/_bulk_create"
   },
   {
     "type": "dashboard",
-    "id": "my-dashboard",
+    "id": "be3733a0-9efe-11e7-acb3-3dab96693fab",
     "attributes": {
       "title": "Look at my dashboard"
     }
@@ -99,7 +108,7 @@ The API returns the following:
       }
     },
     {
-      "id": "my-dashboard",
+      "id": "be3733a0-9efe-11e7-acb3-3dab96693fab",
       "type": "dashboard",
       "error": {
         "statusCode": 409,

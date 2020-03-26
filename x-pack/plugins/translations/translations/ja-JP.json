@@ -11876,8 +11876,6 @@
     "xpack.rollupJobs.rollupIndexPatternsTitle": "ロールアップインデックスパターンを有効にする",
     "xpack.rollupJobs.startJobsAction.errorTitle": "ロールアップジョブの開始中にエラーが発生",
     "xpack.rollupJobs.stopJobsAction.errorTitle": "ロールアップジョブの停止中にエラーが発生",
-    "xpack.searchProfiler.aceAccessibilityOverlayInstructionEnter": "編集を開始するにはEnterキーを押してください。",
-    "xpack.searchProfiler.aceAccessibilityOverlayInstructionExit": "完了したらEscapeキーで編集を終了します。",
     "xpack.searchProfiler.advanceTimeDescription": "イテレーターを次のドキュメントに進めるためにかかった時間。",
     "xpack.searchProfiler.aggregationProfileTabTitle": "集約プロフィール",
     "xpack.searchProfiler.basicLicenseTitle": "ベーシック",

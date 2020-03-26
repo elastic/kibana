@@ -28,7 +28,7 @@ import * as qs from 'querystring-browser';
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
-import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
+import { useUIAceKeyboardMode } from '../../../../../../../../../../plugins/es_ui_shared/public';
 import { ConsoleMenu } from '../../../../components';
 
 import { autoIndent, getDocumentation } from '../console_menu_actions';
