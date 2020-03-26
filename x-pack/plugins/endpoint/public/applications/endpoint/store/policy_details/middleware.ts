@@ -5,8 +5,9 @@
  */
 
 import { MiddlewareFactory, PolicyDetailsState } from '../../types';
-import { policyIdFromParams, isOnPolicyDetailsPage } from './selectors';
+import { policyIdFromParams } from './selectors';
 import { sendGetDatasource } from '../../services/ingest';
+import { isOnPolicyPage } from '../../lib/is_on_page';
 
 export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
   const http = coreStart.http;
@@ -15,7 +16,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
     next(action);
     const state = getState();
 
-    if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
+    if (action.type === 'userChangedUrl' && isOnPolicyPage(state)) {
       const id = policyIdFromParams(state);
 
       const { item: policyItem } = await sendGetDatasource(http, id);

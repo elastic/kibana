@@ -56,12 +56,6 @@ export const hostListReducer: Reducer<HostListState, AppAction> = (
       ...action.payload,
       loading: true,
     };
-  } else if (action.type === 'userChangedUrl') {
-    return {
-      ...state,
-      location: action.payload,
-      detailsError: undefined,
-    };
   }
 
   return state;

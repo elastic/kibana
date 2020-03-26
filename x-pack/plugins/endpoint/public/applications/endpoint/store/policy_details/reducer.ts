@@ -28,13 +28,6 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
     };
   }
 
-  if (action.type === 'userChangedUrl') {
-    return {
-      ...state,
-      location: action.payload,
-    };
-  }
-
   if (action.type === 'userChangedPolicyConfig') {
     return {
       ...state,

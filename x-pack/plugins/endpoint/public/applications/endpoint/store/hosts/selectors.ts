@@ -24,9 +24,6 @@ export const detailsData = (state: HostListState) => {
   return state.details;
 };
 
-export const isOnHostPage = (state: HostListState) =>
-  state.location ? state.location.pathname === '/hosts' : false;
-
 export const uiQueryParams: (
   state: HostListState
 ) => Immutable<HostIndexUIQueryParams> = createSelector(

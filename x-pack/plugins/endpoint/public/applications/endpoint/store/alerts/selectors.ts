@@ -33,13 +33,6 @@ export const alertListPagination = createStructuredSelector({
 });
 
 /**
- * Returns a boolean based on whether or not the user is on the alerts page
- */
-export const isOnAlertPage = (state: AlertListState): boolean => {
-  return state.location ? state.location.pathname === '/alerts' : false;
-};
-
-/**
  * Returns the query object received from parsing the browsers URL query params.
  * Used to calculate urls for links and such.
  */

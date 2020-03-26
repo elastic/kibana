@@ -11,16 +11,6 @@ import { Immutable } from '../../../../../common/types';
 /** Returns the policy details */
 export const policyDetails = (state: PolicyDetailsState) => state.policyItem;
 
-/** Returns a boolean of whether the user is on the policy details page or not */
-export const isOnPolicyDetailsPage = (state: PolicyDetailsState) => {
-  if (state.location) {
-    const pathnameParts = state.location.pathname.split('/');
-    return pathnameParts[1] === 'policy' && pathnameParts[2];
-  } else {
-    return false;
-  }
-};
-
 /** Returns the policyId from the url */
 export const policyIdFromParams: (state: PolicyDetailsState) => string = createSelector(
   (state: PolicyDetailsState) => state.location,

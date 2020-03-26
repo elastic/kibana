@@ -8,9 +8,10 @@ import { IIndexPattern } from 'src/plugins/data/public';
 import { AlertResultList, AlertData } from '../../../../../common/types';
 import { AppAction } from '../action';
 import { MiddlewareFactory, AlertListState } from '../../types';
-import { isOnAlertPage, apiQueryParams, hasSelectedAlert, uiQueryParams } from './selectors';
+import { apiQueryParams, hasSelectedAlert, uiQueryParams } from './selectors';
 import { cloneHttpFetchQuery } from '../../../../common/clone_http_fetch_query';
 import { EndpointAppConstants } from '../../../../../common/types';
+import { isOnAlertPage } from '../../lib/is_on_page';
 
 export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreStart, depsStart) => {
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {

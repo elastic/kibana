@@ -42,11 +42,6 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
       pageIndex: pageIndex || 0,
       total,
     };
-  } else if (action.type === 'userChangedUrl') {
-    return {
-      ...state,
-      location: action.payload,
-    };
   } else if (action.type === 'serverReturnedAlertDetailsData') {
     return {
       ...state,
