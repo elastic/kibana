@@ -275,7 +275,6 @@ function discoverController(
       filterManager.getUpdates$(),
       {
         next: () => {
-          $scope.state.filters = filterManager.getAppFilters();
           $scope.updateDataSource();
         },
       },
