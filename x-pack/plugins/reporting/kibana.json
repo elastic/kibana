@@ -1,11 +1,8 @@
 {
-  "configPath": [ "xpack", "reporting" ],
   "id": "reporting",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "optionalPlugins": [
-    "usageCollection"
-  ],
+  "configPath": ["xpack", "reporting"],
   "requiredPlugins": [
     "home",
     "management",
@@ -15,6 +12,6 @@
     "share",
     "kibanaLegacy"
   ],
-  "server": true,
+  "server": false,
   "ui": true
 }

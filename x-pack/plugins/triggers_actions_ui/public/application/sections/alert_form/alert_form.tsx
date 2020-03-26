@@ -260,7 +260,7 @@ export const AlertForm = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkWithTooltip', {
-          defaultMessage: 'This is some help text here for check alert.',
+          defaultMessage: 'Define how often to evaluate the condition.',
         })}
       />
     </>
@@ -270,13 +270,13 @@ export const AlertForm = ({
     <>
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel"
-        defaultMessage="Re-notify every"
+        defaultMessage="Notify every"
       />{' '}
       <EuiIconTip
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
-          defaultMessage: 'This is some help text here for re-notify alert.',
+          defaultMessage: 'Define how often to repeat the action while the alert is active.',
         })}
       />
     </>
@@ -456,7 +456,7 @@ export const AlertForm = ({
           <EuiTitle size="s">
             <h5 id="alertTypeTitle">
               <FormattedMessage
-                defaultMessage="Trigger: Select a trigger type"
+                defaultMessage="Select a trigger type"
                 id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle"
               />
             </h5>
