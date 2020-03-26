@@ -821,9 +821,11 @@ function discoverController(
       });
   };
 
-  $scope.updateQuery = function({ query }) {
-    setAppState({ query });
-    $fetchObservable.next();
+  $scope.updateQuery = function({ query }, isUpdate = true) {
+    if (!_.isEqual(query, appStateContainer.getState().query) || isUpdate === false) {
+      setAppState({ query });
+      $fetchObservable.next();
+    }
   };
 
   $scope.updateSavedQueryId = newSavedQueryId => {
