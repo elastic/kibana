@@ -101,7 +101,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   /**
    * We need to distinguish between the add flyout and the edit flyout.
    * useEffect will run only once on component mount.
-   * This guarantees that the above function will run only once.
+   * This guarantees that the function below will run only once.
    * On the first render of the component the apiUrl can be either undefined or filled.
    * If it is filled then we are on the edit flyout. Otherwise we are on the add flyout.
    */
@@ -227,7 +227,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
         <EuiFlexItem>
           <EuiSpacer size="xs" />
           <FieldMapping
-            disabled={false}
+            disabled={true}
             mapping={mapping as CasesConfigurationMapping[]}
             onChangeMapping={handleOnChangeMappingConfig}
           />
