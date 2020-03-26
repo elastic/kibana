@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable prettier/prettier */
-
 import expect from '@kbn/expect';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from './saved_object_test_cases';
@@ -55,7 +53,9 @@ export const getTestTitle = (
     return `forbidden [${stringify(testCases)}]`;
   }
   if (testCases.find(x => x.failure === 403)) {
-    throw new Error('Cannot create test title for multiple forbidden test cases; specify individual tests for each of these test cases');
+    throw new Error(
+      'Cannot create test title for multiple forbidden test cases; specify individual tests for each of these test cases'
+    );
   }
   // permitted
   const list: string[] = [];
@@ -75,10 +75,13 @@ export const getTestTitle = (
 
 export const testCaseFailures = {
   // test suites need explicit return types for number primitives
-  fail400: (condition?: boolean): { failure?: 400 } => (condition !== false ? { failure: 400 } : {}),
-  fail404: (condition?: boolean): { failure?: 404 } => (condition !== false ? { failure: 404 } : {}),
-  fail409: (condition?: boolean): { failure?: 409 } => (condition !== false ? { failure: 409 } : {}),
-}
+  fail400: (condition?: boolean): { failure?: 400 } =>
+    condition !== false ? { failure: 400 } : {},
+  fail404: (condition?: boolean): { failure?: 404 } =>
+    condition !== false ? { failure: 404 } : {},
+  fail409: (condition?: boolean): { failure?: 409 } =>
+    condition !== false ? { failure: 409 } : {},
+};
 
 /**
  * Test cases have additional properties that we don't want to send in HTTP Requests
@@ -189,31 +192,63 @@ export const getTestScenarios = <T>(modifier?: T[]) => {
     noAccess: { ...NOT_A_KIBANA_USER, description: 'user with no access' },
     superuser: { ...SUPERUSER, description: 'superuser' },
     legacyAll: { ...KIBANA_LEGACY_USER, description: 'legacy user' },
-    allGlobally: { ...KIBANA_RBAC_USER, description: 'rbac user with all globally', },
-    readGlobally: { ...KIBANA_RBAC_DASHBOARD_ONLY_USER, description: 'rbac user with read globally' },
+    allGlobally: { ...KIBANA_RBAC_USER, description: 'rbac user with all globally' },
+    readGlobally: {
+      ...KIBANA_RBAC_DASHBOARD_ONLY_USER,
+      description: 'rbac user with read globally',
+    },
     dualAll: { ...KIBANA_DUAL_PRIVILEGES_USER, description: 'dual-privileges user' },
-    dualRead: { ...KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER, description: 'dual-privileges readonly user'},
+    dualRead: {
+      ...KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+      description: 'dual-privileges readonly user',
+    },
   };
 
-  interface Modifier { modifier?: T; }
+  interface Modifier {
+    modifier?: T;
+  }
   interface Security extends Modifier {
-    users: Record<keyof typeof commonUsers | 'allAtDefaultSpace' | 'readAtDefaultSpace' | 'allAtSpace1' | 'readAtSpace1', TestUser>;
+    users: Record<
+      | keyof typeof commonUsers
+      | 'allAtDefaultSpace'
+      | 'readAtDefaultSpace'
+      | 'allAtSpace1'
+      | 'readAtSpace1',
+      TestUser
+    >;
   }
   interface SecurityAndSpaces extends Modifier {
-    users: Record<keyof typeof commonUsers | 'allAtSpace' | 'readAtSpace' | 'allAtOtherSpace', TestUser>;
+    users: Record<
+      keyof typeof commonUsers | 'allAtSpace' | 'readAtSpace' | 'allAtOtherSpace',
+      TestUser
+    >;
     spaceId: string;
   }
-  interface Spaces extends Modifier { spaceId: string };
+  interface Spaces extends Modifier {
+    spaceId: string;
+  }
 
   let spaces = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID].map(x => ({ spaceId: x })) as Spaces[];
   let security = [
     {
       users: {
         ...commonUsers,
-        allAtDefaultSpace: { ...KIBANA_RBAC_DEFAULT_SPACE_ALL_USER, description: 'rbac user with all at default space'},
-        readAtDefaultSpace: { ...KIBANA_RBAC_DEFAULT_SPACE_READ_USER, description: 'rbac user with read at default space'},
-        allAtSpace1: { ...KIBANA_RBAC_SPACE_1_ALL_USER, description: 'rbac user with all at space_1'},
-        readAtSpace1: { ...KIBANA_RBAC_SPACE_1_READ_USER, description: 'rbac user with read at space_1'},
+        allAtDefaultSpace: {
+          ...KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          description: 'rbac user with all at default space',
+        },
+        readAtDefaultSpace: {
+          ...KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          description: 'rbac user with read at default space',
+        },
+        allAtSpace1: {
+          ...KIBANA_RBAC_SPACE_1_ALL_USER,
+          description: 'rbac user with all at space_1',
+        },
+        readAtSpace1: {
+          ...KIBANA_RBAC_SPACE_1_READ_USER,
+          description: 'rbac user with read at space_1',
+        },
       },
     },
   ] as Security[];
@@ -222,9 +257,18 @@ export const getTestScenarios = <T>(modifier?: T[]) => {
       spaceId: DEFAULT_SPACE_ID,
       users: {
         ...commonUsers,
-        allAtSpace: { ...KIBANA_RBAC_DEFAULT_SPACE_ALL_USER, description: 'user with all at the space' },
-        readAtSpace: { ...KIBANA_RBAC_DEFAULT_SPACE_READ_USER, description: 'user with read at the space' },
-        allAtOtherSpace: { ...KIBANA_RBAC_SPACE_1_ALL_USER, description: 'user with all at other space' },
+        allAtSpace: {
+          ...KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          description: 'user with all at the space',
+        },
+        readAtSpace: {
+          ...KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          description: 'user with read at the space',
+        },
+        allAtOtherSpace: {
+          ...KIBANA_RBAC_SPACE_1_ALL_USER,
+          description: 'user with all at other space',
+        },
       },
     },
     {
@@ -232,8 +276,14 @@ export const getTestScenarios = <T>(modifier?: T[]) => {
       users: {
         ...commonUsers,
         allAtSpace: { ...KIBANA_RBAC_SPACE_1_ALL_USER, description: 'user with all at the space' },
-        readAtSpace: { ...KIBANA_RBAC_SPACE_1_READ_USER, description: 'user with read at the space' },
-        allAtOtherSpace: { ...KIBANA_RBAC_DEFAULT_SPACE_ALL_USER, description: 'user with all at other space' },
+        readAtSpace: {
+          ...KIBANA_RBAC_SPACE_1_READ_USER,
+          description: 'user with read at the space',
+        },
+        allAtOtherSpace: {
+          ...KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          description: 'user with all at other space',
+        },
       },
     },
   ] as SecurityAndSpaces[];

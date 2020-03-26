@@ -5,7 +5,7 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { testCaseFailures, getTestScenarios } from '../../common/lib/space_test_utils';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { bulkUpdateTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/bulk_update';
 

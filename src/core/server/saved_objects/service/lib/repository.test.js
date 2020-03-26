@@ -171,6 +171,7 @@ describe('SavedObjectsRepository', () => {
     for (let i = 0; i < actions.length; i++) {
       expect(callAdminCluster).toHaveBeenNthCalledWith(i + 1, actions[i], expect.any(Object));
     }
+    expect(callAdminCluster).toHaveBeenCalledTimes(actions.length);
   };
   const expectClusterCallArgs = (args, n = 1) => {
     expect(callAdminCluster).toHaveBeenNthCalledWith(
@@ -334,7 +335,7 @@ describe('SavedObjectsRepository', () => {
         expect(callAdminCluster).not.toHaveBeenCalled();
       });
 
-      it(`throws when type is not namespace-agnostic`, async () => {
+      it(`throws when type is not multi-namespace`, async () => {
         const test = async type => {
           const message = `${type} doesn't support namespaces`;
           await expectBadRequestError(type, id, [newNs1, newNs2], message);
@@ -361,13 +362,13 @@ describe('SavedObjectsRepository', () => {
       it(`throws when ES is unable to find the document during get`, async () => {
         callAdminCluster.mockResolvedValue({ found: false }); // this._callCluster('get', ...)
         await expectNotFoundError(type, id, [newNs1, newNs2]);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when ES is unable to find the index during get`, async () => {
         callAdminCluster.mockResolvedValue({ status: 404 }); // this._callCluster('get', ...)
         await expectNotFoundError(type, id, [newNs1, newNs2]);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when the document exists, but not in this namespace`, async () => {
@@ -375,7 +376,7 @@ describe('SavedObjectsRepository', () => {
         await expectNotFoundError(type, id, [newNs1, newNs2], {
           namespace: 'some-other-namespace',
         });
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when the document already exists in one or more of the targeted namespaces`, async () => {
@@ -389,14 +390,14 @@ describe('SavedObjectsRepository', () => {
             `${type}:${id} already exists in the following namespace(s): ${existing}`
           )
         );
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when ES is unable to find the document during update`, async () => {
         mockGetResponse(type, id); // this._callCluster('get', ...)
         callAdminCluster.mockResolvedValue({ status: 404 }); // this._writeToCluster('update', ...)
         await expectNotFoundError(type, id, [newNs1, newNs2]);
-        expect(callAdminCluster).toHaveBeenCalledTimes(2);
+        expectClusterCalls('get', 'update');
       });
     });
 
@@ -640,7 +641,7 @@ describe('SavedObjectsRepository', () => {
         callAdminCluster.mockResolvedValue(response); // this._writeToCluster('bulk', ...)
 
         const result = await savedObjectsRepository.bulkCreate(objects);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('bulk');
         const objCall = esError ? expectObjArgs(obj) : [];
         const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
         expectClusterCallArgs({ body });
@@ -679,7 +680,7 @@ describe('SavedObjectsRepository', () => {
 
         const options = { overwrite: true };
         const result = await savedObjectsRepository.bulkCreate([obj1, obj, obj2], options);
-        expect(callAdminCluster).toHaveBeenCalledTimes(2);
+        expectClusterCalls('mget', 'bulk');
         const body1 = { docs: [expect.objectContaining({ _id: `${obj.type}:${obj.id}` })] };
         expectClusterCallArgs({ body: body1 }, 1);
         const body2 = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
@@ -892,7 +893,7 @@ describe('SavedObjectsRepository', () => {
         const response = getMockMgetResponse([obj1, obj2]);
         callAdminCluster.mockResolvedValue(response);
         const result = await bulkGet([obj1, obj, obj2]);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('mget');
         expect(result).toEqual({
           saved_objects: [expectSuccess(obj1), expectErrorInvalidType(obj), expectSuccess(obj2)],
         });
@@ -901,7 +902,7 @@ describe('SavedObjectsRepository', () => {
       const bulkGetErrorNotFound = async ([obj1, obj, obj2], options, response) => {
         callAdminCluster.mockResolvedValue(response);
         const result = await bulkGet([obj1, obj, obj2], options);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('mget');
         expect(result).toEqual({
           saved_objects: [expectSuccess(obj1), expectErrorNotFound(obj), expectSuccess(obj2)],
         });
@@ -1232,7 +1233,7 @@ describe('SavedObjectsRepository', () => {
         callAdminCluster.mockResolvedValue(mockResponse); // this._writeToCluster('bulk', ...)
 
         const result = await savedObjectsRepository.bulkUpdate(objects);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('bulk');
         const objCall = esError ? expectObjArgs(obj) : [];
         const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
         expectClusterCallArgs({ body });
@@ -1247,7 +1248,7 @@ describe('SavedObjectsRepository', () => {
         callAdminCluster.mockResolvedValue(bulkResponse); // this._writeToCluster('bulk', ...)
 
         const result = await savedObjectsRepository.bulkUpdate([obj1, _obj, obj2], options);
-        expect(callAdminCluster).toHaveBeenCalledTimes(2);
+        expectClusterCalls('mget', 'bulk');
         const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
         expectClusterCallArgs({ body }, 2);
         expect(result).toEqual({
@@ -1533,7 +1534,7 @@ describe('SavedObjectsRepository', () => {
             namespace,
           })
         ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_TYPE, id));
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when automatic index creation fails`, async () => {
@@ -1719,32 +1720,42 @@ describe('SavedObjectsRepository', () => {
       it(`throws when ES is unable to find the document during get`, async () => {
         callAdminCluster.mockResolvedValue({ found: false }); // this._callCluster('get', ...)
         await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when ES is unable to find the index during get`, async () => {
         callAdminCluster.mockResolvedValue({ status: 404 }); // this._callCluster('get', ...)
         await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when the type is multi-namespace and the document exists, but not in this namespace`, async () => {
         const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
         callAdminCluster.mockResolvedValue(response); // this._callCluster('get', ...)
         await expectNotFoundError(MULTI_NAMESPACE_TYPE, id, { namespace: 'bar-namespace' });
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
+      });
+
+      it(`throws when ES is unable to find the document during update`, async () => {
+        const mockResponse = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id });
+        mockResponse._source.namespaces = ['default', 'some-other-nameespace'];
+        callAdminCluster
+          .mockResolvedValueOnce(mockResponse) // this._callCluster('get', ...)
+          .mockResolvedValue({ status: 404 }); // this._writeToCluster('update', ...)
+        await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
+        expectClusterCalls('get', 'update');
       });
 
       it(`throws when ES is unable to find the document during delete`, async () => {
         callAdminCluster.mockResolvedValue({ result: 'not_found' }); // this._writeToCluster('delete', ...)
         await expectNotFoundError(type, id);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('delete');
       });
 
       it(`throws when ES is unable to find the index during delete`, async () => {
         callAdminCluster.mockResolvedValue({ error: { type: 'index_not_found_exception' } }); // this._writeToCluster('delete', ...)
         await expectNotFoundError(type, id);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('delete');
       });
 
       it(`throws when ES returns an unexpected response`, async () => {
@@ -1752,7 +1763,7 @@ describe('SavedObjectsRepository', () => {
         await expect(savedObjectsRepository.delete(type, id)).rejects.toThrowError(
           'Unexpected Elasticsearch DELETE response'
         );
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('delete');
       });
     });
 
@@ -2050,6 +2061,7 @@ describe('SavedObjectsRepository', () => {
                           --------------------------------^: Bad Request]
                       `);
         expect(getSearchDslNS.getSearchDsl).not.toHaveBeenCalled();
+        expect(callAdminCluster).not.toHaveBeenCalled();
       });
     });
 
@@ -2282,20 +2294,20 @@ describe('SavedObjectsRepository', () => {
       it(`throws when ES is unable to find the document during get`, async () => {
         callAdminCluster.mockResolvedValue({ found: false });
         await expectNotFoundError(type, id);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when ES is unable to find the index during get`, async () => {
         callAdminCluster.mockResolvedValue({ status: 404 });
         await expectNotFoundError(type, id);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when type is multi-namespace and the document exists, but not in this namespace`, async () => {
         const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
         callAdminCluster.mockResolvedValue(response);
         await expectNotFoundError(MULTI_NAMESPACE_TYPE, id, { namespace: 'bar-namespace' });
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
     });
 
@@ -2470,7 +2482,7 @@ describe('SavedObjectsRepository', () => {
         await expect(
           savedObjectsRepository.incrementCounter(MULTI_NAMESPACE_TYPE, id, field, { namespace })
         ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_TYPE, id));
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
     });
 
@@ -2731,19 +2743,19 @@ describe('SavedObjectsRepository', () => {
       it(`throws when ES is unable to find the document during get`, async () => {
         callAdminCluster.mockResolvedValue({ found: false }); // this._callCluster('get', ...)
         await expectNotFoundError(type, id, [namespace1, namespace2]);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when ES is unable to find the index during get`, async () => {
         callAdminCluster.mockResolvedValue({ status: 404 }); // this._callCluster('get', ...)
         await expectNotFoundError(type, id, [namespace1, namespace2]);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when the document exists, but not in this namespace`, async () => {
         mockGetResponse(type, id, [namespace1]); // this._callCluster('get', ...)
         await expectNotFoundError(type, id, [namespace1], { namespace: 'some-other-namespace' });
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when the document doesn't exist in all of the targeted namespaces`, async () => {
@@ -2756,21 +2768,21 @@ describe('SavedObjectsRepository', () => {
             `${type}:${id} doesn't exist in the following namespace(s): ${missing}`
           )
         );
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when ES is unable to find the document during delete`, async () => {
         mockGetResponse(type, id, [namespace1]); // this._callCluster('get', ...)
         callAdminCluster.mockResolvedValue({ result: 'not_found' }); // this._writeToCluster('delete', ...)
         await expectNotFoundError(type, id, [namespace1]);
-        expect(callAdminCluster).toHaveBeenCalledTimes(2);
+        expectClusterCalls('get', 'delete');
       });
 
       it(`throws when ES is unable to find the index during delete`, async () => {
         mockGetResponse(type, id, [namespace1]); // this._callCluster('get', ...)
         callAdminCluster.mockResolvedValue({ error: { type: 'index_not_found_exception' } }); // this._writeToCluster('delete', ...)
         await expectNotFoundError(type, id, [namespace1]);
-        expect(callAdminCluster).toHaveBeenCalledTimes(2);
+        expectClusterCalls('get', 'delete');
       });
 
       it(`throws when ES returns an unexpected response`, async () => {
@@ -2779,14 +2791,14 @@ describe('SavedObjectsRepository', () => {
         await expect(
           savedObjectsRepository.removeNamespaces(type, id, [namespace1])
         ).rejects.toThrowError('Unexpected Elasticsearch DELETE response');
-        expect(callAdminCluster).toHaveBeenCalledTimes(2);
+        expectClusterCalls('get', 'delete');
       });
 
       it(`throws when ES is unable to find the document during update`, async () => {
         mockGetResponse(type, id, [namespace1, namespace2]); // this._callCluster('get', ...)
         callAdminCluster.mockResolvedValue({ status: 404 }); // this._writeToCluster('update', ...)
         await expectNotFoundError(type, id, [namespace1]);
-        expect(callAdminCluster).toHaveBeenCalledTimes(2);
+        expectClusterCalls('get', 'update');
       });
     });
 
@@ -2987,26 +2999,26 @@ describe('SavedObjectsRepository', () => {
       it(`throws when ES is unable to find the document during get`, async () => {
         callAdminCluster.mockResolvedValue({ found: false }); // this._callCluster('get', ...)
         await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when ES is unable to find the index during get`, async () => {
         callAdminCluster.mockResolvedValue({ status: 404 }); // this._callCluster('get', ...)
         await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when type is multi-namespace and the document exists, but not in this namespace`, async () => {
         const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
         callAdminCluster.mockResolvedValue(response); // this._callCluster('get', ...)
         await expectNotFoundError(MULTI_NAMESPACE_TYPE, id, { namespace: 'bar-namespace' });
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('get');
       });
 
       it(`throws when ES is unable to find the document during update`, async () => {
         callAdminCluster.mockResolvedValue({ status: 404 }); // this._writeToCluster('update', ...)
         await expectNotFoundError(type, id);
-        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expectClusterCalls('update');
       });
     });
 

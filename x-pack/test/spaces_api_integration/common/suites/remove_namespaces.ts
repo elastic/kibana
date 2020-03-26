@@ -12,7 +12,7 @@ import {
   expectResponses,
   getUrlPrefix,
   getTestTitle,
-} from '../../../saved_object_api_integration/common/lib/space_test_utils';
+} from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
 import {
   DescribeFn,
   ExpectResponseBody,

@@ -383,6 +383,25 @@ describe('#rawToSavedObject', () => {
     });
   });
 
+  describe('multi-namespace type with a namespace', () => {
+    const raw = createSampleDoc({ _source: { namespace: 'baz' } });
+    const actual = multiNamespaceSerializer.rawToSavedObject(raw);
+
+    test(`removes type prefix from _id`, () => {
+      expect(actual).toHaveProperty('id', 'bar');
+    });
+
+    test(`copies _id to id if prefixed by namespace and type`, () => {
+      const _id = `${raw._source.namespace}:${raw._id}`;
+      const _actual = multiNamespaceSerializer.rawToSavedObject({ ...raw, _id });
+      expect(_actual).toHaveProperty('id', _id);
+    });
+
+    test(`doesn't copy _source.namespace to namespace`, () => {
+      expect(actual).not.toHaveProperty('namespace');
+    });
+  });
+
   describe('multi-namespace type with namespaces', () => {
     const raw = createSampleDoc({ _source: { namespaces: ['baz'] } });
     const actual = multiNamespaceSerializer.rawToSavedObject(raw);
@@ -514,19 +533,15 @@ describe('#savedObjectToRaw', () => {
     test('generates an id prefixed with type, if no id is specified', () => {
       const v1 = singleNamespaceSerializer.savedObjectToRaw({
         type: 'foo',
-        attributes: {
-          bar: true,
-        },
+        attributes: { bar: true },
       } as any);
 
       const v2 = singleNamespaceSerializer.savedObjectToRaw({
         type: 'foo',
-        attributes: {
-          bar: true,
-        },
+        attributes: { bar: true },
       } as any);
 
-      expect(v1._id).toMatch(/foo\:[\w-]+$/);
+      expect(v1._id).toMatch(/^foo\:[\w-]+$/);
       expect(v1._id).not.toEqual(v2._id);
     });
 
@@ -545,20 +560,16 @@ describe('#savedObjectToRaw', () => {
       const v1 = singleNamespaceSerializer.savedObjectToRaw({
         type: 'foo',
         namespace: 'bar',
-        attributes: {
-          bar: true,
-        },
+        attributes: { bar: true },
       } as any);
 
       const v2 = singleNamespaceSerializer.savedObjectToRaw({
         type: 'foo',
         namespace: 'bar',
-        attributes: {
-          bar: true,
-        },
+        attributes: { bar: true },
       } as any);
 
-      expect(v1._id).toMatch(/bar\:foo\:[\w-]+$/);
+      expect(v1._id).toMatch(/^bar\:foo\:[\w-]+$/);
       expect(v1._id).not.toEqual(v2._id);
     });
 
@@ -573,25 +584,50 @@ describe('#savedObjectToRaw', () => {
     });
   });
 
+  describe('single-namespace type with namespaces', () => {
+    test('generates an id prefixed with type, if no id is specified', () => {
+      const v1 = namespaceAgnosticSerializer.savedObjectToRaw({
+        type: 'foo',
+        namespaces: ['bar'],
+        attributes: { bar: true },
+      } as any);
+
+      const v2 = namespaceAgnosticSerializer.savedObjectToRaw({
+        type: 'foo',
+        namespaces: ['bar'],
+        attributes: { bar: true },
+      } as any);
+
+      expect(v1._id).toMatch(/^foo\:[\w-]+$/);
+      expect(v1._id).not.toEqual(v2._id);
+    });
+
+    test(`doesn't specify _source.namespaces`, () => {
+      const actual = namespaceAgnosticSerializer.savedObjectToRaw({
+        type: 'foo',
+        namespaces: ['bar'],
+        attributes: {},
+      } as any);
+
+      expect(actual._source).not.toHaveProperty('namespaces');
+    });
+  });
+
   describe('namespace-agnostic type with a namespace', () => {
     test('generates an id prefixed with type, if no id is specified', () => {
       const v1 = namespaceAgnosticSerializer.savedObjectToRaw({
         type: 'foo',
         namespace: 'bar',
-        attributes: {
-          bar: true,
-        },
+        attributes: { bar: true },
       } as any);
 
       const v2 = namespaceAgnosticSerializer.savedObjectToRaw({
         type: 'foo',
         namespace: 'bar',
-        attributes: {
-          bar: true,
-        },
+        attributes: { bar: true },
       } as any);
 
-      expect(v1._id).toMatch(/foo\:[\w-]+$/);
+      expect(v1._id).toMatch(/^foo\:[\w-]+$/);
       expect(v1._id).not.toEqual(v2._id);
     });
 
@@ -611,31 +647,85 @@ describe('#savedObjectToRaw', () => {
       const v1 = namespaceAgnosticSerializer.savedObjectToRaw({
         type: 'foo',
         namespaces: ['bar'],
-        attributes: {
-          bar: true,
-        },
+        attributes: { bar: true },
       } as any);
 
       const v2 = namespaceAgnosticSerializer.savedObjectToRaw({
         type: 'foo',
         namespaces: ['bar'],
-        attributes: {
-          bar: true,
-        },
+        attributes: { bar: true },
       } as any);
 
-      expect(v1._id).toMatch(/foo\:[\w-]+$/);
+      expect(v1._id).toMatch(/^foo\:[\w-]+$/);
+      expect(v1._id).not.toEqual(v2._id);
+    });
+
+    test(`doesn't specify _source.namespaces`, () => {
+      const actual = namespaceAgnosticSerializer.savedObjectToRaw({
+        type: 'foo',
+        namespaces: ['bar'],
+        attributes: {},
+      } as any);
+
+      expect(actual._source).not.toHaveProperty('namespaces');
+    });
+  });
+
+  describe('multi-namespace type with a namespace', () => {
+    test('generates an id prefixed with type, if no id is specified', () => {
+      const v1 = multiNamespaceSerializer.savedObjectToRaw({
+        type: 'foo',
+        namespace: 'bar',
+        attributes: { bar: true },
+      } as any);
+
+      const v2 = multiNamespaceSerializer.savedObjectToRaw({
+        type: 'foo',
+        namespace: 'bar',
+        attributes: { bar: true },
+      } as any);
+
+      expect(v1._id).toMatch(/^foo\:[\w-]+$/);
       expect(v1._id).not.toEqual(v2._id);
     });
 
     test(`doesn't specify _source.namespace`, () => {
-      const actual = namespaceAgnosticSerializer.savedObjectToRaw({
+      const actual = multiNamespaceSerializer.savedObjectToRaw({
         type: 'foo',
         namespace: 'bar',
         attributes: {},
       } as any);
 
       expect(actual._source).not.toHaveProperty('namespace');
+    });
+  });
+
+  describe('multi-namespace type with namespaces', () => {
+    test('generates an id prefixed with type, if no id is specified', () => {
+      const v1 = multiNamespaceSerializer.savedObjectToRaw({
+        type: 'foo',
+        namespaces: ['bar'],
+        attributes: { bar: true },
+      } as any);
+
+      const v2 = multiNamespaceSerializer.savedObjectToRaw({
+        type: 'foo',
+        namespaces: ['bar'],
+        attributes: { bar: true },
+      } as any);
+
+      expect(v1._id).toMatch(/^foo\:[\w-]+$/);
+      expect(v1._id).not.toEqual(v2._id);
+    });
+
+    test(`it copies namespaces to _source.namespaces`, () => {
+      const actual = multiNamespaceSerializer.savedObjectToRaw({
+        type: 'foo',
+        namespaces: ['bar'],
+        attributes: {},
+      } as any);
+
+      expect(actual._source).toHaveProperty('namespaces', ['bar']);
     });
   });
 });
@@ -933,36 +1023,36 @@ describe('#generateRawId', () => {
   describe('single-namespace type without a namespace', () => {
     test('generates an id if none is specified', () => {
       const id = singleNamespaceSerializer.generateRawId('', 'goodbye');
-      expect(id).toMatch(/goodbye\:[\w-]+$/);
+      expect(id).toMatch(/^goodbye\:[\w-]+$/);
     });
 
     test('uses the id that is specified', () => {
       const id = singleNamespaceSerializer.generateRawId('', 'hello', 'world');
-      expect(id).toMatch('hello:world');
+      expect(id).toEqual('hello:world');
     });
   });
 
   describe('single-namespace type with a namespace', () => {
     test('generates an id if none is specified and prefixes namespace', () => {
       const id = singleNamespaceSerializer.generateRawId('foo', 'goodbye');
-      expect(id).toMatch(/foo:goodbye\:[\w-]+$/);
+      expect(id).toMatch(/^foo:goodbye\:[\w-]+$/);
     });
 
     test('uses the id that is specified and prefixes the namespace', () => {
       const id = singleNamespaceSerializer.generateRawId('foo', 'hello', 'world');
-      expect(id).toMatch('foo:hello:world');
+      expect(id).toEqual('foo:hello:world');
     });
   });
 
   describe('namespace-agnostic type with a namespace', () => {
     test(`generates an id if none is specified and doesn't prefix namespace`, () => {
       const id = namespaceAgnosticSerializer.generateRawId('foo', 'goodbye');
-      expect(id).toMatch(/goodbye\:[\w-]+$/);
+      expect(id).toMatch(/^goodbye\:[\w-]+$/);
     });
 
     test(`uses the id that is specified and doesn't prefix the namespace`, () => {
       const id = namespaceAgnosticSerializer.generateRawId('foo', 'hello', 'world');
-      expect(id).toMatch('hello:world');
+      expect(id).toEqual('hello:world');
     });
   });
 });

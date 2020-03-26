@@ -147,3 +147,37 @@ test(`#bulkUpdate`, async () => {
   });
   expect(result).toBe(returnValue);
 });
+
+test(`#addNamespaces`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    addNamespaces: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const namespaces = Symbol();
+  const options = Symbol();
+  const result = await client.addNamespaces(type, id, namespaces, options);
+
+  expect(mockRepository.addNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
+  expect(result).toBe(returnValue);
+});
+
+test(`#removeNamespaces`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    removeNamespaces: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const namespaces = Symbol();
+  const options = Symbol();
+  const result = await client.removeNamespaces(type, id, namespaces, options);
+
+  expect(mockRepository.removeNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
+  expect(result).toBe(returnValue);
+});

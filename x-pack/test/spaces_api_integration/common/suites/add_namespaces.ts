@@ -11,7 +11,7 @@ import { SPACES } from '../lib/spaces';
 import {
   expectResponses,
   getUrlPrefix,
-} from '../../../saved_object_api_integration/common/lib/space_test_utils';
+} from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
 import {
   DescribeFn,
   ExpectResponseBody,

@@ -13,7 +13,7 @@ import {
   expectResponses,
   getUrlPrefix,
   getTestTitle,
-} from '../lib/space_test_utils';
+} from '../lib/saved_object_test_utils';
 import { DescribeFn, ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface BulkUpdateTestDefinition extends TestDefinition {

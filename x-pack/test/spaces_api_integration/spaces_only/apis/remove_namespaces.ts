@@ -8,7 +8,7 @@ import { SPACES } from '../../common/lib/spaces';
 import {
   testCaseFailures,
   getTestScenarios,
-} from '../../../saved_object_api_integration/common/lib/space_test_utils';
+} from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
 import { TestInvoker } from '../../common/lib/types';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
 import { removeNamespacesTestSuiteFactory } from '../../common/suites/remove_namespaces';

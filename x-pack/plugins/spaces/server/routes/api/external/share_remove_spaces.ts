@@ -56,8 +56,6 @@ export function initShareRemoveSpacesApi(deps: ExternalRouteDeps) {
       } catch (error) {
         if (SavedObjectsClient.errors.isNotFoundError(error)) {
           return response.notFound();
-        } else if (SavedObjectsClient.errors.isBadRequestError(error)) {
-          return response.badRequest();
         }
         return response.customError(wrapError(error));
       }

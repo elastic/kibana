@@ -167,7 +167,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         // if the preflight request did not find a saved object, check the user's privileges at the current namespace; this will instead
         // throw a 403 error for unauthorized users, to prevent possible information disclosure of the saved object's existing namespace(s)
         // otherwise, if the user is authorized to update saved objects in the current namespace, they will see the actual 404 error
-        await this.ensureAuthorized(type, 'update', namespace, args, 'addNamespacesUpdate', false);
+        await this.ensureAuthorized(type, 'update', namespace, args, 'addNamespacesUpdate');
       }
       throw error;
     }
