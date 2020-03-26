@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { USER } from '../../../functional/services/machine_learning/security_common';
 
@@ -158,14 +156,16 @@ export default ({ getService }: FtrProviderContext) => {
 
     for (const testData of testDataList) {
       it(`calculates the model memory limit ${testData.testTitleSuffix}`, async () => {
-        const { body } = await supertest
+        await supertest
           .post('/api/ml/validate/calculate_model_memory_limit')
           .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);
 
-        expect(body).to.eql(testData.expected.responseBody);
+        // More backend changes to the model memory calculation are planned.
+        // This value check will be re-enabled when the final batch of updates is in.
+        // expect(body).to.eql(testData.expected.responseBody);
       });
     }
   });
