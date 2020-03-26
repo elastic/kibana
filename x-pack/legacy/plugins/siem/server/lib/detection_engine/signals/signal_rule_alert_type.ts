@@ -283,13 +283,14 @@ export const signalRulesAlertType = ({
             lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString() ?? null,
           });
         }
-      } catch (err) {
+      } catch (error) {
+        const message = error.message ?? '(no error message given)';
         await writeSignalRuleExceptionToSavedObject({
           name,
           alertId,
           currentStatusSavedObject,
           logger,
-          message: `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
+          message: `Signal creation failed: ${message}\nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
           services,
           ruleStatusSavedObjects,
           ruleId: ruleId ?? '(unknown rule id)',
