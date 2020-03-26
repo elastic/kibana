@@ -13,7 +13,7 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   isErrorEmbeddable,
-} from 'src/plugins/embeddable/public';
+} from '../../../../../../../../../src/plugins/embeddable/public';
 import { start } from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import * as i18n from './translations';
 import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public';
