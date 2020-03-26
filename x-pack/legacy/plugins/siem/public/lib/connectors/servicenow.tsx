@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, ChangeEvent } from 'react';
+import React, { useCallback, ChangeEvent, useEffect } from 'react';
 import {
   EuiFieldText,
   EuiFlexGroup,
@@ -97,6 +97,21 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
   const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
+
+  /**
+   * We need to distinguish between the add flyout and the edit flyout.
+   * useEffect will run only once on component mount.
+   * This guarantees that the above function will run only once.
+   * On the first render of the component the apiUrl can be either undefined or filled.
+   * If it is filled then we are on the edit flyout. Otherwise we are on the add flyout.
+   */
+
+  useEffect(() => {
+    if (!isEmpty(apiUrl)) {
+      editActionSecrets('username', '');
+      editActionSecrets('password', '');
+    }
+  }, []);
 
   if (isEmpty(mapping)) {
     editActionConfig('casesConfiguration', {
