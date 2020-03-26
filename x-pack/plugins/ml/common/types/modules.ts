@@ -90,8 +90,14 @@ export interface DataRecognizerConfigResponse {
   };
 }
 
-export type GeneralOverride = any;
-
 export type JobOverride = Partial<Job>;
+export type GeneralJobsOverride = Omit<JobOverride, 'job_id'>;
+export type JobSpecificOverride = JobOverride & { job_id: Job['job_id'] };
+
+export function isGeneralJobOverride(override: JobOverride): override is GeneralJobsOverride {
+  return override.job_id === undefined;
+}
+
+export type GeneralDatafeedsOverride = Partial<Omit<Datafeed, 'job_id' | 'datafeed_id'>>;
 
 export type DatafeedOverride = Partial<Datafeed>;

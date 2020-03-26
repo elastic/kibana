@@ -16,14 +16,14 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('settings-page-link', 5000);
     },
     changeHeartbeatIndicesInput: async (text: string) => {
-      const input = await testSubjects.find('heartbeat-indices-input', 5000);
+      const input = await testSubjects.find('heartbeat-indices-input-loaded', 5000);
       await input.clearValueWithKeyboard();
       await input.type(text);
     },
     loadFields: async () => {
-      const heartbeatIndices = await (
-        await testSubjects.find('heartbeat-indices-input', 5000)
-      ).getAttribute('value');
+      const input = await testSubjects.find('heartbeat-indices-input-loaded', 5000);
+      const heartbeatIndices = await input.getAttribute('value');
+
       return { heartbeatIndices };
     },
     applyButtonIsDisabled: async () => {
@@ -34,7 +34,7 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       await retry.waitFor('submit to succeed', async () => {
         // When the form submit is complete the form will no longer be disabled
         const disabled = await (
-          await testSubjects.find('heartbeat-indices-input', 5000)
+          await testSubjects.find('heartbeat-indices-input-loaded', 5000)
         ).getAttribute('disabled');
         return disabled === null;
       });
@@ -193,6 +193,15 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       return await testSubjects.existOrFail('xpack.uptime.locationMap.locationMissing', {
         timeout: 3000,
       });
+    },
+    async openPageSizeSelectPopover(): Promise<void> {
+      return testSubjects.click('xpack.uptime.monitorList.pageSizeSelect.popoverOpen', 5000);
+    },
+    async clickPageSizeSelectPopoverItem(size: number = 10): Promise<void> {
+      return testSubjects.click(
+        `xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem${size.toString()}`,
+        5000
+      );
     },
   };
 }

@@ -272,6 +272,32 @@ export const getRuleStatusById = async ({
   });
 
 /**
+ * Return rule statuses given list of alert ids
+ *
+ * @param ids array of string of Rule ID's (not rule_id)
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getRulesStatusByIds = async ({
+  ids,
+  signal,
+}: {
+  ids: string[];
+  signal: AbortSignal;
+}): Promise<RuleStatusResponse> => {
+  const res = await KibanaServices.get().http.fetch<RuleStatusResponse>(
+    DETECTION_ENGINE_RULES_STATUS_URL,
+    {
+      method: 'GET',
+      query: { ids: JSON.stringify(ids) },
+      signal,
+    }
+  );
+  return res;
+};
+
+/**
  * Fetch all unique Tags used by Rules
  *
  * @param signal to cancel request

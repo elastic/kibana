@@ -16,4 +16,11 @@ export enum API_URLS {
   PING_HISTOGRAM = `/api/uptime/ping/histogram`,
   SNAPSHOT_COUNT = `/api/uptime/snapshot/count`,
   FILTERS = `/api/uptime/filters`,
+  logPageView = `/api/uptime/logPageView`,
+
+  ML_MODULE_JOBS = `/api/ml/modules/jobs_exist/`,
+  ML_SETUP_MODULE = '/api/ml/modules/setup/',
+  ML_DELETE_JOB = `/api/ml/jobs/delete_jobs`,
+  ML_CAPABILITIES = '/api/ml/ml_capabilities',
+  ML_ANOMALIES_RESULT = `/api/ml/results/anomalies_table_data`,
 }
