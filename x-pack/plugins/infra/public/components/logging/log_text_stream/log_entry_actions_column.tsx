@@ -27,6 +27,10 @@ interface LogEntryActionsColumnProps {
   onViewDetails: () => void;
 }
 
+const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
+  defaultMessage: 'View Details',
+});
+
 export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   isHovered,
   isMenuOpen,
@@ -39,14 +43,10 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
     onViewDetails();
   }, [onCloseMenu, onViewDetails]);
 
-  const label = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
-    defaultMessage: 'View Details',
-  });
-
   const button = (
     <ButtonWrapper>
       <EuiButtonIcon
-        aria-label={label}
+        aria-label={MENU_LABEL}
         color="ghost"
         iconType="boxesHorizontal"
         onClick={onOpenMenu}
