@@ -13,7 +13,6 @@ import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
   EmbeddableFactoryDefinition,
-  ErrorEmbeddable,
   IContainer,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -29,11 +28,6 @@ import { getInitialLayers } from '../angular/get_initial_layers';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../angular/services/gis_map_saved_object_loader';
 import { bindSetupCoreAndPlugins, bindStartCoreAndPlugins } from '../plugin';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
-import {
-  EventHandlers,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
