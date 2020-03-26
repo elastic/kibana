@@ -19,19 +19,23 @@
 
 import { StartServicesAccessor, CoreStart } from '../../../core/public';
 
-export const GetStartServicesSync = <T extends StartServicesAccessor>(
+export interface StartServices<Plugins extends object, Core extends object = CoreStart> {
+  readonly plugins: Readonly<Partial<Plugins>>;
+  readonly core: Readonly<Partial<Core>>;
+}
+
+export const getStartServicesSync = <T extends StartServicesAccessor>(
   asyncAccessor: T
-): [
-  Readonly<Partial<CoreStart>>,
-  Readonly<Partial<T extends StartServicesAccessor<infer P> ? P : never>>
-] => {
-  const core: Partial<CoreStart> = {};
-  const plugins: Partial<T extends StartServicesAccessor<infer P> ? P : never> = {};
+): StartServices<T extends StartServicesAccessor<infer P> ? P : never> => {
+  const services: StartServices<T extends StartServicesAccessor<infer P> ? P : never> = {
+    plugins: {} as T extends StartServicesAccessor<infer P> ? P : never,
+    core: {},
+  };
 
   asyncAccessor().then(
     ([asyncCore, asyncPlugins]) => {
-      Object.assign(core, asyncCore);
-      Object.assign(plugins, asyncPlugins);
+      Object.assign(services.core, asyncCore);
+      Object.assign(services.plugins, asyncPlugins);
     },
     error => {
       /* eslint-disable no-console */
@@ -41,5 +45,5 @@ export const GetStartServicesSync = <T extends StartServicesAccessor>(
     }
   );
 
-  return [core, plugins];
+  return services;
 };

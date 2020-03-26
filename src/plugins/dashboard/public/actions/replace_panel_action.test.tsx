@@ -81,26 +81,26 @@ beforeEach(async () => {
 });
 
 test('Executes the replace panel action', async () => {
-  let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    coreStart,
-    SavedObjectFinder,
-    notifications,
-    getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction({
+    core: coreStart,
+    plugins: {
+      embeddable: {
+        getEmbeddableFactories,
+      },
+    },
+  });
   action.execute({ embeddable });
 });
 
 test('Is not compatible when embeddable is not in a dashboard container', async () => {
-  let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    coreStart,
-    SavedObjectFinder,
-    notifications,
-    getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction({
+    core: coreStart,
+    plugins: {
+      embeddable: {
+        getEmbeddableFactories,
+      },
+    },
+  });
   expect(
     await action.isCompatible({
       embeddable: new ContactCardEmbeddable(
@@ -112,14 +112,14 @@ test('Is not compatible when embeddable is not in a dashboard container', async 
 });
 
 test('Execute throws an error when called with an embeddable not in a parent', async () => {
-  let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    coreStart,
-    SavedObjectFinder,
-    notifications,
-    getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction({
+    core: coreStart,
+    plugins: {
+      embeddable: {
+        getEmbeddableFactories,
+      },
+    },
+  });
   async function check() {
     await action.execute({ embeddable: container });
   }
@@ -127,25 +127,25 @@ test('Execute throws an error when called with an embeddable not in a parent', a
 });
 
 test('Returns title', async () => {
-  let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    coreStart,
-    SavedObjectFinder,
-    notifications,
-    getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction({
+    core: coreStart,
+    plugins: {
+      embeddable: {
+        getEmbeddableFactories,
+      },
+    },
+  });
   expect(action.getDisplayName({ embeddable })).toBeDefined();
 });
 
 test('Returns an icon', async () => {
-  let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    coreStart,
-    SavedObjectFinder,
-    notifications,
-    getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction({
+    core: coreStart,
+    plugins: {
+      embeddable: {
+        getEmbeddableFactories,
+      },
+    },
+  });
   expect(action.getIconType({ embeddable })).toBeDefined();
 });

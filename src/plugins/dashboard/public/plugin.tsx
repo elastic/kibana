@@ -33,7 +33,7 @@ import { ExpandPanelAction, ReplacePanelAction } from './actions';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
 import { getSavedObjectFinder, SavedObjectLoader } from '../../../plugins/saved_objects/public';
-import { GetStartServicesSync } from '../../../plugins/kibana_utils/public';
+import { getStartServicesSync } from '../../../plugins/kibana_utils/public';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
@@ -91,11 +91,11 @@ export class DashboardEmbeddableContainerPublicPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
     const startServices = core.getStartServices();
 
-    const [startCore, startPlugins] = GetStartServicesSync(core.getStartServices);
+    const start = getStartServicesSync(core.getStartServices);
 
     const changeViewAction = new ReplacePanelAction({
-      core: startCore,
-      embeddable: startPlugins.embeddable,
+      core: start.core,
+      embeddable: start.plugins.embeddable,
     });
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);

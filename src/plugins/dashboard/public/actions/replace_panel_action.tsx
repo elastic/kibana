@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '../../../../core/public';
+import { StartServices } from '../../../kibana_utils/public';
 import { IEmbeddable, ViewMode, EmbeddableStart } from '../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
@@ -35,10 +36,9 @@ export interface ReplacePanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export interface ReplacePanelActionParams {
-  readonly core?: Partial<CoreStart>;
+export type ReplacePanelActionParams = StartServices<{
   readonly embeddable?: Pick<EmbeddableStart, 'getEmbeddableFactories'>;
-}
+}>;
 
 export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PANEL> {
   public readonly type = ACTION_REPLACE_PANEL;
@@ -89,7 +89,7 @@ export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PA
       ),
       notifications: this.params.core!.notifications!,
       panelToRemove: view,
-      getEmbeddableFactories: this.params.embeddable!.getEmbeddableFactories,
+      getEmbeddableFactories: this.params.plugins.embeddable!.getEmbeddableFactories,
     });
   }
 }
