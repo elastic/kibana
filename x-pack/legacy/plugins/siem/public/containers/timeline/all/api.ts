@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ImportRulesProps, ImportRulesResponse } from '../../detection_engine/rules';
+import { ImportDataProps, ImportRulesResponse } from '../../detection_engine/rules';
 import { KibanaServices } from '../../../lib/kibana';
 import { TIMELINE_IMPORT_URL, TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { ExportSelectedData } from '../../../components/generic_downloader';
@@ -13,7 +13,7 @@ export const importTimelines = async ({
   fileToImport,
   overwrite = false,
   signal,
-}: ImportRulesProps): Promise<ImportRulesResponse> => {
+}: ImportDataProps): Promise<ImportRulesResponse> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
 

@@ -15,7 +15,7 @@ import {
   Rule,
   FetchRuleProps,
   BasicFetchProps,
-  ImportRulesProps,
+  ImportDataProps,
   ExportDocumentsProps,
   RuleStatusResponse,
   ImportRulesResponse,
@@ -204,7 +204,7 @@ export const importRules = async ({
   fileToImport,
   overwrite = false,
   signal,
-}: ImportRulesProps): Promise<ImportRulesResponse> => {
+}: ImportDataProps): Promise<ImportRulesResponse> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
 
