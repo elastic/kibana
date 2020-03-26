@@ -61,8 +61,13 @@ const ConnectorsComponent: React.FC<Props> = ({
         fullWidth
         title={<h3>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h3>}
         description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
+        data-test-subj="case-connectors-form-group"
       >
-        <EuiFormRowExtended fullWidth label={dropDownLabel}>
+        <EuiFormRowExtended
+          fullWidth
+          label={dropDownLabel}
+          data-test-subj="case-connectors-form-row"
+        >
           <ConnectorsDropdown
             connectors={connectors}
             disabled={disabled}

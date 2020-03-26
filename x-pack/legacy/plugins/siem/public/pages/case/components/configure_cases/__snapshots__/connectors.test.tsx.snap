@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Connectors it renders 1`] = `
+<Fragment>
+  <EuiDescribedFormGroup
+    data-test-subj="case-connectors-form-group"
+    description="You may optionally connect SIEM cases to a third-party incident management system of your choosing. This will allow you to push case data as an incident in your chosen third-party system."
+    fullWidth={true}
+    title={
+      <h3>
+        Connect to third-party incident management system
+      </h3>
+    }
+  >
+    <Styled(EuiFormRow)
+      data-test-subj="case-connectors-form-row"
+      fullWidth={true}
+      label={
+        <ForwardRef
+          justifyContent="spaceBetween"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            Incident management system
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <ForwardRef
+              onClick={[MockFunction]}
+            >
+              Add new connector option
+            </ForwardRef>
+          </EuiFlexItem>
+        </ForwardRef>
+      }
+    >
+      <Memo(ConnectorsDropdownComponent)
+        connectors={Array []}
+        disabled={false}
+        isLoading={false}
+        onChange={[MockFunction]}
+        selectedConnector="none"
+      />
+    </Styled(EuiFormRow)>
+  </EuiDescribedFormGroup>
+</Fragment>
+`;
