@@ -15,6 +15,7 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -22,12 +23,13 @@ import { useDispatch } from 'react-redux';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import {
   policyDetails,
-  selectAgentStatusSummary,
+  agentStatusSummary,
   updateStatus,
   isLoading,
+  apiError,
 } from '../../store/policy_details/selectors';
 import { WindowsEventing } from './policy_forms/eventing/windows';
-import { PageView } from '../../components/page_view';
+import { PageView, PageViewHeaderTitle } from '../../components/page_view';
 import { AppAction } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
@@ -38,9 +40,10 @@ export const PolicyDetails = React.memo(() => {
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
-  const agentStatusSummary = usePolicyDetailsSelector(selectAgentStatusSummary);
+  const policyAgentStatusSummary = usePolicyDetailsSelector(agentStatusSummary);
   const policyUpdateStatus = usePolicyDetailsSelector(updateStatus);
   const isPolicyLoading = usePolicyDetailsSelector(isLoading);
+  const policyApiError = usePolicyDetailsSelector(apiError);
 
   // Local state
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
@@ -90,16 +93,37 @@ export const PolicyDetails = React.memo(() => {
     setShowConfirm(false);
   }, []);
 
-  const headerLeftContent =
-    policyItem?.name ??
-    i18n.translate('xpack.endpoint.policy.details.notFound', {
-      defaultMessage: 'Policy Not Found',
-    });
+  // Before proceeding - check if we have a policyItem.
+  if (!policyItem) {
+    return (
+      <PageView>
+        {isPolicyLoading ? (
+          <EuiLoadingSpinner size="xl" />
+        ) : (
+          <EuiCallOut color="danger" title={policyApiError?.error}>
+            {policyApiError?.message}
+          </EuiCallOut>
+        )}
+      </PageView>
+    );
+  }
+
+  const headerLeftContent = (
+    <div>
+      <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { paddingLeft: '0' } }}>
+        <FormattedMessage
+          id="xpack.endpoint.policy.details.backToListTitle"
+          defaultMessage="Back to policy list"
+        />
+      </EuiButtonEmpty>
+      <PageViewHeaderTitle>{policyItem.name}</PageViewHeaderTitle>
+    </div>
+  );
 
   const headerRightContent = (
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <AgentsSummary {...agentStatusSummary} />
+        <AgentsSummary {...policyAgentStatusSummary} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty>
@@ -123,7 +147,7 @@ export const PolicyDetails = React.memo(() => {
     <>
       {showConfirm && (
         <ConfirmUpdate
-          hostCount={agentStatusSummary.total}
+          hostCount={policyAgentStatusSummary.total}
           onCancel={handleSaveCancel}
           onConfirm={handleSaveConfirmation}
         />

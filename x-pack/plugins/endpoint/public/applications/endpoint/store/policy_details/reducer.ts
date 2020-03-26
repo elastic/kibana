@@ -39,6 +39,14 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
     };
   }
 
+  if (action.type === 'serverFailedToReturnPolicyDetailsData') {
+    return {
+      ...state,
+      isLoading: false,
+      apiError: action.payload,
+    };
+  }
+
   if (action.type === 'serverReturnedPolicyDetailsAgentSummaryData') {
     return {
       ...state,

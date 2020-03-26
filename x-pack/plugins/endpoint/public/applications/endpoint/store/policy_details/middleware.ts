@@ -7,6 +7,7 @@
 import { MiddlewareFactory, PolicyData, PolicyDetailsState } from '../../types';
 import { policyIdFromParams, isOnPolicyDetailsPage, policyDetails } from './selectors';
 import {
+  GetDatasourceResponse,
   sendGetDatasource,
   sendGetFleetAgentStatusForConfig,
   sendPutDatasource,
@@ -22,7 +23,17 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
 
     if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
       const id = policyIdFromParams(state);
-      const { item: policyItem } = await sendGetDatasource(http, id);
+      let policyItem: PolicyData;
+
+      try {
+        policyItem = (await sendGetDatasource(http, id)).item;
+      } catch (error) {
+        dispatch({
+          type: 'serverFailedToReturnPolicyDetailsData',
+          payload: error.body || error,
+        });
+        return;
+      }
 
       // FIXME: remove this code once the Default Policy is available in the endpoint package
       // Until we get the Default configuration into the Enpoint package so that the datasource has

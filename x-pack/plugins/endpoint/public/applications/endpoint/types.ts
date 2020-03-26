@@ -102,6 +102,8 @@ export interface PolicyListState {
 export interface PolicyDetailsState {
   /** A single policy item  */
   policyItem?: PolicyData;
+  /** API error if loading data failed */
+  apiError?: ServerApiError;
   /** data is being retrieved from server */
   policyConfig?: PolicyConfig;
   isLoading: boolean;

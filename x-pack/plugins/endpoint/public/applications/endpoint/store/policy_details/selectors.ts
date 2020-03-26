@@ -61,8 +61,14 @@ export const selectedWindowsEventing = (state: PolicyDetailsState): number => {
   return 0;
 };
 
+/** is there an api call in flight */
 export const isLoading = (state: PolicyDetailsState) => state.isLoading;
 
-export const selectAgentStatusSummary = (state: PolicyDetailsState) => state.agentStatusSummary;
+/** API error when fetching Policy data */
+export const apiError = (state: PolicyDetailsState) => state.apiError;
 
+/** Policy Agent Summary Stats */
+export const agentStatusSummary = (state: PolicyDetailsState) => state.agentStatusSummary;
+
+/** Status for an update to the policy */
 export const updateStatus = (state: PolicyDetailsState) => state.updateStatus;
