@@ -98,10 +98,10 @@ type CoreSetupMockType = MockedKeys<CoreSetup> & jest.Mocked<Pick<CoreSetup, 'ge
 
 function createCoreSetupMock({
   pluginStartDeps = {},
-  pluginStartContract = {},
+  pluginStartContract,
 }: {
   pluginStartDeps?: object;
-  pluginStartContract?: object;
+  pluginStartContract?: any;
 } = {}) {
   const httpService = httpServiceMock.createSetupContract();
   const httpMock: jest.Mocked<CoreSetup['http']> = {
@@ -137,7 +137,7 @@ function createCoreSetupMock({
     uuid: uuidServiceMock.createSetupContract(),
     metrics: metricsServiceMock.createSetupContract(),
     getStartServices: jest
-      .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, object]>, []>()
+      .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
   };
 

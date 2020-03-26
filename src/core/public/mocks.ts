@@ -52,21 +52,19 @@ export { scopedHistoryMock } from './application/scoped_history.mock';
 function createCoreSetupMock({
   basePath = '',
   pluginStartDeps = {},
-  pluginStartContract = {},
+  pluginStartContract,
 }: {
   basePath?: string;
   pluginStartDeps?: object;
-  pluginStartContract?: object;
+  pluginStartContract?: any;
 } = {}) {
   const mock = {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-    getStartServices: jest.fn<
-      Promise<[ReturnType<typeof createCoreStartMock>, object, object]>,
-      []
-    >(() =>
-      Promise.resolve([createCoreStartMock({ basePath }), pluginStartDeps, pluginStartContract])
+    getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>(
+      () =>
+        Promise.resolve([createCoreStartMock({ basePath }), pluginStartDeps, pluginStartContract])
     ),
     http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
