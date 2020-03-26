@@ -49,7 +49,8 @@ if (chrome.getInjected('ilmUiEnabled')) {
   const esSection = management.getSection('data');
   esSection.register('index_lifecycle_policies', {
     visible: true,
-    display: 'Schedules',
+    display: 'Index Lifecycle Policies',
+    // display: 'Scheduling',
     order: 20,
     url: `#${BASE_PATH}policies`,
   });

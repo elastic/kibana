@@ -53,7 +53,7 @@ export class IndexMgmtUIPlugin {
 
     management.sections.getSection('data')!.registerApp({
       id: PLUGIN.id,
-      title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Sources' }),
+      title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Data Sources' }),
       order: 10,
       mount: async ({ element, setBreadcrumbs }) => {
         const [core] = await getStartServices();
@@ -79,20 +79,6 @@ export class IndexMgmtUIPlugin {
         const { renderApp } = await import('./application');
         return renderApp(element, { core, dependencies: appDependencies });
       },
-    });
-
-    management.sections.getSection('ingest')!.registerApp({
-      id: 'ingest_node',
-      title: 'Ingest Node',
-      order: 50,
-      mount: async ({ element, setBreadcrumbs }) => {},
-    });
-
-    management.sections.getSection('ingest')!.registerApp({
-      id: 'index_templates',
-      title: 'Index Templates',
-      order: 60,
-      mount: async ({ element, setBreadcrumbs }) => {},
     });
 
     return {

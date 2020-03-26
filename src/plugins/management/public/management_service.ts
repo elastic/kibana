@@ -88,14 +88,14 @@ export class ManagementService {
 
     register({
       id: 'data',
-      title: 'Data',
+      title: 'Cluster',
       order: 20,
       euiIconType: 'none',
     });
 
     register({
       id: 'actions',
-      title: 'Detection',
+      title: 'Alerting',
       order: 30,
       euiIconType: 'none',
     });

@@ -45,7 +45,7 @@ export class SnapshotRestoreUIPlugin {
     management.sections.getSection('data')!.registerApp({
       id: PLUGIN.id,
       title: i18n.translate('xpack.snapshotRestore.appTitle', {
-        defaultMessage: '^ Snapshot and Restore',
+        defaultMessage: 'Snapshot and Restore',
       }),
       order: 40,
       mount: async ({ element, setBreadcrumbs }) => {

@@ -87,7 +87,7 @@ export class RollupPlugin implements Plugin {
     if (esSection) {
       esSection.registerApp({
         id: 'rollup_jobs',
-        title: '^ Rollups',
+        title: 'Rollup Jobs',
         order: 30,
         mount(params) {
           params.setBreadcrumbs([

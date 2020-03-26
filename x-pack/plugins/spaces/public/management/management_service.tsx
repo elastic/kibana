@@ -25,7 +25,7 @@ export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
   public setup({ getStartServices, management, spacesManager, securityLicense }: SetupDeps) {
-    const kibanaSection = management.sections.getSection('kibana');
+    const kibanaSection = management.sections.getSection('auth');
     if (kibanaSection) {
       this.registeredSpacesManagementApp = kibanaSection.registerApp(
         spacesManagementApp.create({ getStartServices, spacesManager, securityLicense })

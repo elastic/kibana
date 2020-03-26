@@ -33,7 +33,8 @@ if (isLicenseOK && isCcrUiEnabled) {
   esSection.register('ccr', {
     visible: true,
     display: i18n.translate('xpack.crossClusterReplication.appTitle', {
-      defaultMessage: 'Cross-Cluster',
+      defaultMessage: 'Cross-Cluster Replication',
+      // defaultMessage: 'Cross-Cluster',
     }),
     order: 90,
     url: `#${BASE_PATH}`,

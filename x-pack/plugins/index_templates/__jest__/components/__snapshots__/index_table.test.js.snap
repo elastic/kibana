@@ -1,0 +1,177 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`index table clear cache button works from context menu 1`] = `"clearing cache..."`;
+
+exports[`index table clear cache button works from context menu 2`] = `"open"`;
+
+exports[`index table close index button works from context menu 1`] = `"closing..."`;
+
+exports[`index table close index button works from context menu 2`] = `"closed"`;
+
+exports[`index table edit index button works from context menu 1`] = `"Edit settings"`;
+
+exports[`index table flush button works from context menu 1`] = `"flushing..."`;
+
+exports[`index table flush button works from context menu 2`] = `"open"`;
+
+exports[`index table force merge button works from context menu 1`] = `"open"`;
+
+exports[`index table force merge button works from context menu 2`] = `"forcing merge..."`;
+
+exports[`index table force merge button works from context menu 3`] = `"open"`;
+
+exports[`index table open index button works from context menu 1`] = `"opening..."`;
+
+exports[`index table open index button works from context menu 2`] = `"open"`;
+
+exports[`index table refresh button works from context menu 1`] = `"refreshing..."`;
+
+exports[`index table refresh button works from context menu 2`] = `"open"`;
+
+exports[`index table should change pages when a pagination link is clicked on 1`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy2",
+  "testy3",
+  "testy4",
+  "testy5",
+  "testy6",
+  "testy7",
+  "testy8",
+  "testy9",
+]
+`;
+
+exports[`index table should change pages when a pagination link is clicked on 2`] = `
+Array [
+  "testy10",
+  "testy11",
+  "testy12",
+  "testy13",
+  "testy14",
+  "testy15",
+  "testy16",
+  "testy17",
+  "testy18",
+  "testy19",
+]
+`;
+
+exports[`index table should filter based on content of search input 1`] = `
+Array [
+  "testy0",
+]
+`;
+
+exports[`index table should show system indices only when the switch is turned on 1`] = `
+Array [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "…",
+  "11",
+]
+`;
+
+exports[`index table should show system indices only when the switch is turned on 2`] = `
+Array [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "…",
+  "21",
+]
+`;
+
+exports[`index table should show the right context menu options when more than one closed index is selected 1`] = `
+Array [
+  "Open indices",
+  "Delete indices",
+]
+`;
+
+exports[`index table should show the right context menu options when more than one open index is selected 1`] = `
+Array [
+  "Close indices",
+  "Force merge indices",
+  "Refresh indices",
+  "Clear indices cache",
+  "Flush indices",
+  "Freeze indices",
+  "Delete indices",
+]
+`;
+
+exports[`index table should show the right context menu options when one index is selected and closed 1`] = `
+Array [
+  "Show index settings",
+  "Show index mapping",
+  "Edit index settings",
+  "Open index",
+  "Delete index",
+]
+`;
+
+exports[`index table should show the right context menu options when one index is selected and open 1`] = `
+Array [
+  "Show index settings",
+  "Show index mapping",
+  "Show index stats",
+  "Edit index settings",
+  "Close index",
+  "Force merge index",
+  "Refresh index",
+  "Clear index cache",
+  "Flush index",
+  "Freeze index",
+  "Delete index",
+]
+`;
+
+exports[`index table should show the right context menu options when one open and one closed index is selected 1`] = `
+Array [
+  "Open indices",
+  "Delete indices",
+]
+`;
+
+exports[`index table should sort when header is clicked 1`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy10",
+  "testy100",
+  "testy101",
+  "testy102",
+  "testy103",
+  "testy104",
+  "testy11",
+  "testy12",
+]
+`;
+
+exports[`index table should sort when header is clicked 2`] = `
+Array [
+  "testy99",
+  "testy98",
+  "testy97",
+  "testy96",
+  "testy95",
+  "testy94",
+  "testy93",
+  "testy92",
+  "testy91",
+  "testy90",
+]
+`;
+
+exports[`index table show mapping button works from context menu 1`] = `"Mapping"`;
+
+exports[`index table show settings button works from context menu 1`] = `"Settings"`;
+
+exports[`index table show stats button works from context menu 1`] = `"Stats"`;

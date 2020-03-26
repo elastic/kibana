@@ -31,7 +31,7 @@ export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, 
       esSection!.registerApp({
         id: 'remote_clusters',
         title: i18n.translate('xpack.remoteClusters.appTitle', {
-          defaultMessage: '^ Remote Clusters',
+          defaultMessage: 'Remote Clusters',
         }),
         order: '100',
         mount: async ({ element, setBreadcrumbs }) => {

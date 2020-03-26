@@ -36,22 +36,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
-  const tabs = [
-    {
-      id: 'indices' as Section,
-      name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
-    },
-    {
-      id: 'templates' as Section,
-      name: (
-        <FormattedMessage
-          id="xpack.idxMgmt.home.indexTemplatesTabTitle"
-          defaultMessage="Index Templates"
-        />
-      ),
-    },
-  ];
-
   const onSectionChange = (newSection: Section) => {
     history.push(`${BASE_PATH}${newSection}`);
   };
@@ -91,25 +75,9 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 
         <EuiSpacer size="m" />
 
-        <EuiTabs>
-          {tabs.map(tab => (
-            <EuiTab
-              onClick={() => onSectionChange(tab.id)}
-              isSelected={tab.id === section}
-              key={tab.id}
-              data-test-subj={`${tab.id}Tab`}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-
-        <EuiSpacer size="m" />
-
         <Switch>
           <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
           <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplateList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
