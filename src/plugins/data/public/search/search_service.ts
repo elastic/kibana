@@ -25,7 +25,7 @@ import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
-import { QuerySetup } from '../query';
+import { QuerySetup } from '../query/query_service';
 import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,

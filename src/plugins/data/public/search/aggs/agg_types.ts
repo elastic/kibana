@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IUiSettingsClient, NotificationsSetup } from 'kibana/public';
-import { QuerySetup } from '../../query';
+
+import { IUiSettingsClient, NotificationsSetup } from 'src/core/public';
+import { QuerySetup } from '../../query/query_service';
 
 import { countMetricAgg } from './metrics/count';
 import { avgMetricAgg } from './metrics/avg';

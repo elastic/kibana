@@ -20,8 +20,8 @@
 import { get, noop, find, every } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from 'src/core/public';
 
-import { IUiSettingsClient } from 'kibana/public';
 import { TimeBuckets } from './lib/time_buckets';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -34,7 +34,7 @@ import { isMetricAggType } from '../metrics/metric_agg_type';
 import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../common';
 import { TimefilterContract } from '../../../query';
 import { getFieldFormats } from '../../../../public/services';
-import { QuerySetup } from '../../../query';
+import { QuerySetup } from '../../../query/query_service';
 
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');

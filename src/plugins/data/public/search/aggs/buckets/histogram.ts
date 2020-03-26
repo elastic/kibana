@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient, NotificationsSetup } from 'kibana/public';
+import { IUiSettingsClient, NotificationsSetup } from 'src/core/public';
 
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';

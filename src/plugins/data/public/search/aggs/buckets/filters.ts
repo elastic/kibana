@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { size, transform, cloneDeep } from 'lodash';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from 'src/core/public';
 
 import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
