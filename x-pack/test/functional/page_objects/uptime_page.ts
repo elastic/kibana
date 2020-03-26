@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
   const uptimeService = getService('uptime');
+  const { common: commonService } = uptimeService;
   const retry = getService('retry');
 
   return new (class UptimePage {
@@ -41,7 +42,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await pageObjects.common.navigateToApp('uptime');
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
       if (monitorIdToCheck) {
-        await uptimeService.common.monitorIdExists(monitorIdToCheck);
+        await commonService.monitorIdExists(monitorIdToCheck);
       }
     }
 
@@ -56,40 +57,38 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     }
 
     public async inputFilterQuery(filterQuery: string) {
-      await uptimeService.common.setFilterText(filterQuery);
+      await commonService.setFilterText(filterQuery);
     }
 
     public async pageHasDataMissing() {
-      return await uptimeService.common.pageHasDataMissing();
+      return await commonService.pageHasDataMissing();
     }
 
     public async pageHasExpectedIds(monitorIdsToCheck: string[]): Promise<void> {
       return retry.tryForTime(15000, async () => {
-        await Promise.all(
-          monitorIdsToCheck.map(id => uptimeService.common.monitorPageLinkExists(id))
-        );
+        await Promise.all(monitorIdsToCheck.map(id => commonService.monitorPageLinkExists(id)));
       });
     }
 
     public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
       return retry.tryForTime(12000, async () => {
-        expect(await uptimeService.common.urlContains(value)).to.eql(expected);
+        expect(await commonService.urlContains(value)).to.eql(expected);
       });
     }
 
     public async changePage(direction: 'next' | 'prev') {
       if (direction === 'next') {
-        await uptimeService.common.goToNextPage();
+        await commonService.goToNextPage();
       } else if (direction === 'prev') {
-        await uptimeService.common.goToPreviousPage();
+        await commonService.goToPreviousPage();
       }
     }
 
     public async setStatusFilter(value: 'up' | 'down') {
       if (value === 'up') {
-        await uptimeService.common.setStatusFilterUp();
+        await commonService.setStatusFilterUp();
       } else if (value === 'down') {
-        await uptimeService.common.setStatusFilterDown();
+        await commonService.setStatusFilterDown();
       }
     }
 
@@ -98,14 +97,14 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
         if (filters.hasOwnProperty(key)) {
           const values = filters[key];
           for (let i = 0; i < values.length; i++) {
-            await uptimeService.common.selectFilterItem(key, values[i]);
+            await commonService.selectFilterItem(key, values[i]);
           }
         }
       }
     }
 
     public async getSnapshotCount() {
-      return await uptimeService.common.getSnapshotCount();
+      return await commonService.getSnapshotCount();
     }
 
     public async openAlertFlyoutAndCreateMonitorStatusAlert({
@@ -125,7 +124,8 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       alertTimerangeSelection: string;
       filters?: string;
     }) {
-      const { alerts, setKueryBarText } = uptimeService.common;
+      const { setKueryBarText } = commonService;
+      const alerts = uptimeService.alerts;
       await alerts.openFlyout();
       await alerts.openMonitorStatusAlertType();
       await alerts.setAlertName(alertName);
@@ -143,8 +143,8 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     }
 
     public async setMonitorListPageSize(size: number): Promise<void> {
-      await uptimeService.common.openPageSizeSelectPopover();
-      return uptimeService.common.clickPageSizeSelectPopoverItem(size);
+      await commonService.openPageSizeSelectPopover();
+      return commonService.clickPageSizeSelectPopoverItem(size);
     }
   })();
 }

@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   defaultDynamicSettings,
   DynamicSettings,
-} from '../../../../legacy/plugins/uptime/common/runtime_types/dynamic_settings';
+} from '../../../../legacy/plugins/uptime/common/runtime_types';
 import { makeChecks } from '../../../api_integration/apis/uptime/graphql/helpers/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

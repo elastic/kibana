@@ -10,17 +10,20 @@ import { UptimeSettingsProvider } from './settings';
 import { UptimeCommonProvider } from './common';
 import { UptimeMonitorProvider } from './monitor';
 import { UptimeNavigationProvider } from './navigation';
+import { UptimeAlertsProvider } from './alerts';
 
 export function UptimeProvider(context: FtrProviderContext) {
   const common = UptimeCommonProvider(context);
   const settings = UptimeSettingsProvider(context);
   const monitor = UptimeMonitorProvider(context);
   const navigation = UptimeNavigationProvider(context);
+  const alerts = UptimeAlertsProvider(context);
 
   return {
     common,
     settings,
     monitor,
     navigation,
+    alerts,
   };
 }
