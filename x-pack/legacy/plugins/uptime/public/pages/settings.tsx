@@ -6,19 +6,19 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EuiForm,
-  EuiTitle,
-  EuiSpacer,
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiFormRow,
-  EuiCode,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCode,
+  EuiDescribedFormGroup,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { connect } from 'react-redux';
@@ -29,10 +29,11 @@ import { AppState } from '../state';
 import { selectDynamicSettings } from '../state/selectors';
 import { DynamicSettingsState } from '../state/reducers/dynamic_settings';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
-import { DynamicSettings, defaultDynamicSettings } from '../../common/runtime_types';
+import { defaultDynamicSettings, DynamicSettings } from '../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { UptimePage, useUptimeTelemetry } from '../hooks';
 
 interface Props {
   dynamicSettingsState: DynamicSettingsState;
@@ -52,6 +53,8 @@ export const SettingsPageComponent = ({
     defaultMessage: 'Settings',
   });
   useBreadcrumbs([{ text: settingsBreadcrumbText }]);
+
+  useUptimeTelemetry(UptimePage.Settings);
 
   useEffect(() => {
     dispatchGetDynamicSettings({});
@@ -75,7 +78,8 @@ export const SettingsPageComponent = ({
     }
   };
 
-  const onApply = () => {
+  const onApply = (event: React.FormEvent) => {
+    event.preventDefault();
     if (formFields) {
       dispatchSetDynamicSettings(formFields);
     }
@@ -173,7 +177,9 @@ export const SettingsPageComponent = ({
                     }
                   >
                     <EuiFieldText
-                      data-test-subj="heartbeat-indices-input"
+                      data-test-subj={`heartbeat-indices-input-${
+                        dss.loading ? 'loading' : 'loaded'
+                      }`}
                       fullWidth
                       disabled={isFormDisabled}
                       isLoading={dss.loading}

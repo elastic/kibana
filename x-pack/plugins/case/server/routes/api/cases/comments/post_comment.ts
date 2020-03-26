@@ -12,6 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { CommentRequestRt, CommentResponseRt, throwErrors } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
+import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import {
   escapeHatch,
   transformNewComment,
@@ -20,7 +21,7 @@ import {
 } from '../../utils';
 import { RouteDeps } from '../../types';
 
-export function initPostCommentApi({ caseService, router }: RouteDeps) {
+export function initPostCommentApi({ caseService, router, userActionService }: RouteDeps) {
   router.post(
     {
       path: '/api/cases/{case_id}/comments',
@@ -33,25 +34,28 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const query = pipe(
           CommentRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
         const myCase = await caseService.getCase({
-          client: context.core.savedObjects.client,
+          client,
           caseId: request.params.case_id,
         });
 
-        const createdBy = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
 
         const newComment = await caseService.postNewComment({
-          client: context.core.savedObjects.client,
+          client,
           attributes: transformNewComment({
             createdDate,
             ...query,
-            ...createdBy,
+            username,
+            full_name,
+            email,
           }),
           references: [
             {
@@ -62,16 +66,19 @@ export function initPostCommentApi({ caseService, router }: RouteDeps) {
           ],
         });
 
-        const updateCase = {
-          comment_ids: [...myCase.attributes.comment_ids, newComment.id],
-        };
-
-        await caseService.patchCase({
-          client: context.core.savedObjects.client,
-          caseId: request.params.case_id,
-          updatedAttributes: {
-            ...updateCase,
-          },
+        await userActionService.postUserActions({
+          client,
+          actions: [
+            buildCommentUserActionItem({
+              action: 'create',
+              actionAt: createdDate,
+              actionBy: { username, full_name, email },
+              caseId: myCase.id,
+              commentId: newComment.id,
+              fields: ['comment'],
+              newValue: query.comment,
+            }),
+          ],
         });
 
         return response.ok({

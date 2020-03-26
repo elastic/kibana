@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { buildPointSeriesData, getFormat } from '../../kibana_services';
+import { buildPointSeriesData, getServices } from '../../kibana_services';
 
 function tableResponseHandler(table, dimensions) {
   const converted = { tables: [] };
@@ -26,7 +26,7 @@ function tableResponseHandler(table, dimensions) {
   if (split) {
     converted.direction = dimensions.splitRow ? 'row' : 'column';
     const splitColumnIndex = split[0].accessor;
-    const splitColumnFormatter = getFormat(split[0].format);
+    const splitColumnFormatter = getServices().data.fieldFormats.deserialize(split[0].format);
     const splitColumn = table.columns[splitColumnIndex];
     const splitMap = {};
     let splitIndex = 0;

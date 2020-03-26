@@ -14,7 +14,6 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
-      comment_ids: ['mock-comment-1'],
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         full_name: 'elastic',
@@ -22,6 +21,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
         username: 'elastic',
       },
       description: 'This is a brand new case of a bad meanie defacing data',
+      external_service: null,
       title: 'Super Bad Security Issue',
       status: 'open',
       tags: ['defacement'],
@@ -42,7 +42,6 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
-      comment_ids: [],
       created_at: '2019-11-25T22:32:00.900Z',
       created_by: {
         full_name: 'elastic',
@@ -50,6 +49,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
         username: 'elastic',
       },
       description: 'Oh no, a bad meanie destroying data!',
+      external_service: null,
       title: 'Damaging Data Destruction Detected',
       status: 'open',
       tags: ['Data Destruction'],
@@ -70,7 +70,6 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
-      comment_ids: [],
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
         full_name: 'elastic',
@@ -78,6 +77,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
         username: 'elastic',
       },
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
+      external_service: null,
       title: 'Another bad one',
       status: 'open',
       tags: ['LOLBins'],
@@ -102,7 +102,6 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
-      comment_ids: [],
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
         full_name: 'elastic',
@@ -110,8 +109,9 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
         username: 'elastic',
       },
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
-      title: 'Another bad one',
+      external_service: null,
       status: 'closed',
+      title: 'Another bad one',
       tags: ['LOLBins'],
       updated_at: '2019-11-25T22:32:17.947Z',
       updated_by: {
@@ -147,6 +147,8 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      pushed_at: null,
+      pushed_by: null,
       updated_at: '2019-11-25T21:55:00.177Z',
       updated_by: {
         full_name: 'elastic',
@@ -175,6 +177,8 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      pushed_at: null,
+      pushed_by: null,
       updated_at: '2019-11-25T21:55:14.633Z',
       updated_by: {
         full_name: 'elastic',
@@ -204,6 +208,8 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      pushed_at: null,
+      pushed_by: null,
       updated_at: '2019-11-25T22:32:30.608Z',
       updated_by: {
         full_name: 'elastic',
