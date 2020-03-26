@@ -7,6 +7,7 @@
 import { Reducer } from 'redux';
 import { PolicyDetailsState } from '../../types';
 import { AppAction } from '../action';
+import { isOnPolicyDetailsPage } from './selectors';
 
 const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {
@@ -62,8 +63,16 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
   }
 
   if (action.type === 'userChangedUrl') {
-    return {
+    const newState = {
       ...state,
+      location: action.payload,
+    };
+
+    if (isOnPolicyDetailsPage(newState)) {
+      return newState;
+    }
+    return {
+      ...initialPolicyDetailsState(),
       location: action.payload,
     };
   }
