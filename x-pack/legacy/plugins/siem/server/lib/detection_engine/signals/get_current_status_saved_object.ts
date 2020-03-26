@@ -36,6 +36,10 @@ export const getCurrentStatusSavedObject = async ({
       lastSuccessAt: null,
       lastFailureMessage: null,
       lastSuccessMessage: null,
+      gap: null,
+      bulkCreateTimeDurations: [],
+      searchAfterTimeDurations: [],
+      lastLookBackDate: null,
     });
     return currentStatusSavedObject;
   } else {
