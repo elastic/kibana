@@ -672,7 +672,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
                         >
                           <EuiCode>
                             {i18n.translate(
-                              'xpack.ml.datavisualizer.searchPanel.invalidKuerySyntaxErrorMessageQueryBar',
+                              'xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar',
                               {
                                 defaultMessage: 'Invalid query',
                               }
