@@ -19,14 +19,6 @@ experimental[] Retrieve multiple {kib} saved objects by ID.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-`POST /s/<space_id>/api/saved_objects/_bulk_get`
-
-[[saved-objects-api-bulk-get-path-params]]
-==== Path parameters
-
-`space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
-
 [[saved-objects-api-bulk-get-request-body]]
 ==== Request Body
 
@@ -52,7 +44,7 @@ Saved objects that are unable to persist are replaced with an error object.
 
 `200`::
   Indicates a successful call.
-  
+
 [[saved-objects-api-bulk-get-body-example]]
 ==== Example
 
