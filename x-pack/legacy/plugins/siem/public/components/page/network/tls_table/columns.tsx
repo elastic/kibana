@@ -32,11 +32,11 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: ({ _id, issuerNames }) =>
+    render: ({ _id, issuers }) =>
       getRowItemDraggables({
-        rowItems: issuerNames,
-        attrName: 'tls.server_certificate.issuer.common_name',
-        idPrefix: `${tableId}-${_id}-table-issuerNames`,
+        rowItems: issuers,
+        attrName: 'tls.server.issuer',
+        idPrefix: `${tableId}-${_id}-table-issuers`,
       }),
   },
   {
@@ -45,18 +45,12 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: ({ _id, alternativeNames, commonNames }) =>
-      alternativeNames != null && alternativeNames.length > 0
-        ? getRowItemDraggables({
-            rowItems: alternativeNames,
-            attrName: 'tls.server_certificate.alternative_names',
-            idPrefix: `${tableId}-${_id}-table-alternative-name`,
-          })
-        : getRowItemDraggables({
-            rowItems: commonNames,
-            attrName: 'tls.server_certificate.subject.common_name',
-            idPrefix: `${tableId}-${_id}-table-common-name`,
-          }),
+    render: ({ _id, subjects }) =>
+      getRowItemDraggables({
+        rowItems: subjects,
+        attrName: 'tls.server.subject',
+        idPrefix: `${tableId}-${_id}-table-subjects`,
+      }),
   },
   {
     field: 'node._id',

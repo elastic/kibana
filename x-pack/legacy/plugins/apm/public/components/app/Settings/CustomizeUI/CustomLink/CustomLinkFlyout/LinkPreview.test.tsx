@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { LinkPreview } from '../CustomLinkFlyout/LinkPreview';
-import { render, getNodeText, getByTestId } from '@testing-library/react';
+import { render, getNodeText, getByTestId, act } from '@testing-library/react';
 
 describe('LinkPreview', () => {
   const getElementValue = (container: HTMLElement, id: string) =>
@@ -15,37 +15,47 @@ describe('LinkPreview', () => {
     );
 
   it('shows label and url default values', () => {
-    const { container } = render(
-      <LinkPreview label="" url="" filters={[['', '']]} />
-    );
-    expect(getElementValue(container, 'preview-label')).toEqual('Elastic.co');
-    expect(getElementValue(container, 'preview-url')).toEqual(
-      'https://www.elastic.co'
-    );
+    act(() => {
+      const { container } = render(
+        <LinkPreview label="" url="" filters={[{ key: '', value: '' }]} />
+      );
+      expect(getElementValue(container, 'preview-label')).toEqual('Elastic.co');
+      expect(getElementValue(container, 'preview-url')).toEqual(
+        'https://www.elastic.co'
+      );
+    });
   });
 
   it('shows label and url values', () => {
-    const { container } = render(
-      <LinkPreview label="foo" url="https://baz.co" filters={[['', '']]} />
-    );
-    expect(getElementValue(container, 'preview-label')).toEqual('foo');
-    expect(
-      (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
-    ).toEqual('https://baz.co');
+    act(() => {
+      const { container } = render(
+        <LinkPreview
+          label="foo"
+          url="https://baz.co"
+          filters={[{ key: '', value: '' }]}
+        />
+      );
+      expect(getElementValue(container, 'preview-label')).toEqual('foo');
+      expect(
+        (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+      ).toEqual('https://baz.co');
+    });
   });
 
   it('shows warning when couldnt replace context variables', () => {
-    const { container } = render(
-      <LinkPreview
-        label="foo"
-        url="https://baz.co?service.name={{invalid}"
-        filters={[['', '']]}
-      />
-    );
-    expect(getElementValue(container, 'preview-label')).toEqual('foo');
-    expect(
-      (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
-    ).toEqual('https://baz.co?service.name={{invalid}');
-    expect(getByTestId(container, 'preview-warning')).toBeInTheDocument();
+    act(() => {
+      const { container } = render(
+        <LinkPreview
+          label="foo"
+          url="https://baz.co?service.name={{invalid}"
+          filters={[{ key: '', value: '' }]}
+        />
+      );
+      expect(getElementValue(container, 'preview-label')).toEqual('foo');
+      expect(
+        (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+      ).toEqual('https://baz.co?service.name={{invalid}');
+      expect(getByTestId(container, 'preview-warning')).toBeInTheDocument();
+    });
   });
 });

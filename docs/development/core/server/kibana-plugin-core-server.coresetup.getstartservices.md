@@ -2,16 +2,12 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [CoreSetup](./kibana-plugin-core-server.coresetup.md) &gt; [getStartServices](./kibana-plugin-core-server.coresetup.getstartservices.md)
 
-## CoreSetup.getStartServices() method
+## CoreSetup.getStartServices property
 
-Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed `start`<!-- -->. This should only be used inside handlers registered during `setup` that will only be executed after `start` lifecycle.
+[StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md)
 
 <b>Signature:</b>
 
 ```typescript
-getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 ```
-<b>Returns:</b>
-
-`Promise<[CoreStart, TPluginsStart]>`
-
