@@ -81,7 +81,7 @@ describe('TOCEntry', () => {
       expect(component).toMatchSnapshot();
     });
 
-    test('should shade background if selected layer is the same', async () => {
+    test('Should shade background when selected layer', async () => {
       const component = shallowWithIntl(<TOCEntry {...defaultProps} selectedLayer={mockLayer} />);
 
       // Ensure all promises resolve
@@ -92,7 +92,7 @@ describe('TOCEntry', () => {
       expect(component).toMatchSnapshot();
     });
 
-    test('should not shade background if selected layer is not the same', async () => {
+    test('Should shade background when not selected layer', async () => {
       const differentLayer = Object.create(mockLayer);
       differentLayer.getId = () => {
         return 'foobar';
