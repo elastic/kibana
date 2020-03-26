@@ -1300,16 +1300,16 @@
     oppsy "2.x.x"
     pumpify "1.3.x"
 
-"@elastic/makelogs@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/makelogs/-/makelogs-5.0.0.tgz#0064e9009c4e480d17195ab70d627bc07635540f"
-  integrity sha512-QiKPR4DHwGH47O1kMuQIQkFCkepVIKrwP3nHUVbC//xMul7QgKRIogcQNTsZoMTGSIUrS80ngqHx+OVnd3t4Bg==
+"@elastic/makelogs@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/makelogs/-/makelogs-5.0.1.tgz#f4f9f5edc61299c7c81f5f30629e3a6fe72a50d7"
+  integrity sha512-I0QOzIHkWlaKVLqQkJMTHMW6F+yYK0Boq84RIVXGFkoeq82Vsn6jww2SBJ5wSjHa8M7HRfa2g4uqH6u+RSKlxA==
   dependencies:
     async "^1.4.2"
+    commander "^5.0.0"
     elasticsearch "^16.4.0"
     inquirer "^7.0.0"
     moment "^2.10.6"
-    optimist "~0.6.1"
     progress "^1.1.8"
     through2 "^2.0.0"
     update-notifier "^0.5.0"
@@ -9084,6 +9084,11 @@ commander@^4.0.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-4.1.1.tgz#9fd602bd936294e9e9ef46a3f4d6964044b18068"
   integrity sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==
+
+commander@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-5.0.0.tgz#dbf1909b49e5044f8fdaf0adc809f0c0722bdfd0"
+  integrity sha512-JrDGPAKjMGSP1G0DUoaceEJ3DZgAfr/q6X7FVk4+U5KxUSKviYGM2k6zWkfyyBHy5rAtzgYJFa1ro2O9PtoxwQ==
 
 commander@~2.8.1:
   version "2.8.1"
@@ -21526,7 +21531,7 @@ optimism@^0.9.0:
   dependencies:
     "@wry/context" "^0.4.0"
 
-optimist@^0.6.1, optimist@~0.6.1:
+optimist@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/optimist/-/optimist-0.6.1.tgz#da3ea74686fa21a19a111c326e90eb15a0196686"
   integrity sha1-2j6nRob6IaGaERwybpDrFaAZZoY=
