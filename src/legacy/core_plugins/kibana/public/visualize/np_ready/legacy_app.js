@@ -204,6 +204,9 @@ export function initVisualizeApp(app, deps) {
                       '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
                   },
                   toastNotifications,
+                  onRedirect() {
+                    deps.setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
+                  },
                 })
               );
           },
