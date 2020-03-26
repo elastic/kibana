@@ -66,8 +66,7 @@ export const LogEntryRow = memo(
 
     const setItemIsNotHovered = useCallback(() => {
       setIsHovered(false);
-      closeMenu();
-    }, [closeMenu]);
+    }, []);
 
     const openFlyout = useCallback(() => openFlyoutWithItem?.(logEntry.id), [
       openFlyoutWithItem,

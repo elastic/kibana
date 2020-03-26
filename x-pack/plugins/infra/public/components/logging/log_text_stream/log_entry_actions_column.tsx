@@ -60,7 +60,7 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
 
   return (
     <ActionsColumnContent>
-      {isHovered ? (
+      {isHovered || isMenuOpen ? (
         <AbsoluteWrapper>
           <ActionMenu closePopover={onCloseMenu} isOpen={isMenuOpen} button={button}>
             <Section>
