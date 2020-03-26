@@ -14,7 +14,7 @@ import {
   QueryStringInput,
 } from '../../../../../../../../src/plugins/data/public';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
 import { explorerService } from '../../explorer_dashboard_service';
 
 export const DEFAULT_QUERY_LANG = SEARCH_QUERY_LANGUAGE.KUERY;
@@ -89,11 +89,6 @@ function getInitSearchInputState({
       language: DEFAULT_QUERY_LANG,
     };
   }
-}
-
-interface ErrorMessage {
-  query: string;
-  message: string;
 }
 
 interface ExplorerQueryBarProps {
@@ -174,7 +169,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
     >
       <EuiCode>
         {i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessageQueryBar', {
-          defaultMessage: 'Invalid Query',
+          defaultMessage: 'Invalid query',
         })}
         {': '}
         {errorMessage?.message.split('\n')[0]}
