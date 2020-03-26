@@ -135,6 +135,7 @@ export class RemoteClusterForm extends Component {
         skipUnavailable,
       },
     } = this.state;
+    const { fields } = this.props;
 
     let modeSettings;
 
@@ -155,6 +156,7 @@ export class RemoteClusterForm extends Component {
       name,
       skipUnavailable,
       mode,
+      hasDeprecatedProxySetting: fields.hasDeprecatedProxySetting,
       ...modeSettings,
     };
   }
