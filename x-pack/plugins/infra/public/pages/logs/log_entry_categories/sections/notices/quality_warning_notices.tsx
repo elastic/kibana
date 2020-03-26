@@ -81,7 +81,7 @@ const CategoryQualityWarningReasonDescription: React.FC<{
       return (
         <FormattedMessage
           id="xpack.infra.logs.logEntryCategories.noFrequentCategoryWarningReasonDescription"
-          defaultMessage="None of the extracted categories frequently have message assigned to them."
+          defaultMessage="None of the extracted categories frequently have messages assigned to them."
         />
       );
     case 'manyDeadCategories':
