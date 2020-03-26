@@ -156,4 +156,72 @@ describe('#getActionsColumns', () => {
 
     expect(onOpenTimeline).toBeCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
   });
+
+  test('it renders the export icon when enableExportTimelineDownloader is including the action export', () => {
+    const testProps: TimelinesTableProps = {
+      ...getMockTimelinesTableProps(mockResults),
+      actionTimelineToShow: ['export'],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <TimelinesTable {...testProps} />
+      </ThemeProvider>
+    );
+    expect(wrapper.find('[data-test-subj="export-timeline"]').exists()).toBe(true);
+  });
+
+  test('it renders No export icon when export is not included in the action ', () => {
+    const testProps: TimelinesTableProps = {
+      ...getMockTimelinesTableProps(mockResults),
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <TimelinesTable {...testProps} />
+      </ThemeProvider>
+    );
+    expect(wrapper.find('[data-test-subj="export-timeline"]').exists()).toBe(false);
+  });
+
+  test('it renders a disabled the export button if the timeline does not have a saved object id', () => {
+    const missingSavedObjectId: OpenTimelineResult[] = [
+      omit('savedObjectId', { ...mockResults[0] }),
+    ];
+
+    const testProps: TimelinesTableProps = {
+      ...getMockTimelinesTableProps(missingSavedObjectId),
+      actionTimelineToShow: ['export'],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <TimelinesTable {...testProps} />
+      </ThemeProvider>
+    );
+
+    const props = wrapper
+      .find('[data-test-subj="export-timeline"]')
+      .first()
+      .props() as EuiButtonIconProps;
+    expect(props.isDisabled).toBe(true);
+  });
+
+  test('it invokes enableExportTimelineDownloader with the expected params when the button is clicked', () => {
+    const enableExportTimelineDownloader = jest.fn();
+    const testProps: TimelinesTableProps = {
+      ...getMockTimelinesTableProps(mockResults),
+      actionTimelineToShow: ['export'],
+      enableExportTimelineDownloader,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <TimelinesTable {...testProps} />
+      </ThemeProvider>
+    );
+
+    wrapper
+      .find('[data-test-subj="export-timeline"]')
+      .first()
+      .simulate('click');
+
+    expect(enableExportTimelineDownloader).toBeCalledWith(mockResults[0]);
+  });
 });
