@@ -8,7 +8,7 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 
-import { ViewMode } from 'src/plugins/embeddable/public';
+import { ViewMode } from '../../../../../../../../../src/plugins/embeddable/public';
 import { start } from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import * as i18n from './translations';
 import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public';

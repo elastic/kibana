@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RenderTooltipContentParams } from '../../../../maps/public';
 import { inputsModel } from '../../store/inputs';
 
 export interface IndexPatternMapping {
@@ -52,16 +53,6 @@ export interface FeatureProperty {
 export interface FeatureGeometry {
   coordinates: [number];
   type: string;
-}
-
-export interface RenderTooltipContentParams {
-  addFilters(filter: object): void;
-  closeTooltip(): void;
-  features: MapFeature[];
-  isLocked: boolean;
-  getLayerName(layerId: string): Promise<string>;
-  loadFeatureProperties({ layerId, featureId }: LoadFeatureProps): Promise<FeatureProperty[]>;
-  loadFeatureGeometry({ layerId, featureId }: LoadFeatureProps): FeatureGeometry;
 }
 
 export type MapToolTipProps = Partial<RenderTooltipContentParams>;

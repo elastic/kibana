@@ -56,6 +56,7 @@ import {
 } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { RenderTooltipContentParams } from './types';
 
 interface MapConfig {
   editUrl?: string;
@@ -90,7 +91,7 @@ export interface MapOutput extends EmbeddableOutput {
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
-  private _renderTooltipContent?: (params: unknown) => React.ComponentType;
+  private _renderTooltipContent?: (params: RenderTooltipContentParams) => React.ComponentType;
   private _eventHandlers?: unknown;
   private _layerList: unknown[];
   private _store: MapStore;

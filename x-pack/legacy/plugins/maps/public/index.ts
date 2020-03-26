@@ -26,4 +26,4 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new MapsPlugin();
 };
 
-export { MapEmbeddable, MapEmbeddableInput } from './embeddable';
+export { MapEmbeddable, MapEmbeddableInput, RenderTooltipContentParams } from './embeddable';
