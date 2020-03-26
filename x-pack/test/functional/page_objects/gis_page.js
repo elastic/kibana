@@ -86,8 +86,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async waitForLayersToLoad() {
       log.debug('Wait for layers to load');
-      const tableOfContents = await testSubjects.find('mapLayerTOC');
       await retry.try(async () => {
+        const tableOfContents = await testSubjects.find('mapLayerTOC');
         await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
       });
     }
@@ -451,7 +451,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async getCodeBlockParsedJson(dataTestSubjName) {
       log.debug(`Get parsed code block for ${dataTestSubjName}`);
-      const indexRespCodeBlock = await find.byCssSelector(`[data-test-subj="${dataTestSubjName}"]`);
+      const indexRespCodeBlock = await testSubjects.find(`${dataTestSubjName}`);
       const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
       return JSON.parse(indexRespJson);
     }

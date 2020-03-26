@@ -24,6 +24,7 @@ export interface GetMonitorStatesParams {
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination?: CursorPagination;
+  pageSize: number;
   filters?: string | null;
   statusFilter?: string;
 }
@@ -47,18 +48,27 @@ const jsonifyPagination = (p: any): string | null => {
 export const getMonitorStates: UMElasticsearchQueryFn<
   GetMonitorStatesParams,
   GetMonitorStatesResult
-> = async ({ callES, dateRangeStart, dateRangeEnd, pagination, filters, statusFilter }) => {
+> = async ({
+  callES,
+  dynamicSettings,
+  dateRangeStart,
+  dateRangeEnd,
+  pagination,
+  pageSize,
+  filters,
+  statusFilter,
+}) => {
   pagination = pagination || CONTEXT_DEFAULTS.CURSOR_PAGINATION;
   statusFilter = statusFilter === null ? undefined : statusFilter;
-  const size = 10;
 
   const queryContext = new QueryContext(
     callES,
+    dynamicSettings.heartbeatIndices,
     dateRangeStart,
     dateRangeEnd,
     pagination,
     filters && filters !== '' ? JSON.parse(filters) : null,
-    size,
+    pageSize,
     statusFilter
   );
 

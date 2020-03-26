@@ -5,9 +5,10 @@
  */
 
 import ApolloClient from 'apollo-client';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
+import { EuiButton } from '@elastic/eui';
 import { HeaderPage } from '../../components/header_page';
 import { StatefulOpenTimeline } from '../../components/open_timeline';
 import { WrapperPage } from '../../components/wrapper_page';
@@ -26,23 +27,35 @@ type OwnProps = TimelinesProps;
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => (
-  <>
-    <WrapperPage>
-      <HeaderPage border title={i18n.PAGE_TITLE} />
+const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
+  const [importCompleteToggle, setImportCompleteToggle] = useState<boolean>(false);
+  const onImportTimelineBtnClick = useCallback(() => {
+    setImportCompleteToggle(true);
+  }, [setImportCompleteToggle]);
+  return (
+    <>
+      <WrapperPage>
+        <HeaderPage border title={i18n.PAGE_TITLE}>
+          <EuiButton iconType="indexOpen" onClick={onImportTimelineBtnClick}>
+            {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
+          </EuiButton>
+        </HeaderPage>
 
-      <TimelinesContainer>
-        <StatefulOpenTimeline
-          apolloClient={apolloClient}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isModal={false}
-          title={i18n.ALL_TIMELINES_PANEL_TITLE}
-        />
-      </TimelinesContainer>
-    </WrapperPage>
+        <TimelinesContainer>
+          <StatefulOpenTimeline
+            apolloClient={apolloClient}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            isModal={false}
+            importCompleteToggle={importCompleteToggle}
+            setImportCompleteToggle={setImportCompleteToggle}
+            title={i18n.ALL_TIMELINES_PANEL_TITLE}
+          />
+        </TimelinesContainer>
+      </WrapperPage>
 
-    <SpyRoute />
-  </>
-);
+      <SpyRoute />
+    </>
+  );
+};
 
 export const TimelinesPage = React.memo(TimelinesPageComponent);

@@ -89,7 +89,7 @@ export class PinnedEvent {
 
   public async persistPinnedEventOnTimeline(
     request: FrameworkRequest,
-    pinnedEventId: string | null,
+    pinnedEventId: string | null, // pinned event saved object id
     eventId: string,
     timelineId: string | null
   ): Promise<PinnedEventResponse | null> {
@@ -116,6 +116,7 @@ export class PinnedEvent {
           const isPinnedAlreadyExisting = allPinnedEventId.filter(
             pinnedEvent => pinnedEvent.eventId === eventId
           );
+
           if (isPinnedAlreadyExisting.length === 0) {
             const savedPinnedEvent: SavedPinnedEvent = {
               eventId,
@@ -180,7 +181,7 @@ export class PinnedEvent {
   }
 }
 
-const convertSavedObjectToSavedPinnedEvent = (
+export const convertSavedObjectToSavedPinnedEvent = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): PinnedEventSavedObject =>
@@ -204,7 +205,7 @@ const convertSavedObjectToSavedPinnedEvent = (
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
 
-const pickSavedPinnedEvent = (
+export const pickSavedPinnedEvent = (
   pinnedEventId: string | null,
   savedPinnedEvent: SavedPinnedEvent,
   userInfo: AuthenticatedUser | null

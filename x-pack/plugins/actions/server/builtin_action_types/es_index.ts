@@ -18,7 +18,7 @@ export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 const ConfigSchema = schema.object({
   index: schema.string(),
   refresh: schema.boolean({ defaultValue: false }),
-  executionTimeField: schema.maybe(schema.string()),
+  executionTimeField: schema.nullable(schema.string()),
 });
 
 // params definition
@@ -36,6 +36,7 @@ const ParamsSchema = schema.object({
 export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.index',
+    minimumLicenseRequired: 'basic',
     name: i18n.translate('xpack.actions.builtin.esIndexTitle', {
       defaultMessage: 'Index',
     }),
@@ -62,8 +63,9 @@ async function executor(
 
   const bulkBody = [];
   for (const document of params.documents) {
-    if (config.executionTimeField != null) {
-      document[config.executionTimeField] = new Date();
+    const timeField = config.executionTimeField == null ? '' : config.executionTimeField.trim();
+    if (timeField !== '') {
+      document[timeField] = new Date();
     }
 
     bulkBody.push({ index: {} });

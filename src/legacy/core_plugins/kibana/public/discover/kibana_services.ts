@@ -52,10 +52,6 @@ export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
 import { search } from '../../../../../plugins/data/public';
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
-// @ts-ignore
-export { intervalOptions } from 'ui/agg_types';
-// @ts-ignore
-export { timezoneProvider } from 'ui/vis/lib/timezone';
 export {
   unhashUrl,
   redirectWhenMissing,
@@ -79,7 +75,5 @@ export {
   EsQuerySortValue,
   SortDirection,
 } from '../../../../../plugins/data/public';
-export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

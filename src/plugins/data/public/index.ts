@@ -328,6 +328,7 @@ export {
   AggParamType,
   AggTypeFieldFilters, // TODO convert to interface
   AggTypeFilters, // TODO convert to interface
+  AggConfigOptions,
   BUCKET_TYPES,
   DateRangeKey, // only used in field formatter deserialization, which will live in data
   IAggConfig,
@@ -373,6 +374,8 @@ export {
   TabbedAggColumn,
   TabbedAggRow,
   TabbedTable,
+  SearchInterceptor,
+  RequestTimeoutError,
 } from './search';
 
 // Search namespace

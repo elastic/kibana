@@ -5,6 +5,7 @@
  */
 
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
@@ -20,6 +21,7 @@ interface SearchAfterAndBulkCreateParams {
   inputIndexPattern: string[];
   signalsIndex: string;
   name: string;
+  actions: RuleAlertAction[];
   createdAt: string;
   createdBy: string;
   updatedBy: string;
@@ -29,6 +31,14 @@ interface SearchAfterAndBulkCreateParams {
   pageSize: number;
   filter: unknown;
   tags: string[];
+  throttle: string | null;
+}
+
+export interface SearchAfterAndBulkCreateReturnType {
+  success: boolean;
+  searchAfterTimes: string[];
+  bulkCreateTimes: string[];
+  lastLookBackDate: Date | null | undefined;
 }
 
 // search_after through documents and re-index using bulk endpoint.
@@ -41,6 +51,7 @@ export const searchAfterAndBulkCreate = async ({
   inputIndexPattern,
   signalsIndex,
   filter,
+  actions,
   name,
   createdAt,
   createdBy,
@@ -50,19 +61,28 @@ export const searchAfterAndBulkCreate = async ({
   enabled,
   pageSize,
   tags,
-}: SearchAfterAndBulkCreateParams): Promise<boolean> => {
+  throttle,
+}: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const toReturn: SearchAfterAndBulkCreateReturnType = {
+    success: false,
+    searchAfterTimes: [],
+    bulkCreateTimes: [],
+    lastLookBackDate: null,
+  };
   if (someResult.hits.hits.length === 0) {
-    return true;
+    toReturn.success = true;
+    return toReturn;
   }
 
   logger.debug('[+] starting bulk insertion');
-  await singleBulkCreate({
+  const { bulkCreateDuration } = await singleBulkCreate({
     someResult,
     ruleParams,
     services,
     logger,
     id,
     signalsIndex,
+    actions,
     name,
     createdAt,
     createdBy,
@@ -71,7 +91,15 @@ export const searchAfterAndBulkCreate = async ({
     interval,
     enabled,
     tags,
+    throttle,
   });
+  toReturn.lastLookBackDate =
+    someResult.hits.hits.length > 0
+      ? new Date(someResult.hits.hits[someResult.hits.hits.length - 1]?._source['@timestamp'])
+      : null;
+  if (bulkCreateDuration) {
+    toReturn.bulkCreateTimes.push(bulkCreateDuration);
+  }
   const totalHits =
     typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
   // maxTotalHitsSize represents the total number of docs to
@@ -87,9 +115,11 @@ export const searchAfterAndBulkCreate = async ({
   let sortIds = someResult.hits.hits[0].sort;
   if (sortIds == null && totalHits > 0) {
     logger.error('sortIds was empty on first search but expected more');
-    return false;
+    toReturn.success = false;
+    return toReturn;
   } else if (sortIds == null && totalHits === 0) {
-    return true;
+    toReturn.success = true;
+    return toReturn;
   }
   let sortId;
   if (sortIds != null) {
@@ -98,7 +128,10 @@ export const searchAfterAndBulkCreate = async ({
   while (hitsSize < maxTotalHitsSize && hitsSize !== 0) {
     try {
       logger.debug(`sortIds: ${sortIds}`);
-      const searchAfterResult: SignalSearchResponse = await singleSearchAfter({
+      const {
+        searchResult,
+        searchDuration,
+      }: { searchResult: SignalSearchResponse; searchDuration: string } = await singleSearchAfter({
         searchAfterSortId: sortId,
         index: inputIndexPattern,
         from: ruleParams.from,
@@ -108,25 +141,29 @@ export const searchAfterAndBulkCreate = async ({
         filter,
         pageSize, // maximum number of docs to receive per search result.
       });
-      if (searchAfterResult.hits.hits.length === 0) {
-        return true;
+      toReturn.searchAfterTimes.push(searchDuration);
+      if (searchResult.hits.hits.length === 0) {
+        toReturn.success = true;
+        return toReturn;
       }
-      hitsSize += searchAfterResult.hits.hits.length;
+      hitsSize += searchResult.hits.hits.length;
       logger.debug(`size adjusted: ${hitsSize}`);
-      sortIds = searchAfterResult.hits.hits[0].sort;
+      sortIds = searchResult.hits.hits[0].sort;
       if (sortIds == null) {
         logger.debug('sortIds was empty on search');
-        return true; // no more search results
+        toReturn.success = true;
+        return toReturn; // no more search results
       }
       sortId = sortIds[0];
       logger.debug('next bulk index');
-      await singleBulkCreate({
-        someResult: searchAfterResult,
+      const { bulkCreateDuration: bulkDuration } = await singleBulkCreate({
+        someResult: searchResult,
         ruleParams,
         services,
         logger,
         id,
         signalsIndex,
+        actions,
         name,
         createdAt,
         createdBy,
@@ -135,13 +172,19 @@ export const searchAfterAndBulkCreate = async ({
         interval,
         enabled,
         tags,
+        throttle,
       });
       logger.debug('finished next bulk index');
+      if (bulkDuration) {
+        toReturn.bulkCreateTimes.push(bulkDuration);
+      }
     } catch (exc) {
       logger.error(`[-] search_after and bulk threw an error ${exc}`);
-      return false;
+      toReturn.success = false;
+      return toReturn;
     }
   }
   logger.debug(`[+] completed bulk index of ${maxTotalHitsSize}`);
-  return true;
+  toReturn.success = true;
+  return toReturn;
 };

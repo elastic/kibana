@@ -14,7 +14,6 @@ import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
-import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
 import { SiemNavigation } from '../../components/navigation';
 import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';
@@ -30,6 +29,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { useMlCapabilities } from '../../components/ml_popover/hooks/use_ml_capabilities';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
@@ -52,7 +52,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
     to,
     hostsPagePath,
   }) => {
-    const capabilities = React.useContext(MlCapabilitiesContext);
+    const capabilities = useMlCapabilities();
     const kibana = useKibana();
     const { tabName } = useParams();
     const tabsFilters = React.useMemo(() => {
