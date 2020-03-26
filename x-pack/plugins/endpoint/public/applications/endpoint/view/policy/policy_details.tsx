@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import {
   policyDetails,
@@ -36,7 +37,8 @@ import { AgentsSummary } from './agents_summary';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
-  const { notifications } = useKibana();
+  const { notifications, services } = useKibana();
+  const history = useHistory();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -78,6 +80,14 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [notifications.toasts, policyItem, policyName, policyUpdateStatus]);
 
+  const handleBackToListOnClick = useCallback(
+    ev => {
+      ev.preventDefault();
+      history.push(`/policy`);
+    },
+    [history]
+  );
+
   const handleSaveOnClick = useCallback(() => {
     setShowConfirm(true);
   }, []);
@@ -99,18 +109,24 @@ export const PolicyDetails = React.memo(() => {
       <PageView>
         {isPolicyLoading ? (
           <EuiLoadingSpinner size="xl" />
-        ) : (
+        ) : policyApiError ? (
           <EuiCallOut color="danger" title={policyApiError?.error}>
             {policyApiError?.message}
           </EuiCallOut>
-        )}
+        ) : null}
       </PageView>
     );
   }
 
   const headerLeftContent = (
     <div>
-      <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { paddingLeft: '0' } }}>
+      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+      <EuiButtonEmpty
+        iconType="arrowLeft"
+        contentProps={{ style: { paddingLeft: '0' } }}
+        onClick={handleBackToListOnClick}
+        href={services.http.basePath.get() + '/app/endpoint/policy'}
+      >
         <FormattedMessage
           id="xpack.endpoint.policy.details.backToListTitle"
           defaultMessage="Back to policy list"
