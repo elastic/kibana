@@ -31,14 +31,17 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { download } from '../download';
 
 describe('src/dev/build/tasks/nodejs/download', () => {
+  const getTempFolder = () => mkdtempSync(join(tmpdir(), 'download-js-'));
   let TMP_DESTINATION;
+  let TMP_DIR;
 
   beforeEach(async () => {
-    TMP_DESTINATION = mkdtempSync(join(tmpdir(), 'download-js'));
+    TMP_DIR = getTempFolder();
+    TMP_DESTINATION = join(TMP_DIR, '__tmp_download_js_test_file__');
   });
 
   afterEach(async () => {
-    await del(TMP_DESTINATION);
+    await del(TMP_DIR, { force: true });
   });
 
   const sandbox = sinon.createSandbox();
