@@ -48,7 +48,7 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
             })}
             data-test-subj="xpack.uptime.toggleAlertFlyout"
             key="create-alert"
-            icon="alert"
+            icon="bell"
             onClick={() => setAlertFlyoutVisible(true)}
           >
             <FormattedMessage

@@ -23,12 +23,15 @@ export class MapPlugin {
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
       }),
+      order: 600,
       icon: APP_ICON,
       navLinkId: APP_ID,
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
       privileges: {
         all: {
+          app: [APP_ID, 'kibana'],
+          catalogue: [APP_ID],
           savedObject: {
             all: [MAP_SAVED_OBJECT_TYPE, 'query'],
             read: ['index-pattern'],
@@ -36,6 +39,8 @@ export class MapPlugin {
           ui: ['save', 'show', 'saveQuery'],
         },
         read: {
+          app: [APP_ID, 'kibana'],
+          catalogue: [APP_ID],
           savedObject: {
             all: [],
             read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],

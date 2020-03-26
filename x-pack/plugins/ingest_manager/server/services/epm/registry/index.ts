@@ -6,6 +6,7 @@
 
 import { Response } from 'node-fetch';
 import { URL } from 'url';
+import { sortBy } from 'lodash';
 import {
   AssetParts,
   AssetsGroupedByServiceByType,
@@ -50,7 +51,11 @@ export async function fetchFindLatestPackage(
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
-    return searchResults[0];
+    // sort by version, then get the last (most recent)
+    const latestPackage = sortBy<string[], RegistrySearchResult>(searchResults, ['version'])[
+      searchResults.length - 1
+    ];
+    return latestPackage;
   } else {
     throw new Error('package not found');
   }

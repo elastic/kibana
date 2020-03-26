@@ -97,22 +97,22 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (!action.secrets.user) {
-        errors.user.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredUserText',
-            {
-              defaultMessage: 'Username is required.',
-            }
-          )
-        );
-      }
-      if (!action.secrets.password) {
+      if (action.secrets.user && !action.secrets.password) {
         errors.password.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPasswordText',
             {
-              defaultMessage: 'Password is required.',
+              defaultMessage: 'Password is required when username is used.',
+            }
+          )
+        );
+      }
+      if (!action.secrets.user && action.secrets.password) {
+        errors.user.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredUserText',
+            {
+              defaultMessage: 'Username is required when password is used.',
             }
           )
         );
@@ -137,7 +137,7 @@ export function getActionType(): ActionTypeModel {
         const errorText = i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredEntryText',
           {
-            defaultMessage: 'No [to], [cc], or [bcc] entries. At least one entry is required.',
+            defaultMessage: 'No To, Cc, or Bcc entry.  At least one entry is required.',
           }
         );
         errors.to.push(errorText);
@@ -303,7 +303,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             id="emailUser"
             fullWidth
             error={errors.user}
-            isInvalid={errors.user.length > 0 && user !== undefined}
+            isInvalid={errors.user.length > 0}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
               {
@@ -313,17 +313,12 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           >
             <EuiFieldText
               fullWidth
-              isInvalid={errors.user.length > 0 && user !== undefined}
+              isInvalid={errors.user.length > 0}
               name="user"
               value={user || ''}
               data-test-subj="emailUserInput"
               onChange={e => {
-                editActionSecrets('user', e.target.value);
-              }}
-              onBlur={() => {
-                if (!user) {
-                  editActionSecrets('user', '');
-                }
+                editActionSecrets('user', nullableString(e.target.value));
               }}
             />
           </EuiFormRow>
@@ -333,7 +328,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             id="emailPassword"
             fullWidth
             error={errors.password}
-            isInvalid={errors.password.length > 0 && password !== undefined}
+            isInvalid={errors.password.length > 0}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
               {
@@ -343,17 +338,12 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           >
             <EuiFieldPassword
               fullWidth
-              isInvalid={errors.password.length > 0 && password !== undefined}
+              isInvalid={errors.password.length > 0}
               name="password"
               value={password || ''}
               data-test-subj="emailPasswordInput"
               onChange={e => {
-                editActionSecrets('password', e.target.value);
-              }}
-              onBlur={() => {
-                if (!password) {
-                  editActionSecrets('password', '');
-                }
+                editActionSecrets('password', nullableString(e.target.value));
               }}
             />
           </EuiFormRow>
@@ -406,7 +396,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientTextFieldLabel',
           {
-            defaultMessage: 'To:',
+            defaultMessage: 'To',
           }
         )}
         labelAppend={
@@ -415,7 +405,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
               {!addCC ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
                   <FormattedMessage
-                    defaultMessage="Add CC"
+                    defaultMessage="Add Cc"
                     id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton"
                   />
                 </EuiButtonEmpty>
@@ -425,7 +415,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
                   <FormattedMessage
                     defaultMessage="{titleBcc}"
                     id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addBccButton"
-                    values={{ titleBcc: !addCC ? '/ BCC' : 'Add BCC' }}
+                    values={{ titleBcc: !addCC ? '/ Bcc' : 'Add Bcc' }}
                   />
                 </EuiButtonEmpty>
               ) : null}
@@ -469,7 +459,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
           label={i18n.translate(
             'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
             {
-              defaultMessage: 'Cc:',
+              defaultMessage: 'Cc',
             }
           )}
         >
@@ -510,7 +500,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
           label={i18n.translate(
             'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
             {
-              defaultMessage: 'Bcc:',
+              defaultMessage: 'Bcc',
             }
           )}
         >
@@ -550,7 +540,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
           {
-            defaultMessage: 'Subject:',
+            defaultMessage: 'Subject',
           }
         )}
       >
@@ -560,7 +550,6 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
           name="subject"
           data-test-subj="emailSubjectInput"
           value={subject || ''}
-          placeholder="Text field (placeholder)"
           onChange={e => {
             editAction('subject', e.target.value, index);
           }}
@@ -578,7 +567,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
           {
-            defaultMessage: 'Message:',
+            defaultMessage: 'Message',
           }
         )}
         labelAppend={
@@ -624,3 +613,9 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionPa
     </Fragment>
   );
 };
+
+// if the string == null or is empty, return null, else return string
+function nullableString(str: string | null | undefined) {
+  if (str == null || str.trim() === '') return null;
+  return str;
+}

@@ -73,6 +73,7 @@ const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-b
 
 const CasesConfigureBasicRt = rt.type({
   connector_id: rt.string,
+  connector_name: rt.string,
   closure_type: ClosureTypeRT,
 });
 

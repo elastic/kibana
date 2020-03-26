@@ -13,7 +13,7 @@ import { identity } from 'fp-ts/lib/function';
 import { isEmpty } from 'lodash';
 import { CasesFindResponseRt, CasesFindRequestRt, throwErrors } from '../../../../common/api';
 import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
-import { RouteDeps } from '../types';
+import { RouteDeps, TotalCommentByCase } from '../types';
 import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
 
 const combineFilters = (filters: string[], operator: 'OR' | 'AND'): string =>
@@ -97,9 +97,44 @@ export function initFindCasesApi({ caseService, router }: RouteDeps) {
           caseService.findCases(argsOpenCases),
           caseService.findCases(argsClosedCases),
         ]);
+
+        const totalCommentsFindByCases = await Promise.all(
+          cases.saved_objects.map(c =>
+            caseService.getAllCaseComments({
+              client,
+              caseId: c.id,
+              options: {
+                fields: [],
+                page: 1,
+                perPage: 1,
+              },
+            })
+          )
+        );
+
+        const totalCommentsByCases = totalCommentsFindByCases.reduce<TotalCommentByCase[]>(
+          (acc, itemFind) => {
+            if (itemFind.saved_objects.length > 0) {
+              const caseId =
+                itemFind.saved_objects[0].references.find(r => r.type === CASE_SAVED_OBJECT)?.id ??
+                null;
+              if (caseId != null) {
+                return [...acc, { caseId, totalComments: itemFind.total }];
+              }
+            }
+            return [...acc];
+          },
+          []
+        );
+
         return response.ok({
           body: CasesFindResponseRt.encode(
-            transformCases(cases, openCases.total ?? 0, closesCases.total ?? 0)
+            transformCases(
+              cases,
+              openCases.total ?? 0,
+              closesCases.total ?? 0,
+              totalCommentsByCases
+            )
           ),
         });
       } catch (error) {
