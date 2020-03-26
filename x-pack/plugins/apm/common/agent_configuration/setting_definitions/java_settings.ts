@@ -20,7 +20,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.enableLogCorrelation.description',
       {
         defaultMessage:
-          "A boolean specifying if the agent should integrate into SLF4J's https://www.slf4j.org/api/org/slf4j/MDC.html[MDC] to enable trace-log correlation.\nIf set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC.\nSee <<log-correlation>> for more details.\n\nNOTE: While it's allowed to enable this setting at runtime, you can't disable it without a restart."
+          "A boolean specifying if the agent should integrate into SLF4J's MDC to enable trace-log correlation.\nIf set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC.\n\nNOTE: While it's allowed to enable this setting at runtime, you can't disable it without a restart."
       }
     ),
     includeAgents: ['java']
@@ -61,7 +61,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.circuitBreakerEnabled.description',
       {
         defaultMessage:
-          'A boolean specifying whether the circuit breaker should be enabled or not. \nWhen enabled, the agent periodically polls stress monitors to detect system/process/JVM stress state. \nIf ANY of the monitors detects a stress indication, the agent will become inactive, as if the \n<<config-active>> configuration option has been set to `false`, thus reducing resource consumption to a minimum. \nWhen inactive, the agent continues polling the same monitors in order to detect whether the stress state \nhas been relieved. If ALL monitors approve that the system/process/JVM is not under stress anymore, the \nagent will resume and become fully functional.'
+          'A boolean specifying whether the circuit breaker should be enabled or not. \nWhen enabled, the agent periodically polls stress monitors to detect system/process/JVM stress state. \nIf ANY of the monitors detects a stress indication, the agent will become inactive, as if the \n`active` configuration option has been set to `false`, thus reducing resource consumption to a minimum. \nWhen inactive, the agent continues polling the same monitors in order to detect whether the stress state \nhas been relieved. If ALL monitors approve that the system/process/JVM is not under stress anymore, the \nagent will resume and become fully functional.'
       }
     ),
     includeAgents: ['java']
@@ -175,7 +175,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.profilingInferredSpansEnabled.description',
       {
         defaultMessage:
-          'Set to `true` to make the agent create spans for method executions based on\nhttps://github.com/jvm-profiling-tools/async-profiler[async-profiler], a sampling aka statistical profiler.\n\nDue to the nature of how sampling profilers work,\nthe duration of the inferred spans are not exact, but only estimations.\nThe <<config-profiling-inferred-spans-sampling-interval, `profiling_inferred_spans_sampling_interval`>> lets you fine tune the trade-off between accuracy and overhead.\n\nThe inferred spans are created after a profiling session has ended.\nThis means there is a delay between the regular and the inferred spans being visible in the UI.\n\nNOTE: This feature is not available on Windows'
+          'Set to `true` to make the agent create spans for method executions based on\nasync-profiler, a sampling aka statistical profiler.\n\nDue to the nature of how sampling profilers work,\nthe duration of the inferred spans are not exact, but only estimations.\nThe `profiling_inferred_spans_sampling_interval` lets you fine tune the trade-off between accuracy and overhead.\n\nThe inferred spans are created after a profiling session has ended.\nThis means there is a delay between the regular and the inferred spans being visible in the UI.\n\nNOTE: This feature is not available on Windows'
       }
     ),
     includeAgents: ['java']
