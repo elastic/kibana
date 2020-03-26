@@ -312,7 +312,12 @@ app.controller(
       const savedLayerList = savedMap.getLayerList();
       const oldConfig = savedLayerList ? savedLayerList : initialLayerListConfig;
 
-      return !_.isEqual(layerListConfigOnly, oldConfig);
+      // savedMap stores layerList as a JSON string using JSON.stringify.
+      // JSON.stringify removes undefined properties from objects.
+      // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
+      // Need to perform the same process for layerListConfigOnly to compare apples to apples
+      // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
+      return !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), oldConfig);
     }
 
     function isOnMapNow() {
