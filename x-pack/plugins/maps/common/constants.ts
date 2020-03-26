@@ -43,13 +43,13 @@ export function createMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
-export const LAYER_TYPE = {
-  TILE: 'TILE',
-  VECTOR: 'VECTOR',
-  VECTOR_TILE: 'VECTOR_TILE',
-  HEATMAP: 'HEATMAP',
-  BLENDED_VECTOR: 'BLENDED_VECTOR',
-};
+export enum LAYER_TYPE {
+  TILE = 'TILE',
+  VECTOR = 'VECTOR',
+  VECTOR_TILE = 'VECTOR_TILE',
+  HEATMAP = 'HEATMAP',
+  BLENDED_VECTOR = 'BLENDED_VECTOR',
+}
 
 export enum SORT_ORDER {
   ASC = 'asc',
@@ -188,7 +188,7 @@ export enum LABEL_BORDER_SIZES {
   LARGE = 'LARGE',
 }
 
-export const DEFAULT_ICON = 'airfield';
+export const DEFAULT_ICON = 'marker';
 
 export enum VECTOR_STYLES {
   SYMBOLIZE_AS = 'symbolizeAs',

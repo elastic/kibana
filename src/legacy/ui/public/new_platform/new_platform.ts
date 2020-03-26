@@ -22,6 +22,7 @@ import { IScope } from 'angular';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
+import { DashboardStart } from '../../../../plugins/dashboard/public';
 import {
   LegacyCoreSetup,
   LegacyCoreStart,
@@ -65,6 +66,11 @@ import {
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
+import {
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+} from '../../../../plugins/saved_objects_management/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -83,7 +89,9 @@ export interface PluginsSetup {
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
   visTypeVega: VisTypeVegaSetup;
+  discover: DiscoverSetup;
   telemetry?: TelemetryPluginSetup;
+  savedObjectsManagement: SavedObjectsManagementPluginSetup;
 }
 
 export interface PluginsStart {
@@ -100,7 +108,10 @@ export interface PluginsStart {
   share: SharePluginStart;
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
+  discover: DiscoverStart;
   telemetry?: TelemetryPluginStart;
+  dashboard: DashboardStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export const npSetup = {

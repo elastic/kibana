@@ -126,7 +126,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
-              defaultMessage="Learn how to configure PagerDuty Accounts"
+              defaultMessage="Configure a PagerDuty account."
             />
           </EuiLink>
         }
@@ -271,12 +271,20 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
       </EuiContextMenuItem>
     ));
 
+  const addVariableButtonTitle = i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariableTitle',
+    {
+      defaultMessage: 'Add alert variable',
+    }
+  );
+
   const getAddVariableComponent = (paramsProperty: string, buttonName: string) => {
     return (
       <EuiPopover
         button={
           <EuiButtonIcon
             data-test-subj={`${paramsProperty}AddVariableButton`}
+            title={addVariableButtonTitle}
             onClick={() =>
               setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, [paramsProperty]: true })
             }
