@@ -177,6 +177,11 @@ export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 /**
  * Core services exposed to the `Plugin` setup lifecycle
  *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
+ *
  * @public
  *
  * @internalRemarks We document the properties with \@link tags to improve
