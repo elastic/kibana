@@ -50,10 +50,10 @@ export interface VisTypeXyPluginStartDependencies {
   visualizations: VisualizationsStart;
 }
 
-type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies>;
+type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies, void>;
 
 /** @internal */
-export class VisTypeXyPlugin implements Plugin<Promise<void>, void> {
+export class VisTypeXyPlugin implements Plugin<void, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(

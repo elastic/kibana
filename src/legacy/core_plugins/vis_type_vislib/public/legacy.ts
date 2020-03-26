@@ -33,8 +33,6 @@ const setupPlugins: Readonly<VisTypeVislibPluginSetupDependencies> = {
 };
 
 const startPlugins: Readonly<VisTypeVislibPluginStartDependencies> = {
-  expressions: npStart.plugins.expressions,
-  visualizations: npStart.plugins.visualizations,
   data: npStart.plugins.data,
 };
 

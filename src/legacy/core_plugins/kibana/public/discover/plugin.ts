@@ -91,7 +91,7 @@ export class DiscoverPlugin implements Plugin<void, void> {
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
-  setup(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
+  setup(core: CoreSetup<DiscoverStartPlugins, void>, plugins: DiscoverSetupPlugins) {
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/discover',
