@@ -9,8 +9,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['uptime']);
+  const uptime = getService('uptime');
+  const { navigation, monitor } = uptime;
 
-  describe.skip('location', () => {
+  describe('Observer location', () => {
     const start = new Date().toISOString();
     const end = new Date().toISOString();
 
@@ -40,9 +42,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
     });
 
+    it('renders the location panel and canvas', async () => {
+      await navigation.goToMonitor(MONITOR_ID);
+      await monitor.locationMapIsRendered();
+    });
+
     it('renders the location missing popover when monitor has location name, but no geo data', async () => {
       await pageObjects.uptime.loadDataAndGoToMonitorPage(start, end, MONITOR_ID);
-      await pageObjects.uptime.locationMissingIsDisplayed();
+      await monitor.locationMissingExists();
     });
   });
 };

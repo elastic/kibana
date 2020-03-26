@@ -18,13 +18,19 @@ interface RouterProps {
 export const PageRouter: FC<RouterProps> = ({ autocomplete }) => (
   <Switch>
     <Route path={MONITOR_ROUTE}>
-      <MonitorPage />
+      <div data-test-subj="uptimeMonitorPage">
+        <MonitorPage />
+      </div>
     </Route>
     <Route path={SETTINGS_ROUTE}>
-      <SettingsPage />
+      <div data-test-subj="uptimeSettingsPage">
+        <SettingsPage />
+      </div>
     </Route>
     <Route path={OVERVIEW_ROUTE}>
-      <OverviewPage autocomplete={autocomplete} />
+      <div data-test-subj="uptimeOverviewPage">
+        <OverviewPage autocomplete={autocomplete} />
+      </div>
     </Route>
     <Route component={NotFoundPage} />
   </Switch>
