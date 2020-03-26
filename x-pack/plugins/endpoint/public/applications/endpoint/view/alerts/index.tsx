@@ -219,16 +219,25 @@ export const AlertIndex = memo(() => {
         title: (
           <FormattedMessage
             id="xpack.endpoint.alerts.closedAlert.successTitle"
-            defaultMessage="Successfully Closed Alert"
+            defaultMessage="Alert Closed"
           />
         ),
         body: (
-          <FormattedMessage
-            id="xpack.endpoint.alerts.closedAlert.successBody"
-            defaultMessage="noice."
-          />
+          <EuiLink
+            onClick={() =>
+              history.push(urlFromQueryParams({ ...queryParams, closed_alerts: 'true' }))
+            }
+          >
+            {i18n.translate(
+              'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
+              {
+                defaultMessage: 'View all closed alerts',
+              }
+            )}
+          </EuiLink>
         ),
         toastLifeTimeMs: 10000,
+        iconType: 'check',
       });
       const { selected_alert, ...paramsWithoutSelectedAlert } = queryParams;
       history.push(urlFromQueryParams(paramsWithoutSelectedAlert));
@@ -244,13 +253,8 @@ export const AlertIndex = memo(() => {
             defaultMessage="Failed to close alert"
           />
         ),
-        body: (
-          <FormattedMessage
-            id="xpack.endpoint.alerts.closedAlert.errorBody"
-            defaultMessage="oh geez sorry."
-          />
-        ),
         toastLifeTimeMs: 10000,
+        iconType: 'alert',
       });
     }
   }, [closeError, notifications.toasts]);
