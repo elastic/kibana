@@ -38,6 +38,7 @@ export interface BaseVisTypeOptions {
   responseHandler?: string | unknown;
   hierarchicalData?: boolean | unknown;
   setup?: unknown;
+  useCustomNoDataScreen?: boolean;
 }
 
 export class BaseVisType {
@@ -59,6 +60,7 @@ export class BaseVisType {
   responseHandler: string | unknown;
   hierarchicalData: boolean | unknown;
   setup?: unknown;
+  useCustomNoDataScreen: boolean;
 
   constructor(opts: BaseVisTypeOptions) {
     if (!opts.icon && !opts.image) {
@@ -92,6 +94,7 @@ export class BaseVisType {
     this.setup = opts.setup;
     this.requiresSearch = this.requestHandler !== 'none';
     this.hierarchicalData = opts.hierarchicalData || false;
+    this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
   }
 
   shouldMarkAsExperimentalInUI() {
