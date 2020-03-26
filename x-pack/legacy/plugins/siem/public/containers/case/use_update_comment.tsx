@@ -93,6 +93,7 @@ export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
   const dispatchUpdateComment = useCallback(
     async ({ caseId, commentId, commentUpdate, fetchUserActions }: UpdateComment) => {
       let cancel = false;
+      const abortCtrl = new AbortController();
       try {
         dispatch({ type: 'FETCH_INIT', payload: commentId });
         const currentComment = state.comments.find(comment => comment.id === commentId) ?? {
@@ -102,7 +103,8 @@ export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
           caseId,
           commentId,
           commentUpdate,
-          currentComment.version
+          currentComment.version,
+          abortCtrl.signal
         );
         if (!cancel) {
           fetchUserActions();
@@ -120,6 +122,7 @@ export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
       }
       return () => {
         cancel = true;
+        abortCtrl.abort();
       };
     },
     [state]

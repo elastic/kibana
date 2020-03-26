@@ -87,7 +87,7 @@ export const usePostPushToService = (): UsePostPushToService => {
       const abortCtrl = new AbortController();
       try {
         dispatch({ type: 'FETCH_INIT' });
-        const casePushData = await getCase(caseId);
+        const casePushData = await getCase(caseId, true, abortCtrl.signal);
         const responseService = await pushToService(
           connectorId,
           formatServiceRequestData(casePushData),

@@ -77,10 +77,12 @@ export const useGetCase = (caseId: string): CaseState => {
 
   const callFetch = () => {
     let didCancel = false;
+    const abortCtrl = new AbortController();
+
     const fetchData = async () => {
       dispatch({ type: 'FETCH_INIT' });
       try {
-        const response = await getCase(caseId);
+        const response = await getCase(caseId, true, abortCtrl.signal);
         if (!didCancel) {
           dispatch({ type: 'FETCH_SUCCESS', payload: response });
         }
@@ -98,6 +100,7 @@ export const useGetCase = (caseId: string): CaseState => {
     fetchData();
     return () => {
       didCancel = true;
+      abortCtrl.abort();
     };
   };
 
