@@ -64,7 +64,8 @@ export default function({ getService }) {
         return esArchiver.unload(archive);
       });
 
-      it('should return data for offline nodes', async () => {
+      // https://github.com/elastic/kibana/issues/61366
+      it.skip('should return data for offline nodes', async () => {
         const { body } = await supertest
           .post('/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/nodes')
           .set('kbn-xsrf', 'xxx')
@@ -93,7 +94,8 @@ export default function({ getService }) {
         return esArchiver.unload(archive);
       });
 
-      it('should return cpu info for cgroup node and cpu info for "regular" node', async () => {
+      // https://github.com/elastic/kibana/issues/61366
+      it.skip('should return cpu info for cgroup node and cpu info for "regular" node', async () => {
         const { body } = await supertest
           .post('/api/monitoring/v1/clusters/Cbo7k85ZRdy--yxmqeykog/elasticsearch/nodes')
           .set('kbn-xsrf', 'xxx')
