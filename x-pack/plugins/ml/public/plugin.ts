@@ -31,7 +31,7 @@ export interface MlSetupDependencies {
 }
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
-  setup(core: CoreSetup<MlStartDependencies>, pluginsSetup: MlSetupDependencies) {
+  setup(core: CoreSetup<MlStartDependencies, MlPluginStart>, pluginsSetup: MlSetupDependencies) {
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
