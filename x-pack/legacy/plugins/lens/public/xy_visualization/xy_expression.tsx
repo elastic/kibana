@@ -15,6 +15,8 @@ import {
   BarSeries,
   Position,
   PartialTheme,
+  GeometryValue,
+  XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -26,11 +28,15 @@ import {
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { FormatFactory } from '../legacy_imports';
-import { LensMultiTable } from '../types';
+import { EmbeddableVisTriggerContext } from '../../../../../../src/plugins/embeddable/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/embeddable/events';
+import { LensMultiTable, FormatFactory } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { parseInterval } from '../../../../../../src/plugins/data/common';
+import { getExecuteTriggerActions } from './services';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -52,6 +58,7 @@ type XYChartRenderProps = XYChartProps & {
   chartTheme: PartialTheme;
   formatFactory: FormatFactory;
   timeZone: string;
+  executeTriggerActions: UiActionsStart['executeTriggerActions'];
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -101,7 +108,7 @@ export const xyChart: ExpressionFunctionDefinition<
 };
 
 export const getXyChartRenderer = (dependencies: {
-  formatFactory: FormatFactory;
+  formatFactory: Promise<FormatFactory>;
   chartTheme: PartialTheme;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -112,11 +119,19 @@ export const getXyChartRenderer = (dependencies: {
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
+  render: async (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
+    const executeTriggerActions = getExecuteTriggerActions();
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
       <I18nProvider>
-        <XYChartReportable {...config} {...dependencies} />
+        <XYChartReportable
+          {...config}
+          formatFactory={formatFactory}
+          chartTheme={dependencies.chartTheme}
+          timeZone={dependencies.timeZone}
+          executeTriggerActions={executeTriggerActions}
+        />
       </I18nProvider>,
       domNode,
       () => handlers.done()
@@ -148,7 +163,14 @@ export function XYChartReportable(props: XYChartRenderProps) {
   );
 }
 
-export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYChartRenderProps) {
+export function XYChart({
+  data,
+  args,
+  formatFactory,
+  timeZone,
+  chartTheme,
+  executeTriggerActions,
+}: XYChartRenderProps) {
   const { legend, layers } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
@@ -189,7 +211,16 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
   const shouldRotate = isHorizontalChart(layers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
+  const interval = parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval);
 
+  const xDomain =
+    data.dateRange && layers.every(l => l.xScaleType === 'time')
+      ? {
+          min: data.dateRange.fromDate.getTime(),
+          max: data.dateRange.toDate.getTime(),
+          minInterval: interval?.asMilliseconds(),
+        }
+      : undefined;
   return (
     <Chart>
       <Settings
@@ -198,14 +229,63 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
         showLegendExtra={false}
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
-        xDomain={
-          data.dateRange && layers.every(l => l.xScaleType === 'time')
-            ? {
-                min: data.dateRange.fromDate.getTime(),
-                max: data.dateRange.toDate.getTime(),
-              }
-            : undefined
-        }
+        xDomain={xDomain}
+        onElementClick={([[geometry, series]]) => {
+          // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
+          const xySeries = series as XYChartSeriesIdentifier;
+          const xyGeometry = geometry as GeometryValue;
+
+          const layer = layers.find(l =>
+            xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
+          );
+          if (!layer) {
+            return;
+          }
+
+          const table = data.tables[layer.layerId];
+
+          const points = [
+            {
+              row: table.rows.findIndex(
+                row => layer.xAccessor && row[layer.xAccessor] === xyGeometry.x
+              ),
+              column: table.columns.findIndex(col => col.id === layer.xAccessor),
+              value: xyGeometry.x,
+            },
+          ];
+
+          if (xySeries.seriesKeys.length > 1) {
+            const pointValue = xySeries.seriesKeys[0];
+
+            points.push({
+              row: table.rows.findIndex(
+                row => layer.splitAccessor && row[layer.splitAccessor] === pointValue
+              ),
+              column: table.columns.findIndex(col => col.id === layer.splitAccessor),
+              value: pointValue,
+            });
+          }
+
+          const xAxisFieldName: string | undefined = table.columns.find(
+            col => col.id === layer.xAccessor
+          )?.meta?.aggConfigParams?.field;
+
+          const timeFieldName = xDomain && xAxisFieldName;
+
+          const context: EmbeddableVisTriggerContext = {
+            data: {
+              data: points.map(point => ({
+                row: point.row,
+                column: point.column,
+                value: point.value,
+                table,
+              })),
+            },
+            timeFieldName,
+          };
+
+          executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+        }}
       />
 
       <Axis
@@ -254,14 +334,23 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
+
           const table = data.tables[layerId];
+
+          // For date histogram chart type, we're getting the rows that represent intervals without data.
+          // To not display them in the legend, they need to be filtered out.
+          const rows = table.rows.filter(
+            row =>
+              !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
+          );
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
             id: splitAccessor || accessors.join(','),
             xAccessor,
             yAccessors: accessors,
-            data: table.rows,
+            data: rows,
             xScaleType,
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
@@ -276,16 +365,17 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
             },
           };
 
-          return seriesType === 'line' ? (
-            <LineSeries key={index} {...seriesProps} />
-          ) : seriesType === 'bar' ||
-            seriesType === 'bar_stacked' ||
-            seriesType === 'bar_horizontal' ||
-            seriesType === 'bar_horizontal_stacked' ? (
-            <BarSeries key={index} {...seriesProps} />
-          ) : (
-            <AreaSeries key={index} {...seriesProps} />
-          );
+          switch (seriesType) {
+            case 'line':
+              return <LineSeries key={index} {...seriesProps} />;
+            case 'bar':
+            case 'bar_stacked':
+            case 'bar_horizontal':
+            case 'bar_horizontal_stacked':
+              return <BarSeries key={index} {...seriesProps} />;
+            default:
+              return <AreaSeries key={index} {...seriesProps} />;
+          }
         }
       )}
     </Chart>
