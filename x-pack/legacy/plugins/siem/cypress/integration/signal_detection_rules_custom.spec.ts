@@ -227,7 +227,7 @@ describe('Deletes custom rules', () => {
         });
         cy.get(SHOWING_RULES_TEXT)
           .invoke('text')
-          .should('eql', 'Showing 1 rule');
+          .should('eql', `Showing ${expectedNumberOfRulesAfterDeletion} rules`);
         cy.get(CUSTOM_RULES_BTN)
           .invoke('text')
           .should('eql', `Custom rules (${expectedNumberOfRulesAfterDeletion})`);
