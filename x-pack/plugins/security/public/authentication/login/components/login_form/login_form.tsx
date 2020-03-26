@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import {
   EuiButton,
   EuiCallOut,
+  EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
   EuiPanel,
@@ -123,12 +124,11 @@ export class LoginForm extends Component<Props, State> {
             }
             {...this.validator.validatePassword(this.state.password)}
           >
-            <EuiFieldText
+            <EuiFieldPassword
               autoComplete="off"
               id="password"
               name="password"
               data-test-subj="loginPassword"
-              type="password"
               value={this.state.password}
               onChange={this.onPasswordChange}
               disabled={!this.isLoadingState(LoadingStateType.None)}
