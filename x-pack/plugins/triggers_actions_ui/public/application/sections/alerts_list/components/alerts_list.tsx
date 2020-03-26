@@ -467,9 +467,11 @@ export const AlertsList: React.FunctionComponent = () => {
       {loadedItems.length || isFilterApplied ? (
         table
       ) : alertTypesState.isLoading || alertsState.isLoading ? (
-        <div style={{ textAlign: 'center', margin: '1em auto' }}>
-          <EuiLoadingSpinner size="xl" />
-        </div>
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         emptyPrompt
       )}

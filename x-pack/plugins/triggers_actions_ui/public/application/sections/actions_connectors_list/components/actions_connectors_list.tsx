@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { useAppDependencies } from '../../../app_context';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
@@ -411,9 +413,11 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
       {(isLoadingActions || isLoadingActionTypes) && (
-        <div style={{ textAlign: 'center', margin: '1em auto' }}>
-          <EuiLoadingSpinner size="xl" />
-        </div>
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
       {data.length !== 0 && table}
       {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && emptyPrompt}
