@@ -80,6 +80,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiCard
+            data-test-subj="customRuleType"
             title={i18n.QUERY_TYPE_TITLE}
             description={i18n.QUERY_TYPE_DESCRIPTION}
             icon={<EuiIcon size="l" type="search" />}
@@ -92,6 +93,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
+            data-test-subj="machineLearningRuleType"
             title={i18n.ML_TYPE_TITLE}
             description={<MlCardDescription hasValidLicense={hasValidLicense} />}
             icon={<EuiIcon size="l" type="machineLearningApp" />}

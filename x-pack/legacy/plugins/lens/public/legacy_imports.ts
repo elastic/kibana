@@ -7,4 +7,3 @@
 import { npSetup } from 'ui/new_platform';
 export const { visualizations } = npSetup.plugins;
 export { VisualizationsSetup } from '../../../../../src/plugins/visualizations/public';
-export { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';

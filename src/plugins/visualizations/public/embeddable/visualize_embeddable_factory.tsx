@@ -122,8 +122,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           indexPatterns,
           editUrl,
           editable,
-          appState: input.appState,
-          uiState: input.uiState,
         },
         input,
         parent

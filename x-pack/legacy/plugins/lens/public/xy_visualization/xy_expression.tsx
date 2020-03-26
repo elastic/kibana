@@ -30,8 +30,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableVisTriggerContext } from '../../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
-import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
-import { LensMultiTable } from '../types';
+import { LensMultiTable, FormatFactory } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
@@ -108,7 +107,7 @@ export const xyChart: ExpressionFunctionDefinition<
 };
 
 export const getXyChartRenderer = (dependencies: {
-  formatFactory: FormatFactory;
+  formatFactory: Promise<FormatFactory>;
   chartTheme: PartialTheme;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -119,14 +118,17 @@ export const getXyChartRenderer = (dependencies: {
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
+  render: async (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
     const executeTriggerActions = getExecuteTriggerActions();
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
       <I18nProvider>
         <XYChartReportable
           {...config}
-          {...dependencies}
+          formatFactory={formatFactory}
+          chartTheme={dependencies.chartTheme}
+          timeZone={dependencies.timeZone}
           executeTriggerActions={executeTriggerActions}
         />
       </I18nProvider>,
