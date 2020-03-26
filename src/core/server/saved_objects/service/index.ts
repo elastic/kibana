@@ -36,6 +36,7 @@ export interface SavedObjectsLegacyService {
   getScopedSavedObjectsClient: SavedObjectsClientProvider['getClient'];
   SavedObjectsClient: typeof SavedObjectsClient;
   types: string[];
+  importAndExportableTypes: string[];
   schema: SavedObjectsSchema;
   getSavedObjectsRepository(...rest: any[]): any;
   importExport: {
