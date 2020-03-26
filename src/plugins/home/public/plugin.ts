@@ -50,7 +50,9 @@ export interface HomePluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
 }
 
-export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, void> {
+export class HomePublicPlugin
+  implements
+    Plugin<HomePublicPluginSetup, void, HomePluginSetupDependencies, HomePluginStartDependencies> {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
