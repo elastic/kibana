@@ -47,10 +47,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     shouldAcceptAlert: boolean;
     useActualUrl: boolean;
   }
-  interface LegacyUrl {
-    pathName: string;
-    hashName: string;
-  }
+  // interface LegacyUrl {
+  //   pathName: string;
+  //   hashName: string;
+  // }
 
   class CommonPage {
     /**
