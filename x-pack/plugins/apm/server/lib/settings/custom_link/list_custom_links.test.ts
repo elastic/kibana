@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { listCustomLinks } from '../list_custom_links';
+import { listCustomLinks } from './list_custom_links';
 import {
   inspectSearchParams,
   SearchParamsMock
-} from '../../../../../../../legacy/plugins/apm/public/utils/testHelpers';
-import { Setup } from '../../../helpers/setup_request';
+} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+import { Setup } from '../../helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/elasticsearch_fieldnames';
 
 describe('List Custom Links', () => {
   let mock: SearchParamsMock;
