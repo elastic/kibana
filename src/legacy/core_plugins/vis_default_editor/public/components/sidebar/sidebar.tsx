@@ -61,7 +61,7 @@ function DefaultEditorSideBar({
   const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
     state.data.aggs,
   ]);
-  const metricSchemas = vis.type.schemas.metrics.map(s => s.name);
+  const metricSchemas = (vis.type.schemas.metrics || []).map(s => s.name);
   const metricAggs = useMemo(
     () => responseAggs.filter(agg => metricSchemas.includes(get(agg, 'schema'))),
     [responseAggs, metricSchemas]
