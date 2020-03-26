@@ -69,7 +69,7 @@ describe('SavedObjectsManagementActionRegistry', () => {
       expect(registry.has('existing-action')).toEqual(true);
     });
 
-    it(`returns false when an action with doesn't exist`, () => {
+    it(`returns false when an action doesn't exist`, () => {
       expect(registry.has('missing-action')).toEqual(false);
     });
   });
