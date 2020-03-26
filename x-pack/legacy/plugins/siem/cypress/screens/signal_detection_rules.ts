@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
+
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
+export const COLLAPSED_ACTION_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
+
 export const CUSTOM_RULES_BTN = '[data-test-subj="show-custom-rules-filter-button"]';
+
+export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
+
+export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const ELASTIC_RULES_BTN = '[data-test-subj="show-elastic-rules-filter-button"]';
 
@@ -20,6 +28,10 @@ export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
 
 export const RISK_SCORE = '[data-test-subj="riskScore"]';
+
+export const RELOAD_PREBUILT_RULES_BTN = '[data-test-subj="reloadPrebuiltRulesBtn"]';
+
+export const RULE_CHECKBOX = '.euiTableRow .euiCheckbox__input';
 
 export const RULE_NAME = '[data-test-subj="ruleName"]';
 
