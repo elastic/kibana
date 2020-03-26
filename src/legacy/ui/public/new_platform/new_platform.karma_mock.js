@@ -68,6 +68,7 @@ export const mockUiSettings = {
   getUpdate$: () => ({
     subscribe: sinon.fake(),
   }),
+  isDefault: sinon.fake(),
   'query:allowLeadingWildcards': true,
   'query:queryString:options': {},
   'courier:ignoreFilterIfFieldNotInIndex': true,
