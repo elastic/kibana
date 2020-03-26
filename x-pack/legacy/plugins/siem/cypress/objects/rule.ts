@@ -35,6 +35,7 @@ export interface MachineLearningRule {
   referenceUrls: string[];
   falsePositivesExamples: string[];
   mitre: Mitre[];
+  note: string;
 }
 
 const mitre1: Mitre = {
@@ -71,4 +72,5 @@ export const machineLearningRule: MachineLearningRule = {
   referenceUrls: ['https://elastic.co/'],
   falsePositivesExamples: ['False1'],
   mitre: [mitre1],
+  note: '# test markdown',
 };
