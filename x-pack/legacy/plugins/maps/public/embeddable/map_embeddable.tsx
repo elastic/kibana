@@ -135,7 +135,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._renderTooltipContent = renderTooltipContent;
   };
 
-  setEventHandlers = (eventHandlers: unknown) => {
+  setEventHandlers = (eventHandlers: EventHandlers) => {
     this._eventHandlers = eventHandlers;
   };
 
