@@ -65,14 +65,14 @@ export function deserializeV1Template(
 }
 
 export function deserializeTemplateList(
-  indexTemplatesByName: { [key: string]: TemplateV1Serialized },
+  indexTemplatesByName: { [key: string]: Omit<TemplateV1Serialized, 'name'> },
   managedTemplatePrefix?: string
 ): TemplateListItem[] {
-  return Object.values(indexTemplatesByName).map(templateSerialized => {
+  return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
     const {
       template: { mappings, settings, aliases },
       ...deserializedTemplate
-    } = deserializeV1Template(templateSerialized);
+    } = deserializeV1Template({ name, ...templateSerialized }, managedTemplatePrefix);
 
     return {
       ...deserializedTemplate,

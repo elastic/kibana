@@ -18,8 +18,9 @@ export function registerGetAllRoute({ router, license }: RouteDependencies) {
       const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
 
       const indexTemplatesByName = await callAsCurrentUser('indices.getTemplate');
+      const body = deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix);
 
-      return res.ok({ body: deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix) });
+      return res.ok({ body });
     })
   );
 }

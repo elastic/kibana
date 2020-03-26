@@ -11,35 +11,40 @@ export const registerHelpers = ({ supertest }) => {
 
   const getOneTemplate = name => supertest.get(`${API_BASE_PATH}/templates/${name}`);
 
-  const getTemplatePayload = name => ({
+  const getTemplatePayload = (name, formatVersion = 1) => ({
     name,
     order: 1,
     indexPatterns: INDEX_PATTERNS,
     version: 1,
-    settings: {
-      number_of_shards: 1,
-      index: {
-        lifecycle: {
-          name: 'my_policy',
+    template: {
+      settings: {
+        number_of_shards: 1,
+        index: {
+          lifecycle: {
+            name: 'my_policy',
+          },
         },
+      },
+      mappings: {
+        _source: {
+          enabled: false,
+        },
+        properties: {
+          host_name: {
+            type: 'keyword',
+          },
+          created_at: {
+            type: 'date',
+            format: 'EEE MMM dd HH:mm:ss Z yyyy',
+          },
+        },
+      },
+      aliases: {
+        alias1: {},
       },
     },
-    mappings: {
-      _source: {
-        enabled: false,
-      },
-      properties: {
-        host_name: {
-          type: 'keyword',
-        },
-        created_at: {
-          type: 'date',
-          format: 'EEE MMM dd HH:mm:ss Z yyyy',
-        },
-      },
-    },
-    aliases: {
-      alias1: {},
+    _kbnMeta: {
+      formatVersion,
     },
   });
 
