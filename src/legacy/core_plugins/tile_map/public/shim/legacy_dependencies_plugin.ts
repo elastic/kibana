@@ -18,8 +18,9 @@
  */
 
 import chrome from 'ui/chrome';
-import 'ui/vis/map/service_settings';
 import { CoreStart, Plugin } from 'kibana/public';
+// TODO: Determine why visualizations don't populate without this
+import 'angular-sanitize';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
