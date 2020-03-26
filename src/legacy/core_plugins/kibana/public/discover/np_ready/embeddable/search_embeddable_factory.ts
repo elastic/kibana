@@ -62,9 +62,9 @@ export class SearchEmbeddableFactory
     return false;
   }
 
-  public async isEditable() {
+  public isEditable = async () => {
     return (await this.getStartServices()).isEditable();
-  }
+  };
 
   public getDisplayName() {
     return i18n.translate('kbn.embeddable.search.displayName', {

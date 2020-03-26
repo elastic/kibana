@@ -39,10 +39,10 @@ export class ListContainerFactory implements EmbeddableFactoryDefinition {
     return true;
   }
 
-  public async create(initialInput: ContainerInput) {
+  public create = async (initialInput: ContainerInput) => {
     const { getEmbeddableFactory } = await this.getStartServices();
     return new ListContainer(initialInput, getEmbeddableFactory);
-  }
+  };
 
   public getDisplayName() {
     return i18n.translate('embeddableExamples.searchableListContainer.displayName', {

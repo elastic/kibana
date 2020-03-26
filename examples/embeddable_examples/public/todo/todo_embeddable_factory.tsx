@@ -67,7 +67,7 @@ export class TodoEmbeddableFactory
    * used to collect specific embeddable input that the container will not provide, like
    * in this case, the task string.
    */
-  public async getExplicitInput() {
+  public getExplicitInput = async () => {
     const { openModal } = await this.getStartServices();
     return new Promise<{ task: string }>(resolve => {
       const onSave = (task: string) => resolve({ task });
@@ -82,7 +82,7 @@ export class TodoEmbeddableFactory
         )
       );
     });
-  }
+  };
 
   public getDisplayName() {
     return i18n.translate('embeddableExamples.todo.displayName', {

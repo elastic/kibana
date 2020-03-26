@@ -42,10 +42,10 @@ export class SearchableListContainerFactory implements EmbeddableFactoryDefiniti
     return true;
   }
 
-  public async create(initialInput: SearchableContainerInput) {
+  public create = async (initialInput: SearchableContainerInput) => {
     const { getEmbeddableFactory } = await this.getStartServices();
     return new SearchableListContainer(initialInput, getEmbeddableFactory);
-  }
+  };
 
   public getDisplayName() {
     return i18n.translate('embeddableExamples.searchableListContainer.displayName', {

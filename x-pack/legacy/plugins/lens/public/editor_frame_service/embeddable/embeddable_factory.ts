@@ -48,10 +48,10 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
-  public async isEditable() {
+  public isEditable = async () => {
     const { capabilities } = await this.getStartServices();
     return capabilities.visualize.save as boolean;
-  }
+  };
 
   canCreateNew() {
     return false;
@@ -63,11 +63,11 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     });
   }
 
-  async createFromSavedObject(
+  createFromSavedObject = async (
     savedObjectId: string,
     input: Partial<EmbeddableInput> & { id: string },
     parent?: IContainer
-  ) {
+  ) => {
     const {
       savedObjectsClient,
       coreHttp,
@@ -108,7 +108,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       input,
       parent
     );
-  }
+  };
 
   async create(input: EmbeddableInput) {
     return new ErrorEmbeddable('Lens can only be created from a saved object', input);
