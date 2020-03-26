@@ -41,7 +41,7 @@ import {
   getEnabledMetricAggsCount,
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
-import { Schema, getSchemasByGroup } from '../schemas';
+import { Schema } from '../schemas';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
@@ -70,7 +70,7 @@ function DefaultEditorAggGroup({
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = (search.aggs.aggGroupNamesMap() as any)[groupName];
   // e.g. buckets can have no aggs
-  const schemaNames = getSchemasByGroup(schemas, groupName).map(s => s.name);
+  const schemaNames = schemas.map(s => s.name);
   const group: IAggConfig[] = useMemo(
     () =>
       state.data.aggs!.aggs.filter(

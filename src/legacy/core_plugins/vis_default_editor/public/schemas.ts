@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _, { defaults } from 'lodash';
 
 import { Optional } from '@kbn/utility-types';
 
-import { IndexedArray } from 'ui/indexed_array';
 import { AggGroupNames, AggParam, IAggGroupNames } from '../../../../plugins/data/public';
 
 export interface ISchemas {
@@ -46,8 +45,7 @@ export interface Schema {
 }
 
 export class Schemas {
-  // @ts-ignore
-  all: IndexedArray<Schema>;
+  all: Schema[] = [];
 
   constructor(
     schemas: Array<
@@ -70,7 +68,7 @@ export class Schemas {
           ] as AggParam[];
         }
 
-        _.defaults(schema, {
+        defaults(schema, {
           min: 0,
           max: Infinity,
           group: AggGroupNames.Buckets,
@@ -83,22 +81,12 @@ export class Schemas {
         return schema as Schema;
       })
       .tap((fullSchemas: Schema[]) => {
-        this.all = new IndexedArray({
-          index: ['name'],
-          group: ['group'],
-          immutable: true,
-          initialSet: fullSchemas,
-        });
+        this.all = fullSchemas;
       })
       .groupBy('group')
       .forOwn((group, groupName) => {
         // @ts-ignore
-        this[groupName] = new IndexedArray({
-          index: ['name'],
-          immutable: true,
-          // @ts-ignore
-          initialSet: group,
-        });
+        this[groupName as IAggGroupNames] = group;
       })
       .commit();
   }
@@ -106,8 +94,4 @@ export class Schemas {
 
 export const getSchemaByName = (schemas: Schema[], schemaName?: string) => {
   return schemas.find(s => s.name === schemaName) || ({} as Schema);
-};
-
-export const getSchemasByGroup = (schemas: Schema[], schemaGroup?: string) => {
-  return schemas.filter(s => s.group === schemaGroup);
 };

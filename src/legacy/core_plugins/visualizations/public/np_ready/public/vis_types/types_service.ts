@@ -23,6 +23,7 @@ import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
 // @ts-ignore
 import { ReactVisType } from './react_vis_type';
+import { ISchemas } from '../../../../../vis_default_editor/public';
 
 export interface VisType {
   name: string;
@@ -37,6 +38,7 @@ export interface VisType {
   stage: 'experimental' | 'beta' | 'production';
   requiresSearch: boolean;
   hidden: boolean;
+  schemas: ISchemas;
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition

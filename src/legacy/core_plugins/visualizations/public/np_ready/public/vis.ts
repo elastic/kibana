@@ -39,6 +39,7 @@ import {
   ISearchSource,
   AggConfigOptions,
 } from '../../../../../../plugins/data/public';
+import { Schema } from '../../../../vis_default_editor/public';
 
 export interface SerializedVisData {
   expression?: string;
@@ -133,7 +134,7 @@ export class Vis {
     }
     if (state.data && state.data.aggs) {
       let configStates = state.data.aggs;
-      configStates = this.initializeDefaultsFromSchemas(configStates, this.type.schemas.all || []);
+      configStates = this.initializeDefaultsFromSchemas(configStates, this.type.schemas.all);
       if (!this.data.indexPattern) {
         if (state.data.aggs.length) {
           throw new Error('trying to initialize aggs without index pattern');
@@ -179,7 +180,7 @@ export class Vis {
     }
   }
 
-  private initializeDefaultsFromSchemas(configStates: AggConfigOptions[], schemas: any) {
+  private initializeDefaultsFromSchemas(configStates: AggConfigOptions[], schemas: Schema[]) {
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
     // of defaults (not sure why a someone define more...
