@@ -17,4 +17,23 @@
  * under the License.
  */
 
-export * from './index_pattern_management';
+import { actionRegistryMock } from './services/action_registry.mock';
+import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
+
+const createSetupContractMock = (): jest.Mocked<SavedObjectsManagementPluginSetup> => {
+  const mock = {
+    actionRegistry: actionRegistryMock.create(),
+  };
+  return mock;
+};
+
+const createStartContractMock = (): jest.Mocked<SavedObjectsManagementPluginStart> => {
+  const mock = {};
+  return mock;
+};
+
+export const savedObjectsManagementPluginMock = {
+  createActionRegistry: actionRegistryMock.create,
+  createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
+};

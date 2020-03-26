@@ -17,4 +17,8 @@
  * under the License.
  */
 
-export * from './index_pattern_management';
+export {
+  SavedObjectsManagementActionRegistry,
+  ISavedObjectsManagementActionRegistry,
+} from './action_registry';
+export { SavedObjectsManagementAction, SavedObjectsManagementRecord } from './action_types';
