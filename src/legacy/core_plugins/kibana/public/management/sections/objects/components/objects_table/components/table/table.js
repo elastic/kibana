@@ -186,6 +186,7 @@ export class Table extends PureComponent {
                 aria-label={getSavedObjectLabel(type)}
                 type={object.meta.icon || 'apps'}
                 size="s"
+                data-test-subj="objectType"
               />
             </EuiToolTip>
           );

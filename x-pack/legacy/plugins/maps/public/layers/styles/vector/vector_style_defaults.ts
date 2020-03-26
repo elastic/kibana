@@ -18,7 +18,7 @@ import {
   DEFAULT_LINE_COLORS,
   // @ts-ignore
 } from '../color_utils';
-import { VectorStylePropertiesDescriptor } from '../../../../common/style_property_descriptor_types';
+import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
 // @ts-ignore
 import { getUiSettings } from '../../../kibana_services';
 

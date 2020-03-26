@@ -7,6 +7,6 @@
     "patterns": [
       "_sql/translate"
     ],
-    "documentation": "Translate SQL into Elasticsearch queries"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-translate.html"
   }
 }

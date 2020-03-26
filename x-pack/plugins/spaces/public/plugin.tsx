@@ -12,6 +12,7 @@ import {
 } from 'src/plugins/saved_objects_management/public';
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
+import { FeaturesPluginStart } from '../../features/public';
 import { SecurityPluginStart, SecurityPluginSetup } from '../../security/public';
 import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';
@@ -30,6 +31,7 @@ export interface PluginsSetup {
 }
 
 export interface PluginsStart {
+  features: FeaturesPluginStart;
   management?: ManagementStart;
   security?: SecurityPluginStart;
 }
@@ -57,7 +59,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService = new ManagementService();
       this.managementService.setup({
         management: plugins.management,
-        getStartServices: core.getStartServices,
+        getStartServices: core.getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: this.spacesManager,
         securityLicense: plugins.security?.license,
       });

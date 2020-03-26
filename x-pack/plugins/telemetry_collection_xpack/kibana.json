@@ -1,0 +1,10 @@
+{
+  "id": "telemetryCollectionXpack",
+  "version": "kibana",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": [
+    "telemetryCollectionManager"
+  ],
+  "optionalPlugins": []
+}

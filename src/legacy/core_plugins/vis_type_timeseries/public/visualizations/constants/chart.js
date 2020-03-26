@@ -32,6 +32,7 @@ export const GRID_LINE_CONFIG = {
 export const X_ACCESSOR_INDEX = 0;
 export const STACK_ACCESSORS = [0];
 export const Y_ACCESSOR_INDEXES = [1];
+export const Y0_ACCESSOR_INDEXES = [2];
 
 export const STACKED_OPTIONS = {
   NONE: 'none',
