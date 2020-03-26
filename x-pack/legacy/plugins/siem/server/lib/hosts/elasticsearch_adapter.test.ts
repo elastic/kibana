@@ -159,7 +159,6 @@ describe('hosts elasticsearch_adapter', () => {
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockGetHostsResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
@@ -180,7 +179,6 @@ describe('hosts elasticsearch_adapter', () => {
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockGetHostOverviewResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
@@ -201,7 +199,6 @@ describe('hosts elasticsearch_adapter', () => {
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockGetHostLastFirstSeenResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),

@@ -6,8 +6,7 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-// @ts-ignore
-import { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { services } from './services';
 
 export default async function({ readConfigFile }: FtrConfigProviderContext) {
@@ -28,6 +27,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [require.resolve('./apis')],
     servers,
+    security: { disableTestUser: true },
     services,
     junit: {
       reportName: 'X-Pack PKI API Integration Tests',
@@ -54,8 +54,8 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--server.ssl.enabled=true',
-        `--server.ssl.key=${ES_KEY_PATH}`,
-        `--server.ssl.certificate=${ES_CERT_PATH}`,
+        `--server.ssl.key=${KBN_KEY_PATH}`,
+        `--server.ssl.certificate=${KBN_CERT_PATH}`,
         `--server.ssl.certificateAuthorities=${JSON.stringify([
           CA_CERT_PATH,
           resolve(__dirname, './fixtures/kibana_ca.crt'),

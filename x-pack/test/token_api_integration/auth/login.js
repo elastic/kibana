@@ -6,7 +6,7 @@
 
 import request from 'request';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   function extractSessionCookie(response) {

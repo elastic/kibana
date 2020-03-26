@@ -24,7 +24,7 @@ import util from 'util';
 import { stat, readFileSync } from 'fs';
 import { snakeCase } from 'lodash';
 import del from 'del';
-import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
+import { ProcRunner, ToolingLog } from '@kbn/dev-utils';
 import { createLegacyEsTestCluster } from '@kbn/test';
 import execa from 'execa';
 
@@ -61,7 +61,8 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     expect(stats.isDirectory()).toBe(true);
   });
 
-  it(`should create an internationalization config file with a blank line appended to satisfy the parser`, async () => {
+  // skipped until internationalization is re-introduced
+  it.skip(`should create an internationalization config file with a blank line appended to satisfy the parser`, async () => {
     // Link to the error that happens when the blank line is not there:
     // https://github.com/elastic/kibana/pull/45044#issuecomment-530092627
     const intlFile = `${generatedPath}/.i18nrc.json`;
@@ -69,8 +70,8 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
   });
 
   describe(`then running`, () => {
-    it(`'yarn test:browser' should exit 0`, async () => {
-      await execa('yarn', ['test:browser'], {
+    it(`'yarn test:karma' should exit 0`, async () => {
+      await execa('yarn', ['test:karma'], {
         cwd: generatedPath,
         env: {
           DISABLE_JUNIT_REPORTER: '1',
@@ -78,41 +79,36 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       });
     });
 
-    it(`'yarn test:server' should exit 0`, async () => {
-      await execa('yarn', ['test:server'], {
-        cwd: generatedPath,
-        env: {
-          DISABLE_JUNIT_REPORTER: '1',
-        },
-      });
-    });
-
-    it(`'yarn build' should exit 0`, async () => {
+    it.skip(`'yarn build' should exit 0`, async () => {
       await execa('yarn', ['build'], { cwd: generatedPath });
     });
 
     describe('with es instance', () => {
-      const log = new ToolingLog();
+      const log = new ToolingLog({
+        level: 'verbose',
+        writeTo: process.stdout,
+      });
+      const pr = new ProcRunner(log);
 
       const es = createLegacyEsTestCluster({ license: 'basic', log });
       beforeAll(es.start);
       afterAll(es.stop);
+      afterAll(() => pr.teardown());
 
       it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
-        await withProcRunner(log, async proc => {
-          await proc.run('kibana', {
-            cmd: 'yarn',
-            args: [
-              'start',
-              '--optimize.enabled=false',
-              '--logging.json=false',
-              '--migrations.skip=true',
-            ],
-            cwd: generatedPath,
-            wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
-          });
-          await proc.stop('kibana');
+        await pr.run('kibana', {
+          cmd: 'yarn',
+          args: [
+            'start',
+            '--optimize.enabled=false',
+            '--logging.json=false',
+            '--logging.verbose=true',
+            '--migrations.skip=true',
+          ],
+          cwd: generatedPath,
+          wait: new RegExp('\\[ispecPlugin\\]\\[plugins\\] Setting up plugin'),
         });
+        await pr.stop('kibana');
       });
     });
 
@@ -120,7 +116,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       await execa('yarn', ['preinstall'], { cwd: generatedPath });
     });
 
-    it(`'yarn lint' should exit 0`, async () => {
+    it.skip(`'yarn lint' should exit 0`, async () => {
       await execa('yarn', ['lint'], { cwd: generatedPath });
     });
 

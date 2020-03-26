@@ -69,7 +69,7 @@ export class Plugin {
       this._options = options;
 
       server.logWithMetadata(['plugins', 'debug'], `Initializing plugin ${this.toString()}`, {
-        plugin: this
+        plugin: this,
       });
 
       if (this.publicDir) {
@@ -88,7 +88,7 @@ export class Plugin {
 
     await kbnServer.server.register({
       plugin: { register, name: id, version },
-      options: config.has(configPrefix) ? config.get(configPrefix) : null
+      options: config.has(configPrefix) ? config.get(configPrefix) : null,
     });
 
     // Only change the plugin status to green if the

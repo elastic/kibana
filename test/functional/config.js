@@ -20,7 +20,7 @@
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
   return {
@@ -32,6 +32,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/discover'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
+      require.resolve('./apps/saved_objects_management'),
       require.resolve('./apps/status_page'),
       require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
@@ -47,6 +48,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
+        '--telemetry.optIn=false',
       ],
     },
 
@@ -54,7 +56,6 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'telemetry:optIn': false,
       },
     },
 
@@ -92,20 +93,183 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dev_tools/console',
       },
-      account: {
-        pathname: '/app/kibana',
-        hash: '/account',
-      },
       home: {
         pathname: '/app/kibana',
         hash: '/home',
       },
     },
     junit: {
-      reportName: 'Chrome UI Functional Tests'
+      reportName: 'Chrome UI Functional Tests',
     },
     browser: {
-      type: 'chrome'
-    }
+      type: 'chrome',
+    },
+
+    security: {
+      roles: {
+        test_logstash_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['logstash*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+        test_shakespeare_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['shakes*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+        test_testhuge_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['testhuge*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+        test_alias_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['alias*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+        //for sample data - can remove but not add sample data.( not ml)- for ml use built in role.
+        kibana_sample_admin: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['kibana_sample*'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        kibana_date_nanos: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['date-nanos'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        kibana_date_nanos_custom: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['date_nanos_custom_timestamp'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        kibana_date_nanos_mixed: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['date_nanos_mixed', 'timestamp-*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        kibana_large_strings: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['testlargestring'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        long_window_logstash: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['long-window-logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        animals: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['animals-*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+      },
+      defaultRoles: ['test_logstash_reader', 'kibana_admin'],
+    },
   };
 }

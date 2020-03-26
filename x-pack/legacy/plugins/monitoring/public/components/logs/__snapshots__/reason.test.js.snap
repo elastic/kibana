@@ -67,7 +67,7 @@ exports[`Logs should render with a no cluster found reason 1`] = `
       values={
         Object {
           "link": <ForwardRef
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
             target="_blank"
           >
             setup
@@ -92,7 +92,7 @@ exports[`Logs should render with a no index found reason 1`] = `
       values={
         Object {
           "link": <ForwardRef
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
             target="_blank"
           >
             setup
@@ -142,11 +142,39 @@ exports[`Logs should render with a no node found reason 1`] = `
       values={
         Object {
           "link": <ForwardRef
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
             target="_blank"
           >
             setup
           </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a no structured logs reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No structured logs found"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Check if the {varPaths} setting {link}."
+      id="xpack.monitoring.logs.reason.notUsingStructuredLogsMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
+          >
+            points to JSON logs
+          </ForwardRef>,
+          "varPaths": <Monospace>
+            var.paths
+          </Monospace>,
         }
       }
     />

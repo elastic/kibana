@@ -20,13 +20,17 @@
 import { Observable } from 'rxjs';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
-import { IClusterClient } from './cluster_client';
+import { IClusterClient, ICustomClusterClient } from './cluster_client';
+import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 /**
  * @public
  */
 export interface ElasticsearchServiceSetup {
   /**
+   * @deprecated
+   * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.createClient} instead.
+   *
    * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
    *
    * @param type Unique identifier of the client
@@ -46,29 +50,75 @@ export interface ElasticsearchServiceSetup {
   readonly createClient: (
     type: string,
     clientConfig?: Partial<ElasticsearchClientConfig>
-  ) => IClusterClient;
+  ) => ICustomClusterClient;
 
   /**
-   * Observable of clients for the `admin` cluster. Observable emits when Elasticsearch config changes on the Kibana
-   * server. See {@link IClusterClient}.
+   * @deprecated
+   * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.client} instead.
    *
-   * @exmaple
+   * A client for the `admin` cluster. All Elasticsearch config value changes are processed under the hood.
+   * See {@link IClusterClient}.
+   *
+   * @example
    * ```js
-   * const client = await elasticsearch.adminClient$.pipe(take(1)).toPromise();
+   * const client = core.elasticsearch.adminClient;
    * ```
    */
-  readonly adminClient$: Observable<IClusterClient>;
+  readonly adminClient: IClusterClient;
 
   /**
-   * Observable of clients for the `data` cluster. Observable emits when Elasticsearch config changes on the Kibana
-   * server. See {@link IClusterClient}.
+   * @deprecated
+   * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.client} instead.
    *
-   * @exmaple
+   * A client for the `data` cluster. All Elasticsearch config value changes are processed under the hood.
+   * See {@link IClusterClient}.
+   *
+   * @example
    * ```js
-   * const client = await elasticsearch.dataClient$.pipe(take(1)).toPromise();
+   * const client = core.elasticsearch.dataClient;
    * ```
    */
-  readonly dataClient$: Observable<IClusterClient>;
+  readonly dataClient: IClusterClient;
+}
+
+/**
+ * @public
+ */
+export interface ElasticsearchServiceStart {
+  legacy: {
+    /**
+     * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
+     *
+     * @param type Unique identifier of the client
+     * @param clientConfig A config consists of Elasticsearch JS client options and
+     * valid sub-set of Elasticsearch service config.
+     * We fill all the missing properties in the `clientConfig` using the default
+     * Elasticsearch config so that we don't depend on default values set and
+     * controlled by underlying Elasticsearch JS client.
+     * We don't run validation against the passed config and expect it to be valid.
+     *
+     * @example
+     * ```js
+     * const client = elasticsearch.createCluster('my-app-name', config);
+     * const data = await client.callAsInternalUser();
+     * ```
+     */
+    readonly createClient: (
+      type: string,
+      clientConfig?: Partial<ElasticsearchClientConfig>
+    ) => ICustomClusterClient;
+
+    /**
+     * A pre-configured Elasticsearch client. All Elasticsearch config value changes are processed under the hood.
+     * See {@link IClusterClient}.
+     *
+     * @example
+     * ```js
+     * const client = core.elasticsearch.client;
+     * ```
+     */
+    readonly client: IClusterClient;
+  };
 }
 
 /** @internal */
@@ -77,4 +127,5 @@ export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceS
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
   };
+  esNodesCompatibility$: Observable<NodesVersionCompatibility>;
 }

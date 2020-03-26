@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiToolTip,
+  EuiSpacer
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../../../plugins/apm/common/i18n';
+import { SERVICE_NODE_NAME_MISSING } from '../../../../../../../plugins/apm/common/service_nodes';
+import { PROJECTION } from '../../../../../../../plugins/apm/common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ManagedTable, ITableColumn } from '../../shared/ManagedTable';
@@ -150,25 +156,31 @@ const ServiceNodeOverview = () => {
   ];
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localFiltersConfig} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={7}>
-        <EuiPanel>
-          <ManagedTable
-            noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
-              defaultMessage: 'No JVMs were found'
-            })}
-            items={items}
-            columns={columns}
-            initialPageSize={INITIAL_PAGE_SIZE}
-            initialSortField={INITIAL_SORT_FIELD}
-            initialSortDirection={INITIAL_SORT_DIRECTION}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <LocalUIFilters {...localFiltersConfig} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <EuiPanel>
+            <ManagedTable
+              noItemsMessage={i18n.translate(
+                'xpack.apm.jvmsTable.noJvmsLabel',
+                {
+                  defaultMessage: 'No JVMs were found'
+                }
+              )}
+              items={items}
+              columns={columns}
+              initialPageSize={INITIAL_PAGE_SIZE}
+              initialSortField={INITIAL_SORT_FIELD}
+              initialSortDirection={INITIAL_SORT_DIRECTION}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
 

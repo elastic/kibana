@@ -5,7 +5,7 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 
 export function getPageData($injector, api) {
   const $http = $injector.get('$http');
@@ -17,8 +17,8 @@ export function getPageData($injector, api) {
       ccs: globalState.ccs,
       timeRange: {
         min: timeBounds.min.toISOString(),
-        max: timeBounds.max.toISOString()
-      }
+        max: timeBounds.max.toISOString(),
+      },
     })
     .then(response => response.data)
     .catch(err => {

@@ -24,27 +24,19 @@ const del = require('del');
 const supportsColor = require('supports-color');
 const { ToolingLog, withProcRunner, pickLevelFromFlags } = require('@kbn/dev-utils');
 
-const {
-  ROOT_DIR,
-  BUILD_DIR,
-} = require('./paths');
+const { ROOT_DIR, BUILD_DIR } = require('./paths');
 
 const unknownFlags = [];
 const flags = getopts(process.argv, {
-  boolean: [
-    'watch',
-    'dev',
-    'help',
-    'debug'
-  ],
+  boolean: ['watch', 'dev', 'help', 'debug'],
   unknown(name) {
     unknownFlags.push(name);
-  }
+  },
 });
 
 const log = new ToolingLog({
   level: pickLevelFromFlags(flags),
-  writeTo: process.stdout
+  writeTo: process.stdout,
 });
 
 if (unknownFlags.length) {
@@ -64,7 +56,7 @@ if (flags.help) {
   process.exit();
 }
 
-withProcRunner(log, async (proc) => {
+withProcRunner(log, async proc => {
   log.info('Deleting old output');
   await del(BUILD_DIR);
 
@@ -80,20 +72,22 @@ withProcRunner(log, async (proc) => {
       cmd: 'babel',
       args: [
         'src',
-        '--ignore', `*.test.js`,
-        '--out-dir', relative(cwd, BUILD_DIR),
+        '--ignore',
+        `*.test.js`,
+        '--out-dir',
+        relative(cwd, BUILD_DIR),
         '--copy-files',
         ...(flags.dev ? ['--source-maps', 'inline'] : []),
-        ...(flags.watch ? ['--watch'] : ['--quiet'])
+        ...(flags.watch ? ['--watch'] : ['--quiet']),
       ],
       wait: true,
       env,
-      cwd
+      cwd,
     }),
   ]);
 
   log.success('Complete');
-}).catch((error) => {
+}).catch(error => {
   log.error(error);
   process.exit(1);
 });

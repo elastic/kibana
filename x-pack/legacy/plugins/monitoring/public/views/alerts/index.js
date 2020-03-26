@@ -8,12 +8,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render } from 'react-dom';
 import { find, get } from 'lodash';
-import uiRoutes from 'ui/routes';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { I18nContext } from 'ui/i18n';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { Alerts } from '../../components/alerts';
 import { MonitoringViewBaseEuiTableController } from '../base_eui_table_controller';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,19 +24,20 @@ function getPageData($injector) {
   const globalState = $injector.get('globalState');
   const $http = $injector.get('$http');
   const Private = $injector.get('Private');
-  const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/alerts`;
+  const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/legacy_alerts`;
 
   const timeBounds = timefilter.getBounds();
 
-  return $http.post(url, {
-    ccs: globalState.ccs,
-    timeRange: {
-      min: timeBounds.min.toISOString(),
-      max: timeBounds.max.toISOString()
-    }
-  })
+  return $http
+    .post(url, {
+      ccs: globalState.ccs,
+      timeRange: {
+        min: timeBounds.min.toISOString(),
+        max: timeBounds.max.toISOString(),
+      },
+    })
     .then(response => get(response, 'data', []))
-    .catch((err) => {
+    .catch(err => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -49,7 +50,7 @@ uiRoutes.when('/alerts', {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ALERTS] });
     },
-    alerts: getPageData
+    alerts: getPageData,
   },
   controllerAs: 'alerts',
   controller: class AlertsView extends MonitoringViewBaseEuiTableController {
@@ -59,29 +60,35 @@ uiRoutes.when('/alerts', {
       const kbnUrl = $injector.get('kbnUrl');
 
       // breadcrumbs + page title
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+      $scope.cluster = find($route.current.locals.clusters, {
+        cluster_uuid: globalState.cluster_uuid,
+      });
 
       super({
-        title: i18n.translate('xpack.monitoring.alerts.clusterAlertsTitle', { defaultMessage: 'Cluster Alerts' }),
+        title: i18n.translate('xpack.monitoring.alerts.clusterAlertsTitle', {
+          defaultMessage: 'Cluster Alerts',
+        }),
         getPageData,
         $scope,
         $injector,
         storageKey: 'alertsTable',
-        reactNodeId: 'monitoringAlertsApp'
+        reactNodeId: 'monitoringAlertsApp',
       });
 
       this.data = $route.current.locals.alerts;
 
       const renderReact = data => {
-        const app = data.message
-          ? (<p>{data.message}</p>)
-          : (<Alerts
+        const app = data.message ? (
+          <p>{data.message}</p>
+        ) : (
+          <Alerts
             alerts={data}
             angular={{ kbnUrl, scope: $scope }}
             sorting={this.sorting}
             pagination={this.pagination}
             onTableChange={this.onTableChange}
-          />);
+          />
+        );
 
         render(
           <I18nContext>
@@ -89,10 +96,8 @@ uiRoutes.when('/alerts', {
               <EuiPageBody>
                 <EuiPageContent>
                   {app}
-                  <EuiSpacer size="m"/>
-                  <EuiLink
-                    href="#/overview"
-                  >
+                  <EuiSpacer size="m" />
+                  <EuiLink href="#/overview">
                     <FormattedMessage
                       id="xpack.monitoring.alerts.clusterOverviewLinkLabel"
                       defaultMessage="« Cluster Overview"
@@ -105,7 +110,10 @@ uiRoutes.when('/alerts', {
           document.getElementById('monitoringAlertsApp')
         );
       };
-      $scope.$watch(() => this.data, data => renderReact(data));
+      $scope.$watch(
+        () => this.data,
+        data => renderReact(data)
+      );
     }
-  }
+  },
 });

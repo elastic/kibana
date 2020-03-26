@@ -19,11 +19,7 @@
 
 import { Readable, Writable, Duplex, Transform } from 'stream';
 
-import {
-  createListStream,
-  createPromiseFromStreams,
-  createReduceStream
-} from './';
+import { createListStream, createPromiseFromStreams, createReduceStream } from './';
 
 describe('promiseFromStreams', () => {
   test('pipes together an array of streams', async () => {
@@ -47,8 +43,8 @@ describe('promiseFromStreams', () => {
               written += chunk;
               cb();
             }, 100);
-          }
-        })
+          },
+        }),
       ]);
 
       expect(written).toBe('a');
@@ -60,8 +56,8 @@ describe('promiseFromStreams', () => {
         new Writable({
           write(chunk, enc, cb) {
             cb();
-          }
-        })
+          },
+        }),
       ]);
 
       expect(result).toBe(undefined);
@@ -70,9 +66,7 @@ describe('promiseFromStreams', () => {
 
   describe('last stream is readable', () => {
     test(`resolves to it's final value`, async () => {
-      const result = await createPromiseFromStreams([
-        createListStream(['a', 'b', 'c'])
-      ]);
+      const result = await createPromiseFromStreams([createListStream(['a', 'b', 'c'])]);
 
       expect(result).toBe('c');
     });
@@ -93,15 +87,17 @@ describe('promiseFromStreams', () => {
           },
 
           write(chunk, enc, cb) {
-            duplexReadQueue.push(new Promise((resolve) => {
-              setTimeout(() => {
-                written += chunk;
-                cb();
-                resolve(duplexItemsToPush.shift());
-              }, 50);
-            }));
-          }
-        }).setEncoding('utf8')
+            duplexReadQueue.push(
+              new Promise(resolve => {
+                setTimeout(() => {
+                  written += chunk;
+                  cb();
+                  resolve(duplexItemsToPush.shift());
+                }, 50);
+              })
+            );
+          },
+        }).setEncoding('utf8'),
       ]);
 
       expect(written).toEqual('abc');
@@ -121,18 +117,15 @@ describe('promiseFromStreams', () => {
         },
         destroy() {
           destroyCalled = true;
-        }
+        },
       });
       const transformStream = new Transform({
         transform(chunk, enc, done) {
           done(new Error('Test error'));
-        }
+        },
       });
       try {
-        await createPromiseFromStreams([
-          readStream,
-          transformStream,
-        ]);
+        await createPromiseFromStreams([readStream, transformStream]);
         throw new Error('Should fail');
       } catch (e) {
         expect(e.message).toBe('Test error');

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { IAction, IncompatibleActionError } from '../../../ui_actions';
+import { Action, IncompatibleActionError } from '../../../ui_actions';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';
 import { IEmbeddable } from '../../../embeddables';
@@ -38,7 +38,7 @@ function hasExpandedPanelInput(
   return (container as IContainer<{}, ExpandedPanelInput>).getInput().expandedPanelId !== undefined;
 }
 
-export class RemovePanelAction implements IAction<ActionContext> {
+export class RemovePanelAction implements Action<ActionContext> {
   public readonly type = REMOVE_PANEL_ACTION;
   public readonly id = REMOVE_PANEL_ACTION;
   public order = 5;

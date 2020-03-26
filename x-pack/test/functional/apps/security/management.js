@@ -11,22 +11,22 @@ import {
   ROLES_PATH,
   EDIT_ROLES_PATH,
   CLONE_ROLES_PATH,
-} from '../../../../legacy/plugins/security/public/views/management/management_urls';
+} from '../../../../plugins/security/public/management/management_urls';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
-  describe('Management', function () {
+  describe('Management', function() {
     this.tags(['skipFirefox']);
 
     before(async () => {
       // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
       await PageObjects.settings.navigateTo();
 

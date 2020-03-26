@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import querystring from 'querystring';
+import { parse } from 'query-string';
 import { get } from 'lodash';
 // @ts-ignore untyped local
 import { getInitialState } from '../state/initial_state';
@@ -13,7 +13,7 @@ import { getWindow } from './get_window';
 import { historyProvider } from './history_provider';
 // @ts-ignore untyped local
 import { routerProvider } from './router_provider';
-import { createTimeInterval, isValidTimeInterval } from './time_interval';
+import { createTimeInterval, isValidTimeInterval, getTimeInterval } from './time_interval';
 import { AppState, AppStateKeys } from '../../types';
 
 export function getDefaultAppState(): AppState {
@@ -38,7 +38,7 @@ export function getDefaultAppState(): AppState {
 export function getCurrentAppState(): AppState {
   const history = historyProvider(getWindow());
   const { search } = history.getLocation();
-  const qs = !!search ? querystring.parse(search.replace(/^\?/, '')) : {};
+  const qs = !!search ? parse(search.replace(/^\?/, ''), { sort: false }) : {};
   const appState = assignAppState({}, qs);
 
   return appState;
@@ -92,7 +92,7 @@ export function setFullscreen(payload: boolean) {
   }
 }
 
-export function setAutoplayInterval(payload: string) {
+export function setAutoplayInterval(payload: string | null) {
   const appState = getAppState();
   const appValue = appState[AppStateKeys.AUTOPLAY_INTERVAL];
 
@@ -112,7 +112,12 @@ export function setRefreshInterval(payload: string) {
   const appValue = appState[AppStateKeys.REFRESH_INTERVAL];
 
   if (payload !== appValue) {
-    appState[AppStateKeys.REFRESH_INTERVAL] = payload;
-    routerProvider().updateAppState(appState);
+    if (getTimeInterval(payload)) {
+      appState[AppStateKeys.REFRESH_INTERVAL] = payload;
+      routerProvider().updateAppState(appState);
+    } else {
+      delete appState[AppStateKeys.REFRESH_INTERVAL];
+      routerProvider().updateAppState(appState);
+    }
   }
 }

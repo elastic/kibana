@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import { shallow } from 'enzyme';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { getMockNetflowData, TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 import {
   eventActionMatches,
@@ -24,20 +24,19 @@ export const justIdAndTimestamp: Ecs = {
   timestamp: '2018-11-12T19:03:25.936Z',
 };
 
-jest.mock('../../../../../lib/settings/use_kibana_ui_setting');
-
 describe('netflowRowRenderer', () => {
+  const mount = useMountAppended();
+
   test('renders correctly against snapshot', () => {
     const browserFields: BrowserFields = {};
     const children = netflowRowRenderer.renderRow({
       browserFields,
       data: getMockNetflowData(),
-      children: <span>{'some children'}</span>,
       timelineId: 'test',
     });
 
     const wrapper = shallow(<span>{children}</span>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('#isInstance', () => {
@@ -98,26 +97,10 @@ describe('netflowRowRenderer', () => {
     });
   });
 
-  test('should render children normally when given non-netflow data', () => {
-    const children = netflowRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
-      data: justIdAndTimestamp,
-      children: <span>{'some children'}</span>,
-      timelineId: 'test',
-    });
-    const wrapper = mount(
-      <TestProviders>
-        <span>{children}</span>
-      </TestProviders>
-    );
-    expect(wrapper.text()).toEqual('some children');
-  });
-
   test('should render netflow data', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: getMockNetflowData(),
-      children: <span>{'some children'}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(

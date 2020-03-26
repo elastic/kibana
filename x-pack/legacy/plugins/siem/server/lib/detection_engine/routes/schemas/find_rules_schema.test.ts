@@ -6,8 +6,17 @@
 
 import { findRulesSchema } from './find_rules_schema';
 import { FindParamsRest } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('find rules schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('empty objects do validate', () => {
     expect(findRulesSchema.validate<Partial<FindParamsRest>>({}).error).toBeFalsy();
   });
@@ -69,8 +78,10 @@ describe('find rules schema', () => {
     expect(
       findRulesSchema.validate<Partial<Omit<FindParamsRest, 'fields'>> & { fields: number[] }>({
         fields: [5],
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual(
+      'child "fields" fails because ["fields" at position 0 fails because ["0" must be a string]]'
+    );
   });
 
   test('per page has a default of 20', () => {
@@ -93,16 +104,16 @@ describe('find rules schema', () => {
     expect(
       findRulesSchema.validate<Partial<Omit<FindParamsRest, 'filter'>> & { filter: number }>({
         filter: 5,
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "filter" fails because ["filter" must be a string]');
   });
 
   test('sort_order requires sort_field to work', () => {
     expect(
       findRulesSchema.validate<Partial<FindParamsRest>>({
         sort_order: 'asc',
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "sort_field" fails because ["sort_field" is required]');
   });
 
   test('sort_order and sort_field validate together', () => {
@@ -130,7 +141,7 @@ describe('find rules schema', () => {
       >({
         sort_order: 'some other string',
         sort_field: 'some field',
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "sort_order" fails because ["sort_order" must be one of [asc, desc]]');
   });
 });

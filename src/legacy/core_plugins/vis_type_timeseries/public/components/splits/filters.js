@@ -36,7 +36,10 @@ export const SplitByFilters = props => {
           <EuiFormRow
             id={htmlId('group')}
             label={
-              <FormattedMessage id="visTypeTimeseries.splits.filters.groupByLabel" defaultMessage="Group by" />
+              <FormattedMessage
+                id="visTypeTimeseries.splits.filters.groupByLabel"
+                defaultMessage="Group by"
+              />
             }
           >
             <GroupBySelect

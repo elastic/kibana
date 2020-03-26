@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { mirrorPluginStatus } from '../mirror_plugin_status';
 
 describe('mirror_plugin_status', () => {
-
   class MockPluginStatus extends EventEmitter {
     constructor() {
       super();
@@ -30,10 +29,18 @@ describe('mirror_plugin_status', () => {
       this.emit('change', prevState, prevMessage, this.state, this.message);
     }
 
-    red(message) { this._changeState('red', message); }
-    yellow(message) { this._changeState('yellow', message); }
-    green(message) { this._changeState('green', message); }
-    uninitialized(message) { this._changeState('uninitialized', message); }
+    red(message) {
+      this._changeState('red', message);
+    }
+    yellow(message) {
+      this._changeState('yellow', message);
+    }
+    green(message) {
+      this._changeState('green', message);
+    }
+    uninitialized(message) {
+      this._changeState('uninitialized', message);
+    }
   }
 
   class MockPlugin {
@@ -54,7 +61,7 @@ describe('mirror_plugin_status', () => {
     }, 100);
   });
 
-  it('should mirror all downstream plugin statuses to upstream plugin statuses', (done) => {
+  it('should mirror all downstream plugin statuses to upstream plugin statuses', done => {
     mirrorPluginStatus(upstreamPlugin, downstreamPlugin);
     downstreamPlugin.status.on('change', () => {
       clearTimeout(eventNotEmittedTimeout);
@@ -66,12 +73,11 @@ describe('mirror_plugin_status', () => {
   });
 
   describe('should only mirror specific downstream plugin statuses to corresponding upstream plugin statuses: ', () => {
-
     beforeEach(() => {
       mirrorPluginStatus(upstreamPlugin, downstreamPlugin, 'yellow', 'red');
     });
 
-    it('yellow', (done) => {
+    it('yellow', done => {
       downstreamPlugin.status.on('change', () => {
         clearTimeout(eventNotEmittedTimeout);
         expect(downstreamPlugin.status.state).to.be('yellow');
@@ -81,7 +87,7 @@ describe('mirror_plugin_status', () => {
       upstreamPlugin.status.yellow('test yellow message');
     });
 
-    it('red', (done) => {
+    it('red', done => {
       downstreamPlugin.status.on('change', () => {
         clearTimeout(eventNotEmittedTimeout);
         expect(downstreamPlugin.status.state).to.be('red');

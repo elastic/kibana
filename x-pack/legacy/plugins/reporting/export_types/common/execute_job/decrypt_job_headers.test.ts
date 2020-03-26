@@ -5,7 +5,7 @@
  */
 
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { createMockServer } from '../../../test_helpers/create_mock_server';
+import { createMockServer } from '../../../test_helpers';
 import { Logger } from '../../../types';
 import { decryptJobHeaders } from './decrypt_job_headers';
 
@@ -43,7 +43,7 @@ describe('headers', () => {
     };
 
     const encryptedHeaders = await encryptHeaders(headers);
-    const { decryptedHeaders } = await decryptJobHeaders({
+    const decryptedHeaders = await decryptJobHeaders({
       job: {
         title: 'cool-job-bro',
         type: 'csv',

@@ -19,10 +19,12 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function HomePageProvider({ getService }: FtrProviderContext) {
+export function HomePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+  const PageObjects = getPageObjects(['common']);
+  let isOss = true;
 
   class HomePage {
     async clickSynopsis(title: string) {
@@ -38,12 +40,15 @@ export function HomePageProvider({ getService }: FtrProviderContext) {
     }
 
     async isSampleDataSetInstalled(id: string) {
-      return await testSubjects.exists(`removeSampleDataSet${id}`);
+      return !(await testSubjects.exists(`addSampleDataSet${id}`));
     }
 
     async addSampleDataSet(id: string) {
-      await testSubjects.click(`addSampleDataSet${id}`);
-      await this._waitForSampleDataLoadingAction(id);
+      const isInstalled = await this.isSampleDataSetInstalled(id);
+      if (!isInstalled) {
+        await testSubjects.click(`addSampleDataSet${id}`);
+        await this._waitForSampleDataLoadingAction(id);
+      }
     }
 
     async removeSampleDataSet(id: string) {
@@ -61,14 +66,17 @@ export function HomePageProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    async launchSampleDataSet(id: string) {
-      if (await find.existsByCssSelector(`#sampleDataLinks${id}`)) {
-        // omits cloud test failures
-        await find.clickByCssSelectorWhenNotDisabled(`#sampleDataLinks${id}`);
-        await find.clickByCssSelector('.euiContextMenuItem:nth-of-type(1)');
-      } else {
-        await testSubjects.click(`launchSampleDataSet${id}`);
+    async launchSampleDashboard(id: string) {
+      await this.launchSampleDataSet(id);
+      isOss = await PageObjects.common.isOss();
+      if (!isOss) {
+        await find.clickByLinkText('Dashboard');
       }
+    }
+
+    async launchSampleDataSet(id: string) {
+      await this.addSampleDataSet(id);
+      await testSubjects.click(`launchSampleDataSet${id}`);
     }
 
     async loadSavedObjects() {

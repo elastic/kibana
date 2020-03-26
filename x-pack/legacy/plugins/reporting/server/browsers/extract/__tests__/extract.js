@@ -22,7 +22,7 @@ const EXTRACT_TARGET_FILE = resolve(EXTRACT_TARGET_FOLDER, 'file.md');
 const fsp = {
   mkdir: promisify(fs.mkdir),
   rmdir: promisify(fs.rmdir),
-  unlink: promisify(fs.unlink)
+  unlink: promisify(fs.unlink),
 };
 
 const ignoreErrorCodes = async (codes, promise) => {
@@ -57,7 +57,6 @@ function fileHash(filepath) {
 }
 
 describe('extract', () => {
-
   beforeEach(cleanup);
   afterEach(cleanup);
 
@@ -87,7 +86,9 @@ describe('extract', () => {
     });
 
     if (isWindows) {
-      it(`Windows doesn't support chmod, so it's missing access tests. Windows is throwing EEXIST.`);
+      it(
+        `Windows doesn't support chmod, so it's missing access tests. Windows is throwing EEXIST.`
+      );
     } else {
       it(`throws an ExtractError with cause.code of EACESS when target is un-writeable`, async () => {
         await fsp.mkdir(EXTRACT_TARGET_FOLDER, 0o444);

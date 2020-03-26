@@ -6,8 +6,14 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { AlertUtils, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import {
+  AlertUtils,
+  checkAAD,
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+} from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateApiKeyTests({ getService }: FtrProviderContext) {
@@ -55,6 +61,67 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should still be able to update API key when AAD is broken', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert');
+
+          await supertest
+            .put(`${getUrlPrefix(space.id)}/api/saved_objects/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              attributes: {
+                name: 'bar',
+              },
+            })
+            .expect(200);
+
+          const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              const { body: updatedAlert } = await supertestWithoutAuth
+                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(200);
+              expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

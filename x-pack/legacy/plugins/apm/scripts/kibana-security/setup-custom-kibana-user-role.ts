@@ -20,13 +20,13 @@ const config = yaml.safeLoad(
   )
 );
 
-const GITHUB_USERNAME = argv.username as string;
 const KIBANA_INDEX = config['kibana.index'] as string;
 const TASK_MANAGER_INDEX = config['xpack.task_manager.index'] as string;
-const ELASTICSEARCH_USERNAME = (argv.esUsername as string) || 'elastic';
-const ELASTICSEARCH_PASSWORD = (argv.esPassword ||
+const KIBANA_ROLE_SUFFIX = argv.roleSuffix as string;
+const ELASTICSEARCH_USERNAME = (argv.username as string) || 'elastic';
+const ELASTICSEARCH_PASSWORD = (argv.password ||
   config['elasticsearch.password']) as string;
-const KIBANA_BASE_URL = (argv.baseUrl as string) || 'http://localhost:5601';
+const KIBANA_BASE_URL = (argv.kibanaUrl as string) || 'http://localhost:5601';
 
 interface User {
   username: string;
@@ -40,51 +40,76 @@ const getKibanaBasePath = once(async () => {
   try {
     await axios.request({ url: KIBANA_BASE_URL, maxRedirects: 0 });
   } catch (e) {
-    const err = e as AxiosError;
-    const { location } = err.response?.headers;
-    const isBasePath = RegExp(/^\/\w{3}$/).test(location);
-    return isBasePath ? location : '';
+    if (isAxiosError(e)) {
+      const location = e.response?.headers?.location;
+      const isBasePath = RegExp(/^\/\w{3}$/).test(location);
+      return isBasePath ? location : '';
+    }
+
+    throw e;
   }
   return '';
 });
 
 init().catch(e => {
-  if (e.response) {
-    console.log(
-      JSON.stringify({ request: e.config, response: e.response.data }, null, 2)
+  if (e instanceof AbortError) {
+    console.error(e.message);
+  } else if (isAxiosError(e)) {
+    console.error(
+      `${e.config.method?.toUpperCase() || 'GET'} ${e.config.url} (Code: ${
+        e.response?.status
+      })`
     );
-    return;
-  }
 
-  console.log(e);
+    if (e.response) {
+      console.error(
+        JSON.stringify(
+          { request: e.config, response: e.response.data },
+          null,
+          2
+        )
+      );
+    }
+  } else {
+    console.error(e);
+  }
 });
 
 async function init() {
+  const version = await getKibanaVersion();
+  console.log(`Connected to Kibana ${version}`);
+
+  const isKibanaLocal = KIBANA_BASE_URL.startsWith('http://localhost');
+
   // kibana.index must be different from `.kibana`
-  if (KIBANA_INDEX === '.kibana') {
+  if (isKibanaLocal && KIBANA_INDEX === '.kibana') {
     console.log(
       'kibana.dev.yml: Please use a custom "kibana.index". Example: "kibana.index: .kibana-john"'
     );
     return;
   }
 
-  if (!KIBANA_INDEX.startsWith('.kibana')) {
+  if (isKibanaLocal && !KIBANA_INDEX.startsWith('.kibana')) {
     console.log(
       'kibana.dev.yml: "kibana.index" must be prefixed with `.kibana`. Example: "kibana.index: .kibana-john"'
     );
     return;
   }
 
-  if (TASK_MANAGER_INDEX && !TASK_MANAGER_INDEX.startsWith('.kibana')) {
+  if (
+    isKibanaLocal &&
+    TASK_MANAGER_INDEX &&
+    !TASK_MANAGER_INDEX.startsWith('.kibana')
+  ) {
     console.log(
       'kibana.dev.yml: "xpack.task_manager.index" must be prefixed with `.kibana`. Example: "xpack.task_manager.index: .kibana-task-manager-john"'
     );
     return;
   }
 
-  if (!GITHUB_USERNAME) {
+  if (!KIBANA_ROLE_SUFFIX) {
     console.log(
-      'Please specify your github username with `--username <username>` '
+      'Please specify a unique suffix that will be added to your roles with `--role-suffix <suffix>` '
     );
     return;
   }
@@ -95,8 +120,8 @@ async function init() {
     return;
   }
 
-  const KIBANA_READ_ROLE = `kibana_read_${GITHUB_USERNAME}`;
-  const KIBANA_WRITE_ROLE = `kibana_write_${GITHUB_USERNAME}`;
+  const KIBANA_READ_ROLE = `kibana_read_${KIBANA_ROLE_SUFFIX}`;
+  const KIBANA_WRITE_ROLE = `kibana_write_${KIBANA_ROLE_SUFFIX}`;
 
   // create roles
   await createRole({ roleName: KIBANA_READ_ROLE, privilege: 'read' });
@@ -132,16 +157,18 @@ async function isSecurityEnabled() {
 }
 
 async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
-  const basePath = await getKibanaBasePath();
-  const { data } = await axios.request({
+  const kibanaBasePath = await getKibanaBasePath();
+  const reqOptions = {
     ...options,
-    baseURL: KIBANA_BASE_URL + basePath,
+    baseURL: KIBANA_BASE_URL + kibanaBasePath,
     auth: {
       username: ELASTICSEARCH_USERNAME,
       password: ELASTICSEARCH_PASSWORD
     },
     headers: { 'kbn-xsrf': 'true', ...options.headers }
-  });
+  };
+
+  const { data } = await axios.request(reqOptions);
   return data;
 }
 
@@ -222,10 +249,8 @@ async function getUser(username: string) {
       url: `/internal/security/users/${username}`
     });
   } catch (e) {
-    const err = e as AxiosError;
-
     // return empty if user doesn't exist
-    if (err.response?.status === 404) {
+    if (isAxiosError(e) && e.response?.status === 404) {
       return null;
     }
 
@@ -240,13 +265,51 @@ async function getRole(roleName: string) {
       url: `/api/security/role/${roleName}`
     });
   } catch (e) {
-    const err = e as AxiosError;
-
     // return empty if role doesn't exist
-    if (err.response?.status === 404) {
+    if (isAxiosError(e) && e.response?.status === 404) {
       return null;
     }
 
     throw e;
+  }
+}
+
+async function getKibanaVersion() {
+  try {
+    const res: { version: { number: number } } = await callKibana({
+      method: 'GET',
+      url: `/api/status`
+    });
+    return res.version.number;
+  } catch (e) {
+    if (isAxiosError(e)) {
+      switch (e.response?.status) {
+        case 401:
+          throw new AbortError(
+            `Could not access Kibana with the provided credentials. Username: "${e.config.auth?.username}". Password: "${e.config.auth?.password}"`
+          );
+
+        case 404:
+          throw new AbortError(
+            `Could not get version on ${e.config.url} (Code: 404)`
+          );
+
+        default:
+          throw new AbortError(
+            `Cannot access Kibana on ${e.config.baseURL}. Please specify Kibana with: "--kibana-url <url>"`
+          );
+      }
+    }
+    throw e;
+  }
+}
+
+function isAxiosError(e: AxiosError | Error): e is AxiosError {
+  return 'isAxiosError' in e;
+}
+
+class AbortError extends Error {
+  constructor(message: string) {
+    super(message);
   }
 }

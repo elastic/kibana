@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { useContext, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { DonutChartLegend } from './donut_chart_legend';
-import { UptimeSettingsContext } from '../../../contexts';
+import { UptimeThemeContext } from '../../../contexts';
 
 interface DonutChartProps {
   down: number;
@@ -18,12 +19,21 @@ interface DonutChartProps {
   width: number;
 }
 
+export const GreenCheckIcon = styled(EuiIcon)`
+  height: 42px;
+  width: 42px;
+  color: #017d73;
+  top: 51px;
+  left: 51px;
+  position: absolute;
+`;
+
 export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
   const chartElement = useRef<SVGSVGElement | null>(null);
 
   const {
     colors: { danger, gray },
-  } = useContext(UptimeSettingsContext);
+  } = useContext(UptimeThemeContext);
 
   let upCount = up;
   if (up === 0 && down === 0) {
@@ -32,15 +42,20 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
   useEffect(() => {
     if (chartElement.current !== null) {
       // we must remove any existing paths before painting
-      d3.selectAll('g').remove();
+      d3.select(chartElement.current)
+        .selectAll('g')
+        .remove();
+
       const svgElement = d3
         .select(chartElement.current)
         .append('g')
         .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
       const color = d3.scale
         .ordinal()
         .domain(['up', 'down'])
         .range([gray, danger]);
+
       const pieGenerator = d3.layout
         .pie()
         .value(({ value }: any) => value)
@@ -68,12 +83,13 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
         )
         .attr('fill', (d: any) => color(d.data.key));
     }
-  }, [chartElement.current, upCount, down]);
+  }, [danger, down, gray, height, upCount, width]);
+
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         <svg
-          aria-label={i18n.translate('xpack.uptime.donutChart.ariaLabel', {
+          aria-label={i18n.translate('xpack.uptime.snapshot.donutChart.ariaLabel', {
             defaultMessage:
               'Pie chart showing the current status. {down} of {total} monitors are down.',
             values: { down, total: up + down },
@@ -82,6 +98,8 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
           width={width}
           height={height}
         />
+        {/* When all monitors are up we show green check icon in middle of donut to indicate, all is well */}
+        {down === 0 && <GreenCheckIcon className="greenCheckIcon" type="checkInCircleFilled" />}
       </EuiFlexItem>
       <EuiFlexItem>
         <DonutChartLegend down={down} up={up} />

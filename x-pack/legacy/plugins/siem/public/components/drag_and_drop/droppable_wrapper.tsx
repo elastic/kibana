@@ -5,8 +5,8 @@
  */
 
 import { rgba } from 'polished';
-import * as React from 'react';
-import { Droppable } from 'react-beautiful-dnd';
+import React from 'react';
+import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 interface Props {
@@ -16,6 +16,7 @@ interface Props {
   isDropDisabled?: boolean;
   type?: string;
   render?: ({ isDraggingOver }: { isDraggingOver: boolean }) => React.ReactNode;
+  renderClone?: DraggableChildrenFn;
 }
 
 const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string }>`
@@ -49,7 +50,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
   > div.timeline-drop-area {
     background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
     .provider-item-filter-container div:first-child{
-      // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
+      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
       transform: none !important;
     }
     .drop-and-provider-timeline {
@@ -68,7 +69,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       background-color: ${props.theme.eui.euiColorLightShade};
     }
     + div {
-      // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
+      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
       display: none !important;
     }
   }
@@ -79,7 +80,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       display: none;
     }
     & + div {
-      // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
+      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
       display: none !important;
     }
   }
@@ -94,12 +95,14 @@ export const DroppableWrapper = React.memo<Props>(
     isDropDisabled = false,
     type,
     render = null,
+    renderClone,
   }) => (
     <Droppable
       isDropDisabled={isDropDisabled}
       droppableId={droppableId}
       direction={'horizontal'}
       type={type}
+      renderClone={renderClone}
     >
       {(provided, snapshot) => (
         <ReactDndDropTarget

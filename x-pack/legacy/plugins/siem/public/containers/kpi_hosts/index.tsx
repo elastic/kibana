@@ -7,12 +7,12 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
-import chrome from 'ui/chrome';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
+import { useUiSetting } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
@@ -28,15 +28,11 @@ export interface KpiHostsArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface KpiHostsReducer {
-  isInspected: boolean;
-}
-
 export interface KpiHostsProps extends QueryTemplateProps {
   children: (args: KpiHostsArgs) => React.ReactNode;
 }
 
-const KpiHostsComponentQuery = React.memo<KpiHostsProps & KpiHostsReducer>(
+const KpiHostsComponentQuery = React.memo<KpiHostsProps & PropsFromRedux>(
   ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
     <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
       query={kpiHostsQuery}
@@ -51,7 +47,7 @@ const KpiHostsComponentQuery = React.memo<KpiHostsProps & KpiHostsReducer>(
           to: endDate!,
         },
         filterQuery: createFilter(filterQuery),
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
         inspect: isInspected,
       }}
     >
@@ -82,4 +78,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const KpiHostsQuery = connect(makeMapStateToProps)(KpiHostsComponentQuery);
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const KpiHostsQuery = connector(KpiHostsComponentQuery);

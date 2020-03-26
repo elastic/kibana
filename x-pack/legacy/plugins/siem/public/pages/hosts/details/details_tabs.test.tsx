@@ -4,27 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { MemoryRouter } from 'react-router-dom';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { mockIndexPattern } from '../../../mock/index_pattern';
 import { TestProviders } from '../../../mock/test_providers';
-import { mockUiSettings } from '../../../mock/ui_settings';
 import { HostDetailsTabs } from './details_tabs';
-import { SetAbsoluteRangeDatePicker } from './types';
+import { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
-
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
-
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-}));
+import { useMountAppended } from '../../../utils/use_mount_appended';
+import { getHostDetailsPageFilters } from './helpers';
 
 jest.mock('../../../containers/source', () => ({
   indicesExistOrDataTemporarilyUnavailable: () => true,
@@ -44,6 +36,10 @@ jest.mock('../../../components/query_bar', () => ({
   QueryBar: () => null,
 }));
 
+const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
+jest.mock('use-resize-observer/polyfilled');
+mockUseResizeObserver.mockImplementation(() => ({}));
+
 describe('body', () => {
   const scenariosMap = {
     authentications: 'AuthenticationsQueryTabBody',
@@ -51,7 +47,25 @@ describe('body', () => {
     uncommonProcesses: 'UncommonProcessQueryTabBody',
     anomalies: 'AnomaliesQueryTabBody',
     events: 'EventsQueryTabBody',
+    alerts: 'HostAlertsQueryTabBody',
   };
+
+  const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');
+
+  const filterQuery = JSON.stringify({
+    bool: {
+      must: [],
+      filter: [{ match_all: {} }, { match_phrase: { 'host.name': { query: 'host-1' } } }],
+      should: [],
+      must_not: [],
+    },
+  });
+
+  const componentProps: Record<string, Partial<HostDetailsTabsProps>> = {
+    events: { pageFilters: mockHostDetailsPageFilters },
+    alerts: { pageFilters: mockHostDetailsPageFilters },
+  };
+  const mount = useMountAppended();
 
   Object.entries(scenariosMap).forEach(([path, componentName]) =>
     test(`it should pass expected object properties to ${componentName}`, () => {
@@ -62,13 +76,14 @@ describe('body', () => {
               from={0}
               isInitializing={false}
               detailName={'host-1'}
-              setQuery={() => {}}
+              setQuery={jest.fn()}
               to={0}
               setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={mockIndexPattern}
               type={type}
-              filterQuery='{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}'
+              pageFilters={mockHostDetailsPageFilters}
+              filterQuery={filterQuery}
             />
           </MemoryRouter>
         </TestProviders>
@@ -77,8 +92,7 @@ describe('body', () => {
       // match against everything but the functions to ensure they are there as expected
       expect(wrapper.find(componentName).props()).toMatchObject({
         endDate: 0,
-        filterQuery:
-          '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}',
+        filterQuery,
         skip: false,
         startDate: 0,
         type: 'details',
@@ -102,6 +116,7 @@ describe('body', () => {
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },
         hostName: 'host-1',
+        ...(componentProps[path] != null ? componentProps[path] : []),
       });
     })
   );

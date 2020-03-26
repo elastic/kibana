@@ -2,5 +2,7 @@
   "id": "home",
   "version": "kibana",
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredPlugins": ["data", "kibanaLegacy"],
+  "optionalPlugins": ["usage_collection", "telemetry"]
 }

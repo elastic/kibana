@@ -55,6 +55,7 @@ export const oneTimelineQuery = gql`
         end
       }
       description
+      eventType
       eventIdToNoteIds {
         eventId
         note

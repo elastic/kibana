@@ -18,36 +18,25 @@
  */
 
 import { TestReport, makeTestCaseIter } from './test_report';
-import { Message } from './add_messages_to_report';
 
-export function* getMetadataIter(report: TestReport) {
+export function* getReportMessageIter(report: TestReport) {
   for (const testCase of makeTestCaseIter(report)) {
-    if (!testCase.$['metadata-json']) {
-      yield [{}, testCase];
-    } else {
-      yield [{}, JSON.parse(testCase.$['metadata-json'])];
-    }
-  }
-}
+    const metadata = testCase.$['metadata-json'] ? JSON.parse(testCase.$['metadata-json']) : {};
 
-export function getReportMessages(report: TestReport) {
-  const messages: Message[] = [];
-  for (const [metadata, testCase] of getMetadataIter(report)) {
     for (const message of metadata.messages || []) {
-      messages.push({
+      yield {
         classname: testCase.$.classname,
         name: testCase.$.name,
-        message,
-      });
+        message: String(message),
+      };
     }
 
     for (const screenshot of metadata.screenshots || []) {
-      messages.push({
+      yield {
         classname: testCase.$.classname,
         name: testCase.$.name,
         message: `Screenshot: ${screenshot.name} ${screenshot.url}`,
-      });
+      };
     }
   }
-  return messages;
 }

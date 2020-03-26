@@ -14,12 +14,15 @@ const EXPECTED_JOIN_VALUES = {
   alpha: 10,
   bravo: 3,
   charlie: 12,
-  tango: undefined
+  tango: undefined,
 };
 
 const VECTOR_SOURCE_ID = 'n1t6f';
+const CIRCLE_STYLE_LAYER_INDEX = 0;
+const FILL_STYLE_LAYER_INDEX = 2;
+const LINE_STYLE_LAYER_INDEX = 3;
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
 
@@ -36,7 +39,10 @@ export default function ({ getPageObjects, getService }) {
       async function getRequestTimestamp() {
         await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
         const requestStats = await inspector.getTableData();
-        const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
+        const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
+          requestStats,
+          'Request timestamp'
+        );
         await inspector.close();
         return requestTimestamp;
       }
@@ -79,22 +85,23 @@ export default function ({ getPageObjects, getService }) {
       const layersForVectorSource = mapboxStyle.layers.filter(mbLayer => {
         return mbLayer.id.startsWith(VECTOR_SOURCE_ID);
       });
+
       // Color is dynamically obtained from eui source lib
-      const dynamicColor = layersForVectorSource[0].paint['circle-stroke-color'];
+      const dynamicColor =
+        layersForVectorSource[CIRCLE_STYLE_LAYER_INDEX].paint['circle-stroke-color'];
 
       //circle layer for points
-      expect(layersForVectorSource[0]).to.eql(
+      expect(layersForVectorSource[CIRCLE_STYLE_LAYER_INDEX]).to.eql(
         _.set(MAPBOX_STYLES.POINT_LAYER, 'paint.circle-stroke-color', dynamicColor)
       );
 
       //fill layer
-      expect(layersForVectorSource[1]).to.eql(MAPBOX_STYLES.FILL_LAYER);
+      expect(layersForVectorSource[FILL_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.FILL_LAYER);
 
       //line layer for borders
-      expect(layersForVectorSource[2]).to.eql(
+      expect(layersForVectorSource[LINE_STYLE_LAYER_INDEX]).to.eql(
         _.set(MAPBOX_STYLES.LINE_LAYER, 'paint.line-color', dynamicColor)
       );
-
     });
 
     it('should flag only the joined features as visible', async () => {
@@ -107,7 +114,6 @@ export default function ({ getPageObjects, getService }) {
 
       expect(visibilitiesOfFeatures).to.eql([false, true, true, true]);
     });
-
 
     describe('query bar', () => {
       before(async () => {
@@ -122,11 +128,14 @@ export default function ({ getPageObjects, getService }) {
       it('should not apply query to source and apply query to join', async () => {
         await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
         const requestStats = await inspector.getTableData();
-        const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+        const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
         expect(totalHits).to.equal('3');
-        const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
         expect(hits).to.equal('0'); // aggregation requests do not return any documents
-        const indexPatternName =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Index pattern');
+        const indexPatternName = PageObjects.maps.getInspectorStatRowHit(
+          requestStats,
+          'Index pattern'
+        );
         expect(indexPatternName).to.equal('meta_for_geo_shapes*');
       });
     });
@@ -143,9 +152,9 @@ export default function ({ getPageObjects, getService }) {
       it('should apply query to join request', async () => {
         await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
         const requestStats = await inspector.getTableData();
-        const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+        const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
         expect(totalHits).to.equal('2');
-        const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
         expect(hits).to.equal('0'); // aggregation requests do not return any documents
         await inspector.close();
       });
@@ -171,8 +180,6 @@ export default function ({ getPageObjects, getService }) {
 
         expect(visibilitiesOfFeatures).to.eql([false, true, false, false]);
       });
-
-
     });
 
     describe('inspector', () => {

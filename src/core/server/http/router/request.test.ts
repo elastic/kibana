@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { RouteOptions } from 'hapi';
 import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
+import { schema } from '@kbn/config-schema';
 
 describe('KibanaRequest', () => {
   describe('get all headers', () => {
@@ -62,6 +64,209 @@ describe('KibanaRequest', () => {
         custom: 'one',
         authorization: 'token',
       });
+    });
+  });
+
+  describe('isSytemApi property', () => {
+    it('is false when no kbn-system-request header is set', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemRequest).toBe(false);
+    });
+
+    it('is true when kbn-system-request header is set to true', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one', 'kbn-system-request': 'true' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemRequest).toBe(true);
+    });
+
+    it('is false when kbn-system-request header is set to false', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one', 'kbn-system-request': 'false' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemRequest).toBe(false);
+    });
+
+    // Remove support for kbn-system-api header in 8.x. Only used by legacy platform.
+    it('is false when no kbn-system-api header is set', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemRequest).toBe(false);
+    });
+
+    it('is true when kbn-system-api header is set to true', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one', 'kbn-system-api': 'true' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemRequest).toBe(true);
+    });
+
+    it('is false when kbn-system-api header is set to false', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one', 'kbn-system-api': 'false' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemRequest).toBe(false);
+    });
+  });
+
+  describe('route.options.authRequired property', () => {
+    it('handles required auth: undefined', () => {
+      const auth: RouteOptions['auth'] = undefined;
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe(true);
+    });
+    it('handles required auth: false', () => {
+      const auth: RouteOptions['auth'] = false;
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe(false);
+    });
+    it('handles required auth: { mode: "required" }', () => {
+      const auth: RouteOptions['auth'] = { mode: 'required' };
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe(true);
+    });
+
+    it('handles required auth: { mode: "optional" }', () => {
+      const auth: RouteOptions['auth'] = { mode: 'optional' };
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe('optional');
+    });
+
+    it('handles required auth: { mode: "try" } as "optional"', () => {
+      const auth: RouteOptions['auth'] = { mode: 'try' };
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+
+      expect(kibanaRequest.route.options.authRequired).toBe('optional');
+    });
+
+    it('throws on auth: strategy name', () => {
+      const auth: RouteOptions['auth'] = 'session';
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+
+      expect(() => KibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
+        `"unexpected authentication options: \\"session\\" for route: /"`
+      );
+    });
+
+    it('throws on auth: { mode: unexpected mode }', () => {
+      const auth: RouteOptions['auth'] = { mode: undefined };
+      const request = httpServerMock.createRawRequest({
+        route: {
+          settings: {
+            auth,
+          },
+        },
+      });
+
+      expect(() => KibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
+        `"unexpected authentication options: {} for route: /"`
+      );
+    });
+  });
+
+  describe('RouteSchema type inferring', () => {
+    it('should work with config-schema', () => {
+      const body = Buffer.from('body!');
+      const request = {
+        ...httpServerMock.createRawRequest({
+          params: { id: 'params' },
+          query: { search: 'query' },
+        }),
+        payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
+      } as any;
+      const kibanaRequest = KibanaRequest.from(request, {
+        params: schema.object({ id: schema.string() }),
+        query: schema.object({ search: schema.string() }),
+        body: schema.buffer(),
+      });
+      expect(kibanaRequest.params).toStrictEqual({ id: 'params' });
+      expect(kibanaRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string
+      expect(kibanaRequest.query).toStrictEqual({ search: 'query' });
+      expect(kibanaRequest.query.search.toUpperCase()).toEqual('QUERY'); // infers it's a string
+      expect(kibanaRequest.body).toEqual(body);
+      expect(kibanaRequest.body.byteLength).toBeGreaterThan(0); // infers it's a buffer
+    });
+
+    it('should work with ValidationFunction', () => {
+      const body = Buffer.from('body!');
+      const request = {
+        ...httpServerMock.createRawRequest({
+          params: { id: 'params' },
+          query: { search: 'query' },
+        }),
+        payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
+      } as any;
+      const kibanaRequest = KibanaRequest.from(request, {
+        params: schema.object({ id: schema.string() }),
+        query: schema.object({ search: schema.string() }),
+        body: (data, { ok, badRequest }) => {
+          if (Buffer.isBuffer(data)) {
+            return ok(data);
+          } else {
+            return badRequest('It should be a Buffer', []);
+          }
+        },
+      });
+      expect(kibanaRequest.params).toStrictEqual({ id: 'params' });
+      expect(kibanaRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string
+      expect(kibanaRequest.query).toStrictEqual({ search: 'query' });
+      expect(kibanaRequest.query.search.toUpperCase()).toEqual('QUERY'); // infers it's a string
+      expect(kibanaRequest.body).toEqual(body);
+      expect(kibanaRequest.body.byteLength).toBeGreaterThan(0); // infers it's a buffer
     });
   });
 });

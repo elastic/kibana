@@ -28,7 +28,7 @@ export function Chart(timelionPanels) {
       interval: '=', // Required for formatting x-axis ticks
       rerenderTrigger: '=',
     },
-    link: function ($scope, $elem) {
+    link: function($scope, $elem) {
       let panelScope = $scope.$new(true);
 
       function render() {
@@ -37,7 +37,7 @@ export function Chart(timelionPanels) {
         if (!$scope.seriesList) return;
 
         $scope.seriesList.render = $scope.seriesList.render || {
-          type: 'timechart'
+          type: 'timechart',
         };
 
         const panelSchema = timelionPanels.get($scope.seriesList.render.type);
@@ -61,6 +61,6 @@ export function Chart(timelionPanels) {
       }
 
       $scope.$watchGroup(['seriesList', 'rerenderTrigger'], render);
-    }
+    },
   };
 }

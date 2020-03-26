@@ -7,7 +7,7 @@
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 
-uiModules.get('monitoring/hacks').run((monitoringUiEnabled) => {
+uiModules.get('monitoring/hacks').run(monitoringUiEnabled => {
   if (monitoringUiEnabled) {
     return;
   }

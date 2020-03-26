@@ -12,7 +12,7 @@ import {
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
   APM_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID
+  LOGSTASH_SYSTEM_ID,
 } from '../../../common/constants';
 
 const SCENARIOS = [
@@ -21,59 +21,59 @@ const SCENARIOS = [
     data: {
       totalUniqueInstanceCount: 0,
       detected: {
-        mightExist: false
-      }
-    }
+        mightExist: false,
+      },
+    },
   },
   {
     name: 'only detectable instances',
     data: {
       totalUniqueInstanceCount: 0,
       detected: {
-        mightExist: true
-      }
-    }
+        mightExist: true,
+      },
+    },
   },
   {
     name: 'all migrated',
     data: {
       totalUniqueInstanceCount: 1,
-      totalUniqueFullyMigratedCount: 1
-    }
+      totalUniqueFullyMigratedCount: 1,
+    },
   },
   {
     name: 'all partially migrated',
     data: {
       totalUniqueInstanceCount: 1,
-      totalUniquePartiallyMigratedCount: 1
-    }
+      totalUniquePartiallyMigratedCount: 1,
+    },
   },
   {
     name: 'all internally collected',
     data: {
       totalUniqueInstanceCount: 1,
       totalUniquePartiallyMigratedCount: 0,
-      totalUniqueFullyMigratedCount: 0
-    }
+      totalUniqueFullyMigratedCount: 0,
+    },
   },
 ];
 
 const PRODUCTS = [
   {
-    name: ELASTICSEARCH_SYSTEM_ID
+    name: ELASTICSEARCH_SYSTEM_ID,
   },
   {
-    name: KIBANA_SYSTEM_ID
+    name: KIBANA_SYSTEM_ID,
   },
   {
-    name: LOGSTASH_SYSTEM_ID
+    name: LOGSTASH_SYSTEM_ID,
   },
   {
-    name: BEATS_SYSTEM_ID
+    name: BEATS_SYSTEM_ID,
   },
   {
-    name: APM_SYSTEM_ID
-  }
+    name: APM_SYSTEM_ID,
+  },
 ];
 
 describe('setupMode ListingCallOut', () => {
@@ -82,10 +82,7 @@ describe('setupMode ListingCallOut', () => {
       for (const { name } of PRODUCTS) {
         it(`should render for ${name}`, () => {
           const component = shallow(
-            <ListingCallOut
-              setupModeData={scenario.data}
-              productName={name}
-            />
+            <ListingCallOut setupModeData={scenario.data} productName={name} />
           );
           expect(component).toMatchSnapshot();
         });
@@ -101,7 +98,7 @@ describe('setupMode ListingCallOut', () => {
         productName={ELASTICSEARCH_SYSTEM_ID}
         customRenderer={() => ({
           shouldRender: true,
-          componentToRender: MyComponent
+          componentToRender: MyComponent,
         })}
       />
     );

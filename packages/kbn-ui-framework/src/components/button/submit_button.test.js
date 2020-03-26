@@ -21,20 +21,14 @@ import React from 'react';
 import { render, shallow } from 'enzyme';
 import sinon from 'sinon';
 
-import {
-  BUTTON_TYPES,
-  KuiSubmitButton,
-} from './button';
+import { BUTTON_TYPES, KuiSubmitButton } from './button';
 
 describe('KuiSubmitButton', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
-      const $button = render(
-        <KuiSubmitButton />
-      );
+      const $button = render(<KuiSubmitButton />);
 
-      expect($button)
-        .toMatchSnapshot();
+      expect($button).toMatchSnapshot();
     });
 
     test('HTML attributes are rendered', () => {
@@ -47,8 +41,7 @@ describe('KuiSubmitButton', () => {
         />
       );
 
-      expect($button)
-        .toMatchSnapshot();
+      expect($button).toMatchSnapshot();
     });
   });
 
@@ -66,14 +59,9 @@ describe('KuiSubmitButton', () => {
 
     describe('children', () => {
       test('is rendered as value', () => {
-        const $button = render(
-          <KuiSubmitButton>
-            Hello
-          </KuiSubmitButton>
-        );
+        const $button = render(<KuiSubmitButton>Hello</KuiSubmitButton>);
 
-        expect($button)
-          .toMatchSnapshot();
+        expect($button).toMatchSnapshot();
       });
     });
 
@@ -81,9 +69,7 @@ describe('KuiSubmitButton', () => {
       test(`isn't called upon instantiation`, () => {
         const onClickHandler = sinon.stub();
 
-        shallow(
-          <KuiSubmitButton onClick={onClickHandler} />
-        );
+        shallow(<KuiSubmitButton onClick={onClickHandler} />);
 
         sinon.assert.notCalled(onClickHandler);
       });
@@ -91,9 +77,7 @@ describe('KuiSubmitButton', () => {
       test('is called when the button is clicked', () => {
         const onClickHandler = sinon.stub();
 
-        const $button = shallow(
-          <KuiSubmitButton onClick={onClickHandler} />
-        );
+        const $button = shallow(<KuiSubmitButton onClick={onClickHandler} />);
 
         $button.simulate('click');
 

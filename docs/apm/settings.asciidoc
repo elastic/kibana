@@ -1,0 +1,18 @@
+// Do not link directly to this page.
+// Link to the anchor in `/docs/settings/apm-settings.asciidoc` instead.
+[[apm-settings-in-kibana]]
+=== APM settings in Kibana
+
+You do not need to configure any settings to use the APM app. It is enabled by default.
+
+[float]
+[[apm-indices-settings]]
+==== APM Indices
+
+include::./../settings/apm-settings.asciidoc[tag=apm-indices-settings]
+
+[float]
+[[general-apm-settings]]
+==== General APM settings
+
+include::./../settings/apm-settings.asciidoc[tag=general-apm-settings]

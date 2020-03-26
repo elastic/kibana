@@ -24,6 +24,12 @@ export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
       validate: {
         body: WorkpadSchema,
       },
+      options: {
+        body: {
+          maxBytes: 26214400,
+          accepts: ['application/json'],
+        },
+      },
     },
     catchErrorHandler(async (context, request, response) => {
       if (!request.body) {

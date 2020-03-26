@@ -26,9 +26,9 @@ export const TestKbnServerConfig = {
   },
   users: [
     {
-      username: 'kibana_user',
+      username: 'kibana_admin',
       password: 'x-pack-test-password',
-      roles: ['kibana_user'],
+      roles: ['kibana_admin'],
     },
   ],
 };

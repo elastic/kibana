@@ -25,10 +25,10 @@ export function getListBreadcrumbs() {
     MANAGEMENT_BREADCRUMB,
     {
       text: i18n.translate('kbn.management.indexPatterns.listBreadcrumb', {
-        defaultMessage: 'Index patterns'
+        defaultMessage: 'Index patterns',
       }),
-      href: '#/management/kibana/index_patterns'
-    }
+      href: '#/management/kibana/index_patterns',
+    },
   ];
 }
 
@@ -37,10 +37,10 @@ export function getCreateBreadcrumbs() {
     ...getListBreadcrumbs(),
     {
       text: i18n.translate('kbn.management.indexPatterns.createBreadcrumb', {
-        defaultMessage: 'Create index pattern'
+        defaultMessage: 'Create index pattern',
       }),
-      href: '#/management/kibana/index_pattern'
-    }
+      href: '#/management/kibana/index_pattern',
+    },
   ];
 }
 
@@ -51,8 +51,8 @@ export function getEditBreadcrumbs($route) {
     ...getListBreadcrumbs(),
     {
       text: indexPattern.title,
-      href: `#/management/kibana/index_patterns/${indexPattern.id}`
-    }
+      href: `#/management/kibana/index_patterns/${indexPattern.id}`,
+    },
   ];
 }
 
@@ -62,8 +62,8 @@ export function getEditFieldBreadcrumbs($route) {
   return [
     ...getEditBreadcrumbs($route),
     {
-      text: fieldName
-    }
+      text: fieldName,
+    },
   ];
 }
 
@@ -72,8 +72,8 @@ export function getCreateFieldBreadcrumbs($route) {
     ...getEditBreadcrumbs($route),
     {
       text: i18n.translate('kbn.management.indexPatterns.createFieldBreadcrumb', {
-        defaultMessage: 'Create field'
-      })
-    }
+        defaultMessage: 'Create field',
+      }),
+    },
   ];
 }

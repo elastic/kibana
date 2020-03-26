@@ -19,11 +19,7 @@
 
 import { Transform } from 'stream';
 
-import {
-  createPromiseFromStreams,
-  createSplitStream,
-  createMapStream,
-} from './streams';
+import { createPromiseFromStreams, createSplitStream, createMapStream } from './streams';
 
 // creates a stream that skips empty lines unless they are followed by
 // another line, preventing the empty lines produced by splitStream
@@ -43,7 +39,7 @@ function skipLastEmptyLineStream() {
       } else {
         return cb(null, line);
       }
-    }
+    },
   });
 }
 

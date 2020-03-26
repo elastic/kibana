@@ -20,11 +20,9 @@
 import 'angular';
 import '../chrome';
 import '../config';
-import '../es';
 import '../notify';
 import '../private';
 import '../promises';
-import '../modals';
 import '../state_management/app_state';
 import '../state_management/global_state';
 import '../style_compile';

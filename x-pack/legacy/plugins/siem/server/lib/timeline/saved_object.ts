@@ -6,8 +6,8 @@
 
 import { getOr } from 'lodash/fp';
 
-import { SavedObjectsFindOptions } from 'src/core/server';
-
+import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import {
   ResponseTimeline,
   PageInfoTimeline,
@@ -15,16 +15,15 @@ import {
   ResponseFavoriteTimeline,
   TimelineResult,
 } from '../../graphql/types';
-import { FrameworkRequest, internalFrameworkRequest } from '../framework';
+import { FrameworkRequest } from '../framework';
+import { Note } from '../note/saved_object';
 import { NoteSavedObject } from '../note/types';
 import { PinnedEventSavedObject } from '../pinned_event/types';
-
-import { SavedTimeline, TimelineSavedObject } from './types';
-import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
-import { timelineSavedObjectType } from './saved_object_mappings';
-import { pickSavedTimeline } from './pick_saved_timeline';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
+import { pickSavedTimeline } from './pick_saved_timeline';
+import { timelineSavedObjectType } from './saved_object_mappings';
+import { SavedTimeline, TimelineSavedObject } from './types';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
@@ -68,8 +67,8 @@ export class Timeline {
     request: FrameworkRequest,
     timelineId: string | null
   ): Promise<ResponseFavoriteTimeline> {
-    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
-    const fullName = getOr(null, 'credentials.fullname', request[internalFrameworkRequest].auth);
+    const userName = request.user?.username ?? UNAUTHENTICATED_USER;
+    const fullName = request.user?.full_name ?? '';
     try {
       let timeline: SavedTimeline = {};
       if (timelineId != null) {
@@ -139,34 +138,31 @@ export class Timeline {
     timeline: SavedTimeline
   ): Promise<ResponseTimeline> {
     const savedObjectsClient = request.context.core.savedObjects.client;
-
     try {
       if (timelineId == null) {
         // Create new timeline
+        const newTimeline = convertSavedObjectToSavedTimeline(
+          await savedObjectsClient.create(
+            timelineSavedObjectType,
+            pickSavedTimeline(timelineId, timeline, request.user)
+          )
+        );
         return {
           code: 200,
           message: 'success',
-          timeline: convertSavedObjectToSavedTimeline(
-            await savedObjectsClient.create(
-              timelineSavedObjectType,
-              pickSavedTimeline(
-                timelineId,
-                timeline,
-                request[internalFrameworkRequest].auth || null
-              )
-            )
-          ),
+          timeline: newTimeline,
         };
       }
       // Update Timeline
       await savedObjectsClient.update(
         timelineSavedObjectType,
         timelineId,
-        pickSavedTimeline(timelineId, timeline, request[internalFrameworkRequest].auth || null),
+        pickSavedTimeline(timelineId, timeline, request.user),
         {
           version: version || undefined,
         }
       );
+
       return {
         code: 200,
         message: 'success',
@@ -217,7 +213,7 @@ export class Timeline {
   }
 
   private async getSavedTimeline(request: FrameworkRequest, timelineId: string) {
-    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
+    const userName = request.user?.username ?? UNAUTHENTICATED_USER;
 
     const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
@@ -234,7 +230,7 @@ export class Timeline {
   }
 
   private async getAllSavedTimeline(request: FrameworkRequest, options: SavedObjectsFindOptions) {
-    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
+    const userName = request.user?.username ?? UNAUTHENTICATED_USER;
     const savedObjectsClient = request.context.core.savedObjects.client;
     if (options.searchFields != null && options.searchFields.includes('favorite.keySearch')) {
       options.search = `${options.search != null ? options.search : ''} ${
@@ -276,7 +272,7 @@ export const convertStringToBase64 = (text: string): string => Buffer.from(text)
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
 
-const timelineWithReduxProperties = (
+export const timelineWithReduxProperties = (
   notes: NoteSavedObject[],
   pinnedEvents: PinnedEventSavedObject[],
   timeline: TimelineSavedObject,
@@ -284,7 +280,9 @@ const timelineWithReduxProperties = (
 ): TimelineSavedObject => ({
   ...timeline,
   favorite:
-    timeline.favorite != null ? timeline.favorite.filter(fav => fav.userName === userName) : [],
+    timeline.favorite != null && userName != null
+      ? timeline.favorite.filter(fav => fav.userName === userName)
+      : [],
   eventIdToNoteIds: notes.filter(note => note.eventId != null),
   noteIds: notes
     .filter(note => note.eventId == null && note.noteId != null)

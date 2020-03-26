@@ -23,7 +23,11 @@ import classNames from 'classnames';
 
 export const KuiBarSection = ({ children, className, ...rest }) => {
   const classes = classNames('kuiBarSection', className);
-  return <div className={classes} {...rest} >{children}</div>;
+  return (
+    <div className={classes} {...rest}>
+      {children}
+    </div>
+  );
 };
 KuiBarSection.propTypes = {
   children: PropTypes.node,

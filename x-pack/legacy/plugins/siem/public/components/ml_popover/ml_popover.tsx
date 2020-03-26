@@ -7,17 +7,13 @@
 import { EuiButtonEmpty, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useContext, useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import styled from 'styled-components';
-import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 
-import { DEFAULT_KBN_VERSION } from '../../../common/constants';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
-import { errorToToaster } from '../ml/api/error_to_toaster';
+import { useKibana } from '../../lib/kibana';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
-import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
-import { useStateToaster } from '../toasters';
+import { errorToToaster, useStateToaster } from '../toasters';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
 import { filterJobs } from './helpers';
 import { useSiemJobs } from './hooks/use_siem_jobs';
@@ -28,6 +24,7 @@ import { PopoverDescription } from './popover_description';
 import * as i18n from './translations';
 import { JobsFilters, JobSummary, SiemJob } from './types';
 import { UpgradeContents } from './upgrade_contents';
+import { useMlCapabilities } from './hooks/use_ml_capabilities';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
@@ -98,10 +95,10 @@ export const MlPopover = React.memo(() => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const [isLoadingSiemJobs, siemJobs] = useSiemJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
-  const capabilities = useContext(MlCapabilitiesContext);
+  const capabilities = useMlCapabilities();
+  const docLinks = useKibana().services.docLinks;
 
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
   const enableDatafeed = async (job: SiemJob, latestTimestampMs: number, enable: boolean) => {
@@ -114,7 +111,6 @@ export const MlPopover = React.memo(() => {
           indexPatternName: job.defaultIndexPattern,
           jobIdErrorFilter: [job.id],
           groups: job.groups,
-          kbnVersion,
         });
       } catch (error) {
         errorToToaster({ title: i18n.CREATE_JOB_FAILURE, error, dispatchToaster });
@@ -132,14 +128,14 @@ export const MlPopover = React.memo(() => {
     if (enable) {
       const startTime = Math.max(latestTimestampMs, maxStartTime);
       try {
-        await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], kbnVersion, start: startTime });
+        await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], start: startTime });
       } catch (error) {
         track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
         errorToToaster({ title: i18n.START_JOB_FAILURE, error, dispatchToaster });
       }
     } else {
       try {
-        await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`], kbnVersion });
+        await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] });
       } catch (error) {
         track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
         errorToToaster({ title: i18n.STOP_JOB_FAILURE, error, dispatchToaster });
@@ -226,7 +222,7 @@ export const MlPopover = React.memo(() => {
                     values={{
                       mlDocs: (
                         <a
-                          href={`${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/machine-learning.html`}
+                          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${docLinks.DOC_LINK_VERSION}/machine-learning.html`}
                           rel="noopener noreferrer"
                           target="_blank"
                         >

@@ -8,7 +8,6 @@ import _ from 'lodash';
 import { RGBAImage } from './image_utils';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
-
   const mbStyle = mbMap.getStyle();
 
   const mbLayerIdsToRemove = [];
@@ -20,7 +19,7 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
       mbLayerIdsToRemove.push(mbLayer.id);
     }
   });
-  mbLayerIdsToRemove.forEach((mbLayerId) => mbMap.removeLayer(mbLayerId));
+  mbLayerIdsToRemove.forEach(mbLayerId => mbMap.removeLayer(mbLayerId));
 
   const mbSourcesToRemove = [];
   for (const mbSourceId in mbStyle.sources) {
@@ -34,7 +33,6 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
     }
   }
   mbSourcesToRemove.forEach(mbSourceId => mbMap.removeSource(mbSourceId));
-
 }
 
 /**
@@ -44,11 +42,9 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
  * @param layerList
  */
 export function syncLayerOrderForSingleLayer(mbMap, layerList) {
-
   if (!layerList || layerList.length === 0) {
     return;
   }
-
 
   const mbLayers = mbMap.getStyle().layers.slice();
   const layerIds = mbLayers.map(mbLayer => {
@@ -59,7 +55,9 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
   const currentLayerOrderLayerIds = _.uniq(layerIds);
 
   const newLayerOrderLayerIdsUnfiltered = layerList.map(l => l.getId());
-  const newLayerOrderLayerIds = newLayerOrderLayerIdsUnfiltered.filter(layerId => currentLayerOrderLayerIds.includes(layerId));
+  const newLayerOrderLayerIds = newLayerOrderLayerIdsUnfiltered.filter(layerId =>
+    currentLayerOrderLayerIds.includes(layerId)
+  );
 
   let netPos = 0;
   let netNeg = 0;
@@ -72,8 +70,9 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
   if (netPos === 0 && netNeg === 0) {
     return;
   }
-  const movedLayerId = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
-    (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
+  const movedLayerId =
+    (netPos >= netNeg && movementArr.find(l => l.movement < 0).id) ||
+    (netPos < netNeg && movementArr.find(l => l.movement > 0).id);
   const nextLayerIdx = newLayerOrderLayerIds.findIndex(layerId => layerId === movedLayerId) + 1;
 
   let nextMbLayerId;
@@ -94,7 +93,6 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
       mbMap.moveLayer(mbLayerId, nextMbLayerId);
     }
   });
-
 }
 
 function getImageData(img) {
@@ -112,12 +110,14 @@ function getImageData(img) {
 export async function loadSpriteSheetImageData(imgUrl) {
   return new Promise((resolve, reject) => {
     const image = new Image();
-    image.crossOrigin = 'Anonymous';
-    image.onload = (el) => {
+    if (isCrossOriginUrl(imgUrl)) {
+      image.crossOrigin = 'Anonymous';
+    }
+    image.onload = el => {
       const imgData = getImageData(el.currentTarget);
       resolve(imgData);
     };
-    image.onerror = (e) =>{
+    image.onerror = e => {
       reject(e);
     };
     image.src = imgUrl;
@@ -143,4 +143,14 @@ export function addSpriteSheetToMapFromImageData(json, imgData, mbMap) {
 export async function addSpritesheetToMap(json, imgUrl, mbMap) {
   const imgData = await loadSpriteSheetImageData(imgUrl);
   addSpriteSheetToMapFromImageData(json, imgData, mbMap);
+}
+
+function isCrossOriginUrl(url) {
+  const a = window.document.createElement('a');
+  a.href = url;
+  return (
+    a.protocol !== window.document.location.protocol ||
+    a.host !== window.document.location.host ||
+    a.port !== window.document.location.port
+  );
 }

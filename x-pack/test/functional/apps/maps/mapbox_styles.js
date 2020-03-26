@@ -6,202 +6,165 @@
 
 export const MAPBOX_STYLES = {
   POINT_LAYER: {
-    'id': 'n1t6f_circle',
-    'type': 'circle',
-    'source': 'n1t6f',
-    'minzoom': 0,
-    'maxzoom': 24,
-    'filter': [
+    id: 'n1t6f_circle',
+    type: 'circle',
+    source: 'n1t6f',
+    minzoom: 0,
+    maxzoom: 24,
+    filter: [
       'all',
-      [
-        '==',
-        ['get', '__kbn_isvisibleduetojoin__'],
-        true
-      ],
-      [
-        'any',
-        [
-          '==',
-          [
-            'geometry-type'
-          ],
-          'Point'
-        ],
-        [
-          '==',
-          [
-            'geometry-type'
-          ],
-          'MultiPoint'
-        ]
-      ]
+      ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
+      ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']],
     ],
-    'layout': {
-      'visibility': 'visible'
-    },
-    'paint': {
+    layout: { visibility: 'visible' },
+    paint: {
       'circle-color': [
         'interpolate',
-        [
-          'linear'
-        ],
+        ['linear'],
         [
           'coalesce',
           [
-            'feature-state',
-            '__kbn__dynamic____kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name__fillColor'
+            'case',
+            [
+              '==',
+              ['feature-state', '__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name'],
+              null,
+            ],
+            2,
+            [
+              'max',
+              [
+                'min',
+                [
+                  'to-number',
+                  [
+                    'feature-state',
+                    '__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name',
+                  ],
+                ],
+                12,
+              ],
+              3,
+            ],
           ],
-          -1
+          2,
         ],
-        -1,
+        2,
         'rgba(0,0,0,0)',
-        0,
+        3,
         '#f7faff',
-        0.125,
+        4.125,
         '#ddeaf7',
-        0.25,
+        5.25,
         '#c5daee',
-        0.375,
+        6.375,
         '#9dc9e0',
-        0.5,
+        7.5,
         '#6aadd5',
-        0.625,
+        8.625,
         '#4191c5',
-        0.75,
+        9.75,
         '#2070b4',
-        0.875,
-        '#072f6b'
+        10.875,
+        '#072f6b',
       ],
       'circle-opacity': 0.75,
-      /* 'circle-stroke-color': '' */ // Obtained dynamically
+      'circle-stroke-color': '#41937c',
       'circle-stroke-opacity': 0.75,
       'circle-stroke-width': 1,
-      'circle-radius': 10
-    }
+      'circle-radius': 10,
+    },
   },
   FILL_LAYER: {
-    'id': 'n1t6f_fill',
-    'type': 'fill',
-    'source': 'n1t6f',
-    'minzoom': 0,
-    'maxzoom': 24,
-    'filter': [
+    id: 'n1t6f_fill',
+    type: 'fill',
+    source: 'n1t6f',
+    minzoom: 0,
+    maxzoom: 24,
+    filter: [
       'all',
-      [
-        '==',
-        ['get', '__kbn_isvisibleduetojoin__'],
-        true
-      ],
-      [
-        'any',
-        [
-          '==',
-          [
-            'geometry-type'
-          ],
-          'Polygon'
-        ],
-        [
-          '==',
-          [
-            'geometry-type'
-          ],
-          'MultiPolygon'
-        ]
-      ]
+      ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
+      ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']],
     ],
-    'layout': {
-      'visibility': 'visible'
-    },
-    'paint': {
+    layout: { visibility: 'visible' },
+    paint: {
       'fill-color': [
         'interpolate',
-        [
-          'linear'
-        ],
+        ['linear'],
         [
           'coalesce',
           [
-            'feature-state',
-            '__kbn__dynamic____kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name__fillColor'
+            'case',
+            [
+              '==',
+              ['feature-state', '__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name'],
+              null,
+            ],
+            2,
+            [
+              'max',
+              [
+                'min',
+                [
+                  'to-number',
+                  [
+                    'feature-state',
+                    '__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name',
+                  ],
+                ],
+                12,
+              ],
+              3,
+            ],
           ],
-          -1
+          2,
         ],
-        -1,
+        2,
         'rgba(0,0,0,0)',
-        0,
+        3,
         '#f7faff',
-        0.125,
+        4.125,
         '#ddeaf7',
-        0.25,
+        5.25,
         '#c5daee',
-        0.375,
+        6.375,
         '#9dc9e0',
-        0.5,
+        7.5,
         '#6aadd5',
-        0.625,
+        8.625,
         '#4191c5',
-        0.75,
+        9.75,
         '#2070b4',
-        0.875,
-        '#072f6b'
+        10.875,
+        '#072f6b',
       ],
-      'fill-opacity': 0.75
-    }
-
+      'fill-opacity': 0.75,
+    },
   },
   LINE_LAYER: {
-    'id': 'n1t6f_line',
-    'type': 'line',
-    'source': 'n1t6f',
-    'minzoom': 0,
-    'maxzoom': 24,
-    'filter': [
+    id: 'n1t6f_line',
+    type: 'line',
+    source: 'n1t6f',
+    minzoom: 0,
+    maxzoom: 24,
+    filter: [
       'all',
-      [
-        '==',
-        ['get', '__kbn_isvisibleduetojoin__'],
-        true
-      ],
+      ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
       [
         'any',
-        [
-          '==',
-          [
-            'geometry-type'
-          ],
-          'Polygon'
-        ],
-        [
-          '==',
-          [
-            'geometry-type'
-          ],
-          'MultiPolygon'
-        ],
-        [
-          '==',
-          [
-            'geometry-type'
-          ],
-          'LineString'
-        ],
-        [
-          '==',
-          [
-            'geometry-type'
-          ],
-          'MultiLineString'
-        ]
-      ]
+        ['==', ['geometry-type'], 'Polygon'],
+        ['==', ['geometry-type'], 'MultiPolygon'],
+        ['==', ['geometry-type'], 'LineString'],
+        ['==', ['geometry-type'], 'MultiLineString'],
+      ],
     ],
-    'layout': {
-      'visibility': 'visible'
+    layout: {
+      visibility: 'visible',
     },
-    'paint': {
+    paint: {
       /* 'line-color': '' */ // Obtained dynamically
       'line-opacity': 0.75,
-      'line-width': 1
-    }
-  }
+      'line-width': 1,
+    },
+  },
 };

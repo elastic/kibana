@@ -21,8 +21,7 @@ import { clone, get } from 'lodash';
 import { resolve } from 'url';
 
 // eslint-disable-next-line import/no-default-export
-export default function (chrome, internals) {
-
+export default function(chrome, internals) {
   if (get(internals, 'app.navLink.url')) {
     internals.app.navLink.url = resolve(window.location.href, internals.app.navLink.url);
   }
@@ -35,9 +34,10 @@ export default function (chrome, internals) {
   } catch (error) {
     throw new Error(
       'Kibana requires access to sessionStorage, and it looks like ' +
-      'your browser is restricting it. If you\'re ' +
-      'using Safari with private browsing enabled, you can solve this ' +
-      'problem by disabling private browsing, or by using another browser.');
+        "your browser is restricting it. If you're " +
+        'using Safari with private browsing enabled, you can solve this ' +
+        'problem by disabling private browsing, or by using another browser.'
+    );
   }
 
   /**
@@ -48,36 +48,36 @@ export default function (chrome, internals) {
    *   than one app installed.
    */
 
-  chrome.setShowAppsLink = function (val) {
+  chrome.setShowAppsLink = function(val) {
     internals.showAppsLink = !!val;
     return chrome;
   };
 
-  chrome.getShowAppsLink = function () {
+  chrome.getShowAppsLink = function() {
     return internals.showAppsLink == null ? internals.nav.length > 1 : internals.showAppsLink;
   };
 
-  chrome.getKibanaVersion = function () {
+  chrome.getKibanaVersion = function() {
     return internals.version;
   };
 
-  chrome.getApp = function () {
+  chrome.getApp = function() {
     return clone(internals.app);
   };
 
-  chrome.getAppTitle = function () {
+  chrome.getAppTitle = function() {
     return get(internals, ['app', 'title']);
   };
 
-  chrome.getAppUrl = function () {
+  chrome.getAppUrl = function() {
     return get(internals, ['app', 'navLink', 'url']);
   };
 
-  chrome.getLastUrlFor = function (appId) {
+  chrome.getLastUrlFor = function(appId) {
     return internals.appUrlStore.getItem(`appLastUrl:${appId}`);
   };
 
-  chrome.setLastUrlFor = function (appId, url) {
+  chrome.setLastUrlFor = function(appId, url) {
     internals.appUrlStore.setItem(`appLastUrl:${appId}`, url);
   };
 }

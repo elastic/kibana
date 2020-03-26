@@ -19,30 +19,26 @@
 
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import {
   Axis,
   Chart,
   Position,
   Settings,
-  getAxisId,
-  getGroupId,
-  DARK_THEME,
-  LIGHT_THEME,
-  getAnnotationId,
   AnnotationDomainTypes,
   LineAnnotation,
   TooltipType,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-
-import { timezoneProvider } from 'ui/vis/lib/timezone';
+import { getTimezone } from '../../../lib/get_timezone';
 import { eventBus, ACTIVE_CURSOR } from '../../lib/active_cursor';
-import chrome from 'ui/chrome';
+import { getUISettings } from '../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
+import { getTheme, getChartClasses } from './utils/theme';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -60,7 +56,8 @@ const handleCursorUpdate = cursor => {
 };
 
 export const TimeSeries = ({
-  isDarkMode,
+  darkMode,
+  backgroundColor,
   showGrid,
   legend,
   legendPosition,
@@ -75,7 +72,7 @@ export const TimeSeries = ({
   const chartRef = useRef();
   const updateCursor = (_, cursor) => {
     if (chartRef.current) {
-      chartRef.current.dispatchExternalCursorEvent(cursor);
+      chartRef.current.dispatchExternalPointerEvent(cursor);
     }
   };
 
@@ -88,30 +85,36 @@ export const TimeSeries = ({
   }, []); // eslint-disable-line
 
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
-  const uiSettings = chrome.getUiSettingsClient();
-  const timeZone = timezoneProvider(uiSettings)();
+  const uiSettings = getUISettings();
+  const timeZone = getTimezone(uiSettings);
   const hasBarChart = series.some(({ bars }) => bars.show);
 
+  // compute the theme based on the bg color
+  const theme = getTheme(darkMode, backgroundColor);
+  // apply legend style change if bgColor is configured
+  const classes = classNames('tvbVisTimeSeries', getChartClasses(backgroundColor));
+
   return (
-    <Chart ref={chartRef} renderer="canvas" className="tvbVisTimeSeries">
+    <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
         showLegend={legend}
+        showLegendExtra={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrush}
         animateData={false}
-        onCursorUpdate={handleCursorUpdate}
+        onPointerUpdate={handleCursorUpdate}
         theme={
           hasBarChart
             ? {}
             : {
-              crosshair: {
-                band: {
-                  fill: '#F00',
+                crosshair: {
+                  band: {
+                    fill: '#F00',
+                  },
                 },
-              },
-            }
+              }
         }
-        baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
+        baseTheme={theme}
         tooltip={{
           snap: true,
           type: TooltipType.VerticalCursor,
@@ -126,7 +129,7 @@ export const TimeSeries = ({
         return (
           <LineAnnotation
             key={id}
-            annotationId={getAnnotationId(id)}
+            id={id}
             domainType={AnnotationDomainTypes.XDomain}
             dataValues={dataValues}
             marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
@@ -152,6 +155,8 @@ export const TimeSeries = ({
             stack,
             points,
             useDefaultGroupDomain,
+            y1AccessorFormat,
+            y0AccessorFormat,
           },
           sortIndex
         ) => {
@@ -178,6 +183,8 @@ export const TimeSeries = ({
                 enableHistogramMode={enableHistogramMode}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
+                y1AccessorFormat={y1AccessorFormat}
+                y0AccessorFormat={y0AccessorFormat}
               />
             );
           }
@@ -202,6 +209,8 @@ export const TimeSeries = ({
                 enableHistogramMode={enableHistogramMode}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
+                y1AccessorFormat={y1AccessorFormat}
+                y0AccessorFormat={y0AccessorFormat}
               />
             );
           }
@@ -213,8 +222,8 @@ export const TimeSeries = ({
       {yAxis.map(({ id, groupId, position, tickFormatter, domain, hide }) => (
         <Axis
           key={groupId}
-          groupId={getGroupId(groupId)}
-          id={getAxisId(id)}
+          groupId={groupId}
+          id={id}
           position={position}
           domain={domain}
           hide={hide}
@@ -225,7 +234,7 @@ export const TimeSeries = ({
       ))}
 
       <Axis
-        id={getAxisId('bottom')}
+        id="bottom"
         position={Position.Bottom}
         title={xAxisLabel}
         tickFormat={xAxisFormatter}
@@ -243,7 +252,8 @@ TimeSeries.defaultProps = {
 };
 
 TimeSeries.propTypes = {
-  isDarkMode: PropTypes.bool,
+  darkMode: PropTypes.bool,
+  backgroundColor: PropTypes.string,
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,

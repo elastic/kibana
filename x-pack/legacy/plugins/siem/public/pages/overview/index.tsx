@@ -6,8 +6,8 @@
 
 import React, { memo } from 'react';
 
-import { OverviewComponent } from './overview';
+import { StatefulOverview } from './overview';
 
-export const Overview = memo(() => <OverviewComponent />);
+export const Overview = memo(() => <StatefulOverview />);
 
 Overview.displayName = 'Overview';

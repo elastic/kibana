@@ -32,12 +32,22 @@ export {
 export { SimpleSavedObject } from './simple_saved_object';
 export { SavedObjectsStart, SavedObjectsService } from './saved_objects_service';
 export {
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
+} from '../../server/types';
+
+export {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsMigrationVersion,
-} from '../../server/types';
+} from '../../types';

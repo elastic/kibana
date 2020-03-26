@@ -9,7 +9,6 @@ import sinon from 'sinon';
 import { callClusterFactory } from '../call_cluster_factory';
 
 describe('callClusterFactory', () => {
-
   let mockServer;
   let mockCluster;
 
@@ -20,7 +19,12 @@ describe('callClusterFactory', () => {
     };
     mockServer = {
       plugins: {
-        elasticsearch: { getCluster: sinon.stub().withArgs('admin').returns(mockCluster) }
+        elasticsearch: {
+          getCluster: sinon
+            .stub()
+            .withArgs('admin')
+            .returns(mockCluster),
+        },
       },
       log() {},
     };
@@ -44,8 +48,8 @@ describe('callClusterFactory', () => {
     it('returns a method that wraps callWithRequest', async () => {
       const mockReq = {
         headers: {
-          authorization: 'Basic dSQzcm5AbTM6cEAkJHcwcmQ=' // u$3rn@m3:p@$$w0rd
-        }
+          authorization: 'Basic dSQzcm5AbTM6cEAkJHcwcmQ=', // u$3rn@m3:p@$$w0rd
+        },
       };
       const callCluster = callClusterFactory(mockServer).getCallClusterWithReq(mockReq);
 
@@ -54,7 +58,7 @@ describe('callClusterFactory', () => {
 
       expect(mockCluster.callWithInternalUser.called).to.be(false);
       expect(mockCluster.callWithRequest.calledOnce).to.be(true);
-      const [ req, method ] = mockCluster.callWithRequest.getCall(0).args;
+      const [req, method] = mockCluster.callWithRequest.getCall(0).args;
       expect(req).to.be(mockReq);
       expect(method).to.be('search');
     });
@@ -69,7 +73,7 @@ describe('callClusterFactory', () => {
 
       expect(mockCluster.callWithRequest.called).to.be(false);
       expect(mockCluster.callWithInternalUser.calledOnce).to.be(true);
-      const [ method ] = mockCluster.callWithInternalUser.getCall(0).args;
+      const [method] = mockCluster.callWithInternalUser.getCall(0).args;
       expect(method).to.eql('search');
     });
   });

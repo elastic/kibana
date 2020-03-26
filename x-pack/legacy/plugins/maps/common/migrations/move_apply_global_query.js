@@ -5,11 +5,7 @@
  */
 
 import _ from 'lodash';
-import {
-  ES_GEO_GRID,
-  ES_PEW_PEW,
-  ES_SEARCH,
-} from '../constants';
+import { ES_GEO_GRID, ES_PEW_PEW, ES_SEARCH } from '../constants';
 
 function isEsSource(layerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
@@ -24,8 +20,7 @@ export function moveApplyGlobalQueryToSources({ attributes }) {
   }
 
   const layerList = JSON.parse(attributes.layerListJSON);
-  layerList.forEach((layerDescriptor) => {
-
+  layerList.forEach(layerDescriptor => {
     const applyGlobalQuery = _.get(layerDescriptor, 'applyGlobalQuery', true);
     delete layerDescriptor.applyGlobalQuery;
 
@@ -41,7 +36,6 @@ export function moveApplyGlobalQueryToSources({ attributes }) {
         }
       });
     }
-
   });
 
   return {

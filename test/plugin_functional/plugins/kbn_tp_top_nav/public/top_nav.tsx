@@ -18,23 +18,11 @@
  */
 
 import React from 'react';
-import {
-  setup as navSetup,
-  start as navStart,
-} from '../../../../../src/legacy/core_plugins/navigation/public/legacy';
-
-const customExtension = {
-  id: 'registered-prop',
-  label: 'Registered Button',
-  description: 'Registered Demo',
-  run() {},
-  testId: 'demoRegisteredNewButton',
-};
-
-navSetup.registerMenuItem(customExtension);
+import './initialize';
+import { npStart } from 'ui/new_platform';
 
 export const AppWithTopNav = () => {
-  const { TopNavMenu } = navStart.ui;
+  const { TopNavMenu } = npStart.plugins.navigation.ui;
   const config = [
     {
       id: 'new',

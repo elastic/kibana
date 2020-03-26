@@ -32,7 +32,7 @@ class VisualizationStub {
   }
 
   render() {
-    renderPromise = new Promise((resolve) => {
+    renderPromise = new Promise(resolve => {
       this.el.textContent = this.vis.params.markdown;
       resolve();
     });
@@ -45,11 +45,12 @@ describe('<VisualizationChart/>', () => {
   const vis = {
     type: {
       title: 'Test Visualization',
-      visualization: VisualizationStub
+      visualization: VisualizationStub,
     },
     params: {
-      markdown: 'This is a test of the [markdown](http://daringfireball.net/projects/markdown) vis.'
-    }
+      markdown:
+        'This is a test of the [markdown](http://daringfireball.net/projects/markdown) vis.',
+    },
   };
 
   it('should render initial html', () => {

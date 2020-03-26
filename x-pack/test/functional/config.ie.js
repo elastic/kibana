@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const defaultConfig = await readConfigFile(require.resolve('./config'));
 
   return {
@@ -54,27 +51,24 @@ export default async function ({ readConfigFile }) {
     },
 
     junit: {
-      reportName: 'Internet Explorer UI Functional X-Pack Tests'
+      reportName: 'Internet Explorer UI Functional X-Pack Tests',
     },
 
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'telemetry:optIn': false,
         'state:storeInSessionStorage': true,
       },
     },
-
 
     kbnTestServer: {
       ...defaultConfig.get('kbnTestServer'),
       serverArgs: [
         ...defaultConfig.get('kbnTestServer.serverArgs'),
         '--csp.strict=false',
+        '--telemetry.optIn=false',
       ],
     },
-
-
   };
 }

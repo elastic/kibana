@@ -13,7 +13,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -49,6 +49,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
+      resolve(__dirname, './apps/api_keys'),
       resolve(__dirname, './apps/index_patterns'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
@@ -56,6 +57,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
+      resolve(__dirname, './apps/endpoint'),
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -68,7 +70,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [],
+      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
     },
 
     kbnTestServer: {
@@ -86,6 +88,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
+        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -131,23 +134,14 @@ export default async function ({ readConfigFile }) {
         pathname: '/',
       },
       infraOps: {
-        pathname: '/app/infra',
+        pathname: '/app/metrics',
       },
       infraLogs: {
-        pathname: '/app/infra',
-        hash: '/logs',
+        pathname: '/app/logs',
       },
       canvas: {
         pathname: '/app/canvas',
         hash: '/',
-      },
-      code: {
-        pathname: '/app/code',
-        hash: '/admin',
-      },
-      codeSearch: {
-        pathname: '/app/code',
-        hash: '/search',
       },
       uptime: {
         pathname: '/app/uptime',
@@ -158,9 +152,17 @@ export default async function ({ readConfigFile }) {
       ml: {
         pathname: '/app/ml',
       },
+      roleMappings: {
+        pathname: '/app/kibana',
+        hash: '/management/security/role_mappings',
+      },
       rollupJob: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/',
+      },
+      apiKeys: {
+        pathname: '/app/kibana',
+        hash: '/management/security/api_keys/',
       },
       licenseManagement: {
         pathname: '/app/kibana',
@@ -195,8 +197,11 @@ export default async function ({ readConfigFile }) {
       },
       transform: {
         pathname: '/app/kibana/',
-        hash: '/management/elasticsearch/transform'
-      }
+        hash: '/management/elasticsearch/transform',
+      },
+      endpoint: {
+        pathname: '/app/endpoint',
+      },
     },
 
     // choose where esArchiver should load archives from
@@ -211,6 +216,25 @@ export default async function ({ readConfigFile }) {
 
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests',
+    },
+    security: {
+      roles: {
+        test_logstash_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['logstash*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+      },
+      defaultRoles: ['superuser'],
     },
   };
 }

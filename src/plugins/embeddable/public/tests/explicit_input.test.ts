@@ -26,14 +26,16 @@ import {
 import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
-import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../lib/test_samples/embeddables/hello_world/hello_world_embeddable';
-import { HelloWorldEmbeddableFactory } from '../lib/test_samples/embeddables/hello_world/hello_world_embeddable_factory';
+import {
+  HELLO_WORLD_EMBEDDABLE,
+  HelloWorldEmbeddableFactory,
+} from '../../../../../examples/embeddable_examples/public';
 import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
 import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 // eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
-import { esFilters } from '../../../../plugins/data/public';
+import { esFilters, Filter } from '../../../../plugins/data/public';
 
 const { setup, doStart, coreStart, uiActions } = testPlugin(
   coreMock.createSetup(),
@@ -47,10 +49,10 @@ const factory = new SlowContactCardEmbeddableFactory({
   execAction: uiActions.executeTriggerActions,
 });
 setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, factory);
-setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
-  const derivedFilter: esFilters.Filter = {
+  const derivedFilter: Filter = {
     $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },

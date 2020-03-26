@@ -4,37 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable } from '@elastic/eui';
-import * as React from 'react';
+import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
 import {
+  ActionTimelineToShow,
   DeleteTimelines,
   OnOpenTimeline,
   OnSelectionChange,
   OnTableChange,
   OnToggleShowNotes,
   OpenTimelineResult,
+  EnableExportTimelineDownloader,
+  OnOpenDeleteTimelineModal,
 } from '../types';
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
 
+// there are a number of type mismatches across this file
+const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
+
 const BasicTable = styled(EuiBasicTable)`
   .euiTableCellContent {
-    animation: none; //Prevents applying max-height from animation
+    animation: none; /* Prevents applying max-height from animation */
   }
 
   .euiTableRow-isExpandedRow .euiTableCellContent__text {
-    width: 100%; //Fixes collapsing nested flex content in IE11
+    width: 100%; /* Fixes collapsing nested flex content in IE11 */
   }
 `;
 BasicTable.displayName = 'BasicTable';
 
-const getExtendedColumnsIfEnabled = (showExtendedColumnsAndActions: boolean) =>
-  showExtendedColumnsAndActions ? [...getExtendedColumns()] : [];
+const getExtendedColumnsIfEnabled = (showExtendedColumns: boolean) =>
+  showExtendedColumns ? [...getExtendedColumns()] : [];
 
 /**
  * Returns the column definitions (passed as the `columns` prop to
@@ -42,39 +48,53 @@ const getExtendedColumnsIfEnabled = (showExtendedColumnsAndActions: boolean) =>
  * view, and the full view shown in the `All Timelines` view of the
  * `Timelines` page
  */
-const getTimelinesTableColumns = ({
+
+export const getTimelinesTableColumns = ({
+  actionTimelineToShow,
   deleteTimelines,
+  enableExportTimelineDownloader,
   itemIdToExpandedNotesRowMap,
+  onOpenDeleteTimelineModal,
   onOpenTimeline,
   onToggleShowNotes,
-  showExtendedColumnsAndActions,
+  showExtendedColumns,
 }: {
+  actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
+  enableExportTimelineDownloader?: EnableExportTimelineDownloader;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+  onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
+  onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
-  showExtendedColumnsAndActions: boolean;
-}) => [
-  ...getCommonColumns({
-    itemIdToExpandedNotesRowMap,
-    onOpenTimeline,
-    onToggleShowNotes,
-    showExtendedColumnsAndActions,
-  }),
-  ...getExtendedColumnsIfEnabled(showExtendedColumnsAndActions),
-  ...getIconHeaderColumns(),
-  ...getActionsColumns({
-    deleteTimelines,
-    onOpenTimeline,
-    showDeleteAction: showExtendedColumnsAndActions,
-  }),
-];
+  showExtendedColumns: boolean;
+}) => {
+  return [
+    ...getCommonColumns({
+      itemIdToExpandedNotesRowMap,
+      onOpenTimeline,
+      onToggleShowNotes,
+    }),
+    ...getExtendedColumnsIfEnabled(showExtendedColumns),
+    ...getIconHeaderColumns(),
+    ...getActionsColumns({
+      actionTimelineToShow,
+      deleteTimelines,
+      enableExportTimelineDownloader,
+      onOpenDeleteTimelineModal,
+      onOpenTimeline,
+    }),
+  ];
+};
 
 export interface TimelinesTableProps {
+  actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
   defaultPageSize: number;
   loading: boolean;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+  enableExportTimelineDownloader?: EnableExportTimelineDownloader;
+  onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onSelectionChange: OnSelectionChange;
   onTableChange: OnTableChange;
@@ -82,9 +102,11 @@ export interface TimelinesTableProps {
   pageIndex: number;
   pageSize: number;
   searchResults: OpenTimelineResult[];
-  showExtendedColumnsAndActions: boolean;
+  showExtendedColumns: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tableRef?: React.MutableRefObject<_EuiBasicTable<any> | undefined>;
   totalSearchResultsCount: number;
 }
 
@@ -94,10 +116,13 @@ export interface TimelinesTableProps {
  */
 export const TimelinesTable = React.memo<TimelinesTableProps>(
   ({
+    actionTimelineToShow,
     deleteTimelines,
     defaultPageSize,
     loading: isLoading,
     itemIdToExpandedNotesRowMap,
+    enableExportTimelineDownloader,
+    onOpenDeleteTimelineModal,
     onOpenTimeline,
     onSelectionChange,
     onTableChange,
@@ -105,13 +130,14 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     pageIndex,
     pageSize,
     searchResults,
-    showExtendedColumnsAndActions,
+    showExtendedColumns,
     sortField,
     sortDirection,
+    tableRef,
     totalSearchResultsCount,
   }) => {
     const pagination = {
-      hidePerPageOptions: !showExtendedColumnsAndActions,
+      hidePerPageOptions: !showExtendedColumns,
       pageIndex,
       pageSize,
       pageSizeOptions: [
@@ -124,7 +150,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
 
     const sorting = {
       sort: {
-        field: sortField,
+        field: sortField as keyof OpenTimelineResult,
         direction: sortDirection,
       },
     };
@@ -135,20 +161,24 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         !selectable ? i18n.MISSING_SAVED_OBJECT_ID : undefined,
       onSelectionChange,
     };
-
+    const basicTableProps = tableRef != null ? { ref: tableRef } : {};
     return (
       <BasicTable
         columns={getTimelinesTableColumns({
+          actionTimelineToShow,
           deleteTimelines,
           itemIdToExpandedNotesRowMap,
+          enableExportTimelineDownloader,
+          onOpenDeleteTimelineModal,
           onOpenTimeline,
+          onSelectionChange,
           onToggleShowNotes,
-          showExtendedColumnsAndActions,
+          showExtendedColumns,
         })}
         compressed
         data-test-subj="timelines-table"
         isExpandable={true}
-        isSelectable={showExtendedColumnsAndActions}
+        isSelectable={actionTimelineToShow.includes('selectable')}
         itemId="savedObjectId"
         itemIdToExpandedRowMap={itemIdToExpandedNotesRowMap}
         items={searchResults}
@@ -156,8 +186,9 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         noItemsMessage={i18n.ZERO_TIMELINES_MATCH}
         onChange={onTableChange}
         pagination={pagination}
-        selection={showExtendedColumnsAndActions ? selection : undefined}
+        selection={actionTimelineToShow.includes('selectable') ? selection : undefined}
         sorting={sorting}
+        {...basicTableProps}
       />
     );
   }

@@ -9,7 +9,6 @@ import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-// @ts-ignore
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -48,7 +47,7 @@ export default function({ getService }: FtrProviderContext) {
         .post('/_security/role_mapping/first_client_pki')
         .ca(CA_CERT)
         .send({
-          roles: ['kibana_user'],
+          roles: ['kibana_admin'],
           enabled: true,
           rules: { field: { dn: 'CN=first_client' } },
         })
@@ -90,6 +89,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
     });
 
     it('should properly set cookie and authenticate user', async () => {
@@ -107,7 +107,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(response.body).to.eql({
         username: 'first_client',
-        roles: ['kibana_user'],
+        roles: ['kibana_admin'],
         full_name: null,
         email: null,
         enabled: true,
@@ -118,6 +118,7 @@ export default function({ getService }: FtrProviderContext) {
         },
         authentication_realm: { name: 'pki1', type: 'pki' },
         lookup_realm: { name: 'pki1', type: 'pki' },
+        authentication_provider: 'pki',
       });
 
       // Cookie should be accepted.
@@ -160,6 +161,7 @@ export default function({ getService }: FtrProviderContext) {
           },
           authentication_realm: { name: 'pki1', type: 'pki' },
           lookup_realm: { name: 'pki1', type: 'pki' },
+          authentication_provider: 'pki',
         });
 
       checkCookieIsSet(request.cookie(response.headers['set-cookie'][0])!);
@@ -239,7 +241,7 @@ export default function({ getService }: FtrProviderContext) {
           .ca(CA_CERT)
           .pfx(FIRST_CLIENT_CERT)
           .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
+          .set('kbn-system-request', 'true')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -287,7 +289,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(cookies).to.have.length(1);
         checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(logoutResponse.headers.location).to.be('/logged_out');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out');
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {

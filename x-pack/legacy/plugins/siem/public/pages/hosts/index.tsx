@@ -21,14 +21,16 @@ const getHostsTabPath = (pagePath: string) =>
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
-  `${HostsTableType.events})`;
+  `${HostsTableType.events}|` +
+  `${HostsTableType.alerts})`;
 
 const getHostDetailsTabPath = (pagePath: string) =>
   `${hostDetailsPagePath}/:tabName(` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
-  `${HostsTableType.events})`;
+  `${HostsTableType.events}|` +
+  `${HostsTableType.alerts})`;
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
@@ -54,10 +56,14 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
         <Route
           strict
           path={getHostDetailsTabPath(hostsPagePath)}
-          render={props => (
+          render={({
+            match: {
+              params: { detailName },
+            },
+          }) => (
             <HostDetails
               hostDetailsPagePath={hostDetailsPagePath}
-              detailName={props.match.params.detailName}
+              detailName={detailName}
               from={from}
               to={to}
               setQuery={setQuery}

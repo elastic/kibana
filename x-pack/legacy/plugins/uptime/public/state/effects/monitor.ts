@@ -4,27 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { call, put, takeLatest, select } from 'redux-saga/effects';
-import { Action } from 'redux-actions';
+import { takeLatest } from 'redux-saga/effects';
 import {
-  FETCH_MONITOR_DETAILS,
-  FETCH_MONITOR_DETAILS_SUCCESS,
-  FETCH_MONITOR_DETAILS_FAIL,
+  getMonitorDetailsAction,
+  getMonitorDetailsActionSuccess,
+  getMonitorDetailsActionFail,
+  getMonitorLocationsAction,
+  getMonitorLocationsActionSuccess,
+  getMonitorLocationsActionFail,
 } from '../actions/monitor';
-import { fetchMonitorDetails } from '../api';
-import { getBasePath } from '../selectors';
-
-function* monitorDetailsEffect(action: Action<any>) {
-  const monitorId: string = action.payload;
-  try {
-    const basePath = yield select(getBasePath);
-    const response = yield call(fetchMonitorDetails, { monitorId, basePath });
-    yield put({ type: FETCH_MONITOR_DETAILS_SUCCESS, payload: response });
-  } catch (error) {
-    yield put({ type: FETCH_MONITOR_DETAILS_FAIL, payload: error.message });
-  }
-}
+import { fetchMonitorDetails, fetchMonitorLocations } from '../api';
+import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorDetailsEffect() {
-  yield takeLatest(FETCH_MONITOR_DETAILS, monitorDetailsEffect);
+  yield takeLatest(
+    getMonitorDetailsAction,
+    fetchEffectFactory(
+      fetchMonitorDetails,
+      getMonitorDetailsActionSuccess,
+      getMonitorDetailsActionFail
+    )
+  );
+
+  yield takeLatest(
+    getMonitorLocationsAction,
+    fetchEffectFactory(
+      fetchMonitorLocations,
+      getMonitorLocationsActionSuccess,
+      getMonitorLocationsActionFail
+    )
+  );
 }

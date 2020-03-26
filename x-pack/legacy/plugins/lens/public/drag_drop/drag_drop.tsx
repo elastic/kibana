@@ -17,9 +17,9 @@ type DroppableEvent = React.DragEvent<HTMLElement>;
 export type DropHandler = (item: unknown) => void;
 
 /**
- * The argument to the DragDrop component.
+ * The base props to the DragDrop component.
  */
-interface Props {
+interface BaseProps {
   /**
    * The CSS class(es) for the root element.
    */
@@ -50,15 +50,37 @@ interface Props {
   droppable?: boolean;
 
   /**
-   * Indicates whether or not this component is draggable.
-   */
-  draggable?: boolean;
-
-  /**
    * The optional test subject associated with this DOM element.
    */
   'data-test-subj'?: string;
 }
+
+/**
+ * The props for a draggable instance of that component.
+ */
+interface DraggableProps extends BaseProps {
+  /**
+   * Indicates whether or not this component is draggable.
+   */
+  draggable: true;
+  /**
+   * The label, which should be attached to the drag event, and which will e.g.
+   * be used if the element will be dropped into a text field.
+   */
+  label: string;
+}
+
+/**
+ * The props for a non-draggable instance of that component.
+ */
+interface NonDraggableProps extends BaseProps {
+  /**
+   * Indicates whether or not this component is draggable.
+   */
+  draggable?: false;
+}
+
+type Props = DraggableProps | NonDraggableProps;
 
 /**
  * A draggable / droppable item. Items can be both draggable and droppable at
@@ -86,7 +108,9 @@ export function DragDrop(props: Props) {
       return;
     }
 
-    e.dataTransfer.setData('text', 'dragging');
+    // We only can reach the dragStart method if the element is draggable,
+    // so we know we have DraggableProps if we reach this code.
+    e.dataTransfer.setData('text', (props as DraggableProps).label);
 
     // Chrome causes issues if you try to render from within a
     // dragStart event, so we drop a setTimeout to avoid that.

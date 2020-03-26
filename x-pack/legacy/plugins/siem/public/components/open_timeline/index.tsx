@@ -6,16 +6,17 @@
 
 import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
-
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
+import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import {
   createTimeline as dispatchCreateNewTimeline,
   updateIsLoading as dispatchUpdateIsLoading,
@@ -24,6 +25,7 @@ import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
 import {
+  ActionTimelineToShow,
   DeleteTimelines,
   EuiSearchBarQuery,
   OnDeleteSelected,
@@ -37,24 +39,24 @@ import {
   OpenTimelineResult,
   OnToggleShowNotes,
   OnDeleteOneTimeline,
-  OpenTimelineDispatchProps,
-  OpenTimelineReduxProps,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-import { timelineDefaults } from '../../store/timeline/model';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
   /** Displays open timeline in modal */
   isModal: boolean;
   closeModalTimeline?: () => void;
+  hideActions?: ActionTimelineToShow[];
+  onOpenTimeline?: (timeline: TimelineModel) => void;
 }
 
 export type OpenTimelineOwnProps = OwnProps &
-  Pick<OpenTimelineProps, 'defaultPageSize' | 'title'> &
-  OpenTimelineDispatchProps &
-  OpenTimelineReduxProps;
+  Pick<
+    OpenTimelineProps,
+    'defaultPageSize' | 'title' | 'importCompleteToggle' | 'setImportCompleteToggle'
+  > &
+  PropsFromRedux;
 
 /** Returns a collection of selected timeline ids */
 export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): string[] =>
@@ -69,15 +71,19 @@ export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): str
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
 export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   ({
-    defaultPageSize,
-    isModal = false,
-    title,
     apolloClient,
     closeModalTimeline,
+    createNewTimeline,
+    defaultPageSize,
+    hideActions = [],
+    isModal = false,
+    importCompleteToggle,
+    onOpenTimeline,
+    setImportCompleteToggle,
+    timeline,
+    title,
     updateTimeline,
     updateIsLoading,
-    timeline,
-    createNewTimeline,
   }) => {
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
@@ -212,6 +218,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         queryTimelineById({
           apolloClient,
           duplicate,
+          onOpenTimeline,
           timelineId,
           updateIsLoading,
           updateTimeline,
@@ -254,7 +261,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         sort={{ sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction }}
         onlyUserFavorite={onlyFavorites}
       >
-        {({ timelines, loading, totalCount }) => {
+        {({ timelines, loading, totalCount, refetch }) => {
           return !isModal ? (
             <OpenTimeline
               data-test-subj={'open-timeline'}
@@ -262,6 +269,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               defaultPageSize={defaultPageSize}
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+              importCompleteToggle={importCompleteToggle}
               onAddTimelinesToFavorites={undefined}
               onDeleteSelected={onDeleteSelected}
               onlyFavorites={onlyFavorites}
@@ -274,7 +282,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               pageIndex={pageIndex}
               pageSize={pageSize}
               query={search}
+              refetch={refetch}
               searchResults={timelines}
+              setImportCompleteToggle={setImportCompleteToggle}
               selectedItems={selectedItems}
               sortDirection={sortDirection}
               sortField={sortField}
@@ -286,6 +296,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               data-test-subj={'open-timeline-modal'}
               deleteTimelines={onDeleteOneTimeline}
               defaultPageSize={defaultPageSize}
+              hideActions={hideActions}
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
               onAddTimelinesToFavorites={undefined}
@@ -332,7 +343,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     show,
   }: {
     id: string;
-    columns: ColumnHeader[];
+    columns: ColumnHeaderOptions[];
     show?: boolean;
   }) => dispatch(dispatchCreateNewTimeline({ id, columns, show })),
   updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
@@ -340,7 +351,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });
 
-export const StatefulOpenTimeline = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(StatefulOpenTimelineComponent);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulOpenTimeline = connector(StatefulOpenTimelineComponent);

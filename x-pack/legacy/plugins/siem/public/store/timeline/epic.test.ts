@@ -8,7 +8,7 @@ import { TimelineModel } from './model';
 import { Direction } from '../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
@@ -85,8 +85,10 @@ describe('Epic Timeline', () => {
             ],
           },
         ],
+        deletedEventIds: [],
         description: '',
         eventIdToNoteIds: {},
+        eventType: 'all',
         highlightedDropAndProviderId: '',
         historyIds: [],
         filters: [
@@ -113,10 +115,11 @@ describe('Epic Timeline', () => {
               value: 'exists',
             },
             exists: { field: '@timestamp' },
-          } as esFilters.Filter,
+          } as Filter,
         ],
         isFavorite: false,
         isLive: false,
+        isSelectAllChecked: false,
         isLoading: false,
         isSaving: false,
         itemsPerPage: 25,
@@ -130,13 +133,17 @@ describe('Epic Timeline', () => {
           },
           filterQueryDraft: { kind: 'kuery', expression: 'endgame.user_name : "zeus" ' },
         },
+        loadingEventIds: [],
         title: 'saved',
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         dateRange: { start: 1572469587644, end: 1572555987644 },
         savedObjectId: '11169110-fc22-11e9-8ca9-072f15ce2685',
+        selectedEventIds: {},
         show: true,
+        showCheckboxes: false,
+        showRowRenderers: true,
         sort: { columnId: '@timestamp', sortDirection: Direction.desc },
         width: 1100,
         version: 'WzM4LDFd',
@@ -221,6 +228,7 @@ describe('Epic Timeline', () => {
           start: 1572469587644,
         },
         description: '',
+        eventType: 'all',
         filters: [
           {
             exists: null,

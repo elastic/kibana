@@ -9,7 +9,7 @@ import { SavedObjectsLegacyService, IClusterClient } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {
-  esClient: Pick<IClusterClient, 'callAsInternalUser'>;
+  esClient: IClusterClient;
   savedObjects: SavedObjectsLegacyService;
 }
 

@@ -27,17 +27,15 @@ import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 
 const WMS_MINZOOM = 0;
-const WMS_MAXZOOM = 22;//increase this to 22. Better for WMS
+const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
 
 export function BaseMapsVisualizationProvider(serviceSettings) {
-
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
    * @class BaseMapsVisualization
    * @constructor
    */
   return class BaseMapsVisualization {
-
     constructor(element, vis) {
       this.vis = vis;
       this._container = element;
@@ -65,28 +63,21 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
      * @param status
      * @return {Promise}
      */
-    async render(esResponse, visParams, status) {
+    async render(esResponse, visParams) {
       if (!this._kibanaMap) {
         //the visualization has been destroyed;
         return;
       }
 
       await this._mapIsLoaded;
-
-      if (status.resize) {
-        this._kibanaMap.resize();
-      }
-      if (status.params || status.aggs) {
-        this._params = visParams;
-        await this._updateParams();
-      }
+      this._kibanaMap.resize();
+      this._params = visParams;
+      await this._updateParams();
 
       if (this._hasESResponseChanged(esResponse)) {
         await this._updateData(esResponse);
       }
-      if (status.uiState) {
-        this._kibanaMap.useUiStateFromVisualization(this.vis);
-      }
+      this._kibanaMap.useUiStateFromVisualization(this.vis);
 
       await this._whenBaseLayerIsLoaded();
     }
@@ -105,8 +96,8 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
 
       this._kibanaMap = new KibanaMap(this._container, options);
-      this._kibanaMap.setMinZoom(WMS_MINZOOM);//use a default
-      this._kibanaMap.setMaxZoom(WMS_MAXZOOM);//use a default
+      this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
+      this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default
 
       this._kibanaMap.addLegendControl();
       this._kibanaMap.addFitControl();
@@ -120,7 +111,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       });
       await this._updateBaseLayer();
     }
-
 
     _tmsConfigured() {
       const { wms } = this._getMapsParams();
@@ -137,7 +127,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     }
 
     async _updateBaseLayer() {
-
       const emsTileLayerId = chrome.getInjected('emsTileLayerId', true);
 
       if (!this._kibanaMap) {
@@ -152,7 +141,9 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
           const initBasemapLayer = userConfiguredTmsLayer
             ? userConfiguredTmsLayer
             : tmsServices.find(s => s.id === emsTileLayerId.bright);
-          if (initBasemapLayer) { this._setTmsLayer(initBasemapLayer); }
+          if (initBasemapLayer) {
+            this._setTmsLayer(initBasemapLayer);
+          }
         } catch (e) {
           toastNotifications.addWarning(e.message);
           return;
@@ -173,8 +164,8 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
               minZoom: WMS_MINZOOM,
               maxZoom: WMS_MAXZOOM,
               url: mapParams.wms.url,
-              ...mapParams.wms.options
-            }
+              ...mapParams.wms.options,
+            },
           });
         } else if (this._tmsConfigured()) {
           const selectedTmsLayer = mapParams.wms.selectedTmsLayer;
@@ -196,21 +187,27 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
         isDesaturated = true;
       }
       const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
-      const meta = await serviceSettings.getAttributesForTMSLayer(tmsLayer, isDesaturated, isDarkMode);
+      const meta = await serviceSettings.getAttributesForTMSLayer(
+        tmsLayer,
+        isDesaturated,
+        isDarkMode
+      );
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;
       delete options.subdomains;
       this._kibanaMap.setBaseLayer({
         baseLayerType: 'tms',
-        options: { ...options, showZoomMessage, ...meta, }
+        options: { ...options, showZoomMessage, ...meta },
       });
     }
 
     async _updateData() {
-      throw new Error(i18n.translate('tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
-        defaultMessage: 'Child should implement this method to respond to data-update',
-      }));
+      throw new Error(
+        i18n.translate('tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
+          defaultMessage: 'Child should implement this method to respond to data-update',
+        })
+      );
     }
 
     _hasESResponseChanged(data) {
@@ -238,7 +235,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     }
 
     _whenBaseLayerIsLoaded() {
-
       if (!this._tmsConfigured()) {
         return true;
       }
@@ -247,9 +243,9 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       const interval$ = Rx.interval(10).pipe(filter(() => !this._baseLayerDirty));
       const timer$ = Rx.timer(maxTimeForBaseLayer);
 
-      return Rx.race(interval$, timer$).pipe(first()).toPromise();
-
+      return Rx.race(interval$, timer$)
+        .pipe(first())
+        .toPromise();
     }
-
   };
 }

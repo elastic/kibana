@@ -1,0 +1,458 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CustomUrlList renders a list of custom URLs 1`] = `
+<div
+  data-test-subj="mlJobEditCustomUrlsList"
+>
+  <EuiFlexGroup
+    data-test-subj="mlJobEditCustomUrlItem_0"
+    key="url_0"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={Array []}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Label"
+            id="xpack.ml.customUrlEditorList.labelLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="mlJobEditCustomUrlLabelInput_0"
+          isInvalid={false}
+          onChange={[Function]}
+          value="Show data"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="URL"
+            id="xpack.ml.customUrlEditorList.urlLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="mlJobEditCustomUrlInput_0"
+          fullWidth={true}
+          onFocus={[Function]}
+          readOnly={true}
+          value="kibana#/discover?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:e532ba80-b76f-11e8-a9dc-37914a458883,query:(language:lucene,query:'airline:\\"$airline$\\"'))"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={Array []}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Time range"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          isInvalid={false}
+          onChange={[Function]}
+          placeholder="auto"
+          value="auto"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
+      >
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              defaultMessage="Test custom URL"
+              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
+          delay="regular"
+          position="top"
+        >
+          <EuiButtonIcon
+            aria-label="Test custom URL"
+            color="primary"
+            iconType="popout"
+            onClick={[Function]}
+            size="s"
+          />
+        </EuiToolTip>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
+      >
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              defaultMessage="Delete custom URL"
+              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
+          delay="regular"
+          position="top"
+        >
+          <EuiButtonIcon
+            aria-label="Delete custom URL"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            size="s"
+          />
+        </EuiToolTip>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    data-test-subj="mlJobEditCustomUrlItem_1"
+    key="url_1"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={Array []}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Label"
+            id="xpack.ml.customUrlEditorList.labelLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="mlJobEditCustomUrlLabelInput_1"
+          isInvalid={false}
+          onChange={[Function]}
+          value="Show dashboard"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="URL"
+            id="xpack.ml.customUrlEditorList.urlLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="mlJobEditCustomUrlInput_1"
+          fullWidth={true}
+          onFocus={[Function]}
+          readOnly={true}
+          value="kibana#/dashboard/52ea8840-bbef-11e8-a04d-b1701b2b977e?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'airline:\\"$airline$\\"'))"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={Array []}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Time range"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          isInvalid={false}
+          onChange={[Function]}
+          placeholder="auto"
+          value="1h"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
+      >
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              defaultMessage="Test custom URL"
+              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
+          delay="regular"
+          position="top"
+        >
+          <EuiButtonIcon
+            aria-label="Test custom URL"
+            color="primary"
+            iconType="popout"
+            onClick={[Function]}
+            size="s"
+          />
+        </EuiToolTip>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
+      >
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              defaultMessage="Delete custom URL"
+              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
+          delay="regular"
+          position="top"
+        >
+          <EuiButtonIcon
+            aria-label="Delete custom URL"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            size="s"
+          />
+        </EuiToolTip>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    data-test-subj="mlJobEditCustomUrlItem_2"
+    key="url_2"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={Array []}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Label"
+            id="xpack.ml.customUrlEditorList.labelLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="mlJobEditCustomUrlLabelInput_2"
+          isInvalid={false}
+          onChange={[Function]}
+          value="Show airline"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="URL"
+            id="xpack.ml.customUrlEditorList.urlLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="mlJobEditCustomUrlInput_2"
+          fullWidth={true}
+          onFocus={[Function]}
+          readOnly={true}
+          value="http://airlinecodes.info/airline-code-$airline$"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={Array []}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Time range"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          isInvalid={false}
+          onChange={[Function]}
+          placeholder="auto"
+          value="auto"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
+      >
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              defaultMessage="Test custom URL"
+              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
+          delay="regular"
+          position="top"
+        >
+          <EuiButtonIcon
+            aria-label="Test custom URL"
+            color="primary"
+            iconType="popout"
+            onClick={[Function]}
+            size="s"
+          />
+        </EuiToolTip>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
+      >
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              defaultMessage="Delete custom URL"
+              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
+          delay="regular"
+          position="top"
+        >
+          <EuiButtonIcon
+            aria-label="Delete custom URL"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            size="s"
+          />
+        </EuiToolTip>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

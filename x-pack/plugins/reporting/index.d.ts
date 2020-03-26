@@ -7,7 +7,7 @@
 import {
   CoreSetup,
   CoreStart,
-  HttpServiceBase,
+  HttpSetup,
   Plugin,
   PluginInitializerContext,
   NotificationsStart,
@@ -16,7 +16,7 @@ import {
 export type JobId = string;
 export type JobStatus = 'completed' | 'pending' | 'processing' | 'failed';
 
-export type HttpService = HttpServiceBase;
+export type HttpService = HttpSetup;
 export type NotificationsService = NotificationsStart;
 
 export interface SourceJob {
@@ -57,3 +57,19 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
+
+export interface PollerOptions {
+  functionToPoll: () => Promise<any>;
+  pollFrequencyInMillis: number;
+  trailing?: boolean;
+  continuePollingOnError?: boolean;
+  pollFrequencyErrorMultiplier?: number;
+  successFunction?: (...args: any) => any;
+  errorFunction?: (error: Error) => any;
+}
+
+export interface LicenseCheckResults {
+  enableLinks: boolean;
+  showLinks: boolean;
+  message: string;
+}

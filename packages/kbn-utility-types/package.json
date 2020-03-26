@@ -13,7 +13,7 @@
     "clean": "del target"
   },
   "dependencies": {
-    "utility-types": "^3.7.0"
+    "utility-types": "^3.10.0"
   },
   "devDependencies": {
     "del-cli": "^3.0.0",

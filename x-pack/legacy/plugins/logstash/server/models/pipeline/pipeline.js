@@ -27,7 +27,7 @@ export class Pipeline {
       description: this.description,
       username: this.username,
       pipeline: this.pipeline,
-      settings: this.settings
+      settings: this.settings,
     };
 
     return json;
@@ -51,7 +51,7 @@ export class Pipeline {
       },
       username: this.username,
       pipeline: this.pipeline,
-      pipeline_settings: this.settings
+      pipeline_settings: this.settings,
     };
   }
 
@@ -62,7 +62,7 @@ export class Pipeline {
       description: downstreamPipeline.description,
       username,
       pipeline: downstreamPipeline.pipeline,
-      settings: downstreamPipeline.settings
+      settings: downstreamPipeline.settings,
     };
 
     return new Pipeline(opts);
@@ -71,9 +71,14 @@ export class Pipeline {
   // generate Pipeline object from elasticsearch response
   static fromUpstreamJSON(upstreamPipeline) {
     if (!upstreamPipeline._id) {
-      throw badRequest(i18n.translate('xpack.logstash.upstreamPipelineArgumentMustContainAnIdPropertyErrorMessage', {
-        defaultMessage: 'upstreamPipeline argument must contain an id property',
-      }));
+      throw badRequest(
+        i18n.translate(
+          'xpack.logstash.upstreamPipelineArgumentMustContainAnIdPropertyErrorMessage',
+          {
+            defaultMessage: 'upstreamPipeline argument must contain an id property',
+          }
+        )
+      );
     }
     const id = get(upstreamPipeline, '_id');
     const description = get(upstreamPipeline, '_source.description');

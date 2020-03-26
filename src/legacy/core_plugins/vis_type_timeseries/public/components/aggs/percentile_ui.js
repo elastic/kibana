@@ -107,7 +107,10 @@ class PercentilesUi extends Component {
 
           <EuiFlexItem grow={false}>
             <EuiFormLabel style={labelStyle} htmlFor={htmlId('mode')}>
-              <FormattedMessage id="visTypeTimeseries.percentile.modeLabel" defaultMessage="Mode:" />
+              <FormattedMessage
+                id="visTypeTimeseries.percentile.modeLabel"
+                defaultMessage="Mode:"
+              />
             </EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -123,12 +126,17 @@ class PercentilesUi extends Component {
 
           <EuiFlexItem style={optionsStyle} grow={false}>
             <EuiFormLabel style={labelStyle} htmlFor={htmlId('fillTo')}>
-              <FormattedMessage id="visTypeTimeseries.percentile.fillToLabel" defaultMessage="Fill to:" />
+              <FormattedMessage
+                id="visTypeTimeseries.percentile.fillToLabel"
+                defaultMessage="Fill to:"
+              />
             </EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem style={optionsStyle} grow={false}>
             <EuiFieldNumber
               id={htmlId('fillTo')}
+              min={0}
+              max={100}
               step={1}
               onChange={this.handleTextChange(model, 'percentile')}
               value={Number(model.percentile)}
@@ -137,7 +145,10 @@ class PercentilesUi extends Component {
 
           <EuiFlexItem style={optionsStyle} grow={false}>
             <EuiFormLabel style={labelStyle} htmlFor={htmlId('shade')}>
-              <FormattedMessage id="visTypeTimeseries.percentile.shadeLabel" defaultMessage="Shade (0 to 1):" />
+              <FormattedMessage
+                id="visTypeTimeseries.percentile.shadeLabel"
+                defaultMessage="Shade (0 to 1):"
+              />
             </EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem style={optionsStyle} grow={false}>

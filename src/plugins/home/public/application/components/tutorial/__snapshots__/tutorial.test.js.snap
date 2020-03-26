@@ -1,0 +1,167 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`isCloudEnabled is false should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided 1`] = `
+<EuiPage
+  restrictWidth={1200}
+>
+  <EuiPageBody>
+    <div>
+      <InjectIntl(IntroductionUI)
+        description="tutorial used to drive jest tests"
+        title="jest test tutorial"
+      />
+      <EuiSpacer />
+      <div
+        className="eui-textCenter"
+      />
+      <EuiSpacer />
+      <EuiPanel
+        paddingSize="l"
+      >
+        <InjectIntl(InstructionSetUi)
+          instructionVariants={
+            Array [
+              Object {
+                "id": "platform id",
+                "instructions": Array [
+                  Object {
+                    "title": "onPrem instructions",
+                  },
+                ],
+              },
+            ]
+          }
+          key="0"
+          offset={1}
+          onStatusCheck={[Function]}
+          paramValues={Object {}}
+          replaceTemplateStrings={[Function]}
+          setParameter={[Function]}
+          statusCheckState="NOT_CHECKED"
+          title="Instruction title"
+        />
+      </EuiPanel>
+    </div>
+  </EuiPageBody>
+</EuiPage>
+`;
+
+exports[`isCloudEnabled is false should render ON_PREM instructions with instruction toggle 1`] = `
+<EuiPage
+  restrictWidth={1200}
+>
+  <EuiPageBody>
+    <div>
+      <InjectIntl(IntroductionUI)
+        description="tutorial used to drive jest tests"
+        iconType="logoApache"
+        title="jest test tutorial"
+      />
+      <EuiSpacer />
+      <div
+        className="eui-textCenter"
+      >
+        <EuiFlexGroup
+          justifyContent="center"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButtonGroup
+              color="primary"
+              idSelected="onPrem"
+              onChange={[Function]}
+              options={
+                Array [
+                  Object {
+                    "id": "onPrem",
+                    "label": "Self managed",
+                  },
+                  Object {
+                    "id": "onPremElasticCloud",
+                    "label": "Elastic Cloud",
+                  },
+                ]
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+      <EuiSpacer />
+      <EuiPanel
+        paddingSize="l"
+      >
+        <InjectIntl(InstructionSetUi)
+          instructionVariants={
+            Array [
+              Object {
+                "id": "platform id",
+                "instructions": Array [
+                  Object {
+                    "title": "onPrem instructions",
+                  },
+                ],
+              },
+            ]
+          }
+          key="0"
+          offset={1}
+          onStatusCheck={[Function]}
+          paramValues={Object {}}
+          replaceTemplateStrings={[Function]}
+          setParameter={[Function]}
+          statusCheckState="NOT_CHECKED"
+          title="Instruction title"
+        />
+      </EuiPanel>
+    </div>
+  </EuiPageBody>
+</EuiPage>
+`;
+
+exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`] = `
+<EuiPage
+  restrictWidth={1200}
+>
+  <EuiPageBody>
+    <div>
+      <InjectIntl(IntroductionUI)
+        description="tutorial used to drive jest tests"
+        iconType="logoApache"
+        title="jest test tutorial"
+      />
+      <EuiSpacer />
+      <div
+        className="eui-textCenter"
+      />
+      <EuiSpacer />
+      <EuiPanel
+        paddingSize="l"
+      >
+        <InjectIntl(InstructionSetUi)
+          instructionVariants={
+            Array [
+              Object {
+                "id": "platform id",
+                "instructions": Array [
+                  Object {
+                    "title": "elasticCloud instructions",
+                  },
+                ],
+              },
+            ]
+          }
+          key="0"
+          offset={1}
+          onStatusCheck={[Function]}
+          paramValues={Object {}}
+          replaceTemplateStrings={[Function]}
+          setParameter={[Function]}
+          statusCheckState="NOT_CHECKED"
+          title="Instruction title"
+        />
+      </EuiPanel>
+    </div>
+  </EuiPageBody>
+</EuiPage>
+`;

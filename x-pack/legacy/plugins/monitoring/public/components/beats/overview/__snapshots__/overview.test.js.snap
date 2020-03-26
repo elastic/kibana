@@ -1,16 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Overview that overview page renders normally 1`] = `
-<EuiPage
-  restrictWidth={false}
->
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
-    <EuiPageContent
-      panelPaddingSize="l"
-    >
+<EuiPage>
+  <EuiPageBody>
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Beats Overview"
+          id="xpack.monitoring.beats.overview.heading"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
+    <EuiPageContent>
       <Stats
         stats={Array []}
       />
@@ -22,13 +24,13 @@ exports[`Overview that overview page renders normally 1`] = `
             <EuiTitle
               size="s"
             >
-              <h3>
+              <h2>
                 <FormattedMessage
                   defaultMessage="Active Beats in Last Day"
                   id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
                   values={Object {}}
                 />
-              </h3>
+              </h2>
             </EuiTitle>
             <EuiSpacer
               size="s"
@@ -66,13 +68,13 @@ exports[`Overview that overview page renders normally 1`] = `
             <EuiTitle
               size="s"
             >
-              <h3>
+              <h2>
                 <FormattedMessage
                   defaultMessage="Top 5 Beat Types in Last Day"
                   id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
                   values={Object {}}
                 />
-              </h3>
+              </h2>
             </EuiTitle>
             <EuiSpacer
               size="s"
@@ -102,13 +104,13 @@ exports[`Overview that overview page renders normally 1`] = `
             <EuiTitle
               size="s"
             >
-              <h3>
+              <h2>
                 <FormattedMessage
                   defaultMessage="Top 5 Versions in Last Day"
                   id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
                   values={Object {}}
                 />
-              </h3>
+              </h2>
             </EuiTitle>
             <EuiSpacer
               size="s"
@@ -199,16 +201,18 @@ exports[`Overview that overview page renders normally 1`] = `
 `;
 
 exports[`Overview that overview page shows a message if there is no beats data 1`] = `
-<EuiPage
-  restrictWidth={false}
->
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
-    <EuiPageContent
-      panelPaddingSize="l"
-    >
+<EuiPage>
+  <EuiPageBody>
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Beats Overview"
+          id="xpack.monitoring.beats.overview.heading"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
+    <EuiPageContent>
       <Stats
         stats={Array []}
       />

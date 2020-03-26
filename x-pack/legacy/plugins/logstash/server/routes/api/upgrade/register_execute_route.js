@@ -7,7 +7,7 @@
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { wrapUnknownError } from '../../../lib/error_wrappers';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function doesIndexExist(callWithRequest) {
   return callWithRequest('indices.exists', {
@@ -16,9 +16,8 @@ function doesIndexExist(callWithRequest) {
 }
 
 async function executeUpgrade(callWithRequest) {
-
   // If index doesn't exist yet, there is no mapping to upgrade
-  if(!await doesIndexExist(callWithRequest)) {
+  if (!(await doesIndexExist(callWithRequest))) {
     return;
   }
 
@@ -28,10 +27,10 @@ async function executeUpgrade(callWithRequest) {
       properties: {
         pipeline_settings: {
           dynamic: false,
-          type: 'object'
-        }
-      }
-    }
+          type: 'object',
+        },
+      },
+    },
   });
 }
 
@@ -41,17 +40,17 @@ export function registerExecuteRoute(server) {
   server.route({
     path: '/api/logstash/upgrade',
     method: 'POST',
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
         await executeUpgrade(callWithRequest);
         return { is_upgraded: true };
-      } catch(err) {
+      } catch (err) {
         throw wrapUnknownError(err);
       }
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

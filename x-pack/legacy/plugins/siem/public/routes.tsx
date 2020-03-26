@@ -16,13 +16,19 @@ interface RouterProps {
   history: History;
 }
 
-export const PageRouter: FC<RouterProps> = memo(({ history }) => (
+const PageRouterComponent: FC<RouterProps> = ({ history }) => (
   <ManageRoutesSpy>
     <Router history={history}>
       <Switch>
-        <Route path="/" render={() => <HomePage />} />
-        <Route render={() => <NotFoundPage />} />
+        <Route path="/">
+          <HomePage />
+        </Route>
+        <Route>
+          <NotFoundPage />
+        </Route>
       </Switch>
     </Router>
   </ManageRoutesSpy>
-));
+);
+
+export const PageRouter = memo(PageRouterComponent);

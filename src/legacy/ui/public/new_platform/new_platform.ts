@@ -16,46 +16,102 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { IScope } from 'angular';
 
-import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
-import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
-import { LegacyCoreSetup, LegacyCoreStart, App } from '../../../../core/public';
+import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
+import { createBrowserHistory } from 'history';
+import { DashboardStart } from '../../../../plugins/dashboard/public';
+import {
+  LegacyCoreSetup,
+  LegacyCoreStart,
+  App,
+  AppMountDeprecated,
+  ScopedHistory,
+} from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
+import {
+  setFieldFormats,
+  setIndexPatterns,
+  setInjectedMetadata,
+  setHttp,
+  setNotifications,
+  setOverlays,
+  setQueryService,
+  setSearchService,
+  setUiSettings,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
 import {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
-import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../../../plugins/charts/public';
 import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
-import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
+import { HomePublicPluginSetup } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
+import {
+  AdvancedSettingsSetup,
+  AdvancedSettingsStart,
+} from '../../../../plugins/advanced_settings/public';
+import { ManagementSetup, ManagementStart } from '../../../../plugins/management/public';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
+import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { TelemetryPluginSetup, TelemetryPluginStart } from '../../../../plugins/telemetry/public';
+import {
+  NavigationPublicPluginSetup,
+  NavigationPublicPluginStart,
+} from '../../../../plugins/navigation/public';
+import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
+import {
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+} from '../../../../plugins/saved_objects_management/public';
 
 export interface PluginsSetup {
+  bfetch: BfetchPublicSetup;
+  charts: ChartsPluginSetup;
   data: ReturnType<DataPlugin['setup']>;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
-  uiActions: IUiActionsSetup;
-  dev_tools: DevToolsSetup;
-  kibana_legacy: KibanaLegacySetup;
+  uiActions: UiActionsSetup;
+  navigation: NavigationPublicPluginSetup;
+  devTools: DevToolsSetup;
+  kibanaLegacy: KibanaLegacySetup;
   share: SharePluginSetup;
+  usageCollection: UsageCollectionSetup;
+  advancedSettings: AdvancedSettingsSetup;
+  management: ManagementSetup;
+  visTypeVega: VisTypeVegaSetup;
+  discover: DiscoverSetup;
+  telemetry?: TelemetryPluginSetup;
+  savedObjectsManagement: SavedObjectsManagementPluginSetup;
 }
 
 export interface PluginsStart {
+  bfetch: BfetchPublicStart;
+  charts: ChartsPluginStart;
   data: ReturnType<DataPlugin['start']>;
-  embeddable: IEmbeddableStart;
-  eui_utils: EuiUtilsStart;
+  embeddable: EmbeddableStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
-  home: HomePublicPluginStart;
   inspector: InspectorStart;
-  uiActions: IUiActionsStart;
-  dev_tools: DevToolsStart;
-  kibana_legacy: KibanaLegacyStart;
+  uiActions: UiActionsStart;
+  navigation: NavigationPublicPluginStart;
+  devTools: DevToolsStart;
+  kibanaLegacy: KibanaLegacyStart;
   share: SharePluginStart;
+  management: ManagementStart;
+  advancedSettings: AdvancedSettingsStart;
+  discover: DiscoverStart;
+  telemetry?: TelemetryPluginStart;
+  dashboard: DashboardStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export const npSetup = {
@@ -86,11 +142,26 @@ export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
 
   // Setup compatibility layer for AppService in legacy platform
   npSetup.core.application.register = legacyAppRegister;
+
+  // Services that need to be set in the legacy platform since the legacy data plugin
+  // which previously provided them has been removed.
+  setInjectedMetadata(npSetup.core.injectedMetadata);
 }
 
 export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
+
+  // Services that need to be set in the legacy platform since the legacy data plugin
+  // which previously provided them has been removed.
+  setHttp(npStart.core.http);
+  setNotifications(npStart.core.notifications);
+  setOverlays(npStart.core.overlays);
+  setUiSettings(npStart.core.uiSettings);
+  setFieldFormats(npStart.plugins.data.fieldFormats);
+  setIndexPatterns(npStart.plugins.data.indexPatterns);
+  setQueryService(npStart.plugins.data.query);
+  setSearchService(npStart.plugins.data.search);
 }
 
 /** Flag used to ensure `legacyAppRegister` is only called once. */
@@ -100,7 +171,7 @@ let legacyAppRegistered = false;
  * Exported for testing only. Use `npSetup.core.application.register` in legacy apps.
  * @internal
  */
-export const legacyAppRegister = (app: App) => {
+export const legacyAppRegister = (app: App<any>) => {
   if (legacyAppRegistered) {
     throw new Error(`core.application.register may only be called once for legacy plugins.`);
   }
@@ -111,13 +182,28 @@ export const legacyAppRegister = (app: App) => {
 
     // Root controller cannot return a Promise so use an internal async function and call it immediately
     (async () => {
-      const unmount = await app.mount(
-        { core: npStart.core },
-        { element, appBasePath: npSetup.core.http.basePath.prepend(`/app/${app.id}`) }
-      );
+      const appRoute = app.appRoute || `/app/${app.id}`;
+      const appBasePath = npSetup.core.http.basePath.prepend(appRoute);
+      const params = {
+        element,
+        appBasePath,
+        history: new ScopedHistory(
+          createBrowserHistory({ basename: npSetup.core.http.basePath.get() }),
+          appRoute
+        ),
+        onAppLeave: () => undefined,
+      };
+      const unmount = isAppMountDeprecated(app.mount)
+        ? await app.mount({ core: npStart.core }, params)
+        : await app.mount(params);
       $scope.$on('$destroy', () => {
         unmount();
       });
     })();
   });
 };
+
+function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {
+  // Mount functions with two arguments are assumed to expect deprecated `context` object.
+  return mount.length === 2;
+}

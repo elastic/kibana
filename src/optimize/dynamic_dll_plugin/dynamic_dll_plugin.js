@@ -44,7 +44,7 @@ export class DynamicDllPlugin {
 
   async init() {
     await this.dllCompiler.init();
-    this.entryPaths = await this.dllCompiler.readEntryFile();
+    this.entryPaths = await this.dllCompiler.readEntryFiles();
   }
 
   apply(compiler) {
@@ -70,12 +70,14 @@ export class DynamicDllPlugin {
   bindDllReferencePlugin(compiler) {
     const rawDllConfig = this.dllCompiler.rawDllConfig;
     const dllContext = rawDllConfig.context;
-    const dllManifestPath = this.dllCompiler.getManifestPath();
+    const dllManifestPaths = this.dllCompiler.getManifestPaths();
 
-    new webpack.DllReferencePlugin({
-      context: dllContext,
-      manifest: dllManifestPath,
-    }).apply(compiler);
+    dllManifestPaths.forEach(dllChunkManifestPath => {
+      new webpack.DllReferencePlugin({
+        context: dllContext,
+        manifest: dllChunkManifestPath,
+      }).apply(compiler);
+    });
   }
 
   registerInitBasicHooks(compiler) {
@@ -84,7 +86,10 @@ export class DynamicDllPlugin {
   }
 
   registerTasksHooks(compiler) {
-    this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Started dynamic dll plugin tasks');
+    this.logWithMetadata(
+      ['info', 'optimize:dynamic_dll_plugin'],
+      'Started dynamic dll plugin tasks'
+    );
     this.registerBeforeCompileHook(compiler);
     this.registerCompilationHook(compiler);
     this.registerDoneHook(compiler);
@@ -104,27 +109,25 @@ export class DynamicDllPlugin {
 
   registerBeforeCompileHook(compiler) {
     compiler.hooks.beforeCompile.tapPromise('DynamicDllPlugin', async ({ normalModuleFactory }) => {
-      normalModuleFactory.hooks.factory.tap(
-        'DynamicDllPlugin',
-        (actualFactory) => (params, cb) => {
-          // This is used in order to avoid the cache for DLL modules
-          // resolved from other dependencies
-          normalModuleFactory.cachePredicate = (module) => !(module.stubType === DLL_ENTRY_STUB_MODULE_TYPE);
+      normalModuleFactory.hooks.factory.tap('DynamicDllPlugin', actualFactory => (params, cb) => {
+        // This is used in order to avoid the cache for DLL modules
+        // resolved from other dependencies
+        normalModuleFactory.cachePredicate = module =>
+          !(module.stubType === DLL_ENTRY_STUB_MODULE_TYPE);
 
-          // Overrides the normalModuleFactory module creation behaviour
-          // in order to understand the modules we need to add to the DLL
-          actualFactory(params, (error, module) => {
-            if (error || !module) {
-              cb(error, module);
-            } else {
-              this.mapNormalModule(module).then(
-                (m = module) => cb(undefined, m),
-                error => cb(error)
-              );
-            }
-          });
-        }
-      );
+        // Overrides the normalModuleFactory module creation behaviour
+        // in order to understand the modules we need to add to the DLL
+        actualFactory(params, (error, module) => {
+          if (error || !module) {
+            cb(error, module);
+          } else {
+            this.mapNormalModule(module).then(
+              (m = module) => cb(undefined, m),
+              error => cb(error)
+            );
+          }
+        });
+      });
     });
   }
 
@@ -155,20 +158,26 @@ export class DynamicDllPlugin {
         const requiresMap = {};
 
         for (const module of compilation.modules) {
-
           // re-include requires for modules already handled by the dll
           if (module.delegateData) {
             const absoluteResource = path.resolve(dllContext, module.userRequest);
-            if (absoluteResource.includes('node_modules') || absoluteResource.includes('webpackShims')) {
+            if (
+              absoluteResource.includes('node_modules') ||
+              absoluteResource.includes('webpackShims')
+            ) {
               // NOTE: normalizePosixPath is been used as we only want to have posix
               // paths inside our final dll entry file
-              requiresMap[normalizePosixPath(path.relative(dllOutputPath, absoluteResource))] = true;
+              requiresMap[
+                normalizePosixPath(path.relative(dllOutputPath, absoluteResource))
+              ] = true;
             }
           }
 
           // include requires for modules that need to be added to the dll
           if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE) {
-            requiresMap[normalizePosixPath(path.relative(dllOutputPath, module.stubResource))] = true;
+            requiresMap[
+              normalizePosixPath(path.relative(dllOutputPath, module.stubResource))
+            ] = true;
           }
         }
 
@@ -183,9 +192,10 @@ export class DynamicDllPlugin {
         // we are not running over the distributable. If we are running under the watch optimizer,
         // this.forceDLLCreationFlag will only be applied in the very first execution,
         // then will be set to false
-        compilation.needsDLLCompilation = (this.afterCompilationEntryPaths !== this.entryPaths)
-          || !this.dllCompiler.dllExistsSync()
-          || (this.isToForceDLLCreation() && this.performedCompilations === 0);
+        compilation.needsDLLCompilation =
+          this.afterCompilationEntryPaths !== this.entryPaths ||
+          !this.dllCompiler.dllsExistsSync() ||
+          (this.isToForceDLLCreation() && this.performedCompilations === 0);
         this.entryPaths = this.afterCompilationEntryPaths;
 
         // Only run this info log in the first performed dll compilation
@@ -229,7 +239,10 @@ export class DynamicDllPlugin {
       if (this.forceDLLCreationFlag) {
         this.forceDLLCreationFlag = false;
       }
-      this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
+      this.logWithMetadata(
+        ['info', 'optimize:dynamic_dll_plugin'],
+        'Finished all dynamic dll plugin tasks'
+      );
     });
   }
 
@@ -302,7 +315,9 @@ export class DynamicDllPlugin {
     // Only enable this for CI builds in order to ensure
     // we have an healthy dll ecosystem.
     if (this.performedCompilations === this.maxCompilations) {
-      throw new Error('All the allowed dll compilations were already performed and one more is needed which is not possible');
+      throw new Error(
+        'All the allowed dll compilations were already performed and one more is needed which is not possible'
+      );
     }
   }
 
@@ -324,7 +339,9 @@ export class DynamicDllPlugin {
     // We need to purge the cache into the inputFileSystem
     // for every single built in previous compilation
     // that we rely in next ones.
-    mainCompiler.inputFileSystem.purge(this.dllCompiler.getManifestPath());
+    this.dllCompiler
+      .getManifestPaths()
+      .forEach(chunkDllManifestPath => mainCompiler.inputFileSystem.purge(chunkDllManifestPath));
 
     this.performedCompilations++;
 

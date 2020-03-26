@@ -106,6 +106,38 @@ describe('PluginWrapper', () => {
     expect(mockPlugin.start).toHaveBeenCalledWith(context, deps);
   });
 
+  test("`start` resolves `startDependencies` Promise after plugin's start", async () => {
+    expect.assertions(2);
+
+    const pluginStartContract = {
+      someApi: () => 'foo',
+    };
+
+    let startDependenciesResolved = false;
+    mockPluginLoader.mockResolvedValueOnce(() => ({
+      setup: jest.fn(),
+      start: async () => {
+        // Add small delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(startDependenciesResolved).toBe(false);
+        return pluginStartContract;
+      },
+    }));
+    await plugin.load(addBasePath);
+    await plugin.setup({} as any, {} as any);
+    const context = { any: 'thing' } as any;
+    const deps = { otherDep: 'value' };
+
+    // Add promise callback prior to calling `start` to ensure calls in `setup` will not resolve before `start` is
+    // called.
+    const startDependenciesCheck = plugin.startDependencies.then(res => {
+      startDependenciesResolved = true;
+      expect(res).toEqual([context, deps, pluginStartContract]);
+    });
+    await plugin.start(context, deps);
+    await startDependenciesCheck;
+  });
+
   test('`stop` fails if plugin is not setup up', async () => {
     expect(() => plugin.stop()).toThrowErrorMatchingInlineSnapshot(
       `"Plugin \\"plugin-a\\" can't be stopped since it isn't set up."`

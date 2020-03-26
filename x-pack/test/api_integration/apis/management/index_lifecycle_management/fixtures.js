@@ -14,40 +14,40 @@ export const getPolicyPayload = ({ name = getRandomString() } = {}) => ({
       actions: {
         rollover: {
           max_age: '30d',
-          max_size: '50gb'
+          max_size: '50gb',
         },
         set_priority: {
-          priority: 100
-        }
-      }
+          priority: 100,
+        },
+      },
     },
     warm: {
       actions: {
         set_priority: {
-          priority: 50
-        }
-      }
+          priority: 50,
+        },
+      },
     },
     cold: {
       min_age: '10d',
       actions: {
         set_priority: {
-          priority: 0
-        }
-      }
+          priority: 0,
+        },
+      },
     },
     delete: {
       min_age: '10d',
       actions: {
-        delete: {}
-      }
-    }
-  }
+        delete: {},
+      },
+    },
+  },
 });
 
 export const getTemplatePayload = () => ({
   index_patterns: [`${INDEX_TEMPLATE_PATTERN_PREFIX}*`],
   settings: {
-    number_of_shards: 1
+    number_of_shards: 1,
   },
 });

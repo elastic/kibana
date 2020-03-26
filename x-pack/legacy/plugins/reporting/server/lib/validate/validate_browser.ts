@@ -18,14 +18,12 @@ export const validateBrowser = async (
   logger: Logger
 ) => {
   if (browserFactory.type === BROWSER_TYPE) {
-    return browserFactory
-      .test({ viewport: { width: 800, height: 600 } }, logger)
-      .then((browser: Browser | null) => {
-        if (browser && browser.close) {
-          browser.close();
-        } else {
-          throw new Error('Could not close browser client handle!');
-        }
-      });
+    return browserFactory.test(logger).then((browser: Browser | null) => {
+      if (browser && browser.close) {
+        browser.close();
+      } else {
+        throw new Error('Could not close browser client handle!');
+      }
+    });
   }
 };

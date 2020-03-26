@@ -11,10 +11,9 @@ exports[`RuleSwitch renders correctly against snapshot 1`] = `
     <StaticSwitch
       checked={true}
       data-test-subj="rule-switch"
-      disabled={false}
       label="rule-switch"
       onChange={[Function]}
-      showLabel={false}
+      showLabel={true}
     />
   </EuiFlexItem>
 </EuiFlexGroup>

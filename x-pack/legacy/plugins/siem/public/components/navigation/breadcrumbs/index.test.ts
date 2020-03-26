@@ -3,32 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import chrome from 'ui/chrome';
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
 
 import { getBreadcrumbsForRoute, setBreadcrumbs } from '.';
 import { HostsTableType } from '../../../store/hosts/model';
-import { RouteSpyState } from '../../../utils/route/types';
+import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { TabNavigationProps } from '../tab_navigation/types';
+import { NetworkRouteType } from '../../../pages/network/navigation/types';
 
-jest.mock('ui/chrome', () => ({
-  getBasePath: () => {
-    return '<basepath>';
-  },
-  breadcrumbs: {
-    set: jest.fn(),
-  },
-  getUiSettingsClient: () => ({
-    get: jest.fn(),
-  }),
-}));
+const setBreadcrumbsMock = jest.fn();
+const chromeMock = {
+  setBreadcrumbs: setBreadcrumbsMock,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
 
-jest.mock('../../search_bar', () => ({
-  siemFilterManager: {
-    addFilters: jest.fn(),
-  },
-}));
+const mockDefaultTab = (pageName: string): SiemRouteType | undefined => {
+  switch (pageName) {
+    case 'hosts':
+      return HostsTableType.authentications;
+    case 'network':
+      return NetworkRouteType.flows;
+    default:
+      return undefined;
+  }
+};
 
 const getMockObject = (
   pageName: string,
@@ -69,7 +68,7 @@ const getMockObject = (
   pageName,
   pathName,
   search: '',
-  tabName: HostsTableType.authentications,
+  tabName: mockDefaultTab(pageName) as HostsTableType,
   query: { query: '', language: 'kuery' },
   filters: [],
   timeline: {
@@ -136,6 +135,10 @@ describe('Navigation Breadcrumbs', () => {
           href:
             '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
         },
+        {
+          text: 'Flows',
+          href: '',
+        },
       ]);
     });
 
@@ -176,7 +179,11 @@ describe('Navigation Breadcrumbs', () => {
           href:
             '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
         },
-        { text: '192.0.2.255', href: '' },
+        {
+          text: ipv4,
+          href: `#/link-to/network/ip/${ipv4}/source?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+        },
+        { text: 'Flows', href: '' },
       ]);
     });
 
@@ -189,14 +196,19 @@ describe('Navigation Breadcrumbs', () => {
           href:
             '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
         },
-        { text: '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff', href: '' },
+        {
+          text: ipv6,
+          href: `#/link-to/network/ip/${ipv6Encoded}/source?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+        },
+        { text: 'Flows', href: '' },
       ]);
     });
   });
+
   describe('setBreadcrumbs()', () => {
     test('should call chrome breadcrumb service with correct breadcrumbs', () => {
-      setBreadcrumbs(getMockObject('hosts', '/hosts', hostName));
-      expect(chrome.breadcrumbs.set).toBeCalledWith([
+      setBreadcrumbs(getMockObject('hosts', '/hosts', hostName), chromeMock);
+      expect(setBreadcrumbsMock).toBeCalledWith([
         { text: 'SIEM', href: '#/link-to/overview' },
         {
           text: 'Hosts',

@@ -7,15 +7,14 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
+import { routes } from './route_config';
 import { UpdateBreadcrumbs } from './UpdateBreadcrumbs';
-import { getRoutes } from './route_config';
 import {
   MockApmPluginContextWrapper,
   mockApmPluginContextValue
-} from '../../../utils/testHelpers';
-import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
+} from '../../../context/ApmPluginContext/MockApmPluginContext';
 
-const routes = getRoutes({ serviceMapEnabled: true });
 const setBreadcrumbs = jest.fn();
 
 function expectBreadcrumbToMatchSnapshot(route: string, params = '') {

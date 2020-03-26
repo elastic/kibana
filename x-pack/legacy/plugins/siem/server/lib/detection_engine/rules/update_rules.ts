@@ -4,46 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaults } from 'lodash/fp';
-import { AlertAction } from '../../../../../alerting/server/types';
+import { PartialAlert } from '../../../../../../../plugins/alerting/server';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { readRules } from './read_rules';
-import { UpdateRuleParams } from './types';
-
-export const calculateInterval = (
-  interval: string | undefined,
-  ruleInterval: string | undefined
-): string => {
-  if (interval != null) {
-    return interval;
-  } else if (ruleInterval != null) {
-    return ruleInterval;
-  } else {
-    return '5m';
-  }
-};
-
-export const calculateName = ({
-  updatedName,
-  originalName,
-}: {
-  updatedName: string | undefined;
-  originalName: string | undefined;
-}): string => {
-  if (updatedName != null) {
-    return updatedName;
-  } else if (originalName != null) {
-    return originalName;
-  } else {
-    // You really should never get to this point. This is a fail safe way to send back
-    // the name of "untitled" just in case a rule name became null or undefined at
-    // some point since TypeScript allows it.
-    return 'untitled';
-  }
-};
+import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
+import { addTags } from './add_tags';
+import { ruleStatusSavedObjectType } from './saved_object_mappings';
+import { calculateVersion } from './utils';
+import { hasListsFeature } from '../feature_flags';
 
 export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
+  actions,
+  savedObjectsClient,
   description,
   falsePositives,
   enabled,
@@ -51,6 +25,8 @@ export const updateRules = async ({
   language,
   outputIndex,
   savedId,
+  timelineId,
+  timelineTitle,
   meta,
   filters,
   from,
@@ -64,61 +40,118 @@ export const updateRules = async ({
   name,
   severity,
   tags,
-  threats,
+  threat,
+  throttle,
   to,
   type,
   references,
-}: UpdateRuleParams) => {
+  version,
+  note,
+  lists,
+  anomalyThreshold,
+  machineLearningJobId,
+}: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
     return null;
   }
 
-  // TODO: Remove this as cast as soon as rule.actions TypeScript bug is fixed
-  // where it is trying to return AlertAction[] or RawAlertAction[]
-  const actions = (rule.actions as AlertAction[] | undefined) || [];
+  const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
+    actions,
+    description,
+    falsePositives,
+    query,
+    language,
+    outputIndex,
+    savedId,
+    timelineId,
+    timelineTitle,
+    meta,
+    filters,
+    from,
+    index,
+    interval,
+    maxSignals,
+    riskScore,
+    name,
+    severity,
+    tags,
+    threat,
+    throttle,
+    to,
+    type,
+    references,
+    version,
+    note,
+    anomalyThreshold,
+    machineLearningJobId,
+  });
 
-  const params = rule.params || {};
+  // TODO: Remove this and use regular lists once the feature is stable for a release
+  const listsParam = hasListsFeature() ? { lists } : {};
 
-  const nextParams = defaults(
-    {
-      ...params,
-    },
-    {
-      description,
-      falsePositives,
-      from,
-      immutable,
-      query,
-      language,
-      outputIndex,
-      savedId,
-      meta,
-      filters,
-      index,
-      maxSignals,
-      riskScore,
-      severity,
-      threats,
-      to,
-      type,
-      references,
-    }
-  );
-
-  if (rule.enabled && !enabled) {
-    await alertsClient.disable({ id: rule.id });
-  } else if (!rule.enabled && enabled) {
-    await alertsClient.enable({ id: rule.id });
-  }
-  return alertsClient.update({
+  const update = await alertsClient.update({
     id: rule.id,
     data: {
-      tags: tags != null ? tags : [],
-      name: calculateName({ updatedName: name, originalName: rule.name }),
-      interval: calculateInterval(interval, rule.interval),
-      actions,
-      params: nextParams,
+      tags: addTags(tags, rule.params.ruleId, immutable),
+      name,
+      schedule: { interval },
+      actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
+      throttle: throttle !== undefined ? throttle : rule.throttle,
+      params: {
+        description,
+        ruleId: rule.params.ruleId,
+        falsePositives,
+        from,
+        immutable,
+        query,
+        language,
+        outputIndex,
+        savedId,
+        timelineId,
+        timelineTitle,
+        meta,
+        filters,
+        index,
+        maxSignals,
+        riskScore,
+        severity,
+        threat,
+        to,
+        type,
+        references,
+        note,
+        version: calculatedVersion,
+        anomalyThreshold,
+        machineLearningJobId,
+        ...listsParam,
+      },
     },
   });
+
+  if (rule.enabled && enabled === false) {
+    await alertsClient.disable({ id: rule.id });
+  } else if (!rule.enabled && enabled === true) {
+    await alertsClient.enable({ id: rule.id });
+    const ruleCurrentStatus = savedObjectsClient
+      ? await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
+          type: ruleStatusSavedObjectType,
+          perPage: 1,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: rule.id,
+          searchFields: ['alertId'],
+        })
+      : null;
+    // set current status for this rule to be 'going to run'
+    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
+      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
+      currentStatusToDisable.attributes.status = 'going to run';
+      await savedObjectsClient?.update(ruleStatusSavedObjectType, currentStatusToDisable.id, {
+        ...currentStatusToDisable.attributes,
+      });
+    }
+  }
+
+  return { ...update, enabled };
 };

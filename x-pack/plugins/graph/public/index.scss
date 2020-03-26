@@ -1,0 +1,14 @@
+/* Graph plugin styles */
+
+// Prefix all styles with "gph" to avoid conflicts.
+// Examples
+//   gphChart
+//   gphChart__legend
+//   gphChart__legend--small
+//   gphChart__legend-isLoading
+
+@import './mixins';
+
+@import './main';
+@import './angular/templates/index';
+@import './components/index';

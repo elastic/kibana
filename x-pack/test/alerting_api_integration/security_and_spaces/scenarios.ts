@@ -29,7 +29,7 @@ const NoKibanaPrivileges: User = {
   },
 };
 
-const Superuser: User = {
+export const Superuser: User = {
   username: 'superuser',
   fullName: 'superuser',
   password: 'superuser-password',

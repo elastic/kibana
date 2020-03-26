@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /**
  * Add a new set of registries to an existing set of registries.
  *

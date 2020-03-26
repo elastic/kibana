@@ -56,7 +56,7 @@ export class PluginPack {
         constructor(options) {
           super(pack, options);
         }
-      }
+      },
     };
 
     const result = this._provider(api);

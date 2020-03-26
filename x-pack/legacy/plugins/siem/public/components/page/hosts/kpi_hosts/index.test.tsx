@@ -7,7 +7,6 @@
 import { mockKpiHostsData, mockKpiHostDetailsData } from './mock';
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { KpiHostsComponentBase } from '.';
 import * as statItems from '../../../stat_items';
 import { kpiHostsMapping } from './kpi_hosts_mapping';
@@ -30,7 +29,7 @@ describe('kpiHostsComponent', () => {
           narrowDateRange={narrowDateRange}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it should render KpiHostsData', () => {
@@ -44,7 +43,7 @@ describe('kpiHostsComponent', () => {
           narrowDateRange={narrowDateRange}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it should render KpiHostDetailsData', () => {
@@ -58,7 +57,7 @@ describe('kpiHostsComponent', () => {
           narrowDateRange={narrowDateRange}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
   });
 

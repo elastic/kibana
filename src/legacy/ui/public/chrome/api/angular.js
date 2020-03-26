@@ -25,7 +25,7 @@ import { configureAppAngularModule } from 'ui/legacy_compat';
 import { npStart } from '../../new_platform/new_platform';
 
 export function initAngularApi(chrome, internals) {
-  chrome.setupAngular = function () {
+  chrome.setupAngular = function() {
     const kibana = uiModules.get('kibana');
 
     configureAppAngularModule(kibana, npStart.core, false);
@@ -37,5 +37,4 @@ export function initAngularApi(chrome, internals) {
 
     uiModules.link(kibana);
   };
-
 }

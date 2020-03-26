@@ -12,10 +12,11 @@
  * The two roles will be assigned to the already existing users: `apm_read_user`, `apm_write_user`, `kibana_write_user`
  *
  * This makes it possible to use the existing cloud users locally
- * Usage: node setup-kibana-security.js --username YOUR-GITHUB-USERNAME
+ * Usage: node setup-kibana-security.js --role-suffix <YOUR-GITHUB-USERNAME-OR-SOMETHING-UNIQUE>
  ******************************/
 
 // compile typescript on the fly
+// eslint-disable-next-line import/no-extraneous-dependencies
 require('@babel/register')({
   extensions: ['.ts'],
   plugins: ['@babel/plugin-proposal-optional-chaining'],

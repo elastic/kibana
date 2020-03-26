@@ -23,38 +23,38 @@ import ngMock from 'ng_mock';
 import { docTitle } from '../doc_title';
 import { npStart } from '../../new_platform';
 
-describe('docTitle Service', function () {
+describe('docTitle Service', function() {
   let initialDocTitle;
   const MAIN_TITLE = 'Kibana 4';
   let $rootScope;
 
-  beforeEach(function () {
+  beforeEach(function() {
     initialDocTitle = document.title;
     document.title = MAIN_TITLE;
     npStart.core.chrome.docTitle.__legacy.setBaseTitle(MAIN_TITLE);
   });
-  afterEach(function () {
+  afterEach(function() {
     document.title = initialDocTitle;
     npStart.core.chrome.docTitle.__legacy.setBaseTitle(initialDocTitle);
   });
 
   beforeEach(
-    ngMock.module('kibana', function ($provide) {
+    ngMock.module('kibana', function($provide) {
       $provide.decorator('$rootScope', decorateWithSpy('$on'));
     })
   );
 
   beforeEach(
-    ngMock.inject(function ($injector) {
+    ngMock.inject(function($injector) {
       $rootScope = $injector.get('$rootScope');
     })
   );
 
-  describe('setup', function () {
-    it('resets the title when a route change begins', function () {
+  describe('setup', function() {
+    it('resets the title when a route change begins', function() {
       const spy = $rootScope.$on;
 
-      const found = spy.args.some(function (args) {
+      const found = spy.args.some(function(args) {
         return args[0] === '$routeChangeStart' && args[1] === docTitle.reset;
       });
 
@@ -64,8 +64,8 @@ describe('docTitle Service', function () {
     });
   });
 
-  describe('#reset', function () {
-    it('clears the internal state', function () {
+  describe('#reset', function() {
+    it('clears the internal state', function() {
       docTitle.change('some title');
       expect(document.title).to.be('some title - ' + MAIN_TITLE);
 
@@ -74,8 +74,8 @@ describe('docTitle Service', function () {
     });
   });
 
-  describe('#change', function () {
-    it('writes the first param to as the first part of the doc name', function () {
+  describe('#change', function() {
+    it('writes the first param to as the first part of the doc name', function() {
       expect(document.title).to.be(MAIN_TITLE);
       docTitle.change('some secondary title');
       expect(document.title).to.be('some secondary title - ' + MAIN_TITLE);
@@ -83,7 +83,7 @@ describe('docTitle Service', function () {
   });
 
   function decorateWithSpy(prop) {
-    return function ($delegate) {
+    return function($delegate) {
       sinon.spy($delegate, prop);
       return $delegate;
     };

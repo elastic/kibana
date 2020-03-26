@@ -44,7 +44,7 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
-import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
@@ -98,6 +98,7 @@ describe('PluginsService', () => {
     mockSetupContext = {
       ...mockSetupDeps,
       application: expect.any(Object),
+      getStartServices: expect.any(Function),
     };
     mockStartDeps = {
       application: applicationServiceMock.createInternalStartContract(),
@@ -109,7 +110,8 @@ describe('PluginsService', () => {
       notifications: notificationServiceMock.createStartContract(),
       overlays: overlayServiceMock.createStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
-      savedObjects: savedObjectsMock.createStartContract(),
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+      fatalErrors: fatalErrorsServiceMock.createStartContract(),
     };
     mockStartContext = {
       ...mockStartDeps,
@@ -278,6 +280,37 @@ describe('PluginsService', () => {
       expect((contracts.get('pluginA')! as any).setupValue).toEqual(1);
       expect((contracts.get('pluginB')! as any).pluginAPlusB).toEqual(2);
     });
+
+    describe('timeout', () => {
+      const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+      beforeAll(() => {
+        jest.useFakeTimers();
+      });
+      afterAll(() => {
+        jest.useRealTimers();
+      });
+
+      it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
+        mockPluginInitializers.set(
+          'pluginA',
+          jest.fn(() => ({
+            setup: jest.fn(() => new Promise(i => i)),
+            start: jest.fn(() => ({ value: 1 })),
+            stop: jest.fn(),
+          }))
+        );
+        const pluginsService = new PluginsService(mockCoreContext, plugins);
+        const promise = pluginsService.setup(mockSetupDeps);
+
+        jest.runAllTimers(); // load plugin bundles
+        await flushPromises();
+        jest.runAllTimers(); // setup plugins
+
+        await expect(promise).rejects.toMatchInlineSnapshot(
+          `[Error: Setup lifecycle of "pluginA" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+        );
+      });
+    });
   });
 
   describe('#start()', () => {
@@ -329,6 +362,34 @@ describe('PluginsService', () => {
       // Verify that plugin contracts were available
       expect((contracts.get('pluginA')! as any).startValue).toEqual(2);
       expect((contracts.get('pluginB')! as any).pluginAPlusB).toEqual(3);
+    });
+    describe('timeout', () => {
+      beforeAll(() => {
+        jest.useFakeTimers();
+      });
+      afterAll(() => {
+        jest.useRealTimers();
+      });
+
+      it('throws timeout error if "start" was not completed in 30 sec.', async () => {
+        mockPluginInitializers.set(
+          'pluginA',
+          jest.fn(() => ({
+            setup: jest.fn(() => ({ value: 1 })),
+            start: jest.fn(() => new Promise(i => i)),
+            stop: jest.fn(),
+          }))
+        );
+        const pluginsService = new PluginsService(mockCoreContext, plugins);
+        await pluginsService.setup(mockSetupDeps);
+
+        const promise = pluginsService.start(mockStartDeps);
+        jest.runAllTimers();
+
+        await expect(promise).rejects.toMatchInlineSnapshot(
+          `[Error: Start lifecycle of "pluginA" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+        );
+      });
     });
   });
 

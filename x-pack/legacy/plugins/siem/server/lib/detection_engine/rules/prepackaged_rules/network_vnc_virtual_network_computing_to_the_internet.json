@@ -1,0 +1,39 @@
+{
+  "description": "This rule detects network events that may indicate the use of VNC traffic\nto the Internet. VNC is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.",
+  "false_positives": [
+    "VNC connections may be made directly to Linux cloud server instances but such\n    connections are usually made only by engineers. VNC is less common than SSH or RDP\n    but may be required by some work flows such as remote access and support for\n    specialized software products or servers. Such work-flows are usually known and not\n    unexpected. Usage that is unfamiliar to server or network owners can be unexpected\n    and suspicious."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "VNC (Virtual Network Computing) to the Internet",
+  "query": "network.transport: tcp and (destination.port >= 5800 and destination.port <= 5810) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 47,
+  "rule_id": "3ad49c61-7adc-42c1-b788-732eda2f5abf",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1219",
+          "name": "Remote Access Tools",
+          "reference": "https://attack.mitre.org/techniques/T1219/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

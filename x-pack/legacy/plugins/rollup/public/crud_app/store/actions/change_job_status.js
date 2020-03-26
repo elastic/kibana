@@ -13,15 +13,11 @@ import {
   showApiError,
 } from '../../services';
 
-import {
-  UPDATE_JOB_START,
-  UPDATE_JOB_SUCCESS,
-  UPDATE_JOB_FAILURE,
-} from '../action_types';
+import { UPDATE_JOB_START, UPDATE_JOB_SUCCESS, UPDATE_JOB_FAILURE } from '../action_types';
 
 import { refreshJobs } from './refresh_jobs';
 
-export const startJobs = (jobIds) => async (dispatch) => {
+export const startJobs = jobIds => async dispatch => {
   dispatch({
     type: UPDATE_JOB_START,
   });
@@ -48,7 +44,7 @@ export const startJobs = (jobIds) => async (dispatch) => {
   dispatch(refreshJobs());
 };
 
-export const stopJobs = (jobIds) => async (dispatch) => {
+export const stopJobs = jobIds => async dispatch => {
   dispatch({
     type: UPDATE_JOB_START,
   });

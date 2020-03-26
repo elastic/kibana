@@ -24,26 +24,31 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 
 const vegaPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
-    // TODO: ID property should be changed from 'vega' to 'vis_type_vega'
-    // It is required to change the configuration property
-    //   vega.enableExternalUrls -> vis_type_vega.enableExternalUrls
-    id: 'vega',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: [resolve(__dirname, 'public/legacy')],
-      injectDefaultVars: server => ({
-        enableExternalUrls: server.config().get('vega.enableExternalUrls'),
-      }),
-    },
-    init: (server: Legacy.Server) => ({}),
+    id: 'vis_type_vega',
+    deprecations: ({ rename }: { rename: any }) => [
+      rename('vega.enabled', 'vis_type_vega.enabled'),
+    ],
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         enableExternalUrls: Joi.boolean().default(false),
       }).default();
     },
+    require: ['kibana', 'elasticsearch'],
+    publicDir: resolve(__dirname, 'public'),
+    uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      hacks: [resolve(__dirname, 'public/legacy')],
+      injectDefaultVars: server => {
+        const serverConfig = server.config();
+        const mapConfig: Record<string, any> = serverConfig.get('map');
+
+        return {
+          emsTileLayerId: mapConfig.emsTileLayerId,
+        };
+      },
+    },
+    init: (server: Legacy.Server) => ({}),
   } as Legacy.PluginSpecOptions);
 
 // eslint-disable-next-line import/no-default-export

@@ -14,42 +14,23 @@ const defaultProps = {
   max: MAX,
   min: 0,
   value: 3,
-  onChange: () => {}
+  onChange: () => {},
 };
 
 test('Should render slider', () => {
-  const component = shallow(
-    <ValidatedRange
-      {...defaultProps}
-    />
-  );
+  const component = shallow(<ValidatedRange {...defaultProps} />);
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });
 
 test('Should pass slider props to slider', () => {
-  const component = shallow(
-    <ValidatedRange
-      {...defaultProps}
-      showLabels
-      showInput
-      showRange
-    />
-  );
+  const component = shallow(<ValidatedRange {...defaultProps} showLabels showInput showRange />);
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });
 
 test('Should display error message when value is outside of range', () => {
-  const component = shallow(
-    <ValidatedRange
-      {...defaultProps}
-      value={MAX + 1}
-    />
-  );
+  const component = shallow(<ValidatedRange {...defaultProps} value={MAX + 1} />);
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });

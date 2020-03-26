@@ -91,8 +91,8 @@ export function uiRegistry(spec) {
    *                          that were registered, the registry spec
    *                          defines how things will be indexed.
    */
-  const registry = function (Private, $injector) {
-    getInvokedProviders = function (newProviders) {
+  const registry = function(Private, $injector) {
+    getInvokedProviders = function(newProviders) {
       let set = invokeProviders
         ? $injector.invoke(invokeProviders, undefined, { providers: newProviders })
         : newProviders.map(Private);
@@ -123,7 +123,7 @@ export function uiRegistry(spec) {
 
   registry.displayName = '[registry ' + props.name + ']';
 
-  registry.register = function (privateModule) {
+  registry.register = function(privateModule) {
     providers.push(privateModule);
 
     if (isInstantiated) {

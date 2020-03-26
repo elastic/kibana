@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import { callApi } from './callApi';
 
 export async function createWatch({
@@ -12,7 +12,7 @@ export async function createWatch({
   watch,
   http
 }: {
-  http: HttpServiceBase;
+  http: HttpSetup;
   id: string;
   watch: any;
 }) {

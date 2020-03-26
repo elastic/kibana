@@ -9,14 +9,11 @@ import expect from '@kbn/expect';
 import { initElasticsearchHelpers, getRandomString } from './lib';
 import { registerHelpers } from './templates.helpers';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  const {
-    cleanUp: cleanUpEsResources,
-    catTemplate,
-  } = initElasticsearchHelpers(es);
+  const { cleanUp: cleanUpEsResources, catTemplate } = initElasticsearchHelpers(es);
 
   const {
     getAllTemplates,
@@ -42,7 +39,14 @@ export default function ({ getService }) {
         const { body: templates } = await getAllTemplates().expect(200);
 
         const createdTemplate = templates.find(template => template.name === payload.name);
-        const expectedKeys = ['name', 'indexPatterns', 'hasSettings', 'hasAliases', 'hasMappings', 'ilmPolicy'];
+        const expectedKeys = [
+          'name',
+          'indexPatterns',
+          'hasSettings',
+          'hasAliases',
+          'hasMappings',
+          'ilmPolicy',
+        ];
         expectedKeys.forEach(key => expect(Object.keys(createdTemplate).includes(key)).to.be(true));
       });
     });
@@ -57,7 +61,14 @@ export default function ({ getService }) {
 
       it('should list the index template with the expected properties', async () => {
         const { body } = await getOneTemplate(templateName).expect(200);
-        const expectedKeys = ['name', 'indexPatterns', 'settings', 'aliases', 'mappings', 'ilmPolicy'];
+        const expectedKeys = [
+          'name',
+          'indexPatterns',
+          'settings',
+          'aliases',
+          'mappings',
+          'ilmPolicy',
+        ];
 
         expect(body.name).to.equal(templateName);
         expectedKeys.forEach(key => expect(Object.keys(body).includes(key)).to.be(true));
@@ -81,14 +92,16 @@ export default function ({ getService }) {
         await createTemplate(payload).expect(409);
       });
 
-      it('should handle ES errors', async () => {
+      it('should validate the request payload', async () => {
         const templateName = `template-${getRandomString()}`;
         const payload = getTemplatePayload(templateName);
 
         delete payload.indexPatterns; // index patterns are required
 
         const { body } = await createTemplate(payload);
-        expect(body.message).to.contain('index patterns are missing');
+        expect(body.message).to.contain(
+          '[request body.indexPatterns]: expected value of type [array] '
+        );
       });
     });
 
@@ -103,7 +116,9 @@ export default function ({ getService }) {
 
         const { name, version } = payload;
 
-        expect(catTemplateResponse.find(({ name: templateName }) => templateName === name).version).to.equal(version.toString());
+        expect(
+          catTemplateResponse.find(({ name: templateName }) => templateName === name).version
+        ).to.equal(version.toString());
 
         // Update template with new version
         const updatedVersion = 2;
@@ -111,7 +126,9 @@ export default function ({ getService }) {
 
         catTemplateResponse = await catTemplate(templateName);
 
-        expect(catTemplateResponse.find(({ name: templateName }) => templateName === name).version).to.equal(updatedVersion.toString());
+        expect(
+          catTemplateResponse.find(({ name: templateName }) => templateName === name).version
+        ).to.equal(updatedVersion.toString());
       });
     });
 
@@ -124,7 +141,9 @@ export default function ({ getService }) {
 
         let catTemplateResponse = await catTemplate(templateName);
 
-        expect(catTemplateResponse.find(template => template.name === payload.name).name).to.equal(templateName);
+        expect(catTemplateResponse.find(template => template.name === payload.name).name).to.equal(
+          templateName
+        );
 
         const { body } = await deleteTemplates([templateName]).expect(200);
 
@@ -133,7 +152,9 @@ export default function ({ getService }) {
 
         catTemplateResponse = await catTemplate(templateName);
 
-        expect(catTemplateResponse.find(template => template.name === payload.name)).to.equal(undefined);
+        expect(catTemplateResponse.find(template => template.name === payload.name)).to.equal(
+          undefined
+        );
       });
     });
   });

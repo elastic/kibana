@@ -18,11 +18,11 @@ export interface CondensedCheckStatus {
 }
 
 export interface Criteria {
-  page: {
+  page?: {
     index: number;
     size: number;
   };
-  sort: {
+  sort?: {
     field: string;
     direction: 'asc' | 'desc';
   };

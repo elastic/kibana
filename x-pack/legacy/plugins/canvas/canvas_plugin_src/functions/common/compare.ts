@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Operation {
@@ -23,7 +23,7 @@ interface Arguments {
 
 type Context = boolean | number | string | null;
 
-export function compare(): ExpressionFunction<'compare', Context, Arguments, boolean> {
+export function compare(): ExpressionFunctionDefinition<'compare', Context, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().compare;
   const errors = getFunctionErrors().compare;
 
@@ -32,9 +32,7 @@ export function compare(): ExpressionFunction<'compare', Context, Arguments, boo
     help,
     aliases: ['condition'],
     type: 'boolean',
-    context: {
-      types: ['string', 'number', 'boolean', 'null'],
-    },
+    inputTypes: ['string', 'number', 'boolean', 'null'],
     args: {
       op: {
         aliases: ['_'],
@@ -48,8 +46,8 @@ export function compare(): ExpressionFunction<'compare', Context, Arguments, boo
         help: argHelp.to,
       },
     },
-    fn: (context, args) => {
-      const a = context;
+    fn: (input, args) => {
+      const a = input;
       const { to: b, op } = args;
       const typesMatch = typeof a === typeof b;
 

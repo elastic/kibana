@@ -20,6 +20,7 @@
 import { IFieldType } from './fields';
 
 export interface IIndexPattern {
+  [key: string]: any;
   fields: IFieldType[];
   title: string;
   id?: string;
@@ -32,4 +33,16 @@ export interface IIndexPattern {
       params: unknown;
     }
   >;
+}
+
+/**
+ * Use data plugin interface instead
+ * @deprecated
+ */
+export interface IndexPatternAttributes {
+  type: string;
+  fields: string;
+  title: string;
+  typeMeta: string;
+  timeFieldName?: string;
 }

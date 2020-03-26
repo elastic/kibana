@@ -9,7 +9,9 @@
 // x-pack has a different version of bluebird so it needs its own polyfills.js to ensure
 // the scheduler is set on the right bluebird instance
 const bluebird = require('bluebird');
-bluebird.Promise.setScheduler(function (fn) { global.setImmediate.call(global, fn); });
+bluebird.Promise.setScheduler(function(fn) {
+  global.setImmediate.call(global, fn);
+});
 
 const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });

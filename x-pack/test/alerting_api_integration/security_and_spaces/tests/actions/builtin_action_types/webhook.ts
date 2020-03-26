@@ -180,7 +180,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(400);
 
       expect(result.error).to.eql('Bad Request');
-      expect(result.message).to.match(/not in the Kibana whitelist/);
+      expect(result.message).to.match(/is not whitelisted in the Kibana config/);
     });
 
     it('should handle unreachable webhook targets', async () => {
@@ -198,6 +198,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/error calling webhook, unexpected error/);
     });
+
     it('should handle failing webhook targets', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL);
       const { body: result } = await supertest
@@ -211,8 +212,8 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/error calling webhook, invalid response/);
-      expect(result.serviceMessage).to.eql('[400] Bad Request');
+      expect(result.message).to.match(/error calling webhook, retry later/);
+      expect(result.serviceMessage).to.eql('[500] Internal Server Error');
     });
   });
 }

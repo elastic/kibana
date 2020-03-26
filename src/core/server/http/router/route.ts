@@ -17,14 +17,29 @@
  * under the License.
  */
 
-import { ObjectType, Type } from '@kbn/config-schema';
-import { Stream } from 'stream';
+import { RouteValidatorFullConfig } from './validator';
+
+export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
+  return method === 'get' || method === 'options';
+}
+
+/**
+ * Set of HTTP methods changing the state of the server.
+ * @public
+ */
+export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
+
+/**
+ * Set of HTTP methods not changing the state of the server.
+ * @public
+ */
+export type SafeRouteMethod = 'get' | 'options';
 
 /**
  * The set of common HTTP methods supported by Kibana routing.
  * @public
  */
-export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
 
 /**
  * The set of valid body.output
@@ -101,13 +116,24 @@ export interface RouteConfigOptionsBody {
  */
 export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
-   * A flag shows that authentication for a route:
-   * `enabled`  when true
-   * `disabled` when false
+   * Defines authentication mode for a route:
+   * - true. A user has to have valid credentials to access a resource
+   * - false. A user can access a resource without any credentials.
+   * - 'optional'. A user can access a resource if has valid credentials or no credentials at all.
+   * Can be useful when we grant access to a resource but want to identify a user if possible.
    *
-   * Enabled by default.
+   * Defaults to `true` if an auth mechanism is registered.
    */
-  authRequired?: boolean;
+  authRequired?: boolean | 'optional';
+
+  /**
+   * Defines xsrf protection requirements for a route:
+   * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
+   * - false. Disables xsrf protection.
+   *
+   * Set to true by default
+   */
+  xsrfRequired?: Method extends 'get' ? never : boolean;
 
   /**
    * Additional metadata tag strings to attach to the route.
@@ -124,12 +150,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
  * Route specific configuration.
  * @public
  */
-export interface RouteConfig<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType | Type<Buffer> | Type<Stream>,
-  Method extends RouteMethod
-> {
+export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * The endpoint _within_ the router path to register the route.
    *
@@ -158,7 +179,7 @@ export interface RouteConfig<
    * access to raw values.
    * In some cases you may want to use another validation library. To do this, you need to
    * instruct the `@kbn/config-schema` library to output **non-validated values** with
-   * setting schema as `schema.object({}, { allowUnknowns: true })`;
+   * setting schema as `schema.object({}, { unknowns: 'allow' })`;
    *
    * @example
    * ```ts
@@ -191,7 +212,7 @@ export interface RouteConfig<
    *   path: 'path/{id}',
    *   validate: {
    *     // handler has access to raw non-validated params in runtime
-   *     params: schema.object({}, { allowUnknowns: true })
+   *     params: schema.object({}, { unknowns: 'allow' })
    *   },
    * },
    * (context, req, res,) {
@@ -201,25 +222,10 @@ export interface RouteConfig<
    * });
    * ```
    */
-  validate: RouteSchemas<P, Q, B> | false;
+  validate: RouteValidatorFullConfig<P, Q, B> | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.
    */
   options?: RouteConfigOptions<Method>;
-}
-
-/**
- * RouteSchemas contains the schemas for validating the different parts of a
- * request.
- * @public
- */
-export interface RouteSchemas<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType | Type<Buffer> | Type<Stream>
-> {
-  params?: P;
-  query?: Q;
-  body?: B;
 }

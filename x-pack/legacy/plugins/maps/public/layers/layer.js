@@ -14,16 +14,18 @@ import {
   SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 import uuid from 'uuid/v4';
-import { copyPersistentState } from '../reducers/util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util.js';
 import { i18n } from '@kbn/i18n';
 
 export class AbstractLayer {
-
   constructor({ layerDescriptor, source }) {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
     if (this._descriptor.__dataRequests) {
-      this._dataRequests = this._descriptor.__dataRequests.map(dataRequest => new DataRequest(dataRequest));
+      this._dataRequests = this._descriptor.__dataRequests.map(
+        dataRequest => new DataRequest(dataRequest)
+      );
     } else {
       this._dataRequests = [];
     }
@@ -44,7 +46,7 @@ export class AbstractLayer {
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', MAX_ZOOM);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
-    layerDescriptor.style = _.get(options, 'style',  {});
+    layerDescriptor.style = _.get(options, 'style', {});
 
     return layerDescriptor;
   }
@@ -61,7 +63,7 @@ export class AbstractLayer {
     clonedDescriptor.id = uuid();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
-    clonedDescriptor.sourceDescriptor = this._source.cloneDescriptor();
+    clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach(joinDescriptor => {
         // right.id is uuid used to track requests in inspector
@@ -76,28 +78,31 @@ export class AbstractLayer {
   }
 
   isJoinable() {
-    return this._source.isJoinable();
+    return this.getSource().isJoinable();
   }
 
   supportsElasticsearchFilters() {
-    return this._source.isESSource();
+    return this.getSource().isESSource();
   }
 
   async supportsFitToBounds() {
-    return await this._source.supportsFitToBounds();
+    return await this.getSource().supportsFitToBounds();
   }
 
-  async getDisplayName() {
+  async getDisplayName(source) {
     if (this._descriptor.label) {
       return this._descriptor.label;
     }
 
-    return (await this._source.getDisplayName()) || `Layer ${this._descriptor.id}`;
+    const sourceDisplayName = source
+      ? await source.getDisplayName()
+      : await this.getSource().getDisplayName();
+    return sourceDisplayName || `Layer ${this._descriptor.id}`;
   }
 
   async getAttributions() {
     if (!this.hasErrors()) {
-      return await this._source.getAttributions();
+      return await this.getSource().getAttributions();
     }
     return [];
   }
@@ -108,12 +113,7 @@ export class AbstractLayer {
 
   getCustomIconAndTooltipContent() {
     return {
-      icon: (
-        <EuiIcon
-          size="m"
-          type={this.getLayerTypeIconName()}
-        />
-      )
+      icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };
   }
 
@@ -124,7 +124,9 @@ export class AbstractLayer {
     if (this.hasErrors()) {
       icon = (
         <EuiIcon
-          aria-label={i18n.translate('xpack.maps.layer.loadWarningAriaLabel', { defaultMessage: 'Load warning' })}
+          aria-label={i18n.translate('xpack.maps.layer.loadWarningAriaLabel', {
+            defaultMessage: 'Load warning',
+          })}
           size="m"
           type="alert"
           color="warning"
@@ -132,28 +134,18 @@ export class AbstractLayer {
       );
       tooltipContent = this.getErrors();
     } else if (this.isLayerLoading()) {
-      icon = (<EuiLoadingSpinner size="m"/>);
+      icon = <EuiLoadingSpinner size="m" />;
     } else if (!this.isVisible()) {
-      icon = (
-        <EuiIcon
-          size="m"
-          type="eyeClosed"
-        />
-      );
+      icon = <EuiIcon size="m" type="eyeClosed" />;
       tooltipContent = i18n.translate('xpack.maps.layer.layerHiddenTooltip', {
-        defaultMessage: `Layer is hidden.`
+        defaultMessage: `Layer is hidden.`,
       });
     } else if (!this.showAtZoomLevel(zoomLevel)) {
       const { minZoom, maxZoom } = this.getZoomConfig();
-      icon = (
-        <EuiIcon
-          size="m"
-          type="expand"
-        />
-      );
+      icon = <EuiIcon size="m" type="expand" />;
       tooltipContent = i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
         defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
-        values: { minZoom, maxZoom }
+        values: { minZoom, maxZoom },
       });
     } else {
       const customIconAndTooltipContent = this.getCustomIconAndTooltipContent();
@@ -164,7 +156,7 @@ export class AbstractLayer {
         } else {
           footnotes.push({
             icon: <EuiIcon color="subdued" type="partial" size="s" />,
-            message: customIconAndTooltipContent.tooltipContent
+            message: customIconAndTooltipContent.tooltipContent,
           });
         }
       }
@@ -173,8 +165,8 @@ export class AbstractLayer {
         footnotes.push({
           icon: <EuiIcon color="subdued" type="filter" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
-            defaultMessage: 'Results narrowed by search bar'
-          })
+            defaultMessage: 'Results narrowed by search bar',
+          }),
         });
       }
     }
@@ -199,6 +191,10 @@ export class AbstractLayer {
   }
 
   getSource() {
+    return this._source;
+  }
+
+  getSourceForEditing() {
     return this._source;
   }
 
@@ -237,12 +233,16 @@ export class AbstractLayer {
     return this._style;
   }
 
+  getStyleForEditing() {
+    return this._style;
+  }
+
   async getImmutableSourceProperties() {
-    return this._source.getImmutableProperties();
+    return this.getSource().getImmutableProperties();
   }
 
   renderSourceSettingsEditor = ({ onChange }) => {
-    return this._source.renderSourceSettingsEditor({ onChange });
+    return this.getSourceForEditing().renderSourceSettingsEditor({ onChange });
   };
 
   getPrevRequestToken(dataId) {
@@ -311,8 +311,6 @@ export class AbstractLayer {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 
-
-
   getLayerTypeIconName() {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
@@ -327,15 +325,16 @@ export class AbstractLayer {
       min_lon: -180,
       max_lon: 180,
       min_lat: -89,
-      max_lat: 89
+      max_lat: 89,
     };
   }
 
   renderStyleEditor({ onStyleDescriptorChange }) {
-    if (!this._style) {
+    const style = this.getStyleForEditing();
+    if (!style) {
       return null;
     }
-    return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
+    return style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
   getIndexPatternIds() {
@@ -346,18 +345,6 @@ export class AbstractLayer {
     return [];
   }
 
-  async getDateFields() {
-    return [];
-  }
-
-  async getNumberFields() {
-    return [];
-  }
-
-  async getOrdinalFields() {
-    return [];
-  }
-
   syncVisibilityWithMb(mbMap, mbLayerId) {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
@@ -365,5 +352,4 @@ export class AbstractLayer {
   getType() {
     return this._descriptor.type;
   }
-
 }

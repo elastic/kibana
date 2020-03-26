@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatusByLocation component renders all locations are down 1`] = `
+<div
+  class="euiText euiText--medium"
+>
+  <h2>
+    Down in 2 Locations
+  </h2>
+</div>
+`;
+
+exports[`StatusByLocation component renders properly against props 1`] = `
+<EuiText>
+  <h2>
+    <FormattedMessage
+      defaultMessage="{status} in {loc} Locations"
+      id="xpack.uptime.monitorStatusBar.locations.upStatus"
+      values={
+        Object {
+          "loc": "2",
+          "status": "Up",
+        }
+      }
+    />
+  </h2>
+</EuiText>
+`;
+
+exports[`StatusByLocation component renders when down in some locations 1`] = `
+<div
+  class="euiText euiText--medium"
+>
+  <h2>
+    Down in 1/2 Locations
+  </h2>
+</div>
+`;
+
+exports[`StatusByLocation component renders when only one location and it is down 1`] = `
+<div
+  class="euiText euiText--medium"
+>
+  <h2>
+    Down in 1 Location
+  </h2>
+</div>
+`;
+
+exports[`StatusByLocation component renders when only one location and it is up 1`] = `
+<div
+  class="euiText euiText--medium"
+>
+  <h2>
+    Up in 1 Location
+  </h2>
+</div>
+`;
+
+exports[`StatusByLocation component renders when up in all locations 1`] = `
+<div
+  class="euiText euiText--medium"
+>
+  <h2>
+    Up in 2 Locations
+  </h2>
+</div>
+`;

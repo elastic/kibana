@@ -21,7 +21,7 @@ import {
   createPromiseFromStreams,
   createListStream,
   createIntersperseStream,
-  createConcatStream
+  createConcatStream,
 } from './';
 
 describe('intersperseStream', () => {
@@ -30,7 +30,7 @@ describe('intersperseStream', () => {
       await createPromiseFromStreams([
         createListStream(['to', 'be', 'or', 'not', 'to', 'be']),
         createIntersperseStream(' '),
-        createConcatStream()
+        createConcatStream(),
       ])
     ).toBe('to be or not to be');
   });

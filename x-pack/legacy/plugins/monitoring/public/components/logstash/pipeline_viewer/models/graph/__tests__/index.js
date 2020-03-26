@@ -24,7 +24,6 @@ describe('Graph', () => {
   });
 
   describe('updating the Graph object', () => {
-
     beforeEach(() => {
       /**
        *       my-prefix:...generator
@@ -44,14 +43,19 @@ describe('Graph', () => {
           { id: 'my-queue', type: 'queue', config_name: 'some-name' },
           { id: 'my-if', type: 'if', config_name: 'some-name' },
           { id: 'my-grok', type: 'plugin', plugin_type: 'filter' },
-          { id: 'my-sleep', type: 'plugin', plugin_type: 'filter', explicit_id: true }
+          { id: 'my-sleep', type: 'plugin', plugin_type: 'filter', explicit_id: true },
         ],
         edges: [
-          { id: 'abcdef', type: 'plain', from: 'my-prefix:my-really-long-named-generator', to: 'my-queue' },
+          {
+            id: 'abcdef',
+            type: 'plain',
+            from: 'my-prefix:my-really-long-named-generator',
+            to: 'my-queue',
+          },
           { id: '123456', type: 'plain', from: 'my-queue', to: 'my-if' },
           { id: 'if-true', type: 'boolean', when: true, from: 'my-if', to: 'my-grok' },
-          { id: 'if-false', type: 'boolean', when: false, from: 'my-if', to: 'my-sleep' }
-        ]
+          { id: 'if-false', type: 'boolean', when: false, from: 'my-if', to: 'my-sleep' },
+        ],
       };
       graph = new Graph();
       graph.update(graphJson);
@@ -166,23 +170,23 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'twitter',
-              stats: {}
+              stats: {},
             },
             {
               id: '__QUEUE__',
               explicit_id: false,
               type: 'queue',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
               from: 'tweet_harvester',
               to: '__QUEUE__',
-              type: 'plain'
-            }
-          ]
+              type: 'plain',
+            },
+          ],
         };
       });
 
@@ -211,10 +215,10 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'grok',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
-          edges: []
+          edges: [],
         };
       });
 
@@ -243,10 +247,10 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
-          edges: []
+          edges: [],
         };
       });
 
@@ -275,13 +279,13 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'twitter',
-              stats: {}
+              stats: {},
             },
             {
               id: '__QUEUE__',
               explicit_id: false,
               type: 'queue',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
@@ -289,23 +293,23 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'grok',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
               from: 'tweet_harvester',
               to: '__QUEUE__',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '__QUEUE__',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-              type: 'plain'
-            }
-          ]
+              type: 'plain',
+            },
+          ],
         };
       });
 
@@ -334,13 +338,13 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'twitter',
-              stats: {}
+              stats: {},
             },
             {
               id: '__QUEUE__',
               explicit_id: false,
               type: 'queue',
-              stats: {}
+              stats: {},
             },
             {
               id: 'es',
@@ -348,23 +352,23 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
               from: 'tweet_harvester',
               to: '__QUEUE__',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '__QUEUE__',
               to: 'es',
-              type: 'plain'
-            }
-          ]
+              type: 'plain',
+            },
+          ],
         };
       });
 
@@ -393,7 +397,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'grok',
-              stats: {}
+              stats: {},
             },
             {
               id: 'es',
@@ -401,17 +405,17 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'es',
-              type: 'plain'
-            }
-          ]
+              type: 'plain',
+            },
+          ],
         };
       });
 
@@ -440,13 +444,13 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'twitter',
-              stats: {}
+              stats: {},
             },
             {
               id: '__QUEUE__',
               explicit_id: false,
               type: 'queue',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
@@ -454,7 +458,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'grok',
-              stats: {}
+              stats: {},
             },
             {
               id: 'es',
@@ -462,29 +466,29 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
               from: 'tweet_harvester',
               to: '__QUEUE__',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
               from: '__QUEUE__',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'es',
-              type: 'plain'
-            }
-          ]
+              type: 'plain',
+            },
+          ],
         };
       });
 
@@ -512,7 +516,7 @@ describe('Graph', () => {
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'log_line_parser',
@@ -520,8 +524,8 @@ describe('Graph', () => {
               config_name: 'grok',
               type: 'plugin',
               plugin_type: 'filter',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
@@ -529,9 +533,9 @@ describe('Graph', () => {
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'log_line_parser',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 
@@ -559,7 +563,7 @@ describe('Graph', () => {
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'es',
@@ -567,8 +571,8 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
@@ -576,9 +580,9 @@ describe('Graph', () => {
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'es',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 
@@ -607,20 +611,20 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'twitter',
-              stats: {}
+              stats: {},
             },
             {
               id: '__QUEUE__',
               explicit_id: false,
               type: 'queue',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'log_line_parser',
@@ -628,30 +632,30 @@ describe('Graph', () => {
               config_name: 'grok',
               type: 'plugin',
               plugin_type: 'filter',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
               from: 'tweet_harvester',
               to: '__QUEUE__',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
               from: '__QUEUE__',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'log_line_parser',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 
@@ -680,20 +684,20 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'twitter',
-              stats: {}
+              stats: {},
             },
             {
               id: '__QUEUE__',
               explicit_id: false,
               type: 'queue',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'es',
@@ -701,30 +705,30 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
               from: 'tweet_harvester',
               to: '__QUEUE__',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
               from: '__QUEUE__',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'es',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 
@@ -752,7 +756,7 @@ describe('Graph', () => {
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'log_line_parser',
@@ -760,14 +764,14 @@ describe('Graph', () => {
               config_name: 'grok',
               type: 'plugin',
               plugin_type: 'filter',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'es',
@@ -775,8 +779,8 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
@@ -784,29 +788,29 @@ describe('Graph', () => {
               from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               to: 'log_line_parser',
               type: 'boolean',
-              when: true
+              when: true,
             },
             {
               id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
               from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               type: 'boolean',
-              when: false
+              when: false,
             },
             {
               id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
               from: 'log_line_parser',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'es',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 
@@ -835,20 +839,20 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'twitter',
-              stats: {}
+              stats: {},
             },
             {
               id: '__QUEUE__',
               explicit_id: false,
               type: 'queue',
-              stats: {}
+              stats: {},
             },
             {
               id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'log_line_parser',
@@ -856,14 +860,14 @@ describe('Graph', () => {
               config_name: 'grok',
               type: 'plugin',
               plugin_type: 'filter',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'es',
@@ -871,50 +875,50 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
               from: 'tweet_harvester',
               to: '__QUEUE__',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: 'ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296',
               from: '__QUEUE__',
               to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: 'e28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296a',
               from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               to: 'log_line_parser',
               type: 'boolean',
-              when: true
+              when: true,
             },
             {
               id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
               from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               type: 'boolean',
-              when: false
+              when: false,
             },
             {
               id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
               from: 'log_line_parser',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'es',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 
@@ -943,7 +947,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'twitter',
-              stats: {}
+              stats: {},
             },
             {
               id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
@@ -951,29 +955,29 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'stdin',
-              stats: {}
+              stats: {},
             },
             {
               id: '__QUEUE__',
               explicit_id: false,
               type: 'queue',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
               from: 'tweet_harvester',
               to: '__QUEUE__',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
               from: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
               to: '__QUEUE__',
-              type: 'plain'
-            }
-          ]
+              type: 'plain',
+            },
+          ],
         };
       });
 
@@ -1002,7 +1006,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'grok',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
@@ -1010,17 +1014,17 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'mutate',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
               from: 'log_line_parser',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-              type: 'plain'
-            }
-          ]
+              type: 'plain',
+            },
+          ],
         };
       });
 
@@ -1039,7 +1043,6 @@ describe('Graph', () => {
       });
     });
 
-
     describe('Pipeline with two output plugin statements', () => {
       beforeEach(() => {
         graphJson = {
@@ -1050,7 +1053,7 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
@@ -1058,10 +1061,10 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'output',
               config_name: 'stdout',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
-          edges: []
+          edges: [],
         };
       });
 
@@ -1090,14 +1093,14 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'grok',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1105,24 +1108,24 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'mutate',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
               from: 'log_line_parser',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 
@@ -1151,14 +1154,14 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'grok',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1166,7 +1169,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'mutate',
-              stats: {}
+              stats: {},
             },
             {
               id: 'micdrop',
@@ -1174,37 +1177,37 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'drop',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
               from: 'log_line_parser',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               type: 'boolean',
-              when: true
+              when: true,
             },
             {
               id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'micdrop',
               type: 'boolean',
-              when: false
+              when: false,
             },
             {
               id: '6ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f029',
               from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               to: 'micdrop',
-              type: 'plain'
-            }
-          ]
+              type: 'plain',
+            },
+          ],
         };
       });
 
@@ -1233,14 +1236,14 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1248,8 +1251,8 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'output',
               config_name: 'stdout',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
@@ -1257,9 +1260,9 @@ describe('Graph', () => {
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 
@@ -1276,7 +1279,6 @@ describe('Graph', () => {
         expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(0);
         expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(3);
       });
-
     });
 
     describe('Pipeline with two output plugin statements and one output if statement', () => {
@@ -1289,14 +1291,14 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1304,7 +1306,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'output',
               config_name: 'stdout',
-              stats: {}
+              stats: {},
             },
             {
               id: 'local_persistent_out',
@@ -1312,8 +1314,8 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'output',
               config_name: 'file',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
@@ -1321,9 +1323,9 @@ describe('Graph', () => {
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 
@@ -1352,7 +1354,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'twitter',
-              stats: {}
+              stats: {},
             },
             {
               id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
@@ -1360,13 +1362,13 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'input',
               config_name: 'stdin',
-              stats: {}
+              stats: {},
             },
             {
               id: '__QUEUE__',
               explicit_id: false,
               type: 'queue',
-              stats: {}
+              stats: {},
             },
             {
               id: 'log_line_parser',
@@ -1374,14 +1376,14 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'grok',
-              stats: {}
+              stats: {},
             },
             {
               id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'mutant',
@@ -1389,7 +1391,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'mutate',
-              stats: {}
+              stats: {},
             },
             {
               id: 'es',
@@ -1397,14 +1399,14 @@ describe('Graph', () => {
               config_name: 'elasticsearch',
               type: 'plugin',
               plugin_type: 'output',
-              stats: {}
+              stats: {},
             },
             {
               id: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1412,7 +1414,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'output',
               config_name: 'stdout',
-              stats: {}
+              stats: {},
             },
             {
               id: 'local_persistent_out',
@@ -1420,88 +1422,88 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'output',
               config_name: 'file',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
               id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
               from: 'tweet_harvester',
               to: '__QUEUE__',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
               from: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
               to: '__QUEUE__',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '6ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f029',
               from: '__QUEUE__',
               to: 'log_line_parser',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: 'ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296',
               from: 'log_line_parser',
               to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: 'e28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296a',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'mutant',
               type: 'boolean',
-              when: true
+              when: true,
             },
             {
               id: '28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'es',
               type: 'boolean',
-              when: false
+              when: false,
             },
             {
               id: '8a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae2',
               from: 'mutant',
               to: 'es',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: 'a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
               type: 'boolean',
-              when: false
+              when: false,
             },
             {
               id: '1c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a1',
               from: 'mutant',
               to: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: 'c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a11',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'local_persistent_out',
               type: 'boolean',
-              when: false
+              when: false,
             },
             {
               id: '3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a11c',
               from: 'mutant',
               to: 'local_persistent_out',
-              type: 'plain'
+              type: 'plain',
             },
             {
               id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
               from: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
               to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 
@@ -1529,7 +1531,7 @@ describe('Graph', () => {
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1537,7 +1539,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'mutate',
-              stats: {}
+              stats: {},
             },
             {
               id: 'micdrop',
@@ -1545,8 +1547,8 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'drop',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
@@ -1554,16 +1556,16 @@ describe('Graph', () => {
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               type: 'boolean',
-              when: true
+              when: true,
             },
             {
               id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'micdrop',
               type: 'boolean',
-              when: false
-            }
-          ]
+              when: false,
+            },
+          ],
         };
       });
 
@@ -1591,7 +1593,7 @@ describe('Graph', () => {
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1599,7 +1601,7 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'mutate',
-              stats: {}
+              stats: {},
             },
             {
               id: 'micdrop',
@@ -1607,8 +1609,8 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'drop',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
@@ -1616,15 +1618,15 @@ describe('Graph', () => {
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               type: 'boolean',
-              when: true
+              when: true,
             },
             {
               id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
               from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               to: 'micdrop',
-              type: 'plain'
-            }
-          ]
+              type: 'plain',
+            },
+          ],
         };
       });
 
@@ -1652,14 +1654,14 @@ describe('Graph', () => {
               explicit_id: false,
               type: 'if',
               condition: '[is_rt] == "RT"',
-              stats: {}
+              stats: {},
             },
             {
               id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               explicit_id: false,
               type: 'if',
               condition: '[has_image] == true',
-              stats: {}
+              stats: {},
             },
             {
               id: 'micdrop',
@@ -1667,8 +1669,8 @@ describe('Graph', () => {
               type: 'plugin',
               plugin_type: 'filter',
               config_name: 'drop',
-              stats: {}
-            }
+              stats: {},
+            },
           ],
           edges: [
             {
@@ -1676,16 +1678,16 @@ describe('Graph', () => {
               from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
               to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               type: 'boolean',
-              when: true
+              when: true,
             },
             {
               id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
               from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
               to: 'micdrop',
               type: 'boolean',
-              when: true
-            }
-          ]
+              when: true,
+            },
+          ],
         };
       });
 

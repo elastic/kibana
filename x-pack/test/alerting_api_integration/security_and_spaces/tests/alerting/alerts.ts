@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../scenarios';
+import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   ESTestIndexTool,
@@ -96,8 +96,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference);
-              await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+
+              await taskManagerUtils.waitForAllTasksIdle(testStart);
+
+              const alertId = response.body.id;
+              await alertUtils.disable(alertId);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 1 alert executed with proper params
               const alertSearchResult = await esTestIndexTool.search(
@@ -112,6 +116,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
+                },
+                alertInfo: {
+                  alertId,
+                  spaceId: space.id,
+                  namespace: space.id,
+                  name: 'abc',
+                  tags: ['tag-A', 'tag-B'],
+                  createdBy: user.fullName,
+                  updatedBy: user.fullName,
                 },
               });
 
@@ -131,15 +144,84 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
-                  message: 'instanceContextValue: true, instanceStateValue: true',
+                  message: `
+alertId: ${alertId},
+alertName: abc,
+spaceId: ${space.id},
+tags: tag-A,tag-B,
+alertInstanceId: 1,
+instanceContextValue: true,
+instanceStateValue: true
+`.trim(),
                 },
                 reference,
                 source: 'action:test.index-record',
               });
+
+              await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
+        });
+
+        it('should pass updated alert params to executor', async () => {
+          const testStart = new Date();
+          // create an alert
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: { throttle: null },
+          });
+
+          // only need to test creation success paths
+          if (response.statusCode !== 200) return;
+
+          // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
+          await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+
+          // Avoid invalidating an API key while the alert is executing
+          await taskManagerUtils.waitForAllTasksIdle(testStart);
+
+          // update the alert with super user
+          const alertId = response.body.id;
+          const reference2 = alertUtils.generateReference();
+          const response2 = await alertUtils.updateAlwaysFiringAction({
+            alertId,
+            actionId: indexRecordActionId,
+            user: Superuser,
+            reference: reference2,
+            overwrites: {
+              name: 'def',
+              tags: ['fee', 'fi', 'fo'],
+              // This will cause the task to re-run on update
+              schedule: { interval: '59s' },
+            },
+          });
+
+          expect(response2.statusCode).to.eql(200);
+
+          // make sure alert info passed to executor is correct
+          await esTestIndexTool.waitForDocs('alert:test.always-firing', reference2);
+
+          await taskManagerUtils.waitForAllTasksIdle(testStart);
+
+          await alertUtils.disable(alertId);
+          const alertSearchResult = await esTestIndexTool.search(
+            'alert:test.always-firing',
+            reference2
+          );
+
+          expect(alertSearchResult.hits.total.value).to.be.greaterThan(0);
+          expect(alertSearchResult.hits.hits[0]._source.alertInfo).to.eql({
+            alertId,
+            spaceId: space.id,
+            namespace: space.id,
+            name: 'def',
+            tags: ['fee', 'fi', 'fo'],
+            createdBy: user.fullName,
+            updatedBy: Superuser.fullName,
+          });
         });
 
         it('should handle custom retry logic when appropriate', async () => {
@@ -286,7 +368,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 1 document exists with proper params
               searchResult = await esTestIndexTool.search('alert:test.authorization', reference);
@@ -314,7 +396,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 1 document exists with proper params
               searchResult = await esTestIndexTool.search('alert:test.authorization', reference);
@@ -394,7 +476,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.authorization', reference);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 1 document with proper params exists
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
@@ -422,7 +504,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.authorization', reference);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 1 document with proper params exists
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
@@ -450,7 +532,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
-              interval: '1s',
+              schedule: { interval: '1s' },
             },
           });
 
@@ -467,10 +549,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
               // Wait until alerts scheduled actions 3 times before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure actions only executed once
               const searchResult = await esTestIndexTool.search(
@@ -490,7 +573,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
-              interval: '1s',
+              schedule: { interval: '1s' },
               params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
@@ -536,7 +619,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 2 actions with proper params exists
               const searchResult = await esTestIndexTool.search(
@@ -560,7 +643,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
-              interval: '1s',
+              schedule: { interval: '1s' },
               params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
@@ -582,10 +665,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
               // Actions should execute twice before widning things down
               await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 2 actions are executed
               const searchResult = await esTestIndexTool.search(
@@ -606,7 +690,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             reference,
             overwrites: {
               enabled: false,
-              interval: '1s',
+              schedule: { interval: '1s' },
             },
           });
 
@@ -630,7 +714,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // execution once before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Should not have executed any action
               const executedActionsResult = await esTestIndexTool.search(
@@ -651,7 +735,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             reference,
             overwrites: {
               enabled: false,
-              interval: '1s',
+              schedule: { interval: '1s' },
             },
           });
 
@@ -675,7 +759,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // once before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Should not have executed any action
               const executedActionsResult = await esTestIndexTool.search(
@@ -696,7 +780,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             reference,
             overwrites: {
               enabled: false,
-              interval: '1s',
+              schedule: { interval: '1s' },
             },
           });
 
@@ -721,7 +805,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // Ensure actions are executed once before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference, 1);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Should have one document indexed by the action
               const searchResult = await esTestIndexTool.search(

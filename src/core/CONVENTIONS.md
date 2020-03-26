@@ -1,6 +1,13 @@
 # Kibana Conventions
 
-- [Plugin Structure](#plugin-structure)
+- [Kibana Conventions](#kibana-conventions)
+  - [Plugin Structure](#plugin-structure)
+    - [The PluginInitializer](#the-plugininitializer)
+    - [The Plugin class](#the-plugin-class)
+    - [Applications](#applications)
+    - [Services](#services)
+    - [Usage Collection](#usage-collection)
+    - [Saved Objects Types](#saved-objects-types)
 
 ## Plugin Structure
 
@@ -25,6 +32,9 @@ my_plugin/
     │   └── index.ts
     ├── collectors
     │   └── register.ts
+    ├── saved_objects
+    │   ├── index.ts
+    │   └── my_type.ts
     ├── services
     │   ├── my_service
     │   │   └── index.ts
@@ -32,6 +42,7 @@ my_plugin/
     ├── index.ts
     └── plugin.ts
 ```
+- [Manifest file](/docs/development/core/server/kibana-plugin-server.pluginmanifest.md) should be defined on top level.
 - Both `server` and `public` should have an `index.ts` and a `plugin.ts` file:
   - `index.ts` should only contain:
     - The `plugin` export
@@ -130,16 +141,16 @@ leverage this pattern.
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ApplicationMountContext } from '../../src/core/public';
+import { CoreStart, AppMountParams } from '../../src/core/public';
 
 import { MyAppRoot } from './components/app.ts';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
-export const renderApp = (context: ApplicationMountContext, domElement: HTMLDivElement) => {
-  ReactDOM.render(<MyAppRoot context={context} />, domElement);
-  return () => ReactDOM.unmountComponentAtNode(domElement);
+export const renderApp = (core: CoreStart, deps: MyPluginDepsStart, { element, history }: AppMountParams) => {
+  ReactDOM.render(<MyAppRoot core={core} deps={deps} routerHistory={history} />, element);
+  return () => ReactDOM.unmountComponentAtNode(element);
 }
 ```
 
@@ -152,10 +163,12 @@ export class MyPlugin implements Plugin {
   public setup(core) {
     core.application.register({
       id: 'my-app',
-      async mount(context, domElement) {
+      async mount(params) {
         // Load application bundle
         const { renderApp } = await import('./application/my_app');
-        return renderApp(context, domElement);
+        // Get start services
+        const [coreStart, depsStart] = core.getStartServices();
+        return renderApp(coreStart, depsStart, params);
       }
     });
   }
@@ -249,6 +262,45 @@ export function registerMyPluginUsageCollector(usageCollection?: UsageCollection
   usageCollection.registerCollector(myCollector);
 }
 ```
+
+### Saved Objects Types
+
+Saved object type definitions should be defined in their own `server/saved_objects` directory.
+
+The folder should contain a file per type, named after the snake_case name of the type, and an `index.ts` file exporting all the types.
+
+```typescript
+// src/plugins/my-plugin/server/saved_objects/my_type.ts
+import { SavedObjectsType } from 'src/core/server';
+
+export const myType: SavedObjectsType = {
+  name: 'my-type',
+  hidden: false,
+  namespaceAgnostic: true,
+  mappings: {
+    properties: {
+      someField: {
+        type: 'text',
+      },
+      anotherField: {
+        type: 'text',
+      },
+    },
+  },
+  migrations: {
+    '1.0.0': migrateFirstTypeToV1,
+    '2.0.0': migrateFirstTypeToV2,
+  },
+};
+```
+
+```typescript
+// src/plugins/my-plugin/server/saved_objects/index.ts
+
+export { myType } from './my_type';
+```
+
+Migration example from the legacy format is available in `src/core/MIGRATION_EXAMPLES.md#saved-objects-types`
 
 ### Naming conventions
 

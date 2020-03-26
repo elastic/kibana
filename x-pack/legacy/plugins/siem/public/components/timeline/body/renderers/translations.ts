@@ -29,3 +29,10 @@ export const IN = i18n.translate('xpack.siem.auditd.inDescription', {
 export const NON_EXISTENT = i18n.translate('xpack.siem.auditd.nonExistentDescription', {
   defaultMessage: 'an unknown process',
 });
+
+export const LINK_ELASTIC_ENDPOINT_SECURITY = i18n.translate(
+  'xpack.siem.event.module.linkToElasticEndpointSecurityDescription',
+  {
+    defaultMessage: 'Open in Elastic Endpoint Security',
+  }
+);

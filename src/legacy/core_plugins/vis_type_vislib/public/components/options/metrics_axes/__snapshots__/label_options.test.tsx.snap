@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LabelOptions component should init with the default set of props 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiTitle
+    size="xxs"
+  >
+    <h3>
+      <FormattedMessage
+        defaultMessage="Labels"
+        id="visTypeVislib.controls.pointSeries.categoryAxis.labelsTitle"
+        values={Object {}}
+      />
+    </h3>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <SwitchOption
+    label="Show labels"
+    paramName="show"
+    setValue={[MockFunction]}
+    value={true}
+  />
+  <SwitchOption
+    data-test-subj=""
+    disabled={false}
+    label="Filter labels"
+    paramName="filter"
+    setValue={[MockFunction]}
+    value={true}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem>
+      <SelectOption
+        disabled={false}
+        label="Align"
+        options={
+          Array [
+            Object {
+              "text": "Horizontal",
+              "value": 0,
+            },
+            Object {
+              "text": "Vertical",
+              "value": 90,
+            },
+            Object {
+              "text": "Angled",
+              "value": 75,
+            },
+          ]
+        }
+        paramName="rotate"
+        setValue={[Function]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <TruncateLabelsOption
+        disabled={false}
+        setValue={[MockFunction]}
+        value={0}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

@@ -19,13 +19,11 @@
 
 import { RemoteProvider } from '../../../remote';
 
-export default function () {
+export default function() {
   return {
-    testFiles: [
-      require.resolve('./test'),
-    ],
+    testFiles: [require.resolve('./test')],
     services: {
-      remote: RemoteProvider
-    }
+      remote: RemoteProvider,
+    },
   };
 }

@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction as ITransaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
@@ -25,8 +25,9 @@ export const MaybeViewTraceLink = ({
     }
   );
 
+  const { rootTransaction } = waterfall;
   // the traceroot cannot be found, so we cannot link to it
-  if (!waterfall.traceRoot) {
+  if (!rootTransaction) {
     return (
       <EuiFlexItem grow={false}>
         <EuiToolTip
@@ -45,8 +46,7 @@ export const MaybeViewTraceLink = ({
     );
   }
 
-  const isRoot =
-    transaction.transaction.id === waterfall.traceRoot.transaction.id;
+  const isRoot = transaction.transaction.id === rootTransaction.transaction.id;
 
   // the user is already viewing the full trace, so don't link to it
   if (isRoot) {
@@ -69,15 +69,14 @@ export const MaybeViewTraceLink = ({
 
     // the user is viewing a zoomed in version of the trace. Link to the full trace
   } else {
-    const traceRoot = waterfall.traceRoot;
     return (
       <EuiFlexItem grow={false}>
         <TransactionDetailLink
-          serviceName={traceRoot.service.name}
-          transactionId={traceRoot.transaction.id}
-          traceId={traceRoot.trace.id}
-          transactionName={traceRoot.transaction.name}
-          transactionType={traceRoot.transaction.type}
+          serviceName={rootTransaction.service.name}
+          transactionId={rootTransaction.transaction.id}
+          traceId={rootTransaction.trace.id}
+          transactionName={rootTransaction.transaction.name}
+          transactionType={rootTransaction.transaction.type}
         >
           <EuiButton iconType="apmTrace">{viewFullTraceButtonLabel}</EuiButton>
         </TransactionDetailLink>

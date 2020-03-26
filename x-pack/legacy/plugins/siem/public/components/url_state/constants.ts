@@ -6,7 +6,9 @@
 
 export enum CONSTANTS {
   appQuery = 'query',
-  detectionEnginePage = 'detectionEngine.page',
+  caseDetails = 'case.details',
+  casePage = 'case.page',
+  detectionsPage = 'detections.page',
   filters = 'filters',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
@@ -14,10 +16,10 @@ export enum CONSTANTS {
   networkPage = 'network.page',
   overviewPage = 'overview.page',
   savedQuery = 'savedQuery',
+  timeline = 'timeline',
   timelinePage = 'timeline.page',
   timerange = 'timerange',
-  timeline = 'timeline',
   unknown = 'unknown',
 }
 
-export type UrlStateType = 'detection-engine' | 'host' | 'network' | 'overview' | 'timeline';
+export type UrlStateType = 'case' | 'detections' | 'host' | 'network' | 'overview' | 'timeline';

@@ -18,13 +18,13 @@
  */
 
 import { mapAndFlattenFilters } from './map_and_flatten_filters';
-import { esFilters } from '../../../../common';
+import { Filter } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapAndFlattenFilters()', () => {
     let filters: unknown;
 
-    function getDisplayName(filter: esFilters.Filter) {
+    function getDisplayName(filter: Filter) {
       return typeof filter.meta.value === 'function' ? filter.meta.value() : filter.meta.value;
     }
 
@@ -45,7 +45,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should map and flatten the filters', () => {
-      const results = mapAndFlattenFilters(filters as esFilters.Filter[]);
+      const results = mapAndFlattenFilters(filters as Filter[]);
 
       expect(results).toHaveLength(5);
       expect(results[0]).toHaveProperty('meta');

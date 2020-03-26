@@ -14,11 +14,11 @@ import {
 } from '@elastic/eui';
 import { getOr, take, isEmpty } from 'lodash/fp';
 import React, { useState, useCallback } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../common/constants';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../lib/kibana';
 import { inputsModel, State } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -34,21 +34,14 @@ import {
   queriesSelector,
   kqlQuerySelector,
 } from './selectors';
-import { InputsRange, Policy } from '../../store/inputs/model';
+import { InputsRange } from '../../store/inputs/model';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
-interface SuperDatePickerStateRedux {
-  duration: number;
-  end: number;
-  fromStr: string;
-  isLoading: boolean;
-  kind: string;
-  kqlQuery: inputsModel.GlobalKqlQuery;
-  policy: Policy['kind'];
-  queries: inputsModel.GlobalGraphqlQuery[];
-  start: number;
-  toStr: string;
+interface Range {
+  from: string;
+  to: string;
+  display: string;
 }
 
 interface UpdateReduxTime extends OnTimeChangeProps {
@@ -70,22 +63,13 @@ export type DispatchUpdateReduxTime = ({
   timelineId,
 }: UpdateReduxTime) => ReturnUpdateReduxTime;
 
-interface SuperDatePickerDispatchProps {
-  setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) => void;
-  startAutoReload: ({ id }: { id: InputsModelId }) => void;
-  stopAutoReload: ({ id }: { id: InputsModelId }) => void;
-  updateReduxTime: DispatchUpdateReduxTime;
-}
-
 interface OwnProps {
   disabled?: boolean;
   id: InputsModelId;
   timelineId?: string;
 }
 
-export type SuperDatePickerProps = OwnProps &
-  SuperDatePickerDispatchProps &
-  SuperDatePickerStateRedux;
+export type SuperDatePickerProps = OwnProps & PropsFromRedux;
 
 export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
   ({
@@ -196,10 +180,10 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
     const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
-    const [quickRanges] = useKibanaUiSetting(DEFAULT_TIMEPICKER_QUICK_RANGES);
+    const [quickRanges] = useUiSetting$<Range[]>(DEFAULT_TIMEPICKER_QUICK_RANGES);
     const commonlyUsedRanges = isEmpty(quickRanges)
       ? []
-      : quickRanges.map(({ from, to, display }: { from: string; to: string; display: string }) => ({
+      : quickRanges.map(({ from, to, display }) => ({
           start: from,
           end: to,
           label: display,
@@ -302,9 +286,9 @@ export const makeMapStateToProps = () => {
       fromStr: getFromStrSelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
       kind: getKindSelector(inputsRange),
-      kqlQuery: getKqlQuerySelector(inputsRange),
+      kqlQuery: getKqlQuerySelector(inputsRange) as inputsModel.GlobalKqlQuery,
       policy: getPolicySelector(inputsRange),
-      queries: getQueriesSelector(inputsRange),
+      queries: getQueriesSelector(inputsRange) as inputsModel.GlobalGraphqlQuery[],
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
     };
@@ -322,7 +306,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-export const SuperDatePicker = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(SuperDatePickerComponent);
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const SuperDatePicker = connector(SuperDatePickerComponent);

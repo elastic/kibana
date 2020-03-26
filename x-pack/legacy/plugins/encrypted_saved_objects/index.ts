@@ -6,7 +6,7 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import { PluginSetupContract } from '../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginSetup } from '../../../plugins/encrypted_saved_objects/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 
@@ -21,19 +21,20 @@ export const encryptedSavedObjects = (kibana: {
     // Some legacy plugins still use `enabled` config key, so we keep it here, but the rest of the
     // keys is handled by the New Platform plugin.
     config: (Joi: Root) =>
-      Joi.object({ enabled: Joi.boolean().default(true) })
+      Joi.object({
+        enabled: Joi.boolean().default(true),
+      })
         .unknown(true)
         .default(),
 
     init(server: Legacy.Server) {
       const encryptedSavedObjectsPlugin = (server.newPlatform.setup.plugins
-        .encryptedSavedObjects as unknown) as PluginSetupContract;
+        .encryptedSavedObjects as unknown) as EncryptedSavedObjectsPluginSetup;
       if (!encryptedSavedObjectsPlugin) {
         throw new Error('New Platform XPack EncryptedSavedObjects plugin is not available.');
       }
 
       encryptedSavedObjectsPlugin.__legacyCompat.registerLegacyAPI({
-        savedObjects: server.savedObjects,
         auditLogger: new AuditLogger(
           server,
           'encryptedSavedObjects',

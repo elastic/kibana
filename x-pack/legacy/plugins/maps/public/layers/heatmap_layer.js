@@ -9,10 +9,9 @@ import { VectorLayer } from './vector_layer';
 import { HeatmapStyle } from './styles/heatmap/heatmap_style';
 import { EMPTY_FEATURE_COLLECTION, LAYER_TYPE } from '../../common/constants';
 
-const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
+const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__'; //unique name to store scaled value for weighting
 
 export class HeatmapLayer extends VectorLayer {
-
   static type = LAYER_TYPE.HEATMAP;
 
   static createDescriptor(options) {
@@ -33,7 +32,7 @@ export class HeatmapLayer extends VectorLayer {
   }
 
   _getPropKeyOfSelectedMetric() {
-    const metricfields = this._source.getMetricFields();
+    const metricfields = this.getSource().getMetricFields();
     return metricfields[0].getName();
   }
 
@@ -58,7 +57,7 @@ export class HeatmapLayer extends VectorLayer {
         id: heatmapLayerId,
         type: 'heatmap',
         source: this.getId(),
-        paint: {}
+        paint: {},
       });
     }
 
@@ -73,22 +72,23 @@ export class HeatmapLayer extends VectorLayer {
     const propertyKey = this._getPropKeyOfSelectedMetric();
     const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
-      let max = 0;
+      let max = 1; //max will be at least one, since counts or sums will be at least one.
       for (let i = 0; i < featureCollection.features.length; i++) {
         max = Math.max(featureCollection.features[i].properties[propertyKey], max);
       }
       for (let i = 0; i < featureCollection.features.length; i++) {
-        featureCollection.features[i].properties[SCALED_PROPERTY_NAME] = featureCollection.features[i].properties[propertyKey] / max;
+        featureCollection.features[i].properties[SCALED_PROPERTY_NAME] =
+          featureCollection.features[i].properties[propertyKey] / max;
       }
       mbSourceAfter.setData(featureCollection);
     }
 
     this.syncVisibilityWithMb(mbMap, heatmapLayerId);
-    this._style.setMBPaintProperties({
+    this.getCurrentStyle().setMBPaintProperties({
       mbMap,
       layerId: heatmapLayerId,
       propertyName: SCALED_PROPERTY_NAME,
-      resolution: this._source.getGridResolution()
+      resolution: this.getSource().getGridResolution(),
     });
     mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
     mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
@@ -103,7 +103,7 @@ export class HeatmapLayer extends VectorLayer {
   }
 
   renderLegendDetails() {
-    const metricFields = this._source.getMetricFields();
-    return this._style.renderLegendDetails(metricFields[0]);
+    const metricFields = this.getSource().getMetricFields();
+    return this.getCurrentStyle().renderLegendDetails(metricFields[0]);
   }
 }

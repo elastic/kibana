@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MonitorList component renders a no items message when no data is provided 1`] = `
+exports[`MonitorListPagination component renders a no items message when no data is provided 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle
@@ -24,12 +24,18 @@ exports[`MonitorList component renders a no items message when no data is provid
           Object {
             "align": "left",
             "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Status",
             "render": [Function],
           },
           Object {
             "align": "left",
             "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Name",
             "render": [Function],
             "sortable": true,
@@ -37,11 +43,11 @@ exports[`MonitorList component renders a no items message when no data is provid
           Object {
             "align": "left",
             "field": "state.url.full",
-            "name": "URL",
+            "name": "Url",
             "render": [Function],
-            "sortable": true,
           },
           Object {
+            "align": "center",
             "field": "histogram.points",
             "mobileOptions": Object {
               "show": false,
@@ -51,17 +57,6 @@ exports[`MonitorList component renders a no items message when no data is provid
           },
           Object {
             "align": "right",
-            "field": "state",
-            "hasActions": true,
-            "id": "actions",
-            "mobileOptions": Object {
-              "header": false,
-            },
-            "name": "Integrations",
-            "render": [Function],
-          },
-          Object {
-            "align": "left",
             "field": "monitor_id",
             "isExpander": true,
             "name": "",
@@ -79,35 +74,55 @@ exports[`MonitorList component renders a no items message when no data is provid
       loading={false}
       noItemsMessage="No uptime monitors found"
       responsive={true}
+      tableLayout="fixed"
     />
     <EuiSpacer
       size="m"
     />
     <EuiFlexGroup
+      justifyContent="spaceBetween"
       responsive={false}
     >
       <EuiFlexItem
         grow={false}
       >
-        <OverviewPageLink
-          dataTestSubj="xpack.uptime.monitorList.prevButton"
-          direction="prev"
+        <MonitorListPageSizeSelect
+          setSize={[MockFunction]}
+          size={25}
         />
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
-        <OverviewPageLink
-          dataTestSubj="xpack.uptime.monitorList.nextButton"
-          direction="next"
-        />
+        <EuiFlexGroup
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.prevButton"
+              direction="prev"
+              pagination=""
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.nextButton"
+              direction="next"
+              pagination=""
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
 </Fragment>
 `;
 
-exports[`MonitorList component renders the monitor list 1`] = `
+exports[`MonitorListPagination component renders the monitor list 1`] = `
 <Fragment>
   <EuiPanel>
     <EuiTitle
@@ -131,12 +146,18 @@ exports[`MonitorList component renders the monitor list 1`] = `
           Object {
             "align": "left",
             "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Status",
             "render": [Function],
           },
           Object {
             "align": "left",
             "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
             "name": "Name",
             "render": [Function],
             "sortable": true,
@@ -144,11 +165,11 @@ exports[`MonitorList component renders the monitor list 1`] = `
           Object {
             "align": "left",
             "field": "state.url.full",
-            "name": "URL",
+            "name": "Url",
             "render": [Function],
-            "sortable": true,
           },
           Object {
+            "align": "center",
             "field": "histogram.points",
             "mobileOptions": Object {
               "show": false,
@@ -158,17 +179,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
           },
           Object {
             "align": "right",
-            "field": "state",
-            "hasActions": true,
-            "id": "actions",
-            "mobileOptions": Object {
-              "header": false,
-            },
-            "name": "Integrations",
-            "render": [Function],
-          },
-          Object {
-            "align": "left",
             "field": "monitor_id",
             "isExpander": true,
             "name": "",
@@ -248,30 +258,48 @@ exports[`MonitorList component renders the monitor list 1`] = `
       loading={false}
       noItemsMessage="No uptime monitors found"
       responsive={true}
+      tableLayout="fixed"
     />
     <EuiSpacer
       size="m"
     />
     <EuiFlexGroup
+      justifyContent="spaceBetween"
       responsive={false}
     >
       <EuiFlexItem
         grow={false}
       >
-        <OverviewPageLink
-          dataTestSubj="xpack.uptime.monitorList.prevButton"
-          direction="prev"
-          pagination="{\\"cursorKey\\":{\\"monitor_id\\":123},\\"cursorDirection\\":\\"BEFORE\\",\\"sortOrder\\":\\"ASC\\"}"
+        <MonitorListPageSizeSelect
+          setSize={[MockFunction]}
+          size={25}
         />
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
-        <OverviewPageLink
-          dataTestSubj="xpack.uptime.monitorList.nextButton"
-          direction="next"
-          pagination="{\\"cursorKey\\":{\\"monitor_id\\":456},\\"cursorDirection\\":\\"AFTER\\",\\"sortOrder\\":\\"ASC\\"}"
-        />
+        <EuiFlexGroup
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.prevButton"
+              direction="prev"
+              pagination="{\\"cursorKey\\":{\\"monitor_id\\":123},\\"cursorDirection\\":\\"BEFORE\\",\\"sortOrder\\":\\"ASC\\"}"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.nextButton"
+              direction="next"
+              pagination="{\\"cursorKey\\":{\\"monitor_id\\":456},\\"cursorDirection\\":\\"AFTER\\",\\"sortOrder\\":\\"ASC\\"}"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

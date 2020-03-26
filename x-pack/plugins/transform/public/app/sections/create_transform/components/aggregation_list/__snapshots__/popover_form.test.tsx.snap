@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: Aggregation <PopoverForm /> Minimal initialization 1`] = `
+<EuiForm
+  style={
+    Object {
+      "width": "300px",
+    }
+  }
+>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={false}
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText=""
+    isInvalid={false}
+    label="Aggregation name"
+    labelType="label"
+  >
+    <EuiFieldText
+      defaultValue="the-group-by-agg-name"
+      isInvalid={false}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={true}
+    labelType="label"
+  >
+    <EuiButton
+      isDisabled={false}
+      onClick={[Function]}
+    >
+      Apply
+    </EuiButton>
+  </EuiFormRow>
+</EuiForm>
+`;

@@ -16,7 +16,8 @@ export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProv
     this.tags('ciGroup9');
 
     before(async () => {
-      const features = await featuresService.get();
+      // we're using a basic license, so if we want to disable all features, we have to ignore the valid licenses
+      const features = await featuresService.get({ ignoreValidLicenses: true });
       for (const space of SpaceScenarios) {
         const disabledFeatures =
           space.disabledFeatures === '*' ? Object.keys(features) : space.disabledFeatures;

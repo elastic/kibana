@@ -49,14 +49,9 @@ export class GuideCodeViewer extends Component {
     if (code) {
       return (
         <div className="guideCodeViewer__section" key={type}>
-          <div className="guideCodeViewer__title">
-            {type}
-          </div>
+          <div className="guideCodeViewer__title">{type}</div>
           <pre className="guideCodeViewer__content">
-            <code
-              ref={codeClass}
-              className={codeClass}
-            >
+            <code ref={codeClass} className={codeClass}>
               {code}
             </code>
           </pre>
@@ -70,20 +65,15 @@ export class GuideCodeViewer extends Component {
       'is-code-viewer-open': this.props.isOpen,
     });
 
-    const codeSections = this.props.source.map(sourceObject => (
+    const codeSections = this.props.source.map(sourceObject =>
       this.renderSection(sourceObject.type, sourceObject.code)
-    ));
+    );
 
     return (
       <div className={classes}>
-        <div className="guideCodeViewer__header">
-          {this.props.title}
-        </div>
+        <div className="guideCodeViewer__header">{this.props.title}</div>
 
-        <div
-          className="guideCodeViewer__closeButton fa fa-times"
-          onClick={this.props.onClose}
-        />
+        <div className="guideCodeViewer__closeButton fa fa-times" onClick={this.props.onClose} />
 
         {codeSections}
       </div>

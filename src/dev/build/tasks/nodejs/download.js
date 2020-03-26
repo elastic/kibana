@@ -53,7 +53,7 @@ export async function download(options) {
 
     const response = await Axios.request({
       url: url,
-      responseType: 'stream'
+      responseType: 'stream',
     });
 
     if (response.status !== 200) {

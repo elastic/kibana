@@ -19,21 +19,11 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiCode,
-  EuiFieldText,
-  EuiFormRow,
-  EuiIcon,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
-import {
-  DefaultFormatEditor
-} from '../default';
+import { DefaultFormatEditor } from '../default';
 
-import {
-  FormatEditorSamples
-} from '../../samples';
+import { FormatEditorSamples } from '../../samples';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -63,7 +53,11 @@ export class NumberFormatEditor extends DefaultFormatEditor {
           helpText={
             <span>
               <EuiLink target="_blank" href="https://adamwdraper.github.io/Numeral-js/">
-                <FormattedMessage id="common.ui.fieldEditor.number.documentationLabel" defaultMessage="Documentation" />&nbsp;
+                <FormattedMessage
+                  id="common.ui.fieldEditor.number.documentationLabel"
+                  defaultMessage="Documentation"
+                />
+                &nbsp;
                 <EuiIcon type="link" />
               </EuiLink>
             </span>
@@ -74,15 +68,13 @@ export class NumberFormatEditor extends DefaultFormatEditor {
           <EuiFieldText
             value={formatParams.pattern}
             placeholder={defaultPattern}
-            onChange={(e) => {
+            onChange={e => {
               this.onChange({ pattern: e.target.value });
             }}
             isInvalid={!!error}
           />
         </EuiFormRow>
-        <FormatEditorSamples
-          samples={samples}
-        />
+        <FormatEditorSamples samples={samples} />
       </Fragment>
     );
   }

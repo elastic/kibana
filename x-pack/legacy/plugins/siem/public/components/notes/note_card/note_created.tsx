@@ -5,7 +5,7 @@
  */
 
 import { FormattedRelative } from '@kbn/i18n/react';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { LocalizedDateTooltip } from '../../localized_date_tooltip';

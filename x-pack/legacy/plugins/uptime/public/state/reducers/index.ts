@@ -6,11 +6,27 @@
 
 import { combineReducers } from 'redux';
 import { monitorReducer } from './monitor';
+import { overviewFiltersReducer } from './overview_filters';
 import { snapshotReducer } from './snapshot';
 import { uiReducer } from './ui';
+import { monitorStatusReducer } from './monitor_status';
+import { dynamicSettingsReducer } from './dynamic_settings';
+import { indexPatternReducer } from './index_pattern';
+import { pingReducer } from './ping';
+import { monitorDurationReducer } from './monitor_duration';
+import { indexStatusReducer } from './index_status';
+import { mlJobsReducer } from './ml_anomaly';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
+  overviewFilters: overviewFiltersReducer,
   snapshot: snapshotReducer,
   ui: uiReducer,
+  monitorStatus: monitorStatusReducer,
+  dynamicSettings: dynamicSettingsReducer,
+  indexPattern: indexPatternReducer,
+  ping: pingReducer,
+  ml: mlJobsReducer,
+  monitorDuration: monitorDurationReducer,
+  indexStatus: indexStatusReducer,
 });

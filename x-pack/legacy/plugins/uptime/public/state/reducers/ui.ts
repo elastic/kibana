@@ -4,49 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { handleActions, Action } from 'redux-actions';
 import {
-  UiActionTypes,
   PopoverState,
-  SET_INTEGRATION_POPOVER_STATE,
-  SET_BASE_PATH,
-  REFRESH_APP,
+  toggleIntegrationsPopover,
+  setBasePath,
+  setEsKueryString,
+  triggerAppRefresh,
+  UiPayload,
+  setAlertFlyoutVisible,
 } from '../actions/ui';
 
 export interface UiState {
-  integrationsPopoverOpen: PopoverState | null;
+  alertFlyoutVisible: boolean;
   basePath: string;
+  esKuery: string;
+  integrationsPopoverOpen: PopoverState | null;
   lastRefresh: number;
 }
 
 const initialState: UiState = {
-  integrationsPopoverOpen: null,
+  alertFlyoutVisible: false,
   basePath: '',
+  esKuery: '',
+  integrationsPopoverOpen: null,
   lastRefresh: Date.now(),
 };
 
-export function uiReducer(state = initialState, action: UiActionTypes): UiState {
-  switch (action.type) {
-    case REFRESH_APP:
-      return {
-        ...state,
-        lastRefresh: action.payload,
-      };
-    case SET_INTEGRATION_POPOVER_STATE:
-      const popoverState = action.payload;
-      return {
-        ...state,
-        integrationsPopoverOpen: {
-          id: popoverState.id,
-          open: popoverState.open,
-        },
-      };
-    case SET_BASE_PATH:
-      const basePath = action.payload;
-      return {
-        ...state,
-        basePath,
-      };
-    default:
-      return state;
-  }
-}
+export const uiReducer = handleActions<UiState, UiPayload>(
+  {
+    [String(toggleIntegrationsPopover)]: (state, action: Action<PopoverState>) => ({
+      ...state,
+      integrationsPopoverOpen: action.payload as PopoverState,
+    }),
+
+    [String(setAlertFlyoutVisible)]: (state, action: Action<boolean | undefined>) => ({
+      ...state,
+      alertFlyoutVisible: action.payload ?? !state.alertFlyoutVisible,
+    }),
+
+    [String(setBasePath)]: (state, action: Action<string>) => ({
+      ...state,
+      basePath: action.payload as string,
+    }),
+
+    [String(triggerAppRefresh)]: (state, action: Action<number>) => ({
+      ...state,
+      lastRefresh: action.payload as number,
+    }),
+
+    [String(setEsKueryString)]: (state, action: Action<string>) => ({
+      ...state,
+      esKuery: action.payload as string,
+    }),
+  },
+  initialState
+);

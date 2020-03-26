@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionCreator } from 'typescript-fsa';
-
+import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { TimelineModel } from '../../store/timeline/model';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { NoteResult } from '../../graphql/types';
+import { Refetch } from '../../store/inputs/model';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -21,8 +20,20 @@ export interface FavoriteTimelineResult {
 export interface TimelineResultNote {
   savedObjectId?: string | null;
   note?: string | null;
+  noteId?: string | null;
   updated?: number | null;
   updatedBy?: string | null;
+}
+
+export interface TimelineActionsOverflowColumns {
+  width: string;
+  actions: Array<{
+    name: string;
+    icon?: string;
+    onClick?: (timeline: OpenTimelineResult) => void;
+    description: string;
+    render?: (timeline: OpenTimelineResult) => JSX.Element;
+  } | null>;
 }
 
 /** The results of the query run by the OpenTimeline component */
@@ -68,6 +79,9 @@ export type OnOpenTimeline = ({
   timelineId: string;
 }) => void;
 
+export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
+export type SetActionTimeline = Dispatch<SetStateAction<OpenTimelineResult | undefined>>;
+export type EnableExportTimelineDownloader = (selectedItem: OpenTimelineResult) => void;
 /** Invoked when the user presses enters to submit the text in the search input */
 export type OnQueryChange = (query: EuiSearchBarQuery) => void;
 
@@ -95,6 +109,8 @@ export interface OnTableChangeParams {
 /** Invoked by the EUI table implementation when the user interacts with the table */
 export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 
+export type ActionTimelineToShow = 'duplicate' | 'delete' | 'export' | 'selectable';
+
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */
   deleteTimelines?: DeleteTimelines;
@@ -104,6 +120,8 @@ export interface OpenTimelineProps {
   isLoading: boolean;
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+  /** Display import timelines modal*/
+  importCompleteToggle?: boolean;
   /** If this callback is specified, a "Favorite Selected" button will be displayed, and this callback will be invoked when the button is clicked */
   onAddTimelinesToFavorites?: OnAddTimelinesToFavorites;
   /** If this callback is specified, a "Delete Selected" button will be displayed, and this callback will be invoked when the button is clicked */
@@ -128,10 +146,14 @@ export interface OpenTimelineProps {
   pageSize: number;
   /** The currently applied search criteria */
   query: string;
+  /** Refetch table */
+  refetch?: Refetch;
   /** The results of executing a search */
   searchResults: OpenTimelineResult[];
   /** the currently-selected timelines in the table */
   selectedItems: OpenTimelineResult[];
+  /** Toggle export timelines modal*/
+  setImportCompleteToggle?: React.Dispatch<React.SetStateAction<boolean>>;
   /** the requested sort direction of the query results */
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
@@ -140,6 +162,8 @@ export interface OpenTimelineProps {
   title: string;
   /** The total (server-side) count of the search results */
   totalSearchResultsCount: number;
+  /** Hide action on timeline if needed it */
+  hideActions?: ActionTimelineToShow[];
 }
 
 export interface UpdateTimeline {
@@ -159,17 +183,3 @@ export type DispatchUpdateTimeline = ({
   timeline,
   to,
 }: UpdateTimeline) => () => void;
-
-export interface OpenTimelineDispatchProps {
-  updateTimeline: DispatchUpdateTimeline;
-  createNewTimeline: ActionCreator<{
-    id: string;
-    columns: ColumnHeader[];
-    show?: boolean;
-  }>;
-  updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
-}
-
-export interface OpenTimelineReduxProps {
-  timeline: TimelineModel;
-}

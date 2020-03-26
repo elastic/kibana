@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "target",
     "target": "ES2019",
-    "declaration": true
+    "declaration": true,
+    "declarationMap": true
   },
   "include": [
     "src/**/*"

@@ -21,7 +21,7 @@ const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
 const REPLACE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-replacePanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
-const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-CUSTOMIZE_PANEL_ACTION_ID';
+const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_PANEL';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 
@@ -30,12 +30,11 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
 
-  return new class DashboardPanelActions {
-
+  return new (class DashboardPanelActions {
     async findContextMenu(parent) {
-      return parent ?
-        await testSubjects.findDescendant(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ, parent) :
-        await testSubjects.find(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
+      return parent
+        ? await testSubjects.findDescendant(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ, parent)
+        : await testSubjects.find(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
     }
 
     async isContextMenuIconVisible() {
@@ -186,5 +185,5 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click('saveNewTitleButton');
       await this.toggleContextMenu(panel);
     }
-  };
+  })();
 }

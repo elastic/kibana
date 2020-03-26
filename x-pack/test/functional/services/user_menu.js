@@ -8,7 +8,7 @@ export function UserMenuProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  return new class UserMenu {
+  return new (class UserMenu {
     async clickLogoutButton() {
       await this._ensureMenuOpen();
       await testSubjects.click('userMenu > logoutLink');
@@ -20,7 +20,7 @@ export function UserMenuProvider({ getService }) {
     }
 
     async logoutLinkExists() {
-      if (!await testSubjects.exists('userMenuButton')) {
+      if (!(await testSubjects.exists('userMenuButton'))) {
         return;
       }
 
@@ -29,7 +29,7 @@ export function UserMenuProvider({ getService }) {
     }
 
     async closeMenu() {
-      if (!await testSubjects.exists('userMenu')) {
+      if (!(await testSubjects.exists('userMenu'))) {
         return;
       }
 
@@ -43,9 +43,7 @@ export function UserMenuProvider({ getService }) {
       }
 
       await testSubjects.click('userMenuButton');
-      await retry.waitFor('user menu opened', async () => (
-        await testSubjects.exists('userMenu')
-      ));
+      await retry.waitFor('user menu opened', async () => await testSubjects.exists('userMenu'));
     }
-  };
+  })();
 }

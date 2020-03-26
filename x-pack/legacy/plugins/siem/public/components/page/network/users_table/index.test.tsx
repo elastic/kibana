@@ -4,33 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTarget } from '../../../../graphql/types';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
-
-jest.mock('../../../../lib/settings/use_kibana_ui_setting');
-
-jest.mock('../../../search_bar', () => ({
-  siemFilterManager: {
-    addFilters: jest.fn(),
-  },
-}));
 
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
+  const mount = useMountAppended();
 
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
@@ -55,7 +48,7 @@ describe('Users Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper.find('Connect(UsersTableComponent)'))).toMatchSnapshot();
+      expect(wrapper.find('Connect(UsersTableComponent)')).toMatchSnapshot();
     });
   });
 

@@ -22,6 +22,7 @@ import { defer, throwError, iif, timer } from 'rxjs';
 import * as legacyElasticsearch from 'elasticsearch';
 
 import { CallAPIOptions } from '.';
+import { APICaller } from './api_types';
 import { Logger } from '../logging';
 
 const esErrors = legacyElasticsearch.errors;
@@ -34,15 +35,11 @@ const esErrors = legacyElasticsearch.errors;
  * different error is received.
  *
  * @param apiCaller
+ * @param log
+ * @param delay
  */
-
-// TODO: Replace with APICaller from './scoped_cluster_client' once #46668 is merged
 export function migrationsRetryCallCluster(
-  apiCaller: (
-    endpoint: string,
-    clientParams: Record<string, any>,
-    options?: CallAPIOptions
-  ) => Promise<any>,
+  apiCaller: APICaller,
   log: Logger,
   delay: number = 2500
 ) {
@@ -65,7 +62,10 @@ export function migrationsRetryCallCluster(
                     error instanceof esErrors.ServiceUnavailable ||
                     error instanceof esErrors.RequestTimeout ||
                     error instanceof esErrors.AuthenticationException ||
-                    error instanceof esErrors.AuthorizationException
+                    error instanceof esErrors.AuthorizationException ||
+                    // @ts-ignore
+                    error instanceof esErrors.Gone ||
+                    error?.body?.error?.type === 'snapshot_in_progress_exception'
                   );
                 },
                 timer(delay),
@@ -86,15 +86,7 @@ export function migrationsRetryCallCluster(
  *
  * @param apiCaller
  */
-
-// TODO: Replace with APICaller from './scoped_cluster_client' once #46668 is merged
-export function retryCallCluster(
-  apiCaller: (
-    endpoint: string,
-    clientParams: Record<string, any>,
-    options?: CallAPIOptions
-  ) => Promise<any>
-) {
+export function retryCallCluster(apiCaller: APICaller) {
   return (endpoint: string, clientParams: Record<string, any> = {}, options?: CallAPIOptions) => {
     return defer(() => apiCaller(endpoint, clientParams, options))
       .pipe(

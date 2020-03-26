@@ -6,9 +6,7 @@
 
 import Boom from 'boom';
 
-import {
-  CONFIG_DASHBOARD_ONLY_MODE_ROLES,
-} from '../common';
+import { CONFIG_DASHBOARD_ONLY_MODE_ROLES } from '../common';
 
 const superuserRole = 'superuser';
 
@@ -46,7 +44,9 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
         return h.continue;
       }
 
-      const isDashboardOnlyModeUser = user.roles.find(role => dashboardOnlyModeRoles.includes(role));
+      const isDashboardOnlyModeUser = user.roles.find(role =>
+        dashboardOnlyModeRoles.includes(role)
+      );
       const isSuperUser = user.roles.find(role => role === superuserRole);
 
       const enforceDashboardOnlyMode = isDashboardOnlyModeUser && !isSuperUser;
@@ -63,6 +63,6 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
       }
 
       return h.continue;
-    }
+    },
   };
 }

@@ -23,11 +23,11 @@ export function makeFakeXAspect() {
   return {
     accessor: -1,
     title: i18n.translate('common.ui.aggResponse.allDocsTitle', {
-      defaultMessage: 'All docs'
+      defaultMessage: 'All docs',
     }),
     params: {
       defaultValue: '_all',
     },
-    format: {}
+    format: {},
   };
 }

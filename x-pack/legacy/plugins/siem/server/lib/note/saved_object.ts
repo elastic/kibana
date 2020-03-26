@@ -5,15 +5,16 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { RequestAuth } from 'hapi';
 import { getOr } from 'lodash/fp';
 import uuid from 'uuid';
-
-import { SavedObjectsFindOptions } from 'src/core/server';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+
+import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
+import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import {
   PageInfoNote,
   ResponseNote,
@@ -21,7 +22,7 @@ import {
   SortNote,
   NoteResult,
 } from '../../graphql/types';
-import { FrameworkRequest, internalFrameworkRequest } from '../framework';
+import { FrameworkRequest } from '../framework';
 import { SavedNote, NoteSavedObjectRuntimeType, NoteSavedObject } from './types';
 import { noteSavedObjectType } from './saved_object_mappings';
 import { timelineSavedObjectType } from '../../saved_objects';
@@ -117,7 +118,7 @@ export class Note {
                 const timelineResult = convertSavedObjectToSavedTimeline(
                   await savedObjectsClient.create(
                     timelineSavedObjectType,
-                    pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
+                    pickSavedTimeline(null, {}, request.user)
                   )
                 );
                 note.timelineId = timelineResult.savedObjectId;
@@ -132,7 +133,7 @@ export class Note {
           note: convertSavedObjectToSavedNote(
             await savedObjectsClient.create(
               noteSavedObjectType,
-              pickSavedNote(noteId, note, request[internalFrameworkRequest].auth || null)
+              pickSavedNote(noteId, note, request.user)
             ),
             timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
           ),
@@ -140,6 +141,8 @@ export class Note {
       }
 
       // Update new note
+
+      const existingNote = await this.getSavedNote(request, noteId);
       return {
         code: 200,
         message: 'success',
@@ -147,9 +150,9 @@ export class Note {
           await savedObjectsClient.update(
             noteSavedObjectType,
             noteId,
-            pickSavedNote(noteId, note, request[internalFrameworkRequest].auth || null),
+            pickSavedNote(noteId, note, request.user),
             {
-              version: version || undefined,
+              version: existingNote.version || undefined,
             }
           )
         ),
@@ -193,7 +196,7 @@ export class Note {
   }
 }
 
-const convertSavedObjectToSavedNote = (
+export const convertSavedObjectToSavedNote = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): NoteSavedObject =>
@@ -220,17 +223,17 @@ const convertSavedObjectToSavedNote = (
 const pickSavedNote = (
   noteId: string | null,
   savedNote: SavedNote,
-  userInfo: RequestAuth
+  userInfo: AuthenticatedUser | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
   if (noteId == null) {
     savedNote.created = new Date().valueOf();
-    savedNote.createdBy = getOr(null, 'credentials.username', userInfo);
+    savedNote.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
     savedNote.updated = new Date().valueOf();
-    savedNote.updatedBy = getOr(null, 'credentials.username', userInfo);
+    savedNote.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   } else if (noteId != null) {
     savedNote.updated = new Date().valueOf();
-    savedNote.updatedBy = getOr(null, 'credentials.username', userInfo);
+    savedNote.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
   return savedNote;
 };

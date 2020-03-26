@@ -14,7 +14,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
 
-  describe('smoke test', function () {
+  describe('smoke test', function() {
     this.tags('smoke');
     const workpadListSelector = 'canvasWorkpadLoaderTable > canvasWorkpadLoaderWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';

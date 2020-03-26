@@ -6,8 +6,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { omit } from 'lodash';
-import { KibanaResponseFactory } from 'src/core/server';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { KibanaResponseFactory, SavedObjectsClientContract } from 'src/core/server';
 import { RouteInitializerDeps } from '../';
 import {
   CANVAS_TYPE,
@@ -64,6 +63,12 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
         }),
         body: WorkpadSchema,
       },
+      options: {
+        body: {
+          maxBytes: 26214400,
+          accepts: ['application/json'],
+        },
+      },
     },
     catchErrorHandler(async (context, request, response) => {
       return workpadUpdateHandler(
@@ -83,6 +88,12 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
           id: schema.string(),
         }),
         body: WorkpadSchema,
+      },
+      options: {
+        body: {
+          maxBytes: 26214400,
+          accepts: ['application/json'],
+        },
       },
     },
     catchErrorHandler(async (context, request, response) => {
@@ -109,7 +120,13 @@ export function initializeUpdateWorkpadAssetsRoute(deps: RouteInitializerDeps) {
         // ToDo: Currently the validation must be a schema.object
         // Because we don't know what keys the assets will have, we have to allow
         // unknowns and then validate in the handler
-        body: schema.object({}, { allowUnknowns: true }),
+        body: schema.object({}, { unknowns: 'allow' }),
+      },
+      options: {
+        body: {
+          maxBytes: 26214400,
+          accepts: ['application/json'],
+        },
       },
     },
     async (context, request, response) => {

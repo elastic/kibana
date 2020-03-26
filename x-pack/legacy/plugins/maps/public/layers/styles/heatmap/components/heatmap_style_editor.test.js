@@ -9,16 +9,14 @@ import { shallow } from 'enzyme';
 
 import { HeatmapStyleEditor } from './heatmap_style_editor';
 
+jest.mock('ui/new_platform');
+
 describe('HeatmapStyleEditor', () => {
   test('is rendered', () => {
     const component = shallow(
-      <HeatmapStyleEditor
-        colorRampName="Blues"
-        onHeatmapColorChange={() => {}}
-      />
+      <HeatmapStyleEditor colorRampName="Blues" onHeatmapColorChange={() => {}} />
     );
 
-    expect(component)
-      .toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 });

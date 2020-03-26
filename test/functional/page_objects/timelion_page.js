@@ -19,7 +19,6 @@
 
 export function TimelionPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header']);
   const esArchiver = getService('esArchiver');
@@ -28,7 +27,7 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
   class TimelionPage {
     async initTests() {
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
 
       log.debug('load kibana index');
@@ -55,14 +54,16 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
     }
 
     async getSuggestionItemsText() {
-      const elements = await find.allByCssSelector('[data-test-subj="timelionSuggestionListItem"]');
+      const elements = await testSubjects.findAll('timelionSuggestionListItem');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
     async clickSuggestion(suggestionIndex = 0, waitTime = 500) {
-      const elements = await find.allByCssSelector('[data-test-subj="timelionSuggestionListItem"]');
+      const elements = await testSubjects.findAll('timelionSuggestionListItem');
       if (suggestionIndex > elements.length) {
-        throw new Error(`Unable to select suggestion ${suggestionIndex}, only ${elements.length} suggestions available.`);
+        throw new Error(
+          `Unable to select suggestion ${suggestionIndex}, only ${elements.length} suggestions available.`
+        );
       }
       await elements[suggestionIndex].click();
       // Wait for timelion expression to be updated after clicking suggestions

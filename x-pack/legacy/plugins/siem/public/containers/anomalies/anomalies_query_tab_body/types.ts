@@ -20,15 +20,16 @@ interface QueryTabBodyProps {
 }
 
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
-  startDate: number;
-  endDate: number;
-  skip: boolean;
-  setQuery: SetQuery;
-  narrowDateRange: NarrowDateRange;
-  updateDateRange?: UpdateDateRange;
   anomaliesFilterQuery?: object;
+  AnomaliesTableComponent: typeof AnomaliesHostTable | typeof AnomaliesNetworkTable;
+  deleteQuery?: ({ id }: { id: string }) => void;
+  endDate: number;
+  flowTarget?: FlowTarget;
+  narrowDateRange: NarrowDateRange;
+  setQuery: SetQuery;
+  startDate: number;
+  skip: boolean;
+  updateDateRange?: UpdateDateRange;
   hideHistogramIfEmpty?: boolean;
   ip?: string;
-  flowTarget?: FlowTarget;
-  AnomaliesTableComponent: typeof AnomaliesHostTable | typeof AnomaliesNetworkTable;
 };

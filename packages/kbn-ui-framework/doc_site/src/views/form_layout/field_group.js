@@ -33,10 +33,7 @@ export default () => (
       <KuiFieldGroupSection isWide>
         <div className="kuiSearchInput">
           <div className="kuiSearchInput__icon kuiIcon fa-search" />
-          <input
-            className="kuiSearchInput__input"
-            type="text"
-          />
+          <input className="kuiSearchInput__input" type="text" />
         </div>
       </KuiFieldGroupSection>
 
@@ -49,51 +46,35 @@ export default () => (
       </KuiFieldGroupSection>
     </KuiFieldGroup>
 
-    <br className="guideBreak"/>
+    <br className="guideBreak" />
 
     <KuiFieldGroup>
       <KuiFieldGroupSection>
-        <input
-          className="kuiTextInput"
-          placeholder="http://"
-          type="text"
-        />
+        <input className="kuiTextInput" placeholder="http://" type="text" />
       </KuiFieldGroupSection>
 
       <KuiFieldGroupSection>
-        <KuiButton buttonType="primary">
-          Ping
-        </KuiButton>
+        <KuiButton buttonType="primary">Ping</KuiButton>
       </KuiFieldGroupSection>
     </KuiFieldGroup>
 
-    <br className="guideBreak"/>
+    <br className="guideBreak" />
 
     <KuiFieldGroup isAlignedTop>
       <KuiFieldGroupSection>
-        <textarea
-          className="kuiTextArea"
-          placeholder="http://"
-          type="text"
-          rows="5"
-        />
+        <textarea className="kuiTextArea" placeholder="http://" type="text" rows="5" />
       </KuiFieldGroupSection>
 
       <KuiFieldGroupSection>
-        <KuiButton buttonType="primary">
-          Ping
-        </KuiButton>
+        <KuiButton buttonType="primary">Ping</KuiButton>
       </KuiFieldGroupSection>
     </KuiFieldGroup>
 
-    <br className="guideBreak"/>
+    <br className="guideBreak" />
 
     <KuiFieldGroup>
       <KuiFieldGroupSection>
-        <input
-          className="kuiTextInput"
-          type="text"
-        />
+        <input className="kuiTextInput" type="text" />
       </KuiFieldGroupSection>
 
       <KuiFieldGroupSection>

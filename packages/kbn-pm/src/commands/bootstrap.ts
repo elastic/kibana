@@ -24,12 +24,14 @@ import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
 import { topologicallyBatchProjects } from '../utils/projects';
 import { ICommand } from './';
+import { getAllChecksums } from '../utils/project_checksums';
+import { BootstrapCacheFile } from '../utils/bootstrap_cache_file';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
   name: 'bootstrap',
 
-  async run(projects, projectGraph, { options }) {
+  async run(projects, projectGraph, { options, kbn }) {
     const batchedProjectsByWorkspace = topologicallyBatchProjects(projects, projectGraph, {
       batchByWorkspace: true,
     });
@@ -65,9 +67,18 @@ export const BootstrapCommand: ICommand = {
      * have to, as it will slow down the bootstrapping process.
      */
     log.write(chalk.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
-    await parallelizeBatches(batchedProjects, async pkg => {
-      if (pkg.hasScript('kbn:bootstrap')) {
-        await pkg.runScriptStreaming('kbn:bootstrap');
+
+    const checksums = options.cache ? await getAllChecksums(kbn, log) : false;
+    await parallelizeBatches(batchedProjects, async project => {
+      if (project.hasScript('kbn:bootstrap')) {
+        const cacheFile = new BootstrapCacheFile(kbn, project, checksums);
+        if (cacheFile.isValid()) {
+          log.success(`[${project.name}] cache up to date`);
+        } else {
+          cacheFile.delete();
+          await project.runScriptStreaming('kbn:bootstrap');
+          cacheFile.write();
+        }
       }
     });
 

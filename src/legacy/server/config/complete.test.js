@@ -20,7 +20,7 @@
 import completeMixin from './complete';
 import sinon from 'sinon';
 
-describe('server/config completeMixin()', function () {
+describe('server/config completeMixin()', function() {
   const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 

@@ -5,12 +5,13 @@
  */
 
 import { shallow, mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { JobsTableComponent } from './jobs_table';
 import { mockSiemJobs } from '../__mocks__/api';
 import { cloneDeep } from 'lodash/fp';
 import { SiemJob } from '../types';
+
+jest.mock('../../../lib/kibana');
 
 describe('JobsTableComponent', () => {
   let siemJobs: SiemJob[];
@@ -28,7 +29,7 @@ describe('JobsTableComponent', () => {
         onJobStateChange={onJobStateChangeMock}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should render the hyperlink which points specifically to the job id', () => {

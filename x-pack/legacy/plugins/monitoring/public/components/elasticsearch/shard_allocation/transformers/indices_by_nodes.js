@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 import { decorateShards } from '../lib/decorate_shards';
 
 export function indicesByNodes() {
   return function indicesByNodesFn(shards, nodes) {
-
     function createIndex(obj, shard) {
       const id = shard.index;
       if (obj[id]) {
@@ -23,7 +20,7 @@ export function indicesByNodes() {
         children: [],
         unassigned: [],
         unassignedPrimaries: false,
-        type: 'index'
+        type: 'index',
       };
       return obj;
     }
@@ -33,7 +30,7 @@ export function indicesByNodes() {
 
       // If the node is null then it's an unassigned shard and we need to
       // add it to the unassigned array.
-      if (!shard.node || (shard.node === null)) {
+      if (!shard.node || shard.node === null) {
         obj[index].unassigned.push(shard);
         // if the shard is a primary we need to set the unassignedPrimaries flag
         if (shard.primary) {
@@ -50,7 +47,7 @@ export function indicesByNodes() {
           name: nodes[node].name,
           node_type: nodes[node].type,
           ip_port: nodes[node].transport_address,
-          children: []
+          children: [],
         };
         obj[index].children.push(nodeObj);
       }
@@ -58,16 +55,19 @@ export function indicesByNodes() {
       return obj;
     }
 
-    const data = _.reduce(decorateShards(shards, nodes), function (obj, shard) {
-      obj = createIndex(obj, shard);
-      obj = createNodeAddShard(obj, shard);
-      return obj;
-    }, {});
+    const data = _.reduce(
+      decorateShards(shards, nodes),
+      function(obj, shard) {
+        obj = createIndex(obj, shard);
+        obj = createNodeAddShard(obj, shard);
+        return obj;
+      },
+      {}
+    );
 
     return _(data)
       .values()
-      .sortBy(index => [ !index.unassignedPrimaries, /^\./.test(index.name), index.name ])
+      .sortBy(index => [!index.unassignedPrimaries, /^\./.test(index.name), index.name])
       .value();
   };
 }
-

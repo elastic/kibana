@@ -5,6 +5,7 @@
  */
 
 import { MlError } from '../ml/types';
+import { AuditMessageBase } from '../../../../../../plugins/ml/common/types/audit_message';
 
 export interface Group {
   id: string;
@@ -13,8 +14,7 @@ export interface Group {
 }
 
 export interface CheckRecognizerProps {
-  indexPatternName: string;
-  kbnVersion: string;
+  indexPatternName: string[];
   signal: AbortSignal;
 }
 
@@ -30,7 +30,6 @@ export interface RecognizerModule {
 
 export interface GetModulesProps {
   moduleId?: string;
-  kbnVersion: string;
   signal: AbortSignal;
 }
 
@@ -97,13 +96,13 @@ export interface MlSetupArgs {
   jobIdErrorFilter: string[];
   groups: string[];
   prefix?: string;
-  kbnVersion: string;
 }
 
 /**
  * Representation of an ML Job as returned from the `ml/jobs/jobs_summary` API
  */
 export interface JobSummary {
+  auditMessage?: AuditMessageBase;
   datafeedId: string;
   datafeedIndices: string[];
   datafeedState: string;
@@ -194,16 +193,6 @@ export interface CloseJobsResponse {
   [key: string]: {
     closed: boolean;
   };
-}
-
-export interface IndexPatternSavedObject {
-  attributes: {
-    title: string;
-  };
-  id: string;
-  type: string;
-  updated_at: string;
-  version: string;
 }
 
 export interface JobsFilters {

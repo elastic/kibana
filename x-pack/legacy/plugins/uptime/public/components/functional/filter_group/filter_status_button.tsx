@@ -11,6 +11,7 @@ import { useUrlParams } from '../../../hooks';
 export interface FilterStatusButtonProps {
   content: string;
   dataTestSubj: string;
+  isDisabled?: boolean;
   value: string;
   withNext: boolean;
 }
@@ -18,6 +19,7 @@ export interface FilterStatusButtonProps {
 export const FilterStatusButton = ({
   content,
   dataTestSubj,
+  isDisabled,
   value,
   withNext,
 }: FilterStatusButtonProps) => {
@@ -27,6 +29,7 @@ export const FilterStatusButton = ({
     <EuiFilterButton
       data-test-subj={dataTestSubj}
       hasActiveFilters={urlValue === value}
+      isDisabled={isDisabled}
       onClick={() => {
         const nextFilter = { statusFilter: urlValue === value ? '' : value, pagination: '' };
         setUrlParams(nextFilter);

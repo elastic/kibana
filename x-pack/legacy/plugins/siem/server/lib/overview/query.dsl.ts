@@ -203,10 +203,26 @@ export const buildOverviewHostQuery = ({
             },
           },
         },
-        winlog_count: {
+        winlog_module: {
           filter: {
             term: {
               'agent.type': 'winlogbeat',
+            },
+          },
+          aggs: {
+            mwsysmon_operational_event_count: {
+              filter: {
+                term: {
+                  'winlog.channel': 'Microsoft-Windows-Sysmon/Operational',
+                },
+              },
+            },
+            security_event_count: {
+              filter: {
+                term: {
+                  'winlog.channel': 'Security',
+                },
+              },
             },
           },
         },

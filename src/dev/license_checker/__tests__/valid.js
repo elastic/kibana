@@ -37,17 +37,19 @@ const PACKAGE = {
 describe('tasks/lib/licenses', () => {
   describe('assertLicensesValid()', () => {
     it('returns undefined when package has valid license', () => {
-      expect(assertLicensesValid({
-        packages: [PACKAGE],
-        validLicenses: [...PACKAGE.licenses]
-      })).to.be(undefined);
+      expect(
+        assertLicensesValid({
+          packages: [PACKAGE],
+          validLicenses: [...PACKAGE.licenses],
+        })
+      ).to.be(undefined);
     });
 
     it('throw an error when the packages license is invalid', () => {
       expect(() => {
         assertLicensesValid({
           packages: [PACKAGE],
-          validLicenses: [`not ${PACKAGE.licenses[0]}`]
+          validLicenses: [`not ${PACKAGE.licenses[0]}`],
         });
       }).to.throwError(PACKAGE.name);
     });
@@ -58,10 +60,10 @@ describe('tasks/lib/licenses', () => {
           packages: [
             {
               ...PACKAGE,
-              licenses: []
-            }
+              licenses: [],
+            },
           ],
-          validLicenses: [...PACKAGE.licenses]
+          validLicenses: [...PACKAGE.licenses],
         });
       }).to.throwError(PACKAGE.name);
     });
@@ -70,7 +72,7 @@ describe('tasks/lib/licenses', () => {
       try {
         assertLicensesValid({
           packages: [PACKAGE],
-          validLicenses: ['none']
+          validLicenses: ['none'],
         });
         throw new Error('expected assertLicensesValid() to throw');
       } catch (error) {

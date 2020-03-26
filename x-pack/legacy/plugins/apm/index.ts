@@ -7,18 +7,23 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import { APMPluginContract } from '../../../plugins/apm/server/plugin';
+import { APMPluginContract } from '../../../plugins/apm/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import mappings from './mappings.json';
-import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
+    require: [
+      'kibana',
+      'elasticsearch',
+      'xpack_main',
+      'apm_oss',
+      'task_manager'
+    ],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
-
     uiExports: {
       app: {
         title: 'APM',
@@ -28,7 +33,8 @@ export const apm: LegacyPluginInitializer = kibana => {
         main: 'plugins/apm/index',
         icon: 'plugins/apm/icon.svg',
         euiIconType: 'apmApp',
-        order: 8100
+        order: 8100,
+        category: DEFAULT_APP_CATEGORIES.observability
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/apm/legacy_register_feature'],
@@ -71,7 +77,15 @@ export const apm: LegacyPluginInitializer = kibana => {
         autocreateApmIndexPattern: Joi.boolean().default(true),
 
         // service map
-        serviceMapEnabled: Joi.boolean().default(false)
+        serviceMapEnabled: Joi.boolean().default(true),
+        serviceMapFingerprintBucketSize: Joi.number().default(100),
+        serviceMapTraceIdBucketSize: Joi.number().default(65),
+        serviceMapFingerprintGlobalBucketSize: Joi.number().default(1000),
+        serviceMapTraceIdGlobalBucketSize: Joi.number().default(6),
+        serviceMapMaxTracesPerRequest: Joi.number().default(50),
+
+        // telemetry
+        telemetryCollectionEnabled: Joi.boolean().default(true)
       }).default();
     },
 
@@ -82,37 +96,50 @@ export const apm: LegacyPluginInitializer = kibana => {
         name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
           defaultMessage: 'APM'
         }),
+        order: 900,
         icon: 'apmApp',
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
         catalogue: ['apm'],
+        // see x-pack/plugins/features/common/feature_kibana_privileges.ts
         privileges: {
           all: {
-            api: ['apm', 'apm_write'],
+            app: ['apm', 'kibana'],
+            api: ['apm', 'apm_write', 'actions-read', 'alerting-read'],
             catalogue: ['apm'],
             savedObject: {
-              all: [],
+              all: ['action', 'action_task_params'],
               read: []
             },
-            ui: ['show', 'save']
+            ui: [
+              'show',
+              'save',
+              'alerting:show',
+              'actions:show',
+              'alerting:save',
+              'actions:save',
+              'alerting:delete',
+              'actions:delete'
+            ]
           },
           read: {
-            api: ['apm'],
+            app: ['apm', 'kibana'],
+            api: ['apm', 'actions-read', 'alerting-read'],
             catalogue: ['apm'],
             savedObject: {
-              all: [],
+              all: ['action', 'action_task_params'],
               read: []
             },
-            ui: ['show']
+            ui: ['show', 'alerting:show', 'actions:show']
           }
         }
       });
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      makeApmUsageCollector(usageCollection, server);
       const apmPlugin = server.newPlatform.setup.plugins
         .apm as APMPluginContract;
 
-      apmPlugin.registerLegacyAPI({ server });
+      apmPlugin.registerLegacyAPI({
+        server
+      });
     }
   });
 };

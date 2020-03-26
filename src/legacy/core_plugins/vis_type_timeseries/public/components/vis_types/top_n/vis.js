@@ -19,8 +19,8 @@
 
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { TopN } from '../../../visualizations/views/top_n';
-import { getLastValue } from '../../../../common/get_last_value';
-import { isBackgroundInverted } from '../../../../common/set_is_reversed';
+import { getLastValue } from '../../../../../../../plugins/vis_type_timeseries/common/get_last_value';
+import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';

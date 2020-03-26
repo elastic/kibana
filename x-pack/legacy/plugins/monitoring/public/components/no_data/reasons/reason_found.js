@@ -6,20 +6,17 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiText,
-  EuiCode,
-} from '@elastic/eui';
+import { EuiText, EuiCode } from '@elastic/eui';
 import {
   ExplainCollectionEnabled,
   ExplainCollectionInterval,
   ExplainExporters,
   ExplainExportersCloud,
-  ExplainPluginEnabled
+  ExplainPluginEnabled,
 } from '../explanations';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-const ExplainWhyNoData = (props) => {
+const ExplainWhyNoData = props => {
   const { reason } = props;
   const { property, data, context } = reason;
   switch (property) {
@@ -29,16 +26,14 @@ const ExplainWhyNoData = (props) => {
       return <ExplainCollectionInterval {...props} />;
     case 'xpack.monitoring.exporters':
       return <ExplainExporters {...props} />;
-    case  'xpack.monitoring.exporters.cloud_enabled':
+    case 'xpack.monitoring.exporters.cloud_enabled':
       return <ExplainExportersCloud />;
     case 'xpack.monitoring.enabled':
       return <ExplainPluginEnabled {...props} />;
     case 'custom':
       return (
         <EuiText>
-          <p>
-            {reason.message}
-          </p>
+          <p>{reason.message}</p>
         </EuiText>
       );
     default:
@@ -49,9 +44,9 @@ const ExplainWhyNoData = (props) => {
               id="xpack.monitoring.noData.reasons.explainWhyNoDataDescription"
               defaultMessage="There is a {context} setting that has {property} set to {data}."
               values={{
-                context: (<EuiCode>{context}</EuiCode>),
-                property: (<EuiCode>{property}</EuiCode>),
-                data: (<EuiCode>{data}</EuiCode>)
+                context: <EuiCode>{context}</EuiCode>,
+                property: <EuiCode>{property}</EuiCode>,
+                data: <EuiCode>{data}</EuiCode>,
               }}
             />
           </p>
@@ -70,5 +65,5 @@ export function ReasonFound(props) {
 
 ReasonFound.propTypes = {
   enabler: PropTypes.object.isRequired,
-  reason: PropTypes.object.isRequired
+  reason: PropTypes.object.isRequired,
 };

@@ -379,6 +379,48 @@ export const ecsSchema = gql`
     auth: AuthEcsFields
   }
 
+  type RuleField {
+    id: ToStringArray
+    rule_id: ToStringArray
+    false_positives: [String!]!
+    saved_id: ToStringArray
+    timeline_id: ToStringArray
+    timeline_title: ToStringArray
+    max_signals: ToNumberArray
+    risk_score: ToStringArray
+    output_index: ToStringArray
+    description: ToStringArray
+    from: ToStringArray
+    immutable: ToBooleanArray
+    index: ToStringArray
+    interval: ToStringArray
+    language: ToStringArray
+    query: ToStringArray
+    references: ToStringArray
+    severity: ToStringArray
+    tags: ToStringArray
+    threat: ToAny
+    type: ToStringArray
+    size: ToStringArray
+    to: ToStringArray
+    enabled: ToBooleanArray
+    filters: ToAny
+    created_at: ToStringArray
+    updated_at: ToStringArray
+    created_by: ToStringArray
+    updated_by: ToStringArray
+    version: ToStringArray
+  }
+
+  type SignalField {
+    rule: RuleField
+    original_time: ToStringArray
+  }
+
+  type RuleEcsField {
+    reference: ToStringArray
+  }
+
   type ECS {
     _id: String!
     _index: String
@@ -390,6 +432,8 @@ export const ecsSchema = gql`
     geo: GeoEcsFields
     host: HostEcsFields
     network: NetworkEcsField
+    rule: RuleEcsField
+    signal: SignalField
     source: SourceEcsFields
     suricata: SuricataEcsFields
     tls: TlsEcsFields

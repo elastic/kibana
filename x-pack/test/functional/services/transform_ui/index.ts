@@ -7,6 +7,8 @@
 export { TransformAPIProvider } from './api';
 export { TransformManagementProvider } from './management';
 export { TransformNavigationProvider } from './navigation';
+export { TransformSecurityCommonProvider } from './security_common';
+export { TransformSecurityUIProvider } from './security_ui';
 export { TransformSourceSelectionProvider } from './source_selection';
 export { TransformTableProvider } from './transform_table';
 export { TransformWizardProvider } from './wizard';

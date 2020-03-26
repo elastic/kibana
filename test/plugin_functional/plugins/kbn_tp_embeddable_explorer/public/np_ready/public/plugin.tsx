@@ -19,7 +19,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { createHelloWorldAction } from '../../../../../../../src/plugins/ui_actions/public/tests/test_samples';
 
 import {
@@ -31,24 +31,16 @@ import { CONTEXT_MENU_TRIGGER } from './embeddable_api';
 
 const REACT_ROOT_ID = 'embeddableExplorerRoot';
 
-import {
-  SayHelloAction,
-  createSendMessageAction,
-  HelloWorldEmbeddableFactory,
-  ContactCardEmbeddableFactory,
-} from './embeddable_api';
+import { SayHelloAction, createSendMessageAction } from './embeddable_api';
 import { App } from './app';
+import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
 import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../../src/plugins/kibana_react/public/saved_objects';
-import {
-  IEmbeddableStart,
-  IEmbeddableSetup,
+  EmbeddableStart,
+  EmbeddableSetup,
 } from '.../../../../../../../src/plugins/embeddable/public';
 
 export interface SetupDependencies {
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   inspector: InspectorSetupContract;
   __LEGACY: {
     ExitFullScreenButton: React.ComponentType<any>;
@@ -56,8 +48,8 @@ export interface SetupDependencies {
 }
 
 interface StartDependencies {
-  embeddable: IEmbeddableStart;
-  uiActions: IUiActionsStart;
+  embeddable: EmbeddableStart;
+  uiActions: UiActionsStart;
   inspector: InspectorStartContract;
   __LEGACY: {
     ExitFullScreenButton: React.ComponentType<any>;
@@ -77,37 +69,15 @@ export class EmbeddableExplorerPublicPlugin
     const helloWorldAction = createHelloWorldAction(core.overlays);
     const sayHelloAction = new SayHelloAction(alert);
     const sendMessageAction = createSendMessageAction(core.overlays);
-    const helloWorldEmbeddableFactory = new HelloWorldEmbeddableFactory();
-    const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
-      {},
-      plugins.uiActions.executeTriggerActions,
-      core.overlays
-    );
 
     plugins.uiActions.registerAction(helloWorldAction);
     plugins.uiActions.registerAction(sayHelloAction);
     plugins.uiActions.registerAction(sendMessageAction);
 
-    plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, helloWorldAction.id);
-
-    plugins.embeddable.registerEmbeddableFactory(
-      helloWorldEmbeddableFactory.type,
-      helloWorldEmbeddableFactory
-    );
-    plugins.embeddable.registerEmbeddableFactory(
-      contactCardEmbeddableFactory.type,
-      contactCardEmbeddableFactory
-    );
+    plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, helloWorldAction);
 
     plugins.__LEGACY.onRenderComplete(() => {
       const root = document.getElementById(REACT_ROOT_ID);
-      const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-        <SavedObjectFinderUi
-          {...props}
-          savedObjects={core.savedObjects}
-          uiSettings={core.uiSettings}
-        />
-      );
       ReactDOM.render(
         <App
           getActions={plugins.uiActions.getTriggerCompatibleActions}
@@ -116,7 +86,7 @@ export class EmbeddableExplorerPublicPlugin
           notifications={core.notifications}
           overlays={core.overlays}
           inspector={plugins.inspector}
-          SavedObjectFinder={SavedObjectFinder}
+          SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
           I18nContext={core.i18n.Context}
         />,
         root

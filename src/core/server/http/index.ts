@@ -29,6 +29,7 @@ export {
   HttpResponsePayload,
   ErrorHttpResponseOptions,
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
@@ -47,10 +48,18 @@ export {
   RouteMethod,
   RouteRegistrar,
   RouteConfigOptions,
-  RouteSchemas,
   RouteConfigOptionsBody,
   RouteContentType,
   validBodyOutput,
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidationError,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
 export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
@@ -58,9 +67,12 @@ export {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
+  AuthRedirected,
+  AuthRedirectedParams,
   AuthToolkit,
   AuthResult,
   Authenticated,
+  AuthNotHandled,
   AuthResultType,
 } from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';

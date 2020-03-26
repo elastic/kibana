@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   describe('delete', () => {
@@ -14,23 +14,17 @@ export default function ({ getService }) {
       await esArchiver.load(archive);
 
       await supertest
-        .put(
-          '/api/logstash/pipeline/fast_generator'
-        )
+        .put('/api/logstash/pipeline/fast_generator')
         .set('kbn-xsrf', 'xxx')
         .send({
           id: 'fast_generator',
           description: 'foobar baz',
           username: 'seger',
-          pipeline: 'input { generator {} }\n\n output { stdout {} }'
+          pipeline: 'input { generator {} }\n\n output { stdout {} }',
         })
         .expect(204);
 
-      await supertest
-        .get(
-          '/api/logstash/pipeline/fast_generator'
-        )
-        .expect(200);
+      await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
     });
 
     after('unload pipelines archive', () => {
@@ -39,17 +33,11 @@ export default function ({ getService }) {
 
     it('should delete the specified pipeline', async () => {
       await supertest
-        .delete(
-          '/api/logstash/pipeline/fast_generator'
-        )
+        .delete('/api/logstash/pipeline/fast_generator')
         .set('kbn-xsrf', 'xxx')
         .expect(204);
 
-      await supertest
-        .get(
-          '/api/logstash/pipeline/fast_generator'
-        )
-        .expect(404);
+      await supertest.get('/api/logstash/pipeline/fast_generator').expect(404);
     });
   });
 }

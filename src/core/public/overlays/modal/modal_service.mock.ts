@@ -25,6 +25,7 @@ const createStartContractMock = () => {
       close: jest.fn(),
       onClose: Promise.resolve(),
     }),
+    openConfirm: jest.fn().mockResolvedValue(true),
   };
   return startContract;
 };

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { PingListExpandedRowComponent } from '../expanded_row';
 import { Ping } from '../../../../../common/graphql/types';
+import { DocLinkForBody } from '../doc_link_body';
 
 describe('PingListExpandedRow', () => {
   let ping: Ping;
@@ -55,5 +56,27 @@ describe('PingListExpandedRow', () => {
     // @ts-ignore this shouldn't be undefined unless the beforeEach block is modified
     delete ping.http;
     expect(shallowWithIntl(<PingListExpandedRowComponent ping={ping} />)).toMatchSnapshot();
+  });
+
+  it(`shallow renders link to docs if body is not recorded but it is present`, () => {
+    // @ts-ignore this shouldn't be undefined unless the beforeEach block is modified
+    delete ping.http.response.body.content;
+    expect(shallowWithIntl(<PingListExpandedRowComponent ping={ping} />)).toMatchSnapshot();
+  });
+
+  it(`renders link to docs if body is not recorded but it is present`, () => {
+    // @ts-ignore this shouldn't be undefined unless the beforeEach block is modified
+    delete ping.http.response.body.content;
+    expect(renderWithIntl(<PingListExpandedRowComponent ping={ping} />)).toMatchSnapshot();
+  });
+
+  it(`mount component to find link to docs if body is not recorded but it is present`, () => {
+    // @ts-ignore this shouldn't be undefined unless the beforeEach block is modified
+    delete ping.http.response.body.content;
+    const component = mountWithIntl(<PingListExpandedRowComponent ping={ping} />);
+
+    const docLinkComponent = component.find(DocLinkForBody);
+
+    expect(docLinkComponent).toHaveLength(1);
   });
 });

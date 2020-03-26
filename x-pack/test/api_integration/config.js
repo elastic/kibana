@@ -7,12 +7,15 @@
 import { services } from './services';
 
 export async function getApiIntegrationConfig({ readConfigFile }) {
-  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const xPackFunctionalTestsConfig = await readConfigFile(
+    require.resolve('../functional/config.js')
+  );
 
   return {
     testFiles: [require.resolve('./apis')],
     services,
     servers: xPackFunctionalTestsConfig.get('servers'),
+    security: xPackFunctionalTestsConfig.get('security'),
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack API Integration Tests',
@@ -24,13 +27,16 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
         '--xpack.security.session.idleTimeout=3600000', // 1 hour
         '--optimize.enabled=false',
         '--xpack.endpoint.enabled=true',
+        '--xpack.ingestManager.enabled=true',
+        '--xpack.ingestManager.fleet.enabled=true',
+        '--xpack.endpoint.alertResultListDefaultDateRange.from=2018-01-10T00:00:00.000Z',
       ],
     },
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
-        'node.attr.name=apiIntegrationTestNode'
+        'node.attr.name=apiIntegrationTestNode',
       ],
     },
   };

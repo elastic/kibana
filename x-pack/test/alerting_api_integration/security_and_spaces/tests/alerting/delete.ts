@@ -108,6 +108,58 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it('should still be able to delete alert when AAD is broken', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+
+          await supertest
+            .put(`${getUrlPrefix(space.id)}/api/saved_objects/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              attributes: {
+                name: 'bar',
+              },
+            })
+            .expect(200);
+
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              objectRemover.add(space.id, createdAlert.id, 'alert');
+              // Ensure task still exists
+              await getScheduledTask(createdAlert.scheduledTaskId);
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              try {
+                await getScheduledTask(createdAlert.scheduledTaskId);
+                throw new Error('Should have removed scheduled task');
+              } catch (e) {
+                expect(e.status).to.eql(404);
+              }
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });

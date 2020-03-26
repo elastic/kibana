@@ -9,32 +9,30 @@ import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
 import {
-  CoreSetup,
   IRouter,
   KibanaResponseFactory,
   RequestHandlerContext,
-  PluginInitializerContext,
-} from 'src/core/server';
+  KibanaRequest,
+} from '../../../../../../../src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
-import { RequestFacade } from '../../types';
+import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
+import { CoreSetup, SetupPlugins } from '../../plugin';
 
 import {
   FrameworkAdapter,
   FrameworkIndexPatternsService,
   FrameworkRequest,
   internalFrameworkRequest,
-  WrappableRequest,
 } from './types';
+import { buildSiemResponse } from '../detection_engine/routes/utils';
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
-  public version: string;
-  private isProductionMode: boolean;
   private router: IRouter;
+  private security: SetupPlugins['security'];
 
-  constructor(core: CoreSetup, env: PluginInitializerContext['env']) {
-    this.version = env.packageInfo.version;
-    this.isProductionMode = env.mode.prod;
+  constructor(core: CoreSetup, plugins: SetupPlugins, private isProductionMode: boolean) {
     this.router = core.http.createRouter();
+    this.security = plugins.security;
   }
 
   public async callWithRequest(
@@ -63,23 +61,18 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     this.router.post(
       {
         path: routePath,
-        validate: {
-          body: configSchema.object({
-            operationName: configSchema.string(),
-            query: configSchema.string(),
-            variables: configSchema.object({}, { allowUnknowns: true }),
-          }),
-        },
+        validate: { body: configSchema.object({}, { unknowns: 'allow' }) },
         options: {
           tags: ['access:siem'],
         },
       },
       async (context, request, response) => {
         try {
+          const user = await this.getCurrentUserInfo(request);
           const gqlResponse = await runHttpQuery([request], {
             method: 'POST',
-            options: (req: RequestFacade) => ({
-              context: { req: wrapRequest(req, context) },
+            options: (req: KibanaRequest) => ({
+              context: { req: wrapRequest(req, context, user) },
               schema,
             }),
             query: request.body,
@@ -100,38 +93,6 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     if (!this.isProductionMode) {
       this.router.get(
         {
-          path: routePath,
-          validate: { query: configSchema.object({}, { allowUnknowns: true }) },
-          options: {
-            tags: ['access:siem'],
-          },
-        },
-        async (context, request, response) => {
-          try {
-            const { query } = request;
-            const gqlResponse = await runHttpQuery([request], {
-              method: 'GET',
-              options: (req: RequestFacade) => ({
-                context: { req: wrapRequest(req, context) },
-                schema,
-              }),
-              query,
-            });
-
-            return response.ok({
-              body: gqlResponse,
-              headers: {
-                'content-type': 'application/json',
-              },
-            });
-          } catch (error) {
-            return this.handleError(error, response);
-          }
-        }
-      );
-
-      this.router.get(
-        {
           path: `${routePath}/graphiql`,
           validate: false,
           options: {
@@ -143,7 +104,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
             request.query,
             {
               endpointURL: routePath,
-              passHeader: `'kbn-version': '${this.version}'`,
+              passHeader: "'kbn-xsrf': 'graphiql'",
             },
             request
           );
@@ -159,24 +120,30 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     }
   }
 
+  private async getCurrentUserInfo(request: KibanaRequest): Promise<AuthenticatedUser | null> {
+    try {
+      const user = (await this.security?.authc.getCurrentUser(request)) ?? null;
+      return user;
+    } catch {
+      return null;
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handleError(error: any, response: KibanaResponseFactory) {
-    if (error.name !== 'HttpQueryError') {
-      return response.internalError({
+    const siemResponse = buildSiemResponse(response);
+
+    if (error.name === 'HttpQueryError') {
+      return siemResponse.error({
+        statusCode: error.statusCode,
+        headers: error.headers,
         body: error.message,
-        headers: {
-          'content-type': 'application/json',
-        },
       });
     }
 
-    return response.customError({
-      statusCode: error.statusCode,
+    return siemResponse.error({
+      statusCode: 500,
       body: error.message,
-      headers: {
-        'content-type': 'application/json',
-        ...error.headers,
-      },
     });
   }
 
@@ -192,18 +159,15 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 }
 
-export function wrapRequest<InternalRequest extends WrappableRequest>(
-  req: InternalRequest,
-  context: RequestHandlerContext
-): FrameworkRequest<InternalRequest> {
-  const { auth, params, payload, query } = req;
-
+export function wrapRequest(
+  request: KibanaRequest,
+  context: RequestHandlerContext,
+  user: AuthenticatedUser | null
+): FrameworkRequest {
   return {
-    [internalFrameworkRequest]: req,
-    auth,
+    [internalFrameworkRequest]: request,
+    body: request.body,
     context,
-    params,
-    payload,
-    query,
+    user,
   };
 }

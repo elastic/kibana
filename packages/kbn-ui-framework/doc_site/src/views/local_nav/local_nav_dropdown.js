@@ -19,11 +19,7 @@
 
 import React from 'react';
 
-import {
-  KuiLocalNav,
-  KuiLocalNavRow,
-  KuiLocalNavRowSection,
-} from '../../../../components';
+import { KuiLocalNav, KuiLocalNavRow, KuiLocalNavRowSection } from '../../../../components';
 
 export function LocalNavWithDropdown() {
   return (
@@ -75,17 +71,11 @@ export function LocalNavWithDropdown() {
         <div className="kuiLocalDropdownSection">
           {/* Header */}
           <div className="kuiLocalDropdownHeader">
-            <div className="kuiLocalDropdownHeader__label">
-              Header for a section of content
-            </div>
+            <div className="kuiLocalDropdownHeader__label">Header for a section of content</div>
           </div>
 
           {/* Input */}
-          <input
-            className="kuiLocalDropdownInput"
-            type="text"
-            placeholder="Input something here"
-          />
+          <input className="kuiLocalDropdownInput" type="text" placeholder="Input something here" />
         </div>
 
         <div className="kuiLocalDropdownSection">
@@ -95,16 +85,10 @@ export function LocalNavWithDropdown() {
               Header for another section of content
             </div>
             <div className="kuiLocalDropdownHeader__actions">
-              <a
-                className="kuiLocalDropdownHeader__action"
-                href=""
-              >
+              <a className="kuiLocalDropdownHeader__action" href="">
                 Action A
               </a>
-              <a
-                className="kuiLocalDropdownHeader__action"
-                href=""
-              >
+              <a className="kuiLocalDropdownHeader__action" href="">
                 Action B
               </a>
             </div>

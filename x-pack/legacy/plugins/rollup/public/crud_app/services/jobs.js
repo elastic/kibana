@@ -97,9 +97,7 @@ export function deserializeJob(job) {
         histogram,
       },
     },
-    status: {
-      job_state: status,
-    },
+    status: { job_state: status },
     stats: {
       documents_processed: documentsProcessed,
       pages_processed: pagesProcessed,

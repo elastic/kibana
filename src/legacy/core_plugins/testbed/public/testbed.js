@@ -24,7 +24,6 @@ uiRoutes.when('/testbed', {
   template: template,
   controllerAs: 'testbed',
   controller: class TestbedController {
-    constructor() {
-    }
-  }
+    constructor() {}
+  },
 });

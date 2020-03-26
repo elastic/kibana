@@ -2,7 +2,9 @@
 
 exports[`ui reducer adds integration popover status to state 1`] = `
 Object {
+  "alertFlyoutVisible": false,
   "basePath": "",
+  "esKuery": "",
   "integrationsPopoverOpen": Object {
     "id": "popover-2",
     "open": true,
@@ -13,7 +15,9 @@ Object {
 
 exports[`ui reducer sets the application's base path 1`] = `
 Object {
+  "alertFlyoutVisible": false,
   "basePath": "yyz",
+  "esKuery": "",
   "integrationsPopoverOpen": null,
   "lastRefresh": 125,
 }
@@ -21,7 +25,9 @@ Object {
 
 exports[`ui reducer updates the refresh value 1`] = `
 Object {
-  "basePath": "",
+  "alertFlyoutVisible": false,
+  "basePath": "abc",
+  "esKuery": "",
   "integrationsPopoverOpen": null,
   "lastRefresh": 125,
 }

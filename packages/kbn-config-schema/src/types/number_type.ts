@@ -46,9 +46,9 @@ export class NumberType extends Type<number> {
       case 'number.base':
         return `expected value of type [number] but got [${typeDetect(value)}]`;
       case 'number.min':
-        return `Value is [${value}] but it must be equal to or greater than [${limit}].`;
+        return `Value must be equal to or greater than [${limit}].`;
       case 'number.max':
-        return `Value is [${value}] but it must be equal to or lower than [${limit}].`;
+        return `Value must be equal to or lower than [${limit}].`;
     }
   }
 }

@@ -1,8 +1,8 @@
 [[TSVB]]
 == TSVB
 
-TSVB is a time series data visualizer that allows you to use the full power of the 
-Elasticsearch aggregation framework. With TSVB, you can combine an infinite 
+TSVB is a time series data visualizer that allows you to use the full power of the
+Elasticsearch aggregation framework. With TSVB, you can combine an infinite
 number of aggregations to display complex data.
 
 NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer is now referred to as TSVB instead of Time Series Visual Builder.
@@ -44,6 +44,18 @@ Table:: Display data from multiple time series by defining the field group to sh
 image:images/tsvb-table.png["Table visualization"]
 
 [float]
+[[tsvb-aggregation]]
+=== Supported aggregations
+
+TSVB supports the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+
+* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
+
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+
+[float]
 [[create-tsvb-visualization]]
 === Create TSVB visualizations
 
@@ -60,7 +72,7 @@ To create a single metric, add multiple data series with multiple aggregations.
 . Specify the data series labels and colors.
 
 .. Select *Data*.
-+ 
++
 If you are using the *Table* visualization, select *Columns*.
 
 .. In the *Label* field, enter a name for the data series, which is used on legends and titles.
@@ -79,7 +91,7 @@ For series that are grouped by a term, you can specify a mustache variable of `{
 
 .. To add another metric, click *+*.
 +
-When you add more than one metric, the last metric value is displayed, which is indicated by the eye icon. 
+When you add more than one metric, the last metric value is displayed, which is indicated by the eye icon.
 
 . To specify the format and display options, select *Options*.
 
@@ -95,7 +107,7 @@ Change the data that you want to display and choose the style options for the pa
 
 . Select *Panel options*.
 
-. Under *Data*, specify how much of the data that you want to display in the visualization. 
+. Under *Data*, specify how much of the data that you want to display in the visualization.
 
 . Under *Style*, specify how you want the visualization to look.
 
@@ -113,7 +125,7 @@ If you are using the Time Series visualization, add annotation data sources.
 [[tsvb-enter-markdown]]
 ==== Enter Markdown text
 
-Edit the source for the Markdown visualization. 
+Edit the source for the Markdown visualization.
 
 . Select *Markdown*.
 

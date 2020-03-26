@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import { UnionToIntersection } from '@kbn/utility-types';
 import { CanvasFunction } from '../../types';
-import { UnionToIntersection } from '../../types';
 
 import { help as all } from './dict/all';
 import { help as alterColumn } from './dict/alter_column';
@@ -44,6 +44,7 @@ import { help as joinRows } from './dict/join_rows';
 import { help as location } from './dict/location';
 import { help as lt } from './dict/lt';
 import { help as lte } from './dict/lte';
+import { help as mapCenter } from './dict/map_center';
 import { help as mapColumn } from './dict/map_column';
 import { help as markdown } from './dict/markdown';
 import { help as math } from './dict/math';
@@ -61,6 +62,7 @@ import { help as replace } from './dict/replace';
 import { help as revealImage } from './dict/reveal_image';
 import { help as rounddate } from './dict/rounddate';
 import { help as rowCount } from './dict/row_count';
+import { help as savedLens } from './dict/saved_lens';
 import { help as savedMap } from './dict/saved_map';
 import { help as savedSearch } from './dict/saved_search';
 import { help as savedVisualization } from './dict/saved_visualization';
@@ -75,6 +77,7 @@ import { help as tail } from './dict/tail';
 import { help as timefilter } from './dict/timefilter';
 import { help as timefilterControl } from './dict/timefilter_control';
 import { help as timelion } from './dict/timelion';
+import { help as timerange } from './dict/time_range';
 import { help as to } from './dict/to';
 import { help as urlparam } from './dict/urlparam';
 
@@ -107,11 +110,11 @@ import { help as urlparam } from './dict/urlparam';
  * This allows one to ensure each argument is present, and no extraneous arguments
  * remain.
  */
-export type FunctionHelp<T> = T extends ExpressionFunction<
+export type FunctionHelp<T> = T extends ExpressionFunctionDefinition<
   infer Name,
-  infer Context,
+  infer Input,
   infer Arguments,
-  infer Return
+  infer Output
 >
   ? {
       help: string;
@@ -135,11 +138,11 @@ export type FunctionHelp<T> = T extends ExpressionFunction<
 //
 // Given a collection of functions, the map would contain each entry.
 //
-type FunctionHelpMap<T> = T extends ExpressionFunction<
+type FunctionHelpMap<T> = T extends ExpressionFunctionDefinition<
   infer Name,
-  infer Context,
+  infer Input,
   infer Arguments,
-  infer Return
+  infer Output
 >
   ? { [key in Name]: FunctionHelp<T> }
   : never;
@@ -153,8 +156,8 @@ type FunctionHelpDict = UnionToIntersection<FunctionHelpMap<CanvasFunction>>;
 
 /**
  * Help text for Canvas Functions should be properly localized. This function will
- * return a dictionary of help strings, organized by `CanvasFunction` specification
- * and then by available arguments within each `CanvasFunction`.
+ * return a dictionary of help strings, organized by `ExpressionFunctionDefinition`
+ * specification and then by available arguments within each `ExpressionFunctionDefinition`.
  *
  * This a function, rather than an object, to future-proof string initialization,
  * if ever necessary.
@@ -196,6 +199,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   location,
   lt,
   lte,
+  mapCenter,
   mapColumn,
   markdown,
   math,
@@ -213,6 +217,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   revealImage,
   rounddate,
   rowCount,
+  savedLens,
   savedMap,
   savedSearch,
   savedVisualization,
@@ -227,6 +232,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   timefilter,
   timefilterControl,
   timelion,
+  timerange,
   to,
   urlparam,
 });

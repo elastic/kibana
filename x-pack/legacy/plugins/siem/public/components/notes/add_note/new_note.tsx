@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel, EuiTabbedContent, EuiTextArea } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { Markdown } from '../../markdown';
@@ -29,8 +29,6 @@ const TextArea = styled(EuiTextArea)<{ height: number }>`
   min-height: ${({ height }) => `${height}px`};
   width: 100%;
 `;
-
-TextArea.displayName = 'TextArea';
 
 TextArea.displayName = 'TextArea';
 

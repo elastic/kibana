@@ -9,7 +9,7 @@ export function LogstashPageProvider({ getPageObjects, getService }) {
   const pipelineList = getService('pipelineList');
   const pipelineEditor = getService('pipelineEditor');
 
-  return new class LogstashPage {
+  return new (class LogstashPage {
     async gotoPipelineList() {
       await PageObjects.common.navigateToApp('logstashPipelines');
       await pipelineList.assertExists();
@@ -20,5 +20,5 @@ export function LogstashPageProvider({ getPageObjects, getService }) {
       await pipelineList.clickAdd();
       await pipelineEditor.assertExists();
     }
-  };
+  })();
 }

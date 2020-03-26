@@ -1,12 +1,12 @@
 include::introduction.asciidoc[]
 
+include::getting-started.asciidoc[]
+
 include::setup.asciidoc[]
 
 include::monitoring/configuring-monitoring.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
-
-include::getting-started.asciidoc[]
 
 include::discover.asciidoc[]
 
@@ -37,14 +37,6 @@ include::dev-tools.asciidoc[]
 include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
-
-include::{kib-repo-dir}/spaces/index.asciidoc[]
-
-include::security/index.asciidoc[]
-
-include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
-
-include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
 
 include::reporting/index.asciidoc[]
 

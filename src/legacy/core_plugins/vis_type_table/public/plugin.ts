@@ -23,11 +23,18 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 
 import { createTableVisFn } from './table_vis_fn';
 import { tableVisTypeDefinition } from './table_vis_type';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { setFormatService } from './services';
 
 /** @internal */
 export interface TablePluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+}
+
+/** @internal */
+export interface TablePluginStartDependencies {
+  data: DataPublicPluginStart;
 }
 
 /** @internal */
@@ -44,10 +51,10 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
   ) {
     expressions.registerFunction(createTableVisFn);
 
-    visualizations.types.createBaseVisualization(tableVisTypeDefinition);
+    visualizations.createBaseVisualization(tableVisTypeDefinition);
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public start(core: CoreStart, { data }: TablePluginStartDependencies) {
+    setFormatService(data.fieldFormats);
   }
 }

@@ -13,54 +13,31 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
   >
     <EuiFieldText
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="My shape"
     />
   </EuiFormRow>
-  <EuiFormRow
-    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Filtered field"
-    labelType="label"
-  >
-    <EuiSuperSelect
-      className="mapGeometryFilter__geoFieldSuperSelect"
-      compressed={true}
-      fullWidth={true}
-      hasDividers={true}
-      isInvalid={false}
-      itemClassName="mapGeometryFilter__geoFieldItem"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "inputDisplay": <EuiText
-              component="span"
-              size="s"
-            >
-              <EuiTextColor
-                color="subdued"
-              >
-                <small>
-                  My index
-                </small>
-              </EuiTextColor>
-              <br />
-              my geo field
-            </EuiText>,
-            "value": "My index/my geo field",
-          },
-        ]
+  <MultiIndexGeoFieldSelect
+    fields={
+      Array [
+        Object {
+          "geoFieldName": "my geo field",
+          "geoFieldType": "geo_point",
+          "indexPatternId": 1,
+          "indexPatternTitle": "My index",
+        },
+      ]
+    }
+    onChange={[Function]}
+    selectedField={
+      Object {
+        "geoFieldName": "my geo field",
+        "geoFieldType": "geo_point",
+        "indexPatternId": 1,
+        "indexPatternTitle": "My index",
       }
-      valueOfSelected="My index/my geo field"
-    />
-  </EuiFormRow>
+    }
+  />
   <EuiSpacer
     size="m"
   />
@@ -92,54 +69,31 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
   >
     <EuiFieldText
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="My shape"
     />
   </EuiFormRow>
-  <EuiFormRow
-    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Filtered field"
-    labelType="label"
-  >
-    <EuiSuperSelect
-      className="mapGeometryFilter__geoFieldSuperSelect"
-      compressed={true}
-      fullWidth={true}
-      hasDividers={true}
-      isInvalid={false}
-      itemClassName="mapGeometryFilter__geoFieldItem"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "inputDisplay": <EuiText
-              component="span"
-              size="s"
-            >
-              <EuiTextColor
-                color="subdued"
-              >
-                <small>
-                  My index
-                </small>
-              </EuiTextColor>
-              <br />
-              my geo field
-            </EuiText>,
-            "value": "My index/my geo field",
-          },
-        ]
+  <MultiIndexGeoFieldSelect
+    fields={
+      Array [
+        Object {
+          "geoFieldName": "my geo field",
+          "geoFieldType": "geo_shape",
+          "indexPatternId": 1,
+          "indexPatternTitle": "My index",
+        },
+      ]
+    }
+    onChange={[Function]}
+    selectedField={
+      Object {
+        "geoFieldName": "my geo field",
+        "geoFieldType": "geo_shape",
+        "indexPatternId": 1,
+        "indexPatternTitle": "My index",
       }
-      valueOfSelected="My index/my geo field"
-    />
-  </EuiFormRow>
+    }
+  />
   <EuiFormRow
     describedByIds={Array []}
     display="rowCompressed"
@@ -151,9 +105,6 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
   >
     <EuiSelect
       compressed={true}
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -201,54 +152,31 @@ exports[`should render error message 1`] = `
   >
     <EuiFieldText
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="My shape"
     />
   </EuiFormRow>
-  <EuiFormRow
-    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Filtered field"
-    labelType="label"
-  >
-    <EuiSuperSelect
-      className="mapGeometryFilter__geoFieldSuperSelect"
-      compressed={true}
-      fullWidth={true}
-      hasDividers={true}
-      isInvalid={false}
-      itemClassName="mapGeometryFilter__geoFieldItem"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "inputDisplay": <EuiText
-              component="span"
-              size="s"
-            >
-              <EuiTextColor
-                color="subdued"
-              >
-                <small>
-                  My index
-                </small>
-              </EuiTextColor>
-              <br />
-              my geo field
-            </EuiText>,
-            "value": "My index/my geo field",
-          },
-        ]
+  <MultiIndexGeoFieldSelect
+    fields={
+      Array [
+        Object {
+          "geoFieldName": "my geo field",
+          "geoFieldType": "geo_point",
+          "indexPatternId": 1,
+          "indexPatternTitle": "My index",
+        },
+      ]
+    }
+    onChange={[Function]}
+    selectedField={
+      Object {
+        "geoFieldName": "my geo field",
+        "geoFieldType": "geo_point",
+        "indexPatternId": 1,
+        "indexPatternTitle": "My index",
       }
-      valueOfSelected="My index/my geo field"
-    />
-  </EuiFormRow>
+    }
+  />
   <EuiSpacer
     size="m"
   />
@@ -283,54 +211,31 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
   >
     <EuiFieldText
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="My shape"
     />
   </EuiFormRow>
-  <EuiFormRow
-    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Filtered field"
-    labelType="label"
-  >
-    <EuiSuperSelect
-      className="mapGeometryFilter__geoFieldSuperSelect"
-      compressed={true}
-      fullWidth={true}
-      hasDividers={true}
-      isInvalid={false}
-      itemClassName="mapGeometryFilter__geoFieldItem"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "inputDisplay": <EuiText
-              component="span"
-              size="s"
-            >
-              <EuiTextColor
-                color="subdued"
-              >
-                <small>
-                  My index
-                </small>
-              </EuiTextColor>
-              <br />
-              my geo field
-            </EuiText>,
-            "value": "My index/my geo field",
-          },
-        ]
+  <MultiIndexGeoFieldSelect
+    fields={
+      Array [
+        Object {
+          "geoFieldName": "my geo field",
+          "geoFieldType": "geo_shape",
+          "indexPatternId": 1,
+          "indexPatternTitle": "My index",
+        },
+      ]
+    }
+    onChange={[Function]}
+    selectedField={
+      Object {
+        "geoFieldName": "my geo field",
+        "geoFieldType": "geo_shape",
+        "indexPatternId": 1,
+        "indexPatternTitle": "My index",
       }
-      valueOfSelected="My index/my geo field"
-    />
-  </EuiFormRow>
+    }
+  />
   <EuiFormRow
     describedByIds={Array []}
     display="rowCompressed"
@@ -342,9 +247,6 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
   >
     <EuiSelect
       compressed={true}
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [

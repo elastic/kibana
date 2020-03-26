@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const overview = getService('monitoringElasticsearchOverview');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
         from: 'Oct 5, 2017 @ 20:31:48.354',
-        to: 'Oct 5, 2017 @ 20:35:12.176'
+        to: 'Oct 5, 2017 @ 20:35:12.176',
       });
 
       // go to overview

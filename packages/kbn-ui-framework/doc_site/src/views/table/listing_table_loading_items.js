@@ -27,9 +27,7 @@ import {
   KuiListingTableLoadingPrompt,
 } from '../../../../components';
 
-import {
-  RIGHT_ALIGNMENT
-} from '../../../../src/services';
+import { RIGHT_ALIGNMENT } from '../../../../src/services';
 
 function renderHeader() {
   return [
@@ -38,8 +36,8 @@ function renderHeader() {
     'Date created',
     {
       content: 'Orders of magnitude',
-      align: RIGHT_ALIGNMENT
-    }
+      align: RIGHT_ALIGNMENT,
+    },
   ];
 }
 
@@ -59,11 +57,7 @@ function renderPager() {
 
 function renderToolBarActions() {
   return [
-    <KuiButton
-      key="add"
-      buttonType="primary"
-      aria-label="Add"
-    >
+    <KuiButton key="add" buttonType="primary" aria-label="Add">
       Add
     </KuiButton>,
     <KuiButton
@@ -77,7 +71,7 @@ function renderToolBarActions() {
       aria-label="Menu"
       buttonType="basic"
       icon={<KuiButtonIcon type="menu" />}
-    />
+    />,
   ];
 }
 

@@ -87,7 +87,10 @@ export const basicHandlerCreators = {
         .create(customElement)
         .then(() =>
           notify.success(
-            `Custom element '${customElement.displayName || customElement.id}' was saved`
+            `Custom element '${customElement.displayName || customElement.id}' was saved`,
+            {
+              'data-test-subj': 'canvasCustomElementCreate-success',
+            }
           )
         )
         .catch((result: Http2ServerResponse) =>

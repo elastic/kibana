@@ -21,7 +21,6 @@ describe('makeStatement', () => {
   });
 
   it('can make an IfStatement from an IfVertex', () => {
-
     // output {
     //   if (...) {
     //     elasticsearch {
@@ -33,7 +32,10 @@ describe('makeStatement', () => {
     const esVertex = new PluginVertex({ edgesByFrom: {} }, { id: 'es_output' });
     esVertex.pipelineStage = 'output';
 
-    const ifVertex = new IfVertex({ edgesByFrom: { 'abcde0': [ { when: true, to: esVertex } ] } }, { json: { id: 'abcdef0' } });
+    const ifVertex = new IfVertex(
+      { edgesByFrom: { abcde0: [{ when: true, to: esVertex }] } },
+      { json: { id: 'abcdef0' } }
+    );
     const actual = makeStatement(ifVertex, 'output');
     expect(actual).to.be.a(IfStatement);
   });
@@ -46,6 +48,8 @@ describe('makeStatement', () => {
 
   it('throws an error for an unknown type of vertex', () => {
     const unknownVertex = {};
-    expect(makeStatement).withArgs(unknownVertex, 'output').to.throwError();
+    expect(makeStatement)
+      .withArgs(unknownVertex, 'output')
+      .to.throwError();
   });
 });

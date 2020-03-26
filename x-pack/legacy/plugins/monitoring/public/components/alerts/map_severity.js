@@ -41,29 +41,35 @@ export function mapSeverity(severity) {
       mapped = {
         value: i18n.translate('xpack.monitoring.alerts.lowSeverityName', { defaultMessage: 'low' }),
         color: 'warning',
-        iconType: 'iInCircle'
+        iconType: 'iInCircle',
       };
       break;
     case 1:
       mapped = {
-        value: i18n.translate('xpack.monitoring.alerts.mediumSeverityName', { defaultMessage: 'medium' }),
+        value: i18n.translate('xpack.monitoring.alerts.mediumSeverityName', {
+          defaultMessage: 'medium',
+        }),
         color: 'warning',
-        iconType: 'alert'
+        iconType: 'alert',
       };
       break;
-    default: // severity >= 2000
+    default:
+      // severity >= 2000
       mapped = {
-        value: i18n.translate('xpack.monitoring.alerts.highSeverityName', { defaultMessage: 'high' }),
+        value: i18n.translate('xpack.monitoring.alerts.highSeverityName', {
+          defaultMessage: 'high',
+        }),
         color: 'danger',
-        iconType: 'bell'
+        iconType: 'bell',
       };
       break;
   }
 
   return {
-    title: i18n.translate('xpack.monitoring.alerts.severityTitle',
-      { defaultMessage: '{severity} severity alert', values: { severity: capitalize(mapped.value) } }
-    ),
-    ...mapped
+    title: i18n.translate('xpack.monitoring.alerts.severityTitle', {
+      defaultMessage: '{severity} severity alert',
+      values: { severity: capitalize(mapped.value) },
+    }),
+    ...mapped,
   };
 }

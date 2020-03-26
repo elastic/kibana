@@ -14,7 +14,7 @@ export async function config(Joi: any) {
     enabled: Joi.boolean().default(true),
     kibanaServer: Joi.object({
       protocol: Joi.string().valid(['http', 'https']),
-      hostname: Joi.string(),
+      hostname: Joi.string().invalid('0'),
       port: Joi.number().integer(),
     }).default(),
     queue: Joi.object({
@@ -31,6 +31,17 @@ export async function config(Joi: any) {
         .default(120000),
     }).default(),
     capture: Joi.object({
+      timeouts: Joi.object({
+        openUrl: Joi.number()
+          .integer()
+          .default(30000),
+        waitForElements: Joi.number()
+          .integer()
+          .default(30000),
+        renderComplete: Joi.number()
+          .integer()
+          .default(30000),
+      }).default(),
       networkPolicy: Joi.object({
         enabled: Joi.boolean().default(true),
         rules: Joi.array()

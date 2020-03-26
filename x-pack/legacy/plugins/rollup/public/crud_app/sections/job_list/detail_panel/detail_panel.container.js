@@ -15,12 +15,9 @@ import {
   isLoading,
 } from '../../../store/selectors';
 
-import {
-  closeDetailPanel,
-  openDetailPanel,
-} from '../../../store/actions';
+import { closeDetailPanel, openDetailPanel } from '../../../store/actions';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     isOpen: isDetailPanelOpen(state),
     isLoading: isLoading(state),
@@ -30,7 +27,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
@@ -41,7 +38,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export const DetailPanel = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(DetailPanelView);
+export const DetailPanel = connect(mapStateToProps, mapDispatchToProps)(DetailPanelView);

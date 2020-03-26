@@ -46,6 +46,286 @@ afterEach(async () => {
   await server.stop();
 });
 
+describe('Options', () => {
+  describe('authRequired', () => {
+    describe('optional', () => {
+      it('User has access to a route if auth mechanism not registered', async () => {
+        const { server: innerServer, createRouter, auth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) =>
+            res.ok({
+              body: {
+                httpAuthIsAuthenticated: auth.isAuthenticated(req),
+                requestIsAuthenticated: req.auth.isAuthenticated,
+              },
+            })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            httpAuthIsAuthenticated: false,
+            requestIsAuthenticated: false,
+          });
+      });
+
+      it('Authenticated user has access to a route', async () => {
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) => {
+          return toolkit.authenticated();
+        });
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) =>
+            res.ok({
+              body: {
+                httpAuthIsAuthenticated: auth.isAuthenticated(req),
+                requestIsAuthenticated: req.auth.isAuthenticated,
+              },
+            })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            httpAuthIsAuthenticated: true,
+            requestIsAuthenticated: true,
+          });
+      });
+
+      it('User with no credentials can access a route', async () => {
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) => toolkit.notHandled());
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) =>
+            res.ok({
+              body: {
+                httpAuthIsAuthenticated: auth.isAuthenticated(req),
+                requestIsAuthenticated: req.auth.isAuthenticated,
+              },
+            })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            httpAuthIsAuthenticated: false,
+            requestIsAuthenticated: false,
+          });
+      });
+
+      it('User with invalid credentials cannot access a route', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) => res.unauthorized());
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(401);
+      });
+
+      it('does not redirect user and allows access to a resource', async () => {
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) =>
+          toolkit.redirected({
+            location: '/redirect-to',
+          })
+        );
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) =>
+            res.ok({
+              body: {
+                httpAuthIsAuthenticated: auth.isAuthenticated(req),
+                requestIsAuthenticated: req.auth.isAuthenticated,
+              },
+            })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            httpAuthIsAuthenticated: false,
+            requestIsAuthenticated: false,
+          });
+      });
+    });
+
+    describe('true', () => {
+      it('User has access to a route if auth  interceptor is not registered', async () => {
+        const { server: innerServer, createRouter, auth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) =>
+            res.ok({
+              body: {
+                httpAuthIsAuthenticated: auth.isAuthenticated(req),
+                requestIsAuthenticated: req.auth.isAuthenticated,
+              },
+            })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            httpAuthIsAuthenticated: false,
+            requestIsAuthenticated: false,
+          });
+      });
+
+      it('Authenticated user has access to a route', async () => {
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) => {
+          return toolkit.authenticated();
+        });
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) =>
+            res.ok({
+              body: {
+                httpAuthIsAuthenticated: auth.isAuthenticated(req),
+                requestIsAuthenticated: req.auth.isAuthenticated,
+              },
+            })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            httpAuthIsAuthenticated: true,
+            requestIsAuthenticated: true,
+          });
+      });
+
+      it('User with no credentials cannot access a route', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) => toolkit.notHandled());
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(401);
+      });
+
+      it('User with invalid credentials cannot access a route', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        registerAuth((req, res, toolkit) => res.unauthorized());
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(401);
+      });
+
+      it('allows redirecting an user', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+        const redirectUrl = '/redirect-to';
+
+        registerAuth((req, res, toolkit) =>
+          toolkit.redirected({
+            location: redirectUrl,
+          })
+        );
+
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await server.start();
+
+        const result = await supertest(innerServer.listener)
+          .get('/')
+          .expect(302);
+
+        expect(result.header.location).toBe(redirectUrl);
+      });
+    });
+
+    describe('false', () => {
+      it('does not try to authenticate a user', async () => {
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
+        const router = createRouter('/');
+
+        const authHook = jest.fn();
+        registerAuth(authHook);
+        router.get(
+          { path: '/', validate: false, options: { authRequired: false } },
+          (context, req, res) =>
+            res.ok({
+              body: {
+                httpAuthIsAuthenticated: auth.isAuthenticated(req),
+                requestIsAuthenticated: req.auth.isAuthenticated,
+              },
+            })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            httpAuthIsAuthenticated: false,
+            requestIsAuthenticated: false,
+          });
+
+        expect(authHook).toHaveBeenCalledTimes(0);
+      });
+    });
+  });
+});
+
 describe('Handler', () => {
   it("Doesn't expose error details if handler throws", async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
@@ -141,6 +421,61 @@ describe('Handler', () => {
       message: '[request query.page]: expected value of type [number] but got [string]',
       statusCode: 400,
     });
+  });
+
+  it('accept to receive an array payload', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    let body: any = null;
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.arrayOf(schema.object({ foo: schema.string() })),
+        },
+      },
+      (context, req, res) => {
+        body = req.body;
+        return res.ok({ body: 'ok' });
+      }
+    );
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .post('/')
+      .send([{ foo: 'bar' }, { foo: 'dolly' }])
+      .expect(200);
+
+    expect(body).toEqual([{ foo: 'bar' }, { foo: 'dolly' }]);
+  });
+
+  it('accept to receive a json primitive payload', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    let body: any = null;
+    router.post(
+      {
+        path: '/',
+        validate: {
+          body: schema.number(),
+        },
+      },
+      (context, req, res) => {
+        body = req.body;
+        return res.ok({ body: 'ok' });
+      }
+    );
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .post('/')
+      .type('json')
+      .send('12')
+      .expect(200);
+
+    expect(body).toEqual(12);
   });
 });
 
@@ -640,6 +975,116 @@ describe('Response factory', () => {
         },
         statusCode: 400,
       });
+    });
+
+    it('validate function in body', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/foo');
+
+      router.post(
+        {
+          path: '/',
+          validate: {
+            body: ({ bar, baz } = {}, { ok, badRequest }) => {
+              if (typeof bar === 'string' && typeof baz === 'number') {
+                return ok({ bar, baz });
+              } else {
+                return badRequest('Wrong payload', ['body']);
+              }
+            },
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: req.body });
+        }
+      );
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 123,
+        })
+        .expect(200)
+        .then(res => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: '123',
+        })
+        .expect(400)
+        .then(res => {
+          expect(res.body).toEqual({
+            error: 'Bad Request',
+            message: '[request body.body]: Wrong payload',
+            statusCode: 400,
+          });
+        });
+    });
+
+    it('@kbn/config-schema validation in body', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/foo');
+
+      router.post(
+        {
+          path: '/',
+          validate: {
+            body: schema.object({
+              bar: schema.string(),
+              baz: schema.number(),
+            }),
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: req.body });
+        }
+      );
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 123,
+        })
+        .expect(200)
+        .then(res => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: '123', // Automatic casting happens
+        })
+        .expect(200)
+        .then(res => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 'test', // Can't cast it into number
+        })
+        .expect(400)
+        .then(res => {
+          expect(res.body).toEqual({
+            error: 'Bad Request',
+            message: '[request body.baz]: expected value of type [number] but got [string]',
+            statusCode: 400,
+          });
+        });
     });
 
     it('401 Unauthorized', async () => {

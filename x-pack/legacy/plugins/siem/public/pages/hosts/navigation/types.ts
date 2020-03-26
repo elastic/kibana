@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
+import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { NarrowDateRange } from '../../../components/ml/types';
-import { hostsModel } from '../../../store';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 
-import { HostsTableType } from '../../../store/hosts/model';
+import { HostsTableType, HostsType } from '../../../store/hosts/model';
 import { NavTab } from '../../../components/navigation/types';
 import { UpdateDateRange } from '../../../components/charts/common';
 
@@ -37,8 +36,8 @@ export type SetQuery = ({
   refetch: Refetch;
 }) => void;
 
-interface QueryTabBodyProps {
-  type: hostsModel.HostsType;
+export interface QueryTabBodyProps {
+  type: HostsType;
   startDate: number;
   endDate: number;
   filterQuery?: string | ESTermQuery;
@@ -47,10 +46,16 @@ interface QueryTabBodyProps {
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
   indexPattern: IIndexPattern;
+  pageFilters?: Filter[];
   skip: boolean;
   setQuery: SetQuery;
   updateDateRange?: UpdateDateRange;
   narrowDateRange?: NarrowDateRange;
+};
+
+export type AlertsComponentQueryProps = HostsComponentsQueryProps & {
+  filterQuery: string;
+  pageFilters?: Filter[];
 };
 
 export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;

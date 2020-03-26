@@ -8,14 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  TabSummary,
-  TabTerms,
-  TabMetrics,
-  TabJson,
-  TabHistogram,
-  TabRequest,
-} from './tabs';
+import { TabSummary, TabTerms, TabMetrics, TabJson, TabHistogram, TabRequest } from './tabs';
 
 export const JOB_DETAILS_TAB_SUMMARY = 'JOB_DETAILS_TAB_SUMMARY';
 export const JOB_DETAILS_TAB_TERMS = 'JOB_DETAILS_TAB_TERMS';
@@ -50,10 +43,7 @@ export const tabToHumanizedMap = {
     />
   ),
   [JOB_DETAILS_TAB_JSON]: (
-    <FormattedMessage
-      id="xpack.rollupJobs.create.jobDetails.tabJsonLabel"
-      defaultMessage="JSON"
-    />
+    <FormattedMessage id="xpack.rollupJobs.create.jobDetails.tabJsonLabel" defaultMessage="JSON" />
   ),
   [JOB_DETAILS_TAB_REQUEST]: (
     <FormattedMessage
@@ -72,42 +62,18 @@ const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_REQUEST,
 ];
 
-export const JobDetails = ({
-  tab,
-  job,
-  stats,
-  json,
-  endpoint,
-}) => {
-  const {
-    metrics,
-    terms,
-    histogram,
-    histogramInterval,
-  } = job;
+export const JobDetails = ({ tab, job, stats, json, endpoint }) => {
+  const { metrics, terms, histogram, histogramInterval } = job;
 
   const tabToContentMap = {
-    [JOB_DETAILS_TAB_SUMMARY]: (
-      <TabSummary
-        job={job}
-        stats={stats}
-      />
-    ),
-    [JOB_DETAILS_TAB_TERMS]: (
-      <TabTerms terms={terms} />
-    ),
+    [JOB_DETAILS_TAB_SUMMARY]: <TabSummary job={job} stats={stats} />,
+    [JOB_DETAILS_TAB_TERMS]: <TabTerms terms={terms} />,
     [JOB_DETAILS_TAB_HISTOGRAM]: (
       <TabHistogram histogram={histogram} histogramInterval={histogramInterval} />
     ),
-    [JOB_DETAILS_TAB_METRICS]: (
-      <TabMetrics metrics={metrics} />
-    ),
-    [JOB_DETAILS_TAB_JSON]: (
-      <TabJson json={json} />
-    ),
-    [JOB_DETAILS_TAB_REQUEST]: (
-      <TabRequest json={json} endpoint={endpoint} />
-    ),
+    [JOB_DETAILS_TAB_METRICS]: <TabMetrics metrics={metrics} />,
+    [JOB_DETAILS_TAB_JSON]: <TabJson json={json} />,
+    [JOB_DETAILS_TAB_REQUEST]: <TabRequest json={json} endpoint={endpoint} />,
   };
 
   return tabToContentMap[tab];

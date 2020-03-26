@@ -51,12 +51,14 @@ describe('src/dev/build/tasks/nodejs/verify_existing_node_builds_task', () => {
       };
     });
 
-    sandbox.stub(NodeShasumsNS, 'getNodeShasums').returns(nodeShasums || {
-      'foo:downloadName': 'foo:sha256',
-      'bar:downloadName': 'bar:sha256',
-    });
+    sandbox.stub(NodeShasumsNS, 'getNodeShasums').returns(
+      nodeShasums || {
+        'foo:downloadName': 'foo:sha256',
+        'bar:downloadName': 'bar:sha256',
+      }
+    );
 
-    sandbox.stub(FsNS, 'getFileHash').callsFake((path) => {
+    sandbox.stub(FsNS, 'getFileHash').callsFake(path => {
       switch (path) {
         case 'foo:downloadPath':
           return 'foo:sha256';
@@ -89,14 +91,16 @@ describe('src/dev/build/tasks/nodejs/verify_existing_node_builds_task', () => {
       nodeShasums: {
         'foo:downloadName': 'foo:sha256',
         'bar:downloadName': 'bar:invalid',
-      }
+      },
     });
 
     try {
       await VerifyExistingNodeBuildsTask.run(config, log);
       throw new Error('Expected VerifyExistingNodeBuildsTask to reject');
     } catch (error) {
-      expect(error).to.have.property('message').be('Download at bar:downloadPath does not match expected checksum bar:sha256');
+      expect(error)
+        .to.have.property('message')
+        .be('Download at bar:downloadPath does not match expected checksum bar:sha256');
     }
   });
 });

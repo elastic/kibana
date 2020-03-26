@@ -5,10 +5,9 @@
  */
 
 import { shallow, mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
-import { isChecked, isFailure, isJobLoading, JobSwitchComponent } from './job_switch';
+import { JobSwitchComponent } from './job_switch';
 import { cloneDeep } from 'lodash/fp';
 import { mockSiemJobs } from '../__mocks__/api';
 import { SiemJob } from '../types';
@@ -29,7 +28,7 @@ describe('JobSwitch', () => {
         onJobStateChange={onJobStateChangeMock}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should call onJobStateChange when the switch is clicked to be true/open', () => {
@@ -75,55 +74,5 @@ describe('JobSwitch', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="job-switch"]').exists()).toBe(false);
-  });
-
-  describe('isChecked', () => {
-    test('returns false if only jobState is enabled', () => {
-      expect(isChecked('started', 'closing')).toBe(false);
-    });
-
-    test('returns false if only datafeedState is enabled', () => {
-      expect(isChecked('stopping', 'opened')).toBe(false);
-    });
-
-    test('returns true if both enabled states are provided', () => {
-      expect(isChecked('started', 'opened')).toBe(true);
-    });
-  });
-
-  describe('isJobLoading', () => {
-    test('returns true if both loading states are not provided', () => {
-      expect(isJobLoading('started', 'closing')).toBe(true);
-    });
-
-    test('returns true if only jobState is loading', () => {
-      expect(isJobLoading('starting', 'opened')).toBe(true);
-    });
-
-    test('returns true if only datafeedState is loading', () => {
-      expect(isJobLoading('started', 'opening')).toBe(true);
-    });
-
-    test('returns false if both disabling states are provided', () => {
-      expect(isJobLoading('stopping', 'closing')).toBe(true);
-    });
-  });
-
-  describe('isFailure', () => {
-    test('returns true if only jobState is failure/deleted', () => {
-      expect(isFailure('failed', 'stopping')).toBe(true);
-    });
-
-    test('returns true if only dataFeed is failure/deleted', () => {
-      expect(isFailure('started', 'deleted')).toBe(true);
-    });
-
-    test('returns true if both enabled states are failure/deleted', () => {
-      expect(isFailure('failed', 'deleted')).toBe(true);
-    });
-
-    test('returns false only if both states are not failure/deleted', () => {
-      expect(isFailure('opened', 'stopping')).toBe(false);
-    });
   });
 });

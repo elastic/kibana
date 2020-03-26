@@ -1,0 +1,51 @@
+{
+  "description": "This rule detects network events that may indicate the use of Windows\nfile sharing (also called SMB or CIFS) traffic to the Internet. SMB is commonly\nused within networks to share files, printers, and other system resources amongst\ntrusted systems. It should almost never be directly exposed to the Internet, as\nit is frequently targeted and exploited by threat actors as an initial access\nor back-door vector or for data exfiltration.\n",
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "SMB (Windows File Sharing) Activity to the Internet",
+  "query": "network.transport: tcp and destination.port: (139 or 445) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "risk_score": 73,
+  "rule_id": "c82b2bd8-d701-420c-ba43-f11a155b681a",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "reference": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0010",
+        "name": "Exfiltration",
+        "reference": "https://attack.mitre.org/tactics/TA0010/"
+      },
+      "technique": [
+        {
+          "id": "T1048",
+          "name": "Exfiltration Over Alternative Protocol",
+          "reference": "https://attack.mitre.org/techniques/T1048/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

@@ -16,43 +16,41 @@ export function DetailStatus({ stats }) {
     os_memory_free: osFreeMemory,
     version,
     uptime,
-    status
+    status,
   } = stats;
 
   const metrics = [
     {
       label: i18n.translate('xpack.monitoring.kibana.detailStatus.transportAddressLabel', {
-        defaultMessage: 'Transport Address'
+        defaultMessage: 'Transport Address',
       }),
       value: transportAddress,
-      'data-test-subj': 'transportAddress'
+      'data-test-subj': 'transportAddress',
     },
     {
       label: i18n.translate('xpack.monitoring.kibana.detailStatus.osFreeMemoryLabel', {
-        defaultMessage: 'OS Free Memory'
+        defaultMessage: 'OS Free Memory',
       }),
       value: formatMetric(osFreeMemory, 'byte'),
-      'data-test-subj': 'osFreeMemory'
+      'data-test-subj': 'osFreeMemory',
     },
     {
       label: i18n.translate('xpack.monitoring.kibana.detailStatus.versionLabel', {
-        defaultMessage: 'Version'
+        defaultMessage: 'Version',
       }),
       value: version,
-      'data-test-subj': 'version'
+      'data-test-subj': 'version',
     },
     {
       label: i18n.translate('xpack.monitoring.kibana.detailStatus.uptimeLabel', {
-        defaultMessage: 'Uptime'
+        defaultMessage: 'Uptime',
       }),
       value: formatMetric(uptime, 'time_since'),
-      'data-test-subj': 'uptime'
-    }
+      'data-test-subj': 'uptime',
+    },
   ];
 
-  const IconComponent = ({ status }) => (
-    <KibanaStatusIcon status={status} />
-  );
+  const IconComponent = ({ status }) => <KibanaStatusIcon status={status} />;
 
   return (
     <SummaryStatus

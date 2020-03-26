@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 export function generateQueryAndLink(data) {
   let type = 'indices';
   let ident = data.name;

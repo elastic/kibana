@@ -11,7 +11,7 @@ import { getAutoFollowIndexPayload } from './fixtures';
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
 import { registerHelpers as registerAutoFollowPatternHelpers } from './auto_follow_pattern.helpers';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
 
   const { addCluster, deleteAllClusters } = registerRemoteClustersHelpers(supertest);
@@ -19,10 +19,10 @@ export default function ({ getService }) {
     loadAutoFollowPatterns,
     getAutoFollowPattern,
     createAutoFollowPattern,
-    deleteAllAutoFollowPatterns
+    deleteAllAutoFollowPatterns,
   } = registerAutoFollowPatternHelpers(supertest);
 
-  describe('auto follow patterns', function () {
+  describe('auto follow patterns', function() {
     this.tags(['skipCloud']);
 
     after(() => deleteAllAutoFollowPatterns().then(deleteAllClusters));
@@ -41,7 +41,7 @@ export default function ({ getService }) {
         payload.remoteCluster = 'unknown-cluster';
 
         const { body } = await createAutoFollowPattern(undefined, payload).expect(404);
-        expect(body.cause[0]).to.contain('no such remote cluster');
+        expect(body.attributes.cause[0]).to.contain('no such remote cluster');
       });
     });
 
@@ -52,6 +52,7 @@ export default function ({ getService }) {
         it('should create an auto-follow pattern when cluster is known', async () => {
           const name = getRandomString();
           const { body } = await createAutoFollowPattern(name).expect(200);
+          console.log(body);
 
           expect(body.acknowledged).to.eql(true);
         });
@@ -62,7 +63,7 @@ export default function ({ getService }) {
           const name = getRandomString();
           const { body } = await getAutoFollowPattern(name).expect(404);
 
-          expect(body.cause).not.to.be(undefined);
+          expect(body.attributes.cause).not.to.be(undefined);
         });
 
         it('should return an auto-follow pattern that was created', async () => {

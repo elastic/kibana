@@ -5,10 +5,19 @@
  */
 // @ts-ignore formatNumber
 import { formatNumber } from '@elastic/eui/lib/services/format';
-import { EuiCodeBlock, EuiDescriptionList, EuiText } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import {
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Ping, HttpBody } from '../../../../common/graphql/types';
+import { DocLinkForBody } from './doc_link_body';
 
 interface Props {
   ping: Ping;
@@ -52,7 +61,7 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
   }
 
   // Show the body, if present
-  if (ping.http && ping.http.response && ping.http.response.body) {
+  if (ping.http?.response?.body) {
     const body = ping.http.response.body;
 
     listItems.push({
@@ -60,12 +69,21 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
         defaultMessage: 'Response Body',
       }),
       description: (
-        <Fragment>
+        <>
           <BodyDescription body={body} />
-          <BodyExcerpt content={body.content || ''} />
-        </Fragment>
+          <EuiSpacer size={'s'} />
+          {body.content ? <BodyExcerpt content={body.content || ''} /> : <DocLinkForBody />}
+        </>
       ),
     });
   }
-  return <EuiDescriptionList listItems={listItems} />;
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiCallOut color={ping?.error ? 'danger' : 'primary'}>
+          <EuiDescriptionList listItems={listItems} />
+        </EuiCallOut>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };

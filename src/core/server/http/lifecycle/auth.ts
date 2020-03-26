@@ -25,11 +25,14 @@ import {
   lifecycleResponseFactory,
   LifecycleResponseFactory,
   isKibanaResponse,
+  ResponseHeaders,
 } from '../router';
 
 /** @public */
 export enum AuthResultType {
   authenticated = 'authenticated',
+  notHandled = 'notHandled',
+  redirected = 'redirected',
 }
 
 /** @public */
@@ -38,10 +41,20 @@ export interface Authenticated extends AuthResultParams {
 }
 
 /** @public */
-export type AuthResult = Authenticated;
+export interface AuthNotHandled {
+  type: AuthResultType.notHandled;
+}
+
+/** @public */
+export interface AuthRedirected extends AuthRedirectedParams {
+  type: AuthResultType.redirected;
+}
+
+/** @public */
+export type AuthResult = Authenticated | AuthNotHandled | AuthRedirected;
 
 const authResult = {
-  authenticated(data: Partial<AuthResultParams> = {}): AuthResult {
+  authenticated(data: AuthResultParams = {}): AuthResult {
     return {
       type: AuthResultType.authenticated,
       state: data.state,
@@ -49,8 +62,25 @@ const authResult = {
       responseHeaders: data.responseHeaders,
     };
   },
+  notHandled(): AuthResult {
+    return {
+      type: AuthResultType.notHandled,
+    };
+  },
+  redirected(headers: { location: string } & ResponseHeaders): AuthResult {
+    return {
+      type: AuthResultType.redirected,
+      headers,
+    };
+  },
   isAuthenticated(result: AuthResult): result is Authenticated {
-    return result && result.type === AuthResultType.authenticated;
+    return result?.type === AuthResultType.authenticated;
+  },
+  isNotHandled(result: AuthResult): result is AuthNotHandled {
+    return result?.type === AuthResultType.notHandled;
+  },
+  isRedirected(result: AuthResult): result is AuthRedirected {
+    return result?.type === AuthResultType.redirected;
   },
 };
 
@@ -62,7 +92,7 @@ const authResult = {
 export type AuthHeaders = Record<string, string | string[]>;
 
 /**
- * Result of an incoming request authentication.
+ * Result of successful authentication.
  * @public
  */
 export interface AuthResultParams {
@@ -83,16 +113,41 @@ export interface AuthResultParams {
 }
 
 /**
+ * Result of auth redirection.
+ * @public
+ */
+export interface AuthRedirectedParams {
+  /**
+   * Headers to attach for auth redirect.
+   * Must include "location" header
+   */
+  headers: { location: string } & ResponseHeaders;
+}
+
+/**
  * @public
  * A tool set defining an outcome of Auth interceptor for incoming request.
  */
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
   authenticated: (data?: AuthResultParams) => AuthResult;
+  /**
+   * User has no credentials.
+   * Allows user to access a resource when authRequired: 'optional'
+   * Rejects a request when authRequired: true
+   * */
+  notHandled: () => AuthResult;
+  /**
+   * Redirects user to another location to complete authentication when authRequired: true
+   * Allows user to access a resource without redirection when authRequired: 'optional'
+   * */
+  redirected: (headers: { location: string } & ResponseHeaders) => AuthResult;
 }
 
 const toolkit: AuthToolkit = {
   authenticated: authResult.authenticated,
+  notHandled: authResult.notHandled,
+  redirected: authResult.redirected,
 };
 
 /**
@@ -109,29 +164,50 @@ export type AuthenticationHandler = (
 export function adoptToHapiAuthFormat(
   fn: AuthenticationHandler,
   log: Logger,
-  onSuccess: (req: Request, data: AuthResultParams) => void = () => undefined
+  onAuth: (request: Request, data: AuthResultParams) => void = () => undefined
 ) {
   return async function interceptAuth(
     request: Request,
     responseToolkit: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+    const kibanaRequest = KibanaRequest.from(request, undefined, false);
+
     try {
-      const result = await fn(
-        KibanaRequest.from(request, undefined, false),
-        lifecycleResponseFactory,
-        toolkit
-      );
+      const result = await fn(kibanaRequest, lifecycleResponseFactory, toolkit);
+
       if (isKibanaResponse(result)) {
         return hapiResponseAdapter.handle(result);
       }
+
       if (authResult.isAuthenticated(result)) {
-        onSuccess(request, {
+        onAuth(request, {
           state: result.state,
           requestHeaders: result.requestHeaders,
           responseHeaders: result.responseHeaders,
         });
         return responseToolkit.authenticated({ credentials: result.state || {} });
+      }
+
+      if (authResult.isRedirected(result)) {
+        // we cannot redirect a user when resources with optional auth requested
+        if (kibanaRequest.route.options.authRequired === 'optional') {
+          return responseToolkit.continue;
+        }
+
+        return hapiResponseAdapter.handle(
+          lifecycleResponseFactory.redirected({
+            // hapi doesn't accept string[] as a valid header
+            headers: result.headers as any,
+          })
+        );
+      }
+
+      if (authResult.isNotHandled(result)) {
+        if (kibanaRequest.route.options.authRequired === 'optional') {
+          return responseToolkit.continue;
+        }
+        return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
       }
       throw new Error(
         `Unexpected result from Authenticate. Expected AuthResult or KibanaResponse, but given: ${result}.`

@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './alerts';
+export * from './common';
+export * from './monitor';
+export * from './overview_filters';
 export * from './snapshot';
-export * from './monitor/monitor_details';
+export * from './dynamic_settings';

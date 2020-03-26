@@ -39,18 +39,40 @@
  * @packageDocumentation
  */
 
-import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import {
+  ElasticsearchServiceSetup,
+  IScopedClusterClient,
+  configSchema as elasticsearchConfigSchema,
+  ElasticsearchServiceStart,
+} from './elasticsearch';
+
 import { HttpServiceSetup } from './http';
+import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
-import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
+import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
-import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
+import {
+  ISavedObjectTypeRegistry,
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+} from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { UuidServiceSetup } from './uuid';
+import { MetricsServiceSetup } from './metrics';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
-export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
+export {
+  ConfigPath,
+  ConfigService,
+  ConfigDeprecation,
+  ConfigDeprecationProvider,
+  ConfigDeprecationLogger,
+  ConfigDeprecationFactory,
+  EnvironmentMode,
+  PackageInfo,
+} from './config';
 export {
   IContextContainer,
   IContextProvider,
@@ -59,18 +81,23 @@ export {
   HandlerParameters,
 } from './context';
 export { CoreId } from './core_context';
+export { CspConfig, ICspConfig } from './csp';
 export {
   ClusterClient,
   IClusterClient,
+  ICustomClusterClient,
   Headers,
   ScopedClusterClient,
   IScopedClusterClient,
+  ElasticsearchConfig,
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   APICaller,
   FakeRequest,
+  ScopeableRequest,
 } from './elasticsearch';
 export * from './elasticsearch/api_types';
 export {
@@ -79,9 +106,12 @@ export {
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  AuthRedirected,
+  AuthRedirectedParams,
   AuthResult,
   AuthResultType,
   Authenticated,
+  AuthNotHandled,
   BasePath,
   IBasePath,
   CustomHttpResponseOptions,
@@ -89,12 +119,14 @@ export {
   GetAuthState,
   HttpResponseOptions,
   HttpResponsePayload,
+  HttpServerInfo,
   HttpServiceSetup,
   HttpServiceStart,
   ErrorHttpResponseOptions,
   IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
@@ -123,15 +155,24 @@ export {
   RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
-  RouteSchemas,
   RouteConfigOptionsBody,
   RouteContentType,
   validBodyOutput,
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+  RouteValidationError,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './http';
+export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -158,6 +199,7 @@ export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
@@ -171,8 +213,11 @@ export {
   SavedObjectsImportRetry,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
+  SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
   SavedObjectsSerializer,
@@ -186,15 +231,44 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsComplexFieldMapping,
+  SavedObjectsCoreFieldMapping,
+  SavedObjectsFieldMapping,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsMappingProperties,
+  SavedObjectTypeRegistry,
+  ISavedObjectTypeRegistry,
+  SavedObjectsType,
+  SavedObjectsTypeManagementDefinition,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationFn,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
 } from './saved_objects';
 
 export {
   IUiSettingsClient,
   UiSettingsParams,
+  PublicUiSettingsParams,
   UiSettingsType,
   UiSettingsServiceSetup,
+  UiSettingsServiceStart,
   UserProvidedValues,
+  ImageValidation,
+  DeprecationSettings,
+  StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
 } from './ui_settings';
+
+export {
+  OpsMetrics,
+  OpsOsMetrics,
+  OpsServerMetrics,
+  OpsProcessMetrics,
+  MetricsServiceSetup,
+} from './metrics';
 
 export { RecursiveReadonly } from '../utils';
 
@@ -211,25 +285,40 @@ export {
   SavedObjectsMigrationVersion,
 } from './types';
 
-export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
+export {
+  LegacyServiceSetupDeps,
+  LegacyServiceStartDeps,
+  LegacyServiceDiscoverPlugins,
+  LegacyConfig,
+  LegacyUiExports,
+  LegacyInternals,
+} from './legacy';
 
 /**
  * Plugin specific context passed to a route handler.
  *
- * Provides the following clients:
+ * Provides the following clients and services:
+ *    - {@link IScopedRenderingClient | rendering} - Rendering client
+ *      which uses the data of the incoming request
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
+ *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
+ *      all the registered types.
  *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
  *      admin client which uses the credentials of the incoming request
+ *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
+ *      which uses the credentials of the incoming request
  *
  * @public
  */
 export interface RequestHandlerContext {
   core: {
+    rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;
+      typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
       dataClient: IScopedClusterClient;
@@ -244,9 +333,13 @@ export interface RequestHandlerContext {
 /**
  * Context passed to the plugins `setup` method.
  *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
  * @public
  */
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
@@ -259,7 +352,26 @@ export interface CoreSetup {
   savedObjects: SavedObjectsServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
+  /** {@link UuidServiceSetup} */
+  uuid: UuidServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
+
+/**
+ * Allows plugins to get access to APIs available in start inside async handlers.
+ * Promise will not resolve until Core and plugin dependencies have completed `start`.
+ * This should only be used inside handlers registered during `setup` that will only be executed
+ * after `start` lifecycle.
+ *
+ * @public
+ */
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
  * Context passed to the plugins `start` method.
@@ -269,15 +381,32 @@ export interface CoreSetup {
 export interface CoreStart {
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
+  /** {@link ElasticsearchServiceStart} */
+  elasticsearch: ElasticsearchServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
+  /** {@link UiSettingsServiceStart} */
+  uiSettings: UiSettingsServiceStart;
 }
 
 export {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
+  IScopedRenderingClient,
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
+  UuidServiceSetup,
+};
+
+/**
+ * Config schemas for the platform services.
+ *
+ * @alpha
+ */
+export const config = {
+  elasticsearch: {
+    schema: elasticsearchConfigSchema,
+  },
 };

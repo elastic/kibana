@@ -35,7 +35,8 @@ export const overviewSchema = gql`
     endgameRegistry: Float
     endgameSecurity: Float
     filebeatSystemModule: Float
-    winlogbeat: Float
+    winlogbeatSecurity: Float
+    winlogbeatMWSysmonOperational: Float
     inspect: Inspect
   }
 

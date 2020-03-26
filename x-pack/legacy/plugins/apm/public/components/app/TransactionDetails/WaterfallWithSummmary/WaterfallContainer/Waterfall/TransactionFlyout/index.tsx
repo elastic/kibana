@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { TransactionActionMenu } from '../../../../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { TransactionSummary } from '../../../../../../shared/Summary/TransactionSummary';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
@@ -27,8 +27,8 @@ import { DroppedSpansWarning } from './DroppedSpansWarning';
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
-  errorCount: number;
-  traceRootDuration?: number;
+  errorCount?: number;
+  rootTransactionDuration?: number;
 }
 
 function TransactionPropertiesTable({
@@ -49,8 +49,8 @@ function TransactionPropertiesTable({
 export function TransactionFlyout({
   transaction: transactionDoc,
   onClose,
-  errorCount,
-  traceRootDuration
+  errorCount = 0,
+  rootTransactionDuration
 }: Props) {
   if (!transactionDoc) {
     return null;
@@ -84,7 +84,7 @@ export function TransactionFlyout({
           <EuiSpacer size="m" />
           <TransactionSummary
             transaction={transactionDoc}
-            totalDuration={traceRootDuration}
+            totalDuration={rootTransactionDuration}
             errorCount={errorCount}
           />
           <EuiHorizontalRule margin="m" />

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('app plugins', () => {
     loadTestFile(require.resolve('./app_navigation'));
   });

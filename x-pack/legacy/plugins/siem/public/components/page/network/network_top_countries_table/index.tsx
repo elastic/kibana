@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual, last } from 'lodash/fp';
-import React from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
+import { last } from 'lodash/fp';
+import React, { useCallback, useMemo } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 import { networkActions } from '../../../../store/actions';
@@ -39,23 +38,7 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface NetworkTopCountriesTableReduxProps {
-  activePage: number;
-  limit: number;
-  sort: NetworkTopTablesSortField;
-}
-
-interface NetworkTopCountriesTableDispatchProps {
-  updateNetworkTable: ActionCreator<{
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.AllNetworkTables;
-    updates: networkModel.TableUpdates;
-  }>;
-}
-
-type NetworkTopCountriesTableProps = OwnProps &
-  NetworkTopCountriesTableReduxProps &
-  NetworkTopCountriesTableDispatchProps;
+type NetworkTopCountriesTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -88,27 +71,6 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     type,
     updateNetworkTable,
   }) => {
-    const onChange = (criteria: Criteria, tableType: networkModel.TopCountriesTableType) => {
-      if (criteria.sort != null) {
-        const splitField = criteria.sort.field.split('.');
-        const field = last(splitField);
-        const newSortDirection = field !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-        const newTopCountriesSort: NetworkTopTablesSortField = {
-          field: field as NetworkTopTablesFields,
-          direction: newSortDirection,
-        };
-        if (!isEqual(newTopCountriesSort, sort)) {
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: {
-              sort: newTopCountriesSort,
-            },
-          });
-        }
-      }
-    };
-
     let tableType: networkModel.TopCountriesTableType;
     const headerTitle: string =
       flowTargeted === FlowTargetSourceDest.source
@@ -133,15 +95,61 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
         ? `node.network.${sort.field}`
         : `node.${flowTargeted}.${sort.field}`;
 
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const splitField = criteria.sort.field.split('.');
+          const lastField = last(splitField);
+          const newSortDirection =
+            lastField !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
+          const newTopCountriesSort: NetworkTopTablesSortField = {
+            field: lastField as NetworkTopTablesFields,
+            direction: newSortDirection as Direction,
+          };
+          if (!deepEqual(newTopCountriesSort, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: {
+                sort: newTopCountriesSort,
+              },
+            });
+          }
+        }
+      },
+      [type, sort, tableType, updateNetworkTable]
+    );
+
+    const columns = useMemo(
+      () =>
+        getCountriesColumnsCurated(indexPattern, flowTargeted, type, NetworkTopCountriesTableId),
+      [indexPattern, flowTargeted, type]
+    );
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getCountriesColumnsCurated(
-          indexPattern,
-          flowTargeted,
-          type,
-          NetworkTopCountriesTableId
-        )}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={headerTitle}
@@ -151,26 +159,14 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
-        onChange={criteria => onChange(criteria, tableType)}
+        loadPage={loadPage}
+        onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={{ field, direction: sort.direction }}
         totalCount={fakeTotalCount}
-        updateActivePage={newPage =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { activePage: newPage },
-          })
-        }
-        updateLimitPagination={newLimit =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { limit: newLimit },
-          })
-        }
+        updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }
@@ -184,8 +180,12 @@ const makeMapStateToProps = () => {
     getTopCountriesSelector(state, type, flowTargeted);
 };
 
-export const NetworkTopCountriesTable = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  })
-)(NetworkTopCountriesTableComponent);
+const mapDispatchToProps = {
+  updateNetworkTable: networkActions.updateNetworkTable,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const NetworkTopCountriesTable = connector(NetworkTopCountriesTableComponent);

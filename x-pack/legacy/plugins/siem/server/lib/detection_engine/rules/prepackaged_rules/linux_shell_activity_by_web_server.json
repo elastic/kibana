@@ -1,0 +1,42 @@
+{
+  "description": "Identifies suspicious commands executed via a web server, which may suggest a vulnerability and remote shell access.",
+  "false_positives": [
+    "Network monitoring or management products may have a web server component that runs shell commands as part of normal behavior."
+  ],
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Potential Shell via Web Server",
+  "query": "process.name: bash and user.name: (apache or www or \"www-data\") and event.action:executed",
+  "references": [
+    "https://pentestlab.blog/tag/web-shell/"
+  ],
+  "risk_score": 47,
+  "rule_id": "231876e7-4d1f-4d63-a47c-47dd1acdc1cb",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/techniques/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1100",
+          "name": "Web Shell",
+          "reference": "https://attack.mitre.org/techniques/T1100/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

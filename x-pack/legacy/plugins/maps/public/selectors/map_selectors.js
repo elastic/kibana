@@ -10,10 +10,17 @@ import { TileLayer } from '../layers/tile_layer';
 import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
+import { BlendedVectorLayer } from '../layers/blended_vector_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
-import { timefilter } from 'ui/timefilter';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
+import { getTimeFilter } from '../kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
+import {
+  copyPersistentState,
+  TRACKED_LAYER_DESCRIPTOR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/reducers/util';
+import { InnerJoin } from '../layers/joins/inner_join';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -22,11 +29,20 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
     case TileLayer.type:
       return new TileLayer({ layerDescriptor, source });
     case VectorLayer.type:
-      return new VectorLayer({ layerDescriptor, source });
+      const joins = [];
+      if (layerDescriptor.joins) {
+        layerDescriptor.joins.forEach(joinDescriptor => {
+          const join = new InnerJoin(joinDescriptor, source);
+          joins.push(join);
+        });
+      }
+      return new VectorLayer({ layerDescriptor, source, joins });
     case VectorTileLayer.type:
       return new VectorTileLayer({ layerDescriptor, source });
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source });
+    case BlendedVectorLayer.type:
+      return new BlendedVectorLayer({ layerDescriptor, source });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
@@ -42,8 +58,14 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   return new Source(sourceDescriptor, inspectorAdapters);
 }
 
-export const getTooltipState = ({ map }) => {
-  return map.tooltipState;
+export const getOpenTooltips = ({ map }) => {
+  return map && map.openTooltips ? map.openTooltips : [];
+};
+
+export const getHasLockedTooltips = state => {
+  return getOpenTooltips(state).some(({ isLocked }) => {
+    return isLocked;
+  });
 };
 
 export const getMapReady = ({ map }) => map && map.ready;
@@ -53,16 +75,15 @@ export const getMapInitError = ({ map }) => map.mapInitError;
 export const getGoto = ({ map }) => map && map.goto;
 
 export const getSelectedLayerId = ({ map }) => {
-  return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
+  return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
 };
 
 export const getTransientLayerId = ({ map }) => map.__transientLayerId;
 
-export const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
+export const getLayerListRaw = ({ map }) => (map.layerList ? map.layerList : []);
 
-export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapReadyLayerList
-  ? map.waitingForMapReadyLayerList
-  : [];
+export const getWaitingForMapReadyLayerListRaw = ({ map }) =>
+  map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
 
 export const getScrollZoom = ({ map }) => map.mapState.scrollZoom;
 
@@ -72,28 +93,29 @@ export const isTooltipControlDisabled = ({ map }) => map.mapState.disableTooltip
 
 export const isToolbarOverlayHidden = ({ map }) => map.mapState.hideToolbarOverlay;
 
-export const getMapExtent = ({ map }) => map.mapState.extent ?
-  map.mapState.extent : {};
+export const isLayerControlHidden = ({ map }) => map.mapState.hideLayerControl;
 
-export const getMapBuffer = ({ map }) => map.mapState.buffer ?
-  map.mapState.buffer : {};
+export const isViewControlHidden = ({ map }) => map.mapState.hideViewControl;
 
-export const getMapZoom = ({ map }) => map.mapState.zoom ?
-  map.mapState.zoom : 0;
+export const getMapExtent = ({ map }) => (map.mapState.extent ? map.mapState.extent : {});
 
-export const getMapCenter = ({ map }) => map.mapState.center ?
-  map.mapState.center : { lat: 0, lon: 0 };
+export const getMapBuffer = ({ map }) => (map.mapState.buffer ? map.mapState.buffer : {});
+
+export const getMapZoom = ({ map }) => (map.mapState.zoom ? map.mapState.zoom : 0);
+
+export const getMapCenter = ({ map }) =>
+  map.mapState.center ? map.mapState.center : { lat: 0, lon: 0 };
 
 export const getMouseCoordinates = ({ map }) => map.mapState.mouseCoordinates;
 
-export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
-  map.mapState.timeFilters : timefilter.getTime();
+export const getTimeFilters = ({ map }) =>
+  map.mapState.timeFilters ? map.mapState.timeFilters : getTimeFilter().getTime();
 
 export const getQuery = ({ map }) => map.mapState.query;
 
 export const getFilters = ({ map }) => map.mapState.filters;
 
-export const isUsingSearch = (state) => {
+export const isUsingSearch = state => {
   const filters = getFilters(state).filter(filter => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
   return filters.length || queryString.length;
@@ -110,7 +132,7 @@ export const getRefreshConfig = ({ map }) => {
     return map.mapState.refreshConfig;
   }
 
-  const refreshInterval = timefilter.getRefreshInterval();
+  const refreshInterval = getTimeFilter().getRefreshInterval();
   return {
     isPaused: refreshInterval.pause,
     interval: refreshInterval.value,
@@ -118,6 +140,21 @@ export const getRefreshConfig = ({ map }) => {
 };
 
 export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
+
+function getLayerDescriptor(state = {}, layerId) {
+  const layerListRaw = getLayerListRaw(state);
+  return layerListRaw.find(layer => layer.id === layerId);
+}
+
+export function getDataRequestDescriptor(state = {}, layerId, dataId) {
+  const layerDescriptor = getLayerDescriptor(state, layerId);
+  if (!layerDescriptor || !layerDescriptor.__dataRequests) {
+    return;
+  }
+  return _.get(layerDescriptor, '__dataRequests', []).find(dataRequest => {
+    return dataRequest.dataId === dataId;
+  });
+}
 
 export const getDataFilters = createSelector(
   getMapExtent,
@@ -145,60 +182,60 @@ export const getLayerList = createSelector(
   getInspectorAdapters,
   (layerDescriptorList, inspectorAdapters) => {
     return layerDescriptorList.map(layerDescriptor =>
-      createLayerInstance(layerDescriptor, inspectorAdapters));
-  });
+      createLayerInstance(layerDescriptor, inspectorAdapters)
+    );
+  }
+);
+
+export const getHiddenLayerIds = createSelector(getLayerListRaw, layers =>
+  layers.filter(layer => !layer.visible).map(layer => layer.id)
+);
 
 export const getSelectedLayer = createSelector(
   getSelectedLayerId,
   getLayerList,
   (selectedLayerId, layerList) => {
     return layerList.find(layer => layer.getId() === selectedLayerId);
-  });
+  }
+);
 
 export const getMapColors = createSelector(
   getTransientLayerId,
   getLayerListRaw,
-  (transientLayerId, layerList) => layerList.reduce((accu, layer) => {
-    if (layer.id === transientLayerId) {
+  (transientLayerId, layerList) =>
+    layerList.reduce((accu, layer) => {
+      if (layer.id === transientLayerId) {
+        return accu;
+      }
+      const color = _.get(layer, 'style.properties.fillColor.options.color');
+      if (color) accu.push(color);
       return accu;
-    }
-    const color = _.get(layer, 'style.properties.fillColor.options.color');
-    if (color) accu.push(color);
-    return accu;
-  }, [])
+    }, [])
 );
 
-export const getSelectedLayerJoinDescriptors = createSelector(
-  getSelectedLayer,
-  (selectedLayer) => {
-    return selectedLayer.getJoins().map(join => {
-      return join.toDescriptor();
-    });
+export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, selectedLayer => {
+  return selectedLayer.getJoins().map(join => {
+    return join.toDescriptor();
   });
+});
 
 // Get list of unique index patterns used by all layers
-export const getUniqueIndexPatternIds = createSelector(
-  getLayerList,
-  (layerList) => {
-    const indexPatternIds = [];
-    layerList.forEach(layer => {
-      indexPatternIds.push(...layer.getIndexPatternIds());
-    });
-    return _.uniq(indexPatternIds).sort();
-  }
-);
+export const getUniqueIndexPatternIds = createSelector(getLayerList, layerList => {
+  const indexPatternIds = [];
+  layerList.forEach(layer => {
+    indexPatternIds.push(...layer.getIndexPatternIds());
+  });
+  return _.uniq(indexPatternIds).sort();
+});
 
 // Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
-export const getQueryableUniqueIndexPatternIds = createSelector(
-  getLayerList,
-  (layerList) => {
-    const indexPatternIds = [];
-    layerList.forEach(layer => {
-      indexPatternIds.push(...layer.getQueryableIndexPatternIds());
-    });
-    return _.uniq(indexPatternIds);
-  }
-);
+export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, layerList => {
+  const indexPatternIds = [];
+  layerList.forEach(layer => {
+    indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+  });
+  return _.uniq(indexPatternIds);
+});
 
 export const hasDirtyState = createSelector(
   getLayerListRaw,

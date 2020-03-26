@@ -8,7 +8,20 @@ import { cloneDeep, set } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React, { useEffect } from 'react';
 
-import { AppToast, useStateToaster, ManageGlobalToaster, GlobalToaster } from '.';
+import {
+  AppToast,
+  useStateToaster,
+  ManageGlobalToaster,
+  GlobalToaster,
+  displayErrorToast,
+} from '.';
+
+jest.mock('uuid', () => {
+  return {
+    v1: jest.fn(() => '27261ae0-0bbb-11ea-b0ea-db767b07ea47'),
+    v4: jest.fn(() => '9e1f72a9-7c73-4b7f-a562-09940f7daf4a'),
+  };
+});
 
 const mockToast: AppToast = {
   color: 'danger',
@@ -268,6 +281,24 @@ describe('Toaster', () => {
       wrapper.find('button[data-test-subj="modal-all-errors-close"]').simulate('click');
       expect(wrapper.find('.euiToast').length).toBe(1);
       expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
+    });
+  });
+
+  describe('displayErrorToast', () => {
+    test('dispatches toast with correct title and message', () => {
+      const mockErrorToast = {
+        toast: {
+          color: 'danger',
+          errors: ['message'],
+          iconType: 'alert',
+          id: '9e1f72a9-7c73-4b7f-a562-09940f7daf4a',
+          title: 'Title',
+        },
+        type: 'addToaster',
+      };
+      const dispatchToasterMock = jest.fn();
+      displayErrorToast('Title', ['message'], dispatchToasterMock);
+      expect(dispatchToasterMock.mock.calls[0][0]).toEqual(mockErrorToast);
     });
   });
 });

@@ -6,7 +6,6 @@
 
 import {
   EuiButtonIcon,
-  // @ts-ignore
   EuiHighlight,
   EuiIcon,
   EuiFlexGroup,
@@ -19,7 +18,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
 import { TimelineContext } from '../timeline/timeline_context';
 import { WithHoverActions } from '../with_hover_actions';
@@ -30,55 +29,55 @@ import * as i18n from './translations';
  * The name of a (draggable) field
  */
 export const FieldNameContainer = styled.span`
-  padding: 5px;
-  {
-    border-radius: 4px;
-    padding: 0 4px 0 8px;
-    position: relative;
+  border-radius: 4px;
+  padding: 0 4px 0 8px;
+  position: relative;
+
+  &::before {
+    background-image: linear-gradient(
+        135deg,
+        ${({ theme }) => theme.eui.euiColorMediumShade} 25%,
+        transparent 25%
+      ),
+      linear-gradient(-135deg, ${({ theme }) => theme.eui.euiColorMediumShade} 25%, transparent 25%),
+      linear-gradient(135deg, transparent 75%, ${({ theme }) => theme.eui.euiColorMediumShade} 75%),
+      linear-gradient(-135deg, transparent 75%, ${({ theme }) => theme.eui.euiColorMediumShade} 75%);
+    background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
+    background-size: 2px 2px;
+    bottom: 2px;
+    content: '';
+    display: block;
+    left: 2px;
+    position: absolute;
+    top: 2px;
+    width: 4px;
+  }
+
+  &:hover,
+  &:focus {
+    transition: background-color 0.7s ease;
+    background-color: #000;
+    color: #fff;
 
     &::before {
-      background-image: linear-gradient(
-          135deg,
-          ${({ theme }) => theme.eui.euiColorMediumShade} 25%,
+      background-image: linear-gradient(135deg, #fff 25%, transparent 25%),
+        linear-gradient(
+          -135deg,
+          ${({ theme }) => theme.eui.euiColorLightestShade} 25%,
           transparent 25%
         ),
-        linear-gradient(-135deg, ${({ theme }) =>
-          theme.eui.euiColorMediumShade} 25%, transparent 25%),
-        linear-gradient(135deg, transparent 75%, ${({ theme }) =>
-          theme.eui.euiColorMediumShade} 75%),
-        linear-gradient(-135deg, transparent 75%, ${({ theme }) =>
-          theme.eui.euiColorMediumShade} 75%);
-      background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
-      background-size: 2px 2px;
-      bottom: 2px;
-      content: '';
-      display: block;
-      left: 2px;
-      position: absolute;
-      top: 2px;
-      width: 4px;
+        linear-gradient(
+          135deg,
+          transparent 75%,
+          ${({ theme }) => theme.eui.euiColorLightestShade} 75%
+        ),
+        linear-gradient(
+          -135deg,
+          transparent 75%,
+          ${({ theme }) => theme.eui.euiColorLightestShade} 75%
+        );
     }
-
-    &:hover,
-    &:focus {
-      transition: background-color 0.7s ease;
-      background-color: #000;
-      color: #fff;
-
-      &::before {
-        background-image: linear-gradient(
-            135deg,
-            #fff 25%,
-            transparent 25%
-          ),
-          linear-gradient(-135deg, ${({ theme }) =>
-            theme.eui.euiColorLightestShade} 25%, transparent 25%),
-          linear-gradient(135deg, transparent 75%, ${({ theme }) =>
-            theme.eui.euiColorLightestShade} 75%),
-          linear-gradient(-135deg, transparent 75%, ${({ theme }) =>
-            theme.eui.euiColorLightestShade} 75%);
-      }
-    }
+  }
 `;
 
 FieldNameContainer.displayName = 'FieldNameContainer';
@@ -108,7 +107,7 @@ ViewCategoryIcon.displayName = 'ViewCategoryIcon';
 interface ToolTipProps {
   categoryId: string;
   onUpdateColumns: OnUpdateColumns;
-  categoryColumns: ColumnHeader[];
+  categoryColumns: ColumnHeaderOptions[];
 }
 
 const ViewCategory = React.memo<ToolTipProps>(
@@ -139,7 +138,7 @@ ViewCategory.displayName = 'ViewCategory';
 /** Renders a field name in it's non-dragging state */
 export const FieldName = React.memo<{
   categoryId: string;
-  categoryColumns: ColumnHeader[];
+  categoryColumns: ColumnHeaderOptions[];
   fieldId: string;
   highlight?: string;
   onUpdateColumns: OnUpdateColumns;

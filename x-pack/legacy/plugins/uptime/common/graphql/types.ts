@@ -8,6 +8,7 @@
 // Scalars
 // ====================================================
 
+
 export type UnsignedInteger = any;
 
 // ====================================================
@@ -17,26 +18,9 @@ export type UnsignedInteger = any;
 export interface Query {
   /** Get a list of all recorded pings for all monitors */
   allPings: PingResults;
-  /** Gets the number of documents in the target index */
-  getDocCount: DocCount;
 
-  getMonitors?: LatestMonitorsResult | null;
-
-  getSnapshot?: Snapshot | null;
-
-  getSnapshotHistogram: HistogramDataPoint[];
-
-  getMonitorChartsData?: MonitorChart | null;
-  /** Fetch the most recent event data for a monitor ID, date range, location. */
-  getLatestMonitors: Ping[];
-
-  getFilterBar?: FilterBar | null;
-
-  getMonitorPageTitle?: MonitorPageTitle | null;
   /** Fetches the current state of Uptime monitors for the given parameters. */
   getMonitorStates?: MonitorSummaryResult | null;
-  /** Fetches details about the uptime index. */
-  getStatesIndexStatus: StatesIndexStatus;
 }
 
 export interface PingResults {
@@ -383,32 +367,6 @@ export interface DocCount {
   count: UnsignedInteger;
 }
 
-export interface LatestMonitorsResult {
-  monitors?: LatestMonitor[] | null;
-}
-/** Represents the latest recorded information about a monitor. */
-export interface LatestMonitor {
-  /** The ID of the monitor represented by this data. */
-  id: MonitorKey;
-  /** Information from the latest document. */
-  ping?: Ping | null;
-  /** Buckets of recent up count status data. */
-  upSeries?: MonitorSeriesPoint[] | null;
-  /** Buckets of recent down count status data. */
-  downSeries?: MonitorSeriesPoint[] | null;
-}
-
-export interface MonitorKey {
-  key: string;
-
-  url?: string | null;
-}
-
-export interface MonitorSeriesPoint {
-  x?: UnsignedInteger | null;
-
-  y?: number | null;
-}
 
 export interface Snapshot {
   counts: SnapshotCount;
@@ -419,80 +377,10 @@ export interface SnapshotCount {
 
   down: number;
 
-  mixed: number;
-
   total: number;
 }
 
-export interface HistogramDataPoint {
-  upCount?: number | null;
 
-  downCount?: number | null;
-
-  x?: UnsignedInteger | null;
-
-  x0?: UnsignedInteger | null;
-
-  y?: UnsignedInteger | null;
-}
-/** The data used to populate the monitor charts. */
-export interface MonitorChart {
-  /** The average values for the monitor duration. */
-  locationDurationLines: LocationDurationLine[];
-  /** The counts of up/down checks for the monitor. */
-  status: StatusData[];
-  /** The maximum status doc count in this chart. */
-  statusMaxCount: number;
-  /** The maximum duration value in this chart. */
-  durationMaxValue: number;
-}
-
-export interface LocationDurationLine {
-  name: string;
-
-  line: MonitorDurationAveragePoint[];
-}
-/** Represents the average monitor duration ms at a point in time. */
-export interface MonitorDurationAveragePoint {
-  /** The timeseries value for this point. */
-  x: UnsignedInteger;
-  /** The average duration ms for the monitor. */
-  y?: number | null;
-}
-/** Represents a bucket of monitor status information. */
-export interface StatusData {
-  /** The timeseries point for this status data. */
-  x: UnsignedInteger;
-  /** The value of up counts for this point. */
-  up?: number | null;
-  /** The value for down counts for this point. */
-  down?: number | null;
-  /** The total down counts for this point. */
-  total?: number | null;
-}
-/** The data used to enrich the filter bar. */
-export interface FilterBar {
-  /** A series of monitor IDs in the heartbeat indices. */
-  ids?: string[] | null;
-  /** The location values users have configured for the agents. */
-  locations?: string[] | null;
-  /** The ports of the monitored endpoints. */
-  ports?: number[] | null;
-  /** The schemes used by the monitors. */
-  schemes?: string[] | null;
-  /** The possible status values contained in the indices. */
-  statuses?: string[] | null;
-  /** The list of URLs */
-  urls?: string[] | null;
-}
-
-export interface MonitorPageTitle {
-  id: string;
-
-  url?: string | null;
-
-  name?: string | null;
-}
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
   /** Used to go to the next page of results */
@@ -502,7 +390,7 @@ export interface MonitorSummaryResult {
   /** The objects representing the state of a series of heartbeat monitors. */
   summaries?: MonitorSummary[] | null;
   /** The number of summaries. */
-  totalSummaryCount: DocCount;
+  totalSummaryCount: number;
 }
 /** Represents the current state and associated data for an Uptime monitor. */
 export interface MonitorSummary {
@@ -635,54 +523,7 @@ export interface SummaryHistogramPoint {
   /** The number of _down_ documents. */
   down: number;
 }
-/** Represents the current status of the uptime index. */
-export interface StatesIndexStatus {
-  /** Flag denoting whether the index exists. */
-  indexExists: boolean;
-  /** The number of documents in the index. */
-  docCount?: DocCount | null;
-}
 
-export interface DataPoint {
-  x?: UnsignedInteger | null;
-
-  y?: number | null;
-}
-/** Represents a monitor's duration performance in microseconds at a point in time. */
-export interface MonitorDurationAreaPoint {
-  /** The timeseries value for this point in time. */
-  x: UnsignedInteger;
-  /** The min duration value in microseconds at this time. */
-  yMin?: number | null;
-  /** The max duration value in microseconds at this point. */
-  yMax?: number | null;
-}
-
-export interface MonitorSummaryUrl {
-  domain?: string | null;
-
-  fragment?: string | null;
-
-  full?: string | null;
-
-  original?: string | null;
-
-  password?: string | null;
-
-  path?: string | null;
-
-  port?: number | null;
-
-  query?: string | null;
-
-  scheme?: string | null;
-
-  username?: string | null;
-}
-
-// ====================================================
-// Arguments
-// ====================================================
 
 export interface AllPingsQueryArgs {
   /** Optional: the direction to sort by. Accepts 'asc' and 'desc'. Defaults to 'desc'. */
@@ -700,62 +541,7 @@ export interface AllPingsQueryArgs {
   /** Optional: agent location to filter by. */
   location?: string | null;
 }
-export interface GetMonitorsQueryArgs {
-  dateRangeStart: string;
 
-  dateRangeEnd: string;
-
-  filters?: string | null;
-
-  statusFilter?: string | null;
-}
-export interface GetSnapshotQueryArgs {
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
-
-  filters?: string | null;
-
-  statusFilter?: string | null;
-}
-export interface GetSnapshotHistogramQueryArgs {
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
-
-  filters?: string | null;
-
-  statusFilter?: string | null;
-
-  monitorId?: string | null;
-}
-export interface GetMonitorChartsDataQueryArgs {
-  monitorId: string;
-
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
-
-  location?: string | null;
-}
-export interface GetLatestMonitorsQueryArgs {
-  /** The lower limit of the date range. */
-  dateRangeStart: string;
-  /** The upper limit of the date range. */
-  dateRangeEnd: string;
-  /** Optional: a specific monitor ID filter. */
-  monitorId?: string | null;
-  /** Optional: a specific instance location filter. */
-  location?: string | null;
-}
-export interface GetFilterBarQueryArgs {
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
-}
-export interface GetMonitorPageTitleQueryArgs {
-  monitorId: string;
-}
 export interface GetMonitorStatesQueryArgs {
   dateRangeStart: string;
 
@@ -766,6 +552,8 @@ export interface GetMonitorStatesQueryArgs {
   filters?: string | null;
 
   statusFilter?: string | null;
+
+  pageSize: number;
 }
 
 // ====================================================

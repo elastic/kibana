@@ -13,13 +13,8 @@
     "id": "e6f890af316a25920c951acefc46bfef",
     "name": "suricata-iowa",
     "containerized": false,
-    "ip": [
-      "10.128.0.21",
-      "fe80::4001:aff:fe80:15"
-    ],
-    "mac": [
-      "42:01:0a:80:00:15"
-    ],
+    "ip": ["10.128.0.21", "fe80::4001:aff:fe80:15"],
+    "mac": ["42:01:0a:80:00:15"],
     "hostname": "suricata-iowa"
   },
   "client": {
@@ -73,11 +68,8 @@
     "bytes": 80
   },
   "process": {
-    "args": [
-      "\/usr\/bin\/python3",
-      "\/usr\/bin\/google_network_daemon"
-    ],
-    "executable": "\/usr\/bin\/python3.7",
+    "args": ["/usr/bin/python3", "/usr/bin/google_network_daemon"],
+    "executable": "/usr/bin/python3.7",
     "created": "2019-11-04T15:01:04.190Z",
     "pid": 808,
     "name": "google_network_"
@@ -137,38 +129,26 @@
     "rule": {
       "id": "8d9bb7f1-9d8a-4f13-ae18-ccaf4ff61893",
       "rule_id": "rule-1",
-      "false_positives": [
-        
-      ],
+      "false_positives": [],
       "max_signals": 100,
       "risk_score": 1,
       "description": "Detecting root and admin users",
       "from": "now-6s",
       "immutable": false,
-      "index": [
-        "auditbeat-*",
-        "filebeat-*",
-        "packetbeat-*",
-        "winlogbeat-*"
-      ],
+      "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
       "interval": "5s",
       "language": "kuery",
-      "name": "Detect Root\/Admin Users",
+      "name": "Detect Root/Admin Users",
       "query": "user.name: root or user.name: admin",
-      "references": [
-        "http:\/\/www.example.com",
-        "https:\/\/ww.example.com"
-      ],
+      "references": ["http://www.example.com", "https://ww.example.com"],
       "severity": "high",
-      "tags": [
-        
-      ],
+      "tags": [],
       "type": "query",
       "to": "now",
       "enabled": true,
       "created_by": "elastic",
       "updated_by": "elastic",
-      "threats": [
+      "threat": [
         {
           "framework": "fake",
           "technique": {

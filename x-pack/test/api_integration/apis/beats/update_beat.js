@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { ES_INDEX_NAME } from './constants';
 import moment from 'moment';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const randomness = getService('randomness');
   const es = getService('legacyEs');

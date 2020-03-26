@@ -23,10 +23,10 @@ describe('Node Listing Metric Cell', () => {
           units: '%',
           format: '0,0.[00]',
           hasCalculation: false,
-          isDerivative: false
+          isDerivative: false,
         },
-        summary: { minVal: 0, maxVal: 2, lastVal: 0, slope: -1 }
-      }
+        summary: { minVal: 0, maxVal: 2, lastVal: 0, slope: -1 },
+      },
     };
     expect(renderWithIntl(<MetricCell {...props} />)).toMatchSnapshot();
   });
@@ -45,15 +45,15 @@ describe('Node Listing Metric Cell', () => {
           units: '',
           format: '0.0 b',
           hasCalculation: false,
-          isDerivative: false
+          isDerivative: false,
         },
         summary: {
           minVal: 221558202368,
           maxVal: 221710200832,
           lastVal: 221559312384,
-          slope: -1
-        }
-      }
+          slope: -1,
+        },
+      },
     };
     expect(renderWithIntl(<MetricCell {...props} />)).toMatchSnapshot();
   });

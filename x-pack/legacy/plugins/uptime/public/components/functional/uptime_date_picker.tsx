@@ -5,9 +5,10 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useUrlParams } from '../../hooks';
 import { CLIENT_DEFAULTS } from '../../../common/constants';
+import { UptimeRefreshContext, UptimeSettingsContext } from '../../contexts';
 
 // TODO: when EUI exports types for this, this should be replaced
 interface SuperDateRangePickerRangeChangedEvent {
@@ -20,21 +21,35 @@ interface SuperDateRangePickerRefreshChangedEvent {
   refreshInterval?: number;
 }
 
-interface Props {
-  refreshApp: () => void;
+export interface CommonlyUsedRange {
+  from: string;
+  to: string;
+  display: string;
 }
 
-type UptimeDatePickerProps = Props;
-
-export const UptimeDatePicker = (props: UptimeDatePickerProps) => {
-  const { refreshApp } = props;
+export const UptimeDatePicker = () => {
   const [getUrlParams, updateUrl] = useUrlParams();
   const { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd } = getUrlParams();
+  const { commonlyUsedRanges } = useContext(UptimeSettingsContext);
+  const { refreshApp } = useContext(UptimeRefreshContext);
+
+  const euiCommonlyUsedRanges = commonlyUsedRanges
+    ? commonlyUsedRanges.map(
+        ({ from, to, display }: { from: string; to: string; display: string }) => {
+          return {
+            start: from,
+            end: to,
+            label: display,
+          };
+        }
+      )
+    : CLIENT_DEFAULTS.COMMONLY_USED_DATE_RANGES;
+
   return (
     <EuiSuperDatePicker
       start={dateRangeStart}
       end={dateRangeEnd}
-      commonlyUsedRanges={CLIENT_DEFAULTS.COMMONLY_USED_DATE_RANGES}
+      commonlyUsedRanges={euiCommonlyUsedRanges}
       isPaused={autorefreshIsPaused}
       refreshInterval={autorefreshInterval}
       onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
@@ -46,7 +61,7 @@ export const UptimeDatePicker = (props: UptimeDatePickerProps) => {
         updateUrl({
           autorefreshInterval:
             refreshInterval === undefined ? autorefreshInterval : refreshInterval,
-          autorefreshPaused: isPaused,
+          autorefreshIsPaused: isPaused,
         });
       }}
     />

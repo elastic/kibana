@@ -32,7 +32,7 @@ export function findTestBundleUrl() {
   const testBundleUrl = scriptUrls.find(url => url.includes('/tests.bundle.js'));
 
   if (!testBundleUrl) {
-    throw new Error('test bundle url couldn\'t be found');
+    throw new Error("test bundle url couldn't be found");
   }
 
   return testBundleUrl;

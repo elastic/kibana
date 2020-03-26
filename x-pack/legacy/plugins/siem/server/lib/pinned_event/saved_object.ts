@@ -5,15 +5,15 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { RequestAuth } from 'hapi';
 import { getOr } from 'lodash/fp';
-
-import { SavedObjectsFindOptions } from 'src/core/server';
-
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { FrameworkRequest, internalFrameworkRequest } from '../framework';
+
+import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
+import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
+import { FrameworkRequest } from '../framework';
 import {
   PinnedEventSavedObject,
   PinnedEventSavedObjectRuntimeType,
@@ -89,7 +89,7 @@ export class PinnedEvent {
 
   public async persistPinnedEventOnTimeline(
     request: FrameworkRequest,
-    pinnedEventId: string | null,
+    pinnedEventId: string | null, // pinned event saved object id
     eventId: string,
     timelineId: string | null
   ): Promise<PinnedEventResponse | null> {
@@ -103,7 +103,7 @@ export class PinnedEvent {
                 const timelineResult = convertSavedObjectToSavedTimeline(
                   await savedObjectsClient.create(
                     timelineSavedObjectType,
-                    pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
+                    pickSavedTimeline(null, {}, request.user || null)
                   )
                 );
                 timelineId = timelineResult.savedObjectId; // eslint-disable-line no-param-reassign
@@ -116,6 +116,7 @@ export class PinnedEvent {
           const isPinnedAlreadyExisting = allPinnedEventId.filter(
             pinnedEvent => pinnedEvent.eventId === eventId
           );
+
           if (isPinnedAlreadyExisting.length === 0) {
             const savedPinnedEvent: SavedPinnedEvent = {
               eventId,
@@ -125,11 +126,7 @@ export class PinnedEvent {
             return convertSavedObjectToSavedPinnedEvent(
               await savedObjectsClient.create(
                 pinnedEventSavedObjectType,
-                pickSavedPinnedEvent(
-                  pinnedEventId,
-                  savedPinnedEvent,
-                  request[internalFrameworkRequest].auth || null
-                )
+                pickSavedPinnedEvent(pinnedEventId, savedPinnedEvent, request.user || null)
               ),
               timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
             );
@@ -184,7 +181,7 @@ export class PinnedEvent {
   }
 }
 
-const convertSavedObjectToSavedPinnedEvent = (
+export const convertSavedObjectToSavedPinnedEvent = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): PinnedEventSavedObject =>
@@ -208,20 +205,21 @@ const convertSavedObjectToSavedPinnedEvent = (
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
 
-const pickSavedPinnedEvent = (
+export const pickSavedPinnedEvent = (
   pinnedEventId: string | null,
   savedPinnedEvent: SavedPinnedEvent,
-  userInfo: RequestAuth
+  userInfo: AuthenticatedUser | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
+  const dateNow = new Date().valueOf();
   if (pinnedEventId == null) {
-    savedPinnedEvent.created = new Date().valueOf();
-    savedPinnedEvent.createdBy = getOr(null, 'credentials.username', userInfo);
-    savedPinnedEvent.updated = new Date().valueOf();
-    savedPinnedEvent.updatedBy = getOr(null, 'credentials.username', userInfo);
+    savedPinnedEvent.created = dateNow;
+    savedPinnedEvent.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+    savedPinnedEvent.updated = dateNow;
+    savedPinnedEvent.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   } else if (pinnedEventId != null) {
-    savedPinnedEvent.updated = new Date().valueOf();
-    savedPinnedEvent.updatedBy = getOr(null, 'credentials.username', userInfo);
+    savedPinnedEvent.updated = dateNow;
+    savedPinnedEvent.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
   return savedPinnedEvent;
 };

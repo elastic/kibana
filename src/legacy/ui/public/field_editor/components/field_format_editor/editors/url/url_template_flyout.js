@@ -19,29 +19,21 @@
 
 import React from 'react';
 
-import {
-  EuiBasicTable,
-  EuiCode,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiCode, EuiFlyout, EuiFlyoutBody, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const UrlTemplateFlyout = ({
-  isVisible = false,
-  onClose = () => {},
-}) => {
+export const UrlTemplateFlyout = ({ isVisible = false, onClose = () => {} }) => {
   return isVisible ? (
-    <EuiFlyout
-      onClose={onClose}
-    >
+    <EuiFlyout onClose={onClose}>
       <EuiFlyoutBody>
         <EuiText>
           <h3>
-            <FormattedMessage id="common.ui.fieldEditor.urlTemplateHeader" defaultMessage="Url Template" />
+            <FormattedMessage
+              id="common.ui.fieldEditor.urlTemplateHeader"
+              defaultMessage="Url Template"
+            />
           </h3>
           <p>
             <FormattedMessage
@@ -50,29 +42,39 @@ export const UrlTemplateFlyout = ({
               a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values.
               The following values can be accessed:"
               values={{
-                doubleCurlyBraces: <EuiCode>{('{{ }}')}</EuiCode>,
+                doubleCurlyBraces: <EuiCode>{'{{ }}'}</EuiCode>,
                 strongUrlTemplate: (
                   <strong>
                     <FormattedMessage
                       id="common.ui.fieldEditor.urlTemplateLabel.strongUrlTemplateLabel"
                       defaultMessage="Url Template"
                     />
-                  </strong>)
+                  </strong>
+                ),
               }}
             />
           </p>
           <ul>
             <li>
               <EuiCode>value</EuiCode> &mdash;&nbsp;
-              <FormattedMessage id="common.ui.fieldEditor.urlTemplate.valueLabel" defaultMessage="The URI-escaped value" />
+              <FormattedMessage
+                id="common.ui.fieldEditor.urlTemplate.valueLabel"
+                defaultMessage="The URI-escaped value"
+              />
             </li>
             <li>
               <EuiCode>rawValue</EuiCode> &mdash;&nbsp;
-              <FormattedMessage id="common.ui.fieldEditor.urlTemplate.rawValueLabel" defaultMessage="The unescaped value" />
+              <FormattedMessage
+                id="common.ui.fieldEditor.urlTemplate.rawValueLabel"
+                defaultMessage="The unescaped value"
+              />
             </li>
           </ul>
           <h4>
-            <FormattedMessage id="common.ui.fieldEditor.urlTemplate.examplesHeader" defaultMessage="Examples" />
+            <FormattedMessage
+              id="common.ui.fieldEditor.urlTemplate.examplesHeader"
+              defaultMessage="Examples"
+            />
           </h4>
           <EuiBasicTable
             items={[
@@ -95,16 +97,22 @@ export const UrlTemplateFlyout = ({
             columns={[
               {
                 field: 'input',
-                name: i18n.translate('common.ui.fieldEditor.urlTemplate.inputHeader', { defaultMessage: 'Input' }),
+                name: i18n.translate('common.ui.fieldEditor.urlTemplate.inputHeader', {
+                  defaultMessage: 'Input',
+                }),
                 width: '160px',
               },
               {
                 field: 'template',
-                name: i18n.translate('common.ui.fieldEditor.urlTemplate.templateHeader', { defaultMessage: 'Template' }),
+                name: i18n.translate('common.ui.fieldEditor.urlTemplate.templateHeader', {
+                  defaultMessage: 'Template',
+                }),
               },
               {
                 field: 'output',
-                name: i18n.translate('common.ui.fieldEditor.urlTemplate.outputHeader', { defaultMessage: 'Output' }),
+                name: i18n.translate('common.ui.fieldEditor.urlTemplate.outputHeader', {
+                  defaultMessage: 'Output',
+                }),
               },
             ]}
           />

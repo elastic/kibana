@@ -21,7 +21,6 @@ const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
  * This is expected to be extended, and behavior enabled using super();
  */
 export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseController {
-
   /**
    * Create a table view controller
    * - used by parent class:
@@ -49,7 +48,7 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
       initialPageSize: 20,
       pageIndex: 0,
       initialPageIndex: 0,
-      pageSizeOptions: PAGE_SIZE_OPTIONS
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
 
     if (page) {
@@ -65,8 +64,8 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
       setLocalStorageData(storage, {
         page,
         sort: {
-          sort
-        }
+          sort,
+        },
       });
     };
 
@@ -77,7 +76,7 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
     this.pagination = {
       pageSize: page.size,
       pageIndex: page.index,
-      pageSizeOptions: PAGE_SIZE_OPTIONS
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
   }
 
@@ -104,7 +103,7 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
     return {
       pagination: {
         size: this.pagination.pageSize,
-        index: this.pagination.pageIndex
+        index: this.pagination.pageIndex,
       },
       ...this.sorting,
       queryText: this.queryText,
@@ -121,7 +120,7 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
         this.setSorting(sort);
         this.setQueryText(queryText);
         await this.updateData();
-      }
+      },
     };
   }
 }

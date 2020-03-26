@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectsSchema } from '../../schema';
-import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
+import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { IndexMigrator } from './index_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
 
@@ -39,7 +39,7 @@ describe('IndexMigrator', () => {
         migrationVersion: {},
         migrate: _.identity,
       },
-      serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
+      serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
     };
   });
 
@@ -58,7 +58,6 @@ describe('IndexMigrator', () => {
           dynamic: 'strict',
           _meta: {
             migrationMappingPropertyHashes: {
-              config: '87aca8fdb053154f11383fce3dbf3edf',
               foo: '18c78c995965207ed3f6e7fc5c6e55fe',
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
@@ -68,10 +67,6 @@ describe('IndexMigrator', () => {
             },
           },
           properties: {
-            config: {
-              dynamic: 'true',
-              properties: { buildNum: { type: 'keyword' } },
-            },
             foo: { type: 'long' },
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
@@ -180,7 +175,6 @@ describe('IndexMigrator', () => {
           dynamic: 'strict',
           _meta: {
             migrationMappingPropertyHashes: {
-              config: '87aca8fdb053154f11383fce3dbf3edf',
               foo: '625b32086eb1d1203564cf85062dd22e',
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
@@ -191,10 +185,6 @@ describe('IndexMigrator', () => {
           },
           properties: {
             author: { type: 'text' },
-            config: {
-              dynamic: 'true',
-              properties: { buildNum: { type: 'keyword' } },
-            },
             foo: { type: 'text' },
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
@@ -254,7 +244,7 @@ describe('IndexMigrator', () => {
   test('transforms all docs from the original index', async () => {
     let count = 0;
     const { callCluster } = testOpts;
-    const migrateDoc = jest.fn((doc: RawSavedObjectDoc) => {
+    const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
       return {
         ...doc,
         attributes: { name: ++count },

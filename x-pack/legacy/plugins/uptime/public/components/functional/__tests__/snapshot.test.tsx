@@ -7,18 +7,17 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Snapshot } from '../../../../common/runtime_types';
-import { PresentationalComponent } from '../snapshot';
+import { SnapshotComponent } from '../snapshot';
 
 describe('Snapshot component', () => {
   const snapshot: Snapshot = {
     up: 8,
     down: 2,
-    mixed: 0,
     total: 10,
   };
 
   it('renders without errors', () => {
-    const wrapper = shallowWithIntl(<PresentationalComponent count={snapshot} loading={false} />);
+    const wrapper = shallowWithIntl(<SnapshotComponent count={snapshot} loading={false} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

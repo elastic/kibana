@@ -5,46 +5,19 @@
  */
 
 import fetchMock from 'fetch-mock';
+
+import { ToasterError } from '../../toasters';
+import { SetupMlResponse } from '../../ml_popover/types';
+import { isMlStartJobError } from './errors';
 import {
-  isMlStartJobError,
-  MessageBody,
-  parseJsonFromBody,
   throwIfErrorAttached,
   throwIfErrorAttachedToSetup,
-  ToasterErrors,
   tryParseResponse,
 } from './throw_if_not_ok';
-import { SetupMlResponse } from '../../ml_popover/types';
 
 describe('throw_if_not_ok', () => {
   afterEach(() => {
     fetchMock.reset();
-  });
-
-  describe('#parseJsonFromBody', () => {
-    test('parses a json from the body correctly', async () => {
-      fetchMock.mock('http://example.com', {
-        status: 500,
-        body: {
-          error: 'some error',
-          statusCode: 500,
-          message: 'I am a custom message',
-        },
-      });
-      const response = await fetch('http://example.com');
-      const expected: MessageBody = {
-        error: 'some error',
-        statusCode: 500,
-        message: 'I am a custom message',
-      };
-      await expect(parseJsonFromBody(response)).resolves.toEqual(expected);
-    });
-
-    test('returns null if the body does not exist', async () => {
-      fetchMock.mock('http://example.com', { status: 500, body: 'some text' });
-      const response = await fetch('http://example.com');
-      await expect(parseJsonFromBody(response)).resolves.toEqual(null);
-    });
   });
 
   describe('#tryParseResponse', () => {
@@ -119,7 +92,7 @@ describe('throw_if_not_ok', () => {
         },
       };
       expect(() => throwIfErrorAttached(json, ['some-id'])).toThrow(
-        new ToasterErrors(['some message'])
+        new ToasterError(['some message'])
       );
     });
 
@@ -230,7 +203,7 @@ describe('throw_if_not_ok', () => {
               path: '/_ml/anomaly_detectors/siem-api-suspicious_login_activity_ecs',
               query: {},
               body:
-                '{"job_type":"anomaly_detector","description":"SIEM Auditbeat: Detect unusually high number of authentication attempts (beta)","groups":["siem"],"analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"high number of authentication attempts","function":"high_non_zero_count","partition_field_name":"host.name"}],"influencers":["host.name","user.name","source.ip"]},"analysis_limits":{"model_memory_limit":"256mb"},"data_description":{"time_field":"@timestamp","time_format":"epoch_ms"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"IP Address Details","url_value":"siem#/ml-network/ip/$source.ip$?_g=()&query=!n&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]}}',
+                '{"job_type":"anomaly_detector","description":"SIEM Auditbeat: Detect unusually high number of authentication attempts (beta)","groups":["siem"],"analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"high number of authentication attempts","function":"high_non_zero_count","partition_field_name":"host.name"}],"influencers":["host.name","user.name","source.ip"]},"analysis_limits":{"model_memory_limit":"256mb"},"data_description":{"time_field":"@timestamp","time_format":"epoch_ms"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"IP Address Details","url_value":"siem#/ml-network/ip/$source.ip$?query=!n&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]}}',
               statusCode: 400,
               response:
                 '{"error":{"root_cause":[{"type":"status_exception","reason":"This job would cause a mapping clash with existing field [multi_bucket_impact] - avoid the clash by assigning a dedicated results index"}],"type":"status_exception","reason":"This job would cause a mapping clash with existing field [multi_bucket_impact] - avoid the clash by assigning a dedicated results index","caused_by":{"type":"illegal_argument_exception","reason":"mapper [multi_bucket_impact] of different type, current_type [keyword], merged_type [double]"}},"status":400}',
@@ -245,7 +218,7 @@ describe('throw_if_not_ok', () => {
               path: '/_ml/anomaly_detectors/siem-api-rare_process_linux_ecs',
               query: {},
               body:
-                '{"job_type":"anomaly_detector","description":"SIEM Auditbeat: Detect unusually rare processes on Linux (beta)","groups":["siem"],"analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"rare process executions on Linux","function":"rare","by_field_name":"process.name","partition_field_name":"host.name"}],"influencers":["host.name","process.name","user.name"]},"analysis_limits":{"model_memory_limit":"256mb"},"data_description":{"time_field":"@timestamp","time_format":"epoch_ms"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"Host Details by process name","url_value":"siem#/ml-hosts/$host.name$?_g=()&query=(query:\'process.name%20:%20%22$process.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Host Details by user name","url_value":"siem#/ml-hosts/$host.name$?_g=()&query=(query:\'user.name%20:%20%22$user.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by process name","url_value":"siem#/ml-hosts?_g=()&query=(query:\'process.name%20:%20%22$process.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by user name","url_value":"siem#/ml-hosts?_g=()&query=(query:\'user.name%20:%20%22$user.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]}}',
+                '{"job_type":"anomaly_detector","description":"SIEM Auditbeat: Detect unusually rare processes on Linux (beta)","groups":["siem"],"analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"rare process executions on Linux","function":"rare","by_field_name":"process.name","partition_field_name":"host.name"}],"influencers":["host.name","process.name","user.name"]},"analysis_limits":{"model_memory_limit":"256mb"},"data_description":{"time_field":"@timestamp","time_format":"epoch_ms"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"Host Details by process name","url_value":"siem#/ml-hosts/$host.name$?query=(query:\'process.name%20:%20%22$process.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Host Details by user name","url_value":"siem#/ml-hosts/$host.name$?query=(query:\'user.name%20:%20%22$user.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by process name","url_value":"siem#/ml-hosts?query=(query:\'process.name%20:%20%22$process.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by user name","url_value":"siem#/ml-hosts?query=(query:\'user.name%20:%20%22$user.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]}}',
               statusCode: 400,
               response:
                 '{"error":{"root_cause":[{"type":"status_exception","reason":"This job would cause a mapping clash with existing field [multi_bucket_impact] - avoid the clash by assigning a dedicated results index"}],"type":"status_exception","reason":"This job would cause a mapping clash with existing field [multi_bucket_impact] - avoid the clash by assigning a dedicated results index","caused_by":{"type":"illegal_argument_exception","reason":"mapper [multi_bucket_impact] of different type, current_type [keyword], merged_type [double]"}},"status":400}',
@@ -320,7 +293,7 @@ describe('throw_if_not_ok', () => {
               path: '/_ml/anomaly_detectors/siem-api-suspicious_login_activity_ecs',
               query: {},
               body:
-                '{"job_type":"anomaly_detector","description":"SIEM Auditbeat: Detect unusually high number of authentication attempts (beta)","groups":["siem"],"analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"high number of authentication attempts","function":"high_non_zero_count","partition_field_name":"host.name"}],"influencers":["host.name","user.name","source.ip"]},"analysis_limits":{"model_memory_limit":"256mb"},"data_description":{"time_field":"@timestamp","time_format":"epoch_ms"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"IP Address Details","url_value":"siem#/ml-network/ip/$source.ip$?_g=()&query=!n,queryLocation:network.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]}}',
+                '{"job_type":"anomaly_detector","description":"SIEM Auditbeat: Detect unusually high number of authentication attempts (beta)","groups":["siem"],"analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"high number of authentication attempts","function":"high_non_zero_count","partition_field_name":"host.name"}],"influencers":["host.name","user.name","source.ip"]},"analysis_limits":{"model_memory_limit":"256mb"},"data_description":{"time_field":"@timestamp","time_format":"epoch_ms"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"IP Address Details","url_value":"siem#/ml-network/ip/$source.ip$?query=!n,queryLocation:network.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]}}',
               statusCode: 400,
               response:
                 '{"error":{"root_cause":[{"type":"status_exception","reason":"This job would cause a mapping clash with existing field [multi_bucket_impact] - avoid the clash by assigning a dedicated results index"}],"type":"status_exception","reason":"This job would cause a mapping clash with existing field [multi_bucket_impact] - avoid the clash by assigning a dedicated results index","caused_by":{"type":"illegal_argument_exception","reason":"mapper [multi_bucket_impact] of different type, current_type [keyword], merged_type [double]"}},"status":400}',
@@ -335,7 +308,7 @@ describe('throw_if_not_ok', () => {
               path: '/_ml/anomaly_detectors/siem-api-rare_process_linux_ecs',
               query: {},
               body:
-                '{"job_type":"anomaly_detector","description":"SIEM Auditbeat: Detect unusually rare processes on Linux (beta)","groups":["siem"],"analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"rare process executions on Linux","function":"rare","by_field_name":"process.name","partition_field_name":"host.name"}],"influencers":["host.name","process.name","user.name"]},"analysis_limits":{"model_memory_limit":"256mb"},"data_description":{"time_field":"@timestamp","time_format":"epoch_ms"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"Host Details by process name","url_value":"siem#/ml-hosts/$host.name$?_g=()&query=(query:\'process.name%20:%20%22$process.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Host Details by user name","url_value":"siem#/ml-hosts/$host.name$?_g=()&query=(query:\'user.name%20:%20%22$user.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by process name","url_value":"siem#/ml-hosts?_g=()&query=(query:\'process.name%20:%20%22$process.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by user name","url_value":"siem#/ml-hosts?_g=()&query=(query:\'user.name%20:%20%22$user.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]}}',
+                '{"job_type":"anomaly_detector","description":"SIEM Auditbeat: Detect unusually rare processes on Linux (beta)","groups":["siem"],"analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"rare process executions on Linux","function":"rare","by_field_name":"process.name","partition_field_name":"host.name"}],"influencers":["host.name","process.name","user.name"]},"analysis_limits":{"model_memory_limit":"256mb"},"data_description":{"time_field":"@timestamp","time_format":"epoch_ms"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"Host Details by process name","url_value":"siem#/ml-hosts/$host.name$?query=(query:\'process.name%20:%20%22$process.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Host Details by user name","url_value":"siem#/ml-hosts/$host.name$?query=(query:\'user.name%20:%20%22$user.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by process name","url_value":"siem#/ml-hosts?query=(query:\'process.name%20:%20%22$process.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by user name","url_value":"siem#/ml-hosts?query=(query:\'user.name%20:%20%22$user.name$%22\',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]}}',
               statusCode: 400,
               response:
                 '{"error":{"root_cause":[{"type":"status_exception","reason":"This job would cause a mapping clash with existing field [multi_bucket_impact] - avoid the clash by assigning a dedicated results index"}],"type":"status_exception","reason":"This job would cause a mapping clash with existing field [multi_bucket_impact] - avoid the clash by assigning a dedicated results index","caused_by":{"type":"illegal_argument_exception","reason":"mapper [multi_bucket_impact] of different type, current_type [keyword], merged_type [double]"}},"status":400}',

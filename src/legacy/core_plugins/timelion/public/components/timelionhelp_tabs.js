@@ -20,10 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiTabs,
-  EuiTab
-} from '@elastic/eui';
+import { EuiTabs, EuiTab } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -58,6 +55,5 @@ export function TimelionHelpTabs(props) {
 
 TimelionHelpTabs.propTypes = {
   activeTab: PropTypes.string.isRequired,
-  activateTab: PropTypes.func.isRequired
+  activateTab: PropTypes.func.isRequired,
 };
-

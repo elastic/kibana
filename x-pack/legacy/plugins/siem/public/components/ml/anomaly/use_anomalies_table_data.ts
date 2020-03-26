@@ -4,22 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { anomaliesTableData } from '../api/anomalies_table_data';
 import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
-import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { useSiemJobs } from '../../ml_popover/hooks/use_siem_jobs';
-import { useStateToaster } from '../../toasters';
-import { errorToToaster } from '../api/error_to_toaster';
+import { useMlCapabilities } from '../../ml_popover/hooks/use_ml_capabilities';
+import { useStateToaster, errorToToaster } from '../../toasters';
 
 import * as i18n from './translations';
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import {
-  DEFAULT_ANOMALY_SCORE,
-  DEFAULT_TIMEZONE_BROWSER,
-  DEFAULT_KBN_VERSION,
-} from '../../../../common/constants';
+import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
+import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -64,12 +59,11 @@ export const useAnomaliesTableData = ({
   const [tableData, setTableData] = useState<Anomalies | null>(null);
   const [, siemJobs] = useSiemJobs(true);
   const [loading, setLoading] = useState(true);
-  const capabilities = useContext(MlCapabilitiesContext);
+  const capabilities = useMlCapabilities();
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
-  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
-  const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const timeZone = useTimeZone();
+  const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
   const siemJobIds = siemJobs.filter(job => job.isInstalled).map(job => job.id);
 
@@ -95,11 +89,10 @@ export const useAnomaliesTableData = ({
               earliestMs,
               latestMs,
               influencers: influencersInput,
-              dateFormatTz: timezone,
+              dateFormatTz: timeZone,
               maxRecords: 500,
               maxExamples: 10,
             },
-            kbnVersion,
             abortCtrl.signal
           );
           if (isSubscribed) {

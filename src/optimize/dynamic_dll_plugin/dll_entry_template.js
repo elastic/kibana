@@ -23,3 +23,19 @@ export function dllEntryTemplate(requirePaths = []) {
     .sort()
     .join('\n');
 }
+
+export function dllEntryFileContentStringToArray(content = '') {
+  return content.split('\n');
+}
+
+export function dllEntryFileContentArrayToString(content = []) {
+  return content.join('\n');
+}
+
+export function dllMergeAllEntryFilesContent(content = []) {
+  return content
+    .join('\n')
+    .split('\n')
+    .sort()
+    .join('\n');
+}

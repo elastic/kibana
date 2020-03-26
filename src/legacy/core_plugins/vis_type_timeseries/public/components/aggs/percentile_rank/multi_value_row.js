@@ -45,7 +45,10 @@ export const MultiValueRow = ({ model, onChange, onDelete, onAdd, disableAdd, di
       <EuiFlexGroup responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFormLabel htmlFor={htmlId('value')}>
-            <FormattedMessage id="visTypeTimeseries.multivalueRow.valueLabel" defaultMessage="Value:" />
+            <FormattedMessage
+              id="visTypeTimeseries.multivalueRow.valueLabel"
+              defaultMessage="Value:"
+            />
           </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

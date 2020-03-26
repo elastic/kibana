@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import toJson from 'enzyme-to-json';
 import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
 import { shallow } from 'enzyme';
@@ -22,13 +21,13 @@ describe('draggable_score', () => {
     const wrapper = shallow(
       <DraggableScoreComponent id="some-id" index={0} score={anomalies.anomalies[0]} />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('renders correctly against snapshot when the index is not included', () => {
     const wrapper = shallow(
       <DraggableScoreComponent id="some-id" score={anomalies.anomalies[0]} />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

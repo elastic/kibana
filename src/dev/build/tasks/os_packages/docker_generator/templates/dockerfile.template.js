@@ -19,13 +19,29 @@
 
 import dedent from 'dedent';
 
-function generator({ artifactTarball, versionTag, license, usePublicArtifact  }) {
+function generator({
+  artifactTarball,
+  versionTag,
+  license,
+  usePublicArtifact,
+  baseOSImage,
+  ubiImageFlavor,
+  dockerBuildDate,
+}) {
   const copyArtifactTarballInsideDockerOptFolder = () => {
     if (usePublicArtifact) {
-      return `RUN cd /opt && curl --retry 8 -s -L -O https://artifacts.elastic.co/downloads/kibana/${ artifactTarball } && cd -`;
+      return `RUN cd /opt && curl --retry 8 -s -L -O https://artifacts.elastic.co/downloads/kibana/${artifactTarball} && cd -`;
     }
 
-    return `COPY ${ artifactTarball } /opt`;
+    return `COPY ${artifactTarball} /opt`;
+  };
+
+  const packageManager = () => {
+    if (ubiImageFlavor) {
+      return 'microdnf';
+    }
+
+    return 'yum';
   };
 
   return dedent(`
@@ -37,11 +53,13 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact  })
   # Build stage 0
   # Extract Kibana and make various file manipulations.
   ################################################################################
-  FROM centos:7 AS prep_files
+  FROM ${baseOSImage} AS prep_files
+  # Add tar and gzip
+  RUN ${packageManager()} update -y && ${packageManager()} install -y tar gzip && ${packageManager()} clean all
   ${copyArtifactTarballInsideDockerOptFolder()}
   RUN mkdir /usr/share/kibana
   WORKDIR /usr/share/kibana
-  RUN tar --strip-components=1 -zxf /opt/${ artifactTarball }
+  RUN tar --strip-components=1 -zxf /opt/${artifactTarball}
   # Ensure that group permissions are the same as user permissions.
   # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
   # OpenShift does this, for example.
@@ -53,11 +71,11 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact  })
   # Build stage 1
   # Copy prepared files from the previous stage and complete the image.
   ################################################################################
-  FROM centos:7
+  FROM ${baseOSImage}
   EXPOSE 5601
 
   # Add Reporting dependencies.
-  RUN yum update -y && yum install -y fontconfig freetype && yum clean all
+  RUN ${packageManager()} update -y && ${packageManager()} install -y fontconfig freetype shadow-utils && ${packageManager()} clean all
 
   # Add an init process, check the checksum to make sure it's a match
   RUN curl -L -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64
@@ -84,6 +102,9 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact  })
   RUN chmod g+ws /usr/share/kibana && \\
       find /usr/share/kibana -gid 0 -and -not -perm /g+w -exec chmod g+w {} \\;
 
+  # Remove the suid bit everywhere to mitigate "Stack Clash"
+  RUN find / -xdev -perm -4000 -exec chmod u-s {} +
+
   # Provide a non-root user to run the process.
   RUN groupadd --gid 1000 kibana && \\
       useradd --uid 1000 --gid 1000 \\
@@ -94,11 +115,13 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact  })
   LABEL org.label-schema.schema-version="1.0" \\
     org.label-schema.vendor="Elastic" \\
     org.label-schema.name="kibana" \\
-    org.label-schema.version="${ versionTag }" \\
+    org.label-schema.version="${versionTag}" \\
     org.label-schema.url="https://www.elastic.co/products/kibana" \\
     org.label-schema.vcs-url="https://github.com/elastic/kibana" \\
-    org.label-schema.license="${ license }" \\
-    license="${ license }"
+    org.label-schema.license="${license}" \\
+    org.label-schema.usage="https://www.elastic.co/guide/en/kibana/index.html" \\
+    org.label-schema.build-date="${dockerBuildDate}" \\
+    license="${license}"
 
   ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 

@@ -9,9 +9,10 @@ import { getPolicyPayload } from './fixtures';
 import { getPolicyNames } from './lib';
 
 export const registerHelpers = ({ supertest }) => {
-  const loadPolicies = (withIndices = false) => withIndices
-    ? supertest.get(`${API_BASE_PATH}/policies?withIndices=true`)
-    : supertest.get(`${API_BASE_PATH}/policies`);
+  const loadPolicies = (withIndices = false) =>
+    withIndices
+      ? supertest.get(`${API_BASE_PATH}/policies?withIndices=true`)
+      : supertest.get(`${API_BASE_PATH}/policies`);
 
   const createPolicy = (policy = getPolicyPayload()) => {
     return supertest
@@ -20,15 +21,11 @@ export const registerHelpers = ({ supertest }) => {
       .send(policy);
   };
 
-  const deletePolicy = (name) => {
-    return supertest
-      .delete(`${API_BASE_PATH}/policies/${name}`)
-      .set('kbn-xsrf', 'xxx');
+  const deletePolicy = name => {
+    return supertest.delete(`${API_BASE_PATH}/policies/${name}`).set('kbn-xsrf', 'xxx');
   };
 
-  const deleteAllPolicies = (policies) => (
-    Promise.all(policies.map(deletePolicy))
-  );
+  const deleteAllPolicies = policies => Promise.all(policies.map(deletePolicy));
 
   const cleanUp = () => {
     return loadPolicies()

@@ -5,10 +5,9 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
-import { ColumnHeaderType } from '../column_header';
+import { ColumnHeaderType } from '../../../../../store/timeline/model';
 import { defaultHeaders } from '../default_headers';
 
 import { Filter } from '.';
@@ -24,7 +23,7 @@ describe('Filter', () => {
     };
 
     const wrapper = shallow(<Filter header={textFilterColumnHeader} />);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('rendering', () => {

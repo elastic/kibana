@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { take, toArray } from 'rxjs/operators';
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -29,6 +29,7 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { ChromeService } from './chrome_service';
 import { App } from '../application';
+import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -51,10 +52,13 @@ function defaultStartDeps(availableApps?: App[]) {
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
 
   if (availableApps) {
-    deps.application.availableApps = new Map(availableApps.map(app => [app.id, app]));
+    deps.application.applications$ = new Rx.BehaviorSubject<Map<string, App>>(
+      new Map(availableApps.map(app => [app.id, app]))
+    );
   }
 
   return deps;
@@ -211,14 +215,15 @@ describe('start', () => {
         new FakeApp('beta', true),
         new FakeApp('gamma', false),
       ]);
-      const { availableApps, currentAppId$ } = startDeps.application;
+      const { applications$, navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      [...availableApps.keys()].forEach(appId => currentAppId$.next(appId));
+      const availableApps = await applications$.pipe(take(1)).toPromise();
+      [...availableApps.keys()].forEach(appId => navigateToApp(appId));
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -233,14 +238,14 @@ describe('start', () => {
 
     it('changing visibility has no effect on chrome-hiding application', async () => {
       const startDeps = defaultStartDeps([new FakeApp('alpha', true)]);
-      const { currentAppId$ } = startDeps.application;
+      const { navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
-      currentAppId$.next('alpha');
+      navigateToApp('alpha');
       chrome.setIsVisible(true);
       service.stop();
 
@@ -251,40 +256,6 @@ describe('start', () => {
           false,
         ]
       `);
-    });
-  });
-
-  describe('is collapsed', () => {
-    it('updates/emits isCollapsed', async () => {
-      const { chrome, service } = await start();
-      const promise = chrome
-        .getIsCollapsed$()
-        .pipe(toArray())
-        .toPromise();
-
-      chrome.setIsCollapsed(true);
-      chrome.setIsCollapsed(false);
-      chrome.setIsCollapsed(true);
-      service.stop();
-
-      await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          false,
-          true,
-          false,
-          true,
-        ]
-      `);
-    });
-
-    it('only stores true in localStorage', async () => {
-      const { chrome } = await start();
-
-      chrome.setIsCollapsed(true);
-      expect(store.size).toBe(1);
-
-      chrome.setIsCollapsed(false);
-      expect(store.size).toBe(0);
     });
   });
 
@@ -437,12 +408,12 @@ describe('start', () => {
 });
 
 describe('stop', () => {
-  it('completes applicationClass$, isCollapsed$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
+  it('completes applicationClass$, getIsNavDrawerLocked, breadcrumbs$, isVisible$, and brand$ observables', async () => {
     const { chrome, service } = await start();
     const promise = Rx.combineLatest(
       chrome.getBrand$(),
       chrome.getApplicationClasses$(),
-      chrome.getIsCollapsed$(),
+      chrome.getIsNavDrawerLocked$(),
       chrome.getBreadcrumbs$(),
       chrome.getIsVisible$(),
       chrome.getHelpExtension$()
@@ -460,7 +431,7 @@ describe('stop', () => {
       Rx.combineLatest(
         chrome.getBrand$(),
         chrome.getApplicationClasses$(),
-        chrome.getIsCollapsed$(),
+        chrome.getIsNavDrawerLocked$(),
         chrome.getBreadcrumbs$(),
         chrome.getIsVisible$(),
         chrome.getHelpExtension$()

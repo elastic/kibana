@@ -31,23 +31,23 @@ import { get } from 'lodash';
 
 export function analyzeArchive(archive) {
   const plugins = [];
-  const regExp = new RegExp('(kibana[\\\\/][^\\\\/]+)[\\\\/]package\.json', 'i');
+  const regExp = new RegExp('(kibana[\\\\/][^\\\\/]+)[\\\\/]package.json', 'i');
 
-  return new Promise ((resolve, reject) => {
-    yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
+  return new Promise((resolve, reject) => {
+    yauzl.open(archive, { lazyEntries: true }, function(err, zipfile) {
       if (err) {
         return reject(err);
       }
 
       zipfile.readEntry();
-      zipfile.on('entry', function (entry) {
+      zipfile.on('entry', function(entry) {
         const match = entry.fileName.match(regExp);
 
         if (!match) {
           return zipfile.readEntry();
         }
 
-        zipfile.openReadStream(entry, function (err, readable) {
+        zipfile.openReadStream(entry, function(err, readable) {
           const chunks = [];
 
           if (err) {
@@ -56,20 +56,22 @@ export function analyzeArchive(archive) {
 
           readable.on('data', chunk => chunks.push(chunk));
 
-          readable.on('end', function () {
+          readable.on('end', function() {
             const contents = Buffer.concat(chunks).toString();
             const pkg = JSON.parse(contents);
 
-            plugins.push(Object.assign(pkg, {
-              archivePath: match[1],
-              archive: archive,
+            plugins.push(
+              Object.assign(pkg, {
+                archivePath: match[1],
+                archive: archive,
 
-              // Plugins must specify their version, and by default that version should match
-              // the version of kibana down to the patch level. If these two versions need
-              // to diverge, they can specify a kibana.version to indicate the version of
-              // kibana the plugin is intended to work with.
-              kibanaVersion: get(pkg, 'kibana.version', pkg.version)
-            }));
+                // Plugins must specify their version, and by default that version should match
+                // the version of kibana down to the patch level. If these two versions need
+                // to diverge, they can specify a kibana.version to indicate the version of
+                // kibana the plugin is intended to work with.
+                kibanaVersion: get(pkg, 'kibana.version', pkg.version),
+              })
+            );
 
             zipfile.readEntry();
           });
@@ -90,14 +92,14 @@ export function _isDirectory(filename) {
 
 export function extractArchive(archive, targetDir, extractPath) {
   return new Promise((resolve, reject) => {
-    yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
+    yauzl.open(archive, { lazyEntries: true }, function(err, zipfile) {
       if (err) {
         return reject(err);
       }
 
       zipfile.readEntry();
       zipfile.on('close', resolve);
-      zipfile.on('entry', function (entry) {
+      zipfile.on('entry', function(entry) {
         let fileName = entry.fileName;
 
         if (extractPath && fileName.startsWith(extractPath)) {
@@ -111,7 +113,7 @@ export function extractArchive(archive, targetDir, extractPath) {
         }
 
         if (_isDirectory(fileName)) {
-          mkdir(fileName, { recursive: true }, function (err) {
+          mkdir(fileName, { recursive: true }, function(err) {
             if (err) {
               return reject(err);
             }
@@ -120,19 +122,21 @@ export function extractArchive(archive, targetDir, extractPath) {
           });
         } else {
           // file entry
-          zipfile.openReadStream(entry, function (err, readStream) {
+          zipfile.openReadStream(entry, function(err, readStream) {
             if (err) {
               return reject(err);
             }
 
             // ensure parent directory exists
-            mkdir(path.dirname(fileName), { recursive: true }, function (err) {
+            mkdir(path.dirname(fileName), { recursive: true }, function(err) {
               if (err) {
                 return reject(err);
               }
 
-              readStream.pipe(createWriteStream(fileName, { mode: entry.externalFileAttributes >>> 16 }));
-              readStream.on('end', function () {
+              readStream.pipe(
+                createWriteStream(fileName, { mode: entry.externalFileAttributes >>> 16 })
+              );
+              readStream.on('end', function() {
                 zipfile.readEntry();
               });
             });

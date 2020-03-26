@@ -18,95 +18,33 @@
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
-import { SavedObjectsMapping } from './mappings';
-import { MigrationDefinition } from './migrations/core/document_migrator';
-import { SavedObjectsSchemaDefinition } from './schema';
+import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
+import { SavedObjectMigrationMap } from './migrations';
 import { PropertyValidators } from './validation';
 
-/**
- * Information about the migrations that have been applied to this SavedObject.
- * When Kibana starts up, KibanaMigrator detects outdated documents and
- * migrates them based on this value. For each migration that has been applied,
- * the plugin's name is used as a key and the latest migration version as the
- * value.
- *
- * @example
- * migrationVersion: {
- *   dashboard: '7.1.1',
- *   space: '6.6.6',
- * }
- *
- * @public
- */
-export interface SavedObjectsMigrationVersion {
-  [pluginName: string]: string;
-}
+export {
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
+} from './import/types';
 
-/**
- * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}
- *
- * @public
- */
-export type SavedObjectAttributeSingle =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | SavedObjectAttributes;
+import { LegacyConfig } from '../legacy';
+import { SavedObjectUnsanitizedDoc } from './serialization';
+import { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
+import { SavedObject } from '../../types';
 
-/**
- * Type definition for a Saved Object attribute value
- *
- * @public
- */
-export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
-
-/**
- * The data for a Saved Object is stored as an object in the `attributes`
- * property.
- *
- * @public
- */
-export interface SavedObjectAttributes {
-  [key: string]: SavedObjectAttribute;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObject<T extends SavedObjectAttributes = any> {
-  /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
-  id: string;
-  /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
-  type: string;
-  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
-  version?: string;
-  /** Timestamp of the last time this document had been updated.  */
-  updated_at?: string;
-  error?: {
-    message: string;
-    statusCode: number;
-  };
-  /** {@inheritdoc SavedObjectAttributes} */
-  attributes: T;
-  /** {@inheritdoc SavedObjectReference} */
-  references: SavedObjectReference[];
-  /** {@inheritdoc SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
-}
-
-/**
- * A reference to another saved object.
- *
- * @public
- */
-export interface SavedObjectReference {
-  name: string;
-  type: string;
-  id: string;
-}
+export {
+  SavedObjectAttributes,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsMigrationVersion,
+} from '../../types';
 
 /**
  *
@@ -222,13 +160,171 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 /**
+ * @remarks This is only internal for now, and will only be public when we expose the registerType API
+ *
+ * @public
+ */
+export interface SavedObjectsType {
+  /**
+   * The name of the type, which is also used as the internal id.
+   */
+  name: string;
+  /**
+   * Is the type hidden by default. If true, repositories will not have access to this type unless explicitly
+   * declared as an `extraType` when creating the repository.
+   *
+   * See {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}.
+   */
+  hidden: boolean;
+  /**
+   * Is the type global (true), or namespaced (false).
+   */
+  namespaceAgnostic: boolean;
+  /**
+   * If defined, the type instances will be stored in the given index instead of the default one.
+   */
+  indexPattern?: string;
+  /**
+   * If defined, will be used to convert the type to an alias.
+   */
+  convertToAliasScript?: string;
+  /**
+   * The {@link SavedObjectsTypeMappingDefinition | mapping definition} for the type.
+   */
+  mappings: SavedObjectsTypeMappingDefinition;
+  /**
+   * An optional map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   */
+  migrations?: SavedObjectMigrationMap;
+  /**
+   * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
+   */
+  management?: SavedObjectsTypeManagementDefinition;
+}
+
+/**
+ * Configuration options for the {@link SavedObjectsType | type}'s management section.
+ *
+ * @public
+ */
+export interface SavedObjectsTypeManagementDefinition {
+  /**
+   * Is the type importable or exportable. Defaults to `false`.
+   */
+  importableAndExportable?: boolean;
+  /**
+   * The default search field to use for this type. Defaults to `id`.
+   */
+  defaultSearchField?: string;
+  /**
+   * The eui icon name to display in the management table.
+   * If not defined, the default icon will be used.
+   */
+  icon?: string;
+  /**
+   * Function returning the title to display in the management table.
+   * If not defined, will use the object's type and id to generate a label.
+   */
+  getTitle?: (savedObject: SavedObject<any>) => string;
+  /**
+   * Function returning the url to use to redirect to the editing page of this object.
+   * If not defined, editing will not be allowed.
+   */
+  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  /**
+   * Function returning the url to use to redirect to this object from the management section.
+   * If not defined, redirecting to the object will not be allowed.
+   *
+   * @returns an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
+   *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
+   *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
+   */
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
+}
+
+/**
  * @internal
  * @deprecated
  */
 export interface SavedObjectsLegacyUiExports {
-  unknown: [{ pluginSpec: { getId: () => unknown }; type: unknown }] | undefined;
-  savedObjectMappings: SavedObjectsMapping[];
-  savedObjectMigrations: MigrationDefinition;
-  savedObjectSchemas: SavedObjectsSchemaDefinition;
+  savedObjectMappings: SavedObjectsLegacyMapping[];
+  savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
+  savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
   savedObjectValidations: PropertyValidators;
+  savedObjectsManagement: SavedObjectsLegacyManagementDefinition;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyMapping {
+  pluginId: string;
+  properties: SavedObjectsTypeMappingDefinitions;
+}
+
+/**
+ * @internal
+ * @deprecated Use {@link SavedObjectsTypeManagementDefinition | management definition} when registering
+ *             from new platform plugins
+ */
+export interface SavedObjectsLegacyManagementDefinition {
+  [key: string]: SavedObjectsLegacyManagementTypeDefinition;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyManagementTypeDefinition {
+  isImportableAndExportable?: boolean;
+  defaultSearchField?: string;
+  icon?: string;
+  getTitle?: (savedObject: SavedObject<any>) => string;
+  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyMigrationDefinitions {
+  [type: string]: SavedObjectLegacyMigrationMap;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectLegacyMigrationMap {
+  [version: string]: SavedObjectLegacyMigrationFn;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export type SavedObjectLegacyMigrationFn = (
+  doc: SavedObjectUnsanitizedDoc,
+  log: SavedObjectsMigrationLogger
+) => SavedObjectUnsanitizedDoc;
+
+/**
+ * @internal
+ * @deprecated
+ */
+interface SavedObjectsLegacyTypeSchema {
+  isNamespaceAgnostic?: boolean;
+  hidden?: boolean;
+  indexPattern?: ((config: LegacyConfig) => string) | string;
+  convertToAliasScript?: string;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacySchemaDefinitions {
+  [type: string]: SavedObjectsLegacyTypeSchema;
 }

@@ -20,6 +20,6 @@ export function xpackInfoRoute(server) {
       return xPackInfo.isAvailable()
         ? convertKeysToSnakeCaseDeep(xPackInfo.toJSON())
         : Boom.notFound();
-    }
+    },
   });
 }

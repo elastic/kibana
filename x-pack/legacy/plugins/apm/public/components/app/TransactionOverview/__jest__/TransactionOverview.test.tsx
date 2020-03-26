@@ -22,11 +22,12 @@ import * as useFetcherHook from '../../../../hooks/useFetcher';
 import { fromQuery } from '../../../shared/Links/url_helpers';
 import { Router } from 'react-router-dom';
 import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
-import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
 
+jest.mock('ui/new_platform');
 function setup({
   urlParams,
   serviceTransactionTypes

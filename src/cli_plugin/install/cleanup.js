@@ -21,13 +21,13 @@ import del from 'del';
 import fs from 'fs';
 
 export function cleanPrevious(settings, logger) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     try {
       fs.statSync(settings.workingPath);
 
       logger.log('Found previous install attempt. Deleting...');
       try {
-        del.sync(settings.workingPath);
+        del.sync(settings.workingPath, { force: true });
       } catch (e) {
         reject(e);
       }
@@ -46,6 +46,5 @@ export function cleanArtifacts(settings) {
   try {
     del.sync(settings.workingPath);
     del.sync(settings.plugins[0].path);
-  }
-  catch (e) {} // eslint-disable-line no-empty
+  } catch (e) {} // eslint-disable-line no-empty
 }
