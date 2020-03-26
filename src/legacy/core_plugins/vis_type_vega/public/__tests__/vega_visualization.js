@@ -43,7 +43,11 @@ import { createVegaTypeDefinition } from '../vega_type';
 // TODO This is an integration test and thus requires a running platform. When moving to the new platform,
 // this test has to be migrated to the newly created integration test environment.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart, npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
 import { setInjectedVars } from '../services';
 
 const THRESHOLD = 0.1;
@@ -55,7 +59,7 @@ describe('VegaVisualizations', () => {
   let vis;
   let imageComparator;
   let vegaVisualizationDependencies;
-  let visRegComplete = false;
+  let vegaVisType;
 
   setInjectedVars({
     emsTileLayerId: {},
@@ -85,13 +89,7 @@ describe('VegaVisualizations', () => {
         },
       };
 
-      if (!visRegComplete) {
-        visRegComplete = true;
-        npSetup.plugins.visualizations.createBaseVisualization(
-          createVegaTypeDefinition(vegaVisualizationDependencies)
-        );
-      }
-
+      vegaVisType = new BaseVisType(createVegaTypeDefinition(vegaVisualizationDependencies));
       VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
     })
   );
@@ -101,7 +99,9 @@ describe('VegaVisualizations', () => {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
-      vis = npStart.plugins.visualizations.createVis('vega', { type: 'vega' });
+      vis = new ExprVis({
+        type: vegaVisType,
+      });
     });
 
     afterEach(function() {
