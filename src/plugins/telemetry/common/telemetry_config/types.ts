@@ -22,7 +22,7 @@ export interface TelemetrySavedObjectAttributes {
   lastVersionChecked?: string;
   sendUsageFrom?: 'browser' | 'server';
   lastReported?: number;
-  telemetryAllowChangingOptInStatus?: boolean;
+  allowChangingOptInStatus?: boolean;
   userHasSeenNotice?: boolean;
   reportFailureCount?: number;
   reportFailureVersion?: string;

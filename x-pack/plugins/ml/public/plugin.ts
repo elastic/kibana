@@ -14,6 +14,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { initManagementSection } from './application/management';
+import { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 
@@ -26,6 +27,7 @@ export interface MlSetupDependencies {
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
   usageCollection: UsageCollectionSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
@@ -50,6 +52,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
             usageCollection: pluginsSetup.usageCollection,
+            licenseManagement: pluginsSetup.licenseManagement,
           },
           {
             element: params.element,

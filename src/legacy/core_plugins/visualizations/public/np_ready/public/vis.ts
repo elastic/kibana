@@ -133,8 +133,10 @@ export class Vis {
       this.data.savedSearchId = state.data.savedSearchId;
     }
     if (state.data && state.data.aggs) {
-      let configStates = state.data.aggs;
-      configStates = this.initializeDefaultsFromSchemas(configStates, this.type.schemas.all);
+      const configStates = this.initializeDefaultsFromSchemas(
+        cloneDeep(state.data.aggs),
+        this.type.schemas.all
+      );
       if (!this.data.indexPattern) {
         if (state.data.aggs.length) {
           throw new Error('trying to initialize aggs without index pattern');

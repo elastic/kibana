@@ -38,7 +38,6 @@ import {
 } from './components';
 import { ChartTooltip } from '../components/chart_tooltip';
 import { ExplorerSwimlane } from './explorer_swimlane';
-import { KqlFilterBar } from '../components/kql_filter_bar';
 import { TimeBuckets } from '../util/time_buckets';
 import { InfluencersList } from '../components/influencers_list';
 import {
@@ -54,7 +53,11 @@ import { SelectInterval } from '../components/controls/select_interval/select_in
 import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import {
+  ExplorerQueryBar,
   getKqlQueryValues,
+  DEFAULT_QUERY_LANG,
+} from './components/explorer_query_bar/explorer_query_bar';
+import {
   removeFilterFromQueryString,
   getQueryPattern,
   escapeParens,
@@ -86,7 +89,6 @@ function mapSwimlaneOptionsToEuiOptions(options) {
     text: option,
   }));
 }
-
 const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
   <div ref={resizeRef} data-test-subj="mlPageAnomalyExplorer">
     <NavigationMenu tabId="explorer" />
@@ -111,6 +113,8 @@ export class Explorer extends React.Component {
     severity: PropTypes.number.isRequired,
     showCharts: PropTypes.bool.isRequired,
   };
+
+  state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
 
   _unsubscribeAll = new Subject();
   // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
@@ -221,7 +225,6 @@ export class Explorer extends React.Component {
   // and will cause a syntax error when called with getKqlQueryValues
   applyFilter = (fieldName, fieldValue, action) => {
     const { filterActive, indexPattern, queryString } = this.props.explorerState;
-
     let newQueryString = '';
     const operator = 'and ';
     const sanitizedFieldName = escapeParens(fieldName);
@@ -248,9 +251,20 @@ export class Explorer extends React.Component {
       }
     }
 
+    this.setState({ filterIconTriggeredQuery: `${newQueryString}` });
+
     try {
-      const queryValues = getKqlQueryValues(`${newQueryString}`, indexPattern);
-      this.applyInfluencersFilterQuery(queryValues);
+      const { clearSettings, settings } = getKqlQueryValues({
+        inputString: `${newQueryString}`,
+        queryLanguage: this.state.language,
+        indexPattern,
+      });
+
+      if (clearSettings === true) {
+        explorerService.clearInfluencerFilterSettings();
+      } else {
+        explorerService.setInfluencerFilterSettings(settings);
+      }
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
 
@@ -264,18 +278,7 @@ export class Explorer extends React.Component {
     }
   };
 
-  applyInfluencersFilterQuery = payload => {
-    const { filterQuery: influencersFilterQuery } = payload;
-
-    if (
-      influencersFilterQuery.match_all &&
-      Object.keys(influencersFilterQuery.match_all).length === 0
-    ) {
-      explorerService.clearInfluencerFilterSettings();
-    } else {
-      explorerService.setInfluencerFilterSettings(payload);
-    }
-  };
+  updateLanguage = language => this.setState({ language });
 
   render() {
     const { showCharts, severity } = this.props;
@@ -296,7 +299,6 @@ export class Explorer extends React.Component {
       selectedJobs,
       swimlaneContainerWidth,
       tableData,
-      tableQueryString,
       viewByLoadedForTimeFormatted,
       viewBySwimlaneData,
       viewBySwimlaneDataLoading,
@@ -362,12 +364,13 @@ export class Explorer extends React.Component {
 
           {noInfluencersConfigured === false && influencers !== undefined && (
             <div className="mlAnomalyExplorer__filterBar">
-              <KqlFilterBar
+              <ExplorerQueryBar
+                filterActive={filterActive}
+                filterPlaceHolder={filterPlaceHolder}
                 indexPattern={indexPattern}
-                onSubmit={this.applyInfluencersFilterQuery}
-                initialValue={queryString}
-                placeholder={filterPlaceHolder}
-                valueExternal={tableQueryString}
+                queryString={queryString}
+                filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
+                updateLanguage={this.updateLanguage}
               />
             </div>
           )}
