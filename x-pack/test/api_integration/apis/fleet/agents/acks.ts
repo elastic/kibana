@@ -18,8 +18,8 @@ export default function(providerContext: FtrProviderContext) {
   const supertest = getSupertestWithoutAuth(providerContext);
   let apiKey: { id: string; api_key: string };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/60471
-  describe.skip('fleet_agents_acks', () => {
+  // eslint-disable-next-line ban/ban
+  describe.only('fleet_agents_acks', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
@@ -89,8 +89,9 @@ export default function(providerContext: FtrProviderContext) {
               payload: 'payload2',
             },
           ],
-        })
-        .expect(200);
+        });
+      // eslint-disable-next-line no-console
+      console.log(apiResponse);
       expect(apiResponse.action).to.be('acks');
       expect(apiResponse.success).to.be(true);
       const { body: eventResponse } = await supertest
@@ -99,8 +100,10 @@ export default function(providerContext: FtrProviderContext) {
         .set(
           'Authorization',
           `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
-        )
-        .expect(200);
+        );
+      // .expect(200);
+      // eslint-disable-next-line no-console
+      console.log(eventResponse);
       const expectedEvents = eventResponse.list.filter(
         (item: Record<string, string>) =>
           item.action_id === '48cebde1-c906-4893-b89f-595d943b72a1' ||
