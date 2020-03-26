@@ -31,6 +31,7 @@ import {
   RULES_ROW,
   RULES_TABLE,
   SEVERITY,
+  SHOWING_RULES_TEXT,
 } from '../screens/signal_detection_rules';
 
 import {
@@ -50,13 +51,14 @@ import {
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
+  deleteFirstRule,
 } from '../tasks/signal_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
-describe('Signal detection rules, custom', () => {
+/* describe('Signal detection rules, custom', () => {
   before(() => {
     esArchiverLoad('prebuilt_rules_loaded');
   });
@@ -190,5 +192,45 @@ describe('Signal detection rules, custom', () => {
       .eq(SCHEDULE_LOOPBACK)
       .invoke('text')
       .should('eql', '1m');
+  });
+});*/
+
+describe('Deletes custom rules', () => {
+  beforeEach(() => {
+    esArchiverLoad('custom_rules');
+    loginAndWaitForPageWithoutDateRange(DETECTIONS);
+    waitForSignalsPanelToBeLoaded();
+    waitForSignalsIndexToBeCreated();
+    goToManageSignalDetectionRules();
+  });
+
+  after(() => {
+    esArchiverUnload('custom_rules');
+  });
+
+  it('Deletes one rule', () => {
+    cy.get(RULES_TABLE)
+      .find(RULES_ROW)
+      .then(rules => {
+        const initialNumberOfRules = rules.length;
+        const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
+
+        cy.get(SHOWING_RULES_TEXT)
+          .invoke('text')
+          .should('eql', `Showing ${initialNumberOfRules} rules`);
+
+        deleteFirstRule();
+        waitForRulesToBeLoaded();
+
+        cy.get(RULES_TABLE).then($table => {
+          cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
+        });
+        cy.get(SHOWING_RULES_TEXT)
+          .invoke('text')
+          .should('eql', 'Showing 1 rule');
+        cy.get(CUSTOM_RULES_BTN)
+          .invoke('text')
+          .should('eql', `Custom rules (${expectedNumberOfRulesAfterDeletion})`);
+      });
   });
 });
