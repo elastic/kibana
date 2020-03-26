@@ -6,11 +6,14 @@
 
 import { performance } from 'perf_hooks';
 import { Logger } from 'src/core/server';
+
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
+import { isJobStarted } from '../../../../common/detection_engine/ml_helpers';
+import { SetupPlugins } from '../../../plugin';
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { getInputIndex } from './get_input_output_index';
@@ -34,12 +37,15 @@ import { getSignalsCount } from '../notifications/get_signals_count';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { isMlRule } from '../rules/utils';
 
+/* eslint-disable complexity */
 export const signalRulesAlertType = ({
   logger,
   version,
+  ml,
 }: {
   logger: Logger;
   version: string;
+  ml: SetupPlugins['ml'];
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -122,6 +128,42 @@ export const signalRulesAlertType = ({
             throw new Error(
               `Attempted to execute machine learning rule, but it is missing job id and/or anomaly threshold for rule id: "${ruleId}", name: "${name}", signals index: "${outputIndex}", job id: "${machineLearningJobId}", anomaly threshold: "${anomalyThreshold}"`
             );
+          }
+          if (ml == null) {
+            return await writeSignalRuleExceptionToSavedObject({
+              name,
+              alertId,
+              currentStatusSavedObject,
+              logger,
+              message: `ML was not available during rule execution. \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
+              services,
+              ruleStatusSavedObjects,
+              ruleId: ruleId ?? '(unknown rule id)',
+            });
+          }
+          const summaryJobs = await ml
+            .jobServiceProvider(ml.mlClient.callAsInternalUser)
+            .jobsSummary([machineLearningJobId]);
+          const jobSummary = summaryJobs.find(job => job.id === machineLearningJobId);
+
+          if (jobSummary == null || !isJobStarted(jobSummary.jobState, jobSummary.datafeedState)) {
+            const message = [
+              'Expected machine learning job to be started, but it was not.',
+              `job id: "${machineLearningJobId}"`,
+              `job status: "${jobSummary?.jobState}"`,
+              `datafeed status: "${jobSummary?.datafeedState}"`,
+            ].join('\n');
+
+            return await writeSignalRuleExceptionToSavedObject({
+              name,
+              alertId,
+              currentStatusSavedObject,
+              logger,
+              message,
+              services,
+              ruleStatusSavedObjects,
+              ruleId: ruleId ?? '(unknown rule id)',
+            });
           }
 
           const anomalyResults = await findMlSignals(
