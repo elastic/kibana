@@ -5,7 +5,7 @@
  */
 
 import { MiddlewareFactory, PolicyData, PolicyDetailsState } from '../../types';
-import { selectPolicyIdFromParams, isOnPolicyDetailsPage, selectPolicyDetails } from './selectors';
+import { policyIdFromParams, isOnPolicyDetailsPage, selectPolicyDetails } from './selectors';
 import {
   sendGetDatasource,
   sendGetFleetAgentStatusForConfig,
@@ -21,7 +21,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
     const state = getState();
 
     if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
-      const id = selectPolicyIdFromParams(state);
+      const id = policyIdFromParams(state);
       const { item: policyItem } = await sendGetDatasource(http, id);
 
       // FIXME: remove this code once the Default Policy is available in the endpoint package
@@ -46,6 +46,19 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
         type: 'serverReturnedPolicyDetailsData',
         payload: {
           policyItem,
+          policyConfig: {
+            windows: {
+              malware: {
+                mode: 'detect',
+              },
+              eventing: {
+                process: true,
+                network: true,
+              },
+            },
+            mac: {},
+            linux: {},
+          },
         },
       });
 

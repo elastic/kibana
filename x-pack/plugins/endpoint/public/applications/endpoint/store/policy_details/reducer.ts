@@ -11,6 +11,7 @@ import { AppAction } from '../action';
 const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {
     policyItem: undefined,
+    policyConfig: undefined,
     isLoading: false,
     agentStatusSummary: {
       error: 0,
@@ -61,6 +62,13 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
     return {
       ...state,
       location: action.payload,
+    };
+  }
+
+  if (action.type === 'userChangedPolicyConfig') {
+    return {
+      ...state,
+      policyConfig: action.payload.policyConfig,
     };
   }
 

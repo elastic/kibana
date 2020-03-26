@@ -4,13 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyData, ServerApiError } from '../../types';
+import { PolicyData, PolicyConfig, ServerApiError } from '../../types';
 import { GetAgentStatusResponse } from '../../../../../../ingest_manager/common/types/rest_spec';
 
 interface ServerReturnedPolicyDetailsData {
   type: 'serverReturnedPolicyDetailsData';
   payload: {
     policyItem: PolicyData | undefined;
+  };
+}
+
+/**
+ * When users change a policy via forms, this action is dispatched with a payload that modifies the configuration of a cloned policy config.
+ */
+interface UserChangedPolicyConfig {
+  type: 'userChangedPolicyConfig';
+  payload: {
+    policyConfig: PolicyConfig;
   };
 }
 
@@ -34,4 +44,5 @@ export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsData
   | UserClickedPolicyDetailsSaveButton
   | ServerReturnedPolicyDetailsAgentSummaryData
-  | ServerReturnedPolicyDetailsUpdateFailure;
+  | ServerReturnedPolicyDetailsUpdateFailure
+  | UserChangedPolicyConfig;

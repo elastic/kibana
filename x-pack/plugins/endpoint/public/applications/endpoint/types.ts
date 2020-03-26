@@ -97,12 +97,13 @@ export interface PolicyListState {
 }
 
 /**
- * Policy list store state
+ * Policy details store state
  */
 export interface PolicyDetailsState {
   /** A single policy item  */
-  policyItem: PolicyData | undefined;
+  policyItem?: PolicyData;
   /** data is being retrieved from server */
+  policyConfig?: PolicyConfig;
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<EndpointAppLocation>;
@@ -110,6 +111,65 @@ export interface PolicyDetailsState {
   agentStatusSummary: GetAgentStatusResponse['results'];
   /** API error if updating policy failed */
   updateApiError?: ServerApiError;
+}
+
+/**
+ * Policy Details configuration
+ */
+export interface PolicyConfig {
+  windows: WindowsPolicyConfig;
+  mac: MacPolicyConfig;
+  linux: LinuxPolicyConfig;
+}
+
+/**
+ * Windows-specific policy configuration
+ */
+interface WindowsPolicyConfig {
+  /** malware mode can be detect, prevent or prevent and notify user */
+  malware: {
+    mode: string;
+  };
+  eventing: {
+    process: boolean;
+    network: boolean;
+  };
+}
+
+/**
+ * Mac-specific policy configuration
+ */
+interface MacPolicyConfig {
+  /** malware mode can be detect, prevent or prevent and notify user */
+  malware: {
+    mode: string;
+  };
+  eventing: {
+    process: boolean;
+    network: boolean;
+  };
+}
+/**
+ * Linux-specific policy configuration
+ */
+interface LinuxPolicyConfig {
+  eventing: {
+    process: boolean;
+    network: boolean;
+  };
+}
+
+/** OS used in Policy */
+export enum OS {
+  windows = 'windows',
+  mac = 'mac',
+  linux = 'linux',
+}
+
+/** Used in Policy */
+export enum EventingFields {
+  process = 'process',
+  network = 'network',
 }
 
 export interface GlobalState {
