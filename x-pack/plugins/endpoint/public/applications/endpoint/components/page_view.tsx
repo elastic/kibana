@@ -34,6 +34,34 @@ const StyledEuiPage = styled(EuiPage)`
 const isStringOrNumber = /(string|number)/;
 
 /**
+ * The `PageView` component used to render `headerLeft` when it is set as a `string`
+ * Can be used when wanting to customize the `headerLeft` value but still use the standard
+ * title component
+ */
+export const PageViewHeaderTitle = memo<{ children: ReactNode }>(({ children }) => {
+  return (
+    <EuiTitle size="l">
+      <h1>{children}</h1>
+    </EuiTitle>
+  );
+});
+
+/**
+ * The `PageView` component used to render `bodyHeader` when it is set as a `string`
+ * Can be used when wanting to customize the `bodyHeader` value but still use the standard
+ * title component
+ */
+export const PageViewBodyHeaderTitle = memo<{ children: ReactNode }>(
+  ({ children, ...otherProps }) => {
+    return (
+      <EuiTitle {...otherProps}>
+        <h2>{children}</h2>
+      </EuiTitle>
+    );
+  }
+);
+
+/**
  * Page View layout for use in Endpoint
  */
 export const PageView = memo<
@@ -60,9 +88,7 @@ export const PageView = memo<
           <EuiPageHeader className="endpoint-header">
             <EuiPageHeaderSection data-test-subj="pageViewHeaderLeft">
               {isStringOrNumber.test(typeof headerLeft) ? (
-                <EuiTitle size="l">
-                  <h1>{headerLeft}</h1>
-                </EuiTitle>
+                <PageViewHeaderTitle>{headerLeft}</PageViewHeaderTitle>
               ) : (
                 headerLeft
               )}
@@ -79,9 +105,7 @@ export const PageView = memo<
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection data-test-subj="pageViewBodyTitle">
                 {isStringOrNumber.test(typeof bodyHeader) ? (
-                  <EuiTitle>
-                    <h2>{bodyHeader}</h2>
-                  </EuiTitle>
+                  <PageViewBodyHeaderTitle>{bodyHeader}</PageViewBodyHeaderTitle>
                 ) : (
                   bodyHeader
                 )}

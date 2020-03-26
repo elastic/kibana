@@ -130,13 +130,15 @@ exports[`PageView component should display body header wrapped in EuiTitle 1`] =
                           className="euiPageContentHeaderSection"
                           data-test-subj="pageViewBodyTitle"
                         >
-                          <EuiTitle>
-                            <h2
-                              className="euiTitle euiTitle--medium"
-                            >
-                              body header
-                            </h2>
-                          </EuiTitle>
+                          <Memo()>
+                            <EuiTitle>
+                              <h2
+                                className="euiTitle euiTitle--medium"
+                              >
+                                body header
+                              </h2>
+                            </EuiTitle>
+                          </Memo()>
                         </div>
                       </EuiPageContentHeaderSection>
                     </div>
@@ -204,15 +206,17 @@ exports[`PageView component should display header left and right 1`] = `
                     className="euiPageHeaderSection"
                     data-test-subj="pageViewHeaderLeft"
                   >
-                    <EuiTitle
-                      size="l"
-                    >
-                      <h1
-                        className="euiTitle euiTitle--large"
+                    <Memo()>
+                      <EuiTitle
+                        size="l"
                       >
-                        page title
-                      </h1>
-                    </EuiTitle>
+                        <h1
+                          className="euiTitle euiTitle--large"
+                        >
+                          page title
+                        </h1>
+                      </EuiTitle>
+                    </Memo()>
                   </div>
                 </EuiPageHeaderSection>
                 <EuiPageHeaderSection
@@ -356,15 +360,17 @@ exports[`PageView component should display only header left 1`] = `
                     className="euiPageHeaderSection"
                     data-test-subj="pageViewHeaderLeft"
                   >
-                    <EuiTitle
-                      size="l"
-                    >
-                      <h1
-                        className="euiTitle euiTitle--large"
+                    <Memo()>
+                      <EuiTitle
+                        size="l"
                       >
-                        page title
-                      </h1>
-                    </EuiTitle>
+                        <h1
+                          className="euiTitle euiTitle--large"
+                        >
+                          page title
+                        </h1>
+                      </EuiTitle>
+                    </Memo()>
                   </div>
                 </EuiPageHeaderSection>
               </div>
