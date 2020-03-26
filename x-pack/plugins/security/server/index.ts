@@ -23,6 +23,7 @@ export {
   CreateAPIKeyResult,
   InvalidateAPIKeyParams,
   InvalidateAPIKeyResult,
+  GrantAPIKeyResult,
   SAMLLogin,
   OIDCLogin,
 } from './authentication';
