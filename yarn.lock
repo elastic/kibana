@@ -30330,9 +30330,9 @@ vega-typings@*, vega-typings@^0.3.17:
     vega-util "^1.7.0"
 
 vega-util@^1.7.0:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.7.1.tgz#0b95bbe6058895c332596c215247507caa68ab61"
-  integrity sha512-jdzigLdaXH0rClqkr/qHY//xvmLyxQyZL4Wxb3mew29QpITrMk/USV6v/399h29xVt1+hJuw1vpLoJqAq6WerA==
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.13.1.tgz#3eae51043184c6b873c17b148755c21b01274a0e"
+  integrity sha512-TmvZSMKqhGlS7eAXphqJUhq+NZVYbvXX2ahargTRkVckGWjEUpWhMC7T13vYihrU2Lf/OevKbrruSXKOBxke2w==
 
 vega-view-transforms@^2.0.3:
   version "2.0.3"
