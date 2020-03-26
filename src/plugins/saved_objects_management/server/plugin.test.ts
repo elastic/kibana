@@ -17,14 +17,29 @@
  * under the License.
  */
 
-export function injectVars(server) {
-  const serverConfig = server.config();
+import { registerRoutesMock } from './plugin.test.mocks';
+import { SavedObjectsManagementPlugin } from './plugin';
+import { coreMock } from '../../../core/server/mocks';
 
-  const { importAndExportableTypes } = server.savedObjects;
+describe('SavedObjectsManagementPlugin', () => {
+  let plugin: SavedObjectsManagementPlugin;
 
-  return {
-    importAndExportableTypes,
-    autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
-    autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
-  };
-}
+  beforeEach(() => {
+    plugin = new SavedObjectsManagementPlugin(coreMock.createPluginInitializerContext());
+  });
+
+  describe('#setup', () => {
+    it('registers the routes', async () => {
+      const coreSetup = coreMock.createSetup();
+
+      await plugin.setup(coreSetup);
+
+      expect(registerRoutesMock).toHaveBeenCalledTimes(1);
+      expect(registerRoutesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          http: coreSetup.http,
+        })
+      );
+    });
+  });
+});
