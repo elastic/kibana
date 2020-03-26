@@ -121,7 +121,7 @@ async function handleWhitelistPost(context: RequestHandlerContext, req, res) {
       return res.internalError({ error: 'unable to create whitelist rule.' });
     } else {
       const cl = context.core.elasticsearch.dataClient.callAsCurrentUser;
-      hydrateWhitelistCache(cl);
+      // hydrateWhitelistCache(cl);
 
       let idx = 0;
       createdItemIDs.forEach((id: string) => {
@@ -131,6 +131,7 @@ async function handleWhitelistPost(context: RequestHandlerContext, req, res) {
       return res.ok({ body: newRules });
     }
   } catch (err) {
+    console.log(err);
     return res.internalError({ body: err });
   }
 }
@@ -173,6 +174,7 @@ async function handleWhitelistGet(context, req, res) {
     const whitelist: WhitelistSet = await getWhitelist(cl);
     return res.ok({ body: whitelist });
   } catch (err) {
+    console.log(err);
     return res.internalError({ body: err });
   }
 }
