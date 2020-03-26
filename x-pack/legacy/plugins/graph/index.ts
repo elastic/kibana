@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-
 // @ts-ignore
 import migrations from './migrations';
 import mappings from './mappings.json';
