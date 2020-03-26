@@ -7,8 +7,11 @@
 import dateMath from '@elastic/datemath';
 import { get } from 'lodash/fp';
 import moment from 'moment';
+import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule, RuleType } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
@@ -18,6 +21,7 @@ import {
   DefineStepRule,
   IMitreEnterpriseAttack,
   ScheduleStepRule,
+  ActionsStepRule,
 } from './types';
 
 export interface GetStepsData {
@@ -25,6 +29,7 @@ export interface GetStepsData {
   modifiedAboutRuleDetailsData: AboutStepRuleDetails;
   defineRuleData: DefineStepRule;
   scheduleRuleData: ScheduleStepRule;
+  ruleActionsData: ActionsStepRule;
 }
 
 export const getStepsData = ({
@@ -38,8 +43,29 @@ export const getStepsData = ({
   const aboutRuleData: AboutStepRule = getAboutStepsData(rule, detailsView);
   const modifiedAboutRuleDetailsData: AboutStepRuleDetails = getModifiedAboutDetailsData(rule);
   const scheduleRuleData: ScheduleStepRule = getScheduleStepsData(rule);
+  const ruleActionsData: ActionsStepRule = getActionsStepsData(rule);
 
-  return { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData };
+  return {
+    aboutRuleData,
+    modifiedAboutRuleDetailsData,
+    defineRuleData,
+    scheduleRuleData,
+    ruleActionsData,
+  };
+};
+
+export const getActionsStepsData = (
+  rule: Omit<Rule, 'actions'> & { actions: RuleAlertAction[] }
+): ActionsStepRule => {
+  const { enabled, actions = [], meta } = rule;
+
+  return {
+    actions: actions?.map(transformRuleToAlertAction),
+    isNew: false,
+    throttle: meta?.throttle,
+    kibanaSiemAppUrl: meta?.kibanaSiemAppUrl,
+    enabled,
+  };
 };
 
 export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
@@ -60,12 +86,11 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
 });
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
-  const { enabled, interval, from } = rule;
+  const { interval, from } = rule;
   const fromHumanizedValue = getHumanizedDuration(from, interval);
 
   return {
     isNew: false,
-    enabled,
     interval,
     from: fromHumanizedValue,
   };
@@ -200,3 +225,46 @@ export const redirectToDetections = (
   isAuthenticated != null &&
   hasEncryptionKey != null &&
   (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);
+
+export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
+  const commonRuleParamsKeys = [
+    'id',
+    'name',
+    'description',
+    'false_positives',
+    'rule_id',
+    'max_signals',
+    'risk_score',
+    'output_index',
+    'references',
+    'severity',
+    'timeline_id',
+    'timeline_title',
+    'threat',
+    'type',
+    'version',
+    // 'lists',
+  ];
+
+  const ruleParamsKeys = [
+    ...commonRuleParamsKeys,
+    ...(isMlRule(ruleType)
+      ? ['anomaly_threshold', 'machine_learning_job_id']
+      : ['index', 'filters', 'language', 'query', 'saved_id']),
+  ].sort();
+
+  return ruleParamsKeys;
+};
+
+export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined): string[] => {
+  if (!ruleType) {
+    return [];
+  }
+  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+
+  return [
+    'state.signals_count',
+    '{context.results_link}',
+    ...actionMessageRuleParams.map(param => `context.rule.${param}`),
+  ];
+});
