@@ -307,6 +307,7 @@ export const AllRules = React.memo<AllRulesProps>(
                       <UtilityBarText>{i18n.SELECTED_RULES(selectedRuleIds.length)}</UtilityBarText>
                       {!hasNoPermissions && (
                         <UtilityBarAction
+                          dataTestSubj="bulkActions"
                           iconSide="right"
                           iconType="arrowDown"
                           popoverContent={getBatchItemsPopoverContent}
