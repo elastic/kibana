@@ -19,6 +19,11 @@
 
 import { ShardsResponse } from 'elasticsearch';
 
+/**
+ * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
+ * not included as it is already included in `successful`.
+ * @internal
+ */
 export function getTotalLoaded({ total, failed, successful }: ShardsResponse) {
   const loaded = failed + successful;
   return { total, loaded };

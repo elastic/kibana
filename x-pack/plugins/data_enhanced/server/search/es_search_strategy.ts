@@ -84,11 +84,11 @@ async function rollupSearch(
   const path = encodeURI(`${index}/_rollup_search`);
   const query = toSnakeCase(params);
 
-  const rawResponse = await (caller(
+  const rawResponse = await ((caller(
     'transport.request',
     { method, path, body, query },
     options
-  ) as SearchResponse<any>);
+  ) as unknown) as SearchResponse<any>);
 
   return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
 }

@@ -331,9 +331,7 @@ export function getDefaultSearchParams(config: SharedGlobalConfig): {
     restTotalHitsAsInt: boolean;
 };
 
-// Warning: (ae-missing-release-tag) "getTotalLoaded" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @internal
 export function getTotalLoaded({ total, failed, successful }: ShardsResponse): {
     total: number;
     loaded: number;
