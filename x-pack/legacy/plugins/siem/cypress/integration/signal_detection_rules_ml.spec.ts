@@ -4,31 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newRule, totalNumberOfPrebuiltRules } from '../objects/rule';
+import { machineLearningRule, totalNumberOfPrebuiltRules } from '../objects/rule';
 
 import {
   ABOUT_FALSE_POSITIVES,
   ABOUT_MITRE,
   ABOUT_RISK,
+  ABOUT_RULE_DESCRIPTION,
   ABOUT_SEVERITY,
   ABOUT_STEP,
   ABOUT_TAGS,
   ABOUT_URLS,
-  DEFINITION_CUSTOM_QUERY,
-  DEFINITION_INDEX_PATTERNS,
+  ANOMALY_SCORE,
   DEFINITION_TIMELINE,
   DEFINITION_STEP,
+  MACHINE_LEARNING_JOB_ID,
+  MACHINE_LEARNING_JOB_STATUS,
   RULE_NAME_HEADER,
   SCHEDULE_LOOPBACK,
   SCHEDULE_RUNS,
   SCHEDULE_STEP,
-  ABOUT_RULE_DESCRIPTION,
+  RULE_TYPE,
 } from '../screens/rule_details';
 import {
   CUSTOM_RULES_BTN,
-  ELASTIC_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
+  RULE_SWITCH,
   RULES_ROW,
   RULES_TABLE,
   SEVERITY,
@@ -37,64 +39,46 @@ import {
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
-  fillDefineRuleAndContinue,
+  fillDefineMachineLearningRuleAndContinue,
+  selectMachineLearningRuleType,
 } from '../tasks/create_new_rule';
-import {
-  changeToThreeHundredRowsPerPage,
-  filterByCustomRules,
-  goToCreateNewRule,
-  goToRuleDetails,
-  loadPrebuiltDetectionRules,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForPrebuiltDetectionRulesToBeLoaded,
-  waitForRulesToBeLoaded,
-} from '../tasks/signal_detection_rules';
 import {
   goToManageSignalDetectionRules,
   waitForSignalsIndexToBeCreated,
   waitForSignalsPanelToBeLoaded,
 } from '../tasks/detections';
-import { esArchiverLoadEmptyKibana, esArchiverUnloadEmptyKibana } from '../tasks/es_archiver';
+import {
+  changeToThreeHundredRowsPerPage,
+  filterByCustomRules,
+  goToCreateNewRule,
+  goToRuleDetails,
+  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
+  waitForRulesToBeLoaded,
+} from '../tasks/signal_detection_rules';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
-describe('Signal detection rules', () => {
+describe('Signal detection rules, machine learning', () => {
   before(() => {
-    esArchiverLoadEmptyKibana();
+    esArchiverLoad('prebuilt_rules_loaded');
+  });
+
+  after(() => {
+    esArchiverUnload('prebuilt_rules_loaded');
+  });
+
+  it('Creates and activates a new ml rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     waitForSignalsPanelToBeLoaded();
     waitForSignalsIndexToBeCreated();
     goToManageSignalDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
-  });
-
-  after(() => {
-    esArchiverUnloadEmptyKibana();
-  });
-
-  it('Loads prebuilt rules', () => {
-    loadPrebuiltDetectionRules();
-    waitForPrebuiltDetectionRulesToBeLoaded();
-
-    const expectedElasticRulesBtnText = 'Elastic rules (92)';
-    cy.get(ELASTIC_RULES_BTN)
-      .invoke('text')
-      .should('eql', expectedElasticRulesBtnText);
-
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
-
-    const expectedNumberOfRules = 92;
-    cy.get(RULES_TABLE).then($table => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
-  });
-
-  it('Creates and activates new rule', () => {
     goToCreateNewRule();
-    fillDefineRuleAndContinue(newRule);
-    fillAboutRuleAndContinue(newRule);
+    selectMachineLearningRuleType();
+    fillDefineMachineLearningRuleAndContinue(machineLearningRule);
+    fillAboutRuleAndContinue(machineLearningRule);
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN)
@@ -116,60 +100,52 @@ describe('Signal detection rules', () => {
     });
     cy.get(RULE_NAME)
       .invoke('text')
-      .should('eql', newRule.name);
+      .should('eql', machineLearningRule.name);
     cy.get(RISK_SCORE)
       .invoke('text')
-      .should('eql', newRule.riskScore);
+      .should('eql', machineLearningRule.riskScore);
     cy.get(SEVERITY)
       .invoke('text')
-      .should('eql', newRule.severity);
-    cy.get('[data-test-subj="rule-switch"]').should('have.attr', 'aria-checked', 'true');
+      .should('eql', machineLearningRule.severity);
+    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
     let expectedUrls = '';
-    newRule.referenceUrls.forEach(url => {
+    machineLearningRule.referenceUrls.forEach(url => {
       expectedUrls = expectedUrls + url;
     });
     let expectedFalsePositives = '';
-    newRule.falsePositivesExamples.forEach(falsePositive => {
+    machineLearningRule.falsePositivesExamples.forEach(falsePositive => {
       expectedFalsePositives = expectedFalsePositives + falsePositive;
     });
     let expectedTags = '';
-    newRule.tags.forEach(tag => {
+    machineLearningRule.tags.forEach(tag => {
       expectedTags = expectedTags + tag;
     });
     let expectedMitre = '';
-    newRule.mitre.forEach(mitre => {
+    machineLearningRule.mitre.forEach(mitre => {
       expectedMitre = expectedMitre + mitre.tactic;
       mitre.techniques.forEach(technique => {
         expectedMitre = expectedMitre + technique;
       });
     });
-    const expectedIndexPatterns = [
-      'apm-*-transaction*',
-      'auditbeat-*',
-      'endgame-*',
-      'filebeat-*',
-      'packetbeat-*',
-      'winlogbeat-*',
-    ];
 
     cy.get(RULE_NAME_HEADER)
       .invoke('text')
-      .should('eql', `${newRule.name} Beta`);
+      .should('eql', `${machineLearningRule.name} Beta`);
 
     cy.get(ABOUT_RULE_DESCRIPTION)
       .invoke('text')
-      .should('eql', newRule.description);
+      .should('eql', machineLearningRule.description);
     cy.get(ABOUT_STEP)
       .eq(ABOUT_SEVERITY)
       .invoke('text')
-      .should('eql', newRule.severity);
+      .should('eql', machineLearningRule.severity);
     cy.get(ABOUT_STEP)
       .eq(ABOUT_RISK)
       .invoke('text')
-      .should('eql', newRule.riskScore);
+      .should('eql', machineLearningRule.riskScore);
     cy.get(ABOUT_STEP)
       .eq(ABOUT_URLS)
       .invoke('text')
@@ -187,17 +163,23 @@ describe('Signal detection rules', () => {
       .invoke('text')
       .should('eql', expectedTags);
 
-    cy.get(DEFINITION_INDEX_PATTERNS).then(patterns => {
-      cy.wrap(patterns).each((pattern, index) => {
-        cy.wrap(pattern)
-          .invoke('text')
-          .should('eql', expectedIndexPatterns[index]);
-      });
-    });
     cy.get(DEFINITION_STEP)
-      .eq(DEFINITION_CUSTOM_QUERY)
+      .eq(RULE_TYPE)
       .invoke('text')
-      .should('eql', `${newRule.customQuery} `);
+      .should('eql', 'Machine Learning');
+    cy.get(DEFINITION_STEP)
+      .eq(ANOMALY_SCORE)
+      .invoke('text')
+      .should('eql', machineLearningRule.anomalyScoreThreshold);
+    cy.get(DEFINITION_STEP)
+      .get(MACHINE_LEARNING_JOB_STATUS)
+      .invoke('text')
+      .should('eql', 'Stopped');
+    cy.get(DEFINITION_STEP)
+      .get(MACHINE_LEARNING_JOB_ID)
+      .invoke('text')
+      .should('eql', machineLearningRule.machineLearningJob);
+
     cy.get(DEFINITION_STEP)
       .eq(DEFINITION_TIMELINE)
       .invoke('text')
