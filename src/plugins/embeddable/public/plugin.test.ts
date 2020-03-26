@@ -19,7 +19,7 @@
 import { coreMock } from '../../../core/public/mocks';
 import { testPlugin } from './tests/test_plugin';
 import { EmbeddableFactoryProvider } from './types';
-import { defaultEmbeddableFactoryProvider } from './lib';
+import { defaultEmbeddableFactoryProvider, EmbeddableFactory } from './lib';
 
 test('cannot register embeddable factory with the same ID', async () => {
   const coreSetup = coreMock.createSetup();
@@ -56,5 +56,5 @@ test('can set custom embeddable factory provider', async () => {
 
   const start = doStart();
   const factory = start.getEmbeddableFactory('test');
-  expect(() => factory!.getDisplayName()).toEqual('Intercepted!');
+  expect(factory!.getDisplayName()).toEqual('Intercepted!');
 });
