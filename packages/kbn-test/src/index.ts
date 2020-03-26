@@ -51,3 +51,5 @@ export { runFtrCli } from './functional_test_runner/cli';
 export { runFailedTestsReporterCli } from './failed_tests_reporter';
 
 export { makeJunitReportPath } from './junit_report_path';
+
+export { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
