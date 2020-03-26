@@ -6,7 +6,7 @@
 
 import { AnyAction } from 'redux';
 
-export function setOpenTOCDetails(details: unknown): AnyAction;
+export function setOpenTOCDetails(layerIds?: string[]): AnyAction;
 
 export function setIsLayerTOCOpen(open: boolean): AnyAction;
 

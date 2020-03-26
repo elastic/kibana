@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './map_embeddable_factory';
 export * from './map_embeddable';
+export * from './map_embeddable_factory';

@@ -35,7 +35,7 @@ export interface MapCenter {
 
 export function setGotoWithCenter(config: MapCenter): AnyAction;
 
-export function replaceLayerList(layerList: unknown): AnyAction;
+export function replaceLayerList(layerList: unknown[]): AnyAction;
 
 export interface QueryGroup {
   filters: Filter[];
@@ -48,23 +48,23 @@ export function setQuery(query: QueryGroup): AnyAction;
 
 export interface RefreshConfig {
   isPaused: boolean;
-  interval: unknown;
+  interval: number;
 }
 
 export function setRefreshConfig(config: RefreshConfig): AnyAction;
 
 export function disableScrollZoom(): AnyAction;
 
-export function disableInteractive(disable: boolean): AnyAction;
+export function disableInteractive(): AnyAction;
 
-export function disableTooltipControl(disable: boolean): AnyAction;
+export function disableTooltipControl(): AnyAction;
 
-export function hideToolbarOverlay(hide: boolean): AnyAction;
+export function hideToolbarOverlay(): AnyAction;
 
-export function hideLayerControl(hide: boolean): AnyAction;
+export function hideLayerControl(): AnyAction;
 
-export function hideViewControl(hide: boolean): AnyAction;
+export function hideViewControl(): AnyAction;
 
-export function setHiddenLayers(layer: unknown): AnyAction;
+export function setHiddenLayers(hiddenLayerIds: string[]): AnyAction;
 
-export function addLayerWithoutDataSync(layer: unknown): AnyAction;
+export function addLayerWithoutDataSync(layerDescriptor: unknown): AnyAction;

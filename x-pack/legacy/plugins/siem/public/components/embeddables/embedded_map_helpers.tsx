@@ -10,7 +10,8 @@ import { OutPortal, PortalNode } from 'react-reverse-portal';
 import minimatch from 'minimatch';
 import { IndexPatternMapping, RenderTooltipContentParams, SetQuery } from './types';
 import { getLayerList } from './map_config';
-import { MAP_SAVED_OBJECT_TYPE, MapInput, MapEmbeddable } from '../../../../maps/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../plugins/maps/public';
+import { MapEmbeddableInput, MapEmbeddable } from '../../../../maps/public';
 import * as i18n from './translations';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import {

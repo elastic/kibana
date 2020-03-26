@@ -26,5 +26,4 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new MapsPlugin();
 };
 
-export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-export { MapEmbeddable, MapInput } from './embeddable';
+export { MapEmbeddable, MapEmbeddableInput } from './embeddable';

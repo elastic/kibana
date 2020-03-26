@@ -8,10 +8,11 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 
+import { ViewMode } from 'src/plugins/embeddable/public';
 import { start } from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import * as i18n from './translations';
-import { MAP_SAVED_OBJECT_TYPE, MapInput, MapEmbeddable } from '../../../../../../maps/public';
-
+import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../../plugins/maps/public';
 import { Location } from '../../../../../common/runtime_types';
 
 import { getLayerList } from './map_config';
@@ -48,7 +49,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
   const factory = start.getEmbeddableFactory<MapInput>(MAP_SAVED_OBJECT_TYPE);
 
-  const input = {
+  const input: MapEmbeddableInput = {
     id: uuid.v4(),
     filters: [],
     hidePanelTitles: true,

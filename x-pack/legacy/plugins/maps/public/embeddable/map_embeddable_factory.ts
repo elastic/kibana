@@ -16,7 +16,7 @@ import {
   IContainer,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { MapEmbeddable, MapInput } from './map_embeddable';
+import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
 import { getIndexPatternService } from '../kibana_services';
 
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
@@ -95,7 +95,11 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     return await savedObjectLoader.get(savedObjectId);
   }
 
-  createFromSavedObject = async (savedObjectId: string, input: MapInput, parent?: IContainer) => {
+  createFromSavedObject = async (
+    savedObjectId: string,
+    input: MapEmbeddableInput,
+    parent?: IContainer
+  ) => {
     const savedMap = await this._fetchSavedMap(savedObjectId);
     const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
@@ -125,7 +129,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     return embeddable;
   };
 
-  create = async (input: MapInput, parent?: IContainer) => {
+  create = async (input: MapEmbeddableInput, parent?: IContainer) => {
     const layerList = input.layerList ?? getInitialLayers();
     const indexPatterns = await this._getIndexPatterns(layerList);
 
