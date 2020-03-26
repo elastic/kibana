@@ -26,15 +26,17 @@ import {
   SavedObjectsImportError,
 } from 'src/core/public';
 
+export interface FailedImport {
+  obj: Pick<SavedObjectsImportError, 'id' | 'type' | 'title'>;
+  error:
+    | SavedObjectsImportConflictError
+    | SavedObjectsImportUnsupportedTypeError
+    | SavedObjectsImportMissingReferencesError
+    | SavedObjectsImportUnknownError;
+}
+
 export interface ProcessedImportResponse {
-  failedImports: Array<{
-    obj: Pick<SavedObjectsImportError, 'id' | 'type' | 'title'>;
-    error:
-      | SavedObjectsImportConflictError
-      | SavedObjectsImportUnsupportedTypeError
-      | SavedObjectsImportMissingReferencesError
-      | SavedObjectsImportUnknownError;
-  }>;
+  failedImports: FailedImport[];
   unmatchedReferences: Array<{
     existingIndexPatternId: string;
     list: Array<Record<string, any>>;
