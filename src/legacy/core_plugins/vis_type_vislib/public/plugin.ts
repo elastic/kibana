@@ -62,10 +62,10 @@ export interface VisTypeVislibPluginStartDependencies {
   data: DataPublicPluginStart;
 }
 
-type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies>;
+type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
 
 /** @internal */
-export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
+export class VisTypeVislibPlugin implements Plugin<void, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(
