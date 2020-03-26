@@ -433,3 +433,38 @@ image::images/timelion-conditional04.png[]
 {nbsp}
 
 For additional information on Timelion conditional capabilities, go to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].
+
+[float]
+[[customizing-data-series-y-axis]]
+==== Customize data series Y axis
+
+It is possible to use different Y axis scales and ranges.
+The `.yaxis()` function allows the following parameters:
+
+[horizontal]
+yaxis :: The numbered y-axis to plot this series on, eg .yaxis(2) for a 2nd y-axis.
+min :: Min value for y-axis range
+max :: Max value for y-axis range
+position :: `left` or `right`  
+label :: Label for axis  
+color :: Color of axis label
+units :: The function to use for formatting y-axis labels. One of: `bits`, `bits/s`, `bytes`, `bytes/s`, `currency(:ISO 4217 currency code)`, `percent`, `custom(:prefix:suffix)`
+tickDecimals :: Tick decimal precision
+
+Example:
+
+[source,text]
+----------------------------------
+.es(index= kibana_sample_data_logs,
+    timefield='@timestamp',
+    metric='avg:bytes')
+  .label('Average Bytes for request')
+  .title('Memory consumption over time in bytes').yaxis(1,units=bytes,position=left), <1>
+.es(index= kibana_sample_data_logs,
+    timefield='@timestamp',
+    metric=avg:machine.ram)
+  .label('Average Machine RAM amount').yaxis(2,units=bytes,position=right) <2>
+----------------------------------
+
+<1> `.yaxis(1,units=bytes,position=left)` allows to set a first Y axis for the first series, changing the units, on the left
+<2> `.yaxis(2,units=bytes,position=left)` allows to set a second Y axis for the second series, changing the units, on the right
