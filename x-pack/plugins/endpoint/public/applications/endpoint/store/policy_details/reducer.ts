@@ -27,7 +27,10 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
   state = initialPolicyDetailsState(),
   action
 ) => {
-  if (action.type === 'serverReturnedPolicyDetailsData') {
+  if (
+    action.type === 'serverReturnedPolicyDetailsData' ||
+    action.type === 'serverReturnedUpdatedPolicyDetailsData'
+  ) {
     return {
       ...state,
       ...action.payload,
@@ -46,7 +49,7 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
     return {
       ...state,
       isLoading: false,
-      updateApiError: action.payload,
+      updateStatus: action.payload,
     };
   }
 

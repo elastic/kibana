@@ -20,7 +20,7 @@ import { usePolicyDetailsSelector } from './policy_hooks';
 import {
   policyDetails,
   selectAgentStatusSummary,
-  selectUpdateApiError,
+  updateStatus,
   isLoading,
 } from '../../store/policy_details/selectors';
 import { WindowsEventing } from './policy_forms/eventing/windows';
@@ -35,17 +35,39 @@ export const PolicyDetails = React.memo(() => {
 
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const agentStatusSummary = usePolicyDetailsSelector(selectAgentStatusSummary);
-  const updateApiError = usePolicyDetailsSelector(selectUpdateApiError);
+  const policyUpdateStatus = usePolicyDetailsSelector(updateStatus);
   const isPolicyLoading = usePolicyDetailsSelector(isLoading);
 
+  const policyName = policyItem?.name ?? '';
+
+  // Handle showing udpate statuses
   useEffect(() => {
-    if (updateApiError) {
-      notifications.toasts.danger({
-        toastLifeTimeMs: 10000,
-        body: <>{updateApiError?.message}</>,
-      });
+    if (policyUpdateStatus) {
+      if (policyUpdateStatus.success) {
+        notifications.toasts.success({
+          toastLifeTimeMs: 10000,
+          title: i18n.translate('xpack.endpoint.policy.details.updateSuccessTitle', {
+            defaultMessage: 'Success!',
+          }),
+          body: (
+            <FormattedMessage
+              id="xpack.endpoint.policy.details.updateSuccessMessage"
+              defaultMessage="Policy {name} has been updated."
+              values={{ name: policyName }}
+            />
+          ),
+        });
+      } else {
+        notifications.toasts.danger({
+          toastLifeTimeMs: 10000,
+          title: i18n.translate('xpack.endpoint.policy.details.updateErrorTitle', {
+            defaultMessage: 'Failed!',
+          }),
+          body: <>{policyUpdateStatus.error!.message}</>,
+        });
+      }
     }
-  }, [notifications.toasts, updateApiError]);
+  }, [notifications.toasts, policyItem, policyName, policyUpdateStatus]);
 
   const handleSaveOnClick = useCallback(() => {
     dispatch({
@@ -55,7 +77,7 @@ export const PolicyDetails = React.memo(() => {
 
   const headerLeftContent =
     policyItem?.name ??
-    i18n.translate('xpack.endpoint.policyDetails.notFound', {
+    i18n.translate('xpack.endpoint.policy.details.notFound', {
       defaultMessage: 'Policy Not Found',
     });
 

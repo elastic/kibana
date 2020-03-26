@@ -109,8 +109,11 @@ export interface PolicyDetailsState {
   location?: Immutable<EndpointAppLocation>;
   /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
   agentStatusSummary: GetAgentStatusResponse['results'];
-  /** API error if updating policy failed */
-  updateApiError?: ServerApiError;
+  /** Status of an update to the policy  */
+  updateStatus?: {
+    success: boolean;
+    error?: ServerApiError;
+  };
 }
 
 /**

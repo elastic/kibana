@@ -160,15 +160,21 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
       } catch (error) {
         dispatch({
           type: 'serverReturnedPolicyDetailsUpdateFailure',
-          payload: error.body || error,
+          payload: {
+            success: false,
+            error: error.body || error,
+          },
         });
         return;
       }
 
       dispatch({
-        type: 'serverReturnedPolicyDetailsData',
+        type: 'serverReturnedUpdatedPolicyDetailsData',
         payload: {
           policyItem: apiResponse.item,
+          updateStatus: {
+            success: true,
+          },
         },
       });
     }

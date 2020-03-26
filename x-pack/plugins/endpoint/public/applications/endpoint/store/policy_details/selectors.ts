@@ -65,4 +65,4 @@ export const isLoading = (state: PolicyDetailsState) => state.isLoading;
 
 export const selectAgentStatusSummary = (state: PolicyDetailsState) => state.agentStatusSummary;
 
-export const selectUpdateApiError = (state: PolicyDetailsState) => state.updateApiError;
+export const updateStatus = (state: PolicyDetailsState) => state.updateStatus;
