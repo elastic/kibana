@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { act } from 'react-dom/test-utils';
 
 import {
   pageHelpers,
@@ -111,8 +112,10 @@ describe('<RemoteClusterList />', () => {
       // Mount the component
       ({ component, find, exists, table, actions } = setup());
 
-      await nextTick(100); // Make sure that the Http request is fulfilled
-      component.update();
+      await act(async () => {
+        await nextTick(100); // Make sure that the Http request is fulfilled
+        component.update();
+      });
 
       // Read the remote clusters list table
       ({ rows, tableCellsValues } = table.getMetaData('remoteClusterListTable'));
@@ -239,8 +242,10 @@ describe('<RemoteClusterList />', () => {
         actions.clickBulkDeleteButton();
         actions.clickConfirmModalDeleteRemoteCluster();
 
-        await nextTick(600); // there is a 500ms timeout in the api action
-        component.update();
+        await act(async () => {
+          await nextTick(600); // there is a 500ms timeout in the api action
+          component.update();
+        });
 
         ({ rows } = table.getMetaData('remoteClusterListTable'));
 
