@@ -40,6 +40,8 @@ import {
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 import { ConfigSchema as VisTypeXyConfigSchema } from '../../vis_type_xy';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { setFormatService } from './services';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -57,6 +59,7 @@ export interface VisTypeVislibPluginSetupDependencies {
 export interface VisTypeVislibPluginStartDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['start']>;
   visualizations: VisualizationsStart;
+  data: DataPublicPluginStart;
 }
 
 type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies>;
@@ -109,6 +112,6 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
   }
 
   public start(core: CoreStart, deps: VisTypeVislibPluginStartDependencies) {
-    // nothing to do here
+    setFormatService(deps.data.fieldFormats);
   }
 }
