@@ -14,6 +14,7 @@ export default function(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
+  const log = getService('log');
 
   const supertest = getSupertestWithoutAuth(providerContext);
   let apiKey: { id: string; api_key: string };
@@ -90,8 +91,8 @@ export default function(providerContext: FtrProviderContext) {
             },
           ],
         });
-      // eslint-disable-next-line no-console
-      console.log(apiResponse);
+
+      log.debug(apiResponse);
       expect(apiResponse.action).to.be('acks');
       expect(apiResponse.success).to.be(true);
       const { body: eventResponse } = await supertest
@@ -102,8 +103,7 @@ export default function(providerContext: FtrProviderContext) {
           `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
         );
       // .expect(200);
-      // eslint-disable-next-line no-console
-      console.log(eventResponse);
+      log.debug(eventResponse);
       const expectedEvents = eventResponse.list.filter(
         (item: Record<string, string>) =>
           item.action_id === '48cebde1-c906-4893-b89f-595d943b72a1' ||
