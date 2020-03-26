@@ -53,7 +53,6 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
           active: false,
         },
       });
-
       try {
         await coreStart.http.patch(`/api/endpoint/alerts/${id}`, {
           body,
