@@ -44,7 +44,6 @@ export class PopulationJobCreator extends JobCreator {
         this._detectors[index].by_field_name = field.id;
       }
     }
-    this._updateModelMemoryEstimation();
   }
 
   // remove a by field from a specific detector

@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { FC, useReducer, useState, useEffect } from 'react';
-import { Subscription } from 'rxjs';
-import { pairwise } from 'rxjs/operators';
-import { useMlKibana } from '../../../../contexts/kibana';
-import { modelMemoryEstimatorProvider } from '../../common/job_creator/util/model_memory_estimator';
+import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
 
 import { WIZARD_STEPS } from '../components/step_types';
 
@@ -46,9 +42,6 @@ export const Wizard: FC<Props> = ({
   existingJobsAndGroups,
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
-  const {
-    services: { notifications },
-  } = useMlKibana();
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number, action: any) => number>(
     s => s + 1,
     0
@@ -86,43 +79,7 @@ export const Wizard: FC<Props> = ({
     stringifyConfigs(jobCreator.jobConfig, jobCreator.datafeedConfig)
   );
 
-  useEffect(() => {
-    const estimator = modelMemoryEstimatorProvider(
-      jobCreator.modelMemoryEstimationPayload$,
-      jobValidator
-    );
-
-    const subscription = new Subscription();
-
-    subscription.add(
-      estimator.updates$.pipe(pairwise()).subscribe(([previousEstimation, currentEstimation]) => {
-        // to make sure we don't overwrite a manual input
-        if (
-          jobCreator.modelMemoryLimit === null ||
-          jobCreator.modelMemoryLimit === previousEstimation
-        ) {
-          jobCreator.modelMemoryLimit = currentEstimation;
-          // required in order to trigger changes on the input
-          jobCreatorUpdate();
-        }
-      })
-    );
-
-    subscription.add(
-      estimator.error$.subscribe(error => {
-        notifications.toasts.addWarning({
-          title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
-            defaultMessage: 'Model memory limit could not be calculated',
-          }),
-          text: error.message,
-        });
-      })
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  useModelMemoryEstimator(jobCreator, jobValidator, jobCreatorUpdate, jobCreatorUpdated);
 
   useEffect(() => {
     const subscription = jobValidator.validationResult$.subscribe(() => {

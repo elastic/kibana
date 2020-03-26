@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subject } from 'rxjs';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -33,7 +32,6 @@ import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import { CalculatePayload } from './util/model_memory_estimator';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -59,9 +57,6 @@ export class JobCreator {
     stop: boolean;
   } = { stop: false };
 
-  private _modelMemoryEstimationPayload$ = new Subject<CalculatePayload>();
-  public modelMemoryEstimationPayload$ = this._modelMemoryEstimationPayload$.asObservable();
-
   constructor(
     indexPattern: IndexPattern,
     savedSearch: SavedSearchSavedObject | null,
@@ -84,26 +79,18 @@ export class JobCreator {
     this._datafeed_config.query = query;
   }
 
-  protected _updateModelMemoryEstimation() {
-    this._modelMemoryEstimationPayload$.next({
-      analysisConfig: this.jobConfig.analysis_config,
-      indexPattern: this._indexPatternTitle,
-      query: this._datafeed_config.query,
-      timeFieldName: this._job_config.data_description.time_field,
-      earliestMs: this._start,
-      latestMs: this._end,
-    });
-  }
-
   public get type(): JOB_TYPE {
     return this._type;
+  }
+
+  public get indexPatternTitle(): string {
+    return this._indexPatternTitle;
   }
 
   protected _addDetector(detector: Detector, agg: Aggregation, field: Field) {
     this._detectors.push(detector);
     this._aggs.push(agg);
     this._fields.push(field);
-    this._updateModelMemoryEstimation();
     this._updateSparseDataDetectors();
   }
 
@@ -112,7 +99,6 @@ export class JobCreator {
       this._detectors[index] = detector;
       this._aggs[index] = agg;
       this._fields[index] = field;
-      this._updateModelMemoryEstimation();
       this._updateSparseDataDetectors();
     }
   }
@@ -121,14 +107,12 @@ export class JobCreator {
     this._detectors.splice(index, 1);
     this._aggs.splice(index, 1);
     this._fields.splice(index, 1);
-    this._updateModelMemoryEstimation();
   }
 
   public removeAllDetectors() {
     this._detectors.length = 0;
     this._aggs.length = 0;
     this._fields.length = 0;
-    this._updateModelMemoryEstimation();
   }
 
   public get detectors(): Detector[] {
@@ -169,7 +153,6 @@ export class JobCreator {
   protected _setBucketSpanMs(bucketSpan: BucketSpan) {
     const bs = parseInterval(bucketSpan);
     this._bucketSpanMs = bs === null ? 0 : bs.asMilliseconds();
-    this._updateModelMemoryEstimation();
   }
 
   public get bucketSpanMs(): number {
@@ -179,7 +162,6 @@ export class JobCreator {
   public addInfluencer(influencer: string) {
     if (this._influencers.includes(influencer) === false) {
       this._influencers.push(influencer);
-      this._updateModelMemoryEstimation();
     }
   }
 
@@ -187,12 +169,10 @@ export class JobCreator {
     const idx = this._influencers.indexOf(influencer);
     if (idx !== -1) {
       this._influencers.splice(idx, 1);
-      this._updateModelMemoryEstimation();
     }
   }
 
   public removeAllInfluencers() {
-    this._updateModelMemoryEstimation();
     this._influencers.length = 0;
   }
 

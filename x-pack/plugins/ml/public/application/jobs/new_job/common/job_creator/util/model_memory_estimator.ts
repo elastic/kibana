@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, of, Subject } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { Observable, of, Subject, Subscription } from 'rxjs';
 import { isEqual, cloneDeep } from 'lodash';
 import {
   catchError,
@@ -14,18 +15,20 @@ import {
   startWith,
   switchMap,
   map,
+  pairwise,
 } from 'rxjs/operators';
+import { useEffect, useState } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
 import { ErrorResponse } from '../../../../../../../common/types/errors';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { JobCreator } from '../job_creator';
 
 export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
 
-export const modelMemoryEstimatorProvider = (
-  modelMemoryCheck$: Observable<CalculatePayload>,
-  jobValidator: JobValidator
-) => {
+export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
+  const modelMemoryCheck$ = new Subject<CalculatePayload>();
   const error$ = new Subject<ErrorResponse['body']>();
 
   return {
@@ -58,5 +61,70 @@ export const modelMemoryEstimatorProvider = (
         startWith(DEFAULT_MODEL_MEMORY_LIMIT)
       );
     },
+    update(payload: CalculatePayload) {
+      modelMemoryCheck$.next(payload);
+    },
   };
+};
+
+export const useModelMemoryEstimator = (
+  jobCreator: JobCreator,
+  jobValidator: JobValidator,
+  jobCreatorUpdate: Function,
+  jobCreatorUpdated: number
+) => {
+  const {
+    services: { notifications },
+  } = useMlKibana();
+
+  // Initialize model memory estimator only once
+  const [modelMemoryEstimator] = useState(modelMemoryEstimatorProvider(jobValidator));
+
+  // Listen for estimation results and errors
+  useEffect(() => {
+    const subscription = new Subscription();
+
+    subscription.add(
+      modelMemoryEstimator.updates$
+        .pipe(pairwise())
+        .subscribe(([previousEstimation, currentEstimation]) => {
+          // to make sure we don't overwrite a manual input
+          if (
+            jobCreator.modelMemoryLimit === null ||
+            jobCreator.modelMemoryLimit === previousEstimation
+          ) {
+            jobCreator.modelMemoryLimit = currentEstimation;
+            // required in order to trigger changes on the input
+            jobCreatorUpdate();
+          }
+        })
+    );
+
+    subscription.add(
+      modelMemoryEstimator.error$.subscribe(error => {
+        notifications.toasts.addWarning({
+          title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
+            defaultMessage: 'Model memory limit could not be calculated',
+          }),
+          text: error.message,
+        });
+      })
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Update model memory estimation payload on the job creator updates
+  useEffect(() => {
+    modelMemoryEstimator.update({
+      analysisConfig: jobCreator.jobConfig.analysis_config,
+      indexPattern: jobCreator.indexPatternTitle,
+      query: jobCreator.datafeedConfig.query,
+      timeFieldName: jobCreator.jobConfig.data_description.time_field,
+      earliestMs: jobCreator.start,
+      latestMs: jobCreator.end,
+    });
+  }, [jobCreatorUpdated]);
 };

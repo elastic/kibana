@@ -45,7 +45,6 @@ export class MultiMetricJobCreator extends JobCreator {
         this._detectors[i].partition_field_name = this._splitField.id;
       }
     }
-    this._updateModelMemoryEstimation();
   }
 
   public removeSplitField() {
