@@ -76,7 +76,7 @@ export const createDirectAccessDashboardLinkGenerator = (
     const appBasePath = startServices.appBasePath;
     const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
 
-    const cleanEmptyKeys = (stateObj: Record<string, any>) => {
+    const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
       Object.keys(stateObj).forEach(key => {
         if (stateObj[key] === undefined) {
           delete stateObj[key];
