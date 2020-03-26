@@ -183,8 +183,8 @@ export const LogEntryRow = memo(
           <LogEntryActionsColumn
             isHovered={isHovered}
             isMenuOpen={isMenuOpen}
-            openMenu={openMenu}
-            closeMenu={closeMenu}
+            onOpenMenu={openMenu}
+            onCloseMenu={closeMenu}
             onViewDetails={openFlyout}
           />
         </LogEntryColumn>

@@ -22,22 +22,22 @@ import { euiStyled } from '../../../../../observability/public';
 interface LogEntryActionsColumnProps {
   isHovered: boolean;
   isMenuOpen: boolean;
-  openMenu: () => void;
-  closeMenu: () => void;
+  onOpenMenu: () => void;
+  onCloseMenu: () => void;
   onViewDetails: () => void;
 }
 
 export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   isHovered,
   isMenuOpen,
-  openMenu,
-  closeMenu,
+  onOpenMenu,
+  onCloseMenu,
   onViewDetails,
 }) => {
   const handleClickViewDetails = useCallback(() => {
-    closeMenu();
+    onCloseMenu();
     onViewDetails();
-  }, [closeMenu, onViewDetails]);
+  }, [onCloseMenu, onViewDetails]);
 
   const label = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
     defaultMessage: 'View Details',
@@ -49,7 +49,7 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
         aria-label={label}
         color="ghost"
         iconType="boxesHorizontal"
-        onClick={openMenu}
+        onClick={onOpenMenu}
       />
     </ButtonWrapper>
   );
@@ -58,7 +58,7 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
     <ActionsColumnContent>
       {isHovered ? (
         <AbsoluteWrapper>
-          <EuiPopover button={button} isOpen={isMenuOpen} closePopover={closeMenu}>
+          <EuiPopover button={button} isOpen={isMenuOpen} closePopover={onCloseMenu}>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
                 <EuiTitle size="xxs">
