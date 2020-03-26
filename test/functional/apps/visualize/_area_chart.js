@@ -484,7 +484,6 @@ export default function({ getService, getPageObjects }) {
           '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
         );
         const errorMessage = await fieldErrorMessage.getVisibleText();
-        await PageObjects.common.sleep(30000);
         expect(errorMessage).to.be(
           'The index pattern test_index* does not contain any of the following compatible field types: date'
         );
