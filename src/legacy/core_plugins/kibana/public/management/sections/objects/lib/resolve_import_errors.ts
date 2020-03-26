@@ -18,8 +18,16 @@
  */
 
 import { kfetch } from 'ui/kfetch';
+import { FailedImport } from './process_import_response';
 
-async function callResolveImportErrorsApi(file, retries) {
+interface RetryObject {
+  id: string;
+  type: string;
+  overwrite?: boolean;
+  replaceReferences?: any[];
+}
+
+async function callResolveImportErrorsApi(file: File, retries: any) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('retries', JSON.stringify(retries));
@@ -39,7 +47,12 @@ function mapImportFailureToRetryObject({
   overwriteDecisionCache,
   replaceReferencesCache,
   state,
-}) {
+}: {
+  failure: FailedImport;
+  overwriteDecisionCache: Map<string, boolean>;
+  replaceReferencesCache: Map<string, any[]>;
+  state: any;
+}): RetryObject | undefined {
   const { isOverwriteAllChecked, unmatchedReferences } = state;
   const isOverwriteGranted =
     isOverwriteAllChecked ||
@@ -86,27 +99,32 @@ function mapImportFailureToRetryObject({
   };
 }
 
-export async function resolveImportErrors({ getConflictResolutions, state }) {
+export async function resolveImportErrors({
+  getConflictResolutions,
+  state,
+}: {
+  getConflictResolutions: (objects: any[]) => Promise<Record<string, boolean>>;
+  state: { importCount: number; failedImports?: FailedImport[] } & Record<string, any>;
+}) {
   const overwriteDecisionCache = new Map();
   const replaceReferencesCache = new Map();
   let { importCount: successImportCount, failedImports: importFailures = [] } = state;
   const { file, isOverwriteAllChecked } = state;
 
-  const doesntHaveOverwriteDecision = ({ obj }) => {
+  const doesntHaveOverwriteDecision = ({ obj }: FailedImport) => {
     return !overwriteDecisionCache.has(`${obj.type}:${obj.id}`);
   };
-  const getOverwriteDecision = ({ obj }) => {
+  const getOverwriteDecision = ({ obj }: FailedImport) => {
     return overwriteDecisionCache.get(`${obj.type}:${obj.id}`);
   };
-  const callMapImportFailure = failure => {
-    return mapImportFailureToRetryObject({
+  const callMapImportFailure = (failure: FailedImport) =>
+    mapImportFailureToRetryObject({
       failure,
       overwriteDecisionCache,
       replaceReferencesCache,
       state,
     });
-  };
-  const isNotSkipped = failure => {
+  const isNotSkipped = (failure: FailedImport) => {
     return (
       (failure.error.type !== 'conflict' && failure.error.type !== 'missing_references') ||
       getOverwriteDecision(failure)
@@ -131,7 +149,7 @@ export async function resolveImportErrors({ getConflictResolutions, state }) {
     }
 
     // Build retries array
-    const retries = importFailures.map(callMapImportFailure).filter(obj => !!obj);
+    const retries = importFailures.map(callMapImportFailure).filter(obj => !!obj) as RetryObject[];
     for (const { error, obj } of importFailures) {
       if (error.type !== 'missing_references') {
         continue;

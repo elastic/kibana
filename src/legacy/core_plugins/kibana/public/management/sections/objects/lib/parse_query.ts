@@ -17,15 +17,15 @@
  * under the License.
  */
 
-export function parseQuery(query) {
-  let queryText = undefined;
-  let visibleTypes = undefined;
+export function parseQuery(query: any) {
+  let queryText;
+  let visibleTypes;
 
   if (query) {
     if (query.ast.getTermClauses().length) {
       queryText = query.ast
         .getTermClauses()
-        .map(clause => clause.value)
+        .map((clause: any) => clause.value)
         .join(' ');
     }
     if (query.ast.getFieldClauses('type')) {

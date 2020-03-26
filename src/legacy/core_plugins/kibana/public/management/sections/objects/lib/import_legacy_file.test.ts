@@ -17,13 +17,21 @@
  * under the License.
  */
 
-export function getSavedObjectLabel(type) {
-  switch (type) {
-    case 'index-pattern':
-    case 'index-patterns':
-    case 'indexPatterns':
-      return 'index patterns';
-    default:
-      return type;
-  }
-}
+import { importLegacyFile } from './import_legacy_file';
+
+describe('importFile', () => {
+  it('should import a file with valid json format', async () => {
+    const file = new File([`{"text": "foo"}`], 'file.json');
+
+    const imported = await importLegacyFile(file);
+    expect(imported).toEqual({ text: 'foo' });
+  });
+
+  it('should throw errors when file content is not parseable', async () => {
+    const file = new File([`not_parseable`], 'file.json');
+
+    await expect(importLegacyFile(file)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unexpected token o in JSON at position 1"`
+    );
+  });
+});

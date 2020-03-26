@@ -17,15 +17,18 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
-import { keysToCamelCaseShallow } from './case_conversion';
+import { IHttpService } from 'angular';
+import chrome from 'ui/chrome';
 
-export async function findObjects(findOptions) {
-  const response = await kfetch({
-    method: 'GET',
-    pathname: '/api/kibana/management/saved_objects/_find',
-    query: findOptions,
+const apiBase = chrome.addBasePath('/api/kibana/management/saved_objects/scroll');
+export async function getSavedObjectCounts(
+  $http: IHttpService,
+  typesToInclude: string[],
+  searchString: string
+): Promise<Record<string, number>> {
+  const results = await $http.post<Record<string, number>>(`${apiBase}/counts`, {
+    typesToInclude,
+    searchString,
   });
-
-  return keysToCamelCaseShallow(response);
+  return results.data;
 }
