@@ -6,6 +6,8 @@
 
 experimental[] Check the status of your cluster.
 
+Check the status of your cluster.
+
 [[upgrade-assistant-api-status-request]]
 ==== Request
 

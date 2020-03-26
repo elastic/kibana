@@ -7,7 +7,6 @@
 import { APICaller as APICaller_2 } from 'kibana/server';
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
-import { CallCluster as CallCluster_2 } from 'src/legacy/core_plugins/elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
 import { CatCommonParams } from 'elasticsearch';
@@ -175,6 +174,8 @@ export enum ES_FIELD_TYPES {
     GEO_SHAPE = "geo_shape",
     // (undocumented)
     HALF_FLOAT = "half_float",
+    // (undocumented)
+    HISTOGRAM = "histogram",
     // (undocumented)
     _ID = "_id",
     // (undocumented)
@@ -548,6 +549,8 @@ export enum KBN_FIELD_TYPES {
     GEO_POINT = "geo_point",
     // (undocumented)
     GEO_SHAPE = "geo_shape",
+    // (undocumented)
+    HISTOGRAM = "histogram",
     // (undocumented)
     IP = "ip",
     // (undocumented)

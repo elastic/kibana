@@ -116,10 +116,12 @@ exports[`EmptyState component does not render empty state with appropriate base 
     headingMessage="No uptime data found"
   >
     <EuiFlexGroup
+      data-test-subj="data-missing"
       justifyContent="center"
     >
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        data-test-subj="data-missing"
       >
         <EuiFlexItem
           grow={false}
@@ -564,10 +566,12 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
     headingMessage="Uptime index not found"
   >
     <EuiFlexGroup
+      data-test-subj="data-missing"
       justifyContent="center"
     >
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        data-test-subj="data-missing"
       >
         <EuiFlexItem
           grow={false}
@@ -745,17 +749,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
 <EmptyStateComponent
   errors={
     Array [
-      Object {
-        "extensions": undefined,
-        "locations": undefined,
-        "message": "An error occurred",
-        "name": "foo",
-        "nodes": undefined,
-        "originalError": undefined,
-        "path": undefined,
-        "positions": undefined,
-        "source": undefined,
-      },
+      [error: There was an error fetching your data.],
     ]
   }
   intl={
@@ -866,17 +860,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
   <EmptyStateError
     errors={
       Array [
-        Object {
-          "extensions": undefined,
-          "locations": undefined,
-          "message": "An error occurred",
-          "name": "foo",
-          "nodes": undefined,
-          "originalError": undefined,
-          "path": undefined,
-          "positions": undefined,
-          "source": undefined,
-        },
+        [error: There was an error fetching your data.],
       ]
     }
   >
@@ -900,7 +884,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                   body={
                     <React.Fragment>
                       <p>
-                        An error occurred
+                        There was an error fetching your data.
                       </p>
                     </React.Fragment>
                   }
@@ -967,9 +951,9 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                             className="euiText euiText--medium"
                           >
                             <p
-                              key="An error occurred"
+                              key="There was an error fetching your data."
                             >
-                              An error occurred
+                              There was an error fetching your data.
                             </p>
                           </div>
                         </EuiText>

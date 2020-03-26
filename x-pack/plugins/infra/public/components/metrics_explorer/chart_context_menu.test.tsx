@@ -143,7 +143,7 @@ describe('MetricsExplorerChartContextMenu', () => {
         uiCapabilities: customUICapabilities,
         chartOptions,
       });
-      expect(component.find('button').length).toBe(0);
+      expect(component.find('button').length).toBe(1);
     });
   });
 

@@ -23,6 +23,9 @@ export {
   CreateAPIKeyResult,
   InvalidateAPIKeyParams,
   InvalidateAPIKeyResult,
+  GrantAPIKeyResult,
+  SAMLLogin,
+  OIDCLogin,
 } from './authentication';
 export { SecurityPluginSetup };
 export { AuthenticatedUser } from '../common/model';
@@ -33,27 +36,38 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     rename('sessionTimeout', 'session.idleTimeout'),
     rename('authProviders', 'authc.providers'),
     unused('authorization.legacyFallback.enabled'),
+    // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.
     (settings, fromPath, log) => {
-      const securityConfig = settings?.xpack?.security;
-      const hasProvider = (provider: string) =>
-        securityConfig?.authc?.providers?.includes(provider) ?? false;
+      if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
+        log(
+          'Defining `xpack.security.authc.providers` as an array of provider types is deprecated. Use extended `object` format instead.'
+        );
+      }
 
-      if (hasProvider('basic') && hasProvider('token')) {
+      return settings;
+    },
+    (settings, fromPath, log) => {
+      const hasProviderType = (providerType: string) => {
+        const providers = settings?.xpack?.security?.authc?.providers;
+        if (Array.isArray(providers)) {
+          return providers.includes(providerType);
+        }
+
+        return Object.values(providers?.[providerType] || {}).some(
+          provider => (provider as { enabled: boolean | undefined })?.enabled !== false
+        );
+      };
+
+      if (hasProviderType('basic') && hasProviderType('token')) {
         log(
           'Enabling both `basic` and `token` authentication providers in `xpack.security.authc.providers` is deprecated. Login page will only use `token` provider.'
         );
       }
 
-      if (hasProvider('saml') && !securityConfig?.authc?.saml?.realm) {
-        log(
-          'Config key "xpack.security.authc.saml.realm" will become mandatory when using the SAML authentication provider in the next major version.'
-        );
-      }
-
-      if (securityConfig?.public) {
+      if (settings?.xpack?.security?.public) {
         log(
           'Config key "xpack.security.public" is deprecated and will be removed in the next major version. ' +
-            'Specify "xpack.security.authc.saml.realm" instead.'
+            'Specify SAML authentication provider and its realm in "xpack.security.authc.providers.saml.*" instead.'
         );
       }
 

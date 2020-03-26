@@ -18,8 +18,9 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const argsOpenCases = {
-          client: context.core.savedObjects.client,
+          client,
           options: {
             fields: [],
             page: 1,
@@ -29,7 +30,7 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
         };
 
         const argsClosedCases = {
-          client: context.core.savedObjects.client,
+          client,
           options: {
             fields: [],
             page: 1,

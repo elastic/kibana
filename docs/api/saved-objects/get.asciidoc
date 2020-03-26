@@ -13,8 +13,14 @@ experimental[] Retrieve a single {kib} saved object by ID.
 
 `GET <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 
+`GET /s/<space_id>/api/saved_objects/<type>/<id>`
+
 [[saved-objects-api-get-params]]
 ==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
 
 `type`::
   (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.

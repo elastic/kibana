@@ -85,7 +85,7 @@ describe('MonitorPage', () => {
         readFromDocValues: true,
       },
     ],
-    title: 'heartbeat-8*',
+    title: 'heartbeat-7*',
   };
 
   const autocomplete = {

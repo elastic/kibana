@@ -5,6 +5,7 @@
  */
 
 import { PartialAlert } from '../../../../../../../plugins/alerting/server';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { readRules } from './read_rules';
 import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
@@ -15,6 +16,7 @@ import { hasListsFeature } from '../feature_flags';
 export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
+  actions,
   savedObjectsClient,
   description,
   falsePositives,
@@ -39,11 +41,11 @@ export const updateRules = async ({
   severity,
   tags,
   threat,
+  throttle,
   to,
   type,
   references,
   version,
-  throttle,
   note,
   lists,
   anomalyThreshold,
@@ -55,6 +57,7 @@ export const updateRules = async ({
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
+    actions,
     description,
     falsePositives,
     query,
@@ -74,11 +77,11 @@ export const updateRules = async ({
     severity,
     tags,
     threat,
+    throttle,
     to,
     type,
     references,
     version,
-    throttle,
     note,
     anomalyThreshold,
     machineLearningJobId,
@@ -93,8 +96,8 @@ export const updateRules = async ({
       tags: addTags(tags, rule.params.ruleId, immutable),
       name,
       schedule: { interval },
-      actions: rule.actions,
-      throttle: throttle ?? rule.throttle ?? null,
+      actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
+      throttle: throttle !== undefined ? throttle : rule.throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,

@@ -10,7 +10,12 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
   PatchRuleAlertParamsRest,
 } from '../../rules/types';
-import { transformBulkError, buildRouteValidation, buildSiemResponse } from '../utils';
+import {
+  transformBulkError,
+  buildRouteValidation,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
@@ -46,6 +51,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
           const {
+            actions,
             description,
             enabled,
             false_positives: falsePositives,
@@ -70,15 +76,23 @@ export const patchRulesBulkRoute = (router: IRouter) => {
             to,
             type,
             threat,
+            throttle,
             references,
             note,
             version,
+            anomaly_threshold: anomalyThreshold,
+            machine_learning_job_id: machineLearningJobId,
           } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
+            if (type) {
+              validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+            }
+
             const rule = await patchRules({
               alertsClient,
               actionsClient,
+              actions,
               description,
               enabled,
               falsePositives,
@@ -104,9 +118,12 @@ export const patchRulesBulkRoute = (router: IRouter) => {
               to,
               type,
               threat,
+              throttle,
               references,
               note,
               version,
+              anomalyThreshold,
+              machineLearningJobId,
             });
             if (rule != null) {
               const ruleStatuses = await savedObjectsClient.find<

@@ -34,7 +34,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('if successful with empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
-    const result = await searchAfterAndBulkCreate({
+    const { success } = await searchAfterAndBulkCreate({
       someResult: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
       services: mockService,
@@ -43,6 +43,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -52,9 +53,10 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockService.callCluster).toHaveBeenCalledTimes(0);
-    expect(result).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('if successful iteration of while loop with maxDocs', async () => {
@@ -90,7 +92,7 @@ describe('searchAfterAndBulkCreate', () => {
           },
         ],
       });
-    const result = await searchAfterAndBulkCreate({
+    const { success } = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(3, 1, someGuids.slice(6, 9)),
       ruleParams: sampleParams,
       services: mockService,
@@ -99,6 +101,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -108,16 +111,17 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockService.callCluster).toHaveBeenCalledTimes(5);
-    expect(result).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('if unsuccessful first bulk create', async () => {
     const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
     const sampleParams = sampleRuleAlertParams(10);
     mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
-    const result = await searchAfterAndBulkCreate({
+    const { success } = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
       ruleParams: sampleParams,
       services: mockService,
@@ -126,6 +130,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -135,9 +140,10 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockLogger.error).toHaveBeenCalled();
-    expect(result).toEqual(false);
+    expect(success).toEqual(false);
   });
 
   test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids', async () => {
@@ -151,7 +157,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
     });
-    const result = await searchAfterAndBulkCreate({
+    const { success } = await searchAfterAndBulkCreate({
       someResult: sampleDocSearchResultsNoSortId(),
       ruleParams: sampleParams,
       services: mockService,
@@ -160,6 +166,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -169,9 +176,10 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(mockLogger.error).toHaveBeenCalled();
-    expect(result).toEqual(false);
+    expect(success).toEqual(false);
   });
 
   test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids and 0 total hits', async () => {
@@ -185,7 +193,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
     });
-    const result = await searchAfterAndBulkCreate({
+    const { success } = await searchAfterAndBulkCreate({
       someResult: sampleDocSearchResultsNoSortIdNoHits(),
       ruleParams: sampleParams,
       services: mockService,
@@ -194,6 +202,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -203,8 +212,9 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
-    expect(result).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('if successful iteration of while loop with maxDocs and search after returns results with no sort ids', async () => {
@@ -221,7 +231,7 @@ describe('searchAfterAndBulkCreate', () => {
         ],
       })
       .mockReturnValueOnce(sampleDocSearchResultsNoSortId());
-    const result = await searchAfterAndBulkCreate({
+    const { success } = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
       ruleParams: sampleParams,
       services: mockService,
@@ -230,6 +240,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -239,8 +250,9 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
-    expect(result).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('if successful iteration of while loop with maxDocs and search after returns empty results with no sort ids', async () => {
@@ -257,7 +269,7 @@ describe('searchAfterAndBulkCreate', () => {
         ],
       })
       .mockReturnValueOnce(sampleEmptyDocSearchResults());
-    const result = await searchAfterAndBulkCreate({
+    const { success } = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
       ruleParams: sampleParams,
       services: mockService,
@@ -266,6 +278,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -275,8 +288,9 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
-    expect(result).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('if returns false when singleSearchAfter throws an exception', async () => {
@@ -295,7 +309,7 @@ describe('searchAfterAndBulkCreate', () => {
       .mockImplementation(() => {
         throw Error('Fake Error');
       });
-    const result = await searchAfterAndBulkCreate({
+    const { success } = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
       ruleParams: sampleParams,
       services: mockService,
@@ -304,6 +318,7 @@ describe('searchAfterAndBulkCreate', () => {
       inputIndexPattern,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -313,7 +328,8 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
-    expect(result).toEqual(false);
+    expect(success).toEqual(false);
   });
 });
