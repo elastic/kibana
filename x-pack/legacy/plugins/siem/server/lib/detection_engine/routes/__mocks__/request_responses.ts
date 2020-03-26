@@ -514,7 +514,7 @@ export const updateActionResult = (): ActionResult => ({
   config: {},
 });
 
-export const getMockPrivileges = () => ({
+export const getMockPrivilegesResult = () => ({
   username: 'test-space',
   has_all_requested: false,
   cluster: {
@@ -565,8 +565,6 @@ export const getMockPrivileges = () => ({
     },
   },
   application: {},
-  is_authenticated: false,
-  has_encryption_key: true,
 });
 
 export const getFindResultStatusEmpty = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
