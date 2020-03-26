@@ -31,7 +31,7 @@ Object {
   "countByType": Object {
     "__index-threshold": 2,
   },
-  "countTotal": 1,
+  "countTotal": 2,
 }
 `);
   });
