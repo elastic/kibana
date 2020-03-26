@@ -44,7 +44,7 @@ export interface VectorLayer extends FileLayer {
   isEMS: boolean;
 }
 
-export interface ServiceSettings {
+export interface IServiceSettings {
   getEMSHotLink(layer: FileLayer): Promise<string>;
   getTMSServices(): Promise<TmsLayer[]>;
   getFileLayers(): Promise<FileLayer[]>;

@@ -23,14 +23,9 @@ import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 import { npStart } from 'ui/new_platform';
 import { getFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
-import {
-  scaleBounds,
-  zoomPrecision,
-  getPrecision,
-  geoContains,
-} from '../../../ui/public/vis/map/decode_geo_hash';
+import { scaleBounds, getPrecision, geoContains } from '../../../../plugins/maps_legacy/public';
 
-export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
+export const createTileMapVisualization = ({ serviceSettings, $injector, getZoomPrecision }) => {
   const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
   const tooltipFormatter = new TileMapTooltipFormatterProvider($injector);
 
@@ -59,6 +54,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
         updateVarsObject.data.boundingBox = geohashAgg.aggConfigParams.boundingBox;
       }
       // todo: autoPrecision should be vis parameter, not aggConfig one
+      const zoomPrecision = getZoomPrecision();
       updateVarsObject.data.precision = geohashAgg.aggConfigParams.autoPrecision
         ? zoomPrecision[this.vis.getUiState().get('mapZoom')]
         : getPrecision(geohashAgg.aggConfigParams.precision);
