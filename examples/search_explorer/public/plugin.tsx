@@ -21,7 +21,7 @@ import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { AppPluginStartDependencies } from './types';
 
 export class SearchExplorerPlugin implements Plugin {
-  public setup(core: CoreSetup<AppPluginStartDependencies>) {
+  public setup(core: CoreSetup<AppPluginStartDependencies, void>) {
     core.application.register({
       id: 'searchExplorer',
       title: 'Search Explorer',

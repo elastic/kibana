@@ -20,11 +20,12 @@
 import { accessSync, constants, readFileSync, statSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 import { dirname, join } from 'path';
+import { Observable } from 'rxjs';
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getConfigPath } from '../../../../../core/server/path';
+import { take } from 'rxjs/operators';
+import { TelemetryConfigType } from '../../config';
 
 // look for telemetry.yml in the same places we expect kibana.yml
 import { ensureDeepObject } from './ensure_deep_object';
@@ -80,20 +81,26 @@ export async function readTelemetryFile(path: string): Promise<object | undefine
 
 export function createTelemetryUsageCollector(
   usageCollection: UsageCollectionSetup,
-  getConfigPathFn = getConfigPath // exposed for testing
+  getConfigPathFn: () => Promise<string>
 ) {
   return usageCollection.makeUsageCollector({
     type: 'static_telemetry',
     isReady: () => true,
     fetch: async () => {
-      const configPath = getConfigPathFn();
+      const configPath = await getConfigPathFn();
       const telemetryPath = join(dirname(configPath), 'telemetry.yml');
       return await readTelemetryFile(telemetryPath);
     },
   });
 }
 
-export function registerTelemetryUsageCollector(usageCollection: UsageCollectionSetup) {
-  const collector = createTelemetryUsageCollector(usageCollection);
+export function registerTelemetryUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  config$: Observable<TelemetryConfigType>
+) {
+  const collector = createTelemetryUsageCollector(usageCollection, async () => {
+    const config = await config$.pipe(take(1)).toPromise();
+    return config.config;
+  });
   usageCollection.registerCollector(collector);
 }

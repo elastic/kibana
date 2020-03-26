@@ -119,7 +119,7 @@ describe('telemetry_usage_collector', () => {
       const usageCollector = mockUsageCollector() as any;
       const collectorOptions = createTelemetryUsageCollector(
         usageCollector,
-        () => tempFiles.unreadable
+        async () => tempFiles.unreadable
       );
 
       expect(collectorOptions.type).toBe('static_telemetry');

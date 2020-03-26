@@ -73,6 +73,5 @@ export {
   EsQuerySortValue,
   SortDirection,
 } from '../../../../../plugins/data/public';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

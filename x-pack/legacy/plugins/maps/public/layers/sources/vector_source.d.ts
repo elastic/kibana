@@ -8,7 +8,7 @@
 import { FeatureCollection } from 'geojson';
 import { AbstractSource, ISource } from './source';
 import { IField } from '../fields/field';
-import { ESSearchSourceResponseMeta } from '../../../common/data_request_descriptor_types';
+import { ESSearchSourceResponseMeta } from '../../../common/descriptor_types';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
