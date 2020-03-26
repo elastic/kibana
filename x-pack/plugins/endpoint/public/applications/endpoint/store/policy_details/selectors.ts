@@ -61,6 +61,8 @@ export const selectedWindowsEventing = (state: PolicyDetailsState): number => {
   return 0;
 };
 
+export const isLoading = (state: PolicyDetailsState) => state.isLoading;
+
 export const selectAgentStatusSummary = (state: PolicyDetailsState) => state.agentStatusSummary;
 
 export const selectUpdateApiError = (state: PolicyDetailsState) => state.updateApiError;

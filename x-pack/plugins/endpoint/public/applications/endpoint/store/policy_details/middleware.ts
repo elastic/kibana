@@ -5,7 +5,7 @@
  */
 
 import { MiddlewareFactory, PolicyData, PolicyDetailsState } from '../../types';
-import { policyIdFromParams, isOnPolicyDetailsPage, selectPolicyDetails } from './selectors';
+import { policyIdFromParams, isOnPolicyDetailsPage, policyDetails } from './selectors';
 import {
   sendGetDatasource,
   sendGetFleetAgentStatusForConfig,
@@ -75,7 +75,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
         });
       }
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
-      const { id, revision, ...updatedPolicyItem } = selectPolicyDetails(state) as PolicyData;
+      const { id, revision, ...updatedPolicyItem } = policyDetails(state) as PolicyData;
       const updatedPolicyConfig = {
         // FIXME: use Candace's selector here
         windows: {
@@ -156,7 +156,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
 
       let apiResponse: UpdateDatasourceResponse;
       try {
-        apiResponse = await sendPutDatasource(http, id + '73847584758475834', updatedPolicyItem);
+        apiResponse = await sendPutDatasource(http, id, updatedPolicyItem);
       } catch (error) {
         dispatch({
           type: 'serverReturnedPolicyDetailsUpdateFailure',
