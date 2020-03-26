@@ -32,13 +32,13 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
-import { ServiceSettingsSetupContract } from '../../../../plugins/maps_legacy/public';
+import { IServiceSettings } from '../../../../plugins/maps_legacy/public';
 
 /** @private */
 interface RegionMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
-  serviceSettings: ServiceSettingsSetupContract;
+  serviceSettings: IServiceSettings;
 }
 
 /** @internal */

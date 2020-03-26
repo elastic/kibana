@@ -33,8 +33,8 @@ import {
   VectorLayer,
   FileLayerField,
   FileLayer,
-  ServiceSettingsSetupContract,
   TmsLayer,
+  IServiceSettings,
 } from './map/service_settings';
 
 export function plugin() {
@@ -48,11 +48,11 @@ export {
   geoContains,
   colorUtil,
   convertToGeoJson,
+  IServiceSettings,
   KibanaMap,
   KibanaMapLayer,
   VectorLayer,
   FileLayerField,
   FileLayer,
-  ServiceSettingsSetupContract,
   TmsLayer,
 };

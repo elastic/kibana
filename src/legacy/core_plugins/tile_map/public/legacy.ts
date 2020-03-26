@@ -28,6 +28,7 @@ import { plugin } from '.';
 const plugins: Readonly<TileMapPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
+  maps_legacy: npSetup.plugins.maps_legacy,
 
   // Temporary solution
   // It will be removed when all dependent services are migrated to the new platform.
