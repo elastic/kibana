@@ -147,13 +147,12 @@ export class DashboardEmbeddableContainerPublicPlugin
       plugins.embeddable.getEmbeddableFactories
     );
     uiActions.registerAction(changeViewAction);
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, changeViewAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
 
     const duplicatePanelAction = new DuplicatePanelAction(core);
     uiActions.registerAction(duplicatePanelAction);
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, duplicatePanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, duplicatePanelAction);
 
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,

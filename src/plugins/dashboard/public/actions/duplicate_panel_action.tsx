@@ -24,9 +24,9 @@ import {
   VisualizeInput,
 } from '../../../../legacy/core_plugins/visualizations/public/np_ready/public/embeddable';
 import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
-import { ViewMode, IContainer } from '../embeddable_plugin';
-import { VisSavedObject } from '../../../../legacy/core_plugins/visualizations/public';
-import { DashboardPanelState } from '..';
+import { ViewMode, IContainer, PanelState } from '../embeddable_plugin';
+import { SavedObject } from '../../../saved_objects/public';
+import { DashboardPanelState, GridData } from '..';
 
 export const ACTION_DUPLICATE_PANEL = 'duplicatePanel';
 
@@ -73,22 +73,22 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
     }
 
     const dashboard = embeddable.getRoot() as IContainer;
-    const originalPanels = dashboard.getInput().panels;
-    const panelToDuplicate = originalPanels[embeddable.id] as DashboardPanelState;
+    const panelToDuplicate = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
 
-    if (!panelToDuplicate.savedObjectId) {
+    if (!panelToDuplicate || !panelToDuplicate.savedObjectId) {
       throw new TypeError('attempt to duplicate panel without a saved object ID');
     } else {
-      // Duplicate saved Object
-      const savedObjectToDuplicate = await this.core.savedObjects.client.get<VisSavedObject>(
+      // Fetch existing saved object
+      const savedObjectToDuplicate = await this.core.savedObjects.client.get<SavedObject>(
         embeddable.type,
         panelToDuplicate.savedObjectId
       );
 
-      const duplicationAppend = i18n.translate('dashboard.panel.title.duplicatedAppendMessage', {
-        defaultMessage: '- copy',
-      });
-      const newTitle = savedObjectToDuplicate.attributes.title + duplicationAppend;
+      // Create the duplicate saved object
+      const newTitle = await this.getUniqueTitle(
+        savedObjectToDuplicate.attributes.title,
+        embeddable.type
+      );
       const duplicatedSavedObject = await this.core.savedObjects.client.create(
         embeddable.type,
         {
@@ -108,10 +108,7 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
       // Place duplicated panel
       const finalPanels = _.cloneDeep(dashboard.getInput().panels);
       const duplicatedPanel = finalPanels[duplicatedEmbeddable.id] as DashboardPanelState;
-      duplicatedPanel.gridData.w = panelToDuplicate.gridData.w;
-      duplicatedPanel.gridData.h = panelToDuplicate.gridData.h;
-      duplicatedPanel.gridData.x = panelToDuplicate.gridData.x + panelToDuplicate.gridData.w;
-      duplicatedPanel.gridData.y = panelToDuplicate.gridData.y;
+      this.placeDuplicatedPanelInDashboard(finalPanels, panelToDuplicate, duplicatedPanel);
 
       this.core.notifications.toasts.addSuccess({
         title: i18n.translate('dashboard.panel.duplicationSuccessMessage', {
@@ -124,6 +121,73 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
       });
       dashboard.updateInput({ panels: finalPanels });
       dashboard.reload();
+    }
+  }
+
+  private async getUniqueTitle(rawTitle: string, embeddableType: string): Promise<string> {
+    const duplicatedTag = i18n.translate('dashboard.panel.title.duplicatedTag', {
+      defaultMessage: 'copy',
+    });
+    const duplicationRegex = new RegExp(`\\(${duplicatedTag}\\)`, 'g');
+    const duplicationNumberRegex = new RegExp(`\\(${duplicatedTag} [0-9]+\\)`, 'g');
+    const baseTitle = rawTitle.replace(duplicationNumberRegex, '').replace(duplicationRegex, '');
+
+    const similarSavedObjects = await this.core.savedObjects.client.find<SavedObject>({
+      type: embeddableType,
+      perPage: 0,
+      fields: ['title'],
+      searchFields: ['title'],
+      search: `"${baseTitle}"`,
+    });
+    const similarBaseTitlesCount: number = similarSavedObjects.total - 1;
+
+    return similarBaseTitlesCount <= 0
+      ? baseTitle + ` (${duplicatedTag})`
+      : baseTitle + ` (${duplicatedTag} ${similarBaseTitlesCount})`;
+  }
+
+  private placeDuplicatedPanelInDashboard(
+    finalPanels: { [key: string]: PanelState<{ [id: string]: unknown } & { id: string }> },
+    panelToDuplicate: DashboardPanelState,
+    duplicatedPanel: DashboardPanelState
+  ) {
+    const duplicatedPanelGrid = duplicatedPanel.gridData;
+    duplicatedPanelGrid.x = panelToDuplicate.gridData.x + panelToDuplicate.gridData.w;
+    duplicatedPanelGrid.y = panelToDuplicate.gridData.y;
+    duplicatedPanelGrid.w = panelToDuplicate.gridData.w;
+    duplicatedPanelGrid.h = panelToDuplicate.gridData.h;
+
+    // Adjust flow of dashboard if necessary
+    const otherPanels: GridData[] = [];
+    _.forOwn(finalPanels, (panel: DashboardPanelState) => {
+      if (
+        panel.savedObjectId !== duplicatedPanel.savedObjectId &&
+        panel.savedObjectId !== panelToDuplicate.savedObjectId
+      ) {
+        otherPanels.push(panel.gridData);
+      }
+    });
+
+    const intersection = otherPanels.some((currentPanelGrid: GridData) => {
+      return (
+        duplicatedPanelGrid.x + duplicatedPanelGrid.w > currentPanelGrid.x &&
+        duplicatedPanelGrid.x < currentPanelGrid.x + currentPanelGrid.w &&
+        duplicatedPanelGrid.y < currentPanelGrid.y + currentPanelGrid.h &&
+        duplicatedPanelGrid.y + duplicatedPanelGrid.h > currentPanelGrid.y
+      );
+    });
+
+    // if any other panel intersects with the newly duplicated panel, move all panels in the same 'row' to the right by the amount of the duplciated panel's width
+    if (intersection) {
+      otherPanels.forEach((currentPanelGrid: GridData) => {
+        if (
+          currentPanelGrid.x >= duplicatedPanelGrid.x &&
+          duplicatedPanelGrid.y <= currentPanelGrid.y + currentPanelGrid.h &&
+          duplicatedPanelGrid.y + duplicatedPanelGrid.h >= currentPanelGrid.y
+        ) {
+          currentPanelGrid.x += duplicatedPanelGrid.w;
+        }
+      });
     }
   }
 }
