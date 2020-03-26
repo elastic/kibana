@@ -17,14 +17,15 @@
  * under the License.
  */
 
-export function injectVars(server) {
-  const serverConfig = server.config();
+import { PluginInitializerContext } from 'src/core/server';
+import { SavedObjectsManagementPlugin } from './plugin';
 
-  const { importAndExportableTypes } = server.savedObjects;
+export const plugin = (context: PluginInitializerContext) =>
+  new SavedObjectsManagementPlugin(context);
 
-  return {
-    importAndExportableTypes,
-    autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
-    autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
-  };
-}
+export {
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+  SavedObjectMetadata,
+  SavedObjectWithMetadata,
+} from './types';

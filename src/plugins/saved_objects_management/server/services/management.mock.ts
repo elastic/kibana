@@ -17,9 +17,21 @@
  * under the License.
  */
 
-export default function({ loadTestFile }) {
-  describe('saved_objects', () => {
-    loadTestFile(require.resolve('./find'));
-    loadTestFile(require.resolve('./relationships'));
-  });
-}
+import { SavedObjectsManagement } from './management';
+
+type Management = PublicMethodsOf<SavedObjectsManagement>;
+const createManagementMock = () => {
+  const mocked: jest.Mocked<Management> = {
+    isImportAndExportable: jest.fn().mockReturnValue(true),
+    getDefaultSearchField: jest.fn(),
+    getIcon: jest.fn(),
+    getTitle: jest.fn(),
+    getEditUrl: jest.fn(),
+    getInAppUrl: jest.fn(),
+  };
+  return mocked;
+};
+
+export const managementMock = {
+  create: createManagementMock,
+};

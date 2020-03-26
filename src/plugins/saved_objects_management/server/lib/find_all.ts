@@ -17,22 +17,30 @@
  * under the License.
  */
 
-import { SavedObjectsManagement } from './management';
+import { SavedObjectsClientContract, SavedObject, SavedObjectsFindOptions } from 'src/core/server';
 
-type Management = PublicMethodsOf<SavedObjectsManagement>;
-const createManagementMock = () => {
-  const mocked: jest.Mocked<Management> = {
-    isImportAndExportable: jest.fn().mockReturnValue(true),
-    getDefaultSearchField: jest.fn(),
-    getImportableAndExportableTypes: jest.fn(),
-    getIcon: jest.fn(),
-    getTitle: jest.fn(),
-    getEditUrl: jest.fn(),
-    getInAppUrl: jest.fn(),
-  };
-  return mocked;
+export const findAll = async (
+  client: SavedObjectsClientContract,
+  findOptions: SavedObjectsFindOptions
+): Promise<SavedObject[]> => {
+  return recursiveFind(client, findOptions, 1, []);
 };
 
-export const managementMock = {
-  create: createManagementMock,
+const recursiveFind = async (
+  client: SavedObjectsClientContract,
+  findOptions: SavedObjectsFindOptions,
+  page: number,
+  allObjects: SavedObject[]
+): Promise<SavedObject[]> => {
+  const objects = await client.find({
+    ...findOptions,
+    page,
+  });
+
+  allObjects.push(...objects.saved_objects);
+  if (allObjects.length < objects.total) {
+    return recursiveFind(client, findOptions, page + 1, allObjects);
+  }
+
+  return allObjects;
 };

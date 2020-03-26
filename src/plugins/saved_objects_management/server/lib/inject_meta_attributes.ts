@@ -17,13 +17,24 @@
  * under the License.
  */
 
-import { registerFind } from './saved_objects/find';
-import { registerRelationships } from './saved_objects/relationships';
-import { registerScrollForExportRoute, registerScrollForCountRoute } from './saved_objects/scroll';
+import { SavedObject } from 'src/core/server';
+import { ISavedObjectsManagement } from '../services';
+import { SavedObjectWithMetadata } from '../types';
 
-export function managementApi(server) {
-  registerRelationships(server);
-  registerFind(server);
-  registerScrollForExportRoute(server);
-  registerScrollForCountRoute(server);
+export function injectMetaAttributes<T = unknown>(
+  savedObject: SavedObject<T> | SavedObjectWithMetadata<T>,
+  savedObjectsManagement: ISavedObjectsManagement
+): SavedObjectWithMetadata<T> {
+  const result = {
+    ...savedObject,
+    meta: (savedObject as SavedObjectWithMetadata).meta || {},
+  };
+
+  // Add extra meta information
+  result.meta.icon = savedObjectsManagement.getIcon(savedObject.type);
+  result.meta.title = savedObjectsManagement.getTitle(savedObject);
+  result.meta.editUrl = savedObjectsManagement.getEditUrl(savedObject);
+  result.meta.inAppUrl = savedObjectsManagement.getInAppUrl(savedObject);
+
+  return result;
 }
