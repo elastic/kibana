@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,6 +12,9 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiSpacer,
+  EuiOverlayMask,
+  EuiConfirmModal,
+  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -33,11 +36,14 @@ export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const { notifications } = useKibana();
 
+  // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const agentStatusSummary = usePolicyDetailsSelector(selectAgentStatusSummary);
   const policyUpdateStatus = usePolicyDetailsSelector(updateStatus);
   const isPolicyLoading = usePolicyDetailsSelector(isLoading);
 
+  // Local state
+  const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const policyName = policyItem?.name ?? '';
 
   // Handle showing udpate statuses
@@ -70,10 +76,19 @@ export const PolicyDetails = React.memo(() => {
   }, [notifications.toasts, policyItem, policyName, policyUpdateStatus]);
 
   const handleSaveOnClick = useCallback(() => {
+    setShowConfirm(true);
+  }, []);
+
+  const handleSaveConfirmation = useCallback(() => {
     dispatch({
       type: 'userClickedPolicyDetailsSaveButton',
     });
+    setShowConfirm(false);
   }, [dispatch]);
+
+  const handleSaveCancel = useCallback(() => {
+    setShowConfirm(false);
+  }, []);
 
   const headerLeftContent =
     policyItem?.name ??
@@ -105,18 +120,84 @@ export const PolicyDetails = React.memo(() => {
   );
 
   return (
-    <PageView
-      data-test-subj="policyDetailsPage"
-      headerLeft={headerLeftContent}
-      headerRight={headerRightContent}
-    >
-      <EuiText size="xs" color="subdued">
-        <h4>
-          <FormattedMessage id="xpack.endpoint.policy.details.settings" defaultMessage="Settings" />
-        </h4>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <WindowsEventing />
-    </PageView>
+    <>
+      {showConfirm && (
+        <ConfirmUpdate
+          hostCount={agentStatusSummary.total}
+          onCancel={handleSaveCancel}
+          onConfirm={handleSaveConfirmation}
+        />
+      )}
+      <PageView
+        data-test-subj="policyDetailsPage"
+        headerLeft={headerLeftContent}
+        headerRight={headerRightContent}
+      >
+        <EuiText size="xs" color="subdued">
+          <h4>
+            <FormattedMessage
+              id="xpack.endpoint.policy.details.settings"
+              defaultMessage="Settings"
+            />
+          </h4>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <WindowsEventing />
+      </PageView>
+    </>
+  );
+});
+
+const ConfirmUpdate = React.memo<{
+  hostCount: number;
+  onConfirm: () => void;
+  onCancel: () => void;
+}>(({ hostCount, onCancel, onConfirm }) => {
+  return (
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        title={i18n.translate('xpack.endpoint.policy.details.updateConfirm.title', {
+          defaultMessage: 'Save and deploy changes',
+        })}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        confirmButtonText={i18n.translate(
+          'xpack.endpoint.policy.details.updateConfirm.confirmButtonTitle',
+          {
+            defaultMessage: 'Save and deploy changes',
+          }
+        )}
+        cancelButtonText={i18n.translate(
+          'xpack.endpoint.policy.details.updateConfirm.cancelButtonTitle',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+      >
+        {hostCount > 0 && (
+          <>
+            <EuiCallOut
+              title={i18n.translate('xpack.endpoint.policy.details.updateConfirm.warningTitle', {
+                defaultMessage:
+                  'This action will update {hostCount, plural, one {# host} other {# hosts}}',
+                values: { hostCount },
+              })}
+            >
+              <FormattedMessage
+                id="xpack.endpoint.policy.details.updateConfirm.warningMessage"
+                defaultMessage="Saving these changes will apply the updates to all active endpoints assigned to this policy"
+              />
+            </EuiCallOut>
+            <EuiSpacer size="xl" />
+          </>
+        )}
+        <p>
+          <FormattedMessage
+            id="xpack.endpoint.policy.details.updateConfirm.message"
+            defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
+          />
+        </p>
+      </EuiConfirmModal>
+    </EuiOverlayMask>
   );
 });
