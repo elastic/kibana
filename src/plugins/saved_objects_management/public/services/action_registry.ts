@@ -16,22 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectsManagementAction } from './saved_objects_management_action';
 
-const actions: Map<string, SavedObjectsManagementAction> = new Map();
+import { SavedObjectsManagementAction } from './action_types';
 
-export const SavedObjectsManagementActionRegistry = {
-  register: (action: SavedObjectsManagementAction) => {
-    if (!action.id) {
-      throw new TypeError('Saved Objects Management Actions must have an id');
-    }
-    if (actions.has(action.id)) {
+export type ISavedObjectsManagementActionRegistry = PublicMethodsOf<
+  SavedObjectsManagementActionRegistry
+>;
+
+export class SavedObjectsManagementActionRegistry {
+  private readonly actions = new Map<string, SavedObjectsManagementAction>();
+
+  /**
+   * register given action in the registry.
+   */
+  register(action: SavedObjectsManagementAction) {
+    if (this.actions.has(action.id)) {
       throw new Error(`Saved Objects Management Action with id '${action.id}' already exists`);
     }
-    actions.set(action.id, action);
-  },
+    this.actions.set(action.id, action);
+  }
 
-  has: (actionId: string) => actions.has(actionId),
+  /**
+   * return true if the registry contains given action, false otherwise.
+   */
+  has(actionId: string) {
+    return this.actions.has(actionId);
+  }
 
-  get: () => Array.from(actions.values()),
-};
+  /**
+   * return all {@link SavedObjectsManagementAction | actions} currently registered.
+   */
+  getAll() {
+    return [...this.actions.values()];
+  }
+}
