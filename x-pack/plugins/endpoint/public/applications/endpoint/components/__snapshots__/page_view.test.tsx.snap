@@ -130,11 +130,9 @@ exports[`PageView component should display body header wrapped in EuiTitle 1`] =
                           className="euiPageContentHeaderSection"
                           data-test-subj="pageViewBodyTitle"
                         >
-                          <EuiTitle
-                            size="l"
-                          >
+                          <EuiTitle>
                             <h2
-                              className="euiTitle euiTitle--large"
+                              className="euiTitle euiTitle--medium"
                             >
                               body header
                             </h2>
