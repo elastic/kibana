@@ -19,14 +19,6 @@ experimental[] Create sets of {kib} saved objects from a file created by the exp
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-`POST /s/<space_id>/api/saved_objects/_import`
-
-[[saved-objects-api-import-path-params]]
-==== Path parameters
-
-`space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
-
 [[saved-objects-api-import-query-params]]
 ==== Query parameters
 
