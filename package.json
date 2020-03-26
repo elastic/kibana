@@ -115,8 +115,8 @@
     ]
   },
   "dependencies": {
-    "@babel/core": "^7.5.5",
-    "@babel/register": "^7.7.0",
+    "@babel/core": "^7.9.0",
+    "@babel/register": "^7.9.0",
     "@elastic/apm-rum": "^4.6.0",
     "@elastic/charts": "^18.1.0",
     "@elastic/datemath": "5.0.2",
@@ -180,7 +180,7 @@
     "fp-ts": "^2.3.1",
     "getos": "^3.1.0",
     "glob": "^7.1.2",
-    "glob-all": "^3.1.0",
+    "glob-all": "^3.2.1",
     "globby": "^8.0.1",
     "h2o2": "^8.1.2",
     "handlebars": "4.5.3",
@@ -284,13 +284,13 @@
     "yauzl": "2.10.0"
   },
   "devDependencies": {
-    "@babel/parser": "^7.5.5",
-    "@babel/types": "^7.5.5",
+    "@babel/parser": "^7.9.3",
+    "@babel/types": "^7.9.0",
     "@elastic/elasticsearch": "^7.4.0",
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
-    "@elastic/makelogs": "^5.0.0",
+    "@elastic/makelogs": "^5.0.1",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
     "@kbn/eslint-import-resolver-kibana": "2.0.0",
