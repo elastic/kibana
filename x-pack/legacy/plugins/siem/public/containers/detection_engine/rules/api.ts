@@ -18,7 +18,7 @@ import {
   ImportDataProps,
   ExportDocumentsProps,
   RuleStatusResponse,
-  ImportRulesResponse,
+  ImportDataResponse,
   PrePackagedRulesStatusResponse,
   BulkRuleResponse,
 } from './types';
@@ -204,11 +204,11 @@ export const importRules = async ({
   fileToImport,
   overwrite = false,
   signal,
-}: ImportDataProps): Promise<ImportRulesResponse> => {
+}: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  return KibanaServices.get().http.fetch<ImportRulesResponse>(
+  return KibanaServices.get().http.fetch<ImportDataResponse>(
     `${DETECTION_ENGINE_RULES_URL}/_import`,
     {
       method: 'POST',

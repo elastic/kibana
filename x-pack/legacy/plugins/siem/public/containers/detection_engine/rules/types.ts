@@ -208,7 +208,7 @@ export interface ImportRulesResponseError {
   };
 }
 
-export interface ImportRulesResponse {
+export interface ImportDataResponse {
   success: boolean;
   success_count: number;
   errors: ImportRulesResponseError[];

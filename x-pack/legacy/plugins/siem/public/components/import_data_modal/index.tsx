@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import { ImportRulesResponse, ImportDataProps } from '../../containers/detection_engine/rules';
+import { ImportDataResponse, ImportDataProps } from '../../containers/detection_engine/rules';
 import {
   displayErrorToast,
   displaySuccessToast,
@@ -37,7 +37,7 @@ interface ImportDataModalProps {
   errorMessage: string;
   failedDetailed: (id: string, statusCode: number, message: string) => string;
   importComplete: () => void;
-  importData: (arg: ImportDataProps) => Promise<ImportRulesResponse>;
+  importData: (arg: ImportDataProps) => Promise<ImportDataResponse>;
   showCheckBox: boolean;
   showModal: boolean;
   submitBtnText: string;
