@@ -6,14 +6,18 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { uniq, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
-import { FormatFactory, LensMultiTable } from '../types';
 import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
-} from '../../../../../../src/plugins/expressions/public';
+  KibanaDatatable,
+  KibanaDatatableColumn,
+  KibanaDatatableRow,
+} from 'src/plugins/expressions/public';
+import { FormatFactory, LensMultiTable } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 
 export interface DatatableColumns {
@@ -128,31 +132,40 @@ export const getDatatableRenderer = (
 });
 
 function DatatableComponent(props: DatatableProps & { formatFactory: FormatFactory }) {
-  const [firstTable] = Object.values(props.data.tables);
+  let [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
   firstTable.columns.forEach(column => {
     formatters[column.id] = props.formatFactory(column.formatHint);
   });
 
+  let columnIds = props.args.columns.columnIds;
+  if (columnIds.length > 2) {
+    firstTable = pivot(firstTable, [columnIds[0], columnIds[1]]);
+    columnIds = firstTable.columns.map(({ id }) => id);
+    debugger;
+  }
+
+  const columns = columnIds
+    .map(field => {
+      const col = firstTable.columns.find(c => c.id === field);
+      return {
+        field,
+        name: (col && col.name) || '',
+      };
+    })
+    .filter(({ field }) => !!field);
+
   return (
     <VisualizationContainer>
       <EuiBasicTable
         className="lnsDataTable"
         data-test-subj="lnsDataTable"
-        columns={props.args.columns.columnIds
-          .map(field => {
-            const col = firstTable.columns.find(c => c.id === field);
-            return {
-              field,
-              name: (col && col.name) || '',
-            };
-          })
-          .filter(({ field }) => !!field)}
+        columns={columns}
         items={
           firstTable
             ? firstTable.rows.map(row => {
-                const formattedRow: Record<string, unknown> = {};
+                const formattedRow: Record<string, unknown> = { ...row };
                 Object.entries(formatters).forEach(([columnId, formatter]) => {
                   formattedRow[columnId] = formatter.convert(row[columnId]);
                 });
@@ -163,4 +176,62 @@ function DatatableComponent(props: DatatableProps & { formatFactory: FormatFacto
       />
     </VisualizationContainer>
   );
+}
+
+function pivot(table: KibanaDatatable, bucketIds: string[]) {
+  const [buckets, metrics] = partition(table.columns, col => bucketIds.includes(col.id));
+  const firstColumn: KibanaDatatableColumn = buckets[0];
+  const skippedColumns = buckets.slice(1);
+  const uniqKeys: string[] = uniq(table.rows.map(row => row[firstColumn.id]));
+
+  const newColumns = skippedColumns.concat(
+    uniqKeys.flatMap(key => {
+      const display = metrics.length > 1 ? `${key} ${name}` : key;
+      return metrics.map(({ id, name, formatHint }) => ({
+        id: `${key}:${id}`,
+        name: display,
+        formatHint,
+      }));
+    })
+  );
+
+  const skippedMap = new Map();
+
+  table.rows.forEach(row => {
+    const pivotKey = row[firstColumn.id];
+    const newRow: KibanaDatatableRow = {};
+
+    metrics.forEach(metricCol => {
+      const metricValue = row[metricCol.id];
+      const pivotKeyValue = `${pivotKey}:${metricCol.id}`;
+      newRow[pivotKeyValue] = metricValue;
+    });
+
+    const skippedKeys = skippedColumns.map(({ id }) => ({
+      [id]: row[id],
+    }));
+    const skippedKeysCombined = Object.assign({}, ...skippedKeys);
+
+    const skippedKeysMapKey = skippedKeys.flatMap(o => Object.values(o)).join('_');
+    if (!skippedMap.has(skippedKeysMapKey)) {
+      skippedMap.set(skippedKeysMapKey, {
+        ...skippedKeysCombined,
+        ...newRow,
+      });
+    } else {
+      const prev = skippedMap.get(skippedKeysMapKey);
+
+      skippedMap.set(skippedKeysMapKey, {
+        ...prev,
+        ...newRow,
+      });
+    }
+  });
+
+  const newRows = Array.from(skippedMap.values());
+
+  table.columns = newColumns;
+  table.rows = newRows;
+
+  return table;
 }

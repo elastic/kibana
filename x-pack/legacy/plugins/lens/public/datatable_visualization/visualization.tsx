@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { render } from 'react-dom';
+import { uniq, partition } from 'lodash';
+import { EuiPopover, EuiButton, EuiButtonIcon, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiSelect } from '@elastic/eui';
 import { SuggestionRequest, Visualization, VisualizationSuggestion, Operation } from '../types';
 import chartTableSVG from '../assets/chart_datatable.svg';
 
@@ -139,6 +144,11 @@ export const datatableVisualization: Visualization<
     // When we add a column it could be empty, and therefore have no order
     const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
 
+    const [buckets, metrics] = partition(
+      sortedColumns,
+      colId => datasource.getOperationForColumnId(colId)?.isBucketed
+    );
+
     return {
       groups: [
         {
@@ -147,9 +157,31 @@ export const datatableVisualization: Visualization<
             defaultMessage: 'Columns',
           }),
           layerId: state.layers[0].layerId,
-          accessors: sortedColumns,
+          accessors: buckets.slice(0, 1),
           supportsMoreColumns: true,
-          filterOperations: () => true,
+          filterOperations: op => op.isBucketed,
+          dataTestSubj: 'lnsDatatable_column',
+        },
+        {
+          groupId: 'columns',
+          groupLabel: i18n.translate('xpack.lens.datatable.rows', {
+            defaultMessage: 'Rows',
+          }),
+          layerId: state.layers[0].layerId,
+          accessors: buckets.slice(1),
+          supportsMoreColumns: true,
+          filterOperations: op => op.isBucketed,
+          dataTestSubj: 'lnsDatatable_column',
+        },
+        {
+          groupId: 'metrics',
+          groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
+            defaultMessage: 'Metrics',
+          }),
+          layerId: state.layers[0].layerId,
+          accessors: metrics,
+          supportsMoreColumns: true,
+          filterOperations: op => !op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',
         },
       ],
@@ -179,6 +211,32 @@ export const datatableVisualization: Visualization<
           : l
       ),
     };
+  },
+
+  renderLayerContextMenu(domElement, props) {
+    render(
+      <>
+        <EuiFormRow label="Group">
+          <EuiSwitch checked={true} label="Group rows by duplicate values" onChange={() => {}} />
+        </EuiFormRow>
+
+        <EuiFormRow label="Show subtotals">
+          <EuiSwitch checked={true} label="Show subtotals" onChange={() => {}} />
+        </EuiFormRow>
+
+        <EuiFormRow label="Subtotal metric">
+          <EuiSelect
+            selected="Sum"
+            options={[
+              {
+                text: 'Sum',
+              },
+            ]}
+          />
+        </EuiFormRow>
+      </>,
+      domElement
+    );
   },
 
   toExpression(state, frame) {
