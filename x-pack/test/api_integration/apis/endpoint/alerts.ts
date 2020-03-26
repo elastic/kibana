@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect/expect.js';
-import { SearchResponse } from 'elasticsearch';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { AlertData, AlertEvent } from '../../../../plugins/endpoint/common/types';
+import { AlertData } from '../../../../plugins/endpoint/common/types';
 
 /**
  * The number of alert documents in the es archive.
@@ -77,7 +76,6 @@ export default function({ getService }: FtrProviderContext) {
           index: 'events-endpoint-1',
           body: ES_QUERY_MISSING,
         });
-        expect(res.hits.hits.length).to.be.greaterThan(0);
         nullableEventId = res.hits.hits[0]._source.event.id;
       });
       after(() => esArchiver.unload('endpoint/alerts/api_feature'));
