@@ -8,7 +8,12 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 
-import { ViewMode } from 'src/plugins/embeddable/public';
+import {
+  ViewMode,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+} from 'src/plugins/embeddable/public';
 import { start } from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import * as i18n from './translations';
 import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public';
@@ -45,9 +50,11 @@ const EmbeddedPanel = styled.div`
 
 export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProps) => {
   const { colors } = useContext(UptimeThemeContext);
-  const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
+  const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
-  const factory = start.getEmbeddableFactory<MapInput>(MAP_SAVED_OBJECT_TYPE);
+  const factory = start.getEmbeddableFactory<MapEmbeddableInput, EmbeddableOutput, MapEmbeddable>(
+    MAP_SAVED_OBJECT_TYPE
+  );
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),
@@ -95,7 +102,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
 
   // update map layers based on points
   useEffect(() => {
-    if (embeddable) {
+    if (embeddable && !isErrorEmbeddable(embeddable)) {
       embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
     }
   }, [upPoints, downPoints, embeddable, colors]);

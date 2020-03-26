@@ -81,7 +81,7 @@ export interface MapEmbeddableInput extends EmbeddableInput {
   mapCenter?: MapCenter;
   hiddenLayers?: string[];
   hideFilterActions?: boolean;
-  layerList: unknown[];
+  layerList?: unknown[];
 }
 
 export interface MapOutput extends EmbeddableOutput {
@@ -129,7 +129,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapOutput> {
     this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
   }
 
-  setRenderTooltipContent = (renderTooltipContent: unknown) => {
+  setRenderTooltipContent = (renderTooltipContent: (params: unknown) => React.ComponentType) => {
     this._renderTooltipContent = renderTooltipContent;
   };
 

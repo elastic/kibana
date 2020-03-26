@@ -19,6 +19,7 @@ import {
   isErrorEmbeddable,
   EmbeddableOutput,
   ViewMode,
+  ErrorEmbeddable,
 } from '../../../../../../../src/plugins/embeddable/public';
 import { IndexPatternSavedObject } from '../../hooks/types';
 
@@ -45,16 +46,18 @@ export const createEmbeddable = async (
   setQuery: SetQuery,
   portalNode: PortalNode,
   embeddableApi: EmbeddableStart
-): Promise<MapEmbeddable> => {
-  const factory = embeddableApi.getEmbeddableFactory<MapInput, EmbeddableOutput, MapEmbeddable>(
-    MAP_SAVED_OBJECT_TYPE
-  );
+): Promise<MapEmbeddable | ErrorEmbeddable> => {
+  const factory = embeddableApi.getEmbeddableFactory<
+    MapEmbeddableInput,
+    EmbeddableOutput,
+    MapEmbeddable
+  >(MAP_SAVED_OBJECT_TYPE);
 
   if (!factory) {
     throw new Error('Map embeddable factory undefined');
   }
 
-  const input: MapInput = {
+  const input: MapEmbeddableInput = {
     layerList: getLayerList(indexPatterns),
     title: i18n.MAP_TITLE,
     id: uuid.v4(),
