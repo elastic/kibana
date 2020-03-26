@@ -169,7 +169,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="username"
+            id="connector-servicenow-username"
             fullWidth
             error={errors.username}
             isInvalid={isUsernameInvalid}
@@ -178,7 +178,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
             <EuiFieldText
               fullWidth
               isInvalid={isUsernameInvalid}
-              name="username"
+              name="connector-servicenow-username"
               value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="usernameFromInput"
               onChange={handleOnChangeSecretConfig.bind(null, 'username')}
@@ -190,7 +190,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="password"
+            id="connector-servicenow-password"
             fullWidth
             error={errors.password}
             isInvalid={isPasswordInvalid}
@@ -199,7 +199,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
             <EuiFieldPassword
               fullWidth
               isInvalid={isPasswordInvalid}
-              name="password"
+              name="connector-servicenow-password"
               value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="passwordFromInput"
               onChange={handleOnChangeSecretConfig.bind(null, 'password')}
