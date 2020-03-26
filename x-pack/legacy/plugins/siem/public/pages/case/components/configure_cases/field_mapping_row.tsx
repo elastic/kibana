@@ -81,7 +81,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSuperSelect
-          disabled={disabled}
+          disabled={true}
           options={actionTypeOptions}
           valueOfSelected={selectedActionType}
           onChange={onChangeActionType.bind(null, siemField)}
