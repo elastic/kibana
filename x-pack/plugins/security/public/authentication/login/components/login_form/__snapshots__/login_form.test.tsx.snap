@@ -89,16 +89,18 @@ exports[`LoginForm login selector renders as expected with login form 1`] = `
         }
         labelType="label"
       >
-        <EuiFieldText
+        <EuiFieldPassword
           aria-required={true}
           autoComplete="off"
+          compressed={false}
           data-test-subj="loginPassword"
           disabled={false}
+          fullWidth={false}
           id="password"
           isInvalid={false}
+          isLoading={false}
           name="password"
           onChange={[Function]}
-          type="password"
           value=""
         />
       </EuiFormRow>
@@ -210,16 +212,18 @@ exports[`LoginForm renders as expected 1`] = `
         }
         labelType="label"
       >
-        <EuiFieldText
+        <EuiFieldPassword
           aria-required={true}
           autoComplete="off"
+          compressed={false}
           data-test-subj="loginPassword"
           disabled={false}
+          fullWidth={false}
           id="password"
           isInvalid={false}
+          isLoading={false}
           name="password"
           onChange={[Function]}
-          type="password"
           value=""
         />
       </EuiFormRow>
