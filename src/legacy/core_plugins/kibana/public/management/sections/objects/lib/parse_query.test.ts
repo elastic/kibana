@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { parseQuery } from './parse_query';
 
-export async function fetchExportByTypeAndSearch(types, search, includeReferencesDeep = false) {
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_export',
-    body: JSON.stringify({
-      type: types,
-      search,
-      includeReferencesDeep,
-    }),
+describe('getQueryText', () => {
+  it('should know how to get the text out of the AST', () => {
+    const ast = {
+      getTermClauses: () => [{ value: 'foo' }, { value: 'bar' }],
+      getFieldClauses: () => [{ value: 'lala' }, { value: 'lolo' }],
+    };
+    expect(parseQuery({ ast })).toEqual({ queryText: 'foo bar', visibleTypes: 'lala' });
   });
-}
+});
