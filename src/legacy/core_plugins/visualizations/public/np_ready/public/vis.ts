@@ -135,7 +135,7 @@ export class Vis {
     if (state.data && state.data.aggs) {
       const configStates = this.initializeDefaultsFromSchemas(
         cloneDeep(state.data.aggs),
-        this.type.schemas.all
+        this.type.schemas.all || []
       );
       if (!this.data.indexPattern) {
         if (state.data.aggs.length) {
@@ -182,7 +182,7 @@ export class Vis {
     }
   }
 
-  private initializeDefaultsFromSchemas(configStates: AggConfigOptions[], schemas: Schema[]) {
+  private initializeDefaultsFromSchemas(configStates: AggConfigOptions[], schemas: Schema[] | []) {
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
     // of defaults (not sure why a someone define more...
