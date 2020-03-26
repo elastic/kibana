@@ -62,8 +62,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     mlContext.combinedQuery
   );
 
-  const jobValidator = new JobValidator(jobCreator, existingJobsAndGroups);
-
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
 
@@ -182,6 +180,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setInterval('auto');
 
   const chartLoader = new ChartLoader(mlContext.currentIndexPattern, mlContext.combinedQuery);
+
+  const jobValidator = new JobValidator(jobCreator, existingJobsAndGroups);
 
   const resultsLoader = new ResultsLoader(jobCreator, chartInterval, chartLoader);
 
