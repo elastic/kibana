@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { extractExportDetails, SavedObjectsExportResultDetails } from '../extract_export_details';
+import { extractExportDetails, SavedObjectsExportResultDetails } from './extract_export_details';
 
 describe('extractExportDetails', () => {
   const objLine = (id: string, type: string) => {

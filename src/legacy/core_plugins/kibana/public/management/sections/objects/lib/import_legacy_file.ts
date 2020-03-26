@@ -17,14 +17,17 @@
  * under the License.
  */
 
-import { parseQuery } from '../parse_query';
-
-describe('getQueryText', () => {
-  it('should know how to get the text out of the AST', () => {
-    const ast = {
-      getTermClauses: () => [{ value: 'foo' }, { value: 'bar' }],
-      getFieldClauses: () => [{ value: 'lala' }, { value: 'lolo' }],
+export async function importLegacyFile(file: File) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = event => {
+      const result = event.target!.result as string;
+      try {
+        resolve(JSON.parse(result));
+      } catch (e) {
+        reject(e);
+      }
     };
-    expect(parseQuery({ ast })).toEqual({ queryText: 'foo bar', visibleTypes: 'lala' });
+    fr.readAsText(file);
   });
-});
+}

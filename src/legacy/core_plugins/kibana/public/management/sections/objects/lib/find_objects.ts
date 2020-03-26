@@ -18,14 +18,15 @@
  */
 
 import { kfetch } from 'ui/kfetch';
+import { SavedObjectsFindOptions } from 'src/core/public';
+import { keysToCamelCaseShallow } from './case_conversion';
 
-export async function fetchExportObjects(objects, includeReferencesDeep = false) {
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_export',
-    body: JSON.stringify({
-      objects,
-      includeReferencesDeep,
-    }),
+export async function findObjects(findOptions: SavedObjectsFindOptions) {
+  const response = await kfetch({
+    method: 'GET',
+    pathname: '/api/kibana/management/saved_objects/_find',
+    query: findOptions as Record<string, any>,
   });
+
+  return keysToCamelCaseShallow(response);
 }

@@ -17,6 +17,18 @@
  * under the License.
  */
 
-export function getDefaultTitle(object) {
-  return `${object.type} [id=${object.id}]`;
+import { kfetch } from 'ui/kfetch';
+
+export async function fetchExportObjects(
+  objects: any[],
+  includeReferencesDeep: boolean = false
+): Promise<Blob> {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_export',
+    body: JSON.stringify({
+      objects,
+      includeReferencesDeep,
+    }),
+  });
 }
