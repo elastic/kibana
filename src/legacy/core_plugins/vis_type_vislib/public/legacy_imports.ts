@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
-export const { createFiltersFromEvent } = npStart.plugins.data.actions;
 import { search } from '../../../../plugins/data/public';
 export const { tabifyAggResponse, tabifyGetColumns } = search;
 // @ts-ignore

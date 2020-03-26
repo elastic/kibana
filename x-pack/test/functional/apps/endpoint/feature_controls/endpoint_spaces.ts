@@ -31,7 +31,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('EEndpoint');
+        expect(navLinks).to.contain('Endpoint');
       });
 
       it(`endpoint app shows 'Hello World'`, async () => {
@@ -69,7 +69,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).not.to.contain('EEndpoint');
+        expect(navLinks).not.to.contain('Endpoint');
       });
     });
   });
