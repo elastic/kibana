@@ -45,8 +45,6 @@ describe('ConnectorsDropdown', () => {
 
     const props = wrapper.find(EuiSuperSelect).props();
 
-    // The dropdown is render outside the render tree of wrapper
-    // so we have to check for the connectors' existence this way
     expect(props.options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ value: '123', 'data-test-subj': 'dropdown-connector-123' }),
