@@ -20,7 +20,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.enableLogCorrelation.description',
       {
         defaultMessage:
-          "A boolean specifying if the agent should integrate into SLF4J's MDC to enable trace-log correlation. If set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC. NOTE: While it's allowed to enable this setting at runtime, you can't disable it without a restart."
+          "A boolean specifying if the agent should integrate into SLF4J's MDC to enable trace-log correlation. If set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC. While it's allowed to enable this setting at runtime, you can't disable it without a restart."
       }
     ),
     includeAgents: ['java']
@@ -175,7 +175,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.profilingInferredSpansEnabled.description',
       {
         defaultMessage:
-          'Set to `true` to make the agent create spans for method executions based on async-profiler, a sampling aka statistical profiler. Due to the nature of how sampling profilers work, the duration of the inferred spans are not exact, but only estimations. The `profiling_inferred_spans_sampling_interval` lets you fine tune the trade-off between accuracy and overhead. The inferred spans are created after a profiling session has ended. This means there is a delay between the regular and the inferred spans being visible in the UI. NOTE: This feature is not available on Windows'
+          'Set to `true` to make the agent create spans for method executions based on async-profiler, a sampling aka statistical profiler. Due to the nature of how sampling profilers work, the duration of the inferred spans are not exact, but only estimations. The `profiling_inferred_spans_sampling_interval` lets you fine tune the trade-off between accuracy and overhead. The inferred spans are created after a profiling session has ended. This means there is a delay between the regular and the inferred spans being visible in the UI. This feature is not available on Windows'
       }
     ),
     includeAgents: ['java']
