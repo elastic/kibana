@@ -6,10 +6,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import {
-  SavedObjectsManagementAction,
-  SavedObjectsManagementPluginSetup,
-} from 'src/plugins/saved_objects_management/public';
+import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import { FeaturesPluginStart } from '../../features/public';
@@ -34,10 +31,6 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
   security?: SecurityPluginStart;
-}
-
-interface LegacyAPI {
-  registerSavedObjectsManagementAction: (action: SavedObjectsManagementAction) => void;
 }
 
 export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
@@ -88,9 +81,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       spacesManager: this.spacesManager,
     });
 
-    return {
-      registerLegacyAPI: (legacyAPI: LegacyAPI) => {},
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {
