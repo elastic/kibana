@@ -410,7 +410,11 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
-      {(isLoadingActions || isLoadingActionTypes) && <EuiLoadingSpinner size="xl" />}
+      {(isLoadingActions || isLoadingActionTypes) && (
+        <div style={{ textAlign: 'center', margin: '1em auto' }}>
+          <EuiLoadingSpinner size="xl" />
+        </div>
+      )}
       {data.length !== 0 && table}
       {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && emptyPrompt}
       {data.length === 0 && !canSave && noPermissionPrompt}
