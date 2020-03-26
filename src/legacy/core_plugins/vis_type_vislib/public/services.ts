@@ -20,6 +20,10 @@
 import { createGetterSetter } from '../../../../plugins/kibana_utils/common';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
+export const [getDataActions, setDataActions] = createGetterSetter<
+  DataPublicPluginStart['actions']
+>('vislib data.actions');
+
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('vislib data.fieldFormats');

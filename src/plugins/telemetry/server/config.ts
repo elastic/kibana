@@ -18,6 +18,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getConfigPath } from '../../../core/server/path';
 import { ENDPOINT_VERSION } from '../common/constants';
 
 export const configSchema = schema.object({
@@ -31,7 +33,7 @@ export const configSchema = schema.object({
     { defaultValue: true }
   ),
   // `config` is used internally and not intended to be set
-  // config: Joi.string().default(getConfigPath()), TODO: Get it in some other way
+  config: schema.string({ defaultValue: getConfigPath() }),
   banner: schema.boolean({ defaultValue: true }),
   url: schema.conditional(
     schema.contextRef('dev'),

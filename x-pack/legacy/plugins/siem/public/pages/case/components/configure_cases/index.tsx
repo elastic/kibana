@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useReducer, useCallback, useEffect, useState } from 'react';
+import React, {
+  useReducer,
+  useCallback,
+  useEffect,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from 'react';
 import styled, { css } from 'styled-components';
 
 import {
@@ -14,8 +21,9 @@ import {
   EuiCallOut,
   EuiBottomBar,
   EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, difference } from 'lodash/fp';
 import { useKibana } from '../../../../lib/kibana';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
@@ -40,7 +48,7 @@ import { ClosureOptions } from '../configure_cases/closure_options';
 import { Mapping } from '../configure_cases/mapping';
 import { SectionWrapper } from '../wrappers';
 import { navTabs } from '../../../../pages/home/home_navigations';
-import { configureCasesReducer, State } from './reducer';
+import { configureCasesReducer, State, CurrentConfiguration } from './reducer';
 import * as i18n from './translations';
 
 const FormWrapper = styled.div`
@@ -58,6 +66,7 @@ const initialState: State = {
   connectorId: 'none',
   closureType: 'close-by-user',
   mapping: null,
+  currentConfiguration: { connectorId: 'none', closureType: 'close-by-user' },
 };
 
 const actionTypes: ActionType[] = [
@@ -83,13 +92,19 @@ const ConfigureCasesComponent: React.FC = () => {
   );
 
   const [actionBarVisible, setActionBarVisible] = useState(false);
+  const [totalConfigurationChanges, setTotalConfigurationChanges] = useState(0);
 
-  const handleShowAddFlyout = useCallback(() => setAddFlyoutVisibility(true), []);
-
-  const [{ connectorId, closureType, mapping }, dispatch] = useReducer(
+  const [{ connectorId, closureType, mapping, currentConfiguration }, dispatch] = useReducer(
     configureCasesReducer(),
     initialState
   );
+
+  const setCurrentConfiguration = useCallback((configuration: CurrentConfiguration) => {
+    dispatch({
+      type: 'setCurrentConfiguration',
+      currentConfiguration: { ...configuration },
+    });
+  }, []);
 
   const setConnectorId = useCallback((newConnectorId: string) => {
     dispatch({
@@ -115,6 +130,7 @@ const ConfigureCasesComponent: React.FC = () => {
   const { loading: loadingCaseConfigure, persistLoading, persistCaseConfigure } = useCaseConfigure({
     setConnector: setConnectorId,
     setClosureType,
+    setCurrentConfiguration,
   });
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
 
@@ -137,15 +153,46 @@ const ConfigureCasesComponent: React.FC = () => {
     [connectorId, connectors, closureType, mapping]
   );
 
-  const onChangeConnector = useCallback((newConnectorId: string) => {
-    setActionBarVisible(true);
-    setConnectorId(newConnectorId);
+  const onClickAddConnector = useCallback(() => {
+    setActionBarVisible(false);
+    setAddFlyoutVisibility(true);
   }, []);
 
-  const onChangeClosureType = useCallback((newClosureType: ClosureType) => {
-    setActionBarVisible(true);
-    setClosureType(newClosureType);
+  const onClickUpdateConnector = useCallback(() => {
+    setActionBarVisible(false);
+    setEditFlyoutVisibility(true);
   }, []);
+
+  const handleActionBar = useCallback(() => {
+    const unsavedChanges = difference(Object.values(currentConfiguration), [
+      connectorId,
+      closureType,
+    ]).length;
+
+    if (unsavedChanges === 0) {
+      setActionBarVisible(false);
+    } else {
+      setActionBarVisible(true);
+    }
+
+    setTotalConfigurationChanges(unsavedChanges);
+  }, [currentConfiguration, connectorId, closureType]);
+
+  const handleSetAddFlyoutVisibility = useCallback(
+    (isVisible: boolean) => {
+      handleActionBar();
+      setAddFlyoutVisibility(isVisible);
+    },
+    [currentConfiguration, connectorId, closureType]
+  );
+
+  const handleSetEditFlyoutVisibility = useCallback(
+    (isVisible: boolean) => {
+      handleActionBar();
+      setEditFlyoutVisibility(isVisible);
+    },
+    [currentConfiguration, connectorId, closureType]
+  );
 
   useEffect(() => {
     if (
@@ -188,6 +235,10 @@ const ConfigureCasesComponent: React.FC = () => {
     }
   }, [connectors, connectorId]);
 
+  useEffect(() => {
+    handleActionBar();
+  }, [connectors, connectorId, closureType, currentConfiguration]);
+
   return (
     <FormWrapper>
       {!connectorIsValid && (
@@ -202,8 +253,8 @@ const ConfigureCasesComponent: React.FC = () => {
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors}
           isLoading={isLoadingConnectors}
-          onChangeConnector={onChangeConnector}
-          handleShowAddFlyout={handleShowAddFlyout}
+          onChangeConnector={setConnectorId}
+          handleShowAddFlyout={onClickAddConnector}
           selectedConnector={connectorId}
         />
       </SectionWrapper>
@@ -211,7 +262,7 @@ const ConfigureCasesComponent: React.FC = () => {
         <ClosureOptions
           closureTypeSelected={closureType}
           disabled={persistLoading || isLoadingConnectors || connectorId === 'none'}
-          onChangeClosureType={onChangeClosureType}
+          onChangeClosureType={setClosureType}
         />
       </SectionWrapper>
       <SectionWrapper>
@@ -220,12 +271,17 @@ const ConfigureCasesComponent: React.FC = () => {
           updateConnectorDisabled={updateConnectorDisabled}
           mapping={mapping}
           onChangeMapping={setMapping}
-          setEditFlyoutVisibility={setEditFlyoutVisibility}
+          setEditFlyoutVisibility={onClickUpdateConnector}
         />
       </SectionWrapper>
       {actionBarVisible && (
         <EuiBottomBar>
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
+                <EuiText>{i18n.UNSAVED_CHANGES(totalConfigurationChanges)}</EuiText>
+              </EuiFlexGroup>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
@@ -269,7 +325,7 @@ const ConfigureCasesComponent: React.FC = () => {
       >
         <ConnectorAddFlyout
           addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
+          setAddFlyoutVisibility={handleSetAddFlyoutVisibility as Dispatch<SetStateAction<boolean>>}
           actionTypes={actionTypes}
         />
         {editedConnectorItem && (
@@ -277,7 +333,9 @@ const ConfigureCasesComponent: React.FC = () => {
             key={editedConnectorItem.id}
             initialConnector={editedConnectorItem}
             editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
+            setEditFlyoutVisibility={
+              handleSetEditFlyoutVisibility as Dispatch<SetStateAction<boolean>>
+            }
           />
         )}
       </ActionsConnectorsContextProvider>
