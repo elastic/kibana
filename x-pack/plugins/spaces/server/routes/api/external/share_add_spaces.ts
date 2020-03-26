@@ -45,7 +45,7 @@ export function initShareAddSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (_context, request, response) => {
-      const { SavedObjectsClient, getScopedSavedObjectsClient } = getSavedObjects();
+      const { getScopedSavedObjectsClient } = getSavedObjects();
       const scopedClient = getScopedSavedObjectsClient(request);
 
       const spaces = request.body.spaces;
@@ -54,9 +54,6 @@ export function initShareAddSpacesApi(deps: ExternalRouteDeps) {
       try {
         await scopedClient.addNamespaces(type, id, spaces);
       } catch (error) {
-        if (SavedObjectsClient.errors.isNotFoundError(error)) {
-          return response.notFound();
-        }
         return response.customError(wrapError(error));
       }
       return response.noContent();

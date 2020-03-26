@@ -45,7 +45,7 @@ export function initShareRemoveSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (_context, request, response) => {
-      const { SavedObjectsClient, getScopedSavedObjectsClient } = getSavedObjects();
+      const { getScopedSavedObjectsClient } = getSavedObjects();
       const scopedClient = getScopedSavedObjectsClient(request);
 
       const spaces = request.body.spaces;
@@ -54,9 +54,6 @@ export function initShareRemoveSpacesApi(deps: ExternalRouteDeps) {
       try {
         await scopedClient.removeNamespaces(type, id, spaces);
       } catch (error) {
-        if (SavedObjectsClient.errors.isNotFoundError(error)) {
-          return response.notFound();
-        }
         return response.customError(wrapError(error));
       }
       return response.noContent();
