@@ -161,8 +161,9 @@ export class InfraLogEntriesDomain {
         ),
         context: FIELDS_FROM_CONTEXT.reduce<LogEntry['context']>((ctx, field) => {
           // Users might have different types here in their mappings.
-          if (typeof doc.fields[field] === 'string') {
-            ctx[field] = doc.fields[field] as string;
+          const value = doc.fields[field];
+          if (typeof value === 'string') {
+            ctx[field] = value;
           }
           return ctx;
         }, {}),
