@@ -135,6 +135,7 @@ const RulesPageComponent: React.FC = () => {
             {prePackagedRuleStatus === 'someRuleUninstall' && (
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="reloadPrebuiltRulesBtn"
                   iconType="plusInCircle"
                   isLoading={loadingCreatePrePackagedRules}
                   isDisabled={userHasNoPermissions || loading}
