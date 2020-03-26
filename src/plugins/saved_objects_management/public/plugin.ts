@@ -18,24 +18,44 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../../../../plugins/home/public';
-import { SavedObjectsManagementActionRegistry } from './saved_objects_management_action_registry';
+  SavedObjectsManagementActionRegistry,
+  ISavedObjectsManagementActionRegistry,
+} from './services';
 
-interface SetupDependencies {
+export interface SavedObjectsManagementPluginSetup {
+  actionRegistry: ISavedObjectsManagementActionRegistry;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SavedObjectsManagementPluginStart {}
+
+export interface SetupDependencies {
   home: HomePublicPluginSetup;
 }
 
-export class SavedObjectsManagementService {
-  public setup({ home }: SetupDependencies) {
+export class SavedObjectsManagementPlugin
+  implements
+    Plugin<
+      SavedObjectsManagementPluginSetup,
+      SavedObjectsManagementPluginStart,
+      SetupDependencies,
+      {}
+    > {
+  private actionRegistry = new SavedObjectsManagementActionRegistry();
+
+  public setup(
+    core: CoreSetup<{}>,
+    { home }: SetupDependencies
+  ): SavedObjectsManagementPluginSetup {
     home.featureCatalogue.register({
       id: 'saved_objects',
-      title: i18n.translate('management.objects.savedObjectsTitle', {
+      title: i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
         defaultMessage: 'Saved Objects',
       }),
-      description: i18n.translate('management.objects.savedObjectsDescription', {
+      description: i18n.translate('savedObjectsManagement.objects.savedObjectsDescription', {
         defaultMessage:
           'Import, export, and manage your saved searches, visualizations, and dashboards.',
       }),
@@ -46,12 +66,11 @@ export class SavedObjectsManagementService {
     });
 
     return {
-      registry: SavedObjectsManagementActionRegistry,
+      actionRegistry: this.actionRegistry,
     };
   }
 
-  public stop() {}
+  public start(core: CoreStart) {
+    return {};
+  }
 }
-
-/** @internal */
-export type SavedObjectsManagementServiceSetup = ReturnType<SavedObjectsManagementService['setup']>;
