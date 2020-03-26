@@ -10,7 +10,7 @@ const alertTypeMetric = {
   scripted_metric: {
     init_script: 'state.types = [:]',
     map_script: `
-      String alertType = doc['alert.alertTypeId'].value;
+      String alertType = doc['alert.alertTypeId'].value.replace(".", "");
       state.types.put(alertType, state.types.containsKey(alertType) ? state.types.get(alertType) + 1 : 1);
     `,
     // Combine script is executed per cluster, but we already have a key-value pair per cluster.
