@@ -6,11 +6,6 @@
 
 import React from 'react';
 import {
-  EuiTitle,
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
@@ -19,64 +14,49 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { policyDetails } from '../../store/policy_details/selectors';
 import { WindowsEventing } from './policy_forms/eventing/windows';
+import { PageView } from '../../components/page_view';
 
 export const PolicyDetails = React.memo(() => {
   const policyItem = usePolicyDetailsSelector(policyDetails);
 
-  function policyName() {
-    if (policyItem) {
-      return <span data-test-subj="policyDetailsName">{policyItem.name}</span>;
-    } else {
-      return (
-        <span data-test-subj="policyDetailsNotFound">
-          <FormattedMessage
-            id="xpack.endpoint.policyDetails.notFound"
-            defaultMessage="Policy Not Found"
-          />
-        </span>
-      );
-    }
-  }
+  const headerLeftContent =
+    policyItem?.name ??
+    i18n.translate('xpack.endpoint.policyDetails.notFound', {
+      defaultMessage: 'Policy Not Found',
+    });
+
+  const headerRightContent = (
+    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty>
+          <FormattedMessage id="xpack.endpoint.policy.details.cancel" defaultMessage="Cancel" />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton fill={true} iconType="save">
+          <FormattedMessage id="xpack.endpoint.policy.details.save" defaultMessage="Save" />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   return (
-    <EuiPage data-test-subj="policyDetailsPage">
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="m">
-              <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty>
-                <FormattedMessage
-                  id="xpack.endpoint.policy.details.cancel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton fill={true} iconType="save">
-                <FormattedMessage id="xpack.endpoint.policy.details.save" defaultMessage="Save" />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageHeader>
-        <EuiText size="xs" color="subdued">
-          <h4>
-            <FormattedMessage
-              id="xpack.endpoint.policy.details.settings"
-              defaultMessage="Settings"
-            />
-          </h4>
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <WindowsEventing />
-      </EuiPageBody>
-    </EuiPage>
+    <PageView
+      data-test-subj="policyDetailsPage"
+      headerLeft={headerLeftContent}
+      headerRight={headerRightContent}
+    >
+      <EuiText size="xs" color="subdued">
+        <h4>
+          <FormattedMessage id="xpack.endpoint.policy.details.settings" defaultMessage="Settings" />
+        </h4>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <WindowsEventing />
+    </PageView>
   );
 });
