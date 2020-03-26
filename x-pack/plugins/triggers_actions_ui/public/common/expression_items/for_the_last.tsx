@@ -10,17 +10,16 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiSelect,
   EuiFlexGroup,
   EuiFormRow,
   EuiFlexItem,
   EuiFieldNumber,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
+import { ClosablePopoverTitle } from './components';
 
 interface ForLastExpressionProps {
   timeWindowSize?: number;
@@ -83,31 +82,12 @@ export const ForLastExpression = ({
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
-                defaultMessage="For the last"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                color="danger"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.common.expressionItems.forTheLast.closePopoverLabel',
-                  {
-                    defaultMessage: 'Close',
-                  }
-                )}
-                onClick={() => {
-                  setAlertDurationPopoverOpen(false);
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAlertDurationPopoverOpen(false)}>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
+            defaultMessage="For the last"
+          />
+        </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiFormRow

@@ -5,20 +5,20 @@
  */
 
 import React, { useState, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   EuiFieldNumber,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { builtInGroupByTypes } from '../constants';
 import { GroupByType } from '../types';
+import { ClosablePopoverTitle } from './components';
 
 interface GroupByExpressionProps {
   groupBy: string;
@@ -113,33 +113,12 @@ export const GroupByExpression = ({
       anchorPosition={popupPosition ?? 'downRight'}
     >
       <div>
-        <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              {i18n.translate(
-                'xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel',
-                {
-                  defaultMessage: 'over',
-                }
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                color="danger"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.common.expressionItems.groupByType.closePopoverLabel',
-                  {
-                    defaultMessage: 'Close',
-                  }
-                )}
-                onClick={() => {
-                  setGroupByPopoverOpen(false);
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setGroupByPopoverOpen(false)}>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel"
+            defaultMessage="over"
+          />
+        </ClosablePopoverTitle>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiSelect

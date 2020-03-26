@@ -6,18 +6,18 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
+import { ClosablePopoverTitle } from './components';
 
 interface OfExpressionProps {
   aggType: string;
@@ -101,30 +101,12 @@ export const OfExpression = ({
       zIndex={8000}
     >
       <div>
-        <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              {i18n.translate('xpack.triggersActionsUI.common.expressionItems.of.popoverTitle', {
-                defaultMessage: 'of',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                color="danger"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.common.expressionItems.of.closePopoverLabel',
-                  {
-                    defaultMessage: 'Close',
-                  }
-                )}
-                onClick={() => {
-                  setAggFieldPopoverOpen(false);
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAggFieldPopoverOpen(false)}>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.of.popoverTitle"
+            defaultMessage="of"
+          />
+        </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">
             <EuiFormRow

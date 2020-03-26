@@ -9,17 +9,16 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   EuiFieldNumber,
   EuiText,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { builtInComparators } from '../constants';
 import { Comparator } from '../types';
+import { ClosablePopoverTitle } from './components';
 
 interface ThresholdExpressionProps {
   thresholdComparator: string;
@@ -98,26 +97,9 @@ export const ThresholdExpression = ({
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>{comparators[thresholdComparator].text}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                color="danger"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.common.expressionItems.threshold.closePopoverLabel',
-                  {
-                    defaultMessage: 'Close',
-                  }
-                )}
-                onClick={() => {
-                  setAlertThresholdPopoverOpen(false);
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAlertThresholdPopoverOpen(false)}>
+          <>{comparators[thresholdComparator].text}</>
+        </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiSelect

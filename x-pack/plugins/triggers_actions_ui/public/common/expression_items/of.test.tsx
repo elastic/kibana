@@ -5,8 +5,8 @@
  */
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { EuiFlexItem } from '@elastic/eui';
 import { OfExpression } from './of';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 describe('of expression', () => {
   it('renders of builtin aggregation types', () => {
@@ -121,6 +121,13 @@ describe('of expression', () => {
       />
     );
     wrapper.simulate('click');
-    expect(wrapper.contains(<EuiFlexItem>of</EuiFlexItem>)).toBeTruthy();
+    expect(
+      wrapper.contains(
+        <FormattedMessage
+          id="xpack.triggersActionsUI.common.expressionItems.of.popoverTitle"
+          defaultMessage="of"
+        />
+      )
+    ).toBeTruthy();
   });
 });

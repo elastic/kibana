@@ -5,7 +5,6 @@
  */
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ForLastExpression } from './for_the_last';
 
@@ -40,12 +39,10 @@ describe('for the last expression', () => {
     expect(wrapper.find('[value="s"]').length > 0).toBeTruthy();
     expect(
       wrapper.contains(
-        <EuiFlexItem>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
-            defaultMessage="For the last"
-          />
-        </EuiFlexItem>
+        <FormattedMessage
+          id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
+          defaultMessage="For the last"
+        />
       )
     ).toBeTruthy();
   });
