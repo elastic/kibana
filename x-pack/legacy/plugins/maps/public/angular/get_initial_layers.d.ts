@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getInitialLayers(layers?: unknown): unknown[];
+export function getInitialLayers(layerListJSON?: string, initialLayers?: unknown[]): unknown[];

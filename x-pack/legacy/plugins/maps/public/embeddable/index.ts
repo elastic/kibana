@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyAction } from 'redux';
-
-export function setOpenTOCDetails(layerIds?: string[]): AnyAction;
-
-export function setIsLayerTOCOpen(open: boolean): AnyAction;
-
-export function setReadOnly(readOnly: boolean): AnyAction;
+export * from './map_embeddable';
+export * from './map_embeddable_factory';

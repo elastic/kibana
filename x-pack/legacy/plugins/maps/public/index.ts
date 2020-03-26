@@ -25,3 +25,5 @@ import { MapsPlugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new MapsPlugin();
 };
+
+export { MapEmbeddable, MapEmbeddableInput } from './embeddable';

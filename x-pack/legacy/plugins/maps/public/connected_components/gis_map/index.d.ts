@@ -5,5 +5,9 @@
  */
 
 import React from 'react';
+import { Filter } from 'src/plugins/data/public';
 
-export const GisMap: React.FC<{ addFilters: unknown; renderTooltipContent: unknown }>;
+export const GisMap: React.ComponentType<{
+  addFilters: ((filters: Filter[]) => void) | null;
+  renderTooltipContent?: (params: unknown) => React.ComponentType;
+}>;

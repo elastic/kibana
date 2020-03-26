@@ -7,9 +7,9 @@
 import { AnyAction } from 'redux';
 import { MapCenter } from '../actions/map_actions';
 
-export function getHiddenLayerIds(config: unknown): AnyAction;
+export function getHiddenLayerIds(config: unknown): string[];
 
-export function getMapZoom(config: unknown): unknown;
+export function getMapZoom(config: unknown): number;
 
 export function getMapCenter(config: unknown): MapCenter;
 

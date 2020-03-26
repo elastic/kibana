@@ -62,37 +62,37 @@ interface MapConfig {
   indexPatterns: IIndexPattern[];
   editable: boolean;
   title?: string;
-  layerList: unknown;
+  layerList: unknown[];
 }
 
-export interface MapInput extends EmbeddableInput {
+export interface MapEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
   filters: Filter[];
   query?: Query;
-  refresh: unknown;
+  refresh?: unknown;
   refreshConfig: RefreshInterval;
   isLayerTOCOpen: boolean;
-  openTOCDetails: unknown;
-  disableTooltipControl: boolean;
-  disableInteractive: boolean;
-  hideToolbarOverlay: boolean;
-  hideLayerControl: boolean;
-  hideViewControl: boolean;
-  mapCenter: MapCenter;
-  hiddenLayers: unknown;
-  hideFilterActions: boolean;
+  openTOCDetails?: string[];
+  disableTooltipControl?: boolean;
+  disableInteractive?: boolean;
+  hideToolbarOverlay?: boolean;
+  hideLayerControl?: boolean;
+  hideViewControl?: boolean;
+  mapCenter?: MapCenter;
+  hiddenLayers?: string[];
+  hideFilterActions?: boolean;
 }
 
 export interface MapOutput extends EmbeddableOutput {
   indexPatterns: IIndexPattern[];
 }
 
-export class MapEmbeddable extends Embeddable<MapInput, MapOutput> {
+export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
-  private _renderTooltipContent?: unknown;
+  private _renderTooltipContent?: (params: unknown) => React.ComponentType;
   private _eventHandlers?: unknown;
-  private _layerList: unknown;
+  private _layerList: unknown[];
   private _store: MapStore;
   private _subscription: Subscription;
   private _prevTimeRange?: TimeRange;
@@ -104,9 +104,9 @@ export class MapEmbeddable extends Embeddable<MapInput, MapOutput> {
 
   constructor(
     config: MapConfig,
-    initialInput: MapInput,
+    initialInput: MapEmbeddableInput,
     parent?: IContainer,
-    renderTooltipContent?: unknown,
+    renderTooltipContent?: (params: unknown) => React.ComponentType,
     eventHandlers?: unknown
   ) {
     super(
@@ -132,7 +132,7 @@ export class MapEmbeddable extends Embeddable<MapInput, MapOutput> {
     return getInspectorAdapters(this._store.getState());
   }
 
-  onContainerStateChanged(containerState: MapInput) {
+  onContainerStateChanged(containerState: MapEmbeddableInput) {
     if (
       !_.isEqual(containerState.timeRange, this._prevTimeRange) ||
       !_.isEqual(containerState.query, this._prevQuery) ||
@@ -151,7 +151,7 @@ export class MapEmbeddable extends Embeddable<MapInput, MapOutput> {
     timeRange,
     filters,
     refresh,
-  }: Pick<MapInput, 'query' | 'timeRange' | 'filters' | 'refresh'>) {
+  }: Pick<MapEmbeddableInput, 'query' | 'timeRange' | 'filters' | 'refresh'>) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
@@ -165,7 +165,7 @@ export class MapEmbeddable extends Embeddable<MapInput, MapOutput> {
     );
   }
 
-  _dispatchSetRefreshConfig({ refreshConfig }: Pick<MapInput, 'refreshConfig'>) {
+  _dispatchSetRefreshConfig({ refreshConfig }: Pick<MapEmbeddableInput, 'refreshConfig'>) {
     this._prevRefreshConfig = refreshConfig;
     this._store.dispatch(
       setRefreshConfig({
@@ -194,22 +194,22 @@ export class MapEmbeddable extends Embeddable<MapInput, MapOutput> {
     }
 
     if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
-      this._store.dispatch(disableInteractive(this.input.disableInteractive));
+      this._store.dispatch(disableInteractive());
     }
 
     if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
-      this._store.dispatch(disableTooltipControl(this.input.disableTooltipControl));
+      this._store.dispatch(disableTooltipControl());
     }
     if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
-      this._store.dispatch(hideToolbarOverlay(this.input.hideToolbarOverlay));
+      this._store.dispatch(hideToolbarOverlay());
     }
 
     if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
-      this._store.dispatch(hideLayerControl(this.input.hideLayerControl));
+      this._store.dispatch(hideLayerControl());
     }
 
     if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
-      this._store.dispatch(hideViewControl(this.input.hideViewControl));
+      this._store.dispatch(hideViewControl());
     }
 
     if (this.input.mapCenter) {
@@ -248,7 +248,7 @@ export class MapEmbeddable extends Embeddable<MapInput, MapOutput> {
     });
   }
 
-  async setLayerList(layerList: unknown) {
+  async setLayerList(layerList: unknown[]) {
     this._layerList = layerList;
     return await this._store.dispatch(replaceLayerList(this._layerList));
   }
@@ -288,7 +288,7 @@ export class MapEmbeddable extends Embeddable<MapInput, MapOutput> {
     const center = getMapCenter(this._store.getState());
     const zoom = getMapZoom(this._store.getState());
 
-    const mapCenter = this.input.mapCenter || {};
+    const mapCenter = this.input.mapCenter || undefined;
     if (
       !mapCenter ||
       mapCenter.lat !== center.lat ||

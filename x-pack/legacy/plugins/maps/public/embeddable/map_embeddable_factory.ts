@@ -17,7 +17,7 @@ import {
   IContainer,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { MapEmbeddable, MapInput } from './map_embeddable';
+import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
 import { getIndexPatternService } from '../kibana_services';
 
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
@@ -99,7 +99,11 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     return await savedObjectLoader.get(savedObjectId);
   }
 
-  async createFromSavedObject(savedObjectId: string, input: MapInput, parent?: IContainer) {
+  async createFromSavedObject(
+    savedObjectId: string,
+    input: MapEmbeddableInput,
+    parent?: IContainer
+  ) {
     const savedMap = await this._fetchSavedMap(savedObjectId);
     const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
@@ -131,9 +135,9 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
 
   async createFromState(
     state: { title?: string; layerList?: unknown[] },
-    input: MapInput,
+    input: MapEmbeddableInput,
     parent: IContainer,
-    renderTooltipContent: unknown,
+    renderTooltipContent: (params: unknown) => React.ComponentType,
     eventHandlers: unknown
   ) {
     const layerList = state && state.layerList ? state.layerList : getInitialLayers();
@@ -153,7 +157,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     );
   }
 
-  async create(input: MapInput) {
+  async create(input: MapEmbeddableInput) {
     window.location.href = chrome.addBasePath(createMapPath(''));
     return new ErrorEmbeddable(
       'Maps can only be created with createFromSavedObject or createFromState',

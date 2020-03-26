@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getOpenTOCDetails(state: unknown): unknown;
+export function getOpenTOCDetails(state: unknown): string[];
 
 export function getIsLayerTOCOpen(state: unknown): boolean;
