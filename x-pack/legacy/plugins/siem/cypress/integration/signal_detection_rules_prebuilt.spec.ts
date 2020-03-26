@@ -38,6 +38,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
+import { totalNumberOfPrebuiltRules } from '../objects/rule';
+
 describe('Signal detection rules, prebuilt rules', () => {
   before(() => {
     esArchiverLoadEmptyKibana();
@@ -48,6 +50,9 @@ describe('Signal detection rules, prebuilt rules', () => {
   });
 
   it('Loads prebuilt rules', () => {
+    const expectedNumberOfRules = totalNumberOfPrebuiltRules;
+    const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
+
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     waitForSignalsPanelToBeLoaded();
     waitForSignalsIndexToBeCreated();
@@ -56,7 +61,6 @@ describe('Signal detection rules, prebuilt rules', () => {
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
-    const expectedElasticRulesBtnText = 'Elastic rules (92)';
     cy.get(ELASTIC_RULES_BTN)
       .invoke('text')
       .should('eql', expectedElasticRulesBtnText);
@@ -64,7 +68,6 @@ describe('Signal detection rules, prebuilt rules', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    const expectedNumberOfRules = 92;
     cy.get(RULES_TABLE).then($table => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
@@ -94,8 +97,8 @@ describe('Deleting prebuilt rules', () => {
   });
 
   it('Deletes and recovers one rule', () => {
-    const expectedNumberOfRulesAfterDeletion = 91;
-    const expectedNumberOfRulesAfterRecovering = 92;
+    const expectedNumberOfRulesAfterDeletion = totalNumberOfPrebuiltRules - 1;
+    const expectedNumberOfRulesAfterRecovering = totalNumberOfPrebuiltRules;
 
     deleteFirstRule();
     cy.reload();
@@ -131,8 +134,8 @@ describe('Deleting prebuilt rules', () => {
 
   it('Deletes and recovers more than one rule', () => {
     const numberOfRulesToBeSelected = 2;
-    const expectedNumberOfRulesAfterDeletion = 90;
-    const expectedNumberOfRulesAfterRecovering = 92;
+    const expectedNumberOfRulesAfterDeletion = totalNumberOfPrebuiltRules - 2;
+    const expectedNumberOfRulesAfterRecovering = totalNumberOfPrebuiltRules;
 
     selectNumberOfRules(numberOfRulesToBeSelected);
     deleteSelectedRules();
