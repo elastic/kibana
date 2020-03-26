@@ -74,6 +74,8 @@ Now that the Kibana plugin boilerplate is out of the way, you can write a Canvas
 Create a new file: `public/index.js` and make it look like this:
 
 ```js
+/*global kbnInterpreter */
+
 // Elements show up in the Canvas elements menu and can be visually added to a canvas
 const elements = [
   () => ({
@@ -97,6 +99,13 @@ const browserFunctions = [
     }
   }),
 ];
+
+// Register our elements and browserFunctions with the Canvas interpreter.
+kbnInterpreter.register({
+  elements,
+  browserFunctions,
+});
+
 ```
 
 #### Trying out your new plugin
