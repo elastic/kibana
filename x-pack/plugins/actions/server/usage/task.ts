@@ -40,7 +40,7 @@ function registerActionsTelemetryTask(
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
-      timeout: '1m',
+      timeout: '5m',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },
   });
@@ -94,7 +94,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
 
 function getNextMidnight() {
   return moment()
-    .add(1, 's')
-    .startOf('s')
+    .add(1, 'd')
+    .startOf('d')
     .toDate();
 }
