@@ -30,6 +30,7 @@ import {
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
+import { SetupPlugins } from '../../../plugin';
 import { importTimelinesPayloadSchema } from './schemas/import_timelines_schema';
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
 import { LegacyServices } from '../../../types';
@@ -37,7 +38,6 @@ import { LegacyServices } from '../../../types';
 import { Timeline } from '../saved_object';
 import { validate } from '../../detection_engine/routes/rules/validate';
 import { FrameworkRequest } from '../../framework';
-import { SecurityPluginSetup } from '../../../../../../../plugins/security/server';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
@@ -46,7 +46,7 @@ const timelineLib = new Timeline();
 export const importTimelinesRoute = (
   router: IRouter,
   config: LegacyServices['config'],
-  securityPluginSetup: SecurityPluginSetup
+  security: SetupPlugins['security']
 ) => {
   router.post(
     {
@@ -96,7 +96,7 @@ export const importTimelinesRoute = (
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importTimelineResponse: ImportTimelineResponse[] = [];
 
-        const user = await securityPluginSetup.authc.getCurrentUser(request);
+        const user = await security?.authc.getCurrentUser(request);
         let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
         frameworkRequest = set('user', user, frameworkRequest);
 
