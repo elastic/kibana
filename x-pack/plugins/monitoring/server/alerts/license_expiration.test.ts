@@ -14,10 +14,10 @@ import { Logger } from 'src/core/server';
 import { AlertServices, AlertInstance } from '../../../alerting/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
-  AlertState,
-  AlertClusterState,
-  AlertParams,
-  LicenseExpirationAlertExecutorOptions,
+  AlertCommonParams,
+  AlertCommonState,
+  AlertLicensePerClusterState,
+  AlertCommonExecutorOptions,
 } from './types';
 import { SavedObject, SavedObjectAttributes } from 'src/core/server';
 import { SavedObjectsClientContract } from 'src/core/server';
@@ -37,8 +37,30 @@ function fillLicense(license: any, clusterUuid?: string) {
   };
 }
 
+function fillCluster(clusterUuid: string, displayName?: string, clusterName?: string) {
+  return {
+    hits: {
+      hits: [
+        {
+          _source: {
+            cluster_uuid: clusterUuid,
+            cluster_settings: {
+              cluster: {
+                metadata: {
+                  display_name: displayName,
+                },
+              },
+            },
+            cluster_name: clusterName,
+          },
+        },
+      ],
+    },
+  };
+}
+
 const clusterUuid = 'a4545jhjb';
-const params: AlertParams = {
+const params: AlertCommonParams = {
   dateFormat: 'YYYY',
   timezone: 'UTC',
 };
@@ -49,7 +71,7 @@ interface MockServices {
   savedObjectsClient: jest.Mock;
 }
 
-const alertExecutorOptions: LicenseExpirationAlertExecutorOptions = {
+const alertExecutorOptions: AlertCommonExecutorOptions = {
   alertId: '',
   startedAt: new Date(),
   services: {
@@ -215,7 +237,7 @@ describe('getLicenseExpiration', () => {
         (method: string, { filterPath }): Promise<any> => {
           return new Promise(resolve => {
             if (filterPath.includes('hits.hits._source.license.*')) {
-              resolve(
+              return resolve(
                 fillLicense(
                   {
                     status: 'active',
@@ -228,7 +250,12 @@ describe('getLicenseExpiration', () => {
                 )
               );
             }
-            resolve({});
+
+            if (filterPath.includes('hits.hits._source.cluster_uuid')) {
+              return resolve(fillCluster(clusterUuid));
+            }
+
+            return resolve({});
           });
         }
       ),
@@ -238,14 +265,16 @@ describe('getLicenseExpiration', () => {
 
     const state = {};
 
-    const result: AlertState = (await alert.executor({
+    const result: AlertCommonState = (await alert.executor({
       ...alertExecutorOptions,
       services,
       params,
       state,
-    })) as AlertState;
+    })) as AlertCommonState;
 
-    const newState: AlertClusterState = result[clusterUuid] as AlertClusterState;
+    const newState: AlertLicensePerClusterState = result[
+      clusterUuid
+    ] as AlertLicensePerClusterState;
 
     expect(newState.expiredCheckDateMS > 0).toBe(true);
     expect(scheduleActions.mock.calls.length).toBe(1);
@@ -290,7 +319,7 @@ describe('getLicenseExpiration', () => {
         (method: string, { filterPath }): Promise<any> => {
           return new Promise(resolve => {
             if (filterPath.includes('hits.hits._source.license.*')) {
-              resolve(
+              return resolve(
                 fillLicense(
                   {
                     status: 'active',
@@ -303,7 +332,12 @@ describe('getLicenseExpiration', () => {
                 )
               );
             }
-            resolve({});
+
+            if (filterPath.includes('hits.hits._source.cluster_uuid')) {
+              return resolve(fillCluster(clusterUuid));
+            }
+
+            return resolve({});
           });
         }
       ),
@@ -311,23 +345,32 @@ describe('getLicenseExpiration', () => {
       savedObjectsClient,
     };
 
-    const state: AlertState = {
+    const state: AlertCommonState = {
       [clusterUuid]: {
         expiredCheckDateMS: moment()
           .subtract(1, 'day')
           .valueOf(),
-        ui: { isFiring: true, severity: 0, message: null, resolvedMS: 0, expirationTime: 0 },
-      },
+        ui: {
+          isFiring: true,
+          severity: 0,
+          message: null,
+          resolvedMS: 0,
+          lastCheckedMS: 0,
+          triggeredMS: 0,
+        },
+      } as AlertLicensePerClusterState,
     };
 
-    const result: AlertState = (await alert.executor({
+    const result: AlertCommonState = (await alert.executor({
       ...alertExecutorOptions,
       services,
       params,
       state,
-    })) as AlertState;
+    })) as AlertCommonState;
 
-    const newState: AlertClusterState = result[clusterUuid] as AlertClusterState;
+    const newState: AlertLicensePerClusterState = result[
+      clusterUuid
+    ] as AlertLicensePerClusterState;
     expect(newState.expiredCheckDateMS).toBe(0);
     expect(scheduleActions.mock.calls.length).toBe(1);
     expect(scheduleActions.mock.calls[0][1].subject).toBe(
@@ -371,7 +414,7 @@ describe('getLicenseExpiration', () => {
         (method: string, { filterPath }): Promise<any> => {
           return new Promise(resolve => {
             if (filterPath.includes('hits.hits._source.license.*')) {
-              resolve(
+              return resolve(
                 fillLicense(
                   {
                     status: 'active',
@@ -384,7 +427,12 @@ describe('getLicenseExpiration', () => {
                 )
               );
             }
-            resolve({});
+
+            if (filterPath.includes('hits.hits._source.cluster_uuid')) {
+              return resolve(fillCluster(clusterUuid));
+            }
+
+            return resolve({});
           });
         }
       ),
@@ -393,15 +441,17 @@ describe('getLicenseExpiration', () => {
     };
 
     const state = {};
-    const result: AlertState = (await alert.executor({
+    const result: AlertCommonState = (await alert.executor({
       ...alertExecutorOptions,
       services,
       params,
       state,
-    })) as AlertState;
+    })) as AlertCommonState;
 
-    const newState: AlertClusterState = result[clusterUuid] as AlertClusterState;
-    expect(newState.expiredCheckDateMS).toBe(undefined);
+    const newState: AlertLicensePerClusterState = result[
+      clusterUuid
+    ] as AlertLicensePerClusterState;
+    expect(newState.expiredCheckDateMS).toBe(0);
     expect(scheduleActions).not.toHaveBeenCalled();
   });
 
@@ -440,7 +490,7 @@ describe('getLicenseExpiration', () => {
         (method: string, { filterPath }): Promise<any> => {
           return new Promise(resolve => {
             if (filterPath.includes('hits.hits._source.license.*')) {
-              resolve(
+              return resolve(
                 fillLicense(
                   {
                     status: 'active',
@@ -453,7 +503,12 @@ describe('getLicenseExpiration', () => {
                 )
               );
             }
-            resolve({});
+
+            if (filterPath.includes('hits.hits._source.cluster_uuid')) {
+              return resolve(fillCluster(clusterUuid));
+            }
+
+            return resolve({});
           });
         }
       ),
@@ -462,14 +517,16 @@ describe('getLicenseExpiration', () => {
     };
 
     const state = {};
-    const result: AlertState = (await alert.executor({
+    const result: AlertCommonState = (await alert.executor({
       ...alertExecutorOptions,
       services,
       params,
       state,
-    })) as AlertState;
+    })) as AlertCommonState;
 
-    const newState: AlertClusterState = result[clusterUuid] as AlertClusterState;
+    const newState: AlertLicensePerClusterState = result[
+      clusterUuid
+    ] as AlertLicensePerClusterState;
     expect(newState.expiredCheckDateMS > 0).toBe(true);
     expect(scheduleActions.mock.calls.length).toBe(1);
   });

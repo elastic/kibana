@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertLicense, AlertCluster } from '../../alerts/types';
+import { AlertLicense, AlertCommonCluster } from '../../alerts/types';
 
 export async function fetchLicenses(
   callCluster: any,
-  clusters: AlertCluster[],
+  clusters: AlertCommonCluster[],
   index: string
 ): Promise<AlertLicense[]> {
   const params = {
@@ -50,17 +50,12 @@ export async function fetchLicenses(
 
   const response = await callCluster('search', params);
   return get<any>(response, 'hits.hits', []).map((hit: any) => {
-    const clusterName: string =
-      get(hit, '_source.cluster_settings.cluster.metadata.display_name') ||
-      get(hit, '_source.cluster_name') ||
-      get(hit, '_source.cluster_uuid');
     const rawLicense: any = get(hit, '_source.license', {});
     const license: AlertLicense = {
       status: rawLicense.status,
       type: rawLicense.type,
       expiryDateMS: rawLicense.expiry_date_in_millis,
       clusterUuid: get(hit, '_source.cluster_uuid'),
-      clusterName,
     };
     return license;
   });

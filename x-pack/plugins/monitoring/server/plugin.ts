@@ -47,6 +47,7 @@ import {
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerting/server';
 import { getLicenseExpiration } from './alerts/license_expiration';
+import { getClusterState } from './alerts/cluster_state';
 import { InfraPluginSetup } from '../../infra/server';
 
 export interface LegacyAPI {
@@ -146,6 +147,17 @@ export class Plugin {
     if (KIBANA_ALERTING_ENABLED) {
       plugins.alerting.registerType(
         getLicenseExpiration(
+          async () => {
+            const coreStart = (await core.getStartServices())[0];
+            return coreStart.uiSettings;
+          },
+          cluster,
+          this.getLogger,
+          config.ui.ccs.enabled
+        )
+      );
+      plugins.alerting.registerType(
+        getClusterState(
           async () => {
             const coreStart = (await core.getStartServices())[0];
             return coreStart.uiSettings;

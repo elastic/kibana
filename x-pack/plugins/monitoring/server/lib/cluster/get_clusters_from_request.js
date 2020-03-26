@@ -102,15 +102,8 @@ export async function getClustersFromRequest(
 
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
       if (KIBANA_ALERTING_ENABLED) {
-        const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-        const callCluster = (...args) => callWithRequest(req, ...args);
-        cluster.alerts = await fetchStatus(
-          callCluster,
-          start,
-          end,
-          cluster.cluster_uuid,
-          req.server
-        );
+        const alertsClient = req.getAlertsClient ? req.getAlertsClient() : null;
+        cluster.alerts = await fetchStatus(alertsClient, start, end, req.logger);
       } else {
         cluster.alerts = await alertsClusterSearch(
           req,
