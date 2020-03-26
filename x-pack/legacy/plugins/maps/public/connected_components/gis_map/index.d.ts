@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Filter } from 'src/plugins/data/public';
-import { RenderTooltipContentParams, RenderToolTipContent } from '../../embeddable/types';
+import { RenderToolTipContent } from '../../layers/tooltips/tooltip_property';
 
 export const GisMap: React.ComponentType<{
   addFilters: ((filters: Filter[]) => void) | null;

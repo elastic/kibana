@@ -8,7 +8,7 @@
 import { Filter, Query } from 'src/plugins/data/public';
 import { AnyAction } from 'redux';
 import { LAYER_TYPE } from '../../common/constants';
-import { DataMeta, MapFilters } from '../../common/data_request_descriptor_types';
+import { DataMeta, MapFilters } from '../../common/descriptor_types';
 
 export type SyncContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;

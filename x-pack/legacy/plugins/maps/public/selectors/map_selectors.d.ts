@@ -7,10 +7,10 @@
 import { AnyAction } from 'redux';
 import { MapCenter } from '../actions/map_actions';
 
-export function getHiddenLayerIds(config: unknown): string[];
+export function getHiddenLayerIds(state: unknown): string[];
 
-export function getMapZoom(config: unknown): number;
+export function getMapZoom(state: unknown): number;
 
-export function getMapCenter(config: unknown): MapCenter;
+export function getMapCenter(state: unknown): MapCenter;
 
 export function getQueryableUniqueIndexPatternIds(state: unknown): string[];
