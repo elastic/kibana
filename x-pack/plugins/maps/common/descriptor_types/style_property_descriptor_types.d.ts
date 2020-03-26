@@ -12,7 +12,7 @@ import {
   VECTOR_STYLES,
   STYLE_TYPE,
   LAYER_STYLE_TYPE,
-} from './constants';
+} from '../constants';
 
 // Non-static/dynamic options
 export type SymbolizeAsOptions = {
