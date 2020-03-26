@@ -13,42 +13,43 @@ import {
   pluck,
   startWith,
   switchMap,
-  withLatestFrom,
   map,
 } from 'rxjs/operators';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
-import { JobValidationResult, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
+import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
+import { ErrorResponse } from '../../../../../../../common/types/errors';
 
 export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
 
 export const modelMemoryEstimatorProvider = (
   modelMemoryCheck$: Observable<CalculatePayload>,
-  validationResults$: Observable<JobValidationResult>
+  jobValidator: JobValidator
 ) => {
-  const error$ = new Subject<Error>();
+  const error$ = new Subject<ErrorResponse['body']>();
 
   return {
-    get error$(): Observable<Error> {
+    get error$(): Observable<ErrorResponse['body']> {
       return error$.asObservable();
     },
     get updates$(): Observable<string> {
       return modelMemoryCheck$.pipe(
+        // delay the request, making sure the validation is completed
         debounceTime(VALIDATION_DELAY_MS + 100),
+        // clone the object to compare payloads and proceed further only
+        // if the configuration has been changed
         map(cloneDeep),
         distinctUntilChanged(isEqual),
-        withLatestFrom(validationResults$),
-        switchMap(([payload, validationResults]) => {
-          const isPayloadValid =
-            payload.analysisConfig?.detectors?.length > 0 && validationResults.bucketSpan.valid;
+        switchMap(payload => {
+          const isPayloadValid = jobValidator.isPickFieldsStepValid;
 
           return isPayloadValid
             ? ml.calculateModelMemoryLimit$(payload).pipe(
                 pluck('modelMemoryLimit'),
                 catchError(error => {
                   // eslint-disable-next-line no-console
-                  console.error('Model memory limit could not be calculated', error);
-                  error$.next(error);
+                  console.error('Model memory limit could not be calculated', error.body);
+                  error$.next(error.body);
                   return of(DEFAULT_MODEL_MEMORY_LIMIT);
                 })
               )

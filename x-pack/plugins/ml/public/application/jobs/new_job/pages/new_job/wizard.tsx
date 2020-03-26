@@ -89,7 +89,7 @@ export const Wizard: FC<Props> = ({
   useEffect(() => {
     const estimator = modelMemoryEstimatorProvider(
       jobCreator.modelMemoryEstimationPayload$,
-      jobValidator.validationResult$
+      jobValidator
     );
 
     const subscription = new Subscription();
@@ -110,11 +110,12 @@ export const Wizard: FC<Props> = ({
 
     subscription.add(
       estimator.error$.subscribe(error => {
-        notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
-            defaultMessage: 'Model memory limit could not be calculated',
-          }),
-        });
+        notifications.toasts.addWarning(
+          i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
+            defaultMessage: 'Model memory limit could not be calculated: {error}',
+            values: { error: error.message },
+          })
+        );
       })
     );
 

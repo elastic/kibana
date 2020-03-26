@@ -7,7 +7,7 @@
 import { useFakeTimers, SinonFakeTimers } from 'sinon';
 import { CalculatePayload, modelMemoryEstimatorProvider } from './model_memory_estimator';
 import { Subject } from 'rxjs';
-import { JobValidationResult } from '../../job_validator/job_validator';
+import { JobValidator } from '../../job_validator';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 
@@ -26,17 +26,16 @@ jest.mock('../../../../../services/ml_api_service', () => {
 describe('delay', () => {
   let clock: SinonFakeTimers;
   let modelMemoryEstimator: ReturnType<typeof modelMemoryEstimatorProvider>;
-  let fakeModelMemoryCheck$: Subject<CalculatePayload>;
-  let fakeValidationResults$: Subject<JobValidationResult>;
+  let mockModelMemoryCheck$: Subject<CalculatePayload>;
+  let mockJobValidator: JobValidator;
 
   beforeEach(() => {
     clock = useFakeTimers();
-    fakeModelMemoryCheck$ = new Subject<CalculatePayload>();
-    fakeValidationResults$ = new Subject<JobValidationResult>();
-    modelMemoryEstimator = modelMemoryEstimatorProvider(
-      fakeModelMemoryCheck$,
-      fakeValidationResults$
-    );
+    mockModelMemoryCheck$ = new Subject<CalculatePayload>();
+    mockJobValidator = {
+      isPickFieldsStepValid: true,
+    } as JobValidator;
+    modelMemoryEstimator = modelMemoryEstimatorProvider(mockModelMemoryCheck$, mockJobValidator);
   });
   afterEach(() => {
     clock.restore();
@@ -54,8 +53,7 @@ describe('delay', () => {
 
     modelMemoryEstimator.updates$.subscribe(spy);
 
-    fakeModelMemoryCheck$.next({ analysisConfig: { detectors: [{}] } } as CalculatePayload);
-    fakeValidationResults$.next({ bucketSpan: { valid: true } } as JobValidationResult);
+    mockModelMemoryCheck$.next({ analysisConfig: { detectors: [{}] } } as CalculatePayload);
 
     clock.tick(601);
     expect(spy).toHaveBeenCalledWith('15MB');
@@ -66,20 +64,19 @@ describe('delay', () => {
 
     modelMemoryEstimator.updates$.subscribe(spy);
 
-    fakeModelMemoryCheck$.next({
-      analysisConfig: { detectors: [{ by_field_name: 'test' }] },
-    } as CalculatePayload);
-    fakeValidationResults$.next({ bucketSpan: { valid: true } } as JobValidationResult);
-
-    clock.tick(601);
-
-    fakeModelMemoryCheck$.next({
+    mockModelMemoryCheck$.next({
       analysisConfig: { detectors: [{ by_field_name: 'test' }] },
     } as CalculatePayload);
 
     clock.tick(601);
 
-    fakeModelMemoryCheck$.next({
+    mockModelMemoryCheck$.next({
+      analysisConfig: { detectors: [{ by_field_name: 'test' }] },
+    } as CalculatePayload);
+
+    clock.tick(601);
+
+    mockModelMemoryCheck$.next({
       analysisConfig: { detectors: [{ by_field_name: 'test' }] },
     } as CalculatePayload);
 
@@ -94,10 +91,11 @@ describe('delay', () => {
 
     modelMemoryEstimator.updates$.subscribe(spy);
 
-    fakeModelMemoryCheck$.next(({
+    mockModelMemoryCheck$.next(({
       analysisConfig: { detectors: [] },
     } as unknown) as CalculatePayload);
-    fakeValidationResults$.next({ bucketSpan: { valid: false } } as JobValidationResult);
+    // @ts-ignore
+    mockJobValidator.isPickFieldsStepValid = false;
 
     clock.tick(601);
 
