@@ -7,6 +7,21 @@
 import { Adapters } from 'src/plugins/inspector/public';
 import { AnyAction } from 'redux';
 
-export function setEventHandlers(handlers: unknown): AnyAction;
+interface EventHandlers {
+  /**
+   * Take action on data load.
+   */
+  onDataLoad: (layerId: string, dataId: string) => void;
+  /**
+   * Take action on data load end.
+   */
+  onDataLoadEnd: (layerId: string, dataId: string, resultMeta: object) => void;
+  /**
+   * Take action on data load error.
+   */
+  onDataLoadError: (layerId: string, dataId: string, errorMessage: string) => void;
+}
+
+export function setEventHandlers(eventHandlers?: EventHandlers): AnyAction;
 
 export function getInspectorAdapters(args: unknown): Adapters | undefined;

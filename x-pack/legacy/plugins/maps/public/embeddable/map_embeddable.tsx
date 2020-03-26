@@ -52,13 +52,14 @@ import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors'
 import {
   getInspectorAdapters,
   setEventHandlers,
+  EventHandlers,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { RenderTooltipContentParams } from './types';
+import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
 
-interface MapConfig {
+interface MapEmbeddableConfig {
   editUrl?: string;
   indexPatterns: IIndexPattern[];
   editable: boolean;
@@ -84,15 +85,15 @@ export interface MapEmbeddableInput extends EmbeddableInput {
   hideFilterActions?: boolean;
 }
 
-export interface MapOutput extends EmbeddableOutput {
+export interface MapEmbeddableOutput extends EmbeddableOutput {
   indexPatterns: IIndexPattern[];
 }
 
-export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapOutput> {
+export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
-  private _renderTooltipContent?: (params: RenderTooltipContentParams) => React.ComponentType;
-  private _eventHandlers?: unknown;
+  private _renderTooltipContent?: RenderToolTipContent;
+  private _eventHandlers?: EventHandlers;
   private _layerList: unknown[];
   private _store: MapStore;
   private _subscription: Subscription;
@@ -104,11 +105,11 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapOutput> {
   private _unsubscribeFromStore?: Unsubscribe;
 
   constructor(
-    config: MapConfig,
+    config: MapEmbeddableConfig,
     initialInput: MapEmbeddableInput,
     parent?: IContainer,
-    renderTooltipContent?: (params: unknown) => React.ComponentType,
-    eventHandlers?: unknown
+    renderTooltipContent?: RenderToolTipContent,
+    eventHandlers?: EventHandlers
   ) {
     super(
       initialInput,
