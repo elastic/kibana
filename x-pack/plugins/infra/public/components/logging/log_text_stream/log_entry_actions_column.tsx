@@ -5,19 +5,19 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiTitle,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LogEntryColumnContent } from './log_entry_column';
-import { euiStyled } from '../../../../../observability/public';
+import {
+  euiStyled,
+  ActionMenu,
+  Section,
+  SectionTitle,
+  SectionLinks,
+  SectionLink,
+} from '../../../../../observability/public';
 
 interface LogEntryActionsColumnProps {
   isHovered: boolean;
@@ -29,6 +29,10 @@ interface LogEntryActionsColumnProps {
 
 const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
   defaultMessage: 'View Details',
+});
+
+const LOG_DETAILS_LABEL = i18n.translate('xpack.infra.logs.logEntryActionsDetailsButton', {
+  defaultMessage: 'Log details',
 });
 
 export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
@@ -58,28 +62,19 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
     <ActionsColumnContent>
       {isHovered ? (
         <AbsoluteWrapper>
-          <EuiPopover button={button} isOpen={isMenuOpen} closePopover={onCloseMenu}>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <EuiTitle size="xxs">
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.infra.logs.logEntryActionsMenuTitle"
-                      defaultMessage="Log line details"
-                    />
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <CtaButton onClick={handleClickViewDetails}>
-                  <FormattedMessage
-                    id="xpack.infra.logs.logEntryActionsDetailsButton"
-                    defaultMessage="Log details"
-                  />
-                </CtaButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPopover>
+          <ActionMenu closePopover={onCloseMenu} isOpen={isMenuOpen} button={button}>
+            <Section>
+              <SectionTitle>
+                <FormattedMessage
+                  id="xpack.infra.logs.logEntryActionsMenuTitle"
+                  defaultMessage="Log line details"
+                />
+              </SectionTitle>
+              <SectionLinks>
+                <SectionLink label={LOG_DETAILS_LABEL} onClick={handleClickViewDetails} />
+              </SectionLinks>
+            </Section>
+          </ActionMenu>
         </AbsoluteWrapper>
       ) : null}
     </ActionsColumnContent>
