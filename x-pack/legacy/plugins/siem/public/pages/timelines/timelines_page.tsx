@@ -42,9 +42,11 @@ const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
     <>
       <WrapperPage>
         <HeaderPage border title={i18n.PAGE_TITLE}>
-          <EuiButton iconType="indexOpen" onClick={onImportTimelineBtnClick}>
-            {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
-          </EuiButton>
+          {capabilitiesCanUserCRUD && (
+            <EuiButton iconType="indexOpen" onClick={onImportTimelineBtnClick}>
+              {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
+            </EuiButton>
+          )}
         </HeaderPage>
 
         <TimelinesContainer>
