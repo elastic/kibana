@@ -104,8 +104,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
   const { uiMetricService } = useServices();
   const decodedTemplateName = decodePath(templateName);
   const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(decodedTemplateName);
-  // TS complains if we use destructuring here. Fixed in 3.6.0 (https://github.com/microsoft/TypeScript/pull/31711).
-  const isManaged = templateDetails ? templateDetails.isManaged : undefined;
+  const isManaged = templateDetails?.isManaged;
   const [templateToDelete, setTemplateToDelete] = useState<Array<TemplateDeserialized['name']>>([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);

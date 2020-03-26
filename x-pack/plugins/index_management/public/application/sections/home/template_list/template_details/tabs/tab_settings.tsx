@@ -14,7 +14,9 @@ interface Props {
 }
 
 export const TabSettings: React.FunctionComponent<Props> = ({ templateDetails }) => {
-  const { settings } = templateDetails;
+  const {
+    template: { settings },
+  } = templateDetails;
 
   if (settings && Object.keys(settings).length) {
     return (

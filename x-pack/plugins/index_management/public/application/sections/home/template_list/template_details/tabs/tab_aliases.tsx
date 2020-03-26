@@ -14,7 +14,9 @@ interface Props {
 }
 
 export const TabAliases: React.FunctionComponent<Props> = ({ templateDetails }) => {
-  const { aliases } = templateDetails;
+  const {
+    template: { aliases },
+  } = templateDetails;
 
   if (aliases && Object.keys(aliases).length) {
     return (

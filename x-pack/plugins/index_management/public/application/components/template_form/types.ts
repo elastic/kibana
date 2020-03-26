@@ -7,11 +7,18 @@
 import { TemplateDeserialized } from '../../../../common';
 
 export interface StepProps {
-  template: Partial<TemplateDeserialized>;
+  template?: TemplateDeserialized;
   setDataGetter: (dataGetter: DataGetterFunc) => void;
   updateCurrentStep: (step: number) => void;
   onStepValidityChange: (isValid: boolean | undefined) => void;
   isEditing?: boolean;
 }
 
-export type DataGetterFunc = () => Promise<{ isValid: boolean; data: any }>;
+export type DataGetterFunc = () => Promise<{
+  /** Is the step data valid or not */
+  isValid: boolean;
+  /** The current step data (can be invalid) */
+  data: any;
+  /** Optional "slice" of the complete object the step is updating  */
+  path?: string;
+}>;

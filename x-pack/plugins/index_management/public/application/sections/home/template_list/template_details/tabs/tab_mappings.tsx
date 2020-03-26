@@ -14,7 +14,9 @@ interface Props {
 }
 
 export const TabMappings: React.FunctionComponent<Props> = ({ templateDetails }) => {
-  const { mappings } = templateDetails;
+  const {
+    template: { mappings },
+  } = templateDetails;
 
   if (mappings && Object.keys(mappings).length) {
     return (

@@ -47,7 +47,16 @@ const stepComponentMap: { [key: number]: React.FunctionComponent<StepProps> } = 
 };
 
 export const TemplateForm: React.FunctionComponent<Props> = ({
-  defaultValue = { isManaged: false },
+  defaultValue = {
+    name: 'untitled',
+    indexPatterns: [],
+    template: {},
+    isManaged: false,
+    _kbnMeta: {
+      // When the V2 API will be ready, we will create V2 template format
+      formatVersion: 1,
+    },
+  },
   onSave,
   isSaving,
   saveError,
@@ -63,7 +72,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     5: defaultValidation,
   });
 
-  const template = useRef<Partial<TemplateDeserialized>>(defaultValue);
+  const template = useRef<TemplateDeserialized>(defaultValue);
   const stepsDataGetters = useRef<Record<number, DataGetterFunc>>({});
 
   const lastStep = Object.keys(stepComponentMap).length;
@@ -91,17 +100,24 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
   );
 
   const validateAndGetDataFromCurrentStep = async () => {
-    const validateAndGetData = stepsDataGetters.current[currentStep];
+    const validateAndGetStepData = stepsDataGetters.current[currentStep];
 
-    if (!validateAndGetData) {
+    if (!validateAndGetStepData) {
       throw new Error(`No data getter has been set for step "${currentStep}"`);
     }
 
-    const { isValid, data } = await validateAndGetData();
+    const { isValid, data, path } = await validateAndGetStepData();
 
     if (isValid) {
-      // Update the template object
-      template.current = { ...template.current, ...data };
+      // Update the template object with the current step data
+      if (path) {
+        template.current = {
+          ...template.current,
+          [path]: { ...template.current[path as 'template'], ...data },
+        };
+      } else {
+        template.current = { ...template.current, ...data };
+      }
     }
 
     return { isValid, data };
@@ -111,9 +127,9 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     // All steps needs validation, except for the last step
     const shouldValidate = currentStep !== lastStep;
 
-    let isValid = isStepValid;
     if (shouldValidate) {
-      isValid = isValid === false ? false : (await validateAndGetDataFromCurrentStep()).isValid;
+      const isValid =
+        isStepValid === false ? false : (await validateAndGetDataFromCurrentStep()).isValid;
 
       // If step is invalid do not let user proceed
       if (!isValid) {
@@ -224,7 +240,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
                     iconType="check"
                     onClick={onSave.bind(
                       null,
-                      stripEmptyFields(template.current) as TemplateDeserialized
+                      stripEmptyFields(template.current!) as TemplateDeserialized
                     )}
                     data-test-subj="submitButton"
                     isLoading={isSaving}

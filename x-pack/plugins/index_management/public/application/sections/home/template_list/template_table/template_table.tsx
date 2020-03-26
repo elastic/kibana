@@ -133,10 +133,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           }),
           icon: 'pencil',
           type: 'icon',
-          onClick: ({ name }: TemplateDeserialized) => {
+          onClick: ({ name }: TemplateListItem) => {
             editTemplate(name);
           },
-          enabled: ({ isManaged }: TemplateDeserialized) => !isManaged,
+          enabled: ({ isManaged }: TemplateListItem) => !isManaged,
         },
         {
           type: 'icon',
@@ -147,7 +147,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             defaultMessage: 'Clone this template',
           }),
           icon: 'copy',
-          onClick: ({ name }: TemplateDeserialized) => {
+          onClick: ({ name }: TemplateListItem) => {
             cloneTemplate(name);
           },
         },
@@ -161,11 +161,11 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           icon: 'trash',
           color: 'danger',
           type: 'icon',
-          onClick: ({ name }: TemplateDeserialized) => {
+          onClick: ({ name }: TemplateListItem) => {
             setTemplatesToDelete([name]);
           },
           isPrimary: true,
-          enabled: ({ isManaged }: TemplateDeserialized) => !isManaged,
+          enabled: ({ isManaged }: TemplateListItem) => !isManaged,
         },
       ],
     },
@@ -185,7 +185,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
-    selectable: ({ isManaged }: TemplateDeserialized) => !isManaged,
+    selectable: ({ isManaged }: TemplateListItem) => !isManaged,
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate('xpack.idxMgmt.templateList.table.deleteManagedTemplateTooltip', {

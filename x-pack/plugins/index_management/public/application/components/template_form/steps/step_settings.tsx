@@ -29,7 +29,7 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
 }) => {
   const { content, setContent, error } = useJsonStep({
     prop: 'settings',
-    defaultValue: template.settings,
+    defaultValue: template?.template.settings,
     setDataGetter,
     onStepValidityChange,
   });
