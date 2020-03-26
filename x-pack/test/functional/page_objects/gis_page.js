@@ -514,11 +514,6 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('uploadedGeoJson');
     }
 
-    async selectGeoJsonUploadSource() {
-      log.debug(`Select upload geojson source`);
-      await testSubjects.click('uploadedGeoJson');
-    }
-
     async uploadJsonFileForIndexing(path) {
       await PageObjects.common.setFileInputPath(path);
       log.debug(`File selected`);
