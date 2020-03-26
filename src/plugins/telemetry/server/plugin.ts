@@ -160,7 +160,7 @@ export class TelemetryPlugin implements Plugin {
       config$: this.config$,
       getSavedObjectsClient,
     });
-    registerTelemetryUsageCollector(usageCollection);
+    registerTelemetryUsageCollector(usageCollection, this.config$);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(usageCollection, registerType, getSavedObjectsClient);

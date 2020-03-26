@@ -103,6 +103,7 @@ const setup = (space: Space) => {
   coreSetup.getStartServices.mockResolvedValue([
     coreMock.createStart(),
     { features: featuresStart },
+    {},
   ]);
 
   const spacesService = spacesServiceMock.createSetupContract();
