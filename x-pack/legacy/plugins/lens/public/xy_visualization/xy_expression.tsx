@@ -28,14 +28,15 @@ import {
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { CoreSetup } from 'kibana/public';
 import { EmbeddableVisTriggerContext } from '../../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/embeddable/events';
 import { LensMultiTable, FormatFactory } from '../types';
+import { XyVisualizationPluginStartPlugins } from './index';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { getExecuteTriggerActions } from './services';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -110,6 +111,7 @@ export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartTheme: PartialTheme;
   timeZone: string;
+  core: CoreSetup<XyVisualizationPluginStartPlugins>;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -119,7 +121,7 @@ export const getXyChartRenderer = (dependencies: {
   validate: () => undefined,
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
-    const executeTriggerActions = getExecuteTriggerActions();
+    const [, startPluginServices] = await dependencies.core.getStartServices();
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
@@ -129,7 +131,7 @@ export const getXyChartRenderer = (dependencies: {
           formatFactory={formatFactory}
           chartTheme={dependencies.chartTheme}
           timeZone={dependencies.timeZone}
-          executeTriggerActions={executeTriggerActions}
+          executeTriggerActions={startPluginServices.uiActions.executeTriggerActions}
         />
       </I18nProvider>,
       domNode,

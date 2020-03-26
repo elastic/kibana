@@ -5,7 +5,7 @@
  */
 
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { CoreSetup, IUiSettingsClient, CoreStart } from 'src/core/public';
+import { CoreSetup, IUiSettingsClient } from 'src/core/public';
 import moment from 'moment-timezone';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { xyVisualization } from './xy_visualization';
@@ -13,7 +13,6 @@ import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { setExecuteTriggerActions } from './services';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
@@ -21,7 +20,7 @@ export interface XyVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
 }
 
-interface XyVisualizationPluginStartPlugins {
+export interface XyVisualizationPluginStartPlugins {
   uiActions: UiActionsStart;
 }
 
@@ -38,7 +37,7 @@ export class XyVisualization {
   constructor() {}
 
   setup(
-    core: CoreSetup,
+    core: CoreSetup<XyVisualizationPluginStartPlugins>,
     { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     expressions.registerFunction(() => legendConfig);
@@ -53,12 +52,10 @@ export class XyVisualization {
           ? EUI_CHARTS_THEME_DARK.theme
           : EUI_CHARTS_THEME_LIGHT.theme,
         timeZone: getTimeZone(core.uiSettings),
+        core,
       })
     );
 
     editorFrame.registerVisualization(xyVisualization);
-  }
-  start(core: CoreStart, { uiActions }: XyVisualizationPluginStartPlugins) {
-    setExecuteTriggerActions(uiActions.executeTriggerActions);
   }
 }
