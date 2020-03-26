@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { CaseResponseRt, CommentRequestRt, throwErrors } from '../../../../../common/api';
+import { CaseResponseRt, CommentRequestRt, excess, throwErrors } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { escapeHatch, transformNewComment, wrapError, flattenCaseSavedObject } from '../../utils';
@@ -32,7 +32,7 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
         const client = context.core.savedObjects.client;
         const caseId = request.params.case_id;
         const query = pipe(
-          CommentRequestRt.decode(request.body),
+          excess(CommentRequestRt).decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 

@@ -282,6 +282,7 @@ export const CaseComponent = React.memo<CaseProps>(
                   data-test-subj="case-view-user-list-participants"
                   email={emailContent}
                   headline={i18n.PARTICIPANTS}
+                  loading={isLoadingUserActions}
                   users={participants}
                 />
                 <TagList
