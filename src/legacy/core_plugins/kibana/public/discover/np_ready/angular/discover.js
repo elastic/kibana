@@ -194,6 +194,8 @@ function discoverController(
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
+  //used for functional testing
+  $scope.fetchCounter = 0;
 
   const getTimeField = () => {
     return isDefaultType($scope.indexPattern) ? $scope.indexPattern.timeFieldName : undefined;
@@ -784,7 +786,7 @@ function discoverController(
   $scope.opts.fetch = $scope.fetch = function() {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
-
+    $scope.fetchCounter++;
     $scope.fetchError = undefined;
 
     // Abort any in-progress requests before fetching again
