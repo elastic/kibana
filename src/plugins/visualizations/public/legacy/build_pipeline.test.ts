@@ -30,8 +30,6 @@ import { Vis } from '..';
 import { dataPluginMock } from '../../../../plugins/data/public/mocks';
 import { IAggConfig } from '../../../../plugins/data/public';
 
-jest.mock('ui/new_platform');
-
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
     it('returns a correctly formatted key/value string', () => {

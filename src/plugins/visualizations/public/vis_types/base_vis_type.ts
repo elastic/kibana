@@ -36,6 +36,8 @@ export interface BaseVisTypeOptions {
   hidden?: boolean;
   requestHandler?: string | unknown;
   responseHandler?: string | unknown;
+  hierarchicalData?: boolean | unknown;
+  setup?: unknown;
 }
 
 export class BaseVisType {
@@ -55,6 +57,8 @@ export class BaseVisType {
   requiresSearch: boolean;
   requestHandler: string | unknown;
   responseHandler: string | unknown;
+  hierarchicalData: boolean | unknown;
+  setup?: unknown;
 
   constructor(opts: BaseVisTypeOptions) {
     if (!opts.icon && !opts.image) {
@@ -85,8 +89,9 @@ export class BaseVisType {
     this.hidden = opts.hidden || false;
     this.requestHandler = opts.requestHandler || 'courier';
     this.responseHandler = opts.responseHandler || 'none';
-
+    this.setup = opts.setup;
     this.requiresSearch = this.requestHandler !== 'none';
+    this.hierarchicalData = opts.hierarchicalData || false;
   }
 
   shouldMarkAsExperimentalInUI() {
