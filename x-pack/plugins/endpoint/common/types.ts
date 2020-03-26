@@ -239,10 +239,18 @@ interface AlertMetadata {
   prev: string | null;
 }
 
+interface AlertState {
+  state: {
+    host_metadata: HostMetadata;
+  };
+}
+
 /**
  * Union of alert data and metadata.
  */
 export type AlertData = AlertEvent & AlertMetadata;
+
+export type AlertDetails = AlertData & AlertState;
 
 export type HostMetadata = Immutable<{
   '@timestamp': number;
