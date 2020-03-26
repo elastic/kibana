@@ -142,13 +142,12 @@ export default ({ getService }: FtrProviderContext) => {
       },
       expected: {
         responseCode: 200,
-        responseBody: { estimatedModelMemoryLimit: '12MB', modelMemoryLimit: '12MB' },
+        responseBody: { estimatedModelMemoryLimit: '11MB', modelMemoryLimit: '11MB' },
       },
     },
   ];
 
-  // failing test, see https://github.com/elastic/kibana/issues/61400
-  describe.skip('calculate model memory limit', function() {
+  describe('calculate model memory limit', function() {
     before(async () => {
       await esArchiver.load('ml/ecommerce');
     });
