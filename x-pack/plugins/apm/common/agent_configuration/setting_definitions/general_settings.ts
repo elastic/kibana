@@ -77,7 +77,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.captureBody.description',
       {
         defaultMessage:
-          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "off".'
+          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables).'
       }
     ),
     options: [
@@ -192,7 +192,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.transactionMaxSpans.description',
       {
         defaultMessage:
-          'Limits the amount of spans that are recorded per transaction. Default is 500.'
+          'Limits the amount of spans that are recorded per transaction.'
       }
     ),
     min: 0,
