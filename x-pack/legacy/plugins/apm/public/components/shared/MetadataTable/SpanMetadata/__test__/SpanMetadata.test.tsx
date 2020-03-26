@@ -10,9 +10,9 @@ import { SpanMetadata } from '..';
 import { Span } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument,
-  MockApmPluginContextWrapper
+  expectTextsNotInDocument
 } from '../../../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderOptions = {
   wrapper: MockApmPluginContextWrapper
