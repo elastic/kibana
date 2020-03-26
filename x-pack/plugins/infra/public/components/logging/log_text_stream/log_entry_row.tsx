@@ -52,21 +52,11 @@ export const LogEntryRow = memo(
     const [isHovered, setIsHovered] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const openMenu = useCallback(() => {
-      setIsMenuOpen(true);
-    }, []);
+    const openMenu = useCallback(() => setIsMenuOpen(true), []);
+    const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
-    const closeMenu = useCallback(() => {
-      setIsMenuOpen(false);
-    }, []);
-
-    const setItemIsHovered = useCallback(() => {
-      setIsHovered(true);
-    }, []);
-
-    const setItemIsNotHovered = useCallback(() => {
-      setIsHovered(false);
-    }, []);
+    const setItemIsHovered = useCallback(() => setIsHovered(true), []);
+    const setItemIsNotHovered = useCallback(() => setIsHovered(false), []);
 
     const openFlyout = useCallback(() => openFlyoutWithItem?.(logEntry.id), [
       openFlyoutWithItem,
