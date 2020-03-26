@@ -18,8 +18,9 @@
  */
 
 import { createServer } from 'http';
-import { resolve } from 'path';
-import { readFileSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { mkdtempSync, readFileSync } from 'fs';
 
 import del from 'del';
 import sinon from 'sinon';
@@ -29,15 +30,17 @@ import Wreck from '@hapi/wreck';
 import { ToolingLog } from '@kbn/dev-utils';
 import { download } from '../download';
 
-const TMP_DESTINATION = resolve(__dirname, '__tmp__');
-beforeEach(async () => {
-  await del(TMP_DESTINATION);
-});
-after(async () => {
-  await del(TMP_DESTINATION);
-});
-
 describe('src/dev/build/tasks/nodejs/download', () => {
+  let TMP_DESTINATION;
+
+  beforeEach(async () => {
+    TMP_DESTINATION = mkdtempSync(join(tmpdir(), 'download-js'));
+  });
+
+  afterEach(async () => {
+    await del(TMP_DESTINATION);
+  });
+
   const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.reset());
 
