@@ -8,10 +8,8 @@
 import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import {
-  FieldMetaOptions,
-  StylePropertyOptions,
-} from '../../../../../common/style_property_descriptor_types';
+import { FieldMetaOptions, StylePropertyOptions } from '../../../../../common/descriptor_types';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 
 type LegendProps = {
   isPointsOnly: boolean;
@@ -23,7 +21,7 @@ export interface IStyleProperty {
   isDynamic(): boolean;
   isComplete(): boolean;
   formatField(value: string | undefined): string;
-  getStyleName(): string;
+  getStyleName(): VECTOR_STYLES;
   getOptions(): StylePropertyOptions;
   renderRangeLegendHeader(): ReactElement<any> | null;
   renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
@@ -34,10 +32,10 @@ export interface IStyleProperty {
 }
 
 export class AbstractStyleProperty implements IStyleProperty {
-  private _options: StylePropertyOptions;
-  private _styleName: string;
+  private readonly _options: StylePropertyOptions;
+  private readonly _styleName: VECTOR_STYLES;
 
-  constructor(options: StylePropertyOptions, styleName: string) {
+  constructor(options: StylePropertyOptions, styleName: VECTOR_STYLES) {
     this._options = options;
     this._styleName = styleName;
   }
@@ -61,7 +59,7 @@ export class AbstractStyleProperty implements IStyleProperty {
     return value == undefined ? '' : value;
   }
 
-  getStyleName(): string {
+  getStyleName(): VECTOR_STYLES {
     return this._styleName;
   }
 

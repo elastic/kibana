@@ -10,6 +10,7 @@ import {
   getScheduleStepsData,
   getStepsData,
   getAboutStepsData,
+  getActionsStepsData,
   getHumanizedDuration,
   getModifiedAboutDetailsData,
   determineDetailsValue,
@@ -17,22 +18,32 @@ import {
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
-import { AboutStepRule, AboutStepRuleDetails, DefineStepRule, ScheduleStepRule } from './types';
+import {
+  AboutStepRule,
+  AboutStepRuleDetails,
+  DefineStepRule,
+  ScheduleStepRule,
+  ActionsStepRule,
+} from './types';
 
 describe('rule helpers', () => {
   describe('getStepsData', () => {
-    test('returns object with about, define, and schedule step properties formatted', () => {
+    test('returns object with about, define, schedule and actions step properties formatted', () => {
       const {
         defineRuleData,
         modifiedAboutRuleDetailsData,
         aboutRuleData,
         scheduleRuleData,
+        ruleActionsData,
       }: GetStepsData = getStepsData({
         rule: mockRuleWithEverything('test-id'),
       });
       const defineRuleStepData = {
         isNew: false,
+        ruleType: 'saved_query',
+        anomalyThreshold: 50,
         index: ['auditbeat-*'],
+        machineLearningJobId: '',
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',
@@ -62,6 +73,10 @@ describe('rule helpers', () => {
           ],
           saved_id: 'test123',
         },
+        timeline: {
+          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+          title: 'Titled timeline',
+        },
       };
       const aboutRuleStepData = {
         description: '24/7',
@@ -90,12 +105,9 @@ describe('rule helpers', () => {
             ],
           },
         ],
-        timeline: {
-          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-          title: 'Titled timeline',
-        },
       };
-      const scheduleRuleStepData = { enabled: true, from: '0s', interval: '5m', isNew: false };
+      const scheduleRuleStepData = { from: '0s', interval: '5m', isNew: false };
+      const ruleActionsStepData = { enabled: true, throttle: undefined, isNew: false, actions: [] };
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
@@ -104,21 +116,12 @@ describe('rule helpers', () => {
       expect(defineRuleData).toEqual(defineRuleStepData);
       expect(aboutRuleData).toEqual(aboutRuleStepData);
       expect(scheduleRuleData).toEqual(scheduleRuleStepData);
+      expect(ruleActionsData).toEqual(ruleActionsStepData);
       expect(modifiedAboutRuleDetailsData).toEqual(aboutRuleDataDetailsData);
     });
   });
 
   describe('getAboutStepsData', () => {
-    test('returns timeline id and title of null if they do not exist on rule', () => {
-      const mockedRule = mockRuleWithEverything('test-id');
-      delete mockedRule.timeline_id;
-      delete mockedRule.timeline_title;
-      const result: AboutStepRule = getAboutStepsData(mockedRule, false);
-
-      expect(result.timeline.id).toBeNull();
-      expect(result.timeline.title).toBeNull();
-    });
-
     test('returns name, description, and note as empty string if detailsView is true', () => {
       const result: AboutStepRule = getAboutStepsData(mockRuleWithEverything('test-id'), true);
 
@@ -180,6 +183,9 @@ describe('rule helpers', () => {
       const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
       const expected = {
         isNew: false,
+        ruleType: 'saved_query',
+        anomalyThreshold: 50,
+        machineLearningJobId: '',
         index: ['auditbeat-*'],
         queryBar: {
           query: {
@@ -189,12 +195,16 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: "Garrett's IP",
         },
+        timeline: {
+          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+          title: 'Untitled timeline',
+        },
       };
 
       expect(result).toEqual(expected);
     });
 
-    test('returns with saved_id of null if value does not exist on rule', () => {
+    test('returns with saved_id of undefined if value does not exist on rule', () => {
       const mockedRule = {
         ...mockRule('test-id'),
       };
@@ -202,6 +212,9 @@ describe('rule helpers', () => {
       const result: DefineStepRule = getDefineStepsData(mockedRule);
       const expected = {
         isNew: false,
+        ruleType: 'saved_query',
+        anomalyThreshold: 50,
+        machineLearningJobId: '',
         index: ['auditbeat-*'],
         queryBar: {
           query: {
@@ -209,11 +222,25 @@ describe('rule helpers', () => {
             language: 'kuery',
           },
           filters: [],
-          saved_id: null,
+          saved_id: undefined,
+        },
+        timeline: {
+          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+          title: 'Untitled timeline',
         },
       };
 
       expect(result).toEqual(expected);
+    });
+
+    test('returns timeline id and title of null if they do not exist on rule', () => {
+      const mockedRule = mockRuleWithEverything('test-id');
+      delete mockedRule.timeline_id;
+      delete mockedRule.timeline_title;
+      const result: DefineStepRule = getDefineStepsData(mockedRule);
+
+      expect(result.timeline.id).toBeNull();
+      expect(result.timeline.title).toBeNull();
     });
   });
 
@@ -257,9 +284,26 @@ describe('rule helpers', () => {
       const result: ScheduleStepRule = getScheduleStepsData(mockedRule);
       const expected = {
         isNew: false,
-        enabled: mockedRule.enabled,
         interval: mockedRule.interval,
         from: '0s',
+      };
+
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe('getActionsStepsData', () => {
+    test('returns expected ActionsStepRule rule object', () => {
+      const mockedRule = {
+        ...mockRule('test-id'),
+        actions: [],
+      };
+      const result: ActionsStepRule = getActionsStepsData(mockedRule);
+      const expected = {
+        actions: [],
+        enabled: mockedRule.enabled,
+        isNew: false,
+        throttle: undefined,
       };
 
       expect(result).toEqual(expected);

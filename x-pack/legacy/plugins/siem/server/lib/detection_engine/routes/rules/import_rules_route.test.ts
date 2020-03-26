@@ -9,6 +9,8 @@ import {
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
   getSimpleRuleWithId,
+  getSimpleRule,
+  getSimpleMlRule,
 } from '../__mocks__/utils';
 import {
   getImportRulesRequest,
@@ -23,8 +25,17 @@ import { createMockConfig, requestContextMock, serverMock, requestMock } from '.
 import { importRulesRoute } from './import_rules_route';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('import_rules_route', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   let config = createMockConfig();
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
@@ -93,6 +104,30 @@ describe('import_rules_route', () => {
   });
 
   describe('unhappy paths', () => {
+    it('returns an error object if creating an ML rule with an insufficient license', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const rules = [getSimpleRule(), getSimpleMlRule('rule-2')];
+      const hapiStreamWithMlRule = buildHapiStream(rulesToNdJsonString(rules));
+      request = getImportRulesRequest(hapiStreamWithMlRule);
+
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [
+          {
+            error: {
+              message:
+                'Your license does not support machine learning. Please upgrade your license.',
+              status_code: 400,
+            },
+            rule_id: 'rule-2',
+          },
+        ],
+        success: false,
+        success_count: 1,
+      });
+    });
+
     test('returns error if createPromiseFromStreams throws error', async () => {
       jest
         .spyOn(createRulesStreamFromNdJson, 'createRulesStreamFromNdJson')

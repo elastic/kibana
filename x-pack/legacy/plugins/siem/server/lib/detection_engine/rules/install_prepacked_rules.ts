@@ -18,6 +18,8 @@ export const installPrepackagedRules = (
 ): Array<Promise<Alert>> =>
   rules.reduce<Array<Promise<Alert>>>((acc, rule) => {
     const {
+      actions,
+      anomaly_threshold: anomalyThreshold,
       description,
       enabled,
       false_positives: falsePositives,
@@ -25,6 +27,7 @@ export const installPrepackagedRules = (
       immutable,
       query,
       language,
+      machine_learning_job_id: machineLearningJobId,
       saved_id: savedId,
       timeline_id: timelineId,
       timeline_title: timelineTitle,
@@ -41,15 +44,19 @@ export const installPrepackagedRules = (
       to,
       type,
       threat,
+      throttle,
       references,
       note,
       version,
+      lists,
     } = rule;
     return [
       ...acc,
       createRules({
         alertsClient,
         actionsClient,
+        actions,
+        anomalyThreshold,
         description,
         enabled,
         falsePositives,
@@ -57,6 +64,7 @@ export const installPrepackagedRules = (
         immutable,
         query,
         language,
+        machineLearningJobId,
         outputIndex,
         savedId,
         timelineId,
@@ -74,9 +82,11 @@ export const installPrepackagedRules = (
         to,
         type,
         threat,
+        throttle,
         references,
         note,
         version,
+        lists,
       }),
     ];
   }, []);

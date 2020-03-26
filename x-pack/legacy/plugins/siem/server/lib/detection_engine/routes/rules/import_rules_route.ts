@@ -24,6 +24,7 @@ import {
   isImportRegular,
   transformError,
   buildSiemResponse,
+  validateLicenseForRuleType,
 } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
@@ -111,6 +112,8 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     return null;
                   }
                   const {
+                    actions,
+                    anomaly_threshold: anomalyThreshold,
                     description,
                     enabled,
                     false_positives: falsePositives,
@@ -118,6 +121,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     immutable,
                     query,
                     language,
+                    machine_learning_job_id: machineLearningJobId,
                     output_index: outputIndex,
                     saved_id: savedId,
                     meta,
@@ -131,6 +135,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     severity,
                     tags,
                     threat,
+                    throttle,
                     to,
                     type,
                     references,
@@ -138,8 +143,15 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     timeline_id: timelineId,
                     timeline_title: timelineTitle,
                     version,
+                    lists,
                   } = parsedRule;
+
                   try {
+                    validateLicenseForRuleType({
+                      license: context.licensing.license,
+                      ruleType: type,
+                    });
+
                     const signalsIndex = siemClient.signalsIndex;
                     const indexExists = await getIndexExists(
                       clusterClient.callAsCurrentUser,
@@ -159,6 +171,8 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                       await createRules({
                         alertsClient,
                         actionsClient,
+                        actions,
+                        anomalyThreshold,
                         description,
                         enabled,
                         falsePositives,
@@ -166,6 +180,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         immutable,
                         query,
                         language,
+                        machineLearningJobId,
                         outputIndex: signalsIndex,
                         savedId,
                         timelineId,
@@ -183,15 +198,18 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         to,
                         type,
                         threat,
+                        throttle,
                         references,
                         note,
                         version,
+                        lists,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
                     } else if (rule != null && request.query.overwrite) {
                       await patchRules({
                         alertsClient,
                         actionsClient,
+                        actions,
                         savedObjectsClient,
                         description,
                         enabled,
@@ -218,9 +236,13 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         to,
                         type,
                         threat,
+                        throttle,
                         references,
                         note,
                         version,
+                        lists,
+                        anomalyThreshold,
+                        machineLearningJobId,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
                     } else if (rule != null) {

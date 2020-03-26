@@ -27,6 +27,8 @@ import * as i18n from './translations';
 import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
+import { RuleType } from '../../../../../containers/detection_engine/rules';
+import { assertUnreachable } from '../../../../../lib/helpers';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -77,12 +79,12 @@ export const buildQueryBarDescription = ({
       },
     ];
   }
-  if (!isEmpty(query.query)) {
+  if (!isEmpty(query)) {
     items = [
       ...items,
       {
         title: <>{i18n.QUERY_LABEL} </>,
-        description: <>{query.query} </>,
+        description: <>{query} </>,
       },
     ];
   }
@@ -265,4 +267,28 @@ export const buildNoteDescription = (label: string, note: string): ListItems[] =
     ];
   }
   return [];
+};
+
+export const buildRuleTypeDescription = (label: string, ruleType: RuleType): ListItems[] => {
+  switch (ruleType) {
+    case 'machine_learning': {
+      return [
+        {
+          title: label,
+          description: i18n.ML_TYPE_DESCRIPTION,
+        },
+      ];
+    }
+    case 'query':
+    case 'saved_query': {
+      return [
+        {
+          title: label,
+          description: i18n.QUERY_TYPE_DESCRIPTION,
+        },
+      ];
+    }
+    default:
+      return assertUnreachable(ruleType);
+  }
 };

@@ -5,13 +5,13 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-
+import { makeMbClampedNumberExpression } from '../style_util';
 import {
   HALF_LARGE_MAKI_ICON_SIZE,
   LARGE_MAKI_ICON_SIZE,
   SMALL_MAKI_ICON_SIZE,
 } from '../symbol_utils';
-import { VECTOR_STYLES } from '../vector_style_defaults';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 import _ from 'lodash';
 import { CircleIcon } from '../components/legend/circle_icon';
 import React, { Fragment } from 'react';
@@ -74,17 +74,24 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   syncIconSizeWithMb(symbolLayerId, mbMap) {
-    if (this._isSizeDynamicConfigComplete(this._options)) {
+    const rangeFieldMeta = this.getRangeFieldMeta();
+    if (this._isSizeDynamicConfigComplete(this._options) && rangeFieldMeta) {
       const halfIconPixels = this.getIconPixelSize() / 2;
-      const targetName = this.getComputedFieldName();
+      const targetName = this.getFieldName();
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
         ['linear'],
-        ['coalesce', ['get', targetName], 0],
-        0,
+        makeMbClampedNumberExpression({
+          minValue: rangeFieldMeta.min,
+          maxValue: rangeFieldMeta.max,
+          fallback: 0,
+          lookupFunction: 'get',
+          fieldName: targetName,
+        }),
+        rangeFieldMeta.min,
         this._options.minSize / halfIconPixels,
-        1,
+        rangeFieldMeta.max,
         this._options.maxSize / halfIconPixels,
       ]);
     } else {
@@ -113,25 +120,35 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   getMbSizeExpression() {
-    if (this._isSizeDynamicConfigComplete(this._options)) {
-      return this._getMbDataDrivenSize({
-        targetName: this.getComputedFieldName(),
-        minSize: this._options.minSize,
-        maxSize: this._options.maxSize,
-      });
+    const rangeFieldMeta = this.getRangeFieldMeta();
+    if (!this._isSizeDynamicConfigComplete(this._options) || !rangeFieldMeta) {
+      return null;
     }
-    return null;
+
+    return this._getMbDataDrivenSize({
+      targetName: this.getFieldName(),
+      minSize: this._options.minSize,
+      maxSize: this._options.maxSize,
+      minValue: rangeFieldMeta.min,
+      maxValue: rangeFieldMeta.max,
+    });
   }
 
-  _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
+  _getMbDataDrivenSize({ targetName, minSize, maxSize, minValue, maxValue }) {
     const lookup = this.supportsMbFeatureState() ? 'feature-state' : 'get';
     return [
       'interpolate',
       ['linear'],
-      ['coalesce', [lookup, targetName], 0],
-      0,
+      makeMbClampedNumberExpression({
+        lookupFunction: lookup,
+        maxValue,
+        minValue,
+        fieldName: targetName,
+        fallback: 0,
+      }),
+      minValue,
       minSize,
-      1,
+      maxValue,
       maxSize,
     ];
   }

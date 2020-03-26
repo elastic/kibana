@@ -4,13 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const totalNumberOfPrebuiltRules = 92;
+
 interface Mitre {
   tactic: string;
   techniques: string[];
 }
 
-export interface Rule {
+export interface CustomRule {
   customQuery: string;
+  name: string;
+  description: string;
+  severity: string;
+  riskScore: string;
+  tags: string[];
+  timelineTemplate?: string;
+  referenceUrls: string[];
+  falsePositivesExamples: string[];
+  mitre: Mitre[];
+}
+
+export interface MachineLearningRule {
+  machineLearningJob: string;
+  anomalyScoreThreshold: string;
   name: string;
   description: string;
   severity: string;
@@ -32,7 +48,7 @@ const mitre2: Mitre = {
   techniques: ['CMSTP (T1191)'],
 };
 
-export const newRule: Rule = {
+export const newRule: CustomRule = {
   customQuery: 'hosts.name: *',
   name: 'New Rule Test',
   description: 'The new rule description.',
@@ -42,4 +58,17 @@ export const newRule: Rule = {
   referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
+};
+
+export const machineLearningRule: MachineLearningRule = {
+  machineLearningJob: 'linux_anomalous_network_service',
+  anomalyScoreThreshold: '20',
+  name: 'New ML Rule Test',
+  description: 'The new ML rule description.',
+  severity: 'Critical',
+  riskScore: '70',
+  tags: ['ML'],
+  referenceUrls: ['https://elastic.co/'],
+  falsePositivesExamples: ['False1'],
+  mitre: [mitre1],
 };

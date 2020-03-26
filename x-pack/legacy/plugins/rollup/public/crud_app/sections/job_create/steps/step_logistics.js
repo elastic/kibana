@@ -26,14 +26,14 @@ import {
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CronEditor } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../legacy_imports';
+import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
+
+import { indices } from '../../../../shared_imports';
 import { getLogisticalDetailsUrl, getCronUrl } from '../../../services';
 import { StepError } from './components';
 
-import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
-
 const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
-const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 export class StepLogistics extends Component {
   static propTypes = {

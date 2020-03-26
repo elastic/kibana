@@ -14,9 +14,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiTitle,
-  EuiButton,
   EuiButtonEmpty,
-  EuiEmptyPrompt,
   EuiI18nNumber,
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -24,15 +22,16 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import { useCapabilities, useGetOneAgentConfig } from '../../../hooks';
-import { Datasource } from '../../../types';
+import { useGetOneAgentConfig } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
-import { DatasourcesTable, EditConfigFlyout } from './components';
+import { EditConfigFlyout } from './components';
 import { LinkedAgentCount } from '../components';
-import { useDetailsUri } from './hooks/use_details_uri';
+import { useAgentConfigLink } from './hooks/use_details_uri';
 import { DETAILS_ROUTER_PATH, DETAILS_ROUTER_SUB_PATH } from './constants';
+import { ConfigDatasourcesView } from './components/datasources';
+import { ConfigYamlView } from './components/yaml';
 
 const Divider = styled.div`
   width: 0;
@@ -57,7 +56,6 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const {
     params: { configId, tabId = '' },
   } = useRouteMatch<{ configId: string; tabId?: string }>();
-  const hasWriteCapabilites = useCapabilities().write;
   const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
@@ -65,7 +63,12 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const agentStatusRequest = useGetAgentStatus(configId);
   const { refreshAgentStatus } = agentStatusRequest;
   const agentStatus = agentStatusRequest.data?.results;
-  const URI = useDetailsUri(configId);
+
+  // Links
+  const configListLink = useAgentConfigLink('list');
+  const configDetailsLink = useAgentConfigLink('details', { configId });
+  const configDetailsYamlLink = useAgentConfigLink('details-yaml', { configId });
+  const configDetailsSettingsLink = useAgentConfigLink('details-settings', { configId });
 
   // Flyout states
   const [isEditConfigFlyoutOpen, setIsEditConfigFlyoutOpen] = useState<boolean>(false);
@@ -83,12 +86,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <div>
-                  <EuiButtonEmpty
-                    iconType="arrowLeft"
-                    href={URI.AGENT_CONFIG_LIST}
-                    flush="left"
-                    size="xs"
-                  >
+                  <EuiButtonEmpty iconType="arrowLeft" href={configListLink} flush="left" size="xs">
                     <FormattedMessage
                       id="xpack.ingestManager.configDetails.viewAgentListTitle"
                       defaultMessage="View all agent configurations"
@@ -123,7 +121,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
         <EuiSpacer size="l" />
       </React.Fragment>
     ),
-    [URI.AGENT_CONFIG_LIST, agentConfig, configId]
+    [configListLink, agentConfig, configId]
   );
 
   const headerRightContent = useMemo(
@@ -134,7 +132,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             label: i18n.translate('xpack.ingestManager.configDetails.summary.revision', {
               defaultMessage: 'Revision',
             }),
-            content: '999', // FIXME: implement version - see: https://github.com/elastic/kibana/issues/56750
+            content: agentConfig?.revision ?? 0,
           },
           { isDivider: true },
           {
@@ -201,15 +199,15 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.datasouces', {
           defaultMessage: 'Data sources',
         }),
-        href: URI.AGENT_CONFIG_DETAILS,
-        isSelected: tabId === '',
+        href: configDetailsLink,
+        isSelected: tabId === '' || tabId === 'datasources',
       },
       {
         id: 'yaml',
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.yamlFile', {
           defaultMessage: 'YAML File',
         }),
-        href: URI.AGENT_CONFIG_DETAILS_YAML,
+        href: configDetailsYamlLink,
         isSelected: tabId === 'yaml',
       },
       {
@@ -217,16 +215,11 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.settings', {
           defaultMessage: 'Settings',
         }),
-        href: URI.AGENT_CONFIG_DETAILS_SETTINGS,
+        href: configDetailsSettingsLink,
         isSelected: tabId === 'settings',
       },
     ];
-  }, [
-    URI.AGENT_CONFIG_DETAILS,
-    URI.AGENT_CONFIG_DETAILS_SETTINGS,
-    URI.AGENT_CONFIG_DETAILS_YAML,
-    tabId,
-  ]);
+  }, [configDetailsLink, configDetailsSettingsLink, configDetailsYamlLink, tabId]);
 
   if (redirectToAgentConfigList) {
     return <Redirect to="/" />;
@@ -290,8 +283,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             <Route
               path={`${DETAILS_ROUTER_PATH}/yaml`}
               render={() => {
-                // TODO: YAML implementation tracked via https://github.com/elastic/kibana/issues/57958
-                return <div>YAML placeholder</div>;
+                return <ConfigYamlView config={agentConfig} />;
               }}
             />
             <Route
@@ -304,57 +296,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             <Route
               path={`${DETAILS_ROUTER_PATH}`}
               render={() => {
-                return (
-                  <DatasourcesTable
-                    datasources={agentConfig.datasources as Datasource[]}
-                    message={
-                      !agentConfig.datasources || agentConfig.datasources.length === 0 ? (
-                        <EuiEmptyPrompt
-                          title={
-                            <h2>
-                              <FormattedMessage
-                                id="xpack.ingestManager.configDetails.noDatasourcesPrompt"
-                                defaultMessage="Config has no data sources"
-                              />
-                            </h2>
-                          }
-                          actions={
-                            <EuiButton
-                              isDisabled={!hasWriteCapabilites}
-                              fill
-                              iconType="plusInCircle"
-                              href={URI.ADD_DATASOURCE}
-                            >
-                              <FormattedMessage
-                                id="xpack.ingestManager.configDetails.addDatasourceButtonText"
-                                defaultMessage="Create data source"
-                              />
-                            </EuiButton>
-                          }
-                        />
-                      ) : null
-                    }
-                    search={{
-                      toolsRight: [
-                        <EuiButton
-                          isDisabled={!hasWriteCapabilites}
-                          iconType="plusInCircle"
-                          href={URI.ADD_DATASOURCE}
-                        >
-                          <FormattedMessage
-                            id="xpack.ingestManager.configDetails.addDatasourceButtonText"
-                            defaultMessage="Create data source"
-                          />
-                        </EuiButton>,
-                      ],
-                      box: {
-                        incremental: true,
-                        schema: true,
-                      },
-                    }}
-                    isSelectable={false}
-                  />
-                );
+                return <ConfigDatasourcesView config={agentConfig} />;
               }}
             />
           </Switch>
