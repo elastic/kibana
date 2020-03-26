@@ -17,100 +17,110 @@
  * under the License.
  */
 
-import { canViewInApp } from '../in_app_url';
+import { Capabilities } from '../../../../../../../../core/public';
+import { canViewInApp } from './in_app_url';
+
+const createCapabilities = (sections: Record<string, any>): Capabilities => {
+  return {
+    navLinks: {},
+    management: {},
+    catalogue: {},
+    ...sections,
+  };
+};
 
 describe('canViewInApp', () => {
   it('should handle saved searches', () => {
-    let uiCapabilities = {
+    let uiCapabilities = createCapabilities({
       discover: {
         show: true,
       },
-    };
+    });
     expect(canViewInApp(uiCapabilities, 'search')).toEqual(true);
     expect(canViewInApp(uiCapabilities, 'searches')).toEqual(true);
 
-    uiCapabilities = {
+    uiCapabilities = createCapabilities({
       discover: {
         show: false,
       },
-    };
+    });
     expect(canViewInApp(uiCapabilities, 'search')).toEqual(false);
     expect(canViewInApp(uiCapabilities, 'searches')).toEqual(false);
   });
 
   it('should handle visualizations', () => {
-    let uiCapabilities = {
+    let uiCapabilities = createCapabilities({
       visualize: {
         show: true,
       },
-    };
+    });
     expect(canViewInApp(uiCapabilities, 'visualization')).toEqual(true);
     expect(canViewInApp(uiCapabilities, 'visualizations')).toEqual(true);
 
-    uiCapabilities = {
+    uiCapabilities = createCapabilities({
       visualize: {
         show: false,
       },
-    };
+    });
     expect(canViewInApp(uiCapabilities, 'visualization')).toEqual(false);
     expect(canViewInApp(uiCapabilities, 'visualizations')).toEqual(false);
   });
 
   it('should handle index patterns', () => {
-    let uiCapabilities = {
+    let uiCapabilities = createCapabilities({
       management: {
         kibana: {
           index_patterns: true,
         },
       },
-    };
+    });
     expect(canViewInApp(uiCapabilities, 'index-pattern')).toEqual(true);
     expect(canViewInApp(uiCapabilities, 'index-patterns')).toEqual(true);
     expect(canViewInApp(uiCapabilities, 'indexPatterns')).toEqual(true);
 
-    uiCapabilities = {
+    uiCapabilities = createCapabilities({
       management: {
         kibana: {
           index_patterns: false,
         },
       },
-    };
+    });
     expect(canViewInApp(uiCapabilities, 'index-pattern')).toEqual(false);
     expect(canViewInApp(uiCapabilities, 'index-patterns')).toEqual(false);
     expect(canViewInApp(uiCapabilities, 'indexPatterns')).toEqual(false);
   });
 
   it('should handle dashboards', () => {
-    let uiCapabilities = {
+    let uiCapabilities = createCapabilities({
       dashboard: {
         show: true,
       },
-    };
+    });
     expect(canViewInApp(uiCapabilities, 'dashboard')).toEqual(true);
     expect(canViewInApp(uiCapabilities, 'dashboards')).toEqual(true);
 
-    uiCapabilities = {
+    uiCapabilities = createCapabilities({
       dashboard: {
         show: false,
       },
-    };
+    });
     expect(canViewInApp(uiCapabilities, 'dashboard')).toEqual(false);
     expect(canViewInApp(uiCapabilities, 'dashboards')).toEqual(false);
   });
 
   it('should have a default case', () => {
-    let uiCapabilities = {
+    let uiCapabilities = createCapabilities({
       foo: {
         show: true,
       },
-    };
+    });
     expect(canViewInApp(uiCapabilities, 'foo')).toEqual(true);
 
-    uiCapabilities = {
+    uiCapabilities = createCapabilities({
       foo: {
         show: false,
       },
-    };
+    });
     expect(canViewInApp(uiCapabilities, 'foo')).toEqual(false);
   });
 });
