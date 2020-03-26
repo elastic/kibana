@@ -11,7 +11,7 @@ export async function getTotalCount(callCluster: APICaller, kibanaIndex: string)
     scripted_metric: {
       init_script: 'state.types = [:]',
       map_script: `
-        String actionType = doc['action.actionTypeId'].value.replace(".", "");
+        String actionType = doc['action.actionTypeId'].value;
         state.types.put(actionType, state.types.containsKey(actionType) ? state.types.get(actionType) + 1 : 1);
       `,
       // Combine script is executed per cluster, but we already have a key-value pair per cluster.
@@ -54,7 +54,13 @@ export async function getTotalCount(callCluster: APICaller, kibanaIndex: string)
         parseInt(searchResult.aggregations.byActionTypeId.value.types[key], 0) + total,
       0
     ),
-    countByType: searchResult.aggregations.byActionTypeId.value.types,
+    countByType: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
+      (obj: any, key: string) => ({
+        ...obj,
+        [key.replace('.', '__')]: searchResult.aggregations.byActionTypeId.value.types[key],
+      }),
+      {}
+    ),
   };
 }
 
