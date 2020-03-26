@@ -25,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('redirects to the logs app and parses URL search params correctly', async () => {
       const location = {
         hash: '',
-        pathname: '/link-to/logs',
+        pathname: '/link-to',
         search: `time=${timestamp}&filter=trace.id:${traceId}`,
         state: undefined,
       };
