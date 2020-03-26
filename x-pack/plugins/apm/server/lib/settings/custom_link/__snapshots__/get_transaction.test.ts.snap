@@ -8,22 +8,35 @@ Object {
         "filter": Array [
           Object {
             "term": Object {
-              "service.name": "foo",
+              "processor.event": "transaction",
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "bar",
+            "terms": Object {
+              "service.name": Array [
+                "foo",
+              ],
             },
           },
           Object {
-            "term": Object {
-              "transaction.type": "qux",
+            "terms": Object {
+              "service.environment": Array [
+                "bar",
+              ],
             },
           },
           Object {
-            "term": Object {
-              "transaction.name": "baz",
+            "terms": Object {
+              "transaction.name": Array [
+                "baz",
+              ],
+            },
+          },
+          Object {
+            "terms": Object {
+              "transaction.type": Array [
+                "qux",
+              ],
             },
           },
         ],
@@ -41,25 +54,10 @@ Object {
   "body": Object {
     "query": Object {
       "bool": Object {
-        "filter": Array [],
-      },
-    },
-  },
-  "index": "myIndex",
-  "size": 1,
-  "terminateAfter": 1,
-}
-`;
-
-exports[`custom link get transaction removes not listed filters from query 1`] = `
-Object {
-  "body": Object {
-    "query": Object {
-      "bool": Object {
         "filter": Array [
           Object {
             "term": Object {
-              "service.name": "foo",
+              "processor.event": "transaction",
             },
           },
         ],
