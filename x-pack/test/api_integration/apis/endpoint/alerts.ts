@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect/expect.js';
+import { SearchResponse } from 'elasticsearch';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { AlertData } from '../../../../plugins/endpoint/common/types';
+import { AlertData, AlertEvent } from '../../../../plugins/endpoint/common/types';
 
 /**
  * The number of alert documents in the es archive.
@@ -18,23 +19,46 @@ const numberOfAlertsInFixture = 12;
 const defaultPageSize = 10;
 
 /**
- * The below two constants are to be used together.
- *
- * `${NULLABLE_EVENT_FIELD}` should be a field in the fixture that exists for some alerts,
+ * `NULLABLE_EVENT_FIELD` should be a field in the fixture that exists for some alerts,
  * but not all.
- *
- * `NULLABLE_EVENT_ID` is the event_id of a specific alert for which `${NULLABLE_EVENT_FIELD}`
- * does not exist (is undefined).
  *
  * This allows us to test sorting and paging on mixed data that may or may not exist
  * for each alert.
  */
 const NULLABLE_EVENT_FIELD = 'process.parent.entity_id';
-const NULLABLE_EVENT_ID = '504dc351-5325-45ad-b406-8e4b28c63e2d';
+
+/**
+ * An Elasticsearch query to get the alert (or alerts) without `NULLABLE_EVENT_FIELD`.
+ */
+const ES_QUERY_MISSING = {
+  query: {
+    bool: {
+      must: [
+        {
+          bool: {
+            must_not: {
+              exists: {
+                field: NULLABLE_EVENT_FIELD,
+              },
+            },
+          },
+        },
+        {
+          term: {
+            'event.kind': {
+              value: 'alert',
+            },
+          },
+        },
+      ],
+    },
+  },
+};
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const es = getService('legacyEs');
 
   const nextPrevPrefixQuery = "query=(language:kuery,query:'')";
   const nextPrevPrefixDateRange = "date_range=(from:'2018-01-10T00:00:00.000Z',to:now)";
@@ -43,9 +67,19 @@ export default function({ getService }: FtrProviderContext) {
   const nextPrevPrefixPageSize = 'page_size=10';
   const nextPrevPrefix = `${nextPrevPrefixQuery}&${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
 
+  let nullableEventId = '';
+
   describe('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
-      before(() => esArchiver.load('endpoint/alerts/api_feature'));
+      before(async () => {
+        await esArchiver.load('endpoint/alerts/api_feature');
+        const res = await es.search({
+          index: 'events-endpoint-1',
+          body: ES_QUERY_MISSING,
+        });
+        expect(res.hits.hits.length).to.be.greaterThan(0);
+        nullableEventId = res.hits.hits[0]._source.event.id;
+      });
       after(() => esArchiver.unload('endpoint/alerts/api_feature'));
 
       it('should not support POST requests', async () => {
@@ -65,7 +99,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.alerts.length).to.eql(defaultPageSize);
         expect(body.request_page_size).to.eql(defaultPageSize);
         /**
-         * No page_index was speciied. It should return page 0.
+         * No page_index was specified. It should return page 0.
          */
         expect(body.request_page_index).to.eql(0);
         /**
@@ -200,15 +234,17 @@ export default function({ getService }: FtrProviderContext) {
       it('alerts api should return data using `before` on undefined primary sort values by custom sort parameter, descending', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&order=desc&sort=${NULLABLE_EVENT_FIELD}&before=&before=${NULLABLE_EVENT_ID}&empty_string_is_undefined=true`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&order=desc&sort=${NULLABLE_EVENT_FIELD}&before=&before=${nullableEventId}&empty_string_is_undefined=true`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
+
         let lastSeen: string | undefined = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
         let valid: boolean = true;
-        (body.alerts as AlertData[]).forEach(alert => {
+
+        for (const alert of body.alerts) {
           const entityId = alert.process?.parent?.entity_id;
-          if (entityId === undefined && alert.event.id > NULLABLE_EVENT_ID) {
+          if (entityId === undefined && alert.event.id > nullableEventId) {
             valid = false;
           }
           if (entityId !== undefined && lastSeen !== undefined && entityId > lastSeen) {
@@ -216,22 +252,25 @@ export default function({ getService }: FtrProviderContext) {
           } else {
             lastSeen = entityId;
           }
-        });
+        }
+
         expect(valid).to.eql(true);
       });
 
       it('alerts api should return data using `before` on undefined primary sort values by custom sort parameter, ascending', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&page_size=25&order=asc&sort=${NULLABLE_EVENT_FIELD}&before=&before=${NULLABLE_EVENT_ID}&empty_string_is_undefined=true`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&page_size=25&order=asc&sort=${NULLABLE_EVENT_FIELD}&before=&before=${nullableEventId}&empty_string_is_undefined=true`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
+
         let lastSeen: string | undefined = '1';
         let valid: boolean = true;
-        (body.alerts as AlertData[]).forEach(alert => {
+
+        for (const alert of body.alerts) {
           const entityId = alert.process?.parent?.entity_id;
-          if (entityId === undefined && alert.event.id < NULLABLE_EVENT_ID) {
+          if (entityId === undefined && alert.event.id < nullableEventId) {
             valid = false;
           }
           if (entityId !== undefined && lastSeen !== undefined && entityId < lastSeen) {
@@ -239,7 +278,7 @@ export default function({ getService }: FtrProviderContext) {
           } else {
             lastSeen = entityId;
           }
-        });
+        }
         expect(valid).to.eql(true);
       });
 
@@ -257,15 +296,17 @@ export default function({ getService }: FtrProviderContext) {
       it('alerts api should return data using `after` on undefined primary sort values by custom sort parameter, descending', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&sort=${NULLABLE_EVENT_FIELD}&order=desc&after=&after=${NULLABLE_EVENT_ID}&empty_string_is_undefined=true`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&sort=${NULLABLE_EVENT_FIELD}&order=desc&after=&after=${nullableEventId}&empty_string_is_undefined=true`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
+
         let lastSeen: string | undefined = 'zzzzzzzzzzzzzzzzzzzzzzzzzzz';
         let valid: boolean = true;
-        (body.alerts as AlertData[]).forEach(alert => {
+
+        for (const alert of body.alerts) {
           const entityId = alert.process?.parent?.entity_id;
-          if (entityId === undefined && alert.event.id < NULLABLE_EVENT_ID) {
+          if (entityId === undefined && alert.event.id < nullableEventId) {
             valid = false;
           }
           if (entityId !== undefined && lastSeen !== undefined && entityId > lastSeen) {
@@ -273,22 +314,24 @@ export default function({ getService }: FtrProviderContext) {
           } else {
             lastSeen = entityId;
           }
-        });
+        }
         expect(valid).to.eql(true);
       });
 
       it('alerts api should return data using `after` on undefined primary sort values by custom sort parameter, ascending', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&sort=${NULLABLE_EVENT_FIELD}&order=asc&after=&after=${NULLABLE_EVENT_ID}&empty_string_is_undefined=true`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&sort=${NULLABLE_EVENT_FIELD}&order=asc&after=&after=${nullableEventId}&empty_string_is_undefined=true`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
+
         let lastSeen: string | undefined = '1';
         let valid: boolean = true;
-        (body.alerts as AlertData[]).forEach(alert => {
+
+        for (const alert of body.alerts) {
           const entityId = alert.process?.parent?.entity_id;
-          if (entityId === undefined && alert.event.id < NULLABLE_EVENT_ID) {
+          if (entityId === undefined && alert.event.id < nullableEventId) {
             valid = false;
           }
           if (entityId !== undefined && lastSeen !== undefined && entityId < lastSeen) {
@@ -296,7 +339,7 @@ export default function({ getService }: FtrProviderContext) {
           } else {
             lastSeen = entityId;
           }
-        });
+        }
         expect(valid).to.eql(true);
       });
 
