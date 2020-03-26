@@ -17,14 +17,8 @@
  * under the License.
  */
 
-export function injectVars(server) {
-  const serverConfig = server.config();
+export const registerRoutesMock = jest.fn();
 
-  const { importAndExportableTypes } = server.savedObjects;
-
-  return {
-    importAndExportableTypes,
-    autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
-    autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
-  };
-}
+jest.doMock('./routes', () => ({
+  registerRoutes: registerRoutesMock,
+}));

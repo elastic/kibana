@@ -17,14 +17,6 @@
  * under the License.
  */
 
-export function injectVars(server) {
-  const serverConfig = server.config();
-
-  const { importAndExportableTypes } = server.savedObjects;
-
-  return {
-    importAndExportableTypes,
-    autocompleteTerminateAfter: serverConfig.get('kibana.autocompleteTerminateAfter'),
-    autocompleteTimeout: serverConfig.get('kibana.autocompleteTimeout'),
-  };
-}
+export { injectMetaAttributes } from './inject_meta_attributes';
+export { findAll } from './find_all';
+export { findRelationships } from './find_relationships';
