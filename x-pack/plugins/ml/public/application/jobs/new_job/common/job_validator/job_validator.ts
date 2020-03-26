@@ -288,4 +288,14 @@ export class JobValidator {
         (this._jobCreator.type === JOB_TYPE.CATEGORIZATION && this.categorizationField))
     );
   }
+
+  public get isModelMemoryEstimationPayloadValid(): boolean {
+    return (
+      this._jobCreator.detectors.length > 0 &&
+      this.bucketSpan.valid &&
+      this.duplicateDetectors.valid &&
+      (this._jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
+        (this._jobCreator.type === JOB_TYPE.CATEGORIZATION && this.categorizationField))
+    );
+  }
 }

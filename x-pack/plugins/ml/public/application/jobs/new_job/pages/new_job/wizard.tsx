@@ -110,12 +110,12 @@ export const Wizard: FC<Props> = ({
 
     subscription.add(
       estimator.error$.subscribe(error => {
-        notifications.toasts.addWarning(
-          i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
-            defaultMessage: 'Model memory limit could not be calculated: {error}',
-            values: { error: error.message },
-          })
-        );
+        notifications.toasts.addWarning({
+          title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
+            defaultMessage: 'Model memory limit could not be calculated',
+          }),
+          text: error.message,
+        });
       })
     );
 

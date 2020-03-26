@@ -41,7 +41,7 @@ export const modelMemoryEstimatorProvider = (
         map(cloneDeep),
         distinctUntilChanged(isEqual),
         switchMap(payload => {
-          const isPayloadValid = jobValidator.isPickFieldsStepValid;
+          const isPayloadValid = jobValidator.isModelMemoryEstimationPayloadValid;
 
           return isPayloadValid
             ? ml.calculateModelMemoryLimit$(payload).pipe(
