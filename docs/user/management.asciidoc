@@ -83,6 +83,10 @@ a| <<advanced-options, *Advanced Settings*>>
 Customize {kib} to suit your needs. Change the format for displaying dates, turn on dark mode,
 set the timespan for notification messages, and much more.
 
+| <<managing-alerts-and-actions, *Alerts and Actions*>>
+
+Centrally manage your alerts from across {kib}. Create and manage re-usable connectors for triggering actions. 
+
 | <<managing-fields, *Index Patterns*>>
 
 Create and manage the index patterns that help you retrieve your data from {es}.
@@ -91,10 +95,6 @@ Create and manage the index patterns that help you retrieve your data from {es}.
 
 Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
 A report can contain a dashboard, visualization, saved search, or Canvas workpad.
-
-| <<managing-alerts-and-actions, *Alerts and Actions*>>
-
-Centrally manage your alerts from across Kibana. Create and manage re-usable connectors for triggering actions. 
 
 | <<managing-saved-objects, *Saved Objects*>>
 
