@@ -65,7 +65,6 @@ export interface VisualizeInput extends EmbeddableInput {
     colors?: { [key: string]: string };
   };
   visObject: SerializedVis;
-  visType: string;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -80,7 +79,7 @@ function getOutput(
   input: VisualizeInput,
   { savedVisualizations, editable }: VisualizeEmbeddableConfiguration
 ): VisualizeOutput {
-  const vis = new Vis(input.visType, input.visObject);
+  const vis = new Vis(input.visObject.type, input.visObject);
   const indexPattern = vis.data.indexPattern;
   const indexPatterns = indexPattern ? [indexPattern] : [];
   const editUrl = input.visObject.id
@@ -117,7 +116,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     parent?: IContainer
   ) {
     super(input, getOutput(input, config), parent);
-    this.vis = new Vis(input.visType, input.visObject);
+    this.vis = new Vis(input.visObject.type, input.visObject);
     this.timefilter = timefilter;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
 

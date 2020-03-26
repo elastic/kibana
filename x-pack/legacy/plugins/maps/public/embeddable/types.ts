@@ -32,3 +32,5 @@ export interface RenderTooltipContentParams {
   loadFeatureProperties({ layerId, featureId }: LoadFeatureProps): Promise<FeatureProperty[]>;
   loadFeatureGeometry({ layerId, featureId }: LoadFeatureProps): FeatureGeometry;
 }
+
+export type RenderToolTipContent = (params: RenderTooltipContentParams) => JSX.Element;

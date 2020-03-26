@@ -134,7 +134,6 @@ export class VisualizeEmbeddableFactory
       const embeddable = await this.create(
         {
           ...input,
-          visType: savedObject.visState.type,
           visObject: await convertToSerializedVis(savedObject),
         },
         parent

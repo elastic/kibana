@@ -56,7 +56,7 @@ import {
 } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { RenderTooltipContentParams } from './types';
+import { RenderToolTipContent } from './types';
 
 interface MapConfig {
   editUrl?: string;
@@ -92,7 +92,7 @@ export interface MapOutput extends EmbeddableOutput {
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
-  private _renderTooltipContent?: (params: RenderTooltipContentParams) => React.ComponentType;
+  private _renderTooltipContent?: RenderToolTipContent;
   private _eventHandlers?: unknown;
   private _layerList: unknown[];
   private _store: MapStore;
@@ -108,7 +108,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapOutput> {
     config: MapConfig,
     initialInput: MapEmbeddableInput,
     parent?: IContainer,
-    renderTooltipContent?: (params: unknown) => React.ComponentType,
+    renderTooltipContent?: RenderToolTipContent,
     eventHandlers?: unknown
   ) {
     super(
@@ -130,7 +130,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapOutput> {
     this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
   }
 
-  setRenderTooltipContent = (renderTooltipContent: (params: unknown) => React.ComponentType) => {
+  setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
     this._renderTooltipContent = renderTooltipContent;
   };
 
