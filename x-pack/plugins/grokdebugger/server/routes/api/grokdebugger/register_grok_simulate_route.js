@@ -8,7 +8,12 @@ import { schema } from '@kbn/config-schema';
 import { GrokdebuggerRequest } from '../../../models/grokdebugger_request';
 import { GrokdebuggerResponse } from '../../../models/grokdebugger_response';
 
-const escapeHatch = schema.object({}, { unknowns: 'allow' });
+const requestBodySchema = schema.object({
+  pattern: schema.string(),
+  rawEvent: schema.string(),
+  // We don't know these key / values up front as they depend on user input
+  customPatterns: schema.object({}, { unknowns: 'allow' }),
+});
 
 export function registerGrokSimulateRoute(framework) {
   framework.registerRoute(
@@ -16,8 +21,7 @@ export function registerGrokSimulateRoute(framework) {
       method: 'post',
       path: '/api/grokdebugger/simulate',
       validate: {
-        // TODO: Add real validation here
-        body: escapeHatch,
+        body: requestBodySchema,
       },
     },
     async (requestContext, request, response) => {
