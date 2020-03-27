@@ -17,6 +17,7 @@
  * under the License.
  */
 import { omit } from 'lodash';
+import { SavedObjectEmbeddableInput } from '../../../../../../../plugins/embeddable/public';
 import { DashboardPanelState } from '../../../../../../../plugins/dashboard/public';
 import { SavedDashboardPanel } from '../types';
 
@@ -26,9 +27,9 @@ export function convertSavedDashboardPanelToPanelState(
   return {
     type: savedDashboardPanel.type,
     gridData: savedDashboardPanel.gridData,
-    ...(savedDashboardPanel.id !== undefined && { savedObjectId: savedDashboardPanel.id }),
     explicitInput: {
       id: savedDashboardPanel.panelIndex,
+      ...(savedDashboardPanel.id !== undefined && { savedObjectId: savedDashboardPanel.id }),
       ...(savedDashboardPanel.title !== undefined && { title: savedDashboardPanel.title }),
       ...savedDashboardPanel.embeddableConfig,
     },
@@ -42,13 +43,14 @@ export function convertPanelStateToSavedDashboardPanel(
   const customTitle: string | undefined = panelState.explicitInput.title
     ? (panelState.explicitInput.title as string)
     : undefined;
+  const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
     version,
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
-    embeddableConfig: omit(panelState.explicitInput, 'id'),
+    embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId']),
     ...(customTitle && { title: customTitle }),
-    ...(panelState.savedObjectId !== undefined && { id: panelState.savedObjectId }),
+    ...(savedObjectId !== undefined && { id: savedObjectId }),
   };
 }

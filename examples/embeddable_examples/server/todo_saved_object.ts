@@ -17,16 +17,24 @@
  * under the License.
  */
 
-export {
-  HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddable,
-  HelloWorldEmbeddableFactory,
-} from './hello_world';
-export { ListContainer, LIST_CONTAINER } from './list_container';
-export { TODO_EMBEDDABLE } from './todo';
+import { SavedObjectsType } from 'kibana/server';
 
-import { EmbeddableExamplesPlugin } from './plugin';
-
-export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
-export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
-export const plugin = () => new EmbeddableExamplesPlugin();
+export const todoSavedObject: SavedObjectsType = {
+  name: 'todo',
+  hidden: false,
+  namespaceAgnostic: true,
+  mappings: {
+    properties: {
+      title: {
+        type: 'keyword',
+      },
+      task: {
+        type: 'text',
+      },
+      icon: {
+        type: 'keyword',
+      },
+    },
+  },
+  migrations: {},
+};

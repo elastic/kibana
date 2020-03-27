@@ -17,16 +17,8 @@
  * under the License.
  */
 
-export {
-  HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddable,
-  HelloWorldEmbeddableFactory,
-} from './hello_world';
-export { ListContainer, LIST_CONTAINER } from './list_container';
-export { TODO_EMBEDDABLE } from './todo';
+import { PluginInitializer } from 'kibana/server';
 
 import { EmbeddableExamplesPlugin } from './plugin';
 
-export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
-export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
-export const plugin = () => new EmbeddableExamplesPlugin();
+export const plugin: PluginInitializer<void, void> = () => new EmbeddableExamplesPlugin();

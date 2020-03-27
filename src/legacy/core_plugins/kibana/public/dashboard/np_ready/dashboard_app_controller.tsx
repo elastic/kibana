@@ -58,6 +58,7 @@ import {
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
+  SavedObjectEmbeddableInput,
   ContainerOutput,
 } from '../../../../../../plugins/embeddable/public';
 import { NavAction, SavedDashboardPanel } from './types';
@@ -391,7 +392,7 @@ export class DashboardAppController {
             if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
               const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
               const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
-              container.addSavedObjectEmbeddable(type, id);
+              container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, { savedObjectId: id });
               removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
               removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
             }
