@@ -31,8 +31,8 @@ export const transformNewUserAction = ({
   actionField: UserActionField;
   action: UserAction;
   actionAt: string;
-  email?: string;
-  full_name?: string;
+  email?: string | null;
+  full_name?: string | null;
   newValue?: string | null;
   oldValue?: string | null;
   username: string;
