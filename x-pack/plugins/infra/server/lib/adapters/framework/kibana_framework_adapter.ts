@@ -7,7 +7,6 @@
 /* eslint-disable @typescript-eslint/array-type */
 
 import { GraphQLSchema } from 'graphql';
-import { Legacy } from 'kibana';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
