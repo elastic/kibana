@@ -119,50 +119,77 @@ export interface PolicyDetailsState {
 }
 
 /**
- * Policy Details configuration
+ * Endpoint Policy configuration
  */
 export interface PolicyConfig {
-  windows: WindowsPolicyConfig;
-  mac: MacPolicyConfig;
-  linux: LinuxPolicyConfig;
+  windows: {
+    /** malware mode can be detect, prevent or prevent and notify user */
+    malware: {
+      mode: string;
+    };
+    eventing: {
+      process: boolean;
+      network: boolean;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  mac: {
+    events: {
+      process: boolean;
+    };
+    malware: {
+      mode: string;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  linux: {
+    events: {
+      process: boolean;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+}
+
+interface PolicyConfigAdvancedOptions {
+  elasticsearch: {
+    indices: {
+      control: string;
+      event: string;
+      logging: string;
+    };
+    kernel: {
+      connect: boolean;
+      process: boolean;
+    };
+  };
 }
 
 /**
- * Windows-specific policy configuration
+ * Windows-specific policy configuration that is supported via the UI
  */
-interface WindowsPolicyConfig {
-  /** malware mode can be detect, prevent or prevent and notify user */
-  malware: {
-    mode: string;
-  };
-  eventing: {
-    process: boolean;
-    network: boolean;
-  };
-}
+type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'eventing' | 'malware'>;
 
 /**
- * Mac-specific policy configuration
+ * Mac-specific policy configuration that is supported via the UI
  */
-interface MacPolicyConfig {
-  /** malware mode can be detect, prevent or prevent and notify user */
-  malware: {
-    mode: string;
-  };
-  eventing: {
-    process: boolean;
-    network: boolean;
-  };
-}
+type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+
 /**
- * Linux-specific policy configuration
+ * Linux-specific policy configuration that is supported via the UI
  */
-interface LinuxPolicyConfig {
-  eventing: {
-    process: boolean;
-    network: boolean;
-  };
-}
+type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
 
 /** OS used in Policy */
 export enum OS {

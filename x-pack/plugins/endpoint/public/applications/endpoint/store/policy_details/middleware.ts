@@ -13,6 +13,7 @@ import {
   sendPutDatasource,
   UpdateDatasourceResponse,
 } from '../../services/ingest';
+import { generatePolicy } from '../../models/policy';
 
 export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
   const http = coreStart.http;
@@ -46,7 +47,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
             streams: [],
             config: {
               policy: {
-                value: {},
+                value: generatePolicy(),
               },
             },
           },
@@ -58,6 +59,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
         payload: {
           policyItem,
           policyConfig: {
+            // FIXME: remove this
             windows: {
               malware: {
                 mode: 'detect',
@@ -88,7 +90,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
       const { id, revision, ...updatedPolicyItem } = policyDetails(state) as PolicyData;
       const updatedPolicyConfig = {
-        // FIXME: use Candace's selector here
+        // FIXME: replace this with a selector
         windows: {
           events: {
             process: true,
