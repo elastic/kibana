@@ -53,12 +53,12 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
                   // eslint-disable-next-line no-console
                   console.error('Model memory limit could not be calculated', error.body);
                   error$.next(error.body);
+                  // fallback to the default in case estimation failed
                   return of(DEFAULT_MODEL_MEMORY_LIMIT);
                 })
               )
             : of(DEFAULT_MODEL_MEMORY_LIMIT);
-        }),
-        startWith(DEFAULT_MODEL_MEMORY_LIMIT)
+        })
       );
     },
     update(payload: CalculatePayload) {
@@ -86,7 +86,7 @@ export const useModelMemoryEstimator = (
 
     subscription.add(
       modelMemoryEstimator.updates$
-        .pipe(pairwise())
+        .pipe(startWith(jobCreator.modelMemoryLimit), pairwise())
         .subscribe(([previousEstimation, currentEstimation]) => {
           // to make sure we don't overwrite a manual input
           if (
