@@ -54,7 +54,7 @@ interface OwnProps<TCache = object> {
 export type OpenTimelineOwnProps = OwnProps &
   Pick<
     OpenTimelineProps,
-    'defaultPageSize' | 'title' | 'importCompleteToggle' | 'setImportCompleteToggle'
+    'defaultPageSize' | 'title' | 'importDataModalToggle' | 'setImportDataModalToggle'
   > &
   PropsFromRedux;
 
@@ -77,9 +77,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     defaultPageSize,
     hideActions = [],
     isModal = false,
-    importCompleteToggle,
+    importDataModalToggle,
     onOpenTimeline,
-    setImportCompleteToggle,
+    setImportDataModalToggle,
     timeline,
     title,
     updateTimeline,
@@ -269,7 +269,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               defaultPageSize={defaultPageSize}
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-              importCompleteToggle={importCompleteToggle}
+              importDataModalToggle={importDataModalToggle}
               onAddTimelinesToFavorites={undefined}
               onDeleteSelected={onDeleteSelected}
               onlyFavorites={onlyFavorites}
@@ -284,7 +284,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               query={search}
               refetch={refetch}
               searchResults={timelines}
-              setImportCompleteToggle={setImportCompleteToggle}
+              setImportDataModalToggle={setImportDataModalToggle}
               selectedItems={selectedItems}
               sortDirection={sortDirection}
               sortField={sortField}

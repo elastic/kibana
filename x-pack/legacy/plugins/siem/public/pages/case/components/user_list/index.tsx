@@ -12,6 +12,7 @@ import {
   EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { ElasticUser } from '../../../../containers/case/types';
@@ -22,6 +23,7 @@ interface UserListProps {
     body: string;
   };
   headline: string;
+  loading?: boolean;
   users: ElasticUser[];
 }
 
@@ -67,7 +69,7 @@ const renderUsers = (
   ));
 };
 
-export const UserList = React.memo(({ email, headline, users }: UserListProps) => {
+export const UserList = React.memo(({ email, headline, loading, users }: UserListProps) => {
   const handleSendEmail = useCallback(
     (emailAddress: string | undefined | null) => {
       if (emailAddress && emailAddress != null) {
@@ -80,6 +82,13 @@ export const UserList = React.memo(({ email, headline, users }: UserListProps) =
     <EuiText>
       <h4>{headline}</h4>
       <EuiHorizontalRule margin="xs" />
+      {loading && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {renderUsers(users, handleSendEmail)}
     </EuiText>
   );
