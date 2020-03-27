@@ -26,8 +26,11 @@ import {
   KBN_FIELD_TYPES,
 } from '../../../../../../../../../plugins/data/public';
 import { AppState } from '../../../angular/discover_state';
-import { VisualizationsStart } from '../../../../../../../visualizations/public/np_ready/public';
 import { DiscoverServices } from '../../../../build_services';
+import {
+  VisualizationsStart,
+  VisTypeAlias,
+} from '../../../../../../../../../plugins/visualizations/public';
 
 function getMapsAppBaseUrl(visualizations: VisualizationsStart) {
   const mapsAppVisAlias = visualizations.getAliases().find(({ name }) => {
@@ -37,7 +40,7 @@ function getMapsAppBaseUrl(visualizations: VisualizationsStart) {
 }
 
 export function isMapsAppRegistered(visualizations: VisualizationsStart) {
-  return visualizations.getAliases().some(({ name }) => {
+  return visualizations.getAliases().some(({ name }: VisTypeAlias) => {
     return name === 'maps';
   });
 }
