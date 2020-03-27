@@ -6,23 +6,17 @@
 
 import moment from 'moment-timezone';
 import { getLicenseExpiration } from './license_expiration';
-import {
-  ALERT_TYPE_LICENSE_EXPIRATION,
-  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-} from '../../common/constants';
+import { ALERT_TYPE_LICENSE_EXPIRATION } from '../../common/constants';
 import { Logger } from 'src/core/server';
-import { AlertServices, AlertInstance } from '../../../alerting/server';
+import { AlertServices } from '../../../alerting/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
   AlertCommonParams,
   AlertCommonState,
   AlertLicensePerClusterState,
-  AlertCommonExecutorOptions,
   AlertLicense,
 } from './types';
-import { SavedObject, SavedObjectAttributes } from 'src/core/server';
 import { executeActions } from '../lib/alerts/license_expiration.lib';
-import { SavedObjectsClientContract } from 'src/core/server';
 import { PreparedAlert, getPreparedAlert } from '../lib/alerts/get_prepared_alert';
 
 jest.mock('../lib/alerts/license_expiration.lib', () => ({
