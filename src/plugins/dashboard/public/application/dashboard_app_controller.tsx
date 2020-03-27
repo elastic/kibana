@@ -246,6 +246,7 @@ export class DashboardAppController {
       return {
         appName: 'dashboard',
         config: isFullScreenMode ? undefined : $scope.topNavMenu,
+        noPadding: isFullScreenMode,
         showSearchBar: !isFullScreenMode,
         showFilterBar: showFilterBar() && !isFullScreenMode,
         showQueryBar: !isFullScreenMode,
