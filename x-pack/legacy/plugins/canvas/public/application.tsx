@@ -32,6 +32,9 @@ import { ACTION_VALUE_CLICK } from '../../../../../src/plugins/data/public/actio
 /* eslint-enable */
 
 import { CapabilitiesStrings } from '../i18n';
+
+import { startServices, stopServices } from './services';
+
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
 let restoreAction: ActionByType<any> | undefined;
@@ -70,6 +73,8 @@ export const initializeCanvas = async (
   startPlugins: CanvasStartDeps,
   registries: SetupRegistries
 ) => {
+  startServices(coreSetup, coreStart, setupPlugins, startPlugins);
+
   // Create Store
   const canvasStore = await createStore(coreSetup, setupPlugins);
 
@@ -124,6 +129,7 @@ export const initializeCanvas = async (
 };
 
 export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDeps) => {
+  stopServices();
   destroyRegistries();
   resetInterpreter();
 
