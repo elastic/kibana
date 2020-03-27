@@ -34,6 +34,7 @@ import { PageView, PageViewHeaderTitle } from '../../components/page_view';
 import { AppAction } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
+import { VerticalDivider } from './vertical_divider';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -103,7 +104,9 @@ export const PolicyDetails = React.memo(() => {
     setShowConfirm(false);
   }, []);
 
-  // Before proceeding - check if we have a policyItem.
+  // Before proceeding - check if we have a policy data.
+  // If not, and we are still loading, show spinner.
+  // Else, if we have an error, then show error on the page.
   if (!policyItem) {
     return (
       <PageView>
@@ -141,8 +144,11 @@ export const PolicyDetails = React.memo(() => {
       <EuiFlexItem grow={false}>
         <AgentsSummary {...policyAgentStatusSummary} />
       </EuiFlexItem>
+      <EuiFlexItem>
+        <VerticalDivider spacing="l" />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty>
+        <EuiButtonEmpty onClick={handleBackToListOnClick}>
           <FormattedMessage id="xpack.endpoint.policy.details.cancel" defaultMessage="Cancel" />
         </EuiButtonEmpty>
       </EuiFlexItem>
