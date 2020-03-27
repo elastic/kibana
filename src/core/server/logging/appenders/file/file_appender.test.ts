@@ -145,7 +145,7 @@ test('`dispose()` succeeds even if stream is not created.', async () => {
 
 test('`dispose()` closes stream.', async () => {
   const mockStreamEndFinished = jest.fn();
-  const mockStreamEnd = jest.fn(async (chunk, encoding, callback) => {
+  const mockStreamEnd = jest.fn(async callback => {
     // It's required to make sure `dispose` waits for `end` to complete.
     await tickMs(100);
     mockStreamEndFinished();
@@ -171,7 +171,7 @@ test('`dispose()` closes stream.', async () => {
   await appender.dispose();
 
   expect(mockStreamEnd).toHaveBeenCalledTimes(1);
-  expect(mockStreamEnd).toHaveBeenCalledWith(undefined, undefined, expect.any(Function));
+  expect(mockStreamEnd).toHaveBeenCalledWith(expect.any(Function));
   expect(mockStreamEndFinished).toHaveBeenCalled();
 
   // Consequent `dispose` calls should not fail even if stream has been disposed.

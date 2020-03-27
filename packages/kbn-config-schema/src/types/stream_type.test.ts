@@ -56,8 +56,30 @@ test('includes namespace in failure', () => {
 
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
-    const value = new Stream();
-    expect(schema.stream({ defaultValue: value }).validate(undefined)).toStrictEqual(value);
+    // The symbol `kCapture` is set directly on the `new Stream()` object, but
+    // will be inherited by the object returned by `schema.stream()`. This means
+    // that the `toStrictEqual` check will fail because the symbol exists
+    // directly on one object but not the other. We hack this by persisting it
+    // onto the object we're testing.
+
+    const defaultValue = new Stream();
+    const value = schema.stream({ defaultValue }).validate(undefined);
+
+    // Ugly hack
+    const sym = Object.getOwnPropertySymbols(defaultValue).find(
+      key => String(key) === 'Symbol(kCapture)'
+    ) as symbol;
+
+    // Safe guards in case Node.js core or the type definitions change later
+    if (!sym) throw new Error('Could not find symbol on stream');
+    if (!(sym in value)) throw new Error('Object expected to contain symbol');
+    if (Object.hasOwnProperty.call(value, sym))
+      throw new Error('Symbol not expected to be directly on object');
+
+    // @ts-ignore
+    value[sym] = value[sym];
+
+    expect(value).toStrictEqual(defaultValue);
   });
 
   test('returns value when specified', () => {

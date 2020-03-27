@@ -27,7 +27,7 @@ describe('capabilitiesMixin', () => {
 
   const getKbnServer = (pluginSpecs: any[] = []) => {
     return ({
-      afterPluginsInit: (callback: () => void) => callback(),
+      afterPluginsInit: async (callback: () => Promise<void>) => await callback(),
       pluginSpecs,
       newPlatform: {
         setup: {

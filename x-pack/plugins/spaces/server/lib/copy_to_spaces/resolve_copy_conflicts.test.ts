@@ -255,7 +255,6 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
                 "length": 0,
                 "needReadable": false,
                 "objectMode": true,
-                "paused": false,
                 "pipes": null,
                 "pipesCount": 0,
                 "readableListening": false,
@@ -263,8 +262,10 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
                 "readingMore": false,
                 "resumeScheduled": false,
                 "sync": false,
+                Symbol(kPaused): false,
               },
               "readable": false,
+              Symbol(kCapture): false,
             },
             "retries": Array [
               Object {
@@ -325,7 +326,6 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
                 "length": 0,
                 "needReadable": false,
                 "objectMode": true,
-                "paused": false,
                 "pipes": null,
                 "pipesCount": 0,
                 "readableListening": false,
@@ -333,8 +333,10 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
                 "readingMore": false,
                 "resumeScheduled": false,
                 "sync": false,
+                Symbol(kPaused): false,
               },
               "readable": false,
+              Symbol(kCapture): false,
             },
             "retries": Array [
               Object {

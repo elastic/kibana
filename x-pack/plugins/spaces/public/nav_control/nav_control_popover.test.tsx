@@ -13,6 +13,7 @@ import { SpacesManager } from '../spaces_manager';
 import { NavControlPopover } from './nav_control_popover';
 import { EuiHeaderSectionItemButton } from '@elastic/eui';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wait } from '@testing-library/react';
 
 describe('NavControlPopover', () => {
   it('renders without crashing', () => {
@@ -64,10 +65,9 @@ describe('NavControlPopover', () => {
     wrapper.find(EuiHeaderSectionItemButton).simulate('click');
 
     // Wait for `getSpaces` promise to resolve
-    await Promise.resolve();
-    await Promise.resolve();
-    wrapper.update();
-
-    expect(wrapper.find(SpaceAvatar)).toHaveLength(3);
+    await wait(() => {
+      wrapper.update();
+      expect(wrapper.find(SpaceAvatar)).toHaveLength(3);
+    });
   });
 });
