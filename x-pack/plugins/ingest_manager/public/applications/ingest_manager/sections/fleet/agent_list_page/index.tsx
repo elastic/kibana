@@ -391,12 +391,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           onClose={() => setIsEnrollmentFlyoutOpen(false)}
         />
       ) : null}
-      <EuiTitle size="l">
-        <h1>
-          <FormattedMessage id="xpack.ingestManager.agentList.pageTitle" defaultMessage="Agents" />
-        </h1>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">

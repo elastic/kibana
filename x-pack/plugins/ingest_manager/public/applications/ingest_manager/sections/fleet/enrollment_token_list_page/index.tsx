@@ -218,15 +218,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           }}
         />
       )}
-      <EuiTitle size="l">
-        <h1>
-          <FormattedMessage
-            id="xpack.ingestManager.enrollmentTokensList.pageTitle"
-            defaultMessage="Enrollment tokens"
-          />
-        </h1>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiText color="subdued">
         <FormattedMessage
           id="xpack.ingestManager.enrollmentTokensList.pageDescription"
