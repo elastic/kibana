@@ -16,11 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FtrProviderContext } from 'test/functional/ftr_provider_context';
+import { format as formatUrl } from 'url';
 
-const serve = require('serve-static');
-const path = require('path');
+import supertestAsPromised from 'supertest-as-promised';
 
-// Extend the Storybook Middleware to include a route to access Legacy UI assets
-module.exports = function(router) {
-  router.get('/ui', serve(path.resolve(__dirname, '../../../src/core/server/core_app/assets')));
-};
+export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
+  const config = getService('config');
+  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
+  return supertestAsPromised(kibanaServerUrl);
+}
+
+export function ElasticsearchSupertestProvider({ getService }: FtrProviderContext) {
+  const config = getService('config');
+  const elasticSearchServerUrl = formatUrl(config.get('servers.elasticsearch'));
+  return supertestAsPromised(elasticSearchServerUrl);
+}
