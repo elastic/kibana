@@ -33,7 +33,6 @@ import pidMixin from './pid';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
-import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
 import { capabilitiesMixin } from './capabilities';
 import { serverExtensionsMixin } from './server_extensions';
@@ -114,7 +113,6 @@ export default class KbnServer {
 
         // setup this.uiBundles
         uiMixin,
-        indexPatternsMixin,
 
         // setup saved object routes
         savedObjectsMixin,
