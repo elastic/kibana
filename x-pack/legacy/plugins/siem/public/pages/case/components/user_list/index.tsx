@@ -18,6 +18,8 @@ import {
 import styled, { css } from 'styled-components';
 import { ElasticUser } from '../../../../containers/case/types';
 
+import * as i18n from './translations';
+
 interface UserListProps {
   email: {
     subject: string;
