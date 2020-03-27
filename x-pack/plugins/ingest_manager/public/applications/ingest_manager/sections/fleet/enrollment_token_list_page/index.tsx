@@ -193,7 +193,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'actions',
-      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.createdAtTitle', {
+      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.actionsTitle', {
         defaultMessage: 'Actions',
       }),
       width: '100px',

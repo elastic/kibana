@@ -41,7 +41,7 @@ export const ConfirmEnrollmentTokenDelete = (props: Props) => {
         buttonColor="danger"
       >
         <EuiCallOut
-          title={i18n.translate('xpack.ingestManager.enrollmentTokenDeleteModal.title', {
+          title={i18n.translate('xpack.ingestManager.enrollmentTokenDeleteModal.description', {
             defaultMessage: 'Are your sure you want to delete {keyName}.',
             values: {
               keyName: enrollmentKey.name,
