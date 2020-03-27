@@ -1,13 +1,7 @@
 {
-  "name": "oidc_provider_plugin",
-  "version": "1.0.0",
-  "kibana": {
-    "version": "kibana",
-    "templateVersion": "1.0.0"
-  },
-  "license": "Apache-2.0",
-  "dependencies": {
-    "joi": "^13.5.2",
-    "jsonwebtoken": "^8.3.0"
-  }
+  "id": "oidc_provider_plugin",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": false
 }
