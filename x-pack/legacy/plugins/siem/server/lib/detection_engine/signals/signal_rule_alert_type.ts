@@ -42,7 +42,7 @@ export const signalRulesAlertType = ({
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
-    name: 'SIEM Signals',
+    name: 'SIEM Signal',
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
     validate: {

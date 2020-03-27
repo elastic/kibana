@@ -51,7 +51,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
 
   alertingPlugin.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
-    name: 'Metric Alert - Threshold',
+    name: 'Metric threshold',
     validate: {
       params: schema.object({
         criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),

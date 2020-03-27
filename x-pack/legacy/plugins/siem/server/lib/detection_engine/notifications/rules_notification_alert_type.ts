@@ -20,7 +20,7 @@ export const rulesNotificationAlertType = ({
   logger: Logger;
 }): NotificationAlertTypeDefinition => ({
   id: NOTIFICATIONS_ID,
-  name: 'SIEM Notifications',
+  name: 'SIEM Notification',
   actionGroups: siemRuleActionGroups,
   defaultActionGroupId: 'default',
   validate: {
