@@ -59,8 +59,8 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     if (
       (selectedOptions === undefined && fieldValue !== null) ||
       (Array.isArray(selectedOptions) &&
-      // @ts-ignore
-      selectedOptions[0].value !== fieldValue && // FIXME
+        // @ts-ignore
+        selectedOptions[0].value !== fieldValue &&
         fieldValue !== null)
     ) {
       selectedOptionsUpdate = [{ label: EMPTY_FIELD_VALUE_LABEL, value: fieldValue }];

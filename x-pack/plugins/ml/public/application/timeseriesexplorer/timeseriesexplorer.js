@@ -329,7 +329,6 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   entityFieldValueChanged = (entity, fieldValue) => {
-    // console.log(fieldValue, '___fieldValue___');
     const { appStateHandler } = this.props;
     const entityControls = this.getControlsForDetector();
 
