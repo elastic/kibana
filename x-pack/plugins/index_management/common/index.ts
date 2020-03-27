@@ -6,4 +6,6 @@
 
 export { PLUGIN, API_BASE_PATH, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from './constants';
 
+export { getTemplateSetting } from './lib';
+
 export * from './types';

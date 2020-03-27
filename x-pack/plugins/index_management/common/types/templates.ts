@@ -26,38 +26,14 @@ export interface TemplateV2Serialized {
   name: string;
   index_patterns: string[];
   version?: number;
+  priority?: number;
   order?: number;
   template: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
   };
-}
-
-// Template Deserialized
-interface TemplateBaseDeserialized {
-  name: string;
-  indexPatterns: string[];
-  version?: number;
-  order?: number;
-  ilmPolicy?: {
-    name: string;
-  };
-  isManaged: boolean;
-}
-
-export interface TemplateV1Deserialized extends TemplateBaseDeserialized {
-  settings?: IndexSettings;
-  aliases?: Aliases;
-  mappings?: Mappings;
-}
-
-export interface TemplateV2Deserialized extends TemplateBaseDeserialized {
-  template: {
-    settings?: IndexSettings;
-    aliases?: Aliases;
-    mappings?: Mappings;
-  };
+  composed_of?: string[];
 }
 
 /**
@@ -84,8 +60,23 @@ export interface TemplateListItem {
  * The UI will only be dealing with this interface, conversion from and to V1 format
  * is done server side.
  */
-export interface TemplateDeserialized extends TemplateV2Deserialized {
+export interface TemplateDeserialized {
+  name: string;
+  indexPatterns: string[];
+  isManaged: boolean;
+  template: {
+    settings?: IndexSettings;
+    aliases?: Aliases;
+    mappings?: Mappings;
+  };
   _kbnMeta: {
     formatVersion: 1 | 2;
   };
+  version?: number;
+  priority?: number;
+  order?: number;
+  ilmPolicy?: {
+    name: string;
+  };
+  composedOf?: string[];
 }

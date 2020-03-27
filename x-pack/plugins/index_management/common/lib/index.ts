@@ -8,3 +8,5 @@ export {
   deserializeV1Template,
   serializeV1Template,
 } from './template_serialization';
+
+export { getTemplateSetting } from './utils';

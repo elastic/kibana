@@ -3,8 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TemplateDeserialized, TemplateV1Serialized, TemplateListItem } from '../types';
-import { getTemplateVersion } from './utils';
+import {
+  TemplateDeserialized,
+  TemplateV1Serialized,
+  TemplateV2Serialized,
+  TemplateListItem,
+} from '../types';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -28,6 +32,21 @@ export function serializeV1Template(template: TemplateDeserialized): TemplateV1S
   };
 
   return serializedTemplate;
+}
+
+export function serializeV2Template(template: TemplateDeserialized): TemplateV2Serialized {
+  const { aliases, mappings, settings, ...templateV1serialized } = serializeV1Template(template);
+
+  return {
+    ...templateV1serialized,
+    template: {
+      aliases,
+      mappings,
+      settings,
+    },
+    priority: template.priority,
+    composed_of: template.composedOf,
+  };
 }
 
 export function deserializeV1Template(
@@ -57,7 +76,7 @@ export function deserializeV1Template(
     ilmPolicy: settings && settings.index && settings.index.lifecycle,
     isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
     _kbnMeta: {
-      formatVersion: getTemplateVersion(templateEs),
+      formatVersion: 1,
     },
   };
 

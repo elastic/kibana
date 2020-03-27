@@ -16,3 +16,14 @@ export const getTemplateVersion = (
 ): 1 | 2 => {
   return {}.hasOwnProperty.call(template, 'template') ? 2 : 1;
 };
+
+export const getTemplateSetting = (
+  template: TemplateV1Serialized | TemplateV2Serialized,
+  setting: 'aliases' | 'settings' | 'mappings'
+) => {
+  const formatVersion = getTemplateVersion(template);
+
+  return formatVersion === 1
+    ? (template as TemplateV1Serialized)[setting]
+    : (template as TemplateV2Serialized).template[setting];
+};
