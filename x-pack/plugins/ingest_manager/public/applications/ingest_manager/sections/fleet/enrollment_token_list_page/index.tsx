@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import {
-  EuiTitle,
   EuiSpacer,
   EuiBasicTable,
   EuiFlexGroup,
