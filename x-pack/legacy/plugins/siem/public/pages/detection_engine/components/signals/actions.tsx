@@ -92,11 +92,9 @@ export const sendSignalToTimelineAction = async ({
   createTimeline,
   ecsData,
   updateTimelineIsLoading,
-  createTimelineNote,
 }: SendSignalToTimelineActionProps) => {
   let openSignalInBasicTimeline = true;
   const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
-
   const timelineId =
     ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
   const { to, from } = determineToAndFrom({ ecsData });
@@ -156,6 +154,7 @@ export const sendSignalToTimelineAction = async ({
             show: true,
           },
           to,
+          ruleGuide: noteContent,
         });
       }
     } catch {
@@ -205,10 +204,7 @@ export const sendSignalToTimelineAction = async ({
         },
       },
       to,
+      ruleGuide: noteContent,
     });
-  }
-
-  if (noteContent.trim() !== '') {
-    createTimelineNote({ noteContent });
   }
 };

@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import uuid from 'uuid';
 
 import { Filter, esQuery } from '../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
@@ -22,9 +21,6 @@ import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { TimelineModel } from '../../../../store/timeline/model';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { useApolloClient } from '../../../../utils/apollo_context';
-import { appActions } from '../../../../store/app';
-import { Note } from '../../../../lib/note';
-import { createNote } from '../../../../components/notes/helpers';
 
 import { updateSignalStatusAction } from './actions';
 import {
@@ -48,7 +44,6 @@ import {
   SetEventsLoadingProps,
   UpdateSignalsStatusCallback,
   UpdateSignalsStatusProps,
-  CreateTimelineNoteProps,
 } from './types';
 import { dispatchUpdateTimeline } from '../../../../components/open_timeline/helpers';
 
@@ -86,8 +81,6 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
   to,
   updateTimeline,
   updateTimelineIsLoading,
-  associateNote,
-  updateNote,
 }) => {
   const [selectAll, setSelectAll] = useState(false);
   const apolloClient = useApolloClient();
@@ -121,7 +114,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
 
   // Callback for creating a new timeline -- utilized by row/batch actions
   const createTimelineCallback = useCallback(
-    ({ from: fromTimeline, timeline, to: toTimeline }: CreateTimelineProps) => {
+    ({ from: fromTimeline, timeline, to: toTimeline, ruleGuide }: CreateTimelineProps) => {
       updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
       updateTimeline({
         duplicate: true,
@@ -133,19 +126,10 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
           show: true,
         },
         to: toTimeline,
+        ruleGuide,
       })();
     },
     [updateTimeline, updateTimelineIsLoading]
-  );
-
-  const createTimelineNoteCallback = useCallback(
-    ({ noteContent }: CreateTimelineNoteProps) => {
-      const getNewNoteId = (): string => uuid.v4();
-      const newNote = createNote({ newNote: noteContent, getNewNoteId });
-      updateNote(newNote);
-      associateNote(newNote.id, 'timeline-1');
-    },
-    [updateNote, associateNote]
   );
 
   const setEventsLoadingCallback = useCallback(
@@ -260,7 +244,6 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         setEventsDeleted: setEventsDeletedCallback,
         status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
         updateTimelineIsLoading,
-        createTimelineNote: createTimelineNoteCallback,
       }),
     [
       apolloClient,
@@ -271,7 +254,6 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
       setEventsLoadingCallback,
       setEventsDeletedCallback,
       updateTimelineIsLoading,
-      createTimelineNoteCallback,
     ]
   );
 
@@ -378,9 +360,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
     dispatch(timelineActions.updateIsLoading({ id, isLoading })),
   updateTimeline: dispatchUpdateTimeline(dispatch),
-  associateNote: (noteId: string, timelineId: string) =>
-    dispatch(timelineActions.addNote({ id: timelineId, noteId })),
-  updateNote: (note: Note) => dispatch(appActions.updateNote({ note })),
 });
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

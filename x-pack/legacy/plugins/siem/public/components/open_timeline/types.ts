@@ -173,6 +173,7 @@ export interface UpdateTimeline {
   notes: NoteResult[] | null | undefined;
   timeline: TimelineModel;
   to: number;
+  ruleGuide?: string | undefined;
 }
 
 export type DispatchUpdateTimeline = ({
@@ -182,4 +183,5 @@ export type DispatchUpdateTimeline = ({
   notes,
   timeline,
   to,
+  ruleGuide,
 }: UpdateTimeline) => () => void;

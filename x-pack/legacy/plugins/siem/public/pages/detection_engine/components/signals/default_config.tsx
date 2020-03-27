@@ -27,7 +27,6 @@ import {
   CreateTimeline,
   SetEventsDeletedProps,
   SetEventsLoadingProps,
-  CreateTimelineNote,
   UpdateTimelineLoading,
 } from './types';
 
@@ -196,7 +195,6 @@ export const getSignalsActions = ({
   createTimeline,
   status,
   updateTimelineIsLoading,
-  createTimelineNote,
 }: {
   apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
@@ -206,7 +204,6 @@ export const getSignalsActions = ({
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
   updateTimelineIsLoading: UpdateTimelineLoading;
-  createTimelineNote: CreateTimelineNote;
 }): TimelineAction[] => [
   {
     getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
@@ -222,7 +219,6 @@ export const getSignalsActions = ({
               createTimeline,
               ecsData,
               updateTimelineIsLoading,
-              createTimelineNote,
             })
           }
           iconType="timeline"

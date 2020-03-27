@@ -9,11 +9,11 @@ import moment from 'moment';
 import { sendSignalToTimelineAction, determineToAndFrom } from './actions';
 import {
   mockEcsDataWithSignal,
-  defaultTimeline,
+  defaultTimelineProps,
   apolloClient,
   mockTimelineApolloResult,
 } from '../../../../mock/';
-import { CreateTimeline, CreateTimelineNote, UpdateTimelineLoading } from './types';
+import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../graphql/types';
 
 jest.mock('apollo-client');
@@ -22,7 +22,6 @@ describe('signals actions', () => {
   const anchor = '2020-03-01T17:59:46.349Z';
   const unix = moment(anchor).valueOf();
   let createTimeline: CreateTimeline;
-  let createTimelineNote: CreateTimelineNote;
   let updateTimelineIsLoading: UpdateTimelineLoading;
   let clock: sinon.SinonFakeTimers;
 
@@ -35,7 +34,6 @@ describe('signals actions', () => {
     jest.clearAllMocks();
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
-    createTimelineNote = jest.fn() as jest.Mocked<CreateTimelineNote>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
 
     jest.spyOn(apolloClient, 'query').mockResolvedValue(mockTimelineApolloResult);
@@ -55,7 +53,6 @@ describe('signals actions', () => {
           createTimeline,
           ecsData: mockEcsDataWithSignal,
           updateTimelineIsLoading,
-          createTimelineNote,
         });
 
         expect(updateTimelineIsLoading).toHaveBeenCalledTimes(1);
@@ -68,7 +65,6 @@ describe('signals actions', () => {
           createTimeline,
           ecsData: mockEcsDataWithSignal,
           updateTimelineIsLoading,
-          createTimelineNote,
         });
         const expected = {
           from: 1541444305937,
@@ -223,46 +219,10 @@ describe('signals actions', () => {
             width: 1100,
           },
           to: 1541444605937,
+          ruleGuide: '# this is some markdown documentation',
         };
 
-        expect(createTimelineNote).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith(expected);
-      });
-      test('it invokes createTimelineNote if signal.rule.note is not empty string', async () => {
-        await sendSignalToTimelineAction({
-          apolloClient,
-          createTimeline,
-          ecsData: mockEcsDataWithSignal,
-          updateTimelineIsLoading,
-          createTimelineNote,
-        });
-
-        expect(createTimelineNote).toHaveBeenCalledTimes(1);
-        expect(createTimelineNote).toHaveBeenCalledWith({
-          noteContent: '# this is some markdown documentation',
-        });
-      });
-
-      test('it does not invoke createTimelineNote if signal.rule.note is empty string', async () => {
-        const ecsDataMock: Ecs = {
-          ...mockEcsDataWithSignal,
-          signal: {
-            rule: {
-              ...mockEcsDataWithSignal.signal?.rule!,
-              note: [''],
-            },
-          },
-        };
-
-        await sendSignalToTimelineAction({
-          apolloClient,
-          createTimeline,
-          ecsData: ecsDataMock,
-          updateTimelineIsLoading,
-          createTimelineNote,
-        });
-
-        expect(createTimelineNote).not.toHaveBeenCalled();
       });
 
       test('it invokes createTimeline with kqlQuery.filterQuery.kuery.kind as "kuery" if not specified in returned timeline template', async () => {
@@ -286,7 +246,6 @@ describe('signals actions', () => {
           createTimeline,
           ecsData: mockEcsDataWithSignal,
           updateTimelineIsLoading,
-          createTimelineNote,
         });
         // @ts-ignore
         const createTimelineArg = createTimeline.mock.calls[0][0];
@@ -316,7 +275,6 @@ describe('signals actions', () => {
           createTimeline,
           ecsData: mockEcsDataWithSignal,
           updateTimelineIsLoading,
-          createTimelineNote,
         });
         // @ts-ignore
         const createTimelineArg = createTimeline.mock.calls[0][0];
@@ -335,7 +293,6 @@ describe('signals actions', () => {
           createTimeline,
           ecsData: mockEcsDataWithSignal,
           updateTimelineIsLoading,
-          createTimelineNote,
         });
 
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({ id: 'timeline-1', isLoading: true });
@@ -344,7 +301,7 @@ describe('signals actions', () => {
           isLoading: false,
         });
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimeline);
+        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
       });
     });
 
@@ -365,64 +322,11 @@ describe('signals actions', () => {
           createTimeline,
           ecsData: ecsDataMock,
           updateTimelineIsLoading,
-          createTimelineNote,
         });
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimeline);
-      });
-
-      test('it invokes createTimelineNote if signal.rule.note is not empty string', async () => {
-        const ecsDataMock: Ecs = {
-          ...mockEcsDataWithSignal,
-          signal: {
-            rule: {
-              ...mockEcsDataWithSignal.signal?.rule!,
-              timeline_id: [''],
-            },
-          },
-        };
-
-        await sendSignalToTimelineAction({
-          apolloClient,
-          createTimeline,
-          ecsData: ecsDataMock,
-          updateTimelineIsLoading,
-          createTimelineNote,
-        });
-
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
-        expect(createTimelineNote).toHaveBeenCalledTimes(1);
-        expect(createTimelineNote).toHaveBeenCalledWith({
-          noteContent: '# this is some markdown documentation',
-        });
-      });
-
-      test('it does not invoke createTimelineNote if signal.rule.note is empty string', async () => {
-        const ecsDataMock: Ecs = {
-          ...mockEcsDataWithSignal,
-          signal: {
-            rule: {
-              ...mockEcsDataWithSignal.signal?.rule!,
-              timeline_id: [''],
-              note: [''],
-            },
-          },
-        };
-
-        await sendSignalToTimelineAction({
-          apolloClient,
-          createTimeline,
-          ecsData: ecsDataMock,
-          updateTimelineIsLoading,
-          createTimelineNote,
-        });
-
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
-        expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimeline);
-        expect(createTimelineNote).not.toHaveBeenCalled();
+        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
       });
     });
 
@@ -442,12 +346,11 @@ describe('signals actions', () => {
           createTimeline,
           ecsData: ecsDataMock,
           updateTimelineIsLoading,
-          createTimelineNote,
         });
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimeline);
+        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
       });
     });
   });

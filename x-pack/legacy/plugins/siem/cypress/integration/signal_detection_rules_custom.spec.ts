@@ -18,13 +18,15 @@ import {
   DEFINITION_INDEX_PATTERNS,
   DEFINITION_TIMELINE,
   DEFINITION_STEP,
+  INVESTIGATION_NOTES_MARKDOWN,
+  INVESTIGATION_NOTES_TOGGLE,
+  RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
   SCHEDULE_LOOPBACK,
   SCHEDULE_RUNS,
   SCHEDULE_STEP,
   ABOUT_RULE_DESCRIPTION,
   ABOUT_INVESTIGATION_NOTES,
-  INVESTIGATION_NOTES_TOGGLE,
 } from '../screens/rule_details';
 import {
   CUSTOM_RULES_BTN,
@@ -168,12 +170,12 @@ describe('Signal detection rules, custom', () => {
       .invoke('text')
       .should('eql', expectedTags);
 
-    cy.get(INVESTIGATION_NOTES_TOGGLE)
-      .eq(1)
+    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE)
+      .eq(INVESTIGATION_NOTES_TOGGLE)
       .click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES)
       .invoke('text')
-      .should('eql', 'test markdown');
+      .should('eql', INVESTIGATION_NOTES_MARKDOWN);
 
     cy.get(DEFINITION_INDEX_PATTERNS).then(patterns => {
       cy.wrap(patterns).each((pattern, index) => {

@@ -14,7 +14,6 @@ import {
   CreateTimeline,
   SetEventsDeletedProps,
   SetEventsLoadingProps,
-  CreateTimelineNote,
   UpdateTimelineLoading,
 } from './types';
 import { mockEcsDataWithSignal } from '../../../../mock/mock_ecs';
@@ -54,14 +53,12 @@ describe('signals default_config', () => {
     let setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
     let createTimeline: CreateTimeline;
     let updateTimelineIsLoading: UpdateTimelineLoading;
-    let createTimelineNote: CreateTimelineNote;
 
     beforeEach(() => {
       setEventsLoading = jest.fn();
       setEventsDeleted = jest.fn();
       createTimeline = jest.fn();
       updateTimelineIsLoading = jest.fn();
-      createTimelineNote = jest.fn();
     });
 
     describe('timeline tooltip', () => {
@@ -74,7 +71,6 @@ describe('signals default_config', () => {
           createTimeline,
           status: 'open',
           updateTimelineIsLoading,
-          createTimelineNote,
         });
         const timelineAction = signalsActions[0].getAction({
           eventId: 'even-id',
@@ -101,7 +97,6 @@ describe('signals default_config', () => {
           createTimeline,
           status: 'open',
           updateTimelineIsLoading,
-          createTimelineNote,
         });
 
         signalOpenAction = signalsActions[1].getAction({
@@ -156,7 +151,6 @@ describe('signals default_config', () => {
           createTimeline,
           status: 'closed',
           updateTimelineIsLoading,
-          createTimelineNote,
         });
 
         signalCloseAction = signalsActions[1].getAction({

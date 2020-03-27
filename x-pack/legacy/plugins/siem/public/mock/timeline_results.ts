@@ -2139,7 +2139,7 @@ export const mockTimelineApolloResult = {
   stale: false,
 };
 
-export const defaultTimeline: CreateTimelineProps = {
+export const defaultTimelineProps: CreateTimelineProps = {
   from: 1541444305937,
   timeline: {
     columns: [
@@ -2200,4 +2200,5 @@ export const defaultTimeline: CreateTimelineProps = {
     width: 1100,
   },
   to: 1541444605937,
+  ruleGuide: '# this is some markdown documentation',
 };

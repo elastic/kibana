@@ -46,14 +46,7 @@ export interface SendSignalToTimelineActionProps {
   createTimeline: CreateTimeline;
   ecsData: Ecs;
   updateTimelineIsLoading: UpdateTimelineLoading;
-  createTimelineNote: CreateTimelineNote;
 }
-
-export interface CreateTimelineNoteProps {
-  noteContent: string;
-}
-
-export type CreateTimelineNote = ({ noteContent }: CreateTimelineNoteProps) => void;
 
 export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 
@@ -61,6 +54,7 @@ export interface CreateTimelineProps {
   from: number;
   timeline: TimelineModel;
   to: number;
+  ruleGuide?: string;
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;
