@@ -59,7 +59,7 @@ describe('DashboardState', function() {
       mockTime.to = '2015-09-29 06:31:44.000';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
+      dashboardState.syncTimefilterWithDashboardTime(mockTimefilter);
 
       expect(mockTime.to).toBe('now/w');
       expect(mockTime.from).toBe('now/w');
@@ -74,7 +74,7 @@ describe('DashboardState', function() {
       mockTime.to = '2015-09-29 06:31:44.000';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
+      dashboardState.syncTimefilterWithDashboardTime(mockTimefilter);
 
       expect(mockTime.to).toBe('now');
       expect(mockTime.from).toBe('now-13d');
@@ -89,7 +89,7 @@ describe('DashboardState', function() {
       mockTime.to = 'now/w';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
+      dashboardState.syncTimefilterWithDashboardTime(mockTimefilter);
 
       expect(mockTime.to).toBe(savedDashboard.timeTo);
       expect(mockTime.from).toBe(savedDashboard.timeFrom);

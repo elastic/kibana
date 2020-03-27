@@ -36,6 +36,7 @@ import {
   IndexPattern,
   IndexPatternsContract,
   Query,
+  QueryState,
   SavedQuery,
   syncQueryStateWithUrl,
 } from '../../../../../../plugins/data/public';
@@ -132,13 +133,6 @@ export class DashboardAppController {
     const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;
 
-    // starts syncing `_g` portion of url with query services
-    // note: dashboard_state_manager.ts syncs `_a` portion of url
-    const {
-      stop: stopSyncingQueryServiceStateWithUrl,
-      hasInheritedQueryFromUrl: hasInheritedGlobalStateFromUrl,
-    } = syncQueryStateWithUrl(queryService, kbnUrlStateStorage);
-
     let lastReloadRequestTime = 0;
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
@@ -170,9 +164,24 @@ export class DashboardAppController {
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalStateFromUrl) {
-      dashboardStateManager.syncTimefilterWithDashboard(timefilter);
+    if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
+      const initialGlobalStateInUrl = kbnUrlStateStorage.get<QueryState>('_g');
+      if (!initialGlobalStateInUrl?.time) {
+        dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
+      }
+      if (!initialGlobalStateInUrl?.refreshInterval) {
+        dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
+      }
     }
+
+    // starts syncing `_g` portion of url with query services
+    // note: dashboard_state_manager.ts syncs `_a` portion of url
+    // it is important to start this syncing after `dashboardStateManager.syncTimefilterWithDashboard(timefilter);` above is run,
+    // otherwise it will case redundant browser history record
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+      queryService,
+      kbnUrlStateStorage
+    );
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
     const getShouldShowEditHelp = () =>
@@ -660,7 +669,8 @@ export class DashboardAppController {
           // temporary solution is to delay $location updates to next digest cycle
           // unfortunately, these causes 2 browser history entries, but this is temporary and will be fixed after migrating '_g' to state_sync utilities
           $scope.$evalAsync(() => {
-            dashboardStateManager.syncTimefilterWithDashboard(timefilter);
+            dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
+            dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
           });
         }
       }

@@ -45,6 +45,7 @@ jest.mock('../legacy_imports', () => {
 
 import {
   addEmbeddableToDashboardUrl,
+  getDashboardIdFromUrl,
   getLensUrlFromDashboardAbsoluteUrl,
   getUrlVars,
 } from './url_helper';
@@ -114,5 +115,31 @@ describe('Dashboard URL Helper', () => {
     expect(getLensUrlFromDashboardAbsoluteUrl(url, '', id)).toEqual(
       'http://localhost:5601/app/kibana#/lens/edit/1244'
     );
+  });
+
+  it('getDashboardIdFromDashboardUrl', () => {
+    let url =
+      "http://localhost:5601/wev/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
+    expect(getDashboardIdFromUrl(url)).toEqual(undefined);
+
+    url =
+      "http://localhost:5601/wev/app/kibana#/dashboard/625357282?_a=(description:'',filters:!()&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))";
+    expect(getDashboardIdFromUrl(url)).toEqual('625357282');
+
+    url = 'http://myserver.mydomain.com:5601/wev/app/kibana#/dashboard/777182';
+    expect(getDashboardIdFromUrl(url)).toEqual('777182');
+
+    url =
+      "http://localhost:5601/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
+    expect(getDashboardIdFromUrl(url)).toEqual(undefined);
+
+    url = '/dashboard/test/?_g=(refreshInterval:';
+    expect(getDashboardIdFromUrl(url)).toEqual('test');
+
+    url = 'dashboard/test/?_g=(refreshInterval:';
+    expect(getDashboardIdFromUrl(url)).toEqual('test');
+
+    url = '/other-app/test/';
+    expect(getDashboardIdFromUrl(url)).toEqual(undefined);
   });
 });
