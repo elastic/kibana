@@ -44,8 +44,8 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
         // if the configuration has been changed
         map(cloneDeep),
         distinctUntilChanged(isEqual),
-        // don't call the endpoint with invalid payload
-        filter(() => jobValidator.isModelMemoryEstimationPayloadValid === true),
+        // don't call the endpoint with the first emitted config or invalid payload
+        filter((value, i) => i > 0 && jobValidator.isModelMemoryEstimationPayloadValid),
         switchMap(payload =>
           ml.calculateModelMemoryLimit$(payload).pipe(
             pluck('modelMemoryLimit'),
