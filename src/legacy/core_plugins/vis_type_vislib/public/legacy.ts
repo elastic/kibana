@@ -25,11 +25,10 @@ import {
   VisTypeVislibPluginSetupDependencies,
   VisTypeVislibPluginStartDependencies,
 } from './plugin';
-import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 
 const setupPlugins: Readonly<VisTypeVislibPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
-  visualizations: visualizationsSetup,
+  visualizations: npSetup.plugins.visualizations,
   charts: npSetup.plugins.charts,
 };
 

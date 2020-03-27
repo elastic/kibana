@@ -16,7 +16,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
   describe('list_alert_types', () => {
     it('should return 200 with list of alert types', async () => {
       const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       const fixtureAlertType = response.body.find((alertType: any) => alertType.id === 'test.noop');
       expect(fixtureAlertType).to.eql({
         actionGroups: [{ id: 'default', name: 'Default' }],
@@ -32,7 +32,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
     it('should return actionVariables with both context and state', async () => {
       const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
 
       const fixtureAlertType = response.body.find(
         (alertType: any) => alertType.id === 'test.always-firing'
@@ -46,7 +46,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
     it('should return actionVariables with just context', async () => {
       const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
 
       const fixtureAlertType = response.body.find(
         (alertType: any) => alertType.id === 'test.onlyContextVariables'
@@ -60,7 +60,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
     it('should return actionVariables with just state', async () => {
       const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
 
       const fixtureAlertType = response.body.find(
         (alertType: any) => alertType.id === 'test.onlyStateVariables'

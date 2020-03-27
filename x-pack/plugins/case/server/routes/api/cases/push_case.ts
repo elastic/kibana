@@ -15,6 +15,7 @@ import { flattenCaseSavedObject, wrapError, escapeHatch } from '../utils';
 import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../saved_object_types';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -53,6 +54,7 @@ export function initPushCaseUserActionApi({
             client,
             caseId,
             options: {
+              filter: `not ${CASE_COMMENT_SAVED_OBJECT}.attributes.pushed_at: *`,
               fields: [],
               page: 1,
               perPage: 1,
@@ -70,6 +72,7 @@ export function initPushCaseUserActionApi({
           client,
           caseId,
           options: {
+            filter: `not ${CASE_COMMENT_SAVED_OBJECT}.attributes.pushed_at: *`,
             fields: [],
             page: 1,
             perPage: totalCommentsFindByCases.total,
@@ -140,7 +143,6 @@ export function initPushCaseUserActionApi({
             ],
           }),
         ]);
-
         return response.ok({
           body: CaseResponseRt.encode(
             flattenCaseSavedObject(
