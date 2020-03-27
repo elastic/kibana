@@ -20,7 +20,7 @@
 import { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 import { toastNotifications } from '../../notify/toasts';
 import { npSetup } from '../../new_platform';
-import { areDecodedHashesEqual } from './sub_url_hooks_utils';
+import { areHashesDifferentButDecodedHashesEquals } from './sub_url_hooks_utils';
 
 export function registerSubUrlHooks(angularModule, internals) {
   angularModule.run(($rootScope, Private, $location) => {
@@ -48,7 +48,7 @@ export function registerSubUrlHooks(angularModule, internals) {
     $rootScope.$on('$locationChangeStart', (e, newUrl) => {
       // This handler fixes issue #31238 where browser back navigation
       // fails due to angular 1.6 parsing url encoded params wrong.
-      if (areDecodedHashesEqual($location.absUrl(), newUrl)) {
+      if (areHashesDifferentButDecodedHashesEquals($location.absUrl(), newUrl)) {
         // replace the urlencoded hash with the version that angular sees.
         const newHash = newUrl.split('#')[1] || '';
         $location.url(newHash).replace();

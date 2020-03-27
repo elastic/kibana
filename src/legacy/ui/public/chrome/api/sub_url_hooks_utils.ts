@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function areDecodedHashesEqual(urlA: string, urlB: string): boolean {
+export function areHashesDifferentButDecodedHashesEquals(urlA: string, urlB: string): boolean {
   const getHash = (url: string) => url.split('#')[1] ?? '';
   const hashA = getHash(urlA);
   const decodedHashA = decodeURIComponent(hashA);

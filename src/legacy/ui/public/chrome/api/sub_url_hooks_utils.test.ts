@@ -17,19 +17,25 @@
  * under the License.
  */
 
-import { areDecodedHashesEqual } from './sub_url_hooks_utils';
+import { areHashesDifferentButDecodedHashesEquals } from './sub_url_hooks_utils';
 
 test('false for different hashes', () => {
   const url1 = `https://localhost/kibana/#/dashboard/id`;
   const url2 = `https://localhost/kibana/#/dashboard/DIFFERENT`;
-  expect(areDecodedHashesEqual(url1, url2)).toBeFalsy();
+  expect(areHashesDifferentButDecodedHashesEquals(url1, url2)).toBeFalsy();
+});
+
+test('false for same hashes', () => {
+  const hash = `/dashboard/id?_a=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),time:(from:now-120m,to:now))`;
+  const url1 = `https://localhost/kibana/#/${hash}`;
+  expect(areHashesDifferentButDecodedHashesEquals(url1, url1)).toBeFalsy();
 });
 
 test('true for same hashes, but one is encoded', () => {
   const hash = `/dashboard/id?_a=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),time:(from:now-120m,to:now))`;
   const url1 = `https://localhost/kibana/#/${hash}`;
   const url2 = `https://localhost/kibana/#/${encodeURIComponent(hash)}`;
-  expect(areDecodedHashesEqual(url1, url2)).toBeTruthy();
+  expect(areHashesDifferentButDecodedHashesEquals(url1, url2)).toBeTruthy();
 });
 
 /**
@@ -48,5 +54,5 @@ test("true for same hashes, but one has reserved character (') encoded", () => {
   const hash = `/dashboard/id?_a=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),time:(from:now-120m,to:now))`;
   const url1 = `https://localhost/kibana/#/${hash}`;
   const url2 = `https://localhost/kibana/#/${hash.replace(/\'/g, '%27')}`;
-  expect(areDecodedHashesEqual(url1, url2)).toBeTruthy();
+  expect(areHashesDifferentButDecodedHashesEquals(url1, url2)).toBeTruthy();
 });
