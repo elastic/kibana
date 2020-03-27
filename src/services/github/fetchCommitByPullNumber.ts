@@ -35,8 +35,8 @@ export async function fetchCommitByPullNumber(
     variables: {
       repoOwner,
       repoName,
-      pullNumber
-    }
+      pullNumber,
+    },
   });
 
   if (res.repository.pullRequest.mergeCommit === null) {
@@ -48,14 +48,14 @@ export async function fetchCommitByPullNumber(
   const message = getFormattedCommitMessage({
     message: res.repository.pullRequest.mergeCommit.message,
     sha,
-    pullNumber
+    pullNumber,
   });
 
   return {
     branch: baseBranch,
     sha,
     message,
-    pullNumber
+    pullNumber,
   };
 }
 

@@ -3,7 +3,7 @@ import { CommitChoice } from './Commit';
 import { fetchAuthorId } from './fetchAuthorId';
 import {
   getFirstCommitMessageLine,
-  getFormattedCommitMessage
+  getFormattedCommitMessage,
 } from './commitFormatters';
 import { gqlRequest } from './gqlRequest';
 import { HandledError } from '../HandledError';
@@ -18,7 +18,7 @@ export async function fetchCommitsByAuthor(
     path,
     repoName,
     repoOwner,
-    sourceBranch
+    sourceBranch,
   } = options;
 
   const query = /* GraphQL */ `
@@ -104,8 +104,8 @@ export async function fetchCommitsByAuthor(
       sourceBranch,
       commitsCount: commitsCount || 10,
       authorId,
-      historyPath: path || null
-    }
+      historyPath: path || null,
+    },
   });
 
   if (res.repository.ref === null) {
@@ -114,7 +114,7 @@ export async function fetchCommitsByAuthor(
     );
   }
 
-  return res.repository.ref.target.history.edges.map(edge => {
+  return res.repository.ref.target.history.edges.map((edge) => {
     const historyNode = edge.node;
     const associatedPullRequest = getAssociatedPullRequest(
       historyNode.associatedPullRequests.edges[0],
@@ -135,7 +135,7 @@ export async function fetchCommitsByAuthor(
     const message = getFormattedCommitMessage({
       message: firstMessageLine,
       pullNumber,
-      sha
+      sha,
     });
 
     return {
@@ -143,7 +143,7 @@ export async function fetchCommitsByAuthor(
       sha,
       message,
       pullNumber,
-      existingBackports
+      existingBackports,
     };
   });
 }
@@ -179,23 +179,23 @@ export function getExistingBackportPRs(
   const firstMessageLine = getFirstCommitMessageLine(message);
   return pullRequest.node.timelineItems.edges
     .filter(notEmpty)
-    .filter(item => {
+    .filter((item) => {
       const { source } = item.node;
       return (
         source.__typename === 'PullRequest' &&
         (source.state === 'MERGED' || source.state === 'OPEN') &&
         source.commits.edges.some(
-          commit =>
+          (commit) =>
             getFirstCommitMessageLine(commit.node.commit.message) ===
             firstMessageLine
         )
       );
     })
-    .map(item => {
+    .map((item) => {
       const { source } = item.node;
       return {
         branch: source.baseRefName,
-        state: source.state
+        state: source.state,
       };
     });
 }

@@ -16,8 +16,8 @@ describe('cherrypickAndCreatePullRequest', () => {
       .mockResolvedValueOnce({
         data: {
           number: 1337,
-          html_url: 'myHtmlUrl'
-        }
+          html_url: 'myHtmlUrl',
+        },
       })
 
       // mock: addLabelsToPullRequest
@@ -42,7 +42,7 @@ describe('cherrypickAndCreatePullRequest', () => {
         repoName: 'kibana',
         repoOwner: 'elastic',
         username: 'sqren',
-        sourceBranch: 'myDefaultRepoBaseBranch'
+        sourceBranch: 'myDefaultRepoBaseBranch',
       } as BackportOptions;
 
       const commits = [
@@ -50,20 +50,20 @@ describe('cherrypickAndCreatePullRequest', () => {
           branch: '7.x',
           sha: 'mySha',
           message: 'myCommitMessage (#1000)',
-          pullNumber: 1000
+          pullNumber: 1000,
         },
         {
           branch: '7.x',
           sha: 'mySha2',
           message: 'myOtherCommitMessage (#2000)',
-          pullNumber: 2000
-        }
+          pullNumber: 2000,
+        },
       ];
 
       await cherrypickAndCreatePullRequest({
         options,
         commits,
-        baseBranch: '6.x'
+        baseBranch: '6.x',
       });
     });
 
@@ -110,15 +110,15 @@ myPrSuffix`
         prTitle: '[{baseBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
-        username: 'sqren'
+        username: 'sqren',
       } as BackportOptions;
 
       await cherrypickAndCreatePullRequest({
         options,
         commits: [
-          { branch: '7.x', sha: 'mySha', message: 'myCommitMessage (mySha)' }
+          { branch: '7.x', sha: 'mySha', message: 'myCommitMessage (mySha)' },
         ],
-        baseBranch: '6.x'
+        baseBranch: '6.x',
       });
     });
 
@@ -173,13 +173,13 @@ myPrSuffix`
         repoName: 'kibana',
         repoOwner: 'elastic',
         username: 'sqren',
-        sourceBranch: 'myDefaultRepoBaseBranch'
+        sourceBranch: 'myDefaultRepoBaseBranch',
       } as BackportOptions;
 
       const promise = cherrypickAndCreatePullRequest({
         options,
         commits: [{ branch: '7.x', sha: 'mySha', message: 'myCommitMessage' }],
-        baseBranch: '6.x'
+        baseBranch: '6.x',
       });
 
       return { logSpy, execSpy, promise };
@@ -196,7 +196,7 @@ myPrSuffix`
       const { execSpy, promise, logSpy } = didResolveConflict(false);
       expect.assertions(4);
 
-      await promise.catch(e => {
+      await promise.catch((e) => {
         expect(logSpy.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [

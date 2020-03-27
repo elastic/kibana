@@ -4,18 +4,18 @@ export const commitByShaMock = {
     author: {
       name: 'Søren Louv-Jansen',
       email: 'sorenlouv@gmail.com',
-      date: '2017-11-28T18:44:33Z'
+      date: '2017-11-28T18:44:33Z',
     },
     committer: {
       name: 'GitHub',
       email: 'noreply@github.com',
-      date: '2017-11-28T18:44:33Z'
+      date: '2017-11-28T18:44:33Z',
     },
     message: '[Chrome] Bootstrap Angular into document.body',
     tree: {
       sha: 'ce129055d52748ed4d931cbc1591d984d71ec04f',
       url:
-        'https://api.github.com/repos/elastic/kibana/git/trees/ce129055d52748ed4d931cbc1591d984d71ec04f'
+        'https://api.github.com/repos/elastic/kibana/git/trees/ce129055d52748ed4d931cbc1591d984d71ec04f',
     },
     url: 'https://api.github.com/repos/elastic/kibana/git/commits/myCommitSha',
     comment_count: 0,
@@ -25,8 +25,8 @@ export const commitByShaMock = {
       signature:
         '-----BEGIN PGP SIGNATURE-----\n\nwsBcBAABCAAQBQJaHa6RCRBK7hj4Ov3rIwAAdHIIAKCbJdxH0Rvxt7oY5hIHFbpI\nFLFKyvzssgIDULgWzqIcc839ChnQuJOtCvobSeGCS3OMcxG+D0DKfn0MAOVGMyfD\n3vWYfkwE7asq2wKPPAsJ8tXNFQ4QLdCh9M24VyZxZwL49si2tZlLwN7vbWAdLgrc\n8MP4YWw7s7Y3Bw0Sm13kDMw07jUWJJd/PgU+cYs3EU+nkjGuz5V85U6w6qavdhqM\n1tQ5iv3q6AyzUDBm4LRX0t89STrCZpt3lG6jhUsqQscGKGBCxhks3zra4DClJIeK\nWoZbSiLcuKgU81KJyF2Wq/i7XMvhv1UQdTu3gqZOHpZEwNjaMaqGoUVs8bu0w+Q=\n=EWOy\n-----END PGP SIGNATURE-----\n',
       payload:
-        'tree ce129055d52748ed4d931cbc1591d984d71ec04f\nparent b81fd782c7a63bc231b4678aa4e685c2025fa302\nauthor Søren Louv-Jansen <sorenlouv@gmail.com> 1511894673 +0100\ncommitter GitHub <noreply@github.com> 1511894673 +0100\n\n[Chrome] Bootstrap Angular into document.body\n\n'
-    }
+        'tree ce129055d52748ed4d931cbc1591d984d71ec04f\nparent b81fd782c7a63bc231b4678aa4e685c2025fa302\nauthor Søren Louv-Jansen <sorenlouv@gmail.com> 1511894673 +0100\ncommitter GitHub <noreply@github.com> 1511894673 +0100\n\n[Chrome] Bootstrap Angular into document.body\n\n',
+    },
   },
   url: 'https://api.github.com/repos/elastic/kibana/commits/myCommitSha',
   html_url: 'https://github.com/elastic/kibana/commit/myCommitSha',
@@ -49,7 +49,7 @@ export const commitByShaMock = {
     events_url: 'https://api.github.com/users/sqren/events{/privacy}',
     received_events_url: 'https://api.github.com/users/sqren/received_events',
     type: 'User',
-    site_admin: false
+    site_admin: false,
   },
   committer: {
     login: 'web-flow',
@@ -70,7 +70,7 @@ export const commitByShaMock = {
     received_events_url:
       'https://api.github.com/users/web-flow/received_events',
     type: 'User',
-    site_admin: false
+    site_admin: false,
   },
   parents: [
     {
@@ -78,13 +78,13 @@ export const commitByShaMock = {
       url:
         'https://api.github.com/repos/elastic/kibana/commits/b81fd782c7a63bc231b4678aa4e685c2025fa302',
       html_url:
-        'https://github.com/elastic/kibana/commit/b81fd782c7a63bc231b4678aa4e685c2025fa302'
-    }
+        'https://github.com/elastic/kibana/commit/b81fd782c7a63bc231b4678aa4e685c2025fa302',
+    },
   ],
   stats: {
     total: 2,
     additions: 1,
-    deletions: 1
+    deletions: 1,
   },
   files: [
     {
@@ -101,7 +101,7 @@ export const commitByShaMock = {
       contents_url:
         'https://api.github.com/repos/elastic/kibana/contents/src/ui/public/chrome/chrome.js?ref=myCommitSha',
       patch:
-        "@@ -48,5 +48,5 @@ translationsApi(chrome, internals);\n \n chrome.bootstrap = function () {\n   chrome.setupAngular();\n-  angular.bootstrap(document, ['kibana']);\n+  angular.bootstrap(document.body, ['kibana']);\n };"
-    }
-  ]
+        "@@ -48,5 +48,5 @@ translationsApi(chrome, internals);\n \n chrome.bootstrap = function () {\n   chrome.setupAngular();\n-  angular.bootstrap(document, ['kibana']);\n+  angular.bootstrap(document.body, ['kibana']);\n };",
+    },
+  ],
 };

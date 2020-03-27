@@ -15,21 +15,21 @@ describe('getCommitBySha', () => {
       repoOwner: 'elastic',
       repoName: 'kibana',
       sha: 'myCommitSha',
-      apiHostname: 'api.github.com'
+      apiHostname: 'api.github.com',
     } as BackportOptions & { sha: string });
 
     expect(commit).toEqual({
       branch: 'master',
       message: '[Chrome] Bootstrap Angular into document.body (myCommit)',
       sha: 'myCommitSha',
-      pullNumber: undefined
+      pullNumber: undefined,
     });
 
     expect(axiosSpy).toHaveBeenCalledWith(
       'https://api.github.com/search/commits?q=hash:myCommitSha%20repo:elastic/kibana&per_page=1',
       {
         headers: { Accept: 'application/vnd.github.cloak-preview' },
-        auth: { password: 'myAccessToken', username: 'sqren' }
+        auth: { password: 'myAccessToken', username: 'sqren' },
       }
     );
   });
@@ -42,7 +42,7 @@ describe('getCommitBySha', () => {
         repoOwner: 'elastic',
         repoName: 'kibana',
         sha: 'myCommitSha',
-        apiHostname: 'api.github.com'
+        apiHostname: 'api.github.com',
       } as BackportOptions & { sha: string })
     ).rejects.toThrowError('No commit found on master with sha "myCommitSha"');
   });

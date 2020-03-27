@@ -20,7 +20,7 @@ export async function gqlRequest<DataResponse>({
   apiHostname,
   query,
   variables,
-  accessToken
+  accessToken,
 }: {
   apiHostname: string;
   query: string;
@@ -38,8 +38,8 @@ export async function gqlRequest<DataResponse>({
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `bearer ${accessToken}`
-        }
+          Authorization: `bearer ${accessToken}`,
+        },
       }
     );
 
@@ -63,7 +63,7 @@ export async function gqlRequest<DataResponse>({
       logger.info(e.response.data);
 
       const errorMessages = e.response.data.errors
-        ?.map(error => error.message)
+        ?.map((error) => error.message)
         .join(', ');
 
       const stringifiedResponseData = JSON.stringify(e.response.data, null, 2);

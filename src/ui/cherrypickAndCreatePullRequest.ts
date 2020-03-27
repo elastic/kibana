@@ -11,7 +11,7 @@ import {
   isIndexDirty,
   pushFeatureBranch,
   getRemoteName,
-  setCommitAuthor
+  setCommitAuthor,
 } from '../services/git';
 import { confirmPrompt } from '../services/prompts';
 import { createPullRequest } from '../services/github/createPullRequest';
@@ -25,7 +25,7 @@ import { withSpinner } from './withSpinner';
 export async function cherrypickAndCreatePullRequest({
   options,
   commits,
-  baseBranch
+  baseBranch,
 }: {
   options: BackportOptions;
   commits: CommitSelected[];
@@ -33,7 +33,7 @@ export async function cherrypickAndCreatePullRequest({
 }) {
   const featureBranch = getFeatureBranchName(baseBranch, commits);
   const commitMessages = commits
-    .map(commit => ` - ${commit.message}`)
+    .map((commit) => ` - ${commit.message}`)
     .join('\n');
   consoleLog(
     `\n${chalk.bold(
@@ -45,7 +45,9 @@ export async function cherrypickAndCreatePullRequest({
     createFeatureBranch(options, baseBranch, featureBranch)
   );
 
-  await sequentially(commits, commit => cherrypickAndConfirm(options, commit));
+  await sequentially(commits, (commit) =>
+    cherrypickAndConfirm(options, commit)
+  );
 
   if (options.resetAuthor) {
     await withSpinner(
@@ -62,7 +64,7 @@ export async function cherrypickAndCreatePullRequest({
 
   await deleteFeatureBranch(options, featureBranch);
 
-  await withSpinner({ text: 'Creating pull request' }, async spinner => {
+  await withSpinner({ text: 'Creating pull request' }, async (spinner) => {
     const payload = getPullRequestPayload(options, baseBranch, commits);
     const pullRequest = await createPullRequest(options, payload);
 
@@ -76,7 +78,7 @@ export async function cherrypickAndCreatePullRequest({
 
 function getFeatureBranchName(baseBranch: string, commits: CommitSelected[]) {
   const refValues = commits
-    .map(commit =>
+    .map((commit) =>
       commit.pullNumber
         ? `pr-${commit.pullNumber}`
         : `commit-${getShortSha(commit.sha)}`
@@ -135,7 +137,7 @@ function getPullRequestTitle(
   commits: CommitSelected[],
   prTitle: string
 ) {
-  const commitMessages = commits.map(commit => commit.message).join(' | ');
+  const commitMessages = commits.map((commit) => commit.message).join(' | ');
   return prTitle
     .replace('{baseBranch}', baseBranch)
     .replace('{commitMessages}', commitMessages)
@@ -155,7 +157,7 @@ function getPullRequestPayload(
   const { prDescription, prTitle } = options;
   const featureBranch = getFeatureBranchName(baseBranch, commits);
   const commitMessages = commits
-    .map(commit => ` - ${commit.message}`)
+    .map((commit) => ` - ${commit.message}`)
     .join('\n');
   const bodySuffix = prDescription ? `\n\n${prDescription}` : '';
 
@@ -163,6 +165,6 @@ function getPullRequestPayload(
     title: getPullRequestTitle(baseBranch, commits, prTitle),
     body: `Backports the following commits to ${baseBranch}:\n${commitMessages}${bodySuffix}`,
     head: getHeadBranchName(options, featureBranch),
-    base: baseBranch
+    base: baseBranch,
   };
 }

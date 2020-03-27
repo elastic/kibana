@@ -4,7 +4,7 @@ import {
   PullRequestEdge,
   fetchCommitsByAuthor,
   getExistingBackportPRs,
-  TimelineItemEdge
+  TimelineItemEdge,
 } from './fetchCommitsByAuthor';
 import { commitsWithPullRequestsMock } from './mocks/commitsByAuthorMock';
 import { getDefaultOptions } from '../../test/getDefaultOptions';
@@ -28,30 +28,30 @@ describe('fetchCommitsByAuthor', () => {
         {
           sha: '2e63475c483f7844b0f2833bc57fdee32095bacb',
           message: 'Add 👻 (2e63475c)',
-          existingBackports: []
+          existingBackports: [],
         },
         {
           sha: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
           message: 'Add witch (#85)',
           pullNumber: 85,
-          existingBackports: []
+          existingBackports: [],
         },
         {
           sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
           message: 'Add SF mention (#80)',
           pullNumber: 80,
-          existingBackports: [{ branch: '6.3', state: 'MERGED' }]
+          existingBackports: [{ branch: '6.3', state: 'MERGED' }],
         },
         {
           sha: '3827bbbaf39914eda4f02f6940189844375fd097',
           message: 'Add backport config (3827bbba)',
-          existingBackports: []
+          existingBackports: [],
         },
         {
           sha: '5ea0da550ac191029459289d67f99ad7d310812b',
           message: 'Initial commit (5ea0da55)',
-          existingBackports: []
-        }
+          existingBackports: [],
+        },
       ]);
     });
 
@@ -72,8 +72,8 @@ describe('fetchCommitsByAuthor', () => {
           existingBackports: [{ branch: '6.3', state: 'MERGED' }],
           message: 'Add SF mention (#80)',
           pullNumber: 80,
-          sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe'
-        }
+          sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
+        },
       ]);
     });
 
@@ -84,8 +84,8 @@ describe('fetchCommitsByAuthor', () => {
           existingBackports: [],
           message: 'Add SF mention (#80)',
           pullNumber: 80,
-          sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe'
-        }
+          sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
+        },
       ]);
     });
   });
@@ -98,7 +98,7 @@ describe('fetchCommitsByAuthor', () => {
       );
 
       const options = getDefaultOptions({
-        apiHostname: 'api.github.my-company.com'
+        apiHostname: 'api.github.my-company.com',
       });
       await fetchCommitsByAuthor(options);
 
@@ -120,8 +120,8 @@ describe('getExistingBackportPRs', () => {
         repository: {
           name: 'kibana',
           owner: {
-            login: 'elastic'
-          }
+            login: 'elastic',
+          },
         },
         number: 1234,
         timelineItems: {
@@ -133,16 +133,16 @@ describe('getExistingBackportPRs', () => {
                   state: 'MERGED' as const,
                   commits: {
                     edges: [
-                      { node: { commit: { message: 'my message (#1234)' } } }
-                    ]
+                      { node: { commit: { message: 'my message (#1234)' } } },
+                    ],
                   },
-                  baseRefName: '7.x'
-                }
-              }
-            }
-          ]
-        }
-      }
+                  baseRefName: '7.x',
+                },
+              },
+            },
+          ],
+        },
+      },
     };
   });
 
@@ -192,8 +192,8 @@ async function getExistingBackportsByRepoName(
                           repository: {
                             name: repoName1,
                             owner: {
-                              login: 'elastic'
-                            }
+                              login: 'elastic',
+                            },
                           },
                           number: 80,
                           timelineItems: {
@@ -210,28 +210,28 @@ async function getExistingBackportsByRepoName(
                                           node: {
                                             commit: {
                                               message:
-                                                'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!'
-                                            }
-                                          }
-                                        }
-                                      ]
-                                    }
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            ]
-          }
-        }
-      }
-    }
+                                                'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
+                                            },
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
   };
 
   spyOn(gqlRequest, 'gqlRequest').and.returnValues(
@@ -240,7 +240,7 @@ async function getExistingBackportsByRepoName(
   );
 
   const options = getDefaultOptions({
-    repoName: repoName2
+    repoName: repoName2,
   });
   return fetchCommitsByAuthor(options);
 }

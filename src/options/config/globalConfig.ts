@@ -33,7 +33,7 @@ export async function maybeCreateGlobalConfig(
   try {
     await writeFile(globalConfigPath, configTemplate, {
       flag: 'wx', // create and write file. Error if it already exists
-      mode: 0o600 // give the owner read-write privleges, no access for others
+      mode: 0o600, // give the owner read-write privleges, no access for others
     });
     return true;
   } catch (e) {

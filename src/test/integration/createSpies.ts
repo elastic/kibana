@@ -6,7 +6,7 @@ import childProcess = require('child_process');
 import {
   HOMEDIR_PATH,
   REMOTE_ORIGIN_REPO_PATH,
-  REMOTE_FORK_REPO_PATH
+  REMOTE_FORK_REPO_PATH,
 } from './envConstants';
 
 const unmockedExec = childProcess.exec;
@@ -40,8 +40,8 @@ export function createSpies({ commitCount }: { commitCount: number }) {
     // mock getDefaultRepoBranch
     .mockReturnValueOnce({
       data: {
-        data: { repository: { defaultBranchRef: { name: 'master' } } }
-      }
+        data: { repository: { defaultBranchRef: { name: 'master' } } },
+      },
     } as any)
 
     // mock author id
@@ -49,17 +49,17 @@ export function createSpies({ commitCount }: { commitCount: number }) {
       data: {
         data: {
           user: {
-            id: 'sqren_author_id'
-          }
-        }
-      }
+            id: 'sqren_author_id',
+          },
+        },
+      },
     } as any)
 
     // mock list of commits
     .mockReturnValueOnce({
       data: {
-        data: commitsWithPullRequestsMock
-      }
+        data: commitsWithPullRequestsMock,
+      },
     } as any)
 
     // mock create pull request
@@ -74,7 +74,7 @@ export function createSpies({ commitCount }: { commitCount: number }) {
         promptResult:
           commitCount === 2
             ? [args[0].choices[0].value, args[0].choices[1].value]
-            : args[0].choices[1].value
+            : args[0].choices[1].value,
       };
     }) as any)
     .mockImplementationOnce((async (args: any) => {
@@ -87,15 +87,15 @@ export function createSpies({ commitCount }: { commitCount: number }) {
         getDefaultRepoBranch,
         getAuthorPayload,
         getCommitsPayload,
-        createPullRequestPayload
-      ] = axiosPostSpy.mock.calls.map(call => call[1]);
+        createPullRequestPayload,
+      ] = axiosPostSpy.mock.calls.map((call) => call[1]);
 
       return {
         getDefaultRepoBranch,
         getAuthorPayload,
         getCommitsPayload,
-        createPullRequestPayload
+        createPullRequestPayload,
       };
-    }
+    },
   };
 }

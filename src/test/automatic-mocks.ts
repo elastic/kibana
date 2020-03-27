@@ -11,10 +11,10 @@ jest.mock('../services/child-process-promisified', () => {
       last(args)();
       return {
         stderr: {
-          on: () => {}
-        }
+          on: () => {},
+        },
       };
-    })
+    }),
   };
 });
 
@@ -27,7 +27,7 @@ jest.mock('../services/fs-promisified', () => {
       if (filepath === '/path/to/project/config') {
         return JSON.stringify({
           upstream: 'elastic/backport-demo',
-          branches: ['6.0', '5.9']
+          branches: ['6.0', '5.9'],
         });
       }
 
@@ -35,7 +35,7 @@ jest.mock('../services/fs-promisified', () => {
       if (filepath.endsWith('/.backport/config.json')) {
         return JSON.stringify({
           username: 'sqren',
-          accessToken: 'myAccessToken'
+          accessToken: 'myAccessToken',
         });
       }
 
@@ -44,11 +44,11 @@ jest.mock('../services/fs-promisified', () => {
 
     stat: jest.fn(async () => {
       return {
-        isDirectory: () => {}
+        isDirectory: () => {},
       };
     }),
 
-    chmod: jest.fn(async () => 'fs.chmod mock value')
+    chmod: jest.fn(async () => 'fs.chmod mock value'),
   };
 });
 
@@ -61,7 +61,7 @@ jest.mock('make-dir', () => {
 });
 
 jest.mock('del', () => {
-  return jest.fn(async path => `Attempted to delete ${path}`);
+  return jest.fn(async (path) => `Attempted to delete ${path}`);
 });
 
 jest.mock('ora', () => {
@@ -70,8 +70,8 @@ jest.mock('ora', () => {
       succeed: () => {},
       stop: () => {},
       fail: () => {},
-      stopAndPersist: () => {}
-    })
+      stopAndPersist: () => {},
+    }),
   };
 
   return () => ora;

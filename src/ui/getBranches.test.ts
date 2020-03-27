@@ -6,7 +6,7 @@ describe('getBranches', () => {
 
   beforeEach(() => {
     promptSpy = spyOn(prompts, 'promptForBranches').and.returnValue([
-      'branchA'
+      'branchA',
     ]);
   });
 
@@ -17,7 +17,7 @@ describe('getBranches', () => {
       branches = getBranches({
         branches: [],
         branchChoices: ['branchA', 'branchB'],
-        multipleBranches: false
+        multipleBranches: false,
       } as any);
     });
 
@@ -37,7 +37,7 @@ describe('getBranches', () => {
       branches = getBranches({
         branches: ['branchA', 'branchB'],
         branchChoices: [],
-        multipleBranches: false
+        multipleBranches: false,
       } as any);
     });
 

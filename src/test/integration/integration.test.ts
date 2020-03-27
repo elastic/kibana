@@ -6,7 +6,7 @@ import { createSpies } from './createSpies';
 import {
   getBranches,
   getLatestCommit,
-  deleteAndSetupEnvironment
+  deleteAndSetupEnvironment,
 } from './helpers';
 
 jest.unmock('make-dir');
@@ -38,7 +38,7 @@ describe('when a single commit is backported', () => {
       getDefaultRepoBranch,
       getAuthorPayload,
       getCommitsPayload,
-      createPullRequestPayload
+      createPullRequestPayload,
     } = spies.getAxiosCalls();
 
     expect(getDefaultRepoBranch).toMatchSnapshot();
@@ -61,7 +61,7 @@ describe('when a single commit is backported', () => {
     const commit = await getLatestCommit({
       branch: 'backport/6.0/pr-85',
       commitCount: 1,
-      cwd: REMOTE_FORK_REPO_PATH
+      cwd: REMOTE_FORK_REPO_PATH,
     });
     expect(commit).toMatchInlineSnapshot(`
       " romeo-and-juliet.txt | 2 +-
@@ -98,7 +98,7 @@ describe('when a multiple commits are backported', () => {
     const {
       getAuthorPayload,
       getCommitsPayload,
-      createPullRequestPayload
+      createPullRequestPayload,
     } = spies.getAxiosCalls();
 
     expect(getAuthorPayload).toMatchSnapshot();
@@ -116,7 +116,7 @@ describe('when a multiple commits are backported', () => {
     expect(branches).toEqual([
       '6.0',
       'backport/6.0/pr-85_commit-2e63475c',
-      '* master'
+      '* master',
     ]);
   });
 
@@ -124,7 +124,7 @@ describe('when a multiple commits are backported', () => {
     const commit = await getLatestCommit({
       branch: 'backport/6.0/pr-85_commit-2e63475c',
       commitCount: 2,
-      cwd: REMOTE_FORK_REPO_PATH
+      cwd: REMOTE_FORK_REPO_PATH,
     });
     expect(commit).toMatchInlineSnapshot(`
             " romeo-and-juliet.txt | 2 +-
@@ -185,7 +185,7 @@ describe('when disabling fork mode', () => {
     const commit = await getLatestCommit({
       branch: 'backport/6.0/pr-85',
       commitCount: 1,
-      cwd: REMOTE_ORIGIN_REPO_PATH
+      cwd: REMOTE_ORIGIN_REPO_PATH,
     });
     expect(commit).toMatchInlineSnapshot(`
       " romeo-and-juliet.txt | 2 +-

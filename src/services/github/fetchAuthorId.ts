@@ -23,7 +23,7 @@ export async function fetchAuthorId(options: BackportOptions) {
     apiHostname,
     accessToken,
     query,
-    variables: { login: author }
+    variables: { login: author },
   });
 
   return res.user.id;

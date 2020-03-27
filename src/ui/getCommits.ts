@@ -16,8 +16,8 @@ export async function getCommits(options: BackportOptions) {
     return [
       await getCommitByPullNumber({
         ...options,
-        pullNumber: options.pullNumber
-      })
+        pullNumber: options.pullNumber,
+      }),
     ];
   }
 

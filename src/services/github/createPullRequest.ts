@@ -24,13 +24,13 @@ export async function createPullRequest(
       {
         auth: {
           username: username,
-          password: accessToken
-        }
+          password: accessToken,
+        },
       }
     );
     return {
       html_url: res.data.html_url,
-      number: res.data.number
+      number: res.data.number,
     };
   } catch (e) {
     throw handleGithubError(e);

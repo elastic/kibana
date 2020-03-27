@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import inquirer, {
   CheckboxQuestion,
   ListQuestion,
-  ConfirmQuestion
+  ConfirmQuestion,
 } from 'inquirer';
 import isEmpty from 'lodash.isempty';
 import { BranchChoice } from '../types/Config';
@@ -12,7 +12,7 @@ type Question = CheckboxQuestion | ListQuestion | ConfirmQuestion;
 
 async function prompt<T = unknown>(options: Question) {
   const { promptResult } = (await inquirer.prompt([
-    { ...options, name: 'promptResult' }
+    { ...options, name: 'promptResult' },
   ])) as { promptResult: T };
   return promptResult;
 }
@@ -23,7 +23,7 @@ export async function promptForCommits(
 ): Promise<CommitChoice[]> {
   const choices = commits.map((c, i) => {
     const backportTags = c.existingBackports
-      .map(item => {
+      .map((item) => {
         const styling = item.state === 'MERGED' ? chalk.green : chalk.gray;
         return styling(item.branch);
       })
@@ -34,7 +34,7 @@ export async function promptForCommits(
     return {
       name: `${position} ${c.message} ${backportTags}`,
       short: c.message,
-      value: c
+      value: c,
     };
   });
 
@@ -42,7 +42,7 @@ export async function promptForCommits(
     choices,
     message: 'Select commit to backport',
     pageSize: Math.min(10, commits.length),
-    type: isMultipleChoice ? 'checkbox' : 'list'
+    type: isMultipleChoice ? 'checkbox' : 'list',
   });
 
   const selectedCommits = Array.isArray(res) ? res.reverse() : [res];
@@ -58,7 +58,7 @@ export async function promptForBranches(
   const res = await prompt<string | string[]>({
     choices: branchChoices,
     message: 'Select branch to backport to',
-    type: isMultipleChoice ? 'checkbox' : 'list'
+    type: isMultipleChoice ? 'checkbox' : 'list',
   });
 
   const selectedBranches = Array.isArray(res) ? res : [res];

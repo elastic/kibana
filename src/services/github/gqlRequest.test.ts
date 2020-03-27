@@ -9,8 +9,8 @@ describe('gqlRequest', () => {
     beforeEach(() => {
       spy = jest.spyOn(axios, 'post').mockResolvedValue({
         data: {
-          data: 'some data'
-        }
+          data: 'some data',
+        },
       } as any);
     });
 
@@ -21,8 +21,8 @@ describe('gqlRequest', () => {
           apiHostname: 'myApiHostname',
           query: 'myQuery',
           variables: {
-            foo: 'bar'
-          }
+            foo: 'bar',
+          },
         })
       ).toEqual('some data');
     });
@@ -32,13 +32,13 @@ describe('gqlRequest', () => {
         'https://myApiHostname/graphql',
         {
           query: 'myQuery',
-          variables: { foo: 'bar' }
+          variables: { foo: 'bar' },
         },
         {
           headers: {
             Authorization: 'bearer myAccessToken',
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         }
       );
     });
@@ -49,9 +49,12 @@ describe('gqlRequest', () => {
       jest.spyOn(axios, 'post').mockRejectedValue({
         response: {
           data: {
-            errors: [{ message: 'some error' }, { message: 'some other error' }]
-          }
-        }
+            errors: [
+              { message: 'some error' },
+              { message: 'some other error' },
+            ],
+          },
+        },
       } as any);
     });
 
@@ -62,8 +65,8 @@ describe('gqlRequest', () => {
           apiHostname: 'myApiHostname',
           query: 'myQuery',
           variables: {
-            foo: 'bar'
-          }
+            foo: 'bar',
+          },
         })
       ).rejects.toThrowError(
         new HandledError(

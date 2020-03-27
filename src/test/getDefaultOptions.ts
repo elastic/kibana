@@ -8,6 +8,6 @@ export function getDefaultOptions(options: Partial<BackportOptions> = {}) {
     username: 'sqren',
     author: 'sqren',
     apiHostname: 'api.github.com',
-    ...options
+    ...options,
   } as BackportOptions;
 }

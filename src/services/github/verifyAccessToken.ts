@@ -17,7 +17,7 @@ export async function verifyAccessToken({
   accessToken,
   apiHostname,
   repoName,
-  repoOwner
+  repoOwner,
 }: ReturnType<typeof validateRequiredOptions>) {
   try {
     return await axios.head(
@@ -25,8 +25,8 @@ export async function verifyAccessToken({
       {
         auth: {
           username: username,
-          password: accessToken
-        }
+          password: accessToken,
+        },
       }
     );
   } catch (e) {

@@ -15,7 +15,7 @@ const enabledVerboseLogging = argv.verbose || argv.v;
 
 export let logger = ({
   info: () => {},
-  verbose: () => {}
+  verbose: () => {},
 } as unknown) as winston.Logger;
 
 export function initLogger() {
@@ -30,9 +30,9 @@ export function initLogger() {
             ({ message, timestamp }) => `${timestamp} ${formatMessage(message)}`
           )
         ),
-        filename: getLogfilePath()
-      })
-    ]
+        filename: getLogfilePath(),
+      }),
+    ],
   });
   return logger;
 }

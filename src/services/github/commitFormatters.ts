@@ -9,7 +9,7 @@ export function getFirstCommitMessageLine(message: string) {
 export function getFormattedCommitMessage({
   message,
   pullNumber,
-  sha
+  sha,
 }: {
   message: string;
   pullNumber?: number;

@@ -16,7 +16,7 @@ describe('getOptionsFromConfigFiles', () => {
       backportCreatedLabels: [],
       branchChoices: [
         { checked: false, name: '6.0' },
-        { checked: false, name: '5.9' }
+        { checked: false, name: '5.9' },
       ],
       fork: true,
       gitHostname: 'github.com',
@@ -26,7 +26,7 @@ describe('getOptionsFromConfigFiles', () => {
       multipleCommits: false,
       prTitle: '[{baseBranch}] {commitMessages}',
       upstream: 'elastic/backport-demo',
-      username: 'sqren'
+      username: 'sqren',
     });
   });
 });

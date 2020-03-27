@@ -55,7 +55,7 @@ export function cloneRepo(
     );
 
     if (execProcess.stderr) {
-      execProcess.stderr.on('data', data => {
+      execProcess.stderr.on('data', (data) => {
         const regex = /^Receiving objects:\s+(\d+)%/;
         const [, progress]: RegExpMatchArray =
           data.toString().match(regex) || [];
@@ -73,7 +73,7 @@ export async function deleteRemote(
 ) {
   try {
     await exec(`git remote rm ${remoteName}`, {
-      cwd: getRepoPath(options)
+      cwd: getRepoPath(options),
     });
   } catch (e) {
     // note: swallowing error
@@ -86,7 +86,7 @@ export async function addRemote(options: BackportOptions, remoteName: string) {
     await exec(
       `git remote add ${remoteName} ${getRemoteUrl(options, remoteName)}`,
       {
-        cwd: getRepoPath(options)
+        cwd: getRepoPath(options),
       }
     );
   } catch (e) {
@@ -99,7 +99,7 @@ export function cherrypick(options: BackportOptions, commit: CommitSelected) {
   return exec(
     `git fetch ${options.repoOwner} ${commit.branch}:${commit.branch} --force && git cherry-pick ${commit.sha}`,
     {
-      cwd: getRepoPath(options)
+      cwd: getRepoPath(options),
     }
   );
 }
@@ -108,7 +108,7 @@ export function setCommitAuthor(options: BackportOptions, username: string) {
   return exec(
     `git commit --amend --no-edit --author "${username} <${username}@users.noreply.github.com>"`,
     {
-      cwd: getRepoPath(options)
+      cwd: getRepoPath(options),
     }
   );
 }
@@ -116,7 +116,7 @@ export function setCommitAuthor(options: BackportOptions, username: string) {
 export async function isIndexDirty(options: BackportOptions) {
   try {
     await exec(`git diff-index --quiet HEAD --`, {
-      cwd: getRepoPath(options)
+      cwd: getRepoPath(options),
     });
     return false;
   } catch (e) {
@@ -133,7 +133,7 @@ export async function createFeatureBranch(
     return await exec(
       `git reset --hard && git clean -d --force && git fetch ${options.repoOwner} ${baseBranch} && git checkout -B ${featureBranch} ${options.repoOwner}/${baseBranch} --no-track`,
       {
-        cwd: getRepoPath(options)
+        cwd: getRepoPath(options),
       }
     );
   } catch (e) {
@@ -156,7 +156,7 @@ export function deleteFeatureBranch(
   return exec(
     `git checkout ${options.sourceBranch} && git branch -D ${featureBranch}`,
     {
-      cwd: getRepoPath(options)
+      cwd: getRepoPath(options),
     }
   );
 }

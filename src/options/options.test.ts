@@ -2,7 +2,7 @@ import { OptionsFromCliArgs } from './cliArgs';
 import {
   validateRequiredOptions,
   getOptions,
-  BackportOptions
+  BackportOptions,
 } from './options';
 import axios from 'axios';
 
@@ -16,8 +16,8 @@ describe('getOptions', () => {
     axiosHeadSpy = jest.spyOn(axios, 'head').mockReturnValueOnce(true as any);
     axiosPostSpy = jest.spyOn(axios, 'post').mockReturnValueOnce({
       data: {
-        data: { repository: { defaultBranchRef: { name: 'myDefaultBranch' } } }
-      }
+        data: { repository: { defaultBranchRef: { name: 'myDefaultBranch' } } },
+      },
     } as any);
 
     const argv = [
@@ -26,7 +26,7 @@ describe('getOptions', () => {
       '--branch',
       '6.1',
       '--upstream',
-      'elastic/kibana'
+      'elastic/kibana',
     ];
 
     options = await getOptions(argv);
@@ -37,7 +37,7 @@ describe('getOptions', () => {
     expect(axiosHeadSpy).toHaveBeenCalledWith(
       'https://api.github.com/repos/elastic/kibana',
       {
-        auth: { password: 'myAccessToken', username: 'sqren' }
+        auth: { password: 'myAccessToken', username: 'sqren' },
       }
     );
   });
@@ -55,7 +55,7 @@ describe('getOptions', () => {
       backportCreatedLabels: [],
       branchChoices: [
         { checked: false, name: '6.0' },
-        { checked: false, name: '5.9' }
+        { checked: false, name: '5.9' },
       ],
       branches: ['6.0', '6.1'],
       fork: true,
@@ -70,7 +70,7 @@ describe('getOptions', () => {
       resetAuthor: false,
       sourceBranch: 'myDefaultBranch',
       username: 'sqren',
-      verbose: false
+      verbose: false,
     });
   });
 });
@@ -101,7 +101,7 @@ describe('validateRequiredOptions', () => {
     sourceBranch: 'mySourceBranch',
     upstream: 'elastic/kibana',
     username: 'sqren',
-    verbose: false
+    verbose: false,
   };
 
   describe('should not throw', () => {
@@ -114,7 +114,7 @@ describe('validateRequiredOptions', () => {
         validateRequiredOptions({
           ...validOptions,
           branchChoices: [{ name: 'branchA' }],
-          branches: []
+          branches: [],
         })
       ).not.toThrow();
     });
@@ -125,7 +125,7 @@ describe('validateRequiredOptions', () => {
       expect(() =>
         validateRequiredOptions({
           ...validOptions,
-          accessToken: undefined
+          accessToken: undefined,
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -134,7 +134,7 @@ describe('validateRequiredOptions', () => {
       expect(() =>
         validateRequiredOptions({
           ...validOptions,
-          accessToken: ''
+          accessToken: '',
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -144,7 +144,7 @@ describe('validateRequiredOptions', () => {
         validateRequiredOptions({
           ...validOptions,
           branchChoices: [],
-          branches: []
+          branches: [],
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -153,7 +153,7 @@ describe('validateRequiredOptions', () => {
       expect(() =>
         validateRequiredOptions({
           ...validOptions,
-          upstream: undefined
+          upstream: undefined,
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -162,7 +162,7 @@ describe('validateRequiredOptions', () => {
       expect(() =>
         validateRequiredOptions({
           ...validOptions,
-          upstream: ''
+          upstream: '',
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -171,7 +171,7 @@ describe('validateRequiredOptions', () => {
       expect(() =>
         validateRequiredOptions({
           ...validOptions,
-          username: undefined
+          username: undefined,
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -180,7 +180,7 @@ describe('validateRequiredOptions', () => {
       expect(() =>
         validateRequiredOptions({
           ...validOptions,
-          username: ''
+          username: '',
         })
       ).toThrowErrorMatchingSnapshot();
     });

@@ -25,7 +25,7 @@ describe('getProjectConfig', () => {
     it('should return config with branches', () => {
       expect(projectConfig).toEqual({
         branches: ['6.x'],
-        upstream: 'elastic/kibana'
+        upstream: 'elastic/kibana',
       });
     });
   });

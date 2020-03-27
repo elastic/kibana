@@ -19,7 +19,7 @@ export async function getOptions(argv: string[]) {
     ...validatedOptions,
     sourceBranch: validatedOptions.sourceBranch
       ? validatedOptions.sourceBranch
-      : await getDefaultRepoBranch(validatedOptions)
+      : await getDefaultRepoBranch(validatedOptions),
   };
 }
 
@@ -59,13 +59,13 @@ export function validateRequiredOptions({
     repoName,
     repoOwner,
     username: options.username,
-    author: options.author || options.username
+    author: options.author || options.username,
   };
 }
 
 function getErrorMessage({
   field,
-  exampleValue
+  exampleValue,
 }: {
   field: keyof OptionsFromCliArgs;
   exampleValue: string;

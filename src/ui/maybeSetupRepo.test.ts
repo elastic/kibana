@@ -16,7 +16,7 @@ describe('maybeSetupRepo', () => {
         repoName: 'kibana',
         username: 'sqren',
         accessToken: 'myAccessToken',
-        gitHostname: 'github.com'
+        gitHostname: 'github.com',
       } as BackportOptions);
     } catch (e) {
       expect(e.message).toBe('makeDir failed');

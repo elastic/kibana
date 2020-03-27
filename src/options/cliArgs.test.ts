@@ -17,7 +17,7 @@ describe('getOptionsFromCliArgs', () => {
       multipleCommits: false,
       prTitle: 'myPrTitle',
       upstream: 'elastic/kibana',
-      username: 'sqren'
+      username: 'sqren',
     };
 
     const argv = [
@@ -29,7 +29,7 @@ describe('getOptionsFromCliArgs', () => {
       'sqren/backport-demo',
       '--all',
       '--username',
-      'sqren'
+      'sqren',
     ];
 
     const res = getOptionsFromCliArgs(configOptions, argv);
@@ -52,7 +52,7 @@ describe('getOptionsFromCliArgs', () => {
       sha: undefined,
       upstream: 'sqren/backport-demo',
       username: 'sqren',
-      verbose: false
+      verbose: false,
     });
   });
 
@@ -62,7 +62,7 @@ describe('getOptionsFromCliArgs', () => {
       '--access-token',
       'my access token',
       '--apiHostname',
-      'my api hostname'
+      'my api hostname',
     ];
 
     const res = getOptionsFromCliArgs(configOptions, argv);

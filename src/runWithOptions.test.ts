@@ -30,7 +30,7 @@ describe('runWithOptions', () => {
         { name: '6.0' },
         { name: '5.6' },
         { name: '5.5' },
-        { name: '5.4' }
+        { name: '5.4' },
       ],
       commitsCount: 10,
       editor: 'code',
@@ -50,7 +50,7 @@ describe('runWithOptions', () => {
       sha: undefined,
       sourceBranch: 'mySourceBranch',
       username: 'sqren',
-      verbose: false
+      verbose: false,
     };
 
     rpcExecMock = (childProcess.exec as any) as jest.SpyInstance;
@@ -79,25 +79,25 @@ describe('runWithOptions', () => {
         data: {
           data: {
             user: {
-              id: 'sqren_author_id'
-            }
-          }
-        }
+              id: 'sqren_author_id',
+            },
+          },
+        },
       } as any)
 
       // mock list of commits
       .mockReturnValueOnce({
         data: {
-          data: commitsWithPullRequestsMock
-        }
+          data: commitsWithPullRequestsMock,
+        },
       } as any)
 
       // mock create pull request
       .mockReturnValueOnce({
         data: {
           html_url: 'pull request url',
-          number: 1337
-        }
+          number: 1337,
+        },
       } as any);
 
     await runWithOptions(options);
@@ -109,7 +109,7 @@ describe('runWithOptions', () => {
         repoName: 'kibana',
         repoOwner: 'elastic',
         username: 'sqren',
-        apiHostname: 'api.github.com'
+        apiHostname: 'api.github.com',
       })
     );
   });
@@ -119,13 +119,13 @@ describe('runWithOptions', () => {
       expect.objectContaining({
         repoName: 'kibana',
         repoOwner: 'elastic',
-        apiHostname: 'api.github.com'
+        apiHostname: 'api.github.com',
       }),
       {
         base: '6.x',
         body: `Backports the following commits to 6.x:\n - Add 👻 (2e63475c)\n\nmyPrDescription`,
         head: 'sqren:backport/6.x/commit-2e63475c',
-        title: 'myPrTitle 6.x Add 👻 (2e63475c)'
+        title: 'myPrTitle 6.x Add 👻 (2e63475c)',
       }
     );
   });

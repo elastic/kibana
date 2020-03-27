@@ -3,7 +3,7 @@ import {
   cloneRepo,
   deleteRemote,
   deleteRepo,
-  repoExists
+  repoExists,
 } from '../services/git';
 import makeDir from 'make-dir';
 import ora = require('ora');

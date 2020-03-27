@@ -11,9 +11,9 @@ export const commitsWithPullRequestsMock: DataResponse = {
                 oid: '2e63475c483f7844b0f2833bc57fdee32095bacb',
                 message: 'Add 👻',
                 associatedPullRequests: {
-                  edges: []
-                }
-              }
+                  edges: [],
+                },
+              },
             },
             {
               node: {
@@ -26,18 +26,18 @@ export const commitsWithPullRequestsMock: DataResponse = {
                         repository: {
                           name: 'kibana',
                           owner: {
-                            login: 'elastic'
-                          }
+                            login: 'elastic',
+                          },
                         },
                         number: 85,
                         timelineItems: {
-                          edges: []
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
+                          edges: [],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
             },
             {
               node: {
@@ -51,8 +51,8 @@ export const commitsWithPullRequestsMock: DataResponse = {
                         repository: {
                           name: 'kibana',
                           owner: {
-                            login: 'elastic'
-                          }
+                            login: 'elastic',
+                          },
                         },
                         number: 80,
                         timelineItems: {
@@ -69,44 +69,44 @@ export const commitsWithPullRequestsMock: DataResponse = {
                                         node: {
                                           commit: {
                                             message:
-                                              'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!'
-                                          }
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-                              }
-                            }
-                          ]
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
+                                              'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
+                                          },
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
             },
             {
               node: {
                 oid: '3827bbbaf39914eda4f02f6940189844375fd097',
                 message: 'Add backport config',
                 associatedPullRequests: {
-                  edges: []
-                }
-              }
+                  edges: [],
+                },
+              },
             },
             {
               node: {
                 oid: '5ea0da550ac191029459289d67f99ad7d310812b',
                 message: 'Initial commit',
                 associatedPullRequests: {
-                  edges: []
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
-  }
+                  edges: [],
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+  },
 };

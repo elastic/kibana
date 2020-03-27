@@ -16,7 +16,7 @@ export async function runWithOptions(options: BackportOptions) {
   await maybeSetupRepo(options);
 
   let backportSucceeded = false; // minimum 1 backport PR was successfully created
-  await sequentially(branches, async baseBranch => {
+  await sequentially(branches, async (baseBranch) => {
     logger.info(`Backporting ${JSON.stringify(commits)} to ${baseBranch}`);
     try {
       await cherrypickAndCreatePullRequest({ options, commits, baseBranch });

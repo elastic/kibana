@@ -10,7 +10,7 @@ describe('verifyAccessToken', () => {
       accessToken: 'myAccessToken',
       apiHostname: 'api.github.com',
       repoName: 'kibana',
-      repoOwner: 'elastic'
+      repoOwner: 'elastic',
     } as BackportOptions;
   });
 
@@ -21,7 +21,7 @@ describe('verifyAccessToken', () => {
     expect(spy).toHaveBeenCalledWith(
       'https://api.github.com/repos/elastic/kibana',
       {
-        auth: { password: 'myAccessToken', username: 'sqren' }
+        auth: { password: 'myAccessToken', username: 'sqren' },
       }
     );
   });
@@ -31,8 +31,8 @@ describe('verifyAccessToken', () => {
       jest.spyOn(axios, 'head').mockRejectedValue({
         response: {
           status: 401,
-          headers: {}
-        }
+          headers: {},
+        },
       });
 
       return expect(verifyAccessToken(options)).rejects.toThrowError(
@@ -45,8 +45,8 @@ describe('verifyAccessToken', () => {
         message: 'unknown error',
         response: {
           status: 403,
-          headers: {}
-        }
+          headers: {},
+        },
       });
 
       return expect(verifyAccessToken(options)).rejects.toThrowError(
@@ -58,8 +58,8 @@ describe('verifyAccessToken', () => {
       jest.spyOn(axios, 'head').mockRejectedValue({
         response: {
           status: 403,
-          headers: { 'x-github-sso': 'required; url=https://ssourl.com' }
-        }
+          headers: { 'x-github-sso': 'required; url=https://ssourl.com' },
+        },
       });
 
       return expect(verifyAccessToken(options)).rejects.toMatchInlineSnapshot(`
@@ -74,10 +74,10 @@ describe('verifyAccessToken', () => {
         response: {
           headers: {
             'x-oauth-scopes': 'a,b,c',
-            'x-accepted-oauth-scopes': 'a,b,c'
+            'x-accepted-oauth-scopes': 'a,b,c',
           },
-          status: 404
-        }
+          status: 404,
+        },
       });
 
       return expect(verifyAccessToken(options)).rejects.toMatchInlineSnapshot(
@@ -90,10 +90,10 @@ describe('verifyAccessToken', () => {
         response: {
           headers: {
             'x-oauth-scopes': 'a,b',
-            'x-accepted-oauth-scopes': 'a,b,c'
+            'x-accepted-oauth-scopes': 'a,b,c',
           },
-          status: 404
-        }
+          status: 404,
+        },
       });
 
       return expect(verifyAccessToken(options)).rejects.toMatchInlineSnapshot(`
@@ -109,8 +109,8 @@ describe('verifyAccessToken', () => {
         message: 'unknown error',
         response: {
           status: 500,
-          headers: {}
-        }
+          headers: {},
+        },
       });
 
       return expect(verifyAccessToken(options)).rejects.toThrowError(

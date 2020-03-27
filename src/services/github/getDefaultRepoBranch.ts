@@ -13,7 +13,7 @@ export async function getDefaultRepoBranch({
   accessToken,
   apiHostname,
   repoName,
-  repoOwner
+  repoOwner,
 }: ReturnType<typeof validateRequiredOptions>) {
   const query = /* GraphQL */ `
     query getDefaultBranch($repoOwner: String!, $repoName: String!) {
@@ -31,8 +31,8 @@ export async function getDefaultRepoBranch({
     query,
     variables: {
       repoOwner,
-      repoName
-    }
+      repoName,
+    },
   });
 
   return res.repository.defaultBranchRef.name;

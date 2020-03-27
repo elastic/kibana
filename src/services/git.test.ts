@@ -10,7 +10,7 @@ describe('addRemote', () => {
         accessToken: 'myAccessToken',
         repoOwner: 'elastic',
         repoName: 'kibana',
-        gitHostname: 'github.com'
+        gitHostname: 'github.com',
       } as BackportOptions,
       'elastic'
     );
@@ -30,7 +30,7 @@ describe('addRemote', () => {
         accessToken: 'myAccessToken',
         repoOwner: 'elastic',
         repoName: 'kibana',
-        gitHostname: 'github.com'
+        gitHostname: 'github.com',
       } as BackportOptions,
       'sqren'
     );
@@ -50,7 +50,7 @@ describe('addRemote', () => {
         accessToken: 'myAccessToken',
         repoOwner: 'elastic',
         repoName: 'kibana',
-        gitHostname: 'github.my-company.com'
+        gitHostname: 'github.my-company.com',
       } as BackportOptions,
       'sqren'
     );

@@ -17,8 +17,8 @@ export async function addLabelsToPullRequest(
       {
         auth: {
           username: username,
-          password: accessToken
-        }
+          password: accessToken,
+        },
       }
     );
   } catch (e) {

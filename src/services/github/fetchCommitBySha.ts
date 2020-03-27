@@ -16,7 +16,7 @@ export async function fetchCommitBySha(
     repoOwner,
     sha,
     accessToken,
-    username
+    username,
   } = options;
   try {
     const res = await axios.get<GithubSearch<GithubCommit>>(
@@ -24,11 +24,11 @@ export async function fetchCommitBySha(
       {
         auth: {
           username: username,
-          password: accessToken
+          password: accessToken,
         },
         headers: {
-          Accept: 'application/vnd.github.cloak-preview'
-        }
+          Accept: 'application/vnd.github.cloak-preview',
+        },
       }
     );
 
@@ -42,13 +42,13 @@ export async function fetchCommitBySha(
 
     const message = getFormattedCommitMessage({
       message: commitRes.commit.message,
-      sha: fullSha
+      sha: fullSha,
     });
 
     return {
       branch: 'master',
       message,
-      sha: fullSha
+      sha: fullSha,
     };
   } catch (e) {
     throw handleGithubError(e);

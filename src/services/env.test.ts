@@ -3,7 +3,7 @@ import {
   getGlobalConfigPath,
   getRepoOwnerPath,
   getRepoPath,
-  getReposPath
+  getReposPath,
 } from '../services/env';
 
 describe('env', () => {
@@ -25,7 +25,7 @@ describe('env', () => {
     expect(
       getRepoPath({
         repoOwner: 'elastic',
-        repoName: 'kibana'
+        repoName: 'kibana',
       } as BackportOptions)
     ).toBe('/myHomeDir/.backport/repositories/elastic/kibana');
   });

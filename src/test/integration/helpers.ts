@@ -3,7 +3,7 @@ import childProcess = require('child_process');
 import { promisify } from 'util';
 import {
   INTEGRATION_TEST_DATA_PATH,
-  INTEGRATION_TEST_DIR_PATH
+  INTEGRATION_TEST_DIR_PATH,
 } from './envConstants';
 
 type Exec = typeof childProcess.exec;
@@ -16,13 +16,13 @@ export async function getBranches(cwd: string) {
   return stdout
     .trim()
     .split('\n')
-    .map(branch => branch.trim());
+    .map((branch) => branch.trim());
 }
 
 export async function getLatestCommit({
   branch,
   commitCount,
-  cwd
+  cwd,
 }: {
   branch: string;
   commitCount: number;
@@ -38,6 +38,6 @@ export async function getLatestCommit({
 export async function deleteAndSetupEnvironment() {
   await del(INTEGRATION_TEST_DATA_PATH);
   await execPromisified(`unzip mock-environment.zip`, {
-    cwd: INTEGRATION_TEST_DIR_PATH
+    cwd: INTEGRATION_TEST_DIR_PATH,
   });
 }

@@ -11,7 +11,7 @@ describe('fetchCommitBySha', () => {
       accessToken: 'myAccessToken',
       username: 'sqren',
       author: 'sqren',
-      apiHostname: 'api.github.com'
+      apiHostname: 'api.github.com',
     } as BackportOptions;
 
     const axiosSpy = jest
@@ -19,14 +19,14 @@ describe('fetchCommitBySha', () => {
 
       // mock commits
       .mockResolvedValueOnce({
-        data: { items: [{ commit: { message: 'myMessage' }, sha: commitSha }] }
+        data: { items: [{ commit: { message: 'myMessage' }, sha: commitSha }] },
       });
 
     expect(await fetchCommitBySha({ ...options, sha: commitSha })).toEqual({
       branch: 'master',
       message: 'myMessage (sha12345)',
       pullNumber: undefined,
-      sha: 'sha123456789'
+      sha: 'sha123456789',
     });
 
     expect(axiosSpy.mock.calls).toMatchSnapshot();

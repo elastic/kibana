@@ -10,12 +10,12 @@ export type OptionsFromConfigFiles = PromiseReturnType<
 export async function getOptionsFromConfigFiles() {
   const [projectConfig, globalConfig] = await Promise.all([
     getProjectConfig(),
-    getGlobalConfig()
+    getGlobalConfig(),
   ]);
 
   const { branches, ...combinedConfig } = {
     ...globalConfig,
-    ...projectConfig
+    ...projectConfig,
   };
 
   return {
@@ -31,7 +31,7 @@ export async function getOptionsFromConfigFiles() {
     gitHostname: 'github.com',
     apiHostname: 'api.github.com',
     branchChoices: getBranchesAsObjects(branches),
-    ...combinedConfig
+    ...combinedConfig,
   };
 }
 
@@ -42,11 +42,11 @@ function getBranchesAsObjects(branches?: Config['branches']) {
     return;
   }
 
-  return branches.map(choice => {
+  return branches.map((choice) => {
     if (isString(choice)) {
       return {
         name: choice,
-        checked: false
+        checked: false,
       };
     }
 

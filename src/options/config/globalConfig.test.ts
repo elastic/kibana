@@ -14,7 +14,7 @@ describe('config', () => {
       jest.spyOn(fs, 'readFile').mockResolvedValue(
         JSON.stringify({
           accessToken: 'myAccessToken',
-          username: 'sqren'
+          username: 'sqren',
         })
       );
       res = await getGlobalConfig();
@@ -44,7 +44,7 @@ describe('config', () => {
     it('should return config', () => {
       expect(res).toEqual({
         accessToken: 'myAccessToken',
-        username: 'sqren'
+        username: 'sqren',
       });
     });
   });

@@ -1,6 +1,6 @@
 import {
   getFirstCommitMessageLine,
-  getFormattedCommitMessage
+  getFormattedCommitMessage,
 } from './commitFormatters';
 
 describe('getFirstCommitMessageLine', () => {
@@ -25,7 +25,7 @@ describe('getFormattedCommitMessage', () => {
       getFormattedCommitMessage({
         message: 'This is my commit message (#1234)\n\nthis is a second line',
         pullNumber: 1234,
-        sha: 'sha123456789'
+        sha: 'sha123456789',
       })
     ).toBe('This is my commit message (#1234)');
   });
@@ -35,7 +35,7 @@ describe('getFormattedCommitMessage', () => {
       getFormattedCommitMessage({
         message: 'This is my commit message\n\nthis is a second line',
         pullNumber: 1234,
-        sha: 'sha123456789'
+        sha: 'sha123456789',
       })
     ).toBe('This is my commit message (#1234)');
   });
@@ -44,7 +44,7 @@ describe('getFormattedCommitMessage', () => {
     expect(
       getFormattedCommitMessage({
         message: 'This is my commit message\n\nthis is a second line',
-        sha: 'sha123456789'
+        sha: 'sha123456789',
       })
     ).toBe('This is my commit message (sha12345)');
   });
