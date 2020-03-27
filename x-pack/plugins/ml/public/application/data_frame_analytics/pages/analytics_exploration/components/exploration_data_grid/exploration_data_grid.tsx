@@ -14,6 +14,8 @@ import { euiDataGridStyle, euiDataGridToolbarSettings } from '../../../../common
 
 import { mlFieldFormatService } from '../../../../../services/field_format_service';
 
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+
 const FEATURE_INFLUENCE = 'feature_influence';
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
@@ -23,7 +25,7 @@ type TableItem = Record<string, any>;
 interface ExplorationDataGridProps {
   colorRange: (d: number) => string;
   columns: any[];
-  indexPattern: any; // TODO: update type
+  indexPattern: IndexPattern;
   pagination: Pagination;
   resultsField: string;
   rowCount: number;

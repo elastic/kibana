@@ -15,7 +15,7 @@ import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/
 import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
 import { LoadingPanel } from '../loading_panel';
 import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
@@ -53,7 +53,7 @@ interface Props {
 export const ClassificationExploration: FC<Props> = ({ jobId }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
-  const [indexPattern, setIndexPattern] = useState<any | undefined>(undefined);
+  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
@@ -113,7 +113,7 @@ export const ClassificationExploration: FC<Props> = ({ jobId }) => {
           ? jobConfig.dest.index[0]
           : jobConfig.dest.index;
         const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
-        let indexP: IIndexPattern | undefined;
+        let indexP: IndexPattern | undefined;
 
         try {
           indexP = await mlContext.indexPatterns.get(destIndexPatternId);

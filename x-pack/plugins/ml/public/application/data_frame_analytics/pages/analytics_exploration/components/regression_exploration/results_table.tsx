@@ -62,6 +62,7 @@ import {
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import { useExploreData, TableItem } from './use_explore_data';
 import { ExplorationTitle } from './regression_exploration';
@@ -86,7 +87,7 @@ const showingFirstDocs = i18n.translate(
 );
 
 interface Props {
-  indexPattern: any; // TODO: update type
+  indexPattern: IndexPattern;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DATA_FRAME_TASK_STATE;
   setEvaluateSearchQuery: React.Dispatch<React.SetStateAction<object>>;

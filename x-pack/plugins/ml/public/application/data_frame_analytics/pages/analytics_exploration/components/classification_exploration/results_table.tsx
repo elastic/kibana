@@ -29,6 +29,7 @@ import {
 import { Query as QueryType } from '../../../analytics_management/components/analytics_list/common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { mlFieldFormatService } from '../../../../../services/field_format_service';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   ColumnType,
@@ -85,7 +86,7 @@ const showingFirstDocs = i18n.translate(
 );
 
 interface Props {
-  indexPattern: any; // TODO: update
+  indexPattern: IndexPattern;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DATA_FRAME_TASK_STATE;
   setEvaluateSearchQuery: React.Dispatch<React.SetStateAction<object>>;
