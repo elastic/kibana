@@ -56,22 +56,8 @@ describe('fixMetricbeatIndex', () => {
 
   beforeEach(() => (dataClient = elasticsearchServiceMock.createScopedClusterClient()));
 
-  it('fails if index already has index.query.default_field setting', async () => {
-    (dataClient.callAsCurrentUser as jest.Mock).mockResolvedValueOnce({
-      'metricbeat-1': {
-        settings: { index: { query: { default_field: [] } } },
-      },
-    });
-    await expect(
-      addDefaultField(dataClient, 'metricbeat-1', defaultFieldTypes)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Index metricbeat-1 already has index.query.default_field set"`
-    );
-  });
-
   it('updates index settings with default_field generated from mappings and otherFields', async () => {
     (dataClient.callAsCurrentUser as jest.Mock)
-      .mockResolvedValueOnce(mockSettings)
       .mockResolvedValueOnce(mockMappings)
       .mockResolvedValueOnce({ acknowledged: true });
 
@@ -85,7 +71,7 @@ describe('fixMetricbeatIndex', () => {
     ).resolves.toEqual({
       acknowledged: true,
     });
-    expect((dataClient.callAsCurrentUser as jest.Mock).mock.calls[2]).toMatchInlineSnapshot(`
+    expect((dataClient.callAsCurrentUser as jest.Mock).mock.calls[1]).toMatchInlineSnapshot(`
       Array [
         "indices.putSettings",
         Object {
