@@ -34,7 +34,7 @@ describe('registerRoutes', () => {
     });
 
     expect(httpSetup.createRouter).toHaveBeenCalledTimes(1);
-    expect(router.get).toHaveBeenCalledTimes(2);
+    expect(router.get).toHaveBeenCalledTimes(3);
     expect(router.post).toHaveBeenCalledTimes(2);
 
     expect(router.get).toHaveBeenCalledWith(
@@ -46,6 +46,12 @@ describe('registerRoutes', () => {
     expect(router.get).toHaveBeenCalledWith(
       expect.objectContaining({
         path: '/api/kibana/management/saved_objects/relationships/{type}/{id}',
+      }),
+      expect.any(Function)
+    );
+    expect(router.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/api/kibana/management/saved_objects/_allowed_types',
       }),
       expect.any(Function)
     );
