@@ -32,7 +32,7 @@ export function shortUrlAssertValid(url: string) {
     throw Boom.notAcceptable(`Short url targets cannot have a hostname, found "${hostname}"`);
   }
 
-  const pathnameParts = trim(pathname, '/').split('/');
+  const pathnameParts = trim(pathname === null ? undefined : pathname, '/').split('/');
   if (pathnameParts.length !== 2) {
     throw Boom.notAcceptable(
       `Short url target path must be in the format "/app/{{appId}}", found "${pathname}"`

@@ -91,9 +91,9 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   });
 
   if (stdin) {
-    childProcess.stdin.end(stdin, 'utf8');
+    childProcess.stdin!.end(stdin, 'utf8');
   } else {
-    childProcess.stdin.end();
+    childProcess.stdin!.end();
   }
 
   let stopCalled = false;
@@ -123,8 +123,8 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   ).pipe(share());
 
   const lines$ = Rx.merge(
-    observeLines(childProcess.stdout),
-    observeLines(childProcess.stderr)
+    observeLines(childProcess.stdout!),
+    observeLines(childProcess.stderr!)
   ).pipe(
     tap(line => log.write(` ${chalk.gray('proc')} [${chalk.gray(name)}] ${line}`)),
     share()

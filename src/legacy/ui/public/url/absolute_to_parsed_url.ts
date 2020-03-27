@@ -37,8 +37,8 @@ export function absoluteToParsedUrl(absoluteUrl: string, basePath = '') {
     basePath,
     appId: appId!,
     appPath,
-    hostname,
-    port,
-    protocol,
+    hostname: hostname === null ? undefined : hostname,
+    port: port === null ? undefined : port,
+    protocol: protocol === null ? undefined : protocol,
   });
 }

@@ -24,7 +24,7 @@ import { AlertingIndexUIQueryParams, EndpointAppLocation } from '../../types';
 export function urlFromQueryParams(
   queryParams: AlertingIndexUIQueryParams
 ): Partial<EndpointAppLocation> {
-  const search = querystring.stringify(queryParams);
+  const search = querystring.stringify({ ...queryParams }); // TypeScript note: {...x} is a workaround for https://github.com/microsoft/TypeScript/issues/15300
   return {
     search,
   };

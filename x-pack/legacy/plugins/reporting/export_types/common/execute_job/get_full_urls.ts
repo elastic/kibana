@@ -62,9 +62,9 @@ export function getFullUrls<JobDocPayloadType>({
     const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
     const jobUrl = getAbsoluteUrl({
       basePath: job.basePath,
-      path: parsedRelative.pathname,
-      hash: parsedRelative.hash,
-      search: parsedRelative.search,
+      path: parsedRelative.pathname === null ? undefined : parsedRelative.pathname,
+      hash: parsedRelative.hash === null ? undefined : parsedRelative.hash,
+      search: parsedRelative.search === null ? undefined : parsedRelative.search,
     });
 
     // capture the route to the visualization

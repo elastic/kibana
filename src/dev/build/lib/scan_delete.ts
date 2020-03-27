@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Fs from 'fs';
+import fs from 'fs';
 
 import del from 'del';
 import { join } from 'path';
@@ -27,8 +27,8 @@ import { count, map, mergeAll, mergeMap } from 'rxjs/operators';
 // @ts-ignore
 import { assertAbsolute } from './fs';
 
-const getStat$ = Rx.bindNodeCallback(Fs.stat);
-const getReadDir$ = Rx.bindNodeCallback<string, string[]>(Fs.readdir);
+const getStat$ = Rx.bindNodeCallback(fs.stat);
+const getReadDir$ = Rx.bindNodeCallback<string, string[]>(fs.readdir);
 
 interface Options {
   directory: string;
@@ -71,7 +71,7 @@ export async function scanDelete(options: Options) {
     }
 
     return getStat$(path).pipe(
-      mergeMap(stat => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
+      mergeMap(stat => ((stat as fs.Stats).isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
       mergeMap(getPathsToDelete$)
     );
   };

@@ -142,8 +142,8 @@ export function observeWorker(
         type: 'worker started',
         bundles,
       }),
-      observeStdio$(proc.stdout, 'stdout'),
-      observeStdio$(proc.stderr, 'stderr'),
+      observeStdio$(proc.stdout!, 'stdout'), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+      observeStdio$(proc.stderr!, 'stderr'), // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
       Rx.fromEvent<[unknown]>(proc, 'message')
         .pipe(
           // validate the messages from the process

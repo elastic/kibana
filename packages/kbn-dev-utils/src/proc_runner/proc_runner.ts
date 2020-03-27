@@ -99,7 +99,7 @@ export class ProcRunner {
         // wait for process to log matching line
         await proc.lines$
           .pipe(
-            filter(line => wait.test(line)),
+            filter((line: string) => wait.test(line)),
             first(),
             catchError(err => {
               if (err.name !== 'EmptyError') {

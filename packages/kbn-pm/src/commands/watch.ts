@@ -85,7 +85,7 @@ export const WatchCommand: ICommand = {
 
     await parallelizeBatches(batchedProjects, async pkg => {
       const completionHint = await waitUntilWatchIsReady(
-        pkg.runScriptStreaming(watchScriptName).stdout
+        pkg.runScriptStreaming(watchScriptName).stdout! // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
       );
 
       log.write(

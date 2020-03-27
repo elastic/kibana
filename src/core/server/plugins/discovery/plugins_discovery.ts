@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { readdir, stat } from 'fs';
+import { readdir, stat, Stats } from 'fs';
 import { resolve } from 'path';
 import { bindNodeCallback, from, merge } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
@@ -93,7 +93,7 @@ function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
             // Filter out non-directory entries from target directories, it's expected that
             // these directories may contain files (e.g. `README.md` or `package.json`).
             // We shouldn't silently ignore the entries we couldn't get stat for though.
-            mergeMap(pathStat => (pathStat.isDirectory() ? [path] : [])),
+            mergeMap(pathStat => ((pathStat as Stats).isDirectory() ? [path] : [])),
             catchError(err => [PluginDiscoveryError.invalidPluginPath(path, err)])
           )
         ),
