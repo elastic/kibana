@@ -217,9 +217,7 @@ export class KibanaFramework {
     });
   }
 
-  public getIndexPatternsService(
-    requestContext: RequestHandlerContext
-  ): Legacy.IndexPatternsService {
+  public getIndexPatternsService(requestContext: RequestHandlerContext): IndexPatternsFetcher {
     return new IndexPatternsFetcher((...rest: Parameters<APICaller>) => {
       rest[1] = rest[1] || {};
       rest[1].allowNoIndices = true;
