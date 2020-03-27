@@ -112,8 +112,8 @@ export const transformComments = (
     ...c,
     comment: flow(...pipes.map(p => t[p]))({
       value: c.comment,
-      date: params.createdAt,
-      user: params.createdBy.fullName ?? '',
+      date: c.createdAt,
+      user: c.createdBy.fullName ?? '',
     }).value,
   }));
 };

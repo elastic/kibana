@@ -274,7 +274,9 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('advanced job', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/61562
+  // FLAKY: https://github.com/elastic/kibana/issues/61563
+  describe.skip('advanced job', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/ecommerce');

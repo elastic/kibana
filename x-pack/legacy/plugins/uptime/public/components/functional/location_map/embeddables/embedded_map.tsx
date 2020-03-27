@@ -8,13 +8,13 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 
+import { ViewMode } from '../../../../../../../../../src/plugins/embeddable/public';
 import { start } from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import * as i18n from './translations';
-// @ts-ignore
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
+import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../../plugins/maps/public';
 import { Location } from '../../../../../common/runtime_types';
 
-import { MapEmbeddable } from './types';
 import { getLayerList } from './map_config';
 import { UptimeThemeContext } from '../../../../contexts';
 
@@ -49,7 +49,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
   const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
-  const input = {
+  const input: MapEmbeddableInput = {
     id: uuid.v4(),
     filters: [],
     hidePanelTitles: true,
@@ -57,7 +57,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       value: 0,
       pause: false,
     },
-    viewMode: 'view',
+    viewMode: ViewMode.VIEW,
     isLayerTOCOpen: false,
     hideFilterActions: true,
     // Zoom Lat/Lon values are set to make sure map is in center in the panel

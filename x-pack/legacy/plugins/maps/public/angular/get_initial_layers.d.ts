@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { KqlFilterBar } from './kql_filter_bar';
+export function getInitialLayers(layerListJSON?: string, initialLayers?: unknown[]): unknown[];

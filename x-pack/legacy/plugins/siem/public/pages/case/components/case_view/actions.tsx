@@ -12,13 +12,13 @@ import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { SiemPageName } from '../../../home/types';
 import { PropertyActions } from '../property_actions';
+import { Case } from '../../../../containers/case/types';
 
 interface CaseViewActions {
-  caseId: string;
-  caseTitle: string;
+  caseData: Case;
 }
 
-const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseId, caseTitle }) => {
+const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData }) => {
   // Delete case
   const {
     handleToggleModal,
@@ -30,14 +30,14 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseId, caseTitle
   const confirmDeleteModal = useMemo(
     () => (
       <ConfirmDeleteCaseModal
-        caseTitle={caseTitle}
+        caseTitle={caseData.title}
         isModalVisible={isDisplayConfirmDeleteModal}
         isPlural={false}
         onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [caseId])}
+        onConfirm={handleOnDeleteConfirm.bind(null, [caseData.id])}
       />
     ),
-    [isDisplayConfirmDeleteModal]
+    [isDisplayConfirmDeleteModal, caseData]
   );
   // TO DO refactor each of these const's into their own components
   const propertyActions = useMemo(
@@ -47,18 +47,17 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseId, caseTitle
         label: i18n.DELETE_CASE,
         onClick: handleToggleModal,
       },
-      {
-        iconType: 'popout',
-        label: 'View ServiceNow incident',
-        onClick: () => null,
-      },
-      {
-        iconType: 'importAction',
-        label: 'Update ServiceNow incident',
-        onClick: () => null,
-      },
+      ...(caseData.externalService?.externalUrl !== null
+        ? [
+            {
+              iconType: 'popout',
+              label: i18n.VIEW_INCIDENT(caseData.externalService?.externalTitle ?? ''),
+              onClick: () => window.open(caseData.externalService?.externalUrl, '_blank'),
+            },
+          ]
+        : []),
     ],
-    [handleToggleModal]
+    [handleToggleModal, caseData]
   );
 
   if (isDeleted) {

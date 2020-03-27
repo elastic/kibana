@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ClickOutside } from './click_outside';
+import { MapEmbeddableInput } from './map_embeddable';
+
+export function mergeInputWithSavedMap(
+  input: MapEmbeddableInput,
+  savedmap: unknown
+): Partial<MapEmbeddableInput>;
