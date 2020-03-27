@@ -108,8 +108,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       return null;
     }
 
-    let nextQuery = null;
-    if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
+    const nextQuery = null;
+    /* if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
@@ -123,7 +123,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         query: '',
         language: nextProps.query.language,
       };
-    }
+    }*/
 
     let nextDateRange = null;
     if (
@@ -363,6 +363,20 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
   }
 
+  public onClearSavedQuery = () => {
+    const query: Query = {
+      query: '',
+      language: get(this.state, 'query.language'),
+    };
+    this.setState({
+      ...this.state,
+      query,
+    });
+    if (this.props.onClearSavedQuery) {
+      this.props.onClearSavedQuery();
+    }
+  };
+
   public render() {
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
@@ -372,7 +386,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onSaveAsNew={this.onInitiateSaveNew}
         onLoad={this.onLoadSavedQuery}
         savedQueryService={this.savedQueryService}
-        onClearSavedQuery={this.props.onClearSavedQuery}
+        onClearSavedQuery={this.onClearSavedQuery}
       />
     );
 
