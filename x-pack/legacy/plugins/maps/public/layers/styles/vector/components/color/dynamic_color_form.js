@@ -123,6 +123,7 @@ export function DynamicColorForm({
         </EuiFlexItem>
         <EuiFlexItem>
           <FieldSelect
+            styleName={styleProperty.getStyleName()}
             fields={fields}
             selectedFieldName={styleProperty.getFieldName()}
             onChange={onFieldChange}
