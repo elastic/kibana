@@ -24,8 +24,6 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';
 
 describe('Geohash Agg', () => {
-  // const typesRegistry = mockAggTypesRegistry([geoHashBucketAgg]);
-  const typesRegistry = mockAggTypesRegistry();
   const getAggConfigs = (params?: Record<string, any>) => {
     const indexPattern = {
       id: '1234',
@@ -63,7 +61,7 @@ describe('Geohash Agg', () => {
           },
         },
       ],
-      { typesRegistry }
+      { typesRegistry: mockAggTypesRegistry() }
     );
   };
 
