@@ -75,4 +75,12 @@ describe('TopNavMenu', () => {
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
   });
+
+  it('Should render without padding', () => {
+    const component = shallowWithIntl(
+      <TopNavMenu appName={'test'} showSearchBar={true} data={dataShim as any} noPadding={true} />
+    );
+
+    expect(component.find('.kbnTopNavMenu').length).toBe(0);
+  });
 });
