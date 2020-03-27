@@ -32,11 +32,11 @@ import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 // @ts-ignore internal modules are not typed
 import edge from 'selenium-webdriver/edge';
+import { installDriver } from 'ms-chromium-edge-driver';
 // @ts-ignore internal modules are not typed
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
-
 import { pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
@@ -50,7 +50,6 @@ const certValidation: string = process.env.NODE_TLS_REJECT_UNAUTHORIZED as strin
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
-const MAC_EDGE_BINARY_PATH = '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge';
 
 /**
  * Best we can tell WebDriver locks up sometimes when we send too many
@@ -78,6 +77,8 @@ async function attemptToCreateCommand(
   const buildDriverInstance = async () => {
     switch (browserType) {
       case 'edge': {
+        const edgeData = await installDriver();
+        // console.log(edgeData);
         const edgeOptions = new edge.Options();
         if (headlessBrowser === '1') {
           // @ts-ignore internal modules are not typed
@@ -86,11 +87,11 @@ async function attemptToCreateCommand(
         // @ts-ignore internal modules are not typed
         edgeOptions.setEdgeChromium(true);
         // @ts-ignore internal modules are not typed
-        edgeOptions.setBinaryPath(MAC_EDGE_BINARY_PATH);
+        edgeOptions.setBinaryPath(edgeData.browserPath);
         const session = new Builder()
           .forBrowser('MicrosoftEdge')
           .setEdgeOptions(edgeOptions)
-          .setEdgeService(new edge.ServiceBuilder('path/msedgedriver'))
+          .setEdgeService(new edge.ServiceBuilder(edgeData.driverPath))
           .build();
         return {
           session,

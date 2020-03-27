@@ -214,6 +214,7 @@
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "monaco-editor": "~0.17.0",
+    "ms-chromium-edge-driver": "^0.0.1",
     "mustache": "2.3.2",
     "ngreact": "0.5.1",
     "node-fetch": "1.7.3",
