@@ -48,7 +48,7 @@ const stepComponentMap: { [key: number]: React.FunctionComponent<StepProps> } = 
 
 export const TemplateForm: React.FunctionComponent<Props> = ({
   defaultValue = {
-    name: 'untitled',
+    name: '',
     indexPatterns: [],
     template: {},
     isManaged: false,
