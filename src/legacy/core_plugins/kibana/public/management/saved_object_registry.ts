@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { npSetup, npStart } from 'ui/new_platform';
-import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { createSavedSearchesLoader } from '../../../../../plugins/discover/public';
 
 const registry = npSetup.plugins.savedObjectsManagement?.serviceRegistry;
@@ -36,7 +35,7 @@ if (registry) {
 
   savedObjectManagementRegistry.register({
     id: 'savedVisualizations',
-    service: visualizations.savedVisualizationsLoader,
+    service: npStart.plugins.visualizations.savedVisualizationsLoader,
     title: 'visualizations',
   });
 

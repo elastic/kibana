@@ -44,6 +44,7 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
+  getUrlTracker,
   unhashUrl,
   subscribeWithScope,
   tabifyAggResponse,
@@ -160,6 +161,9 @@ app.config($routeProvider => {
                       '/management/kibana/objects/savedSearches/' + $route.current.params.id,
                   },
                   toastNotifications,
+                  onBeforeRedirect() {
+                    getUrlTracker().setTrackedUrl('/discover');
+                  },
                 })
               ),
           });
@@ -277,6 +281,7 @@ function discoverController(
       filterManager.getUpdates$(),
       {
         next: () => {
+          $scope.state.filters = filterManager.getAppFilters();
           $scope.updateDataSource();
         },
       },

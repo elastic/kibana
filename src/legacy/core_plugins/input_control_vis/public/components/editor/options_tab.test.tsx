@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from '../../../../../../plugins/visualizations/public';
 import { OptionsTab, OptionsTabProps } from './options_tab';
 
 describe('OptionsTab', () => {
