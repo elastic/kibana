@@ -32,42 +32,37 @@ import {
 export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'oracle';
   return {
-    id: 'oracleMetrics',
+    id: moduleName + 'Metrics',
     name: i18n.translate('home.tutorials.oracleMetrics.nameTitle', {
-      defaultMessage: 'Oracle metrics',
+      defaultMessage: 'oracle metrics',
     }),
+    isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.oracleMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the Oracle server.',
+      defaultMessage: 'Fetch internal metrics from a Oracle server.',
     }),
     longDescription: i18n.translate('home.tutorials.oracleMetrics.longDescription', {
       defaultMessage:
-        'The `oracle` Metricbeat module fetches monitoring metrics from Oracle. \
+        'The `{moduleName}` Metricbeat module fetches internal metrics from a Oracle server. \
 [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-oracle.html',
+        moduleName,
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/oracle.svg',
     artifacts: {
-      dashboards: [
-        {
-          id: '496910f0-b952-11e9-a579-f5c0a5d81340',
-          linkLabel: i18n.translate(
-            'home.tutorials.oracleMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Oracle metrics dashboard',
-            }
-          ),
-          isOverview: true,
-        },
-      ],
+      application: {
+        label: i18n.translate('home.tutorials.oracleMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
+        path: '/app/kibana#/discover',
+      },
+      dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-oracle.html',
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-' + moduleName + '.html',
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/oracle_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
