@@ -9,7 +9,7 @@ import * as rt from 'io-ts';
 export const UserRT = rt.type({
   email: rt.union([rt.undefined, rt.null, rt.string]),
   full_name: rt.union([rt.undefined, rt.null, rt.string]),
-  username: rt.string,
+  username: rt.union([rt.undefined, rt.null, rt.string]),
 });
 
 export const UsersRt = rt.array(UserRT);

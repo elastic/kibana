@@ -71,14 +71,14 @@ export const UserActionTree = React.memo(
     );
 
     const handleSaveComment = useCallback(
-      (id: string, content: string) => {
+      ({ id, version }: { id: string; version: string }, content: string) => {
         handleManageMarkdownEditId(id);
         patchComment({
           caseId: caseData.id,
           commentId: id,
           commentUpdate: content,
           fetchUserActions,
-          version: caseData.version,
+          version,
           updateCase,
         });
       },
@@ -203,7 +203,10 @@ export const UserActionTree = React.memo(
                       content={comment.comment}
                       isEditable={manageMarkdownEditIds.includes(comment.id)}
                       onChangeEditable={handleManageMarkdownEditId}
-                      onSaveContent={handleSaveComment.bind(null, comment.id)}
+                      onSaveContent={handleSaveComment.bind(null, {
+                        id: comment.id,
+                        version: comment.version,
+                      })}
                     />
                   }
                   onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
