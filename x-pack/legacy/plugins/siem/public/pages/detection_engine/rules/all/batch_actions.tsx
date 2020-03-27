@@ -108,6 +108,7 @@ export const getBatchItems = ({
       {i18n.BATCH_ACTION_DUPLICATE_SELECTED}
     </EuiContextMenuItem>,
     <EuiContextMenuItem
+      data-test-subj="deleteRuleBulk"
       key={i18n.BATCH_ACTION_DELETE_SELECTED}
       icon="trash"
       title={containsImmutable ? i18n.BATCH_ACTION_DELETE_SELECTED_IMMUTABLE : undefined}

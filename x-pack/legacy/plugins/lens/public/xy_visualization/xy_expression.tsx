@@ -30,12 +30,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableVisTriggerContext } from '../../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/embeddable/events';
-import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
-import { LensMultiTable } from '../types';
+import { LensMultiTable, FormatFactory } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { parseInterval } from '../../../../../../src/plugins/data/common';
 import { getExecuteTriggerActions } from './services';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
@@ -108,7 +108,7 @@ export const xyChart: ExpressionFunctionDefinition<
 };
 
 export const getXyChartRenderer = (dependencies: {
-  formatFactory: FormatFactory;
+  formatFactory: Promise<FormatFactory>;
   chartTheme: PartialTheme;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -119,14 +119,17 @@ export const getXyChartRenderer = (dependencies: {
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
+  render: async (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
     const executeTriggerActions = getExecuteTriggerActions();
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
       <I18nProvider>
         <XYChartReportable
           {...config}
-          {...dependencies}
+          formatFactory={formatFactory}
+          chartTheme={dependencies.chartTheme}
+          timeZone={dependencies.timeZone}
           executeTriggerActions={executeTriggerActions}
         />
       </I18nProvider>,
@@ -208,11 +211,14 @@ export function XYChart({
   const shouldRotate = isHorizontalChart(layers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
+  const interval = parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval);
+
   const xDomain =
     data.dateRange && layers.every(l => l.xScaleType === 'time')
       ? {
           min: data.dateRange.fromDate.getTime(),
           max: data.dateRange.toDate.getTime(),
+          minInterval: interval?.asMilliseconds(),
         }
       : undefined;
   return (
