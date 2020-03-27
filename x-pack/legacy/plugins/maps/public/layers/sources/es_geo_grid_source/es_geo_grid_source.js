@@ -38,7 +38,7 @@ import { registerLayerWizard } from '../../layer_wizard_registry';
 export const MAX_GEOTILE_LEVEL = 29;
 
 const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
-  defaultMessage: 'Clusters',
+  defaultMessage: 'Clusters and grids',
 });
 
 const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle', {
