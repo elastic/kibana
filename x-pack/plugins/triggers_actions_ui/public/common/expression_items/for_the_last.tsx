@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiSelect,
   EuiFlexGroup,
   EuiFormRow,
@@ -20,6 +19,7 @@ import {
 import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
+import { ClosablePopoverTitle } from './components';
 
 interface ForLastExpressionProps {
   timeWindowSize?: number;
@@ -82,12 +82,12 @@ export const ForLastExpression = ({
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAlertDurationPopoverOpen(false)}>
           <FormattedMessage
             id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
             defaultMessage="For the last"
           />
-        </EuiPopoverTitle>
+        </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiFormRow
