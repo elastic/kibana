@@ -57,6 +57,22 @@ exports[`ML Flyout component renders without errors 1`] = `
       justifyContent="spaceBetween"
     >
       <EuiFlexItem
+        grow={true}
+      >
+        <EuiButtonEmpty
+          disabled={false}
+          fullWidth={false}
+          onClick={[Function]}
+          style={
+            Object {
+              "width": 100,
+            }
+          }
+        >
+          Cancel
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
         grow={false}
       >
         <EuiButton
@@ -208,6 +224,25 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
         <div
           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
+          <div
+            class="euiFlexItem"
+          >
+            <button
+              class="euiButtonEmpty euiButtonEmpty--primary"
+              style="width:100px"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Cancel
+                </span>
+              </span>
+            </button>
+          </div>
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
