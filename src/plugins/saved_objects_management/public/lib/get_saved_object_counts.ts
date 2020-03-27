@@ -17,18 +17,15 @@
  * under the License.
  */
 
-import { IHttpService } from 'angular';
-import chrome from 'ui/chrome';
+import { HttpStart } from 'src/core/public';
 
-const apiBase = chrome.addBasePath('/api/kibana/management/saved_objects/scroll');
 export async function getSavedObjectCounts(
-  $http: IHttpService,
+  http: HttpStart,
   typesToInclude: string[],
   searchString: string
 ): Promise<Record<string, number>> {
-  const results = await $http.post<Record<string, number>>(`${apiBase}/counts`, {
-    typesToInclude,
-    searchString,
-  });
-  return results.data;
+  return await http.post<Record<string, number>>(
+    `/api/kibana/management/saved_objects/scroll/counts`,
+    { body: JSON.stringify({ typesToInclude, searchString }) }
+  );
 }

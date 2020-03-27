@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { SimpleSavedObject, SavedObjectReference } from '../../../../../../../../core/public';
-import { savedObjectsServiceMock } from '../../../../../../../../core/public/mocks';
+import { SimpleSavedObject, SavedObjectReference } from '../../../../core/public';
+import { savedObjectsServiceMock } from '../../../../core/public/mocks';
 import { createFieldList } from './create_field_list';
 
 const savedObjectClientMock = savedObjectsServiceMock.createStartContract().client;

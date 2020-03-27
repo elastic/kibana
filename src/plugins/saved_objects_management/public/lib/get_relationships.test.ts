@@ -17,44 +17,43 @@
  * under the License.
  */
 
+import { httpServiceMock } from '../../../../core/public/mocks';
 import { getRelationships } from './get_relationships';
 
 describe('getRelationships', () => {
-  it('should make an http request', async () => {
-    const $http = jest.fn() as any;
-    const basePath = 'test';
+  let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
 
-    await getRelationships('dashboard', '1', ['search', 'index-pattern'], $http, basePath);
-    expect($http.mock.calls.length).toBe(1);
+  beforeEach(() => {
+    httpMock = httpServiceMock.createSetupContract();
+  });
+
+  it('should make an http request', async () => {
+    await getRelationships(httpMock, 'dashboard', '1', ['search', 'index-pattern']);
+    expect(httpMock.get).toHaveBeenCalledTimes(1);
   });
 
   it('should handle successful responses', async () => {
-    const $http = jest.fn().mockImplementation(() => ({ data: [1, 2] })) as any;
-    const basePath = 'test';
+    httpMock.get.mockResolvedValue([1, 2]);
 
-    const response = await getRelationships(
-      'dashboard',
-      '1',
-      ['search', 'index-pattern'],
-      $http,
-      basePath
-    );
+    const response = await getRelationships(httpMock, 'dashboard', '1', [
+      'search',
+      'index-pattern',
+    ]);
     expect(response).toEqual([1, 2]);
   });
 
   it('should handle errors', async () => {
-    const $http = jest.fn().mockImplementation(() => {
+    httpMock.get.mockImplementation(() => {
       const err = new Error();
       (err as any).data = {
         error: 'Test error',
         statusCode: 500,
       };
       throw err;
-    }) as any;
-    const basePath = 'test';
+    });
 
     await expect(
-      getRelationships('dashboard', '1', ['search', 'index-pattern'], $http, basePath)
+      getRelationships(httpMock, 'dashboard', '1', ['search', 'index-pattern'])
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Test error"`);
   });
 });

@@ -17,36 +17,30 @@
  * under the License.
  */
 
-import { IHttpService } from 'angular';
+import { HttpStart } from 'src/core/public';
 import { get } from 'lodash';
 import { SavedObjectRelation } from '../types';
 
 export async function getRelationships(
+  http: HttpStart,
   type: string,
   id: string,
-  savedObjectTypes: string[],
-  $http: IHttpService,
-  basePath: string
+  savedObjectTypes: string[]
 ): Promise<SavedObjectRelation[]> {
-  const url = `${basePath}/api/kibana/management/saved_objects/relationships/${encodeURIComponent(
+  const url = `/api/kibana/management/saved_objects/relationships/${encodeURIComponent(
     type
   )}/${encodeURIComponent(id)}`;
-  const options = {
-    method: 'GET',
-    url,
-    params: {
-      savedObjectTypes,
-    },
-  };
-
   try {
-    const response = await $http<SavedObjectRelation[]>(options);
-    return response?.data;
-  } catch (resp) {
-    const respBody = get(resp, 'data', {}) as any;
-    const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
+    return await http.get<SavedObjectRelation[]>(url, {
+      query: {
+        savedObjectTypes,
+      },
+    });
+  } catch (respError) {
+    const respBody = get(respError, 'data', {}) as any;
+    const err = new Error(respBody.message || respBody.error || `${respError.status} Response`);
 
-    (err as any).statusCode = respBody.statusCode || resp.status;
+    (err as any).statusCode = respBody.statusCode || respError.status;
     (err as any).body = respBody;
 
     throw err;

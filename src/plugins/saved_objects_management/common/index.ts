@@ -17,27 +17,4 @@
  * under the License.
  */
 
-import { HttpStart, SavedObjectsFindOptions } from 'src/core/public';
-import { keysToCamelCaseShallow } from './case_conversion';
-import { SavedObjectWithMetadata } from '../types';
-
-interface SavedObjectsFindResponse {
-  total: number;
-  page: number;
-  perPage: number;
-  savedObjects: SavedObjectWithMetadata[]; // TODO: this is camelCased, so not exactly the same type...
-}
-
-export async function findObjects(
-  http: HttpStart,
-  findOptions: SavedObjectsFindOptions
-): Promise<SavedObjectsFindResponse> {
-  const response = await http.get<Record<string, any>>(
-    '/api/kibana/management/saved_objects/_find',
-    {
-      query: findOptions as Record<string, any>,
-    }
-  );
-
-  return keysToCamelCaseShallow(response) as SavedObjectsFindResponse;
-}
+export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';

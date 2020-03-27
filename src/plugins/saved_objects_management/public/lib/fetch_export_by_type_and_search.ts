@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { HttpStart } from 'src/core/public';
 
 export async function fetchExportByTypeAndSearch(
+  http: HttpStart,
   types: string[],
   search: string | undefined,
   includeReferencesDeep: boolean = false
 ): Promise<Blob> {
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_export',
+  return http.post('/api/saved_objects/_export', {
     body: JSON.stringify({
       type: types,
       search,

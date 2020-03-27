@@ -17,13 +17,9 @@
  * under the License.
  */
 
-jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
-
 import { SavedObjectsImportUnknownError } from 'src/core/public';
-import { kfetch } from 'ui/kfetch';
+import { httpServiceMock } from '../../../../core/public/mocks';
 import { resolveImportErrors } from './resolve_import_errors';
-
-const kfetchMock = kfetch as jest.Mock;
 
 function getFormData(form: Map<string, any>) {
   const formData: Record<string, any> = {};
@@ -39,13 +35,20 @@ function getFormData(form: Map<string, any>) {
 
 describe('resolveImportErrors', () => {
   const getConflictResolutions = jest.fn();
+  let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
 
   beforeEach(() => {
+    httpMock = httpServiceMock.createSetupContract();
     jest.resetAllMocks();
   });
 
+  const extractBodyFromCall = (index: number): Map<string, any> => {
+    return (httpMock.post.mock.calls[index] as any)[1].body;
+  };
+
   test('works with empty import failures', async () => {
     const result = await resolveImportErrors({
+      http: httpMock,
       getConflictResolutions,
       state: {
         importCount: 0,
@@ -62,6 +65,7 @@ Object {
 
   test(`doesn't retry if only unknown failures are passed in`, async () => {
     const result = await resolveImportErrors({
+      http: httpMock,
       getConflictResolutions,
       state: {
         importCount: 0,
@@ -98,7 +102,7 @@ Object {
   });
 
   test('resolves conflicts', async () => {
-    kfetchMock.mockResolvedValueOnce({
+    httpMock.post.mockResolvedValueOnce({
       success: true,
       successCount: 1,
     });
@@ -107,6 +111,7 @@ Object {
       'a:2': false,
     });
     const result = await resolveImportErrors({
+      http: httpMock,
       getConflictResolutions,
       state: {
         importCount: 0,
@@ -139,7 +144,8 @@ Object {
   "status": "success",
 }
 `);
-    const formData = getFormData(kfetchMock.mock.calls[0][0].body);
+
+    const formData = getFormData(extractBodyFromCall(0));
     expect(formData).toMatchInlineSnapshot(`
 Object {
   "file": "undefined",
@@ -156,12 +162,13 @@ Object {
   });
 
   test('resolves missing references', async () => {
-    kfetchMock.mockResolvedValueOnce({
+    httpMock.post.mockResolvedValueOnce({
       success: true,
       successCount: 2,
     });
     getConflictResolutions.mockResolvedValueOnce({});
     const result = await resolveImportErrors({
+      http: httpMock,
       getConflictResolutions,
       state: {
         importCount: 0,
@@ -203,7 +210,7 @@ Object {
   "status": "success",
 }
 `);
-    const formData = getFormData(kfetchMock.mock.calls[0][0].body);
+    const formData = getFormData(extractBodyFromCall(0));
     expect(formData).toMatchInlineSnapshot(`
 Object {
   "file": "undefined",
@@ -232,6 +239,7 @@ Object {
   test(`doesn't resolve missing references if newIndexPatternId isn't defined`, async () => {
     getConflictResolutions.mockResolvedValueOnce({});
     const result = await resolveImportErrors({
+      http: httpMock,
       getConflictResolutions,
       state: {
         importCount: 0,
@@ -276,7 +284,7 @@ Object {
   });
 
   test('handles missing references then conflicts on the same errored objects', async () => {
-    kfetchMock.mockResolvedValueOnce({
+    httpMock.post.mockResolvedValueOnce({
       success: false,
       successCount: 0,
       errors: [
@@ -289,7 +297,7 @@ Object {
         },
       ],
     });
-    kfetchMock.mockResolvedValueOnce({
+    httpMock.post.mockResolvedValueOnce({
       success: true,
       successCount: 1,
     });
@@ -298,6 +306,7 @@ Object {
       'a:1': true,
     });
     const result = await resolveImportErrors({
+      http: httpMock,
       getConflictResolutions,
       state: {
         importCount: 0,
@@ -334,7 +343,7 @@ Object {
   "status": "success",
 }
 `);
-    const formData1 = getFormData(kfetchMock.mock.calls[0][0].body);
+    const formData1 = getFormData(extractBodyFromCall(0));
     expect(formData1).toMatchInlineSnapshot(`
 Object {
   "file": "undefined",
@@ -354,7 +363,7 @@ Object {
   ],
 }
 `);
-    const formData2 = getFormData(kfetchMock.mock.calls[1][0].body);
+    const formData2 = getFormData(extractBodyFromCall(1));
     expect(formData2).toMatchInlineSnapshot(`
 Object {
   "file": "undefined",

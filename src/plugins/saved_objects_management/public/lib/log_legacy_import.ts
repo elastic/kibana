@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { HttpStart } from 'src/core/public';
 
-export async function logLegacyImport() {
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_log_legacy_import',
-  });
+export async function logLegacyImport(http: HttpStart) {
+  return http.post('/api/saved_objects/_log_legacy_import');
 }

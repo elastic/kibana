@@ -18,10 +18,10 @@
  */
 
 import { forOwn, indexBy, isNumber, isBoolean, isPlainObject, isString } from 'lodash';
-import { SimpleSavedObject } from '../../../../../../../../core/public';
-import { castEsToKbnFieldTypeName } from '../../../../../../../../plugins/data/public';
+import { SimpleSavedObject } from '../../../../core/public';
+import { castEsToKbnFieldTypeName } from '../../../data/public';
 import { ObjectField } from '../types';
-import { SavedObjectLoader } from '../../../../../../../../plugins/saved_objects/public';
+import { SavedObjectLoader } from '../../../saved_objects/public';
 
 const maxRecursiveIterations = 20;
 

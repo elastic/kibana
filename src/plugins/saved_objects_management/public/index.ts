@@ -26,6 +26,7 @@ export {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
 } from './services';
+export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { HttpStart } from 'src/core/public';
 import { FailedImport } from './process_import_response';
 
 interface RetryObject {
@@ -27,13 +27,11 @@ interface RetryObject {
   replaceReferences?: any[];
 }
 
-async function callResolveImportErrorsApi(file: File, retries: any) {
+async function callResolveImportErrorsApi(http: HttpStart, file: File, retries: any) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('retries', JSON.stringify(retries));
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_resolve_import_errors',
+  return http.post<any>('/api/saved_objects/_resolve_import_errors', {
     headers: {
       // Important to be undefined, it forces proper headers to be set for FormData
       'Content-Type': undefined,
@@ -100,9 +98,11 @@ function mapImportFailureToRetryObject({
 }
 
 export async function resolveImportErrors({
+  http,
   getConflictResolutions,
   state,
 }: {
+  http: HttpStart;
   getConflictResolutions: (objects: any[]) => Promise<Record<string, boolean>>;
   state: { importCount: number; failedImports?: FailedImport[] } & Record<string, any>;
 }) {
@@ -170,7 +170,7 @@ export async function resolveImportErrors({
     }
 
     // Call API
-    const response = await callResolveImportErrorsApi(file, retries);
+    const response = await callResolveImportErrorsApi(http, file, retries);
     successImportCount += response.successCount;
     importFailures = [];
     for (const { error, ...obj } of response.errors || []) {

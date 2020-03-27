@@ -17,27 +17,32 @@
  * under the License.
  */
 
-import { HttpStart, SavedObjectsFindOptions } from 'src/core/public';
-import { keysToCamelCaseShallow } from './case_conversion';
-import { SavedObjectWithMetadata } from '../types';
+import { SavedObject } from 'src/core/types';
 
-interface SavedObjectsFindResponse {
-  total: number;
-  page: number;
-  perPage: number;
-  savedObjects: SavedObjectWithMetadata[]; // TODO: this is camelCased, so not exactly the same type...
+/**
+ * The metadata injected into a {@link SavedObject | saved object} when returning
+ * {@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints.
+ */
+export interface SavedObjectMetadata {
+  icon?: string;
+  title?: string;
+  editUrl?: string;
+  inAppUrl?: { path: string; uiCapabilitiesPath: string };
 }
 
-export async function findObjects(
-  http: HttpStart,
-  findOptions: SavedObjectsFindOptions
-): Promise<SavedObjectsFindResponse> {
-  const response = await http.get<Record<string, any>>(
-    '/api/kibana/management/saved_objects/_find',
-    {
-      query: findOptions as Record<string, any>,
-    }
-  );
+/**
+ * A {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin.
+ */
+export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
+  meta: SavedObjectMetadata;
+};
 
-  return keysToCamelCaseShallow(response) as SavedObjectsFindResponse;
+/**
+ * Represents a relation between two {@link SavedObject | saved object}
+ */
+export interface SavedObjectRelation {
+  id: string;
+  type: string;
+  relationship: 'child' | 'parent';
+  meta: SavedObjectMetadata;
 }

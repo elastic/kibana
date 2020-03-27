@@ -17,16 +17,21 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { HttpStart, SavedObjectsImportError } from 'src/core/public';
 
-export async function importFile(file: Blob, overwriteAll: boolean = false) {
+interface ImportResponse {
+  success: boolean;
+  successCount: number;
+  errors?: SavedObjectsImportError[];
+}
+
+export async function importFile(http: HttpStart, file: File, overwriteAll: boolean = false) {
   const formData = new FormData();
   formData.append('file', file);
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_import',
+  return await http.post<ImportResponse>('/api/saved_objects/_import', {
     body: formData,
     headers: {
+      // TODO: this was for kfetch. is this also needed here?
       // Important to be undefined, it forces proper headers to be set for FormData
       'Content-Type': undefined,
     },

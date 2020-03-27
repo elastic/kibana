@@ -17,38 +17,10 @@
  * under the License.
  */
 
-import { SavedObject } from 'src/core/server';
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsManagementPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsManagementPluginStart {}
 
-/**
- * The metadata injected into a {@link SavedObject | saved object} when returning
- * {@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints.
- */
-export interface SavedObjectMetadata {
-  icon?: string;
-  title?: string;
-  editUrl?: string;
-  inAppUrl?: { path: string; uiCapabilitiesPath: string };
-}
-
-/**
- * A {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin.
- */
-export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
-  meta: SavedObjectMetadata;
-};
-
-/**
- * Represents a relation between two {@link SavedObject | saved object}
- */
-export interface SavedObjectRelation {
-  id: string;
-  type: string;
-  relationship: 'child' | 'parent';
-  meta: SavedObjectMetadata;
-}
+export { SavedObjectMetadata, SavedObjectWithMetadata, SavedObjectRelation } from '../common';
