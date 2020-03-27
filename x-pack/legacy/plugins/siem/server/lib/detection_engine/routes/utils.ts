@@ -16,9 +16,9 @@ import {
 } from '../../../../../../../../src/core/server';
 import { ILicense } from '../../../../../../../plugins/licensing/server';
 import { MINIMUM_ML_LICENSE } from '../../../../common/constants';
-import { isMlRule } from '../rules/utils';
+import { RuleType } from '../../../../common/detection_engine/types';
+import { isMlRule } from '../../../../common/detection_engine/ml_helpers';
 import { BadRequestError } from '../errors/bad_request_error';
-import { RuleType } from '../types';
 
 export interface OutputError {
   message: string;

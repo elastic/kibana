@@ -12,6 +12,7 @@ import {
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
+import { isJobStarted, isMlRule } from '../../../../common/detection_engine/ml_helpers';
 import { SetupPlugins } from '../../../plugin';
 
 import { buildEventsSearchQuery } from './build_events_query';
@@ -34,8 +35,6 @@ import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { getSignalsCount } from '../notifications/get_signals_count';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
-import { isMlRule } from '../rules/utils';
-import { isJobStarted } from '../rules/ml/utils';
 
 /* eslint-disable complexity */
 export const signalRulesAlertType = ({

@@ -8,6 +8,7 @@ import * as t from 'io-ts';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
 import {
   dependentRulesSchema,
   RequiredRulesSchema,
@@ -15,7 +16,6 @@ import {
   requiredRulesSchema,
 } from './rules_schema';
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
-import { isMlRule } from '../../../rules/utils';
 
 export const addSavedId = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'saved_query') {

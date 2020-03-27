@@ -6,9 +6,6 @@
 
 import { pickBy, isEmpty } from 'lodash/fp';
 import { PatchRuleParams } from './types';
-import { RuleType } from '../types';
-
-export const isMlRule = (ruleType: RuleType) => ruleType === 'machine_learning';
 
 export const calculateInterval = (
   interval: string | undefined,
