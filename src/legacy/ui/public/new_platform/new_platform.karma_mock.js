@@ -44,6 +44,10 @@ const mockComponent = () => {
   return null;
 };
 
+let refreshInterval = undefined;
+let isTimeRangeSelectorEnabled = true;
+let isAutoRefreshSelectorEnabled = true;
+
 export const mockUiSettings = {
   get: item => {
     return mockUiSettings[item];
@@ -51,6 +55,7 @@ export const mockUiSettings = {
   getUpdate$: () => ({
     subscribe: sinon.fake(),
   }),
+  isDefault: sinon.fake(),
   'query:allowLeadingWildcards': true,
   'query:queryString:options': {},
   'courier:ignoreFilterIfFieldNotInIndex': true,
@@ -91,10 +96,77 @@ const mockCoreStart = {
   uiSettings: mockUiSettings,
 };
 
+const querySetup = {
+  state$: mockObservable(),
+  filterManager: {
+    getFetches$: sinon.fake(),
+    getFilters: sinon.fake(),
+    getAppFilters: sinon.fake(),
+    getGlobalFilters: sinon.fake(),
+    removeFilter: sinon.fake(),
+    addFilters: sinon.fake(),
+    setFilters: sinon.fake(),
+    removeAll: sinon.fake(),
+    getUpdates$: mockObservable,
+  },
+  timefilter: {
+    timefilter: {
+      getFetch$: mockObservable,
+      getAutoRefreshFetch$: mockObservable,
+      getEnabledUpdated$: mockObservable,
+      getTimeUpdate$: mockObservable,
+      getRefreshIntervalUpdate$: mockObservable,
+      isTimeRangeSelectorEnabled: () => {
+        return isTimeRangeSelectorEnabled;
+      },
+      isAutoRefreshSelectorEnabled: () => {
+        return isAutoRefreshSelectorEnabled;
+      },
+      disableAutoRefreshSelector: () => {
+        isAutoRefreshSelectorEnabled = false;
+      },
+      enableAutoRefreshSelector: () => {
+        isAutoRefreshSelectorEnabled = true;
+      },
+      getRefreshInterval: () => {
+        return refreshInterval;
+      },
+      setRefreshInterval: interval => {
+        refreshInterval = interval;
+      },
+      enableTimeRangeSelector: () => {
+        isTimeRangeSelectorEnabled = true;
+      },
+      disableTimeRangeSelector: () => {
+        isTimeRangeSelectorEnabled = false;
+      },
+      getTime: sinon.fake(),
+      setTime: sinon.fake(),
+      getActiveBounds: sinon.fake(),
+      getBounds: sinon.fake(),
+      calculateBounds: sinon.fake(),
+      createFilter: sinon.fake(),
+    },
+    history: sinon.fake(),
+  },
+  savedQueries: {
+    saveQuery: sinon.fake(),
+    getAllSavedQueries: sinon.fake(),
+    findSavedQueries: sinon.fake(),
+    getSavedQuery: sinon.fake(),
+    deleteSavedQuery: sinon.fake(),
+    getSavedQueryCount: sinon.fake(),
+  },
+};
+
 const mockAggTypesRegistry = () => {
   const registry = new AggTypesRegistry();
   const registrySetup = registry.setup();
-  const aggTypes = getAggTypes({ uiSettings: mockCoreSetup.uiSettings });
+  const aggTypes = getAggTypes({
+    uiSettings: mockCoreSetup.uiSettings,
+    notifications: mockCoreStart.notifications,
+    query: querySetup,
+  });
   aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
   aggTypes.metrics.forEach(type => registrySetup.registerMetric(type));
 
@@ -102,10 +174,6 @@ const mockAggTypesRegistry = () => {
 };
 
 const aggTypesRegistry = mockAggTypesRegistry();
-
-let refreshInterval = undefined;
-let isTimeRangeSelectorEnabled = true;
-let isAutoRefreshSelectorEnabled = true;
 
 export const npSetup = {
   core: mockCoreSetup,
@@ -145,72 +213,7 @@ export const npSetup = {
         addProvider: sinon.fake(),
         getProvider: sinon.fake(),
       },
-      query: {
-        state$: mockObservable(),
-        filterManager: {
-          getFetches$: sinon.fake(),
-          getFilters: sinon.fake(),
-          getAppFilters: sinon.fake(),
-          getGlobalFilters: sinon.fake(),
-          removeFilter: sinon.fake(),
-          addFilters: sinon.fake(),
-          setFilters: sinon.fake(),
-          removeAll: sinon.fake(),
-          getUpdates$: mockObservable,
-        },
-        timefilter: {
-          timefilter: {
-            getTime: sinon.fake(),
-            getRefreshInterval: sinon.fake(),
-            getTimeUpdate$: mockObservable,
-            getRefreshIntervalUpdate$: mockObservable,
-            getFetch$: mockObservable,
-            getAutoRefreshFetch$: mockObservable,
-            getEnabledUpdated$: mockObservable,
-            getTimeUpdate$: mockObservable,
-            getRefreshIntervalUpdate$: mockObservable,
-            isTimeRangeSelectorEnabled: () => {
-              return isTimeRangeSelectorEnabled;
-            },
-            isAutoRefreshSelectorEnabled: () => {
-              return isAutoRefreshSelectorEnabled;
-            },
-            disableAutoRefreshSelector: () => {
-              isAutoRefreshSelectorEnabled = false;
-            },
-            enableAutoRefreshSelector: () => {
-              isAutoRefreshSelectorEnabled = true;
-            },
-            getRefreshInterval: () => {
-              return refreshInterval;
-            },
-            setRefreshInterval: interval => {
-              refreshInterval = interval;
-            },
-            enableTimeRangeSelector: () => {
-              isTimeRangeSelectorEnabled = true;
-            },
-            disableTimeRangeSelector: () => {
-              isTimeRangeSelectorEnabled = false;
-            },
-            getTime: sinon.fake(),
-            setTime: sinon.fake(),
-            getActiveBounds: sinon.fake(),
-            getBounds: sinon.fake(),
-            calculateBounds: sinon.fake(),
-            createFilter: sinon.fake(),
-          },
-          history: sinon.fake(),
-        },
-        savedQueries: {
-          saveQuery: sinon.fake(),
-          getAllSavedQueries: sinon.fake(),
-          findSavedQueries: sinon.fake(),
-          getSavedQuery: sinon.fake(),
-          deleteSavedQuery: sinon.fake(),
-          getSavedQueryCount: sinon.fake(),
-        },
-      },
+      query: querySetup,
       search: {
         aggs: {
           calculateAutoTimeExpression: sinon.fake(),
@@ -420,7 +423,6 @@ export const npStart = {
       search: {
         aggs: {
           calculateAutoTimeExpression: sinon.fake(),
-          createAggConfigs: sinon.fake(),
           createAggConfigs: (indexPattern, configStates = []) => {
             return new AggConfigs(indexPattern, configStates, {
               typesRegistry: aggTypesRegistry.start(),
