@@ -194,6 +194,8 @@ function discoverController(
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
+  //used for functional testing
+  $scope.fetchCounter = 0;
 
   const getTimeField = () => {
     return isDefaultType($scope.indexPattern) ? $scope.indexPattern.timeFieldName : undefined;
@@ -275,6 +277,7 @@ function discoverController(
       filterManager.getUpdates$(),
       {
         next: () => {
+          $scope.state.filters = filterManager.getAppFilters();
           $scope.updateDataSource();
         },
       },
@@ -784,7 +787,7 @@ function discoverController(
   $scope.opts.fetch = $scope.fetch = function() {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
-
+    $scope.fetchCounter++;
     $scope.fetchError = undefined;
 
     // Abort any in-progress requests before fetching again
@@ -821,9 +824,11 @@ function discoverController(
       });
   };
 
-  $scope.updateQuery = function({ query }) {
-    setAppState({ query });
-    $fetchObservable.next();
+  $scope.updateQuery = function({ query }, isUpdate = true) {
+    if (!_.isEqual(query, appStateContainer.getState().query) || isUpdate === false) {
+      setAppState({ query });
+      $fetchObservable.next();
+    }
   };
 
   $scope.updateSavedQueryId = newSavedQueryId => {
