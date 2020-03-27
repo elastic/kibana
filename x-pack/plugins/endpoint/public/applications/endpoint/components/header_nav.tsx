@@ -8,6 +8,7 @@ import React, { MouseEvent, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
+import styled, { css } from 'styled-components';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface NavTabs {
@@ -75,5 +76,17 @@ export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
     });
   }, [BASE_PATH, history, location.pathname]);
 
-  return <EuiTabs>{tabList}</EuiTabs>;
+  return (
+    <Wrapper>
+      <EuiTabs display="condensed">{tabList}</EuiTabs>
+    </Wrapper>
+  );
 });
+
+const Wrapper = styled.header`
+  ${({ theme }) => css`
+    background: ${theme.eui.euiColorEmptyShade};
+    border-bottom: ${theme.eui.euiBorderThin};
+    padding: ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.l};
+  `}
+`;

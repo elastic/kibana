@@ -9,17 +9,12 @@ import React from 'react';
 import {
   EuiDataGrid,
   EuiDataGridColumn,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
   EuiBadge,
   EuiLoadingSpinner,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
   EuiPageContentBody,
   EuiLink,
 } from '@elastic/eui';
@@ -35,6 +30,7 @@ import { FormattedDate } from './formatted_date';
 import { AlertIndexSearchBar } from './index_search_bar';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AlertListTabs } from './alert_list_tabs';
+import { PageView } from '../../components/page_view';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -277,37 +273,26 @@ export const AlertIndex = memo(() => {
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
-      <EuiPage data-test-subj="alertListPage">
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle size="l">
-                  <h1 data-test-subj="alertsViewTitle">
-                    <FormattedMessage
-                      id="xpack.endpoint.alertList.viewTitle"
-                      defaultMessage="Alerts"
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
-            <AlertListTabs />
-            <EuiPageContentBody>
-              <AlertIndexSearchBar />
-              <EuiDataGrid
-                aria-label="Alert List"
-                rowCount={total}
-                columns={columns}
-                columnVisibility={columnVisibility}
-                renderCellValue={renderCellValue}
-                pagination={pagination}
-                data-test-subj="alertListGrid"
-              />
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <PageView
+        data-test-subj="alertListPage"
+        headerLeft={i18n.translate('xpack.endpoint.alertList.viewTitle', {
+          defaultMessage: 'Alerts',
+        })}
+      >
+        <AlertListTabs />
+        <EuiPageContentBody>
+          <AlertIndexSearchBar />
+          <EuiDataGrid
+            aria-label="Alert List"
+            rowCount={total}
+            columns={columns}
+            columnVisibility={columnVisibility}
+            renderCellValue={renderCellValue}
+            pagination={pagination}
+            data-test-subj="alertListGrid"
+          />
+        </EuiPageContentBody>
+      </PageView>
     </>
   );
 });

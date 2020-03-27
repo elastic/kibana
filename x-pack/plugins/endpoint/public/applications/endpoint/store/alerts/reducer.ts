@@ -72,6 +72,7 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
     return {
       ...state,
       closedAlert: {
+        ...state.closedAlert,
         success: true,
       },
     };
@@ -79,6 +80,7 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
     return {
       ...state,
       closedAlert: {
+        ...state.closedAlert,
         error: true,
       },
     };

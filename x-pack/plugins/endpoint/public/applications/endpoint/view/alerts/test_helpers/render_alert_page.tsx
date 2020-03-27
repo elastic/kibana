@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
+import { EuiThemeProvider } from '../../../../../../../../legacy/common/eui_styled_components';
 import { AlertIndex } from '../index';
 import { appStoreFactory } from '../../../store';
 import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
@@ -47,11 +48,13 @@ export const alertPageTestRender = () => {
         <Provider store={store}>
           <KibanaContextProvider services={{ data: depsStart.data }}>
             <I18nProvider>
-              <Router history={history}>
-                <RouteCapture>
-                  <AlertIndex />
-                </RouteCapture>
-              </Router>
+              <EuiThemeProvider>
+                <Router history={history}>
+                  <RouteCapture>
+                    <AlertIndex />
+                  </RouteCapture>
+                </Router>
+              </EuiThemeProvider>
             </I18nProvider>
           </KibanaContextProvider>
         </Provider>
