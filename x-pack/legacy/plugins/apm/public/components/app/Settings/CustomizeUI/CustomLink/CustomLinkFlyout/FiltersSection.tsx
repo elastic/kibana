@@ -116,7 +116,7 @@ export const FiltersSection = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldText
-                data-test-subj={`value-${idx}`}
+                data-test-subj={`${key}.value`}
                 fullWidth
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption.value',
