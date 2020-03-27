@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { buildHierarchicalData, buildPointSeriesData } from '../legacy_imports';
+import { buildPointSeriesData } from '../legacy_imports';
 import { getFormatService } from '../services';
+import { buildHierarchicalData } from './helpers/build_hierarchical_data';
 
 function tableResponseHandler(table, dimensions) {
   const converted = { tables: [] };

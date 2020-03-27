@@ -71,15 +71,11 @@ function tableVisResponseHandler(table, dimensions) {
   return converted;
 }
 
-jest.mock('ui/new_platform');
-jest.mock('ui/chrome', () => ({
-  getUiSettingsClient: jest.fn().mockReturnValue({
-    get: jest.fn().mockReturnValue('KQL'),
-  }),
-}));
-jest.mock('ui/visualize/loader/pipeline_helpers/utilities', () => ({
-  getFormat: jest.fn(() => ({
-    convert: jest.fn(v => v),
+jest.mock('../../services', () => ({
+  getFormatService: jest.fn(() => ({
+    deserialize: () => ({
+      convert: jest.fn(v => v),
+    }),
   })),
 }));
 
