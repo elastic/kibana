@@ -143,6 +143,9 @@ export class TelemetryPlugin implements Plugin {
           reportFailureVersion: {
             type: 'keyword',
           },
+          allowChangingOptInStatus: {
+            type: 'boolean',
+          },
         },
       },
     });
