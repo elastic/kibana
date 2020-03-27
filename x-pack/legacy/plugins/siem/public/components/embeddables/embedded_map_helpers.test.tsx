@@ -22,6 +22,7 @@ const { npStart } = createUiNewPlatformMock();
 npStart.plugins.embeddable.getEmbeddableFactory = jest.fn().mockImplementation(() => ({
   create: () => ({
     reload: jest.fn(),
+    setRenderTooltipContent: jest.fn(),
   }),
 }));
 

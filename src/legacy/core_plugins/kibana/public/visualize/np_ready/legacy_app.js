@@ -60,7 +60,7 @@ const getResolvedResults = deps => {
       })
       .then(vis => {
         results.vis = vis;
-        return createVisEmbeddableFromObject({
+        return createVisEmbeddableFromObject(vis, {
           timeRange: data.query.timefilter.timefilter.getTime(),
           filters: data.query.filterManager.getFilters(),
         });

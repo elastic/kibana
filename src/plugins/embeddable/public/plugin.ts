@@ -89,7 +89,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     });
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
-      getEmbeddableFactories: () => this.embeddableFactories.values(),
+      getEmbeddableFactories: () => {
+        this.ensureFactoriesExist();
+        return this.embeddableFactories.values();
+      },
     };
   }
 
@@ -114,23 +117,33 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   >(
     embeddableFactoryId: string
   ): EmbeddableFactory<I, O, E> => {
-    let factory = this.embeddableFactories.get(embeddableFactoryId);
+    this.ensureFactoryExists(embeddableFactoryId);
+    const factory = this.embeddableFactories.get(embeddableFactoryId);
 
     if (!factory) {
-      // This is only needed for legacy plugins registering embeddable factories after this start method.
-      const def = this.embeddableFactoryDefinitions.get(embeddableFactoryId);
-      if (def) {
-        factory = this.embeddableFactoryProvider
-          ? this.embeddableFactoryProvider(def)
-          : defaultEmbeddableFactoryProvider(def);
-        this.embeddableFactories.set(def.type, factory);
-      } else {
-        throw new Error(
-          `Embeddable factory [embeddableFactoryId = ${embeddableFactoryId}] does not exist.`
-        );
-      }
+      throw new Error(
+        `Embeddable factory [embeddableFactoryId = ${embeddableFactoryId}] does not exist.`
+      );
     }
 
     return factory as EmbeddableFactory<I, O, E>;
   };
+
+  // These two functions are only to support legacy plugins registering factories after the start lifecycle.
+  private ensureFactoriesExist() {
+    this.embeddableFactoryDefinitions.forEach(def => this.ensureFactoryExists(def.type));
+  }
+
+  private ensureFactoryExists(type: string) {
+    if (!this.embeddableFactories.get(type)) {
+      const def = this.embeddableFactoryDefinitions.get(type);
+      if (!def) return;
+      this.embeddableFactories.set(
+        type,
+        this.embeddableFactoryProvider
+          ? this.embeddableFactoryProvider(def)
+          : defaultEmbeddableFactoryProvider(def)
+      );
+    }
+  }
 }

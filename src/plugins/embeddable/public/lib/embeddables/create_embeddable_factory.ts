@@ -44,6 +44,7 @@ export const defaultEmbeddableFactoryProvider = <
     type: def.type,
     isEditable: def.isEditable,
     getDisplayName: def.getDisplayName,
+    savedObjectMetaData: def.savedObjectMetaData,
   };
   return factory;
 };
