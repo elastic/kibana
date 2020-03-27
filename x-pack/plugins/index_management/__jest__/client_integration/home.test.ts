@@ -115,11 +115,13 @@ describe('<IndexManagementHome />', () => {
         const template1 = fixtures.getTemplate({
           name: `a${getRandomString()}`,
           indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
-          settings: {
-            index: {
-              number_of_shards: '1',
-              lifecycle: {
-                name: 'my_ilm_policy',
+          template: {
+            settings: {
+              index: {
+                number_of_shards: '1',
+                lifecycle: {
+                  name: 'my_ilm_policy',
+                },
               },
             },
           },
@@ -396,24 +398,26 @@ describe('<IndexManagementHome />', () => {
               const template = fixtures.getTemplate({
                 name: `a${getRandomString()}`,
                 indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
-                settings: {
-                  index: {
-                    number_of_shards: '1',
-                  },
-                },
-                mappings: {
-                  _source: {
-                    enabled: false,
-                  },
-                  properties: {
-                    created_at: {
-                      type: 'date',
-                      format: 'EEE MMM dd HH:mm:ss Z yyyy',
+                template: {
+                  settings: {
+                    index: {
+                      number_of_shards: '1',
                     },
                   },
-                },
-                aliases: {
-                  alias1: {},
+                  mappings: {
+                    _source: {
+                      enabled: false,
+                    },
+                    properties: {
+                      created_at: {
+                        type: 'date',
+                        format: 'EEE MMM dd HH:mm:ss Z yyyy',
+                      },
+                    },
+                  },
+                  aliases: {
+                    alias1: {},
+                  },
                 },
               });
 
