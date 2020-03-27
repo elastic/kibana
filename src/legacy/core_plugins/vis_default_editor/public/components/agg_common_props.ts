@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisParams } from 'src/legacy/core_plugins/visualizations/public';
+import { VisParams } from 'src/plugins/visualizations/public';
 import { IAggType, IAggConfig, IAggGroupNames } from 'src/plugins/data/public';
 import { Schema } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
