@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from 'src/plugins/visualizations/public';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
