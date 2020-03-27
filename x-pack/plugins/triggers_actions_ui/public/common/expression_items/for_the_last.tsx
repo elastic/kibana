@@ -25,7 +25,7 @@ interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
   errors: { [key: string]: string[] };
-  onChangeWindowSize: (selectedWindowSize: number | '') => void;
+  onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
     | 'upCenter'
@@ -43,7 +43,7 @@ interface ForLastExpressionProps {
 }
 
 export const ForLastExpression = ({
-  timeWindowSize = 1,
+  timeWindowSize,
   timeWindowUnit = 's',
   errors,
   onChangeWindowSize,
@@ -64,7 +64,7 @@ export const ForLastExpression = ({
           )}
           value={`${timeWindowSize} ${getTimeUnitLabel(
             timeWindowUnit as TIME_UNITS,
-            timeWindowSize.toString()
+            (timeWindowSize ?? '').toString()
           )}`}
           isActive={alertDurationPopoverOpen}
           onClick={() => {
@@ -97,11 +97,11 @@ export const ForLastExpression = ({
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"
                 isInvalid={errors.timeWindowSize.length > 0 && timeWindowSize !== undefined}
-                min={1}
-                value={timeWindowSize}
+                min={0}
+                value={timeWindowSize || ''}
                 onChange={e => {
                   const { value } = e.target;
-                  const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : value;
+                  const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : undefined;
                   onChangeWindowSize(timeWindowSizeVal);
                 }}
               />
@@ -114,7 +114,7 @@ export const ForLastExpression = ({
               onChange={e => {
                 onChangeWindowUnit(e.target.value);
               }}
-              options={getTimeOptions(timeWindowSize)}
+              options={getTimeOptions(timeWindowSize ?? 1)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

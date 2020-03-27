@@ -4,27 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeRange } from 'src/plugins/data/public';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-  EmbeddableFactory,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { RenderTooltipContentParams } from '../../../../maps/public';
 import { inputsModel } from '../../store/inputs';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
-
-export interface MapEmbeddableInput extends EmbeddableInput {
-  filters: Filter[];
-  query: Query;
-  refreshConfig: {
-    isPaused: boolean;
-    interval: number;
-  };
-  timeRange?: TimeRange;
-}
-
-export type MapEmbeddable = IEmbeddable<MapEmbeddableInput, EmbeddableOutput>;
 
 export interface IndexPatternMapping {
   title: string;
@@ -74,19 +55,4 @@ export interface FeatureGeometry {
   type: string;
 }
 
-export interface RenderTooltipContentParams {
-  addFilters(filter: object): void;
-  closeTooltip(): void;
-  features: MapFeature[];
-  isLocked: boolean;
-  getLayerName(layerId: string): Promise<string>;
-  loadFeatureProperties({ layerId, featureId }: LoadFeatureProps): Promise<FeatureProperty[]>;
-  loadFeatureGeometry({ layerId, featureId }: LoadFeatureProps): FeatureGeometry;
-}
-
 export type MapToolTipProps = Partial<RenderTooltipContentParams>;
-
-export interface EmbeddableApi {
-  getEmbeddableFactory: (embeddableFactoryId: string) => EmbeddableFactory;
-  registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
-}

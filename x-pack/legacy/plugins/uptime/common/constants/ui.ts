@@ -8,10 +8,16 @@ export const MONITOR_ROUTE = '/monitor/:monitorId?';
 
 export const OVERVIEW_ROUTE = '/';
 
+export const SETTINGS_ROUTE = '/settings';
+
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',
 }
+
+export const ML_JOB_ID = 'high_latency_by_geo';
+
+export const ML_MODULE_ID = 'uptime_heartbeat';
 
 export const UNNAMED_LOCATION = 'Unnamed-location';
 

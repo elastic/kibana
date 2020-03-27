@@ -13,6 +13,14 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
   const retry = getService('retry');
 
   return new (class UptimePage {
+    public get settings() {
+      return uptimeService.settings;
+    }
+
+    public async goToRoot() {
+      await pageObjects.common.navigateToApp('uptime');
+    }
+
     public async goToUptimePageAndSetDateRange(
       datePickerStartValue: string,
       datePickerEndValue: string
@@ -24,11 +32,13 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     public async goToUptimeOverviewAndLoadData(
       datePickerStartValue: string,
       datePickerEndValue: string,
-      monitorIdToCheck: string
+      monitorIdToCheck?: string
     ) {
       await pageObjects.common.navigateToApp('uptime');
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-      await uptimeService.monitorIdExists(monitorIdToCheck);
+      if (monitorIdToCheck) {
+        await uptimeService.monitorIdExists(monitorIdToCheck);
+      }
     }
 
     public async loadDataAndGoToMonitorPage(
@@ -52,12 +62,18 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await uptimeService.setFilterText(filterQuery);
     }
 
-    public async pageHasExpectedIds(monitorIdsToCheck: string[]) {
-      await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
+    public async pageHasDataMissing() {
+      return await uptimeService.pageHasDataMissing();
     }
 
-    public async pageUrlContains(value: string, expected: boolean = true) {
-      await retry.try(async () => {
+    public async pageHasExpectedIds(monitorIdsToCheck: string[]): Promise<void> {
+      return retry.tryForTime(15000, async () => {
+        await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
+      });
+    }
+
+    public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
+      return retry.tryForTime(12000, async () => {
         expect(await uptimeService.urlContains(value)).to.eql(expected);
       });
     }
@@ -95,6 +111,45 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
 
     public locationMissingIsDisplayed() {
       return uptimeService.locationMissingExists();
+    }
+
+    public async openAlertFlyoutAndCreateMonitorStatusAlert({
+      alertInterval,
+      alertName,
+      alertNumTimes,
+      alertTags,
+      alertThrottleInterval,
+      alertTimerangeSelection,
+      filters,
+    }: {
+      alertName: string;
+      alertTags: string[];
+      alertInterval: string;
+      alertThrottleInterval: string;
+      alertNumTimes: string;
+      alertTimerangeSelection: string;
+      filters?: string;
+    }) {
+      const { alerts, setKueryBarText } = uptimeService;
+      await alerts.openFlyout();
+      await alerts.openMonitorStatusAlertType();
+      await alerts.setAlertName(alertName);
+      await alerts.setAlertTags(alertTags);
+      await alerts.setAlertInterval(alertInterval);
+      await alerts.setAlertThrottleInterval(alertThrottleInterval);
+      if (filters) {
+        await setKueryBarText('xpack.uptime.alerts.monitorStatus.filterBar', filters);
+      }
+      await alerts.setAlertStatusNumTimes(alertNumTimes);
+      await alerts.setAlertTimerangeSelection(alertTimerangeSelection);
+      await alerts.setMonitorStatusSelectableToHours();
+      await alerts.setLocationsSelectable();
+      await alerts.clickSaveAlertButtion();
+    }
+
+    public async setMonitorListPageSize(size: number): Promise<void> {
+      await uptimeService.openPageSizeSelectPopover();
+      return uptimeService.clickPageSizeSelectPopoverItem(size);
     }
   })();
 }

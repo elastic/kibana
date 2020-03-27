@@ -182,8 +182,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
   async function executeAsAdmin({ method = 'get', url, body }: Endpoint['req'], spaceId?: string) {
     const basePath = spaceId ? `/s/${spaceId}` : '';
-
-    let request = supertest[method](`${basePath}${url}`);
+    const fullPath = `${basePath}${url}`;
+    let request = supertest[method](fullPath);
 
     // json body
     if (body) {
@@ -192,10 +192,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     const response = await request.set('kbn-xsrf', 'foo');
 
-    const { statusCode, req } = response;
-    if (statusCode !== 200) {
-      throw new Error(`Endpoint: ${req.method} ${req.path}
-      Status code: ${statusCode}
+    const { status } = response;
+    if (status !== 200) {
+      throw new Error(`Endpoint: ${method} ${fullPath}
+      Status code: ${status}
       Response: ${response.body.message}`);
     }
 
@@ -244,7 +244,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   describe('apm feature controls', () => {
     const config = {
       service: { name: 'test-service' },
-      settings: { transaction_sample_rate: 0.5 },
+      settings: { transaction_sample_rate: '0.5' },
     };
     before(async () => {
       log.info(`Creating agent configuration`);

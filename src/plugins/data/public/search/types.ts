@@ -17,12 +17,13 @@
  * under the License.
  */
 
+import { ISearchSource } from './search_source';
 import { CoreStart, SavedObjectReference } from 'kibana/public';
-import { TimeRange } from '../../common';
+import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './es_client';
-import { ISearchSource } from './search_source';
+import { SearchInterceptor } from './search_interceptor';
 
 export interface ISearchContext {
   core: CoreStart;
@@ -68,12 +69,8 @@ export type TRegisterSearchStrategyProvider = <T extends TStrategyTypes>(
   searchStrategyProvider: TSearchStrategyProvider<T>
 ) => void;
 
-interface SearchAggsSetup {
-  calculateAutoTimeExpression: (range: TimeRange) => string | undefined;
-}
-
-interface SearchAggsStart {
-  calculateAutoTimeExpression: (range: TimeRange) => string | undefined;
+interface ISearchStartLegacy {
+  esClient: LegacyApiCaller;
 }
 
 /**
@@ -91,6 +88,7 @@ export interface ISearchSetup {
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
+  setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
   /**
    * Serializes a `SearchSource` instance to a JSON string and a set of referenced objects.
@@ -116,7 +114,5 @@ export interface ISearchStart {
     searchSourceJson: string,
     references: SavedObjectReference[]
   ) => Promise<ISearchSource>;
-  __LEGACY: {
-    esClient: LegacyApiCaller;
-  };
+  __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
 }

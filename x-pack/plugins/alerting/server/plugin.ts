@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { first, map } from 'rxjs/operators';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -26,6 +28,7 @@ import {
   SavedObjectsServiceStart,
   IContextProvider,
   RequestHandler,
+  SharedGlobalConfig,
 } from '../../../../src/core/server';
 
 import {
@@ -43,6 +46,7 @@ import {
   unmuteAllAlertRoute,
   muteAlertInstanceRoute,
   unmuteAlertInstanceRoute,
+  healthRoute,
 } from './routes';
 import { LicensingPluginSetup } from '../../licensing/server';
 import {
@@ -50,6 +54,8 @@ import {
   PluginStartContract as ActionsPluginStartContract,
 } from '../../../plugins/actions/server';
 import { Services } from './types';
+import { registerAlertsUsageCollector } from './usage';
+import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
@@ -66,6 +72,7 @@ export interface AlertingPluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -84,11 +91,20 @@ export class AlertingPlugin {
   private spaces?: SpacesServiceSetup;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
+  private readonly telemetryLogger: Logger;
+  private readonly kibanaIndex: Promise<string>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
+    this.telemetryLogger = initializerContext.logger.get('telemetry');
+    this.kibanaIndex = initializerContext.config.legacy.globalConfig$
+      .pipe(
+        first(),
+        map((config: SharedGlobalConfig) => config.kibana.index)
+      )
+      .toPromise();
   }
 
   public async setup(core: CoreSetup, plugins: AlertingPluginsSetup): Promise<PluginSetupContract> {
@@ -122,7 +138,22 @@ export class AlertingPlugin {
       taskRunnerFactory: this.taskRunnerFactory,
     });
     this.alertTypeRegistry = alertTypeRegistry;
+
     this.serverBasePath = core.http.basePath.serverBasePath;
+
+    const usageCollection = plugins.usageCollection;
+    if (usageCollection) {
+      core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
+        registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
+
+        initializeAlertingTelemetry(
+          this.telemetryLogger,
+          core,
+          plugins.taskManager,
+          await this.kibanaIndex
+        );
+      });
+    }
 
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext());
 
@@ -143,6 +174,7 @@ export class AlertingPlugin {
     unmuteAllAlertRoute(router, this.licenseState);
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
+    healthRoute(router, this.licenseState);
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
@@ -176,10 +208,12 @@ export class AlertingPlugin {
       logger,
       getServices: this.getServicesFactory(core.savedObjects),
       spaceIdToNamespace: this.spaceIdToNamespace,
-      executeAction: plugins.actions.execute,
+      actionsPlugin: plugins.actions,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
     });
+
+    scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
@@ -203,7 +237,7 @@ export class AlertingPlugin {
     return async function alertsRouteHandlerContext(context, request) {
       return {
         getAlertsClient: () => {
-          return alertsClientFactory!.create(request, context.core!.savedObjects.client);
+          return alertsClientFactory!.create(request, context.core.savedObjects.client);
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
       };

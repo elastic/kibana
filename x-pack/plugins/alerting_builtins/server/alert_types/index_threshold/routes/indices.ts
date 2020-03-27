@@ -54,15 +54,18 @@ export function createIndicesRoute(service: Service, router: IRouter, baseRoute:
     try {
       aliases = await getAliasesFromPattern(ctx.core.elasticsearch.dataClient, pattern);
     } catch (err) {
-      service.logger.debug(`route ${path} error: ${err.message}`);
-      return res.internalError({ body: 'error getting alias data' });
+      service.logger.warn(
+        `route ${path} error getting aliases from pattern "${pattern}": ${err.message}`
+      );
     }
+
     let indices: string[] = [];
     try {
       indices = await getIndicesFromPattern(ctx.core.elasticsearch.dataClient, pattern);
     } catch (err) {
-      service.logger.debug(`route ${path} error: ${err.message}`);
-      return res.internalError({ body: 'error getting index data' });
+      service.logger.warn(
+        `route ${path} error getting indices from pattern "${pattern}": ${err.message}`
+      );
     }
 
     const result = { indices: uniqueCombined(aliases, indices, MAX_INDICES) };

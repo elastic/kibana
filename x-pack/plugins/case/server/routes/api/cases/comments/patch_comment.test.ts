@@ -43,7 +43,9 @@ describe('PATCH comment', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.comment).toEqual('Update my comment');
+    expect(response.payload.comments[response.payload.comments.length - 1].comment).toEqual(
+      'Update my comment'
+    );
   });
 
   it(`Fails with 409 if version does not match`, async () => {
