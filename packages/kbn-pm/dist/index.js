@@ -4895,7 +4895,7 @@ class ProcRunner {
             if (wait instanceof RegExp) {
                 // wait for process to log matching line
                 await proc.lines$
-                    .pipe(operators_1.filter(line => wait.test(line)), operators_1.first(), operators_1.catchError(err => {
+                    .pipe(operators_1.filter((line) => wait.test(line)), operators_1.first(), operators_1.catchError(err => {
                     if (err.name !== 'EmptyError') {
                         throw errors_1.createCliError(`[${name}] exited without matching pattern: ${wait}`);
                     }
@@ -55202,8 +55202,10 @@ function spawnStreaming(command, args, opts, {
     mergeMultiline: true,
     tag: `${log_symbols__WEBPACK_IMPORTED_MODULE_2___default.a.error} ${color.bold(prefix)}:`
   });
-  spawned.stdout.pipe(prefixedStdout).pipe(process.stdout);
-  spawned.stderr.pipe(prefixedStderr).pipe(process.stderr);
+  spawned.stdout.pipe(prefixedStdout).pipe(process.stdout); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+
+  spawned.stderr.pipe(prefixedStderr).pipe(process.stderr); // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
+
   return spawned;
 }
 
@@ -78256,7 +78258,8 @@ const WatchCommand = {
     }
 
     await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_2__["parallelizeBatches"])(batchedProjects, async pkg => {
-      const completionHint = await Object(_utils_watch__WEBPACK_IMPORTED_MODULE_4__["waitUntilWatchIsReady"])(pkg.runScriptStreaming(watchScriptName).stdout);
+      const completionHint = await Object(_utils_watch__WEBPACK_IMPORTED_MODULE_4__["waitUntilWatchIsReady"])(pkg.runScriptStreaming(watchScriptName).stdout // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+      );
       _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`[${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(pkg.name)}] Initial build completed (${completionHint}).`));
     });
   }
