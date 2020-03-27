@@ -6,32 +6,43 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TraceAPIResponse } from '../../../../../../../../../plugins/apm/server/lib/traces/get_trace';
 import { WaterfallContainer } from './index';
 import {
   location,
   urlParams,
-  simpleWaterfall,
-  waterfallWithErrors,
-  waterfallChildStartBeforeParent
+  simpleTrace,
+  traceWithErrors,
+  traceChildStartBeforeParent
 } from './waterfallContainer.stories.data';
+import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 
 storiesOf('app/Transaction/Waterfall', module).add('simple', () => {
+  const waterfall = getWaterfall(
+    simpleTrace as TraceAPIResponse,
+    '975c8d5bfd1dd20b'
+  );
   return (
     <WaterfallContainer
       location={location}
       urlParams={urlParams}
-      waterfall={simpleWaterfall}
+      waterfall={waterfall}
       exceedsMax={false}
     />
   );
 });
 
 storiesOf('app/Transaction/Waterfall', module).add('with errors', () => {
+  const waterfall = getWaterfall(
+    (traceWithErrors as unknown) as TraceAPIResponse,
+    '975c8d5bfd1dd20b'
+  );
   return (
     <WaterfallContainer
       location={location}
       urlParams={urlParams}
-      waterfall={waterfallWithErrors}
+      waterfall={waterfall}
       exceedsMax={false}
     />
   );
@@ -40,11 +51,15 @@ storiesOf('app/Transaction/Waterfall', module).add('with errors', () => {
 storiesOf('app/Transaction/Waterfall', module).add(
   'child starts before parent',
   () => {
+    const waterfall = getWaterfall(
+      traceChildStartBeforeParent as TraceAPIResponse,
+      '975c8d5bfd1dd20b'
+    );
     return (
       <WaterfallContainer
         location={location}
         urlParams={urlParams}
-        waterfall={waterfallChildStartBeforeParent}
+        waterfall={waterfall}
         exceedsMax={false}
       />
     );
