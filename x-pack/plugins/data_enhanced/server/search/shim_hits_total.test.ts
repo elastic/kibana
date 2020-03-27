@@ -12,7 +12,7 @@ describe('shimHitsTotal', () => {
       hits: {
         total: 5,
       },
-    });
+    } as any);
     expect(result).toEqual({
       hits: {
         total: 5,
@@ -27,7 +27,7 @@ describe('shimHitsTotal', () => {
           value: 5,
         },
       },
-    });
+    } as any);
     expect(result).toEqual({
       hits: {
         total: 5,
@@ -44,7 +44,7 @@ describe('shimHitsTotal', () => {
           value: 5,
         },
       },
-    });
+    } as any);
     expect(result).toEqual({
       _shards: {},
       hits: {
