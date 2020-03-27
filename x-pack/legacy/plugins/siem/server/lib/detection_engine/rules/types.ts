@@ -93,7 +93,7 @@ export interface IRuleStatusFindType {
   saved_objects: IRuleStatusSavedObject[];
 }
 
-export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
+export type RuleStatusString = 'succeeded' | 'failed' | 'going to run';
 
 export interface HapiReadableStream extends Readable {
   hapi: {

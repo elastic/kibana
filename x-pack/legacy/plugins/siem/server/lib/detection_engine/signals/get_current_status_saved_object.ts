@@ -4,57 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsFindResponse, SavedObject } from 'src/core/server';
+import { SavedObjectsFindResponse, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
-import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
-import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
+import { IRuleStatusAttributes } from '../rules/types';
+import { ruleStatusSavedObjectClientFactory } from './rule_status_saved_object_client';
 
 interface CurrentStatusSavedObjectParams {
   alertId: string;
-  services: AlertServices;
-  ruleStatusSavedObjects: SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>;
+  savedObjectsClient: SavedObjectsClientContract;
+  ruleStatuses: SavedObjectsFindResponse<IRuleStatusAttributes>;
 }
 
 export const getCurrentStatusSavedObject = async ({
   alertId,
-  services,
-  ruleStatusSavedObjects,
-}: CurrentStatusSavedObjectParams): Promise<SavedObject<
-  IRuleSavedAttributesSavedObjectAttributes
->> => {
-  if (ruleStatusSavedObjects.saved_objects.length === 0) {
-    // create
-    const date = new Date().toISOString();
-    const currentStatusSavedObject = await services.savedObjectsClient.create<
-      IRuleSavedAttributesSavedObjectAttributes
-    >(ruleStatusSavedObjectType, {
-      alertId, // do a search for this id.
-      statusDate: date,
-      status: 'going to run',
-      lastFailureAt: null,
-      lastSuccessAt: null,
-      lastFailureMessage: null,
-      lastSuccessMessage: null,
-      gap: null,
-      bulkCreateTimeDurations: [],
-      searchAfterTimeDurations: [],
-      lastLookBackDate: null,
-    });
-    return currentStatusSavedObject;
-  } else {
-    // update 0th to executing.
-    const currentStatusSavedObject = ruleStatusSavedObjects.saved_objects[0];
-    const sDate = new Date().toISOString();
-    currentStatusSavedObject.attributes.status = 'going to run';
-    currentStatusSavedObject.attributes.statusDate = sDate;
-    await services.savedObjectsClient.update(
-      ruleStatusSavedObjectType,
-      currentStatusSavedObject.id,
-      {
-        ...currentStatusSavedObject.attributes,
-      }
-    );
-    return currentStatusSavedObject;
+  savedObjectsClient,
+  ruleStatuses,
+}: CurrentStatusSavedObjectParams): Promise<SavedObject<IRuleStatusAttributes>> => {
+  const [currentStatus] = ruleStatuses.saved_objects;
+  if (currentStatus) {
+    return currentStatus;
   }
+
+  const ruleStatusClient = ruleStatusSavedObjectClientFactory(savedObjectsClient);
+  const now = new Date().toISOString();
+  const newStatus = await ruleStatusClient.create({
+    alertId,
+    statusDate: now,
+    status: 'going to run',
+    lastFailureAt: null,
+    lastSuccessAt: null,
+    lastFailureMessage: null,
+    lastSuccessMessage: null,
+    gap: null,
+    bulkCreateTimeDurations: [],
+    searchAfterTimeDurations: [],
+    lastLookBackDate: null,
+  });
+
+  return newStatus;
 };

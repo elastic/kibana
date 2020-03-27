@@ -4,25 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
-import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
-import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
+import { SavedObjectsFindResponse, SavedObjectsClientContract } from 'kibana/server';
+import { IRuleStatusAttributes } from '../rules/types';
+import { MAX_RULE_STATUSES } from './rule_status_service';
+import { ruleStatusSavedObjectClientFactory } from './rule_status_saved_object_client';
 
 interface GetRuleStatusSavedObject {
   alertId: string;
-  services: AlertServices;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export const getRuleStatusSavedObjects = async ({
   alertId,
-  services,
-}: GetRuleStatusSavedObject): Promise<SavedObjectsFindResponse<
-  IRuleSavedAttributesSavedObjectAttributes
->> => {
-  return services.savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
-    type: ruleStatusSavedObjectType,
-    perPage: 6, // 0th element is current status, 1-5 is last 5 failures.
+  savedObjectsClient,
+}: GetRuleStatusSavedObject): Promise<SavedObjectsFindResponse<IRuleStatusAttributes>> => {
+  const ruleStatusClient = ruleStatusSavedObjectClientFactory(savedObjectsClient);
+  return ruleStatusClient.find({
+    perPage: MAX_RULE_STATUSES,
     sortField: 'statusDate',
     sortOrder: 'desc',
     search: `${alertId}`,
