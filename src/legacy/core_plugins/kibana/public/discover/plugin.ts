@@ -31,7 +31,7 @@ import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { EmbeddableStart, EmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
-import { setAngularModule, setServices } from './kibana_services';
+import { setAngularModule, setServices, setUrlTracker } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { buildServices } from './build_services';
@@ -92,7 +92,12 @@ export class DiscoverPlugin implements Plugin<void, void> {
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
   setup(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+      setActiveUrl: setTrackedUrl,
+    } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/discover',
       storageKey: 'lastUrl:discover',
@@ -113,6 +118,7 @@ export class DiscoverPlugin implements Plugin<void, void> {
         },
       ],
     });
+    setUrlTracker({ setTrackedUrl });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
