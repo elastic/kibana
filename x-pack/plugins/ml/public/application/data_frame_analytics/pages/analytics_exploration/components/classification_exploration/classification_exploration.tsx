@@ -144,7 +144,7 @@ export const ClassificationExploration: FC<Props> = ({ jobId }) => {
 
   useEffect(() => {
     initializeJobCapsService();
-  }, [JSON.stringify(jobConfig)]);
+  }, [jobConfig && jobConfig.id]);
 
   if (jobConfigErrorMessage !== undefined || jobCapsServiceErrorMessage !== undefined) {
     return (
