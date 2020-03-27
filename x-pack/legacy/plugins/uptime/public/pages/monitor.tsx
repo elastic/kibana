@@ -5,11 +5,10 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { connect, MapDispatchToPropsFunction, MapStateToPropsParam } from 'react-redux';
-import { UptimeRefreshContext } from '../contexts';
-import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
+import { useUptimeTelemetry, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails } from '../components/connected';
 import { Ping } from '../../common/runtime_types';
@@ -45,14 +44,6 @@ export const MonitorPageComponent: React.FC<Props> = ({
     }
   }, [dispatchGetMonitorStatus, monitorId]);
 
-  const [pingListPageCount, setPingListPageCount] = useState<number>(10);
-  const { refreshApp } = useContext(UptimeRefreshContext);
-  const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
-  const { selectedPingStatus } = params;
-
-  const [selectedLocation, setSelectedLocation] = useState(undefined);
-
   useUptimeTelemetry(UptimePage.Monitor);
 
   useTrackPageview({ app: 'uptime', path: 'monitor' });
@@ -68,20 +59,7 @@ export const MonitorPageComponent: React.FC<Props> = ({
       <EuiSpacer size="s" />
       <MonitorCharts monitorId={monitorId} />
       <EuiSpacer size="s" />
-      <PingList
-        onPageCountChange={setPingListPageCount}
-        onSelectedLocationChange={setSelectedLocation}
-        onSelectedStatusChange={(selectedStatus: string | undefined) => {
-          updateUrlParams({ selectedPingStatus: selectedStatus || '' });
-          refreshApp();
-        }}
-        pageSize={pingListPageCount}
-        selectedOption={selectedPingStatus}
-        selectedLocation={selectedLocation}
-        monitorId={monitorId}
-        size={pingListPageCount}
-        status={selectedPingStatus}
-      />
+      <PingList monitorId={monitorId} />
     </>
   );
 };

@@ -66,24 +66,34 @@ interface Props extends PingListProps {
   pings: Ping[];
 }
 
+const DEFAULT_PAGE_SIZE = 10;
+
+const statusOptions = [
+  {
+    text: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
+      defaultMessage: 'All',
+    }),
+    value: '',
+  },
+  {
+    text: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
+      defaultMessage: 'Up',
+    }),
+    value: 'up',
+  },
+  {
+    text: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
+      defaultMessage: 'Down',
+    }),
+    value: 'down',
+  },
+];
+
 export const PingListComponent = (props: Props) => {
-  const {
-    dateRangeStart,
-    dateRangeEnd,
-    getPings,
-    loading,
-    locations,
-    monitorId,
-    onPageCountChange,
-    onSelectedLocationChange,
-    onSelectedStatusChange,
-    pageSize,
-    pings,
-    selectedLocation,
-    selectedOption,
-    size,
-    status,
-  } = props;
+  const [selectedLocation, setSelectedLocation] = useState<string>('');
+  const [status, setStatus] = useState<string>('');
+  const [size, setSize] = useState(DEFAULT_PAGE_SIZE);
+  const { dateRangeStart, dateRangeEnd, getPings, loading, locations, monitorId, pings } = props;
 
   useEffect(() => {
     getPings({
@@ -98,26 +108,6 @@ export const PingListComponent = (props: Props) => {
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
 
-  const statusOptions = [
-    {
-      text: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
-        defaultMessage: 'All',
-      }),
-      value: '',
-    },
-    {
-      text: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
-        defaultMessage: 'Up',
-      }),
-      value: 'up',
-    },
-    {
-      text: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
-        defaultMessage: 'Down',
-      }),
-      value: 'down',
-    },
-  ];
   const locationOptions = !locations
     ? [AllLocationOption]
     : [AllLocationOption].concat(
@@ -243,13 +233,13 @@ export const PingListComponent = (props: Props) => {
   const pagination: Pagination = {
     initialPageSize: 20,
     pageIndex: 0,
-    pageSize,
+    pageSize: size,
     pageSizeOptions: [5, 10, 20, 50, 100],
     /**
      * we're not currently supporting pagination in this component
      * so the first page is the only page
      */
-    totalItemCount: pageSize,
+    totalItemCount: size,
   };
 
   return (
@@ -273,15 +263,9 @@ export const PingListComponent = (props: Props) => {
               aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
                 defaultMessage: 'Status',
               })}
-              value={selectedOption}
+              value={status}
               onChange={selected => {
-                if (typeof selected.target.value === 'string') {
-                  onSelectedStatusChange(
-                    selected.target && selected.target.value !== ''
-                      ? selected.target.value
-                      : undefined
-                  );
-                }
+                setStatus(selected.target.value);
               }}
             />
           </EuiFormRow>
@@ -300,9 +284,7 @@ export const PingListComponent = (props: Props) => {
                 defaultMessage: 'Location',
               })}
               onChange={selected => {
-                onSelectedLocationChange(
-                  selected.target && selected.target.value !== '' ? selected.target.value : null
-                );
+                setSelectedLocation(selected.target.value);
               }}
             />
           </EuiFormRow>
@@ -318,7 +300,7 @@ export const PingListComponent = (props: Props) => {
         itemId="@timestamp"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         pagination={pagination}
-        onChange={(criteria: any) => onPageCountChange(criteria.page!.size)}
+        onChange={(criteria: any) => setSize(criteria.page!.size)}
       />
     </EuiPanel>
   );

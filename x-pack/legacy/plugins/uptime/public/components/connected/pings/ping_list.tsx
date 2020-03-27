@@ -14,15 +14,8 @@ import { PingListComponent } from '../../functional';
 
 export interface PingListProps {
   monitorId: string;
-  onSelectedStatusChange: (status: string | undefined) => void;
-  onSelectedLocationChange: (location: any) => void;
-  onPageCountChange: (itemCount: number) => void;
-  pageSize: number;
-  selectedOption: string;
-  selectedLocation: string | undefined;
-  size: number;
-  status: string;
 }
+
 export const PingList = (props: PingListProps) => {
   const {
     loading,
