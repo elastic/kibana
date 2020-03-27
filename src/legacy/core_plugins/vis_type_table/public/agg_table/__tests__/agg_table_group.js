@@ -20,54 +20,14 @@
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
 import { npStart } from '../../legacy_imports';
-import { search } from '../../../../../../plugins/data/public';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
-import { tableVisResponseHandler } from '../../table_vis_response_handler';
-import { start as visualizationsStart } from '../../../../visualizations/public/np_ready/public/legacy';
-
-const { tabifyAggResponse } = search;
+import { tabifiedData } from './tabified_data';
 
 describe('Table Vis - AggTableGroup Directive', function() {
   let $rootScope;
   let $compile;
-  let indexPattern;
-  const tabifiedData = {};
-
-  const init = () => {
-    const searchSource = {
-      getField: name => {
-        if (name === 'index') {
-          return indexPattern;
-        }
-      },
-    };
-    const vis1 = visualizationsStart.createVis('table', {
-      type: 'table',
-      data: { searchSource, aggs: [] },
-    });
-    tabifiedData.metricOnly = tabifyAggResponse(vis1.data.aggs, metricOnly);
-
-    const vis2 = visualizationsStart.createVis('pie', {
-      type: 'pie',
-      data: {
-        aggs: [
-          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-          { type: 'terms', schema: 'split', params: { field: 'extension' } },
-          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
-          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
-        ],
-        searchSource,
-      },
-    });
-    vis2.data.aggs.aggs.forEach(function(agg, i) {
-      agg.id = 'agg_' + (i + 1);
-    });
-    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.data.aggs, threeTermBuckets);
-  };
 
   const initLocalAngular = () => {
     const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
@@ -78,23 +38,9 @@ describe('Table Vis - AggTableGroup Directive', function() {
 
   beforeEach(ngMock.module('kibana/table_vis'));
   beforeEach(
-    ngMock.inject(function($injector, Private) {
-      // this is provided in table_vis_controller.js
-      // tech debt that will be resolved through further deangularization and moving tests to jest
-      /*
-      legacyDependencies = {
-        // eslint-disable-next-line new-cap
-        createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
-      };
-
-      visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
-      */
-
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    ngMock.inject(function($injector) {
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
-
-      init();
     })
   );
 
@@ -111,7 +57,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
       metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
       buckets: [],
     };
-    $scope.group = tableVisResponseHandler(tabifiedData.metricOnly, $scope.dimensions);
+    $scope.group = tabifiedData.metricOnly;
     $scope.sort = {
       columnIndex: null,
       direction: null,
@@ -156,10 +102,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
         { accessor: 5, params: {} },
       ],
     };
-    const group = ($scope.group = tableVisResponseHandler(
-      tabifiedData.threeTermBuckets,
-      $scope.dimensions
-    ));
+    const group = ($scope.group = tabifiedData.threeTermBucketsWithSplit);
     const $el = $(
       '<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>'
     );
