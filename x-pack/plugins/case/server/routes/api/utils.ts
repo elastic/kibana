@@ -14,7 +14,7 @@ import {
 } from 'kibana/server';
 
 import {
-  CaseRequest,
+  CasePostRequest,
   CaseResponse,
   CasesFindResponse,
   CaseAttributes,
@@ -35,17 +35,18 @@ export const transformNewCase = ({
   createdDate: string;
   email?: string;
   full_name?: string;
-  newCase: CaseRequest;
+  newCase: CasePostRequest;
   username: string;
 }): CaseAttributes => ({
+  ...newCase,
   closed_at: null,
   closed_by: null,
   created_at: createdDate,
   created_by: { email, full_name, username },
   external_service: null,
+  status: 'open',
   updated_at: null,
   updated_by: null,
-  ...newCase,
 });
 
 interface NewCommentArgs {
