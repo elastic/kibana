@@ -20,6 +20,16 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const template = req.body as TemplateDeserialized;
+      const {
+        _kbnMeta: { formatVersion },
+      } = template;
+
+      if (formatVersion !== 1) {
+        return res.badRequest({ body: 'Only index template version 1 can be created.' });
+      }
+
+      // For now we format to V1 index templates.
+      // When the V2 API is ready we will only create V2 template format.
       const serializedTemplate = serializeV1Template(template);
 
       const {

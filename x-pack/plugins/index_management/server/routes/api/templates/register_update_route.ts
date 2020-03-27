@@ -26,6 +26,14 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const { name } = req.params as typeof paramsSchema.type;
       const template = req.body as TemplateDeserialized;
+      const {
+        _kbnMeta: { formatVersion },
+      } = template;
+
+      if (formatVersion !== 1) {
+        return res.badRequest({ body: 'Only index template version 1 can be edited.' });
+      }
+
       const serializedTemplate = serializeV1Template(template);
 
       const { order, index_patterns, version, settings, mappings, aliases } = serializedTemplate;
