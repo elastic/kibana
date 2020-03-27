@@ -71,6 +71,10 @@ function refineInterval(interval: number[], cd: number, mask: number) {
   }
 }
 
+export function geohashColumns(precision: number): number {
+  return geohashCells(precision, 0);
+}
+
 /**
  * Get the number of geohash cells for a given precision
  *
@@ -85,20 +89,6 @@ function geohashCells(precision: number, axis: number) {
     cells *= i % 2 === axis ? 4 : 8;
   }
   return cells;
-}
-
-export function getPrecision(val: string) {
-  let precision = parseInt(val, 10);
-
-  if (Number.isNaN(precision)) {
-    precision = defaultPrecision;
-  }
-
-  if (precision > maxPrecision) {
-    return maxPrecision;
-  }
-
-  return precision;
 }
 
 interface GeoBoundingBoxCoordinate {

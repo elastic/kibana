@@ -18,27 +18,29 @@
  */
 
 import { getUiSettings } from '../kibana_services';
+import { geohashColumns } from './decode_geo_hash';
 
 /**
  * Get the number of geohash columns (world-wide) for a given precision
  * @param precision the geohash precision
  * @returns {number} the number of columns
  */
-export function geohashColumns(precision: number): number {
-  return geohashCells(precision, 0);
+
+const DEFAULT_PRECISION = 2;
+
+function getMaxPrecision() {
+  const config = getUiSettings();
+  return parseInt(config.get('visualization:tileMap:maxPrecision'), 10) || 12;
 }
 
 export function getZoomPrecision() {
-  const config = getUiSettings();
-  const defaultPrecision = 2;
-  const maxPrecision = parseInt(config.get('visualization:tileMap:maxPrecision'), 10) || 12;
-
   /**
    * Map Leaflet zoom levels to geohash precision levels.
    * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
    */
   const zoomPrecision: any = {};
   const minGeohashPixels = 16;
+  const maxPrecision = getMaxPrecision();
 
   for (let zoom = 0; zoom <= 21; zoom += 1) {
     const worldPixels = 256 * Math.pow(2, zoom);
@@ -53,4 +55,19 @@ export function getZoomPrecision() {
     }
   }
   return zoomPrecision;
+}
+
+export function getPrecision(val: string) {
+  let precision = parseInt(val, 10);
+  const maxPrecision = getMaxPrecision();
+
+  if (Number.isNaN(precision)) {
+    precision = DEFAULT_PRECISION;
+  }
+
+  if (precision > maxPrecision) {
+    return maxPrecision;
+  }
+
+  return precision;
 }

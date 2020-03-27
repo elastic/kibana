@@ -39,6 +39,7 @@ interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup
   serviceSettings: IServiceSettings;
   uiSettings: IUiSettingsClient;
   getZoomPrecision: any;
+  getPrecision: any;
 }
 
 /** @internal */
@@ -66,10 +67,11 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
       __LEGACY,
     }: TileMapPluginSetupDependencies
   ) {
-    const { getZoomPrecision, serviceSettings } = mapsLegacy;
+    const { getZoomPrecision, getPrecision, serviceSettings } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
       serviceSettings,
       getZoomPrecision,
+      getPrecision,
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };

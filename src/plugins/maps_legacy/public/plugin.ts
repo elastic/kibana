@@ -24,7 +24,7 @@ import { setToasts, setUiSettings, setInjectedVarFunc } from './kibana_services'
 // @ts-ignore
 import { ServiceSettings } from './map/service_settings';
 // @ts-ignore
-import { getZoomPrecision } from './map/zoom_precision';
+import { getPrecision, getZoomPrecision } from './map/precision';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -51,6 +51,7 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
     return {
       serviceSettings: new ServiceSettings(),
       getZoomPrecision,
+      getPrecision,
     };
   }
 
