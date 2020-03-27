@@ -109,6 +109,10 @@ describe('PluginWrapper', () => {
   test("`start` resolves `startDependencies` Promise after plugin's start", async () => {
     expect.assertions(2);
 
+    const pluginStartContract = {
+      someApi: () => 'foo',
+    };
+
     let startDependenciesResolved = false;
     mockPluginLoader.mockResolvedValueOnce(() => ({
       setup: jest.fn(),
@@ -116,6 +120,7 @@ describe('PluginWrapper', () => {
         // Add small delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
         await new Promise(resolve => setTimeout(resolve, 10));
         expect(startDependenciesResolved).toBe(false);
+        return pluginStartContract;
       },
     }));
     await plugin.load(addBasePath);
@@ -127,7 +132,7 @@ describe('PluginWrapper', () => {
     // called.
     const startDependenciesCheck = plugin.startDependencies.then(res => {
       startDependenciesResolved = true;
-      expect(res).toEqual([context, deps]);
+      expect(res).toEqual([context, deps, pluginStartContract]);
     });
     await plugin.start(context, deps);
     await startDependenciesCheck;
