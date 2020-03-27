@@ -57,7 +57,7 @@ async function asyncSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
-  const { timeout, restTotalHitsAsInt, ...params } = {
+  const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
     trackTotalHits: true, // Get the exact count of hits
     ...request.params,
   };
@@ -77,7 +77,7 @@ async function asyncSearch(
     options
   )) as AsyncSearchResponse<any>;
 
-  return { id, rawResponse: shimHitsTotal(response), ...getTotalLoaded(rawResponse._shards) };
+  return { id, rawResponse: shimHitsTotal(response), ...getTotalLoaded(response._shards) };
 }
 
 async function rollupSearch(

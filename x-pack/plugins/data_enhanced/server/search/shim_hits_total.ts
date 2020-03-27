@@ -13,7 +13,7 @@ import { SearchResponse } from 'elasticsearch';
  */
 export function shimHitsTotal(response: SearchResponse<any>) {
   let { hits } = response;
-  const total = hits.total.value ?? hits.total;
+  const total = (hits.total as any).value ?? hits.total;
   hits = { ...hits, total };
   return { ...response, hits };
 }
