@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SchemaConfig } from '../../visualizations/public';
+import { SchemaConfig } from '../../../../plugins/visualizations/public';
 
 export enum AggTypes {
   SUM = 'sum',

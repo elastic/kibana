@@ -22,7 +22,7 @@ function getAddFilter({ entityName, entityValue, filter }) {
       }
     >
       <EuiButtonIcon
-        size="xs"
+        size="s"
         className="filter-button"
         onClick={() => filter(entityName, entityValue, '+')}
         iconType="plusInCircle"
@@ -45,7 +45,7 @@ function getRemoveFilter({ entityName, entityValue, filter }) {
       }
     >
       <EuiButtonIcon
-        size="xs"
+        size="s"
         className="filter-button"
         onClick={() => filter(entityName, entityValue, '-')}
         iconType="minusInCircle"
