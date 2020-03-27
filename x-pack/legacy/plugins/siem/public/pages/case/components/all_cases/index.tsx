@@ -26,6 +26,7 @@ import { useGetCases, UpdateCase } from '../../../../containers/case/use_get_cas
 import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
+import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { Panel } from '../../../../components/panel';
 import {
   UtilityBar,
@@ -35,16 +36,15 @@ import {
   UtilityBarText,
 } from '../../../../components/utility_bar';
 import { getConfigureCasesUrl, getCreateCaseUrl } from '../../../../components/link_to';
-import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
-import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
-import { navTabs } from '../../../home/home_navigations';
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { OpenClosedStats } from '../open_closed_stats';
+import { navTabs } from '../../../home/home_navigations';
 
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
+import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -77,6 +77,7 @@ const getSortField = (field: string): SortFieldCase => {
 };
 export const AllCases = React.memo(() => {
   const urlSearch = useGetUrlSearch(navTabs.case);
+
   const {
     countClosedCases,
     countOpenCases,
@@ -108,19 +109,21 @@ export const AllCases = React.memo(() => {
 
   const { dispatchResetIsUpdated, isUpdated, updateBulkStatus } = useUpdateCases();
 
+  const refreshCases = useCallback(() => {
+    refetchCases(filterOptions, queryParams);
+    fetchCasesStatus();
+  }, [filterOptions, queryParams]);
+
   useEffect(() => {
     if (isDeleted) {
-      refetchCases(filterOptions, queryParams);
-      fetchCasesStatus();
+      refreshCases();
       dispatchResetIsDeleted();
     }
     if (isUpdated) {
-      refetchCases(filterOptions, queryParams);
-      fetchCasesStatus();
+      refreshCases();
       dispatchResetIsUpdated();
     }
-  }, [isDeleted, isUpdated, filterOptions, queryParams]);
-
+  }, [isDeleted, isUpdated]);
   const [deleteThisCase, setDeleteThisCase] = useState({
     title: '',
     id: '',
@@ -325,6 +328,10 @@ export const AllCases = React.memo(() => {
                     popoverContent={getBulkItemsPopoverContent}
                   >
                     {i18n.BULK_ACTIONS}
+                  </UtilityBarAction>
+
+                  <UtilityBarAction iconSide="left" iconType="refresh" onClick={refreshCases}>
+                    {i18n.REFRESH}
                   </UtilityBarAction>
                 </UtilityBarGroup>
               </UtilityBarSection>

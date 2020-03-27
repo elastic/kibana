@@ -138,7 +138,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no advanced_settings privileges', () => {
+    describe('no advanced_settings privileges', function() {
+      this.tags(['skipCoverage']);
       before(async () => {
         await security.role.create('no_advanced_settings_privileges_role', {
           elasticsearch: {

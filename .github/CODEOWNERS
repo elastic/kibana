@@ -131,6 +131,7 @@
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
 /src/legacy/server/status/ @elastic/kibana-platform
 /src/plugins/status_page/ @elastic/kibana-platform
+/src/plugins/saved_objects_management/ @elastic/kibana-platform
 /src/dev/run_check_published_api_changes.ts @elastic/kibana-platform
 
 # Security
@@ -149,8 +150,11 @@
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse
 /src/legacy/core_plugins/ui_metric/ @elastic/pulse
+/src/plugins/telemetry/ @elastic/pulse
+/src/plugins/telemetry_collection_manager/ @elastic/pulse
+/src/plugins/telemetry_management_section/ @elastic/pulse
 /src/plugins/usage_collection/ @elastic/pulse
-/x-pack/legacy/plugins/telemetry/ @elastic/pulse
+/x-pack/plugins/telemetry_collection_xpack/ @elastic/pulse
 
 # Kibana Alerting Services
 /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services

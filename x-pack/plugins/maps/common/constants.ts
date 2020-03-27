@@ -188,7 +188,7 @@ export enum LABEL_BORDER_SIZES {
   LARGE = 'LARGE',
 }
 
-export const DEFAULT_ICON = 'airfield';
+export const DEFAULT_ICON = 'marker';
 
 export enum VECTOR_STYLES {
   SYMBOLIZE_AS = 'symbolizeAs',

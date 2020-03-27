@@ -19,6 +19,9 @@ interface SignalRuleExceptionParams {
   message: string;
   services: AlertServices;
   name: string;
+  lastLookBackDate?: string | null | undefined;
+  bulkCreateTimes?: string[] | null | undefined;
+  searchAfterTimes?: string[] | null | undefined;
 }
 
 export const writeSignalRuleExceptionToSavedObject = async ({
@@ -30,6 +33,9 @@ export const writeSignalRuleExceptionToSavedObject = async ({
   ruleStatusSavedObjects,
   ruleId,
   name,
+  lastLookBackDate,
+  bulkCreateTimes,
+  searchAfterTimes,
 }: SignalRuleExceptionParams): Promise<void> => {
   logger.error(
     `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${message}`
@@ -39,6 +45,15 @@ export const writeSignalRuleExceptionToSavedObject = async ({
   currentStatusSavedObject.attributes.statusDate = sDate;
   currentStatusSavedObject.attributes.lastFailureAt = sDate;
   currentStatusSavedObject.attributes.lastFailureMessage = message;
+  if (lastLookBackDate) {
+    currentStatusSavedObject.attributes.lastLookBackDate = lastLookBackDate;
+  }
+  if (bulkCreateTimes) {
+    currentStatusSavedObject.attributes.bulkCreateTimeDurations = bulkCreateTimes;
+  }
+  if (searchAfterTimes) {
+    currentStatusSavedObject.attributes.searchAfterTimeDurations = searchAfterTimes;
+  }
   // current status is failing
   await services.savedObjectsClient.update(ruleStatusSavedObjectType, currentStatusSavedObject.id, {
     ...currentStatusSavedObject.attributes,

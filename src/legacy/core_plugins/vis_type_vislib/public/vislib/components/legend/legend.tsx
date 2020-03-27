@@ -23,7 +23,7 @@ import { compact, uniq, map, every, isUndefined } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 
-import { createFiltersFromEvent } from '../../../legacy_imports';
+import { getDataActions } from '../../../services';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
@@ -101,7 +101,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       return false;
     }
 
-    const filters = await createFiltersFromEvent(item.values);
+    const filters = await getDataActions().createFiltersFromEvent(item.values);
     return Boolean(filters.length);
   };
 
