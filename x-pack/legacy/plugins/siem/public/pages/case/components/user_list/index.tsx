@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { ElasticUser } from '../../../../containers/case/types';
@@ -49,11 +50,13 @@ const renderUsers = (
             <MyAvatar name={fullName ? fullName : username} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <p>
-              <strong>
-                <small data-test-subj="case-view-username">{username}</small>
-              </strong>
-            </p>
+            <EuiToolTip position="top" content={<p>{fullName ?? username}</p>}>
+              <p>
+                <strong>
+                  <small data-test-subj="case-view-username">{username}</small>
+                </strong>
+              </p>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -63,6 +66,7 @@ const renderUsers = (
           onClick={handleSendEmail.bind(null, email)}
           iconType="email"
           aria-label="email"
+          isDisabled={!email}
         />
       </EuiFlexItem>
     </MyFlexGroup>

@@ -107,7 +107,13 @@ export const AllCases = React.memo(() => {
     isDisplayConfirmDeleteModal,
   } = useDeleteCases();
 
-  const { dispatchResetIsUpdated, isUpdated, updateBulkStatus } = useUpdateCases();
+  // Update case
+  const {
+    dispatchResetIsUpdated,
+    isLoading: isUpdating,
+    isUpdated,
+    updateBulkStatus,
+  } = useUpdateCases();
   const [deleteThisCase, setDeleteThisCase] = useState({
     title: '',
     id: '',
@@ -301,7 +307,7 @@ export const AllCases = React.memo(() => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
-      {(isCasesLoading || isDeleting) && !isDataEmpty && (
+      {(isCasesLoading || isDeleting || isUpdating) && !isDataEmpty && (
         <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
       )}
       <Panel loading={isCasesLoading}>

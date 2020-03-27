@@ -71,17 +71,18 @@ export const useUpdateCases = (): UseUpdateCase => {
         dispatch({ type: 'FETCH_INIT' });
         const patchResponse = await patchCasesStatus(cases);
         if (!cancel) {
-          console.log('patchResponse', patchResponse);
-          dispatch({ type: 'FETCH_SUCCESS', payload: true });
-          if (patchResponse.length && patchResponse[0].status === 'open') {
+          const resultCount = Object.keys(patchResponse).length;
+          const firstTitle = patchResponse[0].title;
 
+          dispatch({ type: 'FETCH_SUCCESS', payload: true });
+          if (resultCount && patchResponse[0].status === 'open') {
             displaySuccessToast(
-              i18n.CLOSED_CASES(cases.length, cases.length === 1 ? cases[0].title : ''),
+              i18n.REOPENED_CASES(resultCount, resultCount === 1 ? firstTitle : ''),
               dispatchToaster
             );
           } else {
             displaySuccessToast(
-              i18n.REOPENED_CASES(cases.length, cases.length === 1 ? cases[0].title : ''),
+              i18n.CLOSED_CASES(resultCount, resultCount === 1 ? firstTitle : ''),
               dispatchToaster
             );
           }
