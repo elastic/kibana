@@ -19,19 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
-import {
-  VisualizeEmbeddable,
-  VisualizeInput,
-} from '../../../../legacy/core_plugins/visualizations/public/np_ready/public/embeddable';
 import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
-import { ViewMode, IContainer, PanelState } from '../embeddable_plugin';
+import { ViewMode, IContainer, PanelState, IEmbeddable } from '../embeddable_plugin';
 import { SavedObject } from '../../../saved_objects/public';
-import { DashboardPanelState, GridData } from '..';
+import { DashboardPanelState, GridData, DASHBOARD_CONTAINER_TYPE } from '..';
 
 export const ACTION_DUPLICATE_PANEL = 'duplicatePanel';
 
 export interface DuplicatePanelActionContext {
-  embeddable: VisualizeEmbeddable;
+  embeddable: IEmbeddable;
 }
 
 export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICATE_PANEL> {
@@ -64,7 +60,11 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
       }
     }
 
-    return Boolean(embeddable.getRoot() && embeddable.getRoot().isContainer);
+    return Boolean(
+      embeddable.getRoot() &&
+        embeddable.getRoot().isContainer &&
+        embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE
+    );
   }
 
   public async execute({ embeddable }: DuplicatePanelActionContext) {
@@ -103,7 +103,11 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
         embeddable.type,
         duplicatedSavedObject.id
       );
-      duplicatedEmbeddable.updateInput({ vis: embeddable.getInput().vis } as VisualizeInput);
+
+      duplicatedEmbeddable.updateInput({
+        ...panelToDuplicate.explicitInput,
+        id: duplicatedEmbeddable.id,
+      });
 
       // Place duplicated panel
       const finalPanels = _.cloneDeep(dashboard.getInput().panels);
