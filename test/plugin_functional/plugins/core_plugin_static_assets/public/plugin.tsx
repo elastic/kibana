@@ -17,10 +17,11 @@
  * under the License.
  */
 
-const serve = require('serve-static');
-const path = require('path');
+import { Plugin, CoreSetup } from 'kibana/public';
 
-// Extend the Storybook Middleware to include a route to access Legacy UI assets
-module.exports = function(router) {
-  router.get('/ui', serve(path.resolve(__dirname, '../../../src/core/server/core_app/assets')));
-};
+export class CorePluginStaticAssets implements Plugin {
+  public setup(core: CoreSetup, deps: {}) {}
+
+  public start() {}
+  public stop() {}
+}
