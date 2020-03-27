@@ -161,7 +161,7 @@ app.config($routeProvider => {
                       '/management/kibana/objects/savedSearches/' + $route.current.params.id,
                   },
                   toastNotifications,
-                  onRedirect() {
+                  onBeforeRedirect() {
                     getUrlTracker().setTrackedUrl('/discover');
                   },
                 })

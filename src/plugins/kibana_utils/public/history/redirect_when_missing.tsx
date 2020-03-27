@@ -37,7 +37,7 @@ export function redirectWhenMissing({
   history,
   mapping,
   toastNotifications,
-  onRedirect,
+  onBeforeRedirect,
 }: {
   history: History;
   /**
@@ -50,9 +50,9 @@ export function redirectWhenMissing({
    */
   toastNotifications: ToastsSetup;
   /**
-   * Optional callback invoked when a redirect occurs
+   * Optional callback invoked directly before a redirect is triggered
    */
-  onRedirect?: (error: SavedObjectNotFound) => void;
+  onBeforeRedirect?: (error: SavedObjectNotFound) => void;
 }) {
   let localMappingObject: Mapping;
 
@@ -80,8 +80,8 @@ export function redirectWhenMissing({
       text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
     });
 
-    if (onRedirect) {
-      onRedirect(error);
+    if (onBeforeRedirect) {
+      onBeforeRedirect(error);
     }
     history.replace(url);
   };
