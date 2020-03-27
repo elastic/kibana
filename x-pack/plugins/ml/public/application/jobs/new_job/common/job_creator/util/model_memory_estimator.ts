@@ -16,6 +16,7 @@ import {
   switchMap,
   map,
   pairwise,
+  filter,
 } from 'rxjs/operators';
 import { useEffect, useState } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
@@ -43,22 +44,20 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
         // if the configuration has been changed
         map(cloneDeep),
         distinctUntilChanged(isEqual),
-        switchMap(payload => {
-          const isPayloadValid = jobValidator.isModelMemoryEstimationPayloadValid;
-
-          return isPayloadValid
-            ? ml.calculateModelMemoryLimit$(payload).pipe(
-                pluck('modelMemoryLimit'),
-                catchError(error => {
-                  // eslint-disable-next-line no-console
-                  console.error('Model memory limit could not be calculated', error.body);
-                  error$.next(error.body);
-                  // fallback to the default in case estimation failed
-                  return of(DEFAULT_MODEL_MEMORY_LIMIT);
-                })
-              )
-            : of(DEFAULT_MODEL_MEMORY_LIMIT);
-        })
+        // don't call the endpoint with invalid payload
+        filter(() => jobValidator.isModelMemoryEstimationPayloadValid === true),
+        switchMap(payload =>
+          ml.calculateModelMemoryLimit$(payload).pipe(
+            pluck('modelMemoryLimit'),
+            catchError(error => {
+              // eslint-disable-next-line no-console
+              console.error('Model memory limit could not be calculated', error.body);
+              error$.next(error.body);
+              // fallback to the default in case estimation failed
+              return of(DEFAULT_MODEL_MEMORY_LIMIT);
+            })
+          )
+        )
       );
     },
     update(payload: CalculatePayload) {

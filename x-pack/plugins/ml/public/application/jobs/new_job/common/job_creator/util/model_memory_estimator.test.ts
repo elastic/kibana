@@ -7,7 +7,6 @@
 import { useFakeTimers, SinonFakeTimers } from 'sinon';
 import { CalculatePayload, modelMemoryEstimatorProvider } from './model_memory_estimator';
 import { JobValidator } from '../../job_validator';
-import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 
 jest.mock('../../../../../services/ml_api_service', () => {
@@ -39,10 +38,10 @@ describe('delay', () => {
     jest.clearAllMocks();
   });
 
-  test('should emit a default value first', () => {
+  test('should not emit any value on subscription initialization', () => {
     const spy = jest.fn();
     modelMemoryEstimator.updates$.subscribe(spy);
-    expect(spy).toHaveBeenCalledWith(DEFAULT_MODEL_MEMORY_LIMIT);
+    expect(spy).not.toHaveBeenCalled();
   });
 
   test('should debounce it for 600 ms', () => {
@@ -80,7 +79,7 @@ describe('delay', () => {
     clock.tick(601);
 
     expect(ml.calculateModelMemoryLimit$).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledTimes(2);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 
   test('should call the endpoint only with a valid payload', () => {
