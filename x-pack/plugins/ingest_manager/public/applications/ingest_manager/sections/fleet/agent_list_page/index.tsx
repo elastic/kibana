@@ -16,9 +16,7 @@ import {
   EuiLink,
   EuiPopover,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
-  EuiTitle,
   EuiButtonIcon,
   EuiContextMenuPanel,
   EuiContextMenuItem,
@@ -391,29 +389,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           onClose={() => setIsEnrollmentFlyoutOpen(false)}
         />
       ) : null}
-      <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.ingestManager.agentList.pageDescription"
-                defaultMessage="Use agents to faciliate data collection for your Elastic stack."
-              />
-            </EuiText>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={i18n.translate('xpack.ingestManager.agentList.showInactiveSwitchLabel', {
-              defaultMessage: 'Show inactive agents',
-            })}
-            checked={showInactive}
-            onChange={() => setShowInactive(!showInactive)}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-
       <EuiFlexGroup alignItems={'center'}>
         {selectedAgents.length ? (
           <EuiFlexItem>
@@ -458,7 +433,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         ) : null}
         <EuiFlexItem grow={4}>
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={3}>
+            <EuiFlexItem grow={6}>
               <SearchBar
                 value={search}
                 onChange={newSearch => {
@@ -471,7 +446,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 fieldPrefix="agents"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={1}>
+            <EuiFlexItem grow={2}>
               <EuiFilterGroup>
                 <EuiPopover
                   ownFocus
@@ -552,6 +527,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                     ))}
                   </div>
                 </EuiPopover>
+                <EuiFilterButton
+                  hasActiveFilters={showInactive}
+                  onClick={() => setShowInactive(!showInactive)}
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.showInactiveSwitchLabel"
+                    defaultMessage="Show inactive"
+                  />
+                </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
