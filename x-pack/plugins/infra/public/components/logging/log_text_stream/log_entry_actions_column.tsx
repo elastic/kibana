@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
