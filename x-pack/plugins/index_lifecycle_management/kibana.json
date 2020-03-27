@@ -6,11 +6,11 @@
   "requiredPlugins": [
     "home",
     "licensing",
-    "management",
-    "indexManagement"
+    "management"
   ],
   "optionalPlugins": [
-    "usageCollection"
+    "usageCollection",
+    "indexManagement"
   ],
   "configPath": ["xpack", "ilm"]
 }

@@ -9,8 +9,6 @@ import { get, every, any } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 
-import { init as initUiMetric } from '../application/services/ui_metric';
-import { init as initNotification } from '../application/services/notification';
 import { retryLifecycleForIndex } from '../application/services/api';
 import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
 import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confirm_modal';
@@ -18,21 +16,7 @@ import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle
 
 const stepPath = 'ilm.step';
 
-export const retryLifecycleActionExtension = ({
-  indices,
-  usageCollection,
-  toasts,
-  fatalErrors,
-}) => {
-  // These are hacks that we can remove once the New Platform migration is done. They're needed here
-  // because API requests and API errors require them.
-  const getLegacyReporter = appName => (type, name) => {
-    usageCollection.reportUiStats(appName, type, name);
-  };
-
-  initUiMetric(getLegacyReporter);
-  initNotification(toasts, fatalErrors);
-
+export const retryLifecycleActionExtension = ({ indices }) => {
   const allHaveErrors = every(indices, index => {
     return index.ilm && index.ilm.failed_step;
   });
@@ -57,19 +41,7 @@ export const retryLifecycleActionExtension = ({
   };
 };
 
-export const removeLifecyclePolicyActionExtension = ({
-  indices,
-  reloadIndices,
-  createUiStatsReporter,
-  toasts,
-  fatalErrors,
-  httpClient,
-}) => {
-  // These are hacks that we can remove once the New Platform migration is done. They're needed here
-  // because API requests and API errors require them.
-  initUiMetric(createUiStatsReporter);
-  initNotification(toasts, fatalErrors);
-
+export const removeLifecyclePolicyActionExtension = ({ indices, reloadIndices }) => {
   const allHaveIlm = every(indices, index => {
     return index.ilm && index.ilm.managed;
   });
@@ -83,8 +55,6 @@ export const removeLifecyclePolicyActionExtension = ({
         <RemoveLifecyclePolicyConfirmModal
           indexNames={indexNames}
           closeModal={closeModal}
-          httpClient={httpClient}
-          toasts={toasts}
           reloadIndices={reloadIndices}
         />
       );
@@ -97,19 +67,7 @@ export const removeLifecyclePolicyActionExtension = ({
   };
 };
 
-export const addLifecyclePolicyActionExtension = ({
-  indices,
-  reloadIndices,
-  createUiStatsReporter,
-  toasts,
-  fatalErrors,
-  httpClient,
-}) => {
-  // These are hacks that we can remove once the New Platform migration is done. They're needed here
-  // because API requests and API errors require them.
-  initUiMetric(createUiStatsReporter);
-  initNotification(toasts, fatalErrors);
-
+export const addLifecyclePolicyActionExtension = ({ indices, reloadIndices }) => {
   if (indices.length !== 1) {
     return null;
   }
@@ -126,8 +84,6 @@ export const addLifecyclePolicyActionExtension = ({
         <AddLifecyclePolicyConfirmModal
           indexName={indexName}
           closeModal={closeModal}
-          httpClient={httpClient}
-          toasts={toasts}
           index={index}
           reloadIndices={reloadIndices}
         />

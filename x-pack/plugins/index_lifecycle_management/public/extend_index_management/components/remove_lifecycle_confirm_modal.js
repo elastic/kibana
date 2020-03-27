@@ -24,10 +24,10 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
   }
 
   removePolicy = async () => {
-    const { indexNames, httpClient, closeModal, reloadIndices } = this.props;
+    const { indexNames, closeModal, reloadIndices } = this.props;
 
     try {
-      await removeLifecycleForIndex(indexNames, httpClient);
+      await removeLifecycleForIndex(indexNames);
       closeModal();
       toasts.addSuccess(
         i18n.translate(

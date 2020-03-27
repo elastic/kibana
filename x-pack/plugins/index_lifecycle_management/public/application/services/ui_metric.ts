@@ -6,7 +6,8 @@
 
 import { get } from 'lodash';
 
-import { createUiStatsReporter } from '../../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UiStatsMetricType } from '@kbn/analytics';
 
 import {
   UIM_APP_NAME,
@@ -22,12 +23,10 @@ import {
 
 import { defaultColdPhase, defaultWarmPhase, defaultHotPhase } from '../store/defaults';
 
-export let trackUiMetric: ReturnType<typeof createUiStatsReporter>;
+export let trackUiMetric: (metricType: UiStatsMetricType, eventName: string) => void;
 
-export function init(getReporter: typeof createUiStatsReporter): void {
-  if (getReporter) {
-    trackUiMetric = getReporter(UIM_APP_NAME);
-  }
+export function init(usageCollection: UsageCollectionSetup): void {
+  trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, UIM_APP_NAME);
 }
 
 export function getUiMetricsForPhases(phases: any): any {

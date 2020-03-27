@@ -23,7 +23,7 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
-import { BASE_PATH } from '../../../../common/constants';
+import { BASE_PATH } from '../../../common/constants';
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
@@ -38,7 +38,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     };
   }
   addPolicy = async () => {
-    const { indexName, httpClient, closeModal, reloadIndices } = this.props;
+    const { indexName, closeModal, reloadIndices } = this.props;
     const { selectedPolicyName, selectedAlias } = this.state;
     if (!selectedPolicyName) {
       this.setState({
@@ -55,7 +55,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
         policyName: selectedPolicyName,
         alias: selectedAlias,
       };
-      await addLifecyclePolicyToIndex(body, httpClient);
+      await addLifecyclePolicyToIndex(body);
       closeModal();
       toasts.addSuccess(
         i18n.translate(

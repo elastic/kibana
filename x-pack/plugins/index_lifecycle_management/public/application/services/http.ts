@@ -20,16 +20,14 @@ function getFullPath(path: string): string {
   return apiPrefix;
 }
 
-// The extend_index_management module requires that we support an injected httpClient here.
-
-export function sendPost(path: string, payload: any, httpClient = _httpClient): any {
-  return httpClient.post(getFullPath(path), { body: JSON.stringify(payload) });
+export function sendPost(path: string, payload: any): any {
+  return _httpClient.post(getFullPath(path), { body: JSON.stringify(payload) });
 }
 
-export function sendGet(path: string, query: any, httpClient = _httpClient): any {
-  return httpClient.get(getFullPath(path), { query });
+export function sendGet(path: string, query: any): any {
+  return _httpClient.get(getFullPath(path), { query });
 }
 
-export function sendDelete(path: string, httpClient = _httpClient): any {
-  return httpClient.delete(getFullPath(path));
+export function sendDelete(path: string): any {
+  return _httpClient.delete(getFullPath(path));
 }

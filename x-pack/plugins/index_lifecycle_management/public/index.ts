@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginInitializerContext } from 'kibana/public';
+
 import './index.scss';
 import { IndexLifecycleManagementPlugin } from './plugin';
 
 /** @public */
-export const plugin = () => {
-  return new IndexLifecycleManagementPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) => {
+  return new IndexLifecycleManagementPlugin(initializerContext);
 };
