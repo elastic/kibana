@@ -9,19 +9,10 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
-  const uptimeService = getService('uptime');
-  const { common: commonService } = uptimeService;
+  const { common: commonService, navigation, alerts } = getService('uptime');
   const retry = getService('retry');
 
   return new (class UptimePage {
-    public get settings() {
-      return uptimeService.settings;
-    }
-
-    public get monitor() {
-      return uptimeService.monitor;
-    }
-
     public async goToRoot() {
       await pageObjects.common.navigateToApp('uptime');
     }
@@ -53,7 +44,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       monitorName?: string
     ) {
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-      await uptimeService.navigation.goToMonitor(monitorId, monitorName);
+      await navigation.goToMonitor(monitorId, monitorName);
     }
 
     public async inputFilterQuery(filterQuery: string) {
@@ -125,7 +116,6 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       filters?: string;
     }) {
       const { setKueryBarText } = commonService;
-      const alerts = uptimeService.alerts;
       await alerts.openFlyout();
       await alerts.openMonitorStatusAlertType();
       await alerts.setAlertName(alertName);

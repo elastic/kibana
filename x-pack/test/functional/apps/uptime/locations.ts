@@ -8,9 +8,8 @@ import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/graph
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['uptime']);
-  const uptime = getService('uptime');
-  const { navigation, monitor } = uptime;
+  const { uptime: uptimePage } = getPageObjects(['uptime']);
+  const { navigation, monitor } = getService('uptime');
 
   describe('Observer location', () => {
     const start = new Date().toISOString();
@@ -48,7 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('renders the location missing popover when monitor has location name, but no geo data', async () => {
-      await pageObjects.uptime.loadDataAndGoToMonitorPage(start, end, MONITOR_ID);
+      await uptimePage.loadDataAndGoToMonitorPage(start, end, MONITOR_ID);
       await monitor.locationMissingExists();
     });
   });
