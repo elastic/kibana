@@ -18,6 +18,7 @@ import {
   getDefaultSearchParams,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
+import { shimHitsTotal } from './shim_hits_total';
 
 export interface AsyncSearchResponse<T> {
   id: string;
@@ -60,21 +61,27 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
   return { search, cancel };
 };
 
-function asyncSearch(
+async function asyncSearch(
   caller: APICaller,
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
-  const { body = undefined, index = undefined, ...params } = request.id ? {} : request.params;
+  const { timeout, restTotalHitsAsInt, ...params } = {
+    trackTotalHits: true, // Get the exact count of hits
+    ...request.params,
+  };
 
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
+  const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
+
   const method = request.id ? 'GET' : 'POST';
   const path = request.id ? `_async_search/${request.id}` : `${index}/_async_search`;
 
   // Wait up to 1s for the response to return
-  const query = toSnakeCase({ waitForCompletion: '1s', ...params });
+  const query = toSnakeCase({ waitForCompletion: '1s', ...queryParams });
 
-  return caller('transport.request', { method, path, body, query }, options);
+  const response = await caller('transport.request', { method, path, body, query }, options);
+  return shimHitsTotal(response);
 }
 
 async function rollupSearch(
