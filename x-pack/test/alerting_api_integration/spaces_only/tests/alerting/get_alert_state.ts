@@ -31,7 +31,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
         `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/state`
       );
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.key('alertInstances', 'previousStartedAt');
     });
 
@@ -59,7 +59,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/state`
         );
 
-        expect(response.statusCode).to.eql(200);
+        expect(response.status).to.eql(200);
         expect(response.body).to.key('alertInstances', 'alertTypeState', 'previousStartedAt');
         expect(response.body.alertTypeState.runCount).to.greaterThan(1);
       });

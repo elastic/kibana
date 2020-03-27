@@ -19,8 +19,6 @@ import {
   CasesStatusResponseRt,
   CasesStatusResponse,
   throwErrors,
-  CommentResponse,
-  CommentResponseRt,
   CasesConfigureResponse,
   CaseConfigureResponseRt,
   CaseUserActionsResponse,
@@ -81,9 +79,6 @@ export const decodeCasesResponse = (respCase?: CasesResponse) =>
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
-
-export const decodeCommentResponse = (respComment?: CommentResponse) =>
-  pipe(CommentResponseRt.decode(respComment), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =>
   pipe(
