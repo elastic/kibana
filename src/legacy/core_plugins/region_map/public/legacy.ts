@@ -20,7 +20,6 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
-import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 import { RegionMapPluginSetupDependencies, RegionMapsConfig } from './plugin';
 import { LegacyDependenciesPlugin } from './shim';
 import { plugin } from '.';
@@ -31,7 +30,7 @@ const regionmapsConfig = npSetup.core.injectedMetadata.getInjectedVar(
 
 const plugins: Readonly<RegionMapPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
-  visualizations: visualizationsSetup,
+  visualizations: npSetup.plugins.visualizations,
   maps_legacy: npSetup.plugins.maps_legacy,
 
   // Temporary solution

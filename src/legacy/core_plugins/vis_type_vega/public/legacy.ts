@@ -19,14 +19,16 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
-
-import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 import { VegaPluginSetupDependencies, VegaPluginStartDependencies } from './plugin';
 import { plugin } from '.';
 
 const setupPlugins: Readonly<VegaPluginSetupDependencies> = {
   ...npSetup.plugins,
-  visualizations: visualizationsSetup,
+  visualizations: npSetup.plugins.visualizations,
+
+  // Temporary solution
+  // It will be removed when all dependent services are migrated to the new platform.
+  __LEGACY: new LegacyDependenciesPlugin(),
 };
 
 const startPlugins: Readonly<VegaPluginStartDependencies> = {
