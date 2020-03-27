@@ -43,8 +43,8 @@ export const TakeActionDropdown = memo(() => {
   const closeAlert = useCallback(() => {
     if (alertDetails) {
       dispatch({
-        type: 'userClosedAlert',
-        payload: alertDetails.id,
+        type: 'userClosedAlerts',
+        payload: [alertDetails.id],
       });
     }
   }, [alertDetails, dispatch]);

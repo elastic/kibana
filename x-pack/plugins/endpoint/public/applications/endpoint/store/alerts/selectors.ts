@@ -171,7 +171,7 @@ export const hasSelectedAlert: (state: AlertListState) => boolean = createSelect
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
 );
 
-export const isOnClosedAlertTab: (state: AlertListState) => boolean = createSelector(
+export const isOnClosedAlertsTab: (state: AlertListState) => boolean = createSelector(
   uiQueryParams,
   ({ closed_alerts: isOnClosedAlertsList }) => isOnClosedAlertsList !== undefined
 );

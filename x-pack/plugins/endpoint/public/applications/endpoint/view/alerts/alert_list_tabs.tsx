@@ -16,7 +16,7 @@ import * as selectors from '../../store/alerts/selectors';
 export const AlertListTabs = memo(() => {
   const history = useHistory();
   const queryParams = useAlertListSelector(selectors.uiQueryParams);
-  const isOnClosedAlertsTab = useAlertListSelector(selectors.isOnClosedAlertTab);
+  const isOnClosedAlertsTab = useAlertListSelector(selectors.isOnClosedAlertsTab);
 
   const onOpenTabClick = useCallback(() => {
     const { closed_alerts, ...paramsWithoutClosedAlerts } = queryParams;

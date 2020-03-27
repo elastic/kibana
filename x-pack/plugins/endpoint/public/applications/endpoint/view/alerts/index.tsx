@@ -224,12 +224,9 @@ export const AlertIndex = memo(() => {
               history.push(urlFromQueryParams({ ...queryParams, closed_alerts: 'true' }))
             }
           >
-            {i18n.translate(
-              'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
-              {
-                defaultMessage: 'View all closed alerts',
-              }
-            )}
+            {i18n.translate('xpack.endpoint.alerts.closedAlert.successLink', {
+              defaultMessage: 'View all closed alerts',
+            })}
           </EuiLink>
         ),
         toastLifeTimeMs: 10000,

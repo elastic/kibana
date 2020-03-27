@@ -106,7 +106,10 @@ export const AlertDetailsOverview = styled(
             {' '}
             <FormattedMessage
               id="xpack.endpoint.application.endpoint.alertDetails.alert.status.open"
-              defaultMessage="Alert Status: Open"
+              defaultMessage="Alert Status: {closedStatus}"
+              values={{
+                closedStatus: alertDetailsData.state.active === true ? 'Open' : 'Closed',
+              }}
             />
           </EuiText>
           <EuiSpacer />

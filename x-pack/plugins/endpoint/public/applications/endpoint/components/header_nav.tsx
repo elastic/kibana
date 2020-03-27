@@ -77,13 +77,13 @@ export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
   }, [BASE_PATH, history, location.pathname]);
 
   return (
-    <Wrapper>
+    <HeaderNav>
       <EuiTabs display="condensed">{tabList}</EuiTabs>
-    </Wrapper>
+    </HeaderNav>
   );
 });
 
-const Wrapper = styled.header`
+const HeaderNav = styled.header`
   ${({ theme }) => css`
     background: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderThin};

@@ -46,8 +46,8 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
       api.dispatch({ type: 'serverReturnedAlertDetailsData', payload: response });
     }
 
-    if (action.type === 'userClosedAlert') {
-      const id = action.payload;
+    if (action.type === 'userClosedAlerts') {
+      const [id] = action.payload;
       const body = JSON.stringify({
         state: {
           active: false,

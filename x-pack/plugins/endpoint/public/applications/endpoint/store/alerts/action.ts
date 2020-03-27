@@ -23,9 +23,9 @@ interface ServerReturnedSearchBarIndexPatterns {
   readonly payload: IIndexPattern[];
 }
 
-interface UserClosedAlert {
-  readonly type: 'userClosedAlert';
-  readonly payload: string;
+interface UserClosedAlerts {
+  readonly type: 'userClosedAlerts';
+  readonly payload: string[];
 }
 
 interface ServerSuccessfullyClosedAlert {
@@ -40,6 +40,6 @@ export type AlertAction =
   | ServerReturnedAlertsData
   | ServerReturnedAlertDetailsData
   | ServerReturnedSearchBarIndexPatterns
-  | UserClosedAlert
+  | UserClosedAlerts
   | ServerSuccessfullyClosedAlert
   | ServerFailedToCloseAlert;
