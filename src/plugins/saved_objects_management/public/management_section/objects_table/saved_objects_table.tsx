@@ -17,17 +17,10 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { saveAs } from '@elastic/filesaver';
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
-import { Header } from './components/header';
-import { Flyout } from './components/flyout';
-import { Relationships } from './components/relationships';
-import { Table } from './components/table';
-import { toastNotifications } from 'ui/notify';
-
+// @ts-ignore
+import { saveAs } from '@elastic/filesaver';
 import {
   EuiSpacer,
   Query,
@@ -54,7 +47,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  HttpStart,
+  OverlayStart,
+  NotificationsStart,
+  Capabilities,
+} from 'src/core/public';
+import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
   getSavedObjectCounts,
@@ -63,39 +64,71 @@ import {
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   findObjects,
+  extractExportDetails,
+  SavedObjectsExportResultDetails,
 } from '../../lib';
-import { extractExportDetails } from '../../lib/extract_export_details';
+// import { Flyout } from './components/flyout';
+// import { Relationships } from './components/relationships';
+import { SavedObjectWithMetadata } from '../../types';
+import { ISavedObjectsManagementServiceRegistry } from '../../services';
+import { Header, Table } from './components';
 
-export const POSSIBLE_TYPES = chrome.getInjected('importAndExportableTypes');
+interface ExportAllOption {
+  id: string;
+  label: string;
+}
 
-export class ObjectsTable extends Component {
-  static propTypes = {
-    savedObjectsClient: PropTypes.object.isRequired,
-    indexPatterns: PropTypes.object.isRequired,
-    $http: PropTypes.func.isRequired,
-    basePath: PropTypes.string.isRequired,
-    perPageConfig: PropTypes.number,
-    newIndexPatternUrl: PropTypes.string.isRequired,
-    confirmModalPromise: PropTypes.func.isRequired,
-    services: PropTypes.array.isRequired,
-    uiCapabilities: PropTypes.object.isRequired,
-    goInspectObject: PropTypes.func.isRequired,
-    canGoInApp: PropTypes.func.isRequired,
-  };
+interface SavedObjectsTableProps {
+  allowedTypes: string[];
+  serviceRegistry: ISavedObjectsManagementServiceRegistry;
+  savedObjectsClient: SavedObjectsClientContract;
+  indexPatterns: IndexPatternsContract;
+  http: HttpStart;
+  overlays: OverlayStart;
+  notifications: NotificationsStart;
+  capabilities: Capabilities;
+  perPageConfig: number;
+  // newIndexPatternUrl - kbnUrl.eval('#/management/kibana/index_pattern')
+  goInspectObject: (obj: SavedObjectWithMetadata) => void;
+  canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+}
 
-  constructor(props) {
+interface SavedObjectsTableState {
+  totalCount: number;
+  page: number;
+  perPage: number;
+  savedObjects: SavedObjectWithMetadata[];
+  savedObjectCounts: Record<string, number>;
+  activeQuery: Query;
+  selectedSavedObjects: SavedObjectWithMetadata[];
+  isShowingImportFlyout: boolean;
+  isSearching: boolean;
+  filteredItemCount: number;
+  isShowingRelationships: boolean;
+  relationshipObject?: SavedObjectWithMetadata;
+  isShowingDeleteConfirmModal: boolean;
+  isShowingExportAllOptionsModal: boolean;
+  isDeleting: boolean;
+  exportAllOptions: ExportAllOption[];
+  exportAllSelectedOptions: Record<string, boolean>;
+  isIncludeReferencesDeepChecked: boolean;
+}
+
+export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
+  private _isMounted = false;
+
+  constructor(props: SavedObjectsTableProps) {
     super(props);
-    this.savedObjectTypes = POSSIBLE_TYPES;
 
     this.state = {
       totalCount: 0,
       page: 0,
       perPage: props.perPageConfig || 50,
       savedObjects: [],
-      savedObjectCounts: this.savedObjectTypes.reduce((typeToCountMap, type) => {
+      savedObjectCounts: props.allowedTypes.reduce((typeToCountMap, type) => {
         typeToCountMap[type] = 0;
         return typeToCountMap;
-      }, {}),
+      }, {} as Record<string, number>),
       activeQuery: Query.parse(''),
       selectedSavedObjects: [],
       isShowingImportFlyout: false,
@@ -124,21 +157,20 @@ export class ObjectsTable extends Component {
   }
 
   fetchCounts = async () => {
+    const { allowedTypes } = this.props;
     const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
 
-    const filteredTypes = this.savedObjectTypes.filter(
-      type => !visibleTypes || visibleTypes.includes(type)
-    );
+    const filteredTypes = allowedTypes.filter(type => !visibleTypes || visibleTypes.includes(type));
 
     // These are the saved objects visible in the table.
     const filteredSavedObjectCounts = await getSavedObjectCounts(
-      this.props.$http,
+      this.props.http,
       filteredTypes,
       queryText
     );
 
-    const exportAllOptions = [];
-    const exportAllSelectedOptions = {};
+    const exportAllOptions: ExportAllOption[] = [];
+    const exportAllSelectedOptions: Record<string, boolean> = {};
 
     Object.keys(filteredSavedObjectCounts).forEach(id => {
       // Add this type as a bulk-export option.
@@ -147,17 +179,13 @@ export class ObjectsTable extends Component {
         label: `${id} (${filteredSavedObjectCounts[id] || 0})`,
       });
 
-      // Select it by defayult.
+      // Select it by default.
       exportAllSelectedOptions[id] = true;
     });
 
     // Fetch all the saved objects that exist so we can accurately populate the counts within
     // the table filter dropdown.
-    const savedObjectCounts = await getSavedObjectCounts(
-      this.props.$http,
-      this.savedObjectTypes,
-      queryText
-    );
+    const savedObjectCounts = await getSavedObjectCounts(this.props.http, allowedTypes, queryText);
 
     this.setState(state => ({
       ...state,
@@ -178,66 +206,64 @@ export class ObjectsTable extends Component {
 
   debouncedFetch = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
+    const { notifications, http, allowedTypes } = this.props;
     const { queryText, visibleTypes } = parseQuery(query);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
-    const findOptions = {
+    const findOptions: SavedObjectsFindOptions = {
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
       fields: ['id'],
-      type: this.savedObjectTypes.filter(type => !visibleTypes || visibleTypes.includes(type)),
+      type: allowedTypes.filter(type => !visibleTypes || visibleTypes.includes(type)),
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
     }
 
-    let resp;
     try {
-      resp = await findObjects(findOptions);
+      const resp = await findObjects(http, findOptions);
+      if (!this._isMounted) {
+        return;
+      }
+
+      this.setState(({ activeQuery }) => {
+        // ignore results for old requests
+        if (activeQuery.text !== query.text) {
+          return null;
+        }
+
+        return {
+          savedObjects: resp.savedObjects,
+          filteredItemCount: resp.total,
+          isSearching: false,
+        };
+      });
     } catch (error) {
       if (this._isMounted) {
         this.setState({
           isSearching: false,
         });
       }
-      toastNotifications.addDanger({
+      notifications.toasts.addDanger({
         title: i18n.translate(
           'kbn.management.objects.objectsTable.unableFindSavedObjectsNotificationMessage',
           { defaultMessage: 'Unable find saved objects' }
         ),
         text: `${error}`,
       });
-      return;
     }
-
-    if (!this._isMounted) {
-      return;
-    }
-
-    this.setState(({ activeQuery }) => {
-      // ignore results for old requests
-      if (activeQuery.text !== query.text) {
-        return {};
-      }
-
-      return {
-        savedObjects: resp.savedObjects,
-        filteredItemCount: resp.total,
-        isSearching: false,
-      };
-    });
   }, 300);
 
   refreshData = async () => {
     await Promise.all([this.fetchSavedObjects(), this.fetchCounts()]);
   };
 
-  onSelectionChanged = selection => {
+  onSelectionChanged = (selection: SavedObjectWithMetadata[]) => {
     this.setState({ selectedSavedObjects: selection });
   };
 
-  onQueryChange = ({ query }) => {
+  onQueryChange = ({ query }: { query: Query }) => {
     // TODO: Use isSameQuery to compare new query with state.activeQuery to avoid re-fetching the
     // same data we already have.
     this.setState(
@@ -253,7 +279,7 @@ export class ObjectsTable extends Component {
     );
   };
 
-  onTableChange = async table => {
+  onTableChange = async (table: any) => {
     const { index: page, size: perPage } = table.page || {};
 
     this.setState(
@@ -266,7 +292,7 @@ export class ObjectsTable extends Component {
     );
   };
 
-  onShowRelationships = object => {
+  onShowRelationships = (object: SavedObjectWithMetadata) => {
     this.setState({
       isShowingRelationships: true,
       relationshipObject: object,
@@ -280,15 +306,16 @@ export class ObjectsTable extends Component {
     });
   };
 
-  onExport = async includeReferencesDeep => {
+  onExport = async (includeReferencesDeep: boolean) => {
     const { selectedSavedObjects } = this.state;
+    const { notifications, http } = this.props;
     const objectsToExport = selectedSavedObjects.map(obj => ({ id: obj.id, type: obj.type }));
 
     let blob;
     try {
-      blob = await fetchExportObjects(objectsToExport, includeReferencesDeep);
+      blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep);
     } catch (e) {
-      toastNotifications.addDanger({
+      notifications.toasts.addDanger({
         title: i18n.translate('kbn.management.objects.objectsTable.export.dangerNotification', {
           defaultMessage: 'Unable to generate export',
         }),
@@ -304,23 +331,25 @@ export class ObjectsTable extends Component {
 
   onExportAll = async () => {
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
+    const { notifications, http } = this.props;
     const { queryText } = parseQuery(activeQuery);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
         accum.push(id);
       }
       return accum;
-    }, []);
+    }, [] as string[]);
 
     let blob;
     try {
       blob = await fetchExportByTypeAndSearch(
+        http,
         exportTypes,
         queryText ? `${queryText}*` : undefined,
         isIncludeReferencesDeepChecked
       );
     } catch (e) {
-      toastNotifications.addDanger({
+      notifications.toasts.addDanger({
         title: i18n.translate('kbn.management.objects.objectsTable.export.dangerNotification', {
           defaultMessage: 'Unable to generate export',
         }),
@@ -335,9 +364,10 @@ export class ObjectsTable extends Component {
     this.setState({ isShowingExportAllOptionsModal: false });
   };
 
-  showExportSuccessMessage = exportDetails => {
+  showExportSuccessMessage = (exportDetails: SavedObjectsExportResultDetails | undefined) => {
+    const { notifications } = this.props;
     if (exportDetails && exportDetails.missingReferences.length > 0) {
-      toastNotifications.addWarning({
+      notifications.toasts.addWarning({
         title: i18n.translate(
           'kbn.management.objects.objectsTable.export.successWithMissingRefsNotification',
           {
@@ -349,7 +379,7 @@ export class ObjectsTable extends Component {
         ),
       });
     } else {
-      toastNotifications.addSuccess({
+      notifications.toasts.addSuccess({
         title: i18n.translate('kbn.management.objects.objectsTable.export.successNotification', {
           defaultMessage: 'Your file is downloading in the background',
         }),
@@ -412,14 +442,9 @@ export class ObjectsTable extends Component {
     });
   };
 
-  getRelationships = async (type, id) => {
-    return await getRelationships(
-      type,
-      id,
-      this.savedObjectTypes,
-      this.props.$http,
-      this.props.basePath
-    );
+  getRelationships = async (type: string, id: string) => {
+    const { allowedTypes, http } = this.props;
+    return await getRelationships(http, type, id, allowedTypes);
   };
 
   renderFlyout() {
@@ -427,6 +452,7 @@ export class ObjectsTable extends Component {
       return null;
     }
 
+    /* TODO
     return (
       <Flyout
         close={this.hideImportFlyout}
@@ -438,6 +464,7 @@ export class ObjectsTable extends Component {
         confirmModalPromise={this.props.confirmModalPromise}
       />
     );
+     */
   }
 
   renderRelationships() {
@@ -445,6 +472,7 @@ export class ObjectsTable extends Component {
       return null;
     }
 
+    /* TODO
     return (
       <Relationships
         savedObject={this.state.relationshipObject}
@@ -455,6 +483,7 @@ export class ObjectsTable extends Component {
         canGoInApp={this.props.canGoInApp}
       />
     );
+     */
   }
 
   renderDeleteConfirmModal() {
@@ -673,12 +702,13 @@ export class ObjectsTable extends Component {
       isSearching,
       savedObjectCounts,
     } = this.state;
+    const { http, allowedTypes } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
     };
 
-    const filterOptions = this.savedObjectTypes.map(type => ({
+    const filterOptions = allowedTypes.map(type => ({
       value: type,
       name: type,
       view: `${type} (${savedObjectCounts[type] || 0})`,
@@ -698,6 +728,7 @@ export class ObjectsTable extends Component {
         />
         <EuiSpacer size="xs" />
         <Table
+          basePath={http.basePath}
           itemId={'id'}
           selectionConfig={selectionConfig}
           selectedSavedObjects={selectedSavedObjects}
@@ -705,7 +736,7 @@ export class ObjectsTable extends Component {
           onTableChange={this.onTableChange}
           filterOptions={filterOptions}
           onExport={this.onExport}
-          canDelete={this.props.uiCapabilities.savedObjectsManagement.delete}
+          canDelete={this.props.capabilities.savedObjectsManagement.delete as boolean}
           onDelete={this.onDelete}
           goInspectObject={this.props.goInspectObject}
           pageIndex={page}

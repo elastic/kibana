@@ -29,7 +29,7 @@ import { ManagementSetup } from '../../../management/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { StartDependencies } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
-import { SavedObjectsTable } from './saved_objects_table';
+import { SavedObjectsTable } from './objects_table';
 import { SavedObjectEdition } from './object_view';
 import { getAllowedTypes } from './../lib';
 
@@ -166,9 +166,7 @@ const SavedObjectsTablePage = ({
           // TODO: it seems only editable objects are done from without the management page.
           // previously, kbnUrl.change(object.meta.editUrl); was used.
           // using direct access to location.hash seems the only option for now.
-
-          // TODO: remove redirect hack
-          window.location.hash = editUrl.replace('/objects', '/toto');
+          window.location.hash = editUrl;
         }
       }}
       canGoInApp={savedObject => {
