@@ -18,8 +18,6 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-
 import {
   EuiSpacer,
   EuiTitle,
@@ -31,7 +29,17 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const Header = ({ onExportAll, onImport, onRefresh, filteredCount }) => (
+export const Header = ({
+  onExportAll,
+  onImport,
+  onRefresh,
+  filteredCount,
+}: {
+  onExportAll: () => void;
+  onImport: () => void;
+  onRefresh: () => void;
+  filteredCount: number;
+}) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
       <EuiFlexItem grow={false}>
@@ -104,10 +112,3 @@ export const Header = ({ onExportAll, onImport, onRefresh, filteredCount }) => (
     <EuiSpacer size="m" />
   </Fragment>
 );
-
-Header.propTypes = {
-  onExportAll: PropTypes.func.isRequired,
-  onImport: PropTypes.func.isRequired,
-  onRefresh: PropTypes.func.isRequired,
-  filteredCount: PropTypes.number.isRequired,
-};
