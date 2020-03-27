@@ -17,39 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { npSetup, npStart } from 'ui/new_platform';
-import { createSavedSearchesLoader } from '../../../../../plugins/discover/public';
+import { npSetup } from 'ui/new_platform';
 
 const registry = npSetup.plugins.savedObjectsManagement?.serviceRegistry;
 
 export const savedObjectManagementRegistry = registry!;
-
-if (registry) {
-  const services = {
-    savedObjectsClient: npStart.core.savedObjects.client,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
-
-  savedObjectManagementRegistry.register({
-    id: 'savedVisualizations',
-    service: npStart.plugins.visualizations.savedVisualizationsLoader,
-    title: 'visualizations',
-  });
-
-  savedObjectManagementRegistry.register({
-    id: 'savedDashboards',
-    service: npStart.plugins.dashboard.getSavedDashboardLoader(),
-    title: i18n.translate('kbn.dashboard.savedDashboardsTitle', {
-      defaultMessage: 'dashboards',
-    }),
-  });
-
-  savedObjectManagementRegistry.register({
-    id: 'savedSearches',
-    service: createSavedSearchesLoader(services),
-    title: 'searches',
-  });
-}

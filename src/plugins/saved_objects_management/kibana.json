@@ -3,5 +3,6 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["home", "management", "data"]
+  "requiredPlugins": ["home", "management", "data", "dashboard"],
+  "optionalPlugins": ["dashboard", "visualizations"]
 }

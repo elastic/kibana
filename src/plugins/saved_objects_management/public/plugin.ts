@@ -21,7 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ManagementSetup } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
+import { DashboardStart } from '../../dashboard/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
+import { VisualizationsStart } from '../../visualizations/public';
 import {
   SavedObjectsManagementActionRegistry,
   ISavedObjectsManagementActionRegistry,
@@ -29,6 +31,7 @@ import {
   ISavedObjectsManagementServiceRegistry,
 } from './services';
 import { registerManagementSection } from './management_section';
+import { registerServices } from './register_services';
 
 export interface SavedObjectsManagementPluginSetup {
   actionRegistry: ISavedObjectsManagementActionRegistry;
@@ -45,6 +48,8 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   data: DataPublicPluginStart;
+  dashboard?: DashboardStart;
+  visualizations?: VisualizationsStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -82,6 +87,9 @@ export class SavedObjectsManagementPlugin
       serviceRegistry: this.serviceRegistry,
       sections: management.sections,
     });
+
+    // depends on `getStartServices`, should not be awaited
+    registerServices(this.serviceRegistry, core.getStartServices);
 
     return {
       actionRegistry: this.actionRegistry,

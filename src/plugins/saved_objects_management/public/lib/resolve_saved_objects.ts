@@ -19,11 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { OverlayStart } from 'src/core/public';
-import {
-  SavedObject,
-  SavedObjectLoader,
-} from '../../../../../../../../plugins/saved_objects/public';
-import { IndexPatternsContract, IIndexPattern } from '../../../../../../../../plugins/data/public';
+import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
+import { IndexPatternsContract, IIndexPattern } from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
 

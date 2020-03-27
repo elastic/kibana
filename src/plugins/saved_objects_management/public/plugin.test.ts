@@ -20,6 +20,8 @@
 import { coreMock } from '../../../core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { homePluginMock } from '../../home/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { managementPluginMock } from '../../management/public/mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
 
 describe('SavedObjectsManagementPlugin', () => {
@@ -33,8 +35,9 @@ describe('SavedObjectsManagementPlugin', () => {
     it('registers the saved_objects feature to the home plugin', async () => {
       const coreSetup = coreMock.createSetup();
       const homeSetup = homePluginMock.createSetupContract();
+      const managementSetup = managementPluginMock.createSetupContract();
 
-      await plugin.setup(coreSetup, { home: homeSetup });
+      await plugin.setup(coreSetup, { home: homeSetup, management: managementSetup });
 
       expect(homeSetup.featureCatalogue.register).toHaveBeenCalledTimes(1);
       expect(homeSetup.featureCatalogue.register).toHaveBeenCalledWith(

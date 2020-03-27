@@ -62,9 +62,8 @@ function createCoreSetupMock({
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-    getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>(
-      () =>
-        Promise.resolve([createCoreStartMock({ basePath }), pluginStartDeps, pluginStartContract])
+    getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, any, any]>, []>(() =>
+      Promise.resolve([createCoreStartMock({ basePath }), pluginStartDeps, pluginStartContract])
     ),
     http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
