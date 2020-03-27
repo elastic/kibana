@@ -14,7 +14,7 @@ import {
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleStatusAttributes } from '../rules/types';
 
-export interface RuleStatusSavedObjectClient {
+export interface RuleStatusSavedObjectsClient {
   find: (
     options?: Omit<SavedObjectsFindOptions, 'type'>
   ) => Promise<SavedObjectsFindResponse<IRuleStatusAttributes>>;
@@ -26,9 +26,9 @@ export interface RuleStatusSavedObjectClient {
   delete: (id: string) => Promise<{}>;
 }
 
-export const ruleStatusSavedObjectClientFactory = (
+export const ruleStatusSavedObjectsClientFactory = (
   savedObjectsClient: SavedObjectsClientContract
-): RuleStatusSavedObjectClient => ({
+): RuleStatusSavedObjectsClient => ({
   find: options =>
     savedObjectsClient.find<IRuleStatusAttributes>({ ...options, type: ruleStatusSavedObjectType }),
   create: attributes => savedObjectsClient.create(ruleStatusSavedObjectType, attributes),

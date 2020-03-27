@@ -32,6 +32,7 @@ import { getSignalsCount } from '../notifications/get_signals_count';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
+import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 
 export const signalRulesAlertType = ({
   logger,
@@ -66,12 +67,15 @@ export const signalRulesAlertType = ({
         to,
         type,
       } = params;
-      const { savedObjectsClient } = services;
-      const savedObject = await savedObjectsClient.get<RuleAlertAttributes>('alert', alertId);
+      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
       const ruleStatusService = await ruleStatusServiceFactory({
         alertId,
-        savedObjectsClient,
+        ruleStatusClient,
       });
+      const savedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
+        'alert',
+        alertId
+      );
       const {
         actions,
         name,

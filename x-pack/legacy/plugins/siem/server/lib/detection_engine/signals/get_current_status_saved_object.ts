@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsFindResponse, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsFindResponse, SavedObject } from 'src/core/server';
 
 import { IRuleStatusAttributes } from '../rules/types';
-import { ruleStatusSavedObjectClientFactory } from './rule_status_saved_object_client';
+import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
 
 interface CurrentStatusSavedObjectParams {
   alertId: string;
-  savedObjectsClient: SavedObjectsClientContract;
   ruleStatuses: SavedObjectsFindResponse<IRuleStatusAttributes>;
+  ruleStatusClient: RuleStatusSavedObjectsClient;
 }
 
 export const getCurrentStatusSavedObject = async ({
   alertId,
-  savedObjectsClient,
+  ruleStatusClient,
   ruleStatuses,
 }: CurrentStatusSavedObjectParams): Promise<SavedObject<IRuleStatusAttributes>> => {
   const [currentStatus] = ruleStatuses.saved_objects;
@@ -25,9 +25,8 @@ export const getCurrentStatusSavedObject = async ({
     return currentStatus;
   }
 
-  const ruleStatusClient = ruleStatusSavedObjectClientFactory(savedObjectsClient);
   const now = new Date().toISOString();
-  const newStatus = await ruleStatusClient.create({
+  return ruleStatusClient.create({
     alertId,
     statusDate: now,
     status: 'going to run',
@@ -40,6 +39,4 @@ export const getCurrentStatusSavedObject = async ({
     searchAfterTimeDurations: [],
     lastLookBackDate: null,
   });
-
-  return newStatus;
 };

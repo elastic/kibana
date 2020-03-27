@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
-
 import { getRuleStatusSavedObjects } from './get_rule_status_saved_objects';
 import { getCurrentStatusSavedObject } from './get_current_status_saved_object';
 import { IRuleStatusAttributes, RuleStatusString } from '../rules/types';
-import { ruleStatusSavedObjectClientFactory } from './rule_status_saved_object_client';
+import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
 import { assertUnreachable } from '../../../utils/build_query';
 
 // 1st is mutable status, followed by 5 most recent failures
@@ -65,19 +63,18 @@ export const buildRuleStatusAttributes: (
 
 export const ruleStatusServiceFactory = async ({
   alertId,
-  savedObjectsClient,
+  ruleStatusClient,
 }: {
   alertId: string;
-  savedObjectsClient: SavedObjectsClientContract;
+  ruleStatusClient: RuleStatusSavedObjectsClient;
 }): Promise<RuleStatusService> => {
-  const ruleStatusClient = ruleStatusSavedObjectClientFactory(savedObjectsClient);
   const ruleStatuses = await getRuleStatusSavedObjects({
     alertId,
-    savedObjectsClient,
+    ruleStatusClient,
   });
   const currentStatus = await getCurrentStatusSavedObject({
     alertId,
-    savedObjectsClient,
+    ruleStatusClient,
     ruleStatuses,
   });
 

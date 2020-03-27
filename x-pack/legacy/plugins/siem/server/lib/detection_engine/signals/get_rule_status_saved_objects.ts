@@ -4,21 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsFindResponse, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsFindResponse } from 'kibana/server';
 import { IRuleStatusAttributes } from '../rules/types';
 import { MAX_RULE_STATUSES } from './rule_status_service';
-import { ruleStatusSavedObjectClientFactory } from './rule_status_saved_object_client';
+import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
 
 interface GetRuleStatusSavedObject {
   alertId: string;
-  savedObjectsClient: SavedObjectsClientContract;
+  ruleStatusClient: RuleStatusSavedObjectsClient;
 }
 
 export const getRuleStatusSavedObjects = async ({
   alertId,
-  savedObjectsClient,
+  ruleStatusClient,
 }: GetRuleStatusSavedObject): Promise<SavedObjectsFindResponse<IRuleStatusAttributes>> => {
-  const ruleStatusClient = ruleStatusSavedObjectClientFactory(savedObjectsClient);
   return ruleStatusClient.find({
     perPage: MAX_RULE_STATUSES,
     sortField: 'statusDate',
