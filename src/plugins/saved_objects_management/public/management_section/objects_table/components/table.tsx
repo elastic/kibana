@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { npSetup } from 'ui/new_platform';
+import { IBasePath } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
-import PropTypes from 'prop-types';
-
 import {
+  // @ts-ignore
   EuiSearchBar,
   EuiBasicTable,
   EuiButton,
@@ -35,41 +33,47 @@ import {
   EuiSwitch,
   EuiFormRow,
   EuiText,
+  EuiTableFieldDataColumnType,
+  EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { getDefaultTitle, getSavedObjectLabel } from '../../../../lib';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import { SavedObjectWithMetadata } from '../../../types';
 
-export class Table extends PureComponent {
-  static propTypes = {
-    selectedSavedObjects: PropTypes.array.isRequired,
-    selectionConfig: PropTypes.shape({
-      selectable: PropTypes.func,
-      selectableMessage: PropTypes.func,
-      onSelectionChange: PropTypes.func.isRequired,
-    }).isRequired,
-    filterOptions: PropTypes.array.isRequired,
-    canDelete: PropTypes.bool.isRequired,
-    onDelete: PropTypes.func.isRequired,
-    onExport: PropTypes.func.isRequired,
-    goInspectObject: PropTypes.func.isRequired,
-
-    pageIndex: PropTypes.number.isRequired,
-    pageSize: PropTypes.number.isRequired,
-    items: PropTypes.array.isRequired,
-    itemId: PropTypes.oneOfType([
-      PropTypes.string, // the name of the item id property
-      PropTypes.func, // (item) => string
-    ]),
-    totalItemCount: PropTypes.number.isRequired,
-    onQueryChange: PropTypes.func.isRequired,
-    onTableChange: PropTypes.func.isRequired,
-    isSearching: PropTypes.bool.isRequired,
-
-    onShowRelationships: PropTypes.func.isRequired,
+interface TableProps {
+  basePath: IBasePath;
+  selectedSavedObjects: SavedObjectWithMetadata[];
+  selectionConfig: {
+    onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
   };
+  filterOptions: any[]; // TODO
+  canDelete: boolean;
+  onDelete: () => void;
+  onExport: (includeReferencesDeep: boolean) => void;
+  goInspectObject: (obj: SavedObjectWithMetadata) => void;
+  pageIndex: number;
+  pageSize: number;
+  items: SavedObjectWithMetadata[];
+  itemId: string | (() => string);
+  totalItemCount: number;
+  onQueryChange: (query: any) => void; // TODO
+  onTableChange: (table: any) => void; // TODO
+  isSearching: boolean;
+  onShowRelationships: (object: SavedObjectWithMetadata) => void;
+  canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+}
 
-  state = {
+interface TableState {
+  isSearchTextValid: boolean;
+  parseErrorMessage: any; // TODO
+  isExportPopoverOpen: boolean;
+  isIncludeReferencesDeepChecked: boolean;
+  activeAction: any; // TODO
+}
+
+export class Table extends PureComponent<TableProps, TableState> {
+  state: TableState = {
     isSearchTextValid: true,
     parseErrorMessage: null,
     isExportPopoverOpen: false,
@@ -77,12 +81,12 @@ export class Table extends PureComponent {
     activeAction: null,
   };
 
-  constructor(props) {
+  constructor(props: TableProps) {
     super(props);
-    this.extraActions = npSetup.plugins.savedObjectsManagement.actionRegistry.getAll();
+    // this.extraActions = npSetup.plugins.savedObjectsManagement.actionRegistry.getAll(); TODO
   }
 
-  onChange = ({ query, error }) => {
+  onChange = ({ query, error }: any) => {
     if (error) {
       this.setState({
         isSearchTextValid: false,
@@ -136,12 +140,13 @@ export class Table extends PureComponent {
       onTableChange,
       goInspectObject,
       onShowRelationships,
+      basePath,
     } = this.props;
 
     const pagination = {
-      pageIndex: pageIndex,
-      pageSize: pageSize,
-      totalItemCount: totalItemCount,
+      pageIndex,
+      pageSize,
+      totalItemCount,
       pageSizeOptions: [5, 10, 20, 50],
     };
 
@@ -179,7 +184,7 @@ export class Table extends PureComponent {
         ),
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
-        render: (type, object) => {
+        render: (type: string, object: SavedObjectWithMetadata) => {
           return (
             <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
               <EuiIcon
@@ -191,7 +196,7 @@ export class Table extends PureComponent {
             </EuiToolTip>
           );
         },
-      },
+      } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       {
         field: 'meta.title',
         name: i18n.translate('kbn.management.objects.objectsTable.table.columnTitleName', {
@@ -204,17 +209,17 @@ export class Table extends PureComponent {
         dataType: 'string',
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowTitle',
-        render: (title, object) => {
-          const { path } = object.meta.inAppUrl || {};
+        render: (title: string, object: SavedObjectWithMetadata) => {
+          const { path = '' } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
           if (!canGoInApp) {
             return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
           }
           return (
-            <EuiLink href={chrome.addBasePath(path)}>{title || getDefaultTitle(object)}</EuiLink>
+            <EuiLink href={basePath.prepend(path)}>{title || getDefaultTitle(object)}</EuiLink>
           );
         },
-      },
+      } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       {
         name: i18n.translate('kbn.management.objects.objectsTable.table.columnActionsName', {
           defaultMessage: 'Actions',
@@ -252,7 +257,7 @@ export class Table extends PureComponent {
             onClick: object => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
-          ...this.extraActions.map(action => {
+          /* ...this.extraActions.map(action => {
             return {
               ...action.euiAction,
               'data-test-subj': `savedObjectsTableAction-${action.id}`,
@@ -270,9 +275,9 @@ export class Table extends PureComponent {
                 action.euiAction.onClick(object);
               },
             };
-          }),
+          }), */
         ],
-      },
+      } as EuiTableActionsColumnType<SavedObjectWithMetadata>,
     ];
 
     let queryParseError;
@@ -300,14 +305,14 @@ export class Table extends PureComponent {
       </EuiButton>
     );
 
-    const activeActionContents = this.state.activeAction ? this.state.activeAction.render() : null;
+    const activeActionContents = this.state.activeAction?.render() ?? null;
 
     return (
       <Fragment>
         {activeActionContents}
         <EuiSearchBar
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
-          filters={filters}
+          filters={filters as any}
           onChange={this.onChange}
           toolsRight={[
             <EuiButton
@@ -374,7 +379,7 @@ export class Table extends PureComponent {
             loading={isSearching}
             itemId={itemId}
             items={items}
-            columns={columns}
+            columns={columns as any}
             pagination={pagination}
             selection={selection}
             onChange={onTableChange}

@@ -171,6 +171,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
       items={
         Array [
           Object {
+            "attributes": Object {},
             "id": "1",
             "meta": Object {
               "editUrl": "#/management/kibana/index_patterns/1",
@@ -181,6 +182,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               },
               "title": "MyIndexPattern*",
             },
+            "references": Array [],
             "type": "index-pattern",
           },
         ]
@@ -384,6 +386,7 @@ exports[`Table should render normally 1`] = `
       items={
         Array [
           Object {
+            "attributes": Object {},
             "id": "1",
             "meta": Object {
               "editUrl": "#/management/kibana/index_patterns/1",
@@ -394,6 +397,7 @@ exports[`Table should render normally 1`] = `
               },
               "title": "MyIndexPattern*",
             },
+            "references": Array [],
             "type": "index-pattern",
           },
         ]

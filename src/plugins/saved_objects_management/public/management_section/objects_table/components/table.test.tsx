@@ -19,27 +19,21 @@
 
 import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
+// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
+// @ts-ignore
 import { keyCodes } from '@elastic/eui/lib/services';
-import { npSetup as mockNpSetup } from '../../../../../../../../../../../ui/public/new_platform/__mocks__';
-
-jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => '',
-}));
-
-jest.mock('ui/new_platform', () => ({
-  npSetup: mockNpSetup,
-}));
-
-import { Table } from '../table';
+import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { Table } from './table';
 
 const defaultProps = {
+  basePath: httpServiceMock.createSetupContract().basePath,
   selectedSavedObjects: [
     {
       id: '1',
       type: 'index-pattern',
+      attributes: {},
+      references: [],
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
@@ -58,13 +52,15 @@ const defaultProps = {
   onDelete: () => {},
   onExport: () => {},
   goInspectObject: () => {},
-  canGoInApp: () => {},
+  canGoInApp: () => true,
   pageIndex: 1,
   pageSize: 2,
   items: [
     {
       id: '1',
       type: 'index-pattern',
+      attributes: {},
+      references: [],
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
@@ -120,7 +116,7 @@ describe('Table', () => {
       { type: 'visualization' },
       { type: 'search' },
       { type: 'index-pattern' },
-    ];
+    ] as any;
     const customizedProps = { ...defaultProps, selectedSavedObjects, canDelete: false };
     const component = shallowWithI18nProvider(<Table {...customizedProps} />);
 
