@@ -175,7 +175,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(version).to.not.be.empty();
       });
 
-      it.skip('Update a timeline with a new title', async () => {
+      it('Update a timeline with a new title', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(client, titleToSaved);
         const { savedObjectId, version } = response.data && response.data.persistTimeline.timeline;
