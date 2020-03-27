@@ -28,11 +28,11 @@ export interface RuleStatusService {
   error: (message: string, attributes?: Attributes) => Promise<void>;
 }
 
-const buildRuleStatusAttributes: (
+export const buildRuleStatusAttributes: (
   status: RuleStatusString,
   message?: string,
   attributes?: Attributes
-) => Promise<Partial<IRuleStatusAttributes>> = async (status, message, attributes = {}) => {
+) => Partial<IRuleStatusAttributes> = (status, message, attributes = {}) => {
   const now = new Date().toISOString();
   const baseAttributes: Partial<IRuleStatusAttributes> = {
     ...attributes,
