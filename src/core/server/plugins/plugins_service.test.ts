@@ -560,7 +560,7 @@ describe('PluginsService', () => {
       it('does initialize if plugins.initialize is true', async () => {
         config$.next({ plugins: { initialize: true } });
         await pluginsService.discover();
-        const { initialized } = await pluginsService.setup({} as any);
+        const { initialized } = await pluginsService.setup(setupDeps);
         expect(mockPluginSystem.setupPlugins).toHaveBeenCalled();
         expect(initialized).toBe(true);
       });
@@ -568,7 +568,7 @@ describe('PluginsService', () => {
       it('does not initialize if plugins.initialize is false', async () => {
         config$.next({ plugins: { initialize: false } });
         await pluginsService.discover();
-        const { initialized } = await pluginsService.setup({} as any);
+        const { initialized } = await pluginsService.setup(setupDeps);
         expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
         expect(initialized).toBe(false);
       });
