@@ -177,13 +177,18 @@ export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 /**
  * Core services exposed to the `Plugin` setup lifecycle
  *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
+ *
  * @public
  *
  * @internalRemarks We document the properties with \@link tags to improve
  * navigation in the generated docs until there's a fix for
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
   /**
@@ -209,7 +214,7 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
   /** {@link StartServicesAccessor} */
-  getStartServices: StartServicesAccessor<TPluginsStart>;
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
 
 /**
@@ -219,9 +224,10 @@ export interface CoreSetup<TPluginsStart extends object = object> {
  *
  * @public
  */
-export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<
-  [CoreStart, TPluginsStart]
->;
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -274,7 +280,7 @@ export interface CoreStart {
  * @public
  * @deprecated
  */
-export interface LegacyCoreSetup extends CoreSetup<any> {
+export interface LegacyCoreSetup extends CoreSetup<any, any> {
   /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
