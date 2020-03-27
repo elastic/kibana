@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { CoreSetup, PluginInitializer } from '../../../../../../src/core/server';
 import { deepFreeze } from '../../../../../../src/core/utils';
 import {
@@ -49,7 +48,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
     core.http.createRouter().get(
       {
         path: '/api/saved_objects/get-decrypted-as-internal-user/{id}',
-        validate: { params: schema.object({ id: schema.string() }) },
+        validate: { params: value => ({ value }) },
       },
       async (context, request, response) => {
         const [, { encryptedSavedObjects }] = await core.getStartServices();

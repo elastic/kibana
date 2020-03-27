@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../../src/core/server';
 import { createTokens } from '../../oidc_tools';
 
@@ -14,7 +13,7 @@ export function initRoutes(router: IRouter) {
   router.post(
     {
       path: '/api/oidc_provider/setup',
-      validate: { body: schema.object({ nonce: schema.string() }) },
+      validate: { body: value => ({ value }) },
       options: { authRequired: false },
     },
     (context, request, response) => {
@@ -26,13 +25,7 @@ export function initRoutes(router: IRouter) {
   router.post(
     {
       path: '/api/oidc_provider/token_endpoint',
-      validate: {
-        body: schema.object({
-          code: schema.string(),
-          grant_type: schema.maybe(schema.string()),
-          redirect_uri: schema.maybe(schema.string()),
-        }),
-      },
+      validate: { body: value => ({ value }) },
       // Token endpoint needs authentication (with the client credentials) but we don't attempt to
       // validate this OIDC behavior here
       options: { authRequired: false, xsrfRequired: false },
