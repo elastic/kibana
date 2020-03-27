@@ -26,7 +26,10 @@
 
 export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
-export { VisSavedObject, VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/';
+export {
+  VisSavedObject,
+  VISUALIZE_EMBEDDABLE_TYPE,
+} from '../../../../../plugins/visualizations/public/';
 export {
   configureAppAngularModule,
   migrateLegacyQuery,

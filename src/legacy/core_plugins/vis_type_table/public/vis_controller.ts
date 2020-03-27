@@ -20,11 +20,10 @@
 import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
 
-import { VisParams } from '../../visualizations/public';
+import { VisParams, ExprVis } from '../../../../plugins/visualizations/public';
 import { npStart } from './legacy_imports';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
-import { ExprVis } from '../../visualizations/public/np_ready/public/expressions/vis';
 
 const innerAngularName = 'kibana/table_vis';
 
