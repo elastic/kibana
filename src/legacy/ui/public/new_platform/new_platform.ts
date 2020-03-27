@@ -57,6 +57,10 @@ import {
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
 import {
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+} from '../../../../plugins/saved_objects_management/public';
+import {
   VisualizationsSetup,
   VisualizationsStart,
 } from '../../../../plugins/visualizations/public';
@@ -81,6 +85,7 @@ export interface PluginsSetup {
   discover: DiscoverSetup;
   visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
+  savedObjectsManagement: SavedObjectsManagementPluginSetup;
 }
 
 export interface PluginsStart {
@@ -101,6 +106,7 @@ export interface PluginsStart {
   visualizations: VisualizationsStart;
   telemetry?: TelemetryPluginStart;
   dashboard: DashboardStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export const npSetup = {

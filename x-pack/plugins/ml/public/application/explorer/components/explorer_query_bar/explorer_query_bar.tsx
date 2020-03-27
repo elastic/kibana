@@ -5,6 +5,8 @@
  */
 
 import React, { FC, useState, useEffect } from 'react';
+import { EuiCode, EuiInputPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   Query,
   esKuery,
@@ -12,10 +14,10 @@ import {
   QueryStringInput,
 } from '../../../../../../../../src/plugins/data/public';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
-import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE } from '../../explorer_constants';
+import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
 import { explorerService } from '../../explorer_dashboard_service';
 
-export const DEFAULT_QUERY_LANG = QUERY_LANGUAGE_KUERY;
+export const DEFAULT_QUERY_LANG = SEARCH_QUERY_LANGUAGE.KUERY;
 
 export function getKqlQueryValues({
   inputString,
@@ -25,11 +27,11 @@ export function getKqlQueryValues({
   inputString: string | { [key: string]: any };
   queryLanguage: string;
   indexPattern: IIndexPattern;
-}) {
+}): { clearSettings: boolean; settings: any } {
   let influencersFilterQuery: any = {};
-  const ast = esKuery.fromKueryExpression(inputString);
-  const isAndOperator = ast.function === 'and';
   const filteredFields: string[] = [];
+  const ast = esKuery.fromKueryExpression(inputString);
+  const isAndOperator = ast && ast.function === 'and';
   // if ast.type == 'function' then layout of ast.arguments:
   // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
   if (ast && Array.isArray(ast.arguments)) {
@@ -45,12 +47,12 @@ export function getKqlQueryValues({
       }
     });
   }
-  if (queryLanguage === QUERY_LANGUAGE_KUERY) {
+  if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
     influencersFilterQuery = esKuery.toElasticsearchQuery(
       esKuery.fromKueryExpression(inputString),
       indexPattern
     );
-  } else if (queryLanguage === QUERY_LANGUAGE_LUCENE) {
+  } else if (queryLanguage === SEARCH_QUERY_LANGUAGE.LUCENE) {
     influencersFilterQuery = esQuery.luceneStringToDsl(inputString);
   }
 
@@ -78,7 +80,7 @@ function getInitSearchInputState({
 }) {
   if (queryString !== undefined && filterActive === true) {
     return {
-      language: QUERY_LANGUAGE_KUERY,
+      language: SEARCH_QUERY_LANGUAGE.KUERY,
       query: queryString,
     };
   } else {
@@ -110,6 +112,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   const [searchInput, setSearchInput] = useState<Query>(
     getInitSearchInputState({ filterActive, queryString })
   );
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
   useEffect(() => {
     if (filterIconTriggeredQuery !== undefined) {
@@ -127,30 +130,50 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
     setSearchInput(query);
   };
   const applyInfluencersFilterQuery = (query: Query) => {
-    const { clearSettings, settings } = getKqlQueryValues({
-      inputString: query.query,
-      queryLanguage: query.language,
-      indexPattern,
-    });
+    try {
+      const { clearSettings, settings } = getKqlQueryValues({
+        inputString: query.query,
+        queryLanguage: query.language,
+        indexPattern,
+      });
 
-    if (clearSettings === true) {
-      explorerService.clearInfluencerFilterSettings();
-    } else {
-      explorerService.setInfluencerFilterSettings(settings);
+      if (clearSettings === true) {
+        explorerService.clearInfluencerFilterSettings();
+      } else {
+        explorerService.setInfluencerFilterSettings(settings);
+      }
+    } catch (e) {
+      console.log('Invalid query syntax in search bar', e); // eslint-disable-line no-console
+      setErrorMessage({ query: query.query as string, message: e.message });
     }
   };
 
   return (
-    <QueryStringInput
-      bubbleSubmitEvent
-      query={searchInput}
-      indexPatterns={[indexPattern]}
-      onChange={searchChangeHandler}
-      onSubmit={applyInfluencersFilterQuery}
-      placeholder={filterPlaceHolder}
-      disableAutoFocus
-      dataTestSubj="explorerQueryInput"
-      languageSwitcherPopoverAnchorPosition="rightDown"
-    />
+    <EuiInputPopover
+      style={{ maxWidth: '100%' }}
+      closePopover={() => setErrorMessage(undefined)}
+      input={
+        <QueryStringInput
+          bubbleSubmitEvent
+          query={searchInput}
+          indexPatterns={[indexPattern]}
+          onChange={searchChangeHandler}
+          onSubmit={applyInfluencersFilterQuery}
+          placeholder={filterPlaceHolder}
+          disableAutoFocus
+          dataTestSubj="explorerQueryInput"
+          languageSwitcherPopoverAnchorPosition="rightDown"
+        />
+      }
+      isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+    >
+      <EuiCode>
+        {i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessageQueryBar', {
+          defaultMessage: 'Invalid query',
+        })}
+        {': '}
+        {errorMessage?.message.split('\n')[0]}
+      </EuiCode>
+    </EuiInputPopover>
   );
 };

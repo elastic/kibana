@@ -17,28 +17,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+import { Filter } from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
-import {
-  FilterKeyValue,
-  convertFiltersToObject,
-  replaceTemplateVariables
-} from './helper';
+import { replaceTemplateVariables, convertFiltersToQuery } from './helper';
 
 interface Props {
   label: string;
   url: string;
-  filters: FilterKeyValue[];
+  filters: Filter[];
 }
 
 const fetchTransaction = debounce(
-  async (
-    filters: FilterKeyValue[],
-    callback: (transaction: Transaction) => void
-  ) => {
+  async (filters: Filter[], callback: (transaction: Transaction) => void) => {
     const transaction = await callApmApi({
       pathname: '/api/apm/settings/custom_links/transaction',
-      params: { query: convertFiltersToObject(filters) }
+      params: { query: convertFiltersToQuery(filters) }
     });
     callback(transaction);
   },
@@ -51,7 +45,20 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
   const [transaction, setTransaction] = useState<Transaction | undefined>();
 
   useEffect(() => {
-    fetchTransaction(filters, setTransaction);
+    /*
+      React throwns "Can't perform a React state update on an unmounted component"
+      It happens when the Custom Link flyout is closed before the return of the api request.
+      To avoid such case, sets the isUnmounted to true when component unmount and check its value before update the transaction.
+    */
+    let isUnmounted = false;
+    fetchTransaction(filters, (_transaction: Transaction) => {
+      if (!isUnmounted) {
+        setTransaction(_transaction);
+      }
+    });
+    return () => {
+      isUnmounted = true;
+    };
   }, [filters]);
 
   const { formattedUrl, error } = replaceTemplateVariables(url, transaction);

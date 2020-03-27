@@ -83,6 +83,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private autoRefreshFetchSubscription: Subscription;
+  private abortController?: AbortController;
 
   constructor(
     timefilter: TimefilterContract,
@@ -319,9 +320,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       },
       uiState: this.vis.uiState,
     };
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.abortController = new AbortController();
     this.expression = await buildPipeline(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
+      abortSignal: this.abortController!.signal,
     });
 
     if (this.handler) {

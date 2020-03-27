@@ -30,6 +30,7 @@ import { usageCollectionPluginMock } from '../../../../../plugins/usage_collecti
 import { kibanaLegacyPluginMock } from '../../../../../plugins/kibana_legacy/public/mocks';
 import { chartPluginMock } from '../../../../../plugins/charts/public/mocks';
 import { advancedSettingsMock } from '../../../../../plugins/advanced_settings/public/mocks';
+import { savedObjectsManagementPluginMock } from '../../../../../plugins/saved_objects_management/public/mocks';
 import { visualizationsPluginMock } from '../../../../../plugins/visualizations/public/mocks';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
@@ -46,6 +47,7 @@ export const pluginsMock = {
     advancedSettings: advancedSettingsMock.createSetupContract(),
     visualizations: visualizationsPluginMock.createSetupContract(),
     kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+    savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
@@ -59,6 +61,7 @@ export const pluginsMock = {
     advancedSettings: advancedSettingsMock.createStartContract(),
     visualizations: visualizationsPluginMock.createStartContract(),
     kibanaLegacy: kibanaLegacyPluginMock.createStartContract(),
+    savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
   }),
 };
 
