@@ -21,3 +21,4 @@ export { VisualizeEmbeddable, VisualizeInput } from './visualize_embeddable';
 export { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
 export { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 export { VIS_EVENT_TO_TRIGGER } from './events';
+export { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';

@@ -157,6 +157,7 @@ export class VisualizePlugin implements Plugin {
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
           DefaultVisualizationEditor: DefaultEditorController,
+          createVisEmbeddableFromObject: visualizations.__LEGACY.createVisEmbeddableFromObject,
         };
         setServices(deps);
 

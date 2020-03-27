@@ -19,7 +19,7 @@
 
 import { Vis } from '../types';
 import { VisualizeInput, VisualizeEmbeddable } from './visualize_embeddable';
-import { IContainer, ErrorEmbeddable } from '../../../../../../../plugins/embeddable/public';
+import { IContainer, ErrorEmbeddable } from '../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
   getSavedVisualizationsLoader,

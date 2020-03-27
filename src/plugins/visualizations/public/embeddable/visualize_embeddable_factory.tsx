@@ -25,10 +25,11 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
-} from '../../../../src/plugins/embeddable/public';
+} from '../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { Vis } from '../vis';
 import {
   getCapabilities,
   getTypes,
@@ -37,7 +38,6 @@ import {
 } from '../services';
 import { showNewVisModal } from '../wizard';
 import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
-import { Vis } from '../types';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
