@@ -33,8 +33,11 @@ import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { IConfigService } from '../config';
 import { pick } from '../../utils';
 
-/** @public */
+/** @internal */
 export interface PluginsServiceSetup {
+  /** Indicates whether or not plugins were initialized. */
+  initialized: boolean;
+  /** Setup contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
   uiPlugins: {
     /**
@@ -55,8 +58,9 @@ export interface PluginsServiceSetup {
   };
 }
 
-/** @public */
+/** @internal */
 export interface PluginsServiceStart {
+  /** Start contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
 }
 
@@ -103,15 +107,17 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     const config = await this.config$.pipe(first()).toPromise();
 
     let contracts = new Map<PluginName, unknown>();
-    if (!config.initialize || this.coreContext.env.isDevClusterMaster) {
-      this.log.info('Plugin initialization disabled.');
-    } else {
+    const initialize = config.initialize && !this.coreContext.env.isDevClusterMaster;
+    if (initialize) {
       contracts = await this.pluginsSystem.setupPlugins(deps);
       this.registerPluginStaticDirs(deps);
+    } else {
+      this.log.info('Plugin initialization disabled.');
     }
 
     const uiPlugins = this.pluginsSystem.uiPlugins();
     return {
+      initialized: initialize,
       contracts,
       uiPlugins: {
         internal: this.uiPluginInternalInfo,

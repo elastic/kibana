@@ -87,6 +87,7 @@ beforeEach(() => {
       },
       savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       plugins: {
+        initialized: true,
         contracts: new Map([['plugin-id', 'plugin-value']]),
         uiPlugins: {
           public: new Map([['plugin-id', {} as DiscoveredPlugin]]),

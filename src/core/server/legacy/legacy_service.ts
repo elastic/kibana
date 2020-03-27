@@ -312,7 +312,7 @@ export class LegacyService implements CoreService {
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
-      getStartServices: () => Promise.resolve([coreStart, startDeps.plugins]),
+      getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires

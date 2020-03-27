@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import * as i18n from '../case_view/translations';
 
-import { Case, CaseUserActions, Comment } from '../../../../containers/case/types';
+import { Case, CaseUserActions } from '../../../../containers/case/types';
 import { useUpdateComment } from '../../../../containers/case/use_update_comment';
 import { useCurrentUser } from '../../../../lib/kibana';
 import { AddComment } from '../add_comment';
@@ -28,6 +28,7 @@ export interface UserActionTreeProps {
   isLoadingUserActions: boolean;
   lastIndexPushToService: number;
   onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
+  updateCase: (newCase: Case) => void;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -47,14 +48,13 @@ export const UserActionTree = React.memo(
     isLoadingUserActions,
     lastIndexPushToService,
     onUpdateField,
+    updateCase,
   }: UserActionTreeProps) => {
     const { commentId } = useParams();
     const handlerTimeoutId = useRef(0);
     const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
-    const { comments, isLoadingIds, updateComment, addPostedComment } = useUpdateComment(
-      caseData.comments
-    );
+    const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
     const [insertQuote, setInsertQuote] = useState<string | null>(null);
@@ -73,14 +73,16 @@ export const UserActionTree = React.memo(
     const handleSaveComment = useCallback(
       (id: string, content: string) => {
         handleManageMarkdownEditId(id);
-        updateComment({
+        patchComment({
           caseId: caseData.id,
           commentId: id,
           commentUpdate: content,
           fetchUserActions,
+          version: caseData.version,
+          updateCase,
         });
       },
-      [handleManageMarkdownEditId, updateComment]
+      [caseData, handleManageMarkdownEditId, patchComment, updateCase]
     );
 
     const handleOutlineComment = useCallback(
@@ -117,11 +119,11 @@ export const UserActionTree = React.memo(
     );
 
     const handleUpdate = useCallback(
-      (comment: Comment) => {
-        addPostedComment(comment);
+      (newCase: Case) => {
+        updateCase(newCase);
         fetchUserActions();
       },
-      [addPostedComment, fetchUserActions]
+      [fetchUserActions, updateCase]
     );
 
     const MarkdownDescription = useMemo(
@@ -181,7 +183,7 @@ export const UserActionTree = React.memo(
 
         {caseUserActions.map((action, index) => {
           if (action.commentId != null && action.action === 'create') {
-            const comment = comments.find(c => c.id === action.commentId);
+            const comment = caseData.comments.find(c => c.id === action.commentId);
             if (comment != null) {
               return (
                 <UserActionItem
