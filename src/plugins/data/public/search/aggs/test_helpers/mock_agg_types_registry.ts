@@ -24,6 +24,7 @@ import { getAggTypes } from '../agg_types';
 import { BucketAggType } from '../buckets/_bucket_agg_type';
 import { MetricAggType } from '../metrics/metric_agg_type';
 import { queryServiceMock } from '../../../query/mocks';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 
 /**
  * Testing utility which creates a new instance of AggTypesRegistry,
@@ -57,6 +58,9 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
       uiSettings: core.uiSettings,
       notifications: core.notifications,
       query: queryServiceMock.createSetupContract(),
+      getInternalStartServices: () => ({
+        fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      }),
     });
 
     aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));

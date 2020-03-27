@@ -71,3 +71,11 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
 }
+
+/** @internal **/
+export interface InternalStartServices {
+  fieldFormats: FieldFormatsStart;
+}
+
+/** @internal **/
+export type getInternalStartServicesFn = () => InternalStartServices;

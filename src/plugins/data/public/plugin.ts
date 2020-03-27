@@ -30,6 +30,7 @@ import {
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
+  getInternalStartServicesFn,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
@@ -47,6 +48,7 @@ import {
   setQueryService,
   setSearchService,
   setUiSettings,
+  getFieldFormats,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { esaggs } from './search/expressions';
@@ -100,6 +102,10 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     expressions.registerFunction(esaggs);
 
+    const getInternalStartServices: getInternalStartServicesFn = () => ({
+      fieldFormats: getFieldFormats(),
+    });
+
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
@@ -122,6 +128,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     return {
       autocomplete: this.autocomplete.setup(core),
       search: this.searchService.setup(core, {
+        getInternalStartServices,
         packageInfo: this.packageInfo,
         query: queryService,
       }),

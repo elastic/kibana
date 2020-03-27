@@ -23,6 +23,7 @@ import { getAggTypes } from './index';
 import { isBucketAggType } from './buckets/_bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';
 import { QueryStart } from '../../query';
+import { FieldFormatsStart } from '../../field_formats';
 
 describe('AggTypesComponent', () => {
   const core = coreMock.createSetup();
@@ -30,6 +31,9 @@ describe('AggTypesComponent', () => {
     uiSettings: core.uiSettings,
     notifications: core.notifications,
     query: {} as QueryStart,
+    getInternalStartServices: () => ({
+      fieldFormats: {} as FieldFormatsStart,
+    }),
   });
 
   const { buckets, metrics } = aggTypes;

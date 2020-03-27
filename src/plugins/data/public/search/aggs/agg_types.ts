@@ -53,13 +53,21 @@ import { bucketAvgMetricAgg } from './metrics/bucket_avg';
 import { bucketMinMetricAgg } from './metrics/bucket_min';
 import { bucketMaxMetricAgg } from './metrics/bucket_max';
 
+import { getInternalStartServicesFn } from '../../types';
+
 export interface AggTypesDependencies {
   notifications: NotificationsSetup;
   uiSettings: IUiSettingsClient;
   query: QuerySetup;
+  getInternalStartServices: getInternalStartServicesFn;
 }
 
-export const getAggTypes = ({ notifications, uiSettings, query }: AggTypesDependencies) => ({
+export const getAggTypes = ({
+  notifications,
+  uiSettings,
+  query,
+  getInternalStartServices,
+}: AggTypesDependencies) => ({
   metrics: [
     countMetricAgg,
     avgMetricAgg,
@@ -87,7 +95,7 @@ export const getAggTypes = ({ notifications, uiSettings, query }: AggTypesDepend
     getDateHistogramBucketAgg({ uiSettings, query }),
     getHistogramBucketAgg({ uiSettings, notifications }),
     rangeBucketAgg,
-    getDateRangeBucketAgg({ uiSettings }),
+    getDateRangeBucketAgg({ uiSettings, getInternalStartServices }),
     ipRangeBucketAgg,
     termsBucketAgg,
     filterBucketAgg,

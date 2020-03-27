@@ -26,6 +26,7 @@ import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
 import { QuerySetup } from '../query/query_service';
+import { getInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
@@ -44,6 +45,7 @@ import {
 interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
   query: QuerySetup;
+  getInternalStartServices: getInternalStartServicesFn;
 }
 
 /**
@@ -81,7 +83,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup,
-    { packageInfo, query }: SearchServiceSetupDependencies
+    { packageInfo, query, getInternalStartServices }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
     this.registerSearchStrategyProvider(SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider);
@@ -92,6 +94,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       query,
       uiSettings: core.uiSettings,
       notifications: core.notifications,
+      getInternalStartServices,
     });
 
     aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));

@@ -28,7 +28,7 @@ import { createFilterDateRange } from './create_filter/date_range';
 import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
 
 import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
-import { getFieldFormats } from '../../../../public/services';
+import { getInternalStartServicesFn } from '../../../types';
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
@@ -36,9 +36,13 @@ const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle',
 
 export interface DateRangeBucketAggDependencies {
   uiSettings: IUiSettingsClient;
+  getInternalStartServices: getInternalStartServicesFn;
 }
 
-export const getDateRangeBucketAgg = ({ uiSettings }: DateRangeBucketAggDependencies) =>
+export const getDateRangeBucketAgg = ({
+  uiSettings,
+  getInternalStartServices,
+}: DateRangeBucketAggDependencies) =>
   new BucketAggType({
     name: BUCKET_TYPES.DATE_RANGE,
     title: dateRangeTitle,
@@ -47,11 +51,11 @@ export const getDateRangeBucketAgg = ({ uiSettings }: DateRangeBucketAggDependen
       return { from, to };
     },
     getFormat(agg) {
-      const fieldFormatsService = getFieldFormats();
+      const { fieldFormats } = getInternalStartServices();
 
       const formatter = agg.fieldOwnFormatter(
         TEXT_CONTEXT_TYPE,
-        fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.DATE)
+        fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
       );
       const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
         return convertDateRangeToString(range, formatter);
