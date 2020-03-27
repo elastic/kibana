@@ -43,6 +43,7 @@
         - [Core services](#core-services-1)
         - [Plugin services](#plugin-services)
       - [UI Exports](#ui-exports)
+      - [Plugin Spec](#plugin-spec)
   - [How to](#how-to)
     - [Configure plugin](#configure-plugin)
       - [Handle plugin configuration deprecations](#handle-plugin-configuration-deprecations)
@@ -1264,40 +1265,19 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `visTypes`                   | `plugins.visualizations.types`                                                                                                                          |                                                                                                                                       |
 | `visualize`                  |                                                                                                                           |                                                                                                                                       |
 
-Examples:
-
-- **uiSettingDefaults**
-
-Before:
-
-```js
-uiExports: {
-  uiSettingDefaults: {
-    'my-plugin:my-setting': {
-      name: 'just-work',
-      value: true,
-      description: 'make it work',
-      category: ['my-category'],
-    },
-  }
-}
-```
-
-After:
-
-```ts
-// src/plugins/my-plugin/server/plugin.ts
-setup(core: CoreSetup){
-  core.uiSettings.register({
-    'my-plugin:my-setting': {
-      name: 'just-work',
-      value: true,
-      description: 'make it work',
-      category: ['my-category'],
-    },
-  })
-}
-```
+#### Plugin Spec
+| Legacy Platform               | New Platform                                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `id`                          | [`manifest.id`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)                  |
+| `require`                     | [`manifest.requiredPlugins`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)     |
+| `version`                     | [`manifest.version`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)             |
+| `kibanaVersion`               | [`manifest.kibanaVersion`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)       |
+| `configPrefix`                | [`manifest.configPath`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)          |
+| `config`                      | [export config](#configure-plugin)                                                                          |
+| `deprecations`                | [export config](#handle-plugin-configuration-deprecations)                                                  |
+| `uiExports`                   | `N/A`. Use platform & plugin public contracts                                                               |
+| `publicDir`                   | `N/A`. Platform serves static assets from `/public/assets` folder under `/plugins/{id}/assets/{path*}` URL. |
+| `preInit`, `init`, `postInit` | `N/A`. Use NP [lifecycle events](#services)                                                                 |
 
 ## How to
 
