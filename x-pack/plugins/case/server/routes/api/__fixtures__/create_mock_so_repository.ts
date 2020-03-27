@@ -29,7 +29,7 @@ export const createMockSavedObjectsRepository = ({
             if (!result.length) {
               throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
             }
-            return result[0];
+            return result;
           }
           const result = caseSavedObject.filter(s => s.id === id);
           if (!result.length) {
@@ -100,8 +100,9 @@ export const createMockSavedObjectsRepository = ({
       if (attributes.description === 'Throw an error' || attributes.comment === 'Throw an error') {
         throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
       }
+
       if (type === CASE_COMMENT_SAVED_OBJECT) {
-        return {
+        const newCommentObj = {
           type,
           id: 'mock-comment',
           attributes,
@@ -109,6 +110,8 @@ export const createMockSavedObjectsRepository = ({
           updated_at: '2019-12-02T22:48:08.327Z',
           version: 'WzksMV0=',
         };
+        caseCommentSavedObject = [...caseCommentSavedObject, newCommentObj];
+        return newCommentObj;
       }
       return {
         type,
@@ -124,6 +127,16 @@ export const createMockSavedObjectsRepository = ({
         if (!caseCommentSavedObject.find(s => s.id === id)) {
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
         }
+        caseCommentSavedObject = [
+          ...caseCommentSavedObject,
+          {
+            id,
+            type,
+            updated_at: '2019-11-22T22:50:55.191Z',
+            version: 'WzE3LDFd',
+            attributes,
+          },
+        ];
       } else if (type === CASE_SAVED_OBJECT) {
         if (!caseSavedObject.find(s => s.id === id)) {
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);

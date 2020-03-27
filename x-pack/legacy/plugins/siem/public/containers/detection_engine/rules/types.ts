@@ -194,7 +194,7 @@ export interface BasicFetchProps {
   signal: AbortSignal;
 }
 
-export interface ImportRulesProps {
+export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
   signal: AbortSignal;
@@ -208,7 +208,7 @@ export interface ImportRulesResponseError {
   };
 }
 
-export interface ImportRulesResponse {
+export interface ImportDataResponse {
   success: boolean;
   success_count: number;
   errors: ImportRulesResponseError[];

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
 import {
   kibanaRequestToMetadataListESQuery,
-  kibanaRequestToMetadataGetESQuery,
+  getESQueryHostMetadataByID,
 } from '../services/endpoint/metadata_query_builders';
 import { HostMetadata, HostResultList } from '../../common/types';
 import { EndpointAppContext } from '../types';
@@ -75,22 +75,33 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const query = kibanaRequestToMetadataGetESQuery(req, endpointAppContext);
-        const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
-          'search',
-          query
-        )) as SearchResponse<HostMetadata>;
-
-        if (response.hits.hits.length === 0) {
-          return res.notFound({ body: 'Endpoint Not Found' });
+        const doc = await getHostData(context, req.params.id);
+        if (doc) {
+          return res.ok({ body: doc });
         }
-
-        return res.ok({ body: response.hits.hits[0]._source });
+        return res.notFound({ body: 'Endpoint Not Found' });
       } catch (err) {
         return res.internalError({ body: err });
       }
     }
   );
+}
+
+export async function getHostData(
+  context: RequestHandlerContext,
+  id: string
+): Promise<HostMetadata | undefined> {
+  const query = getESQueryHostMetadataByID(id);
+  const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
+    'search',
+    query
+  )) as SearchResponse<HostMetadata>;
+
+  if (response.hits.hits.length === 0) {
+    return undefined;
+  }
+
+  return response.hits.hits[0]._source;
 }
 
 function mapToHostResultList(
