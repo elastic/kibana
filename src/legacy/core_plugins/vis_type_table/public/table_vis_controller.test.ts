@@ -27,7 +27,7 @@ import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 import { tableVisTypeDefinition } from './table_vis_type';
-import { Vis } from '../../visualizations/public';
+import { Vis } from '../../../../plugins/visualizations/public';
 // eslint-disable-next-line
 import { stubFields } from '../../../../plugins/data/public/stubs';
 // eslint-disable-next-line
