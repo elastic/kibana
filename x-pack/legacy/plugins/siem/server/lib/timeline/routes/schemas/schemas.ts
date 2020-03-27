@@ -24,19 +24,11 @@ export const filters = Joi.array()
         disabled: Joi.boolean().allow(null),
         field: allowEmptyString,
         formattedValue: allowEmptyString,
-        index: {
-          type: 'keyword',
-        },
-        key: {
-          type: 'keyword',
-        },
-        negate: {
-          type: 'boolean',
-        },
+        index: Joi.string(),
+        key: Joi.string(),
+        negate: Joi.boolean().allow(null),
         params: allowEmptyString,
-        type: {
-          type: 'keyword',
-        },
+        type: Joi.string(),
         value: allowEmptyString,
       }),
       exists: allowEmptyString,
