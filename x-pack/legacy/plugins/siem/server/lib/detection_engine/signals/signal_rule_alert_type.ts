@@ -31,25 +31,7 @@ import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { getSignalsCount } from '../notifications/get_signals_count';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { ruleStatusServiceFactory } from './rule_status_service';
-
-const buildRuleMessageFactory = ({
-  id,
-  ruleId,
-  index,
-  name,
-}: {
-  name: string;
-  id: string;
-  ruleId: string | null | undefined;
-  index: string;
-}) => (...messages: string[]) =>
-  [
-    ...messages,
-    `name: "${name}"`,
-    `id: "${id}"`,
-    `rule id: "${ruleId ?? '(unknown rule id)'}"`,
-    `signals index: "${index}"`,
-  ].join('\n');
+import { buildRuleMessageFactory } from './rule_messages';
 
 export const signalRulesAlertType = ({
   logger,
