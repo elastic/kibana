@@ -20,6 +20,7 @@
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
+import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -33,8 +34,8 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   Embeddable,
-  Container,
   EmbeddableVisTriggerContext,
+  IContainer,
 } from '../../../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 import {
@@ -43,25 +44,26 @@ import {
 } from '../../../../../../../plugins/expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
-import { getExpressions, getUiActions } from '../services';
+import { getExpressions, getUiActions, getHttp } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
+import { SerializedVis } from '../types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export interface VisualizeEmbeddableConfiguration {
-  vis: Vis;
-  indexPatterns?: IIndexPattern[];
-  editUrl: string;
   editable: boolean;
+  savedVisualizations: SavedObjectLoader;
 }
 
 export interface VisualizeInput extends EmbeddableInput {
   timeRange?: TimeRange;
   query?: Query;
   filters?: Filter[];
+  // This should probably be called "vis overrides". "vis" is a bad name.
   vis?: {
     colors?: { [key: string]: string };
   };
+  visObject: SerializedVis;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -72,6 +74,25 @@ export interface VisualizeOutput extends EmbeddableOutput {
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
+function getOutput(
+  input: VisualizeInput,
+  { savedVisualizations, editable }: VisualizeEmbeddableConfiguration
+): VisualizeOutput {
+  const vis = new Vis(input.visObject.type, input.visObject);
+  const indexPattern = vis.data.indexPattern;
+  const indexPatterns = indexPattern ? [indexPattern] : [];
+  const editUrl = input.visObject.id
+    ? getHttp().basePath.prepend(`/app/kibana${savedVisualizations.urlFor(input.visObject.id)}`)
+    : '';
+  return {
+    defaultTitle: vis.title,
+    editUrl,
+    editable,
+    indexPatterns,
+    visTypeName: vis.type.name,
+  };
+}
+
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
@@ -79,6 +100,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private query?: Query;
   private title?: string;
   private filters?: Filter[];
+  private visObject?: SerializedVis;
   private visCustomizations: VisualizeInput['vis'];
   private subscriptions: Subscription[] = [];
   private expression: string = '';
@@ -90,31 +112,23 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editUrl, indexPatterns, editable }: VisualizeEmbeddableConfiguration,
-    initialInput: VisualizeInput,
-    parent?: Container
+    config: VisualizeEmbeddableConfiguration,
+    input: VisualizeInput,
+    parent?: IContainer
   ) {
-    super(
-      initialInput,
-      {
-        defaultTitle: vis.title,
-        editUrl,
-        indexPatterns,
-        editable,
-        visTypeName: vis.type.name,
-      },
-      parent
-    );
+    super(input, getOutput(input, config), parent);
     this.timefilter = timefilter;
-    this.vis = vis;
-    this.vis.uiState.on('change', this.uiStateChangeHandler);
 
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
       .subscribe(this.updateHandler.bind(this));
 
+    this.vis = new Vis(input.visObject.type, input.visObject);
+    this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.subscriptions.push(
-      Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+      Rx.merge(this.getInput$()).subscribe(() => {
+        const output = getOutput(this.input, { savedVisualizations, editable });
+        this.updateOutput(output);
         this.handleChanges();
       })
     );
@@ -167,6 +181,15 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.transferCustomizationsToUiState();
 
     let dirty = false;
+
+    if (!_.isEqual(this.input.visObject, this.visObject)) {
+      this.visObject = this.input.visObject;
+      this.vis.uiState.off('change', this.uiStateChangeHandler);
+      this.vis = new Vis(this.input.visObject.type, this.input.visObject);
+      this.vis.uiState.on('change', this.uiStateChangeHandler);
+
+      dirty = true;
+    }
 
     // Check if timerange has changed
     if (!_.isEqual(this.input.timeRange, this.timeRange)) {

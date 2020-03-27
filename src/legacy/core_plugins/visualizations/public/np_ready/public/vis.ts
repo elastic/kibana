@@ -28,6 +28,7 @@
  */
 
 import { isFunction, defaults, cloneDeep } from 'lodash';
+import { SearchSource } from 'src/legacy/core_plugins/input_control_vis/public/legacy_imports';
 import { PersistedState } from '../../../../../../../src/plugins/visualizations/public';
 // @ts-ignore
 import { updateVisualizationConfig } from './legacy/vis_update';
@@ -38,13 +39,14 @@ import {
   IndexPattern,
   ISearchSource,
   AggConfigOptions,
+  SearchSourceFields,
 } from '../../../../../../plugins/data/public';
 
 export interface SerializedVisData {
   expression?: string;
   aggs: AggConfigOptions[];
   indexPattern?: string;
-  searchSource?: ISearchSource;
+  searchSourceFields?: SearchSourceFields;
   savedSearchId?: string;
 }
 
@@ -124,8 +126,8 @@ export class Vis {
     // move to migration script
     updateVisualizationConfig(state.params, this.params);
 
-    if (state.data && state.data.searchSource) {
-      this.data.searchSource = state.data.searchSource!;
+    if (state.data && state.data.searchSourceFields) {
+      this.data.searchSource = new SearchSource(state.data.searchSourceFields);
       this.data.indexPattern = this.data.searchSource.getField('index');
     }
     if (state.data && state.data.savedSearchId) {
@@ -162,7 +164,7 @@ export class Vis {
       data: {
         aggs: aggs as any,
         indexPattern: indexPattern ? indexPattern.id : undefined,
-        searchSource: this.data.searchSource!.createCopy(),
+        searchSourceFields: this.data.searchSource!.getFields(),
         savedSearchId: this.data.savedSearchId,
       },
     };

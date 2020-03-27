@@ -152,6 +152,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
   });
 
   $scope.eventEmitter.on('updateVis', () => {
+    embeddableHandler.updateInput({ visObject: vis.serialize() });
     embeddableHandler.reload();
   });
 
