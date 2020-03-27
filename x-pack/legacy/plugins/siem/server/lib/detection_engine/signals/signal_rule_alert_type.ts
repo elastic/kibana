@@ -126,7 +126,7 @@ export const signalRulesAlertType = ({
       }
 
       const searchAfterSize = Math.min(params.maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-      let creationSucceeded: SearchAfterAndBulkCreateReturnType = {
+      let result: SearchAfterAndBulkCreateReturnType = {
         success: false,
         bulkCreateTimes: [],
         searchAfterTimes: [],
@@ -194,9 +194,9 @@ export const signalRulesAlertType = ({
             enabled,
             tags,
           });
-          creationSucceeded.success = success;
+          result.success = success;
           if (bulkCreateDuration) {
-            creationSucceeded.bulkCreateTimes.push(bulkCreateDuration);
+            result.bulkCreateTimes.push(bulkCreateDuration);
           }
         } else {
           const inputIndex = await getInputIndex(services, version, index);
@@ -233,7 +233,7 @@ export const signalRulesAlertType = ({
             );
           }
 
-          creationSucceeded = await searchAfterAndBulkCreate({
+          result = await searchAfterAndBulkCreate({
             someResult: noReIndexResult,
             ruleParams: params,
             services,
@@ -254,10 +254,10 @@ export const signalRulesAlertType = ({
             tags,
             throttle,
           });
-          creationSucceeded.searchAfterTimes.push(makeFloatString(end - start));
+          result.searchAfterTimes.push(makeFloatString(end - start));
         }
 
-        if (creationSucceeded.success) {
+        if (result.success) {
           if (meta?.throttle === NOTIFICATION_THROTTLE_RULE && actions.length) {
             const notificationRuleParams = {
               ...ruleParams,
@@ -289,9 +289,9 @@ export const signalRulesAlertType = ({
 
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
           await ruleStatusService.success('succeeded', {
-            bulkCreateTimes: creationSucceeded.bulkCreateTimes,
-            searchAfterTimeDurations: creationSucceeded.searchAfterTimes,
-            lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString(),
+            bulkCreateTimeDurations: result.bulkCreateTimes,
+            searchAfterTimeDurations: result.searchAfterTimes,
+            lastLookBackDate: result.lastLookBackDate?.toISOString(),
           });
         } else {
           const errorMessage = buildRuleMessage(
@@ -299,9 +299,9 @@ export const signalRulesAlertType = ({
           );
           logger.error(errorMessage);
           await ruleStatusService.error(errorMessage, {
-            bulkCreateTimes: creationSucceeded.bulkCreateTimes,
-            searchAfterTimeDurations: creationSucceeded.searchAfterTimes,
-            lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString(),
+            bulkCreateTimeDurations: result.bulkCreateTimes,
+            searchAfterTimeDurations: result.searchAfterTimes,
+            lastLookBackDate: result.lastLookBackDate?.toISOString(),
           });
         }
       } catch (error) {
@@ -313,9 +313,9 @@ export const signalRulesAlertType = ({
 
         logger.error(message);
         await ruleStatusService.error(message, {
-          bulkCreateTimes: creationSucceeded.bulkCreateTimes,
-          searchAfterTimeDurations: creationSucceeded.searchAfterTimes,
-          lastLookBackDate: creationSucceeded.lastLookBackDate?.toISOString(),
+          bulkCreateTimeDurations: result.bulkCreateTimes,
+          searchAfterTimeDurations: result.searchAfterTimes,
+          lastLookBackDate: result.lastLookBackDate?.toISOString(),
         });
       }
     },

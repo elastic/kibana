@@ -17,7 +17,7 @@ export const MAX_RULE_STATUSES = 6;
 
 interface Attributes {
   searchAfterTimeDurations?: string[];
-  bulkCreateTimes?: string[];
+  bulkCreateTimeDurations?: string[];
   lastLookBackDate?: string;
   gap?: string;
 }
