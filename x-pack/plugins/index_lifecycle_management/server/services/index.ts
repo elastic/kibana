@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: Remove this once CCR is migrated to the plugins directory.
-export function indexManagement(kibana: any) {
-  return new kibana.Plugin({
-    id: 'index_management',
-    configPrefix: 'xpack.index_management',
-  });
-}
+export { License } from './license';
+export { addBasePath } from './add_base_path';

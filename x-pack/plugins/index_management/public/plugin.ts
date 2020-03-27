@@ -23,7 +23,7 @@ import { setUiMetricService } from './application/services/api';
 import { IndexMgmtMetricsType } from './types';
 import { ExtensionsService, ExtensionsSetup } from './services';
 
-export interface IndexMgmtSetup {
+export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
 }
 
@@ -43,7 +43,7 @@ export class IndexMgmtUIPlugin {
     setUiMetricService(this.uiMetricService);
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexMgmtSetup {
+  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexManagementPluginSetup {
     const { http, notifications, getStartServices } = coreSetup;
     const { usageCollection, management } = plugins;
 

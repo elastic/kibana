@@ -3,14 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import './index.scss';
-import { IndexMgmtUIPlugin, IndexManagementPluginSetup } from './plugin';
+import { IndexLifecycleManagementPlugin } from './plugin';
 
 /** @public */
 export const plugin = () => {
-  return new IndexMgmtUIPlugin();
+  return new IndexLifecycleManagementPlugin();
 };
-
-export { IndexManagementPluginSetup };
-
-export { getIndexListUri } from './application/services/navigation';
