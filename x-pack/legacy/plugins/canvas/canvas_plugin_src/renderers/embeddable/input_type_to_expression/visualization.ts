@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VisualizeInput } from 'src/legacy/core_plugins/visualizations/public';
+import { VisualizeInput } from 'src/plugins/visualizations/public';
 
 export function toExpression(input: VisualizeInput): string {
   const expressionParts = [] as string[];
