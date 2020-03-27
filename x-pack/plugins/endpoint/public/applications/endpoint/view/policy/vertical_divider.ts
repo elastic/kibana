@@ -7,13 +7,14 @@
 import styled from 'styled-components';
 import { EuiTheme } from '../../../../../../../legacy/common/eui_styled_components';
 
-type SpacingOptions = keyof EuiTheme['eui']['paddingSizes'];
+type SpacingOptions = keyof EuiTheme['eui']['spacerSizes'];
 
 /**
  * A vertical divider - show a vertical line that spans 100% of the height of its parent container.
  * Ideal for use (for example) in `EuiFlexItem`
  *
- * @param [spacing] optional horizontal spacing (on each side of the vertical line)
+ * @param [spacing] optional horizontal spacing (on each side of the vertical line). Uses the value `EuiSpacer`
+ *
  */
 export const VerticalDivider = styled.div<{ spacing?: SpacingOptions }>`
   width: 0;
