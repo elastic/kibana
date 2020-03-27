@@ -6,6 +6,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../common';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
 import {
@@ -338,29 +339,34 @@ describe('<TemplateCreate />', () => {
 
       const latestRequest = server.requests[server.requests.length - 1];
 
-      const expected = JSON.stringify({
+      const expected = {
         isManaged: false,
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        settings: SETTINGS,
-        mappings: {
-          ...MAPPINGS,
-          properties: {
-            [BOOLEAN_MAPPING_FIELD.name]: {
-              type: BOOLEAN_MAPPING_FIELD.type,
-            },
-            [TEXT_MAPPING_FIELD.name]: {
-              type: TEXT_MAPPING_FIELD.type,
-            },
-            [KEYWORD_MAPPING_FIELD.name]: {
-              type: KEYWORD_MAPPING_FIELD.type,
+        template: {
+          settings: SETTINGS,
+          mappings: {
+            ...MAPPINGS,
+            properties: {
+              [BOOLEAN_MAPPING_FIELD.name]: {
+                type: BOOLEAN_MAPPING_FIELD.type,
+              },
+              [TEXT_MAPPING_FIELD.name]: {
+                type: TEXT_MAPPING_FIELD.type,
+              },
+              [KEYWORD_MAPPING_FIELD.name]: {
+                type: KEYWORD_MAPPING_FIELD.type,
+              },
             },
           },
+          aliases: ALIASES,
         },
-        aliases: ALIASES,
-      });
+        _kbnMeta: {
+          formatVersion: DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
+        },
+      };
 
-      expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });
 
     it('should surface the API errors from the put HTTP request', async () => {

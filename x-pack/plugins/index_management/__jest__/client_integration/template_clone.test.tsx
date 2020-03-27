@@ -54,10 +54,8 @@ describe('<TemplateClone />', () => {
   const templateToClone = getTemplate({
     name: TEMPLATE_NAME,
     indexPatterns: ['indexPattern1'],
-    mappings: {
-      ...MAPPINGS,
-      _meta: {},
-      _source: {},
+    template: {
+      mappings: MAPPINGS,
     },
   });
 
