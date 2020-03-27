@@ -67,7 +67,6 @@ describe('CaseView ', () => {
   /* eslint-enable no-console */
 
   const defaultUpdateCaseState = {
-    caseData: data,
     isLoading: false,
     isError: false,
     updateKey: null,
@@ -186,12 +185,7 @@ describe('CaseView ', () => {
     wrapper
       .find('input[data-test-subj="toggle-case-status"]')
       .simulate('change', { target: { checked: true } });
-
-    expect(updateCaseProperty).toBeCalledWith({
-      fetchCaseUserActions,
-      updateKey: 'status',
-      updateValue: 'closed',
-    });
+    expect(updateCaseProperty).toHaveBeenCalled();
   });
 
   it('should render comments', async () => {
