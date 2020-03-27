@@ -17,5 +17,17 @@
  * under the License.
  */
 
-import { search } from '../../../../plugins/data/public';
-export const { tabifyAggResponse, tabifyGetColumns } = search;
+import { i18n } from '@kbn/i18n';
+
+export function makeFakeXAspect() {
+  return {
+    accessor: -1,
+    title: i18n.translate('common.ui.aggResponse.allDocsTitle', {
+      defaultMessage: 'All docs',
+    }),
+    params: {
+      defaultValue: '_all',
+    },
+    format: {},
+  };
+}

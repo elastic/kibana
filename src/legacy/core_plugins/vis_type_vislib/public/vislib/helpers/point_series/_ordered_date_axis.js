@@ -17,5 +17,16 @@
  * under the License.
  */
 
-import { search } from '../../../../plugins/data/public';
-export const { tabifyAggResponse, tabifyGetColumns } = search;
+export function orderedDateAxis(chart) {
+  const x = chart.aspects.x[0];
+  const { bounds } = x.params;
+
+  chart.ordered.date = true;
+
+  if (bounds) {
+    chart.ordered.min = isNaN(bounds.min) ? Date.parse(bounds.min) : bounds.min;
+    chart.ordered.max = isNaN(bounds.max) ? Date.parse(bounds.max) : bounds.max;
+  } else {
+    chart.ordered.endzones = false;
+  }
+}

@@ -17,5 +17,22 @@
  * under the License.
  */
 
-import { search } from '../../../../plugins/data/public';
-export const { tabifyAggResponse, tabifyGetColumns } = search;
+export function addToSiri(series, point, id, yLabel, yFormat, zFormat, zLabel) {
+  id = id == null ? '' : id + '';
+
+  if (series.has(id)) {
+    series.get(id).values.push(point);
+    return;
+  }
+
+  series.set(id, {
+    id: id.split('-').pop(),
+    rawId: id,
+    label: yLabel == null ? id : yLabel,
+    count: 0,
+    values: [point],
+    format: yFormat,
+    zLabel,
+    zFormat,
+  });
+}

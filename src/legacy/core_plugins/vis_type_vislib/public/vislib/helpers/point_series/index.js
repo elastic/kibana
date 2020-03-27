@@ -17,5 +17,4 @@
  * under the License.
  */
 
-import { search } from '../../../../plugins/data/public';
-export const { tabifyAggResponse, tabifyGetColumns } = search;
+export { buildPointSeriesData } from './point_series';

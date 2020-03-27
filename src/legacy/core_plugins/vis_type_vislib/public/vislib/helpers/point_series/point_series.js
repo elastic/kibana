@@ -17,5 +17,26 @@
  * under the License.
  */
 
-import { search } from '../../../../plugins/data/public';
-export const { tabifyAggResponse, tabifyGetColumns } = search;
+import { getSeries } from './_get_series';
+import { getAspects } from './_get_aspects';
+import { initYAxis } from './_init_y_axis';
+import { initXAxis } from './_init_x_axis';
+import { orderedDateAxis } from './_ordered_date_axis';
+
+export const buildPointSeriesData = (table, dimensions) => {
+  const chart = {
+    aspects: getAspects(table, dimensions),
+  };
+
+  initXAxis(chart, table);
+  initYAxis(chart);
+
+  if (chart.aspects.x[0].params.date) {
+    orderedDateAxis(chart);
+  }
+
+  chart.series = getSeries(table, chart);
+
+  delete chart.aspects;
+  return chart;
+};

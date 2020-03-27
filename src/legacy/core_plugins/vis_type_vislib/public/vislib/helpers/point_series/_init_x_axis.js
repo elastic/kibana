@@ -17,5 +17,30 @@
  * under the License.
  */
 
-import { search } from '../../../../plugins/data/public';
-export const { tabifyAggResponse, tabifyGetColumns } = search;
+import { uniq } from 'lodash';
+import moment from 'moment';
+
+export function initXAxis(chart, table) {
+  const { format, title, params, accessor } = chart.aspects.x[0];
+
+  chart.xAxisOrderedValues =
+    accessor === -1 ? [params.defaultValue] : uniq(table.rows.map(r => r[accessor]));
+  chart.xAxisFormat = format;
+  chart.xAxisLabel = title;
+
+  const { interval, date } = params;
+  if (interval) {
+    if (date) {
+      const { intervalESUnit, intervalESValue } = params;
+      chart.ordered = {
+        interval: moment.duration(interval),
+        intervalESUnit: intervalESUnit,
+        intervalESValue: intervalESValue,
+      };
+    } else {
+      chart.ordered = {
+        interval,
+      };
+    }
+  }
+}
