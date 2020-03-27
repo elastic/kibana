@@ -22,7 +22,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('alertListPage');
     });
     it('contains the Alert List Page title', async () => {
-      const alertsTitle = await testSubjects.getVisibleText('alertsViewTitle');
+      const alertsTitle = await testSubjects.getVisibleText('pageViewHeaderLeft');
       expect(alertsTitle).to.equal('Alerts');
     });
     it('includes alerts search bar', async () => {
@@ -49,7 +49,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('and user has clicked details view link', () => {
       before(async () => {
-        await pageObjects.endpointAlerts.setSearchBarDate('Mar 10, 2020 @ 19:33:40.767'); // A timestamp that encompases our es-archive data
+        await pageObjects.endpointAlerts.setSearchBarDate('Mar 10, 2020 @ 19:33:40.767'); // A timestamp that encompasses our es-archive data
         await testSubjects.click('alertTypeCellLink');
       });
 
