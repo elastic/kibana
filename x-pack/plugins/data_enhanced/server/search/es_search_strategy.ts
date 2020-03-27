@@ -72,7 +72,7 @@ function asyncSearch(
   const path = request.id ? `_async_search/${request.id}` : `${index}/_async_search`;
 
   // Wait up to 1s for the response to return
-  const query = toSnakeCase({ waitForCompletion: '1s', ...params });
+  const query = toSnakeCase({ waitForCompletionTimeout: '1s', ...params });
 
   return caller('transport.request', { method, path, body, query }, options);
 }
