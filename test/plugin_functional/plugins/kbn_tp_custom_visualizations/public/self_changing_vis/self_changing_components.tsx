@@ -17,10 +17,32 @@
  * under the License.
  */
 
-export default function(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      hacks: ['plugins/kbn_tp_custom_visualizations/self_changing_vis/self_changing_vis'],
-    },
+import React, { useEffect } from 'react';
+
+import { EuiBadge } from '@elastic/eui';
+
+interface SelfChangingComponentProps {
+  renderComplete: () => {};
+  visParams: {
+    counter: number;
+  };
+}
+
+export function SelfChangingComponent(props: SelfChangingComponentProps) {
+  useEffect(() => {
+    props.renderComplete();
   });
+
+  return (
+    <div>
+      <EuiBadge
+        onClick={() => {}}
+        data-test-subj="counter"
+        onClickAriaLabel="Increase counter"
+        color="primary"
+      >
+        {props.visParams.counter}
+      </EuiBadge>
+    </div>
+  );
 }
