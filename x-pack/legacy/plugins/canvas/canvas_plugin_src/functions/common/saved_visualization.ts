@@ -22,7 +22,7 @@ interface Arguments {
   hideLegend: boolean | null;
 }
 
-type Output = EmbeddableExpression<Omit<VisualizeInput, 'visObject' | 'visType'>>;
+type Output = EmbeddableExpression<VisualizeInput>;
 
 const defaultTimeRange = {
   from: 'now-15m',

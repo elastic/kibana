@@ -41,6 +41,7 @@ import {
   getEditBreadcrumbs,
 } from './breadcrumbs';
 import { createSavedSearchesLoader } from '../../../../../../plugins/discover/public';
+import { createVisEmbeddableFromObject } from '../../../../visualizations/public/np_ready/public/embeddable/create_vis_embeddable_from_object';
 
 const getResolvedResults = deps => {
   const { core, data, visualizations } = deps;
@@ -51,21 +52,16 @@ const getResolvedResults = deps => {
     results.savedVis = savedVis;
     return visualizations
       .convertToSerializedVis(savedVis)
-      .then(serializedVis => ({
-        vis: visualizations.createVis(serializedVis.type, serializedVis),
-        serializedVis,
-      }))
-      .then(({ vis, serializedVis }) => {
+      .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
+      .then(vis => {
         if (vis.type.setup) {
           return vis.type.setup(vis).catch(() => vis);
         }
-        return { vis, serializedVis };
+        return vis;
       })
-      .then(({ vis, serializedVis }) => {
+      .then(vis => {
         results.vis = vis;
-        return deps.embeddable.getEmbeddableFactory('visualization').create({
-          visType: savedVis.type,
-          visObject: serializedVis,
+        return createVisEmbeddableFromObject({
           timeRange: data.query.timefilter.timefilter.getTime(),
           filters: data.query.filterManager.getFilters(),
         });

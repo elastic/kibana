@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectMetaData } from 'src/plugins/saved_objects/public';
 import { SavedObjectAttributes } from '../../../../../../../core/public';
 import {
-  Container,
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
   ErrorEmbeddable,
@@ -35,10 +34,11 @@ import {
   getTypes,
   getUISettings,
   getSavedVisualizationsLoader,
-  getTimeFilter,
 } from '../services';
 import { showNewVisModal } from '../wizard';
 import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
+import { Vis } from '../types';
+import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -91,79 +91,29 @@ export class VisualizeEmbeddableFactory
     });
   }
 
-  public createFromInput = async (
-    input: VisualizeInput,
-    parent?: IContainer
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
-    const savedVisualizations = getSavedVisualizationsLoader();
-
-    try {
-      const type = getTypes().get(input.visObject.type);
-
-      const isLabsEnabled = getUISettings().get<boolean>('visualize:enableLabs');
-
-      if (!isLabsEnabled && type.stage === 'experimental') {
-        return new DisabledLabEmbeddable(input.visObject.title, input);
-      }
-
-      const editable = await this.isEditable();
-      return new VisualizeEmbeddable(
-        getTimeFilter(),
-        {
-          editable,
-          savedVisualizations,
-        },
-        input,
-        parent
-      );
-    } catch (e) {
-      console.error(e); // eslint-disable-line no-console
-      return new ErrorEmbeddable(e, input, parent);
-    }
-  };
-
-  public createFromSavedObject = async (
+  public async createFromSavedObject(
     savedObjectId: string,
     input: Partial<VisualizeInput> & { id: string },
-    parent?: Container
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
+    parent?: IContainer
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = getSavedVisualizationsLoader();
 
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
-      const embeddable = await this.create(
-        {
-          ...input,
-          visObject: await convertToSerializedVis(savedObject),
-        },
-        parent
-      );
-      if (embeddable === undefined) {
-        return new ErrorEmbeddable(
-          i18n.translate('visualizations.errorCreatingVisualizeEmbeddable', {
-            defaultMessage: 'An error was encountered attempting to create a visualization.',
-          }),
-          input
-        );
-      } else {
-        return embeddable;
-      }
+      const vis = new Vis(savedObject.visState.type, await convertToSerializedVis(savedObject));
+      return createVisEmbeddableFromObject(vis, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
     }
-  };
+  }
 
-  public create = async (input: VisualizeInput, parent?: IContainer) => {
-    if (input === undefined) {
-      // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
-      // to allow for in place creation of visualizations without having to navigate away to a new URL.
-      showNewVisModal({
-        editorParams: ['addToDashboard'],
-      });
-      return undefined;
-    } else {
-      return this.createFromInput(input, parent);
-    }
-  };
+  public async create() {
+    // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
+    // to allow for in place creation of visualizations without having to navigate away to a new URL.
+    showNewVisModal({
+      editorParams: ['addToDashboard'],
+    });
+    return undefined;
+  }
 }

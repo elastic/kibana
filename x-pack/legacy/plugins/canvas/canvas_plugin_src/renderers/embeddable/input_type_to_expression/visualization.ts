@@ -6,10 +6,7 @@
 
 import { VisualizeInput } from 'src/legacy/core_plugins/visualizations/public';
 
-export function toExpression(
-  // Expressions work "by reference" only.
-  input: Omit<VisualizeInput, 'visObject' | 'visType'> & { id: string }
-): string {
+export function toExpression(input: VisualizeInput): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedVisualization');

@@ -19,7 +19,7 @@
 import { coreMock } from '../../../core/public/mocks';
 import { testPlugin } from './tests/test_plugin';
 import { EmbeddableFactoryProvider } from './types';
-import { defaultEmbeddableFactoryProvider, EmbeddableFactory } from './lib';
+import { defaultEmbeddableFactoryProvider } from './lib';
 
 test('cannot register embeddable factory with the same ID', async () => {
   const coreSetup = coreMock.createSetup();
