@@ -4,19 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useMemo } from 'react';
+
 import { JobModelSizeStats, JobSummary } from '../../../containers/logs/log_analysis';
 import { QualityWarning, CategoryQualityWarningReason } from './sections/notices/quality_warnings';
 
 export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: JobSummary[] }) => {
-  const categoryQualityWarnings: QualityWarning[] = jobSummaries
-    .filter(jobSummary => jobSummary.fullJob?.model_size_stats?.categorization_status === 'warn')
-    .map(jobSummary => ({
-      type: 'categoryQualityWarning',
-      jobId: jobSummary.id,
-      reasons: jobSummary.fullJob?.model_size_stats
-        ? getCategoryQualityWarningReasons(jobSummary.fullJob.model_size_stats)
-        : [],
-    }));
+  const categoryQualityWarnings: QualityWarning[] = useMemo(
+    () =>
+      jobSummaries
+        .filter(
+          jobSummary => jobSummary.fullJob?.model_size_stats?.categorization_status === 'warn'
+        )
+        .map(jobSummary => ({
+          type: 'categoryQualityWarning',
+          jobId: jobSummary.id,
+          reasons: jobSummary.fullJob?.model_size_stats
+            ? getCategoryQualityWarningReasons(jobSummary.fullJob.model_size_stats)
+            : [],
+        })),
+    [jobSummaries]
+  );
 
   return {
     categoryQualityWarnings,
