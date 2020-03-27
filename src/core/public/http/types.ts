@@ -206,12 +206,19 @@ export interface HttpRequestInit {
 
 /** @public */
 export interface HttpFetchQuery {
-  [key: string]:
-    | string
-    | number
-    | boolean
-    | undefined
-    | Array<string | number | boolean | undefined>;
+  /**
+   * TypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter
+   * definition, so to avoid TypeScript errors, we'll restrict our version.
+   *
+   * [key: string]:
+   *   | string
+   *   | number
+   *   | boolean
+   *   | Array<string | number | boolean>
+   *   | undefined
+   *   | null;
+   */
+  [key: string]: string | number | boolean | string[] | number[] | boolean[] | undefined | null;
 }
 
 /**

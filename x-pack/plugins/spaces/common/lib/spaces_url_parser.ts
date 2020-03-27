@@ -8,9 +8,11 @@ import { DEFAULT_SPACE_ID } from '../constants';
 const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 
 export function getSpaceIdFromPath(
-  requestBasePath: string = '/',
-  serverBasePath: string = '/'
+  requestBasePath?: string | null,
+  serverBasePath?: string | null
 ): { spaceId: string; pathHasExplicitSpaceIdentifier: boolean } {
+  if (requestBasePath == null) requestBasePath = '/';
+  if (serverBasePath == null) serverBasePath = '/';
   const pathToCheck: string = stripServerBasePath(requestBasePath, serverBasePath);
 
   // Look for `/s/space-url-context` in the base path

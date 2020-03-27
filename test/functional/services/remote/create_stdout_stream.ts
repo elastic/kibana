@@ -76,7 +76,7 @@ export async function createStdoutSocket() {
     throw new Error('server must listen to a random port, not a unix socket');
   }
 
-  const input = Net.createConnection(addressInfo.port, addressInfo.address);
+  const input = Net.createConnection(addressInfo!.port, addressInfo!.address); // TypeScript note: addressInfo will not be null after 'listening' has been emitted
   await Rx.fromEvent<void>(input, 'connect').pipe(take(1)).toPromise();
 
   return {

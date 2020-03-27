@@ -121,14 +121,15 @@ describe('Server logging configuration', function () {
           '--verbose',
         ]);
 
-        const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
+        // TypeScript note: As long as the child stdio[1] is 'pipe', then stdout will not be null
+        const message$ = Rx.fromEvent(child.stdout!, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );
 
         await message$
           .pipe(
             // We know the sighup handler will be registered before this message logged
-            filter((messages) => messages.some((m) => m.includes('setting up root'))),
+            filter((messages: string[]) => messages.some((m) => m.includes('setting up root'))),
             take(1)
           )
           .toPromise();
@@ -189,14 +190,15 @@ describe('Server logging configuration', function () {
 
         child = Child.spawn(process.execPath, [kibanaPath, '--oss', '--config', configFilePath]);
 
-        const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
+        // TypeScript note: As long as the child stdio[1] is 'pipe', then stdout will not be null
+        const message$ = Rx.fromEvent(child.stdout!, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );
 
         await message$
           .pipe(
             // We know the sighup handler will be registered before this message logged
-            filter((messages) => messages.some((m) => m.includes('setting up root'))),
+            filter((messages: string[]) => messages.some((m) => m.includes('setting up root'))),
             take(1)
           )
           .toPromise();

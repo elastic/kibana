@@ -32,7 +32,7 @@ type Exact<T, Shape> = T extends Shape ? ExactKeys<T, Shape> : never;
  * Ensures that when creating a URL query param string, that the given input strictly
  * matches the expected interface (guards against possibly leaking internal state)
  */
-const querystringStringify: <ExpectedType extends object, ArgType>(
+const querystringStringify: <ExpectedType, ArgType>(
   params: Exact<ExpectedType, ArgType>
 ) => string = querystring.stringify;
 

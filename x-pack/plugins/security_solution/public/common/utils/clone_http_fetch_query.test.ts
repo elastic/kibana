@@ -14,7 +14,7 @@ describe('cloneHttpFetchQuery', () => {
       a: 'a',
       '1': 1,
       undefined,
-      array: [1, 2, undefined],
+      array: [1, 2],
     };
     expect(cloneHttpFetchQuery(query)).toMatchInlineSnapshot(`
       Object {
@@ -23,7 +23,6 @@ describe('cloneHttpFetchQuery', () => {
         "array": Array [
           1,
           2,
-          undefined,
         ],
         "undefined": undefined,
       }
