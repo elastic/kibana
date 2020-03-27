@@ -1197,10 +1197,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^4.7.0"
 
-"@elastic/charts@^18.1.0":
-  version "18.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-18.1.0.tgz#ee98b3e7680239d79807c09f0ee6efa6c1afa84b"
-  integrity sha512-cUobkGiKHPKHNytxsO7sSJyH6fOcAsZvcxAfnJPBn143P2d5oEsjSJmJTqu0z/obCs2v476Xlg6POVGainUj1Q==
+"@elastic/charts@^18.1.1":
+  version "18.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-18.2.0.tgz#e141151b4d7ecc71c9f6f235f8ce141665c67195"
+  integrity sha512-OWsARaHI/4Ict/GkeKIO3a+e2c86esGw3FtSGRLPFVgzpwBXdjvjYyraGntKOIVs/NAGNVWYj5XoRRb5C6cMlQ==
   dependencies:
     classnames "^2.2.6"
     d3-array "^1.2.4"
@@ -3930,6 +3930,15 @@
     "@types/vinyl-fs" "*"
     chokidar "^2.1.2"
 
+"@types/h2o2@^8.1.1":
+  version "8.1.1"
+  resolved "https://registry.yarnpkg.com/@types/h2o2/-/h2o2-8.1.1.tgz#f990302cd2fdfd7909cff9d6643052002b69998f"
+  integrity sha512-lwF9WSvo4sfT0TnDZDXKef9Yza4xUXC3561QG4Q3Axhrkr+ZFBVJ7kCwI1mUNzk60jI1aMTYVIIoHKZjwCGuHw==
+  dependencies:
+    "@types/boom" "*"
+    "@types/hapi" "*"
+    "@types/node" "*"
+
 "@types/hapi-auth-cookie@^9.1.0":
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/@types/hapi-auth-cookie/-/hapi-auth-cookie-9.1.0.tgz#cbcd2236b7d429bd0632a8cc45cfd355fdd7e7a2"
@@ -3996,6 +4005,13 @@
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/indent-string/-/indent-string-3.0.0.tgz#9ebb391ceda548926f5819ad16405349641b999f"
   integrity sha1-nrs5HO2lSJJvWBmtFkBTSWQbmZ8=
+
+"@types/inert@^5.1.2":
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/@types/inert/-/inert-5.1.2.tgz#2bb8bef3b2462f904c960654c9edfa39285a85c6"
+  integrity sha512-3IoSFLQWvhLfZ85kHas/F3iD/TyZPfeJbTsDjrwYljK1MgBGCB2OywAsyeA/YiJ62VbNXfXBwpD1/VbJPIZSGA==
+  dependencies:
+    "@types/hapi" "*"
 
 "@types/intl-relativeformat@^2.1.0":
   version "2.1.0"
@@ -30416,9 +30432,9 @@ vega-typings@*, vega-typings@^0.3.17:
     vega-util "^1.7.0"
 
 vega-util@^1.7.0:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.7.1.tgz#0b95bbe6058895c332596c215247507caa68ab61"
-  integrity sha512-jdzigLdaXH0rClqkr/qHY//xvmLyxQyZL4Wxb3mew29QpITrMk/USV6v/399h29xVt1+hJuw1vpLoJqAq6WerA==
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.13.1.tgz#3eae51043184c6b873c17b148755c21b01274a0e"
+  integrity sha512-TmvZSMKqhGlS7eAXphqJUhq+NZVYbvXX2ahargTRkVckGWjEUpWhMC7T13vYihrU2Lf/OevKbrruSXKOBxke2w==
 
 vega-view-transforms@^2.0.3:
   version "2.0.3"
