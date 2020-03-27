@@ -81,21 +81,6 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   );
 };
 
-interface CtaButtonProps {
-  onClick: () => void;
-}
-const CtaButton: React.FC<CtaButtonProps> = ({ children, onClick }) => {
-  return (
-    <EuiButtonEmpty
-      size="s"
-      onClick={onClick}
-      contentProps={{ style: { justifyContent: 'flex-start', flexGrow: 1, padding: 0 } }}
-    >
-      {children}
-    </EuiButtonEmpty>
-  );
-};
-
 const ActionsColumnContent = euiStyled(LogEntryColumnContent)`
   overflow: hidden;
   user-select: none;
