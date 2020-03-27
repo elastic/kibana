@@ -33,14 +33,13 @@ export const renderApp = (
   coreStart: CoreStart,
   plugins: CanvasStartDeps,
   { element }: AppMountParameters,
-  canvasStore: Store,
-  setActiveUrl: any
+  canvasStore: Store
 ) => {
   ReactDOM.render(
     <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
       <I18nProvider>
         <Provider store={canvasStore}>
-          <App setActiveUrl={setActiveUrl} />
+          <App />
         </Provider>
       </I18nProvider>
     </KibanaContextProvider>,

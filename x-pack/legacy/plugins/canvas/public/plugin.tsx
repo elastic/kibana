@@ -55,7 +55,7 @@ export class CanvasPlugin
   public setup(core: CoreSetup<CanvasStartDeps>, plugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
 
-    const { appMounted, appUnMounted, setActiveUrl } = createKbnUrlTracker({
+    const { appMounted, appUnMounted } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana/canvas'),
       defaultSubUrl: `#/`,
       storageKey: 'lastUrl:canvas',
@@ -80,7 +80,7 @@ export class CanvasPlugin
 
         const canvasStore = await initializeCanvas(core, coreStart, plugins, depsStart, registries);
 
-        const unmount = renderApp(coreStart, depsStart, params, canvasStore, setActiveUrl);
+        const unmount = renderApp(coreStart, depsStart, params, canvasStore);
 
         return () => {
           unmount();
