@@ -10,16 +10,29 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import { Embeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
-import { esFilters } from '../../../../../../src/plugins/data/public';
-
 import { I18nContext } from 'ui/i18n';
+import { npStart } from 'ui/new_platform';
+import { Subscription } from 'rxjs';
+import { Unsubscribe } from 'redux';
+import {
+  Embeddable,
+  IContainer,
+  EmbeddableInput,
+  EmbeddableOutput,
+} from '../../../../../../src/plugins/embeddable/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  esFilters,
+  IIndexPattern,
+  TimeRange,
+  Filter,
+  Query,
+  RefreshInterval,
+} from '../../../../../../src/plugins/data/public';
 
 import { GisMap } from '../connected_components/gis_map';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
-import { npStart } from 'ui/new_platform';
+import { createMapStore, MapStore } from '../../../../../plugins/maps/public/reducers/store';
 import {
   setGotoWithCenter,
   replaceLayerList,
@@ -32,21 +45,72 @@ import {
   hideLayerControl,
   hideViewControl,
   setHiddenLayers,
+  MapCenter,
 } from '../actions/map_actions';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
   setEventHandlers,
+  EventHandlers,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
 
-export class MapEmbeddable extends Embeddable {
+interface MapEmbeddableConfig {
+  editUrl?: string;
+  indexPatterns: IIndexPattern[];
+  editable: boolean;
+  title?: string;
+  layerList: unknown[];
+}
+
+export interface MapEmbeddableInput extends EmbeddableInput {
+  timeRange?: TimeRange;
+  filters: Filter[];
+  query?: Query;
+  refresh?: unknown;
+  refreshConfig: RefreshInterval;
+  isLayerTOCOpen: boolean;
+  openTOCDetails?: string[];
+  disableTooltipControl?: boolean;
+  disableInteractive?: boolean;
+  hideToolbarOverlay?: boolean;
+  hideLayerControl?: boolean;
+  hideViewControl?: boolean;
+  mapCenter?: MapCenter;
+  hiddenLayers?: string[];
+  hideFilterActions?: boolean;
+}
+
+export interface MapEmbeddableOutput extends EmbeddableOutput {
+  indexPatterns: IIndexPattern[];
+}
+
+export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
-  constructor(config, initialInput, parent, renderTooltipContent, eventHandlers) {
+  private _renderTooltipContent?: RenderToolTipContent;
+  private _eventHandlers?: EventHandlers;
+  private _layerList: unknown[];
+  private _store: MapStore;
+  private _subscription: Subscription;
+  private _prevTimeRange?: TimeRange;
+  private _prevQuery?: Query;
+  private _prevRefreshConfig?: RefreshInterval;
+  private _prevFilters?: Filter[];
+  private _domNode?: HTMLElement;
+  private _unsubscribeFromStore?: Unsubscribe;
+
+  constructor(
+    config: MapEmbeddableConfig,
+    initialInput: MapEmbeddableInput,
+    parent?: IContainer,
+    renderTooltipContent?: RenderToolTipContent,
+    eventHandlers?: EventHandlers
+  ) {
     super(
       initialInput,
       {
@@ -70,7 +134,7 @@ export class MapEmbeddable extends Embeddable {
     return getInspectorAdapters(this._store.getState());
   }
 
-  onContainerStateChanged(containerState) {
+  onContainerStateChanged(containerState: MapEmbeddableInput) {
     if (
       !_.isEqual(containerState.timeRange, this._prevTimeRange) ||
       !_.isEqual(containerState.query, this._prevQuery) ||
@@ -84,7 +148,12 @@ export class MapEmbeddable extends Embeddable {
     }
   }
 
-  _dispatchSetQuery({ query, timeRange, filters, refresh }) {
+  _dispatchSetQuery({
+    query,
+    timeRange,
+    filters,
+    refresh,
+  }: Pick<MapEmbeddableInput, 'query' | 'timeRange' | 'filters' | 'refresh'>) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
@@ -98,7 +167,7 @@ export class MapEmbeddable extends Embeddable {
     );
   }
 
-  _dispatchSetRefreshConfig({ refreshConfig }) {
+  _dispatchSetRefreshConfig({ refreshConfig }: Pick<MapEmbeddableInput, 'refreshConfig'>) {
     this._prevRefreshConfig = refreshConfig;
     this._store.dispatch(
       setRefreshConfig({
@@ -113,7 +182,7 @@ export class MapEmbeddable extends Embeddable {
    * @param {HTMLElement} domNode
    * @param {ContainerState} containerState
    */
-  render(domNode) {
+  render(domNode: HTMLElement) {
     this._store.dispatch(setEventHandlers(this._eventHandlers));
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(disableScrollZoom());
@@ -127,23 +196,22 @@ export class MapEmbeddable extends Embeddable {
     }
 
     if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
-      this._store.dispatch(disableInteractive(this.input.disableInteractive));
+      this._store.dispatch(disableInteractive());
     }
 
     if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
-      this._store.dispatch(disableTooltipControl(this.input.disableTooltipControl));
+      this._store.dispatch(disableTooltipControl());
     }
-
     if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
-      this._store.dispatch(hideToolbarOverlay(this.input.hideToolbarOverlay));
+      this._store.dispatch(hideToolbarOverlay());
     }
 
     if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
-      this._store.dispatch(hideLayerControl(this.input.hideLayerControl));
+      this._store.dispatch(hideLayerControl());
     }
 
     if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
-      this._store.dispatch(hideViewControl(this.input.hideViewControl));
+      this._store.dispatch(hideViewControl());
     }
 
     if (this.input.mapCenter) {
@@ -182,12 +250,12 @@ export class MapEmbeddable extends Embeddable {
     });
   }
 
-  async setLayerList(layerList) {
+  async setLayerList(layerList: unknown[]) {
     this._layerList = layerList;
     return await this._store.dispatch(replaceLayerList(this._layerList));
   }
 
-  addFilters = filters => {
+  addFilters = (filters: Filter[]) => {
     npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       filters,
@@ -213,7 +281,7 @@ export class MapEmbeddable extends Embeddable {
     this._dispatchSetQuery({
       query: this._prevQuery,
       timeRange: this._prevTimeRange,
-      filters: this._prevFilters,
+      filters: this._prevFilters ?? [],
       refresh: true,
     });
   }
@@ -222,7 +290,7 @@ export class MapEmbeddable extends Embeddable {
     const center = getMapCenter(this._store.getState());
     const zoom = getMapZoom(this._store.getState());
 
-    const mapCenter = this.input.mapCenter || {};
+    const mapCenter = this.input.mapCenter || undefined;
     if (
       !mapCenter ||
       mapCenter.lat !== center.lat ||
@@ -233,7 +301,7 @@ export class MapEmbeddable extends Embeddable {
         mapCenter: {
           lat: center.lat,
           lon: center.lon,
-          zoom: zoom,
+          zoom,
         },
       });
     }

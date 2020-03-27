@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FilterBar } from './filter_bar';
+export * from './map_embeddable';
+export * from './map_embeddable_factory';
