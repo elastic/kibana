@@ -18,6 +18,7 @@ export const alertingIndexGetQuerySchema = schema.object(
       schema.number({
         min: 1,
         max: 100,
+        defaultValue: EndpointAppConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
       })
     ),
     page_index: schema.maybe(
@@ -37,6 +38,7 @@ export const alertingIndexGetQuerySchema = schema.object(
         maxSize: 2,
       }) as Type<[string, string]> // Cast this to a string tuple. `@kbn/config-schema` doesn't do this automatically
     ),
+    empty_string_is_undefined: schema.maybe(schema.boolean()),
     sort: schema.maybe(schema.string()),
     order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     query: schema.maybe(
@@ -102,18 +104,6 @@ export const alertingIndexGetQuerySchema = schema.object(
         return i18n.translate('xpack.endpoint.alerts.errors.before_cannot_be_used_with_after', {
           defaultMessage: '[before] cannot be used with [after]',
         });
-      }
-      if (
-        value.before !== undefined &&
-        value.sort !== undefined &&
-        value.sort !== EndpointAppConstants.ALERT_LIST_DEFAULT_SORT
-      ) {
-        return i18n.translate(
-          'xpack.endpoint.alerts.errors.before_cannot_be_used_with_custom_sort',
-          {
-            defaultMessage: '[before] cannot be used with custom sort',
-          }
-        );
       }
     },
   }

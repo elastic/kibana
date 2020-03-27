@@ -127,6 +127,7 @@ describe('filterByAgent', () => {
 
     it('dotnet', () => {
       expect(getSettingKeysForAgent('dotnet')).toEqual([
+        'capture_body',
         'capture_headers',
         'log_level',
         'span_frames_min_duration',
@@ -152,6 +153,7 @@ describe('filterByAgent', () => {
 
     it('"All" services (no agent name)', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual([
+        'capture_body',
         'capture_headers',
         'transaction_max_spans',
         'transaction_sample_rate'
