@@ -147,7 +147,7 @@ export default function(providerContext: FtrProviderContext) {
         })
         .expect(400);
       expect(apiResponse.message).to.eql(
-        'agent events contains events with different agent id from currently authorized agent'
+        'agent events contains events with agent ids: agent2, which differ from currently authorized agent agent1'
       );
     });
 

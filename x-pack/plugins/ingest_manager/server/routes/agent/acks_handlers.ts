@@ -29,14 +29,15 @@ export const postAgentAcksHandlerBuilder = function(
       const agentEvents = request.body.events as AgentEvent[];
 
       // validate that all events are for the authorized agent obtained from the api key
-      const notAuthorizedAgentEvent = agentEvents.filter(
-        agentEvent => agentEvent.agent_id !== agent.id
-      );
+      const notAuthorizedAgentEvent = agentEvents
+        .map(agentEvent => agentEvent.agent_id)
+        .filter(id => id !== agent.id);
 
-      if (notAuthorizedAgentEvent && notAuthorizedAgentEvent.length > 0) {
+      if (notAuthorizedAgentEvent.length > 0) {
         return response.badRequest({
-          body:
-            'agent events contains events with different agent id from currently authorized agent',
+          body: `agent events contains events with agent ids: ${notAuthorizedAgentEvent.toString()}, which differ from currently authorized agent ${
+            agent.id
+          }`,
         });
       }
 
