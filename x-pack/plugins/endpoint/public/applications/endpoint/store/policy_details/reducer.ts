@@ -5,9 +5,9 @@
  */
 
 import { Reducer } from 'redux';
-import { PolicyDetailsState } from '../../types';
+import { PolicyConfig, PolicyDetailsState } from '../../types';
 import { AppAction } from '../action';
-import { isOnPolicyDetailsPage } from './selectors';
+import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
 
 const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {
@@ -86,10 +86,23 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
   }
 
   if (action.type === 'userChangedPolicyConfig') {
-    return {
-      ...state,
-      policyConfig: action.payload.policyConfig,
+    const newState = { ...state };
+    const { windows, linux, mac } = fullPolicy(state) as PolicyConfig;
+    newState.policyItem!.inputs[0].config.policy.value = {
+      windows: {
+        ...windows,
+        ...action.payload.policyConfig.windows,
+      },
+      mac: {
+        ...mac,
+        ...action.payload.policyConfig.mac,
+      },
+      linux: {
+        ...linux,
+        ...action.payload.policyConfig.linux,
+      },
     };
+    return newState;
   }
 
   return state;

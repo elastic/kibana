@@ -5,8 +5,8 @@
  */
 
 import { createSelector } from 'reselect';
-import { PolicyDetailsState } from '../../types';
-import { Immutable } from '../../../../../common/types';
+import { PolicyConfig, PolicyDetailsState, UIPolicyConfig } from '../../types';
+import { generatePolicy } from '../../models/policy';
 
 /** Returns the policy details */
 export const policyDetails = (state: PolicyDetailsState) => state.policyItem;
@@ -32,8 +32,53 @@ export const policyIdFromParams: (state: PolicyDetailsState) => string = createS
   }
 );
 
+/** Returns the full Endpoint Policy, which will include private settings not shown on the UI */
+
+export const fullPolicy: (s: PolicyDetailsState) => PolicyConfig | undefined = createSelector(
+  policyDetails,
+  policyData => {
+    return policyData?.inputs[0].config.policy.value;
+  }
+);
+
+const fullWindowsPolicySettings: (
+  s: PolicyDetailsState
+) => PolicyConfig['windows'] = createSelector(
+  fullPolicy,
+  policy => policy?.windows || generatePolicy().windows
+);
+
+const fullMacPolicySettings: (s: PolicyDetailsState) => PolicyConfig['mac'] = createSelector(
+  fullPolicy,
+  policy => policy?.mac || generatePolicy().mac
+);
+
+const fullLinuxPolicySettings: (s: PolicyDetailsState) => PolicyConfig['linux'] = createSelector(
+  fullPolicy,
+  policy => policy?.linux || generatePolicy().linux
+);
+
 /** Returns the policy configuration */
-export const policyConfig = (state: Immutable<PolicyDetailsState>) => state.policyConfig;
+export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSelector(
+  fullWindowsPolicySettings,
+  fullMacPolicySettings,
+  fullLinuxPolicySettings,
+  (windows, mac, linux) => {
+    return {
+      windows: {
+        eventing: windows.eventing,
+        malware: windows.malware,
+      },
+      mac: {
+        events: mac.events,
+        malware: mac.malware,
+      },
+      linux: {
+        events: linux.events,
+      },
+    };
+  }
+);
 
 /** Returns an object of all the windows eventing configuration */
 export const windowsEventing = (state: PolicyDetailsState) => {

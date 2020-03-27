@@ -63,10 +63,7 @@ export type NewPolicyData = NewDatasource & {
       streams: [];
       config: {
         policy: {
-          // FIXME: replace with Candice's PR type `PolicyConfig`
-          value: {
-            [key: string]: any;
-          };
+          value: PolicyConfig;
         };
       };
     }
@@ -76,7 +73,7 @@ export type NewPolicyData = NewDatasource & {
 /**
  * Endpoint Policy data, which extends Ingest's `Datasource` type
  */
-export type PolicyData = NewPolicyData & Datasource;
+export type PolicyData = Datasource & NewPolicyData;
 
 /**
  * Policy list store state
@@ -123,13 +120,13 @@ export interface PolicyDetailsState {
  */
 export interface PolicyConfig {
   windows: {
-    /** malware mode can be detect, prevent or prevent and notify user */
-    malware: {
-      mode: string;
-    };
     eventing: {
       process: boolean;
       network: boolean;
+    };
+    /** malware mode can be detect, prevent or prevent and notify user */
+    malware: {
+      mode: string;
     };
     logging: {
       stdout: string;
@@ -190,6 +187,15 @@ type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
  * Linux-specific policy configuration that is supported via the UI
  */
 type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
+
+/**
+ * The set of Policy configuration settings that are show/edited via the UI
+ */
+export interface UIPolicyConfig {
+  windows: WindowsPolicyConfig;
+  mac: MacPolicyConfig;
+  linux: LinuxPolicyConfig;
+}
 
 /** OS used in Policy */
 export enum OS {

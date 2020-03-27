@@ -7,7 +7,6 @@
 import { MiddlewareFactory, PolicyData, PolicyDetailsState } from '../../types';
 import { policyIdFromParams, isOnPolicyDetailsPage, policyDetails } from './selectors';
 import {
-  GetDatasourceResponse,
   sendGetDatasource,
   sendGetFleetAgentStatusForConfig,
   sendPutDatasource,
@@ -89,83 +88,6 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
       }
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
       const { id, revision, ...updatedPolicyItem } = policyDetails(state) as PolicyData;
-      const updatedPolicyConfig = {
-        // FIXME: replace this with a selector
-        windows: {
-          events: {
-            process: true,
-          },
-          malware: {
-            mode: 'prevent',
-          },
-          logging: {
-            stdout: 'debug',
-            file: 'info',
-          },
-          advanced: {
-            elasticsearch: {
-              indices: {
-                control: 'control-index',
-                event: 'event-index',
-                logging: 'logging-index',
-              },
-              kernel: {
-                connect: true,
-                process: true,
-              },
-            },
-          },
-        },
-        mac: {
-          events: {
-            process: true,
-          },
-          malware: {
-            mode: 'detect',
-          },
-          logging: {
-            stdout: 'debug',
-            file: 'info',
-          },
-          advanced: {
-            elasticsearch: {
-              indices: {
-                control: 'control-index',
-                event: 'event-index',
-                logging: 'logging-index',
-              },
-              kernel: {
-                connect: true,
-                process: true,
-              },
-            },
-          },
-        },
-        linux: {
-          events: {
-            process: true,
-          },
-          logging: {
-            stdout: 'debug',
-            file: 'info',
-          },
-          advanced: {
-            elasticsearch: {
-              indices: {
-                control: 'control-index',
-                event: 'event-index',
-                logging: 'logging-index',
-              },
-              kernel: {
-                connect: true,
-                process: true,
-              },
-            },
-          },
-        },
-      };
-
-      updatedPolicyItem.inputs[0].config.policy.value = updatedPolicyConfig;
 
       let apiResponse: UpdateDatasourceResponse;
       try {
