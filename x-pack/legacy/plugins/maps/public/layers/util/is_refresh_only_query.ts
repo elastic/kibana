@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query } from '../../../common/map_descriptor';
+import { Query } from '../../../common/descriptor_types';
 
 // Refresh only query is query where timestamps are different but query is the same.
 // Triggered by clicking "Refresh" button in QueryBar
