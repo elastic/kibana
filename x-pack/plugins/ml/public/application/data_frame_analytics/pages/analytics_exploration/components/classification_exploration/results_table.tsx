@@ -128,6 +128,8 @@ export const ResultsTable: FC<Props> = React.memo(
       }
     }
 
+    const needsDestIndexFields = indexPattern && indexPattern.title === jobConfig.source.index[0];
+
     const {
       errorMessage,
       loadExploreData,
@@ -135,7 +137,14 @@ export const ResultsTable: FC<Props> = React.memo(
       sortDirection,
       status,
       tableItems,
-    } = useExploreData(jobConfig, selectedFields, setSelectedFields, setDocFields, setDepVarType);
+    } = useExploreData(
+      jobConfig,
+      needsDestIndexFields,
+      selectedFields,
+      setSelectedFields,
+      setDocFields,
+      setDepVarType
+    );
 
     const columns: Array<ColumnType<TableItem>> = selectedFields
       .sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig))
