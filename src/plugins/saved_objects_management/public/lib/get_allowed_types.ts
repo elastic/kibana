@@ -17,13 +17,15 @@
  * under the License.
  */
 
-export {
-  SavedObjectsManagementActionRegistry,
-  ISavedObjectsManagementActionRegistry,
-} from './action_registry';
-export { SavedObjectsManagementAction, SavedObjectsManagementRecord } from './action_types';
-export {
-  SavedObjectsManagementServiceRegistry,
-  ISavedObjectsManagementServiceRegistry,
-  SavedObjectsManagementServiceRegistryEntry,
-} from './service_registry';
+import { HttpStart } from 'src/core/public';
+
+interface GetAllowedTypesResponse {
+  types: string[];
+}
+
+export async function getAllowedTypes(http: HttpStart) {
+  const response = await http.get<GetAllowedTypesResponse>(
+    '/api/kibana/management/saved_objects/_allowed_types'
+  );
+  return response.types;
+}

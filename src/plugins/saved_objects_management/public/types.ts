@@ -17,24 +17,4 @@
  * under the License.
  */
 
-import { SavedObjectReference } from 'src/core/public';
-
 export { SavedObjectMetadata, SavedObjectWithMetadata, SavedObjectRelation } from '../common';
-
-export interface ObjectField {
-  type: FieldType;
-  name: string;
-  value: any;
-}
-
-export type FieldType = 'text' | 'number' | 'boolean' | 'array' | 'json';
-
-export interface FieldState {
-  value?: any;
-  invalid?: boolean;
-}
-
-export interface SubmittedFormData {
-  attributes: any;
-  references: SavedObjectReference[];
-}

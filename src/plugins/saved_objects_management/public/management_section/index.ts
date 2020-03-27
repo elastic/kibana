@@ -17,13 +17,4 @@
  * under the License.
  */
 
-export {
-  SavedObjectsManagementActionRegistry,
-  ISavedObjectsManagementActionRegistry,
-} from './action_registry';
-export { SavedObjectsManagementAction, SavedObjectsManagementRecord } from './action_types';
-export {
-  SavedObjectsManagementServiceRegistry,
-  ISavedObjectsManagementServiceRegistry,
-  SavedObjectsManagementServiceRegistryEntry,
-} from './service_registry';
+export { registerManagementSection } from './register_section';

@@ -19,21 +19,32 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { ManagementSetup } from '../../management/public';
+import { DataPublicPluginStart } from '../../data/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import {
   SavedObjectsManagementActionRegistry,
   ISavedObjectsManagementActionRegistry,
+  SavedObjectsManagementServiceRegistry,
+  ISavedObjectsManagementServiceRegistry,
 } from './services';
+import { registerManagementSection } from './management_section';
 
 export interface SavedObjectsManagementPluginSetup {
   actionRegistry: ISavedObjectsManagementActionRegistry;
+  serviceRegistry: ISavedObjectsManagementServiceRegistry;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsManagementPluginStart {}
 
 export interface SetupDependencies {
+  management: ManagementSetup;
   home: HomePublicPluginSetup;
+}
+
+export interface StartDependencies {
+  data: DataPublicPluginStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -42,13 +53,14 @@ export class SavedObjectsManagementPlugin
       SavedObjectsManagementPluginSetup,
       SavedObjectsManagementPluginStart,
       SetupDependencies,
-      {}
+      StartDependencies
     > {
   private actionRegistry = new SavedObjectsManagementActionRegistry();
+  private serviceRegistry = new SavedObjectsManagementServiceRegistry();
 
   public setup(
-    core: CoreSetup<{}>,
-    { home }: SetupDependencies
+    core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
+    { home, management }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     home.featureCatalogue.register({
       id: 'saved_objects',
@@ -65,8 +77,15 @@ export class SavedObjectsManagementPlugin
       category: FeatureCatalogueCategory.ADMIN,
     });
 
+    registerManagementSection({
+      core,
+      serviceRegistry: this.serviceRegistry,
+      sections: management.sections,
+    });
+
     return {
       actionRegistry: this.actionRegistry,
+      serviceRegistry: this.serviceRegistry,
     };
   }
 

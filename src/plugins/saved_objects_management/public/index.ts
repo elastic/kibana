@@ -25,6 +25,8 @@ export {
   ISavedObjectsManagementActionRegistry,
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
+  ISavedObjectsManagementServiceRegistry,
+  SavedObjectsManagementServiceRegistryEntry,
 } from './services';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 

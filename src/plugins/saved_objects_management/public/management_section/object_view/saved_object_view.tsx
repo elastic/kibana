@@ -27,7 +27,7 @@ import {
   NotificationsStart,
   SimpleSavedObject,
 } from '../../../../../core/public';
-import { ISavedObjectsManagementRegistry } from '../../saved_object_registry';
+import { ISavedObjectsManagementServiceRegistry } from '../../services';
 import { Header, NotFoundErrors, Intro, Form } from './components';
 import { canViewInApp } from '../../lib';
 import { SubmittedFormData } from '../types';
@@ -35,7 +35,7 @@ import { SubmittedFormData } from '../types';
 interface SavedObjectEditionProps {
   id: string;
   serviceName: string;
-  serviceRegistry: ISavedObjectsManagementRegistry;
+  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   capabilities: Capabilities;
   overlays: OverlayStart;
   notifications: NotificationsStart;

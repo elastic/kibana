@@ -17,13 +17,22 @@
  * under the License.
  */
 
-export {
-  SavedObjectsManagementActionRegistry,
-  ISavedObjectsManagementActionRegistry,
-} from './action_registry';
-export { SavedObjectsManagementAction, SavedObjectsManagementRecord } from './action_types';
-export {
-  SavedObjectsManagementServiceRegistry,
-  ISavedObjectsManagementServiceRegistry,
-  SavedObjectsManagementServiceRegistryEntry,
-} from './service_registry';
+import { SavedObjectReference } from '../../../../core/types';
+
+export interface ObjectField {
+  type: FieldType;
+  name: string;
+  value: any;
+}
+
+export type FieldType = 'text' | 'number' | 'boolean' | 'array' | 'json';
+
+export interface FieldState {
+  value?: any;
+  invalid?: boolean;
+}
+
+export interface SubmittedFormData {
+  attributes: any;
+  references: SavedObjectReference[];
+}
