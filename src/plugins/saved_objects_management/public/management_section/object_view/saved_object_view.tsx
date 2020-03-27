@@ -26,11 +26,11 @@ import {
   OverlayStart,
   NotificationsStart,
   SimpleSavedObject,
-} from '../../../../../../../core/public';
+} from '../../../../../core/public';
 import { ISavedObjectsManagementRegistry } from '../../saved_object_registry';
-import { Header, NotFoundErrors, Intro, Form } from './components/object_view';
-import { canViewInApp } from './lib/in_app_url';
-import { SubmittedFormData } from './types';
+import { Header, NotFoundErrors, Intro, Form } from './components';
+import { canViewInApp } from '../../lib';
+import { SubmittedFormData } from '../types';
 
 interface SavedObjectEditionProps {
   id: string;

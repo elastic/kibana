@@ -29,15 +29,11 @@ import {
 import { cloneDeep, set } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  SimpleSavedObject,
-  SavedObjectsClientContract,
-} from '../../../../../../../../../core/public';
-
-import { SavedObjectLoader } from '../../../../../../../../../plugins/saved_objects/public';
+import { SimpleSavedObject, SavedObjectsClientContract } from '../../../../../../core/public';
+import { SavedObjectLoader } from '../../../../../saved_objects/public';
 import { Field } from './field';
 import { ObjectField, FieldState, SubmittedFormData } from '../../types';
-import { createFieldList } from '../../lib/create_field_list';
+import { createFieldList } from '../../../lib';
 
 interface FormProps {
   object: SimpleSavedObject;
