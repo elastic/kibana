@@ -129,12 +129,21 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                   loader: 'resolve-url-loader',
                   options: {
                     join: (_: string, __: any) => (uri: string, base?: string) => {
-                      if (!base) {
+                      // apply only to legacy platform styles
+                      if (!base || !parseDirPath(base).dirs.includes('legacy')) {
                         return null;
                       }
 
+                      if (uri.startsWith('ui/assets')) {
+                        return Path.resolve(
+                          worker.repoRoot,
+                          'src/core/server/core_app/',
+                          uri.replace('ui/', '')
+                        );
+                      }
+
                       // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                      if (uri.startsWith('ui/') && parseDirPath(base).dirs.includes('legacy')) {
+                      if (uri.startsWith('ui/')) {
                         return Path.resolve(
                           worker.repoRoot,
                           'src/legacy/ui/public',
