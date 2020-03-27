@@ -29,6 +29,7 @@ import {
   CODE_PATH_BEATS,
   CODE_PATH_APM,
   KIBANA_ALERTING_ENABLED,
+  ALERT_TYPES,
 } from '../../../common/constants';
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
@@ -103,7 +104,7 @@ export async function getClustersFromRequest(
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
       if (KIBANA_ALERTING_ENABLED) {
         const alertsClient = req.getAlertsClient ? req.getAlertsClient() : null;
-        cluster.alerts = await fetchStatus(alertsClient, start, end, req.logger);
+        cluster.alerts = await fetchStatus(alertsClient, ALERT_TYPES, start, end, req.logger);
       } else {
         cluster.alerts = await alertsClusterSearch(
           req,

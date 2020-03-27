@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertLicense, AlertCommonCluster } from '../../alerts/types';
+import { AlertCommonCluster, AlertClusterState } from '../../alerts/types';
 
-export async function fetchLicenses(
+export async function fetchClusterState(
   callCluster: any,
   clusters: AlertCommonCluster[],
   index: string
-): Promise<AlertLicense[]> {
+): Promise<AlertClusterState[]> {
   const params = {
     index,
-    filterPath: ['hits.hits._source.license.*', 'hits.hits._source.cluster_uuid'],
+    filterPath: ['hits.hits._source.cluster_state.status', 'hits.hits._source.cluster_uuid'],
     body: {
       size: 1,
       sort: [{ timestamp: { order: 'desc' } }],
@@ -45,13 +45,9 @@ export async function fetchLicenses(
 
   const response = await callCluster('search', params);
   return get<any>(response, 'hits.hits', []).map((hit: any) => {
-    const rawLicense: any = get(hit, '_source.license', {});
-    const license: AlertLicense = {
-      status: rawLicense.status,
-      type: rawLicense.type,
-      expiryDateMS: rawLicense.expiry_date_in_millis,
+    return {
+      state: get(hit, '_source.cluster_state.status'),
       clusterUuid: get(hit, '_source.cluster_uuid'),
     };
-    return license;
   });
 }

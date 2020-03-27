@@ -6,17 +6,17 @@
 import moment from 'moment';
 import { Logger } from '../../../../../../src/core/server';
 import { AlertCommonPerClusterState } from '../../alerts/types';
-import { ALERT_TYPES } from '../../../common/constants';
 import { AlertsClient } from '../../../../alerting/server';
 
 export async function fetchStatus(
   alertsClient: AlertsClient,
+  alertTypes: string[],
   start: number,
   end: number,
   log: Logger
 ): Promise<any[]> {
   const statuses = await Promise.all(
-    ALERT_TYPES.map(
+    alertTypes.map(
       type =>
         new Promise(async (resolve, reject) => {
           // We need to get the id from the alertTypeId
@@ -35,11 +35,11 @@ export async function fetchStatus(
 
           const id = alerts.data[0].id;
 
-          // Now that we hvae the id, we can get the state
+          // Now that we have the id, we can get the state
           const states = await alertsClient.getAlertState({ id });
           if (!states || !states.alertTypeState) {
             log.warn(`No alert states found for type ${type} which is unexpected.`);
-            return reject(null);
+            return resolve(false);
           }
 
           const state = Object.values(states.alertTypeState)[0] as AlertCommonPerClusterState;
