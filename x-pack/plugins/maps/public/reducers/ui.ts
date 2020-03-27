@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import {
   UPDATE_FLYOUT,
@@ -15,19 +16,30 @@ import {
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
   UPDATE_INDEXING_STAGE,
+  // @ts-ignore
 } from '../actions/ui_actions';
 
-export const FLYOUT_STATE = {
-  NONE: 'NONE',
-  LAYER_PANEL: 'LAYER_PANEL',
-  ADD_LAYER_WIZARD: 'ADD_LAYER_WIZARD',
-};
+export enum FLYOUT_STATE {
+  NONE = 'NONE',
+  LAYER_PANEL = 'LAYER_PANEL',
+  ADD_LAYER_WIZARD = 'ADD_LAYER_WIZARD',
+}
 
-export const INDEXING_STAGE = {
-  READY: 'READY',
-  TRIGGERED: 'TRIGGERED',
-  SUCCESS: 'SUCCESS',
-  ERROR: 'ERROR',
+export enum INDEXING_STAGE {
+  READY = 'READY',
+  TRIGGERED = 'TRIGGERED',
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
+}
+
+export type UiState = {
+  flyoutDisplay: FLYOUT_STATE;
+  isFullScreen: boolean;
+  isReadOnly: boolean;
+  isLayerTOCOpen: boolean;
+  isSetViewOpen: boolean;
+  openTOCDetails: string[];
+  importIndexingStage: INDEXING_STAGE | null;
 };
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
@@ -45,7 +57,7 @@ const INITIAL_STATE = {
 };
 
 // Reducer
-export function ui(state = INITIAL_STATE, action) {
+export function ui(state: UiState = INITIAL_STATE, action: any) {
   switch (action.type) {
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
