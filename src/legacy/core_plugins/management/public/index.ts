@@ -35,4 +35,4 @@ export {
 export {
   processImportResponse,
   ProcessedImportResponse,
-} from '../../kibana/public/management/sections/objects/lib/process_import_response';
+} from '../../../../plugins/saved_objects_management/public/lib/process_import_response';

@@ -40,7 +40,7 @@ interface RegisterOptions {
 }
 
 const title = i18n.translate('kbn.management.objects.savedObjectsSectionLabel', {
-  defaultMessage: 'Saved Objects XXX',
+  defaultMessage: 'Saved Objects',
 });
 
 export const registerManagementSection = ({ core, sections, serviceRegistry }: RegisterOptions) => {
