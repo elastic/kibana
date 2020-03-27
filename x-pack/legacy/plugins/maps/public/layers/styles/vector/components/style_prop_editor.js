@@ -77,6 +77,7 @@ export class StylePropEditor extends Component {
           defaultMessage: 'Select to style by fixed value or by data value',
         })}
         compressed
+        data-test-subj={`staticDynamicSelect_${this.props.styleProperty.getStyleName()}`}
       />
     );
   }

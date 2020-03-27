@@ -9,5 +9,5 @@
 <b>Signature:</b>
 
 ```typescript
-getStartServices: StartServicesAccessor<TPluginsStart>;
+getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 ```
