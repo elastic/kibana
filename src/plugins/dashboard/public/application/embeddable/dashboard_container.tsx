@@ -55,7 +55,7 @@ export interface DashboardContainerInput extends ContainerInput {
   description?: string;
   isFullScreenMode: boolean;
   panels: {
-    [panelId: string]: DashboardPanelState;
+    [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
   isEmptyState?: boolean;
 }

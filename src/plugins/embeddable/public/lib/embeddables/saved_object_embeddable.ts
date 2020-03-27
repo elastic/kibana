@@ -17,16 +17,14 @@
  * under the License.
  */
 
-export {
-  HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddable,
-  HelloWorldEmbeddableFactory,
-} from './hello_world';
-export { ListContainer, LIST_CONTAINER } from './list_container';
-export { TODO_EMBEDDABLE } from './todo';
+import { EmbeddableInput } from '..';
 
-import { EmbeddableExamplesPlugin } from './plugin';
+export interface SavedObjectEmbeddableInput extends EmbeddableInput {
+  savedObjectId: string;
+}
 
-export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
-export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
-export const plugin = () => new EmbeddableExamplesPlugin();
+export function isSavedObjectEmbeddableInput(
+  input: EmbeddableInput | SavedObjectEmbeddableInput
+): input is SavedObjectEmbeddableInput {
+  return (input as SavedObjectEmbeddableInput).savedObjectId !== undefined;
+}
