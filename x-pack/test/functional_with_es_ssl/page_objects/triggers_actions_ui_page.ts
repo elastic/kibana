@@ -111,11 +111,11 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
         const $ = await table.parseDomContent();
         const rows = $.findTestSubjects('alert-row').toArray();
-        expect(rows.length).not.to.eql(0);
+        expect(rows.length).to.eql(0);
         const emptyRow = await find.byCssSelector(
           '[data-test-subj="alertsList"] table .euiTableRow'
         );
-        expect(await emptyRow.getVisibleText()).not.to.eql('No items found');
+        expect(await emptyRow.getVisibleText()).to.eql('No items found');
       });
       return true;
     },

@@ -10,3 +10,5 @@ import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
 export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = () => {
   return new MapsPlugin();
 };
+
+export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';

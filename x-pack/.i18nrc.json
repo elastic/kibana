@@ -30,6 +30,7 @@
     "xpack.ml": ["plugins/ml", "legacy/plugins/ml"],
     "xpack.monitoring": ["plugins/monitoring", "legacy/plugins/monitoring"],
     "xpack.remoteClusters": "plugins/remote_clusters",
+    "xpack.painlessLab": "plugins/painless_lab",
     "xpack.reporting": ["plugins/reporting", "legacy/plugins/reporting"],
     "xpack.rollupJobs": "legacy/plugins/rollup",
     "xpack.searchProfiler": "plugins/searchprofiler",

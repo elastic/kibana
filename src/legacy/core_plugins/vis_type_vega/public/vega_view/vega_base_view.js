@@ -132,7 +132,8 @@ export class VegaBaseView {
 
   createViewConfig() {
     const config = {
-      logLevel: vega.Warn,
+      // eslint-disable-next-line import/namespace
+      logLevel: vega.Warn, // note: eslint has a false positive here
       renderer: this._parser.renderer,
     };
 
