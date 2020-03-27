@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { setup as visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
-export { VisualizationsSetup } from '../../../../../src/legacy/core_plugins/visualizations/public';
+import { npSetup } from 'ui/new_platform';
+export const { visualizations } = npSetup.plugins;
+export { VisualizationsSetup } from '../../../../../src/plugins/visualizations/public';

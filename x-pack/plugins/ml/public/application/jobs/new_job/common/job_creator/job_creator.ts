@@ -83,6 +83,10 @@ export class JobCreator {
     return this._type;
   }
 
+  public get indexPatternTitle(): string {
+    return this._indexPatternTitle;
+  }
+
   protected _addDetector(detector: Detector, agg: Aggregation, field: Field) {
     this._detectors.push(detector);
     this._aggs.push(agg);

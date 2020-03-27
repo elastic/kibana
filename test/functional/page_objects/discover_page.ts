@@ -305,6 +305,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         'true'
       );
     }
+    public async getNrOfFetches() {
+      const el = await find.byCssSelector('[data-fetch-counter]');
+      const nr = await el.getAttribute('data-fetch-counter');
+      return Number(nr);
+    }
   }
 
   return new DiscoverPage();
