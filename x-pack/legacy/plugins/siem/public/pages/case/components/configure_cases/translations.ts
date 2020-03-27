@@ -104,7 +104,7 @@ export const FIELD_MAPPING_FIRST_COL = i18n.translate(
 export const FIELD_MAPPING_SECOND_COL = i18n.translate(
   'xpack.siem.case.configureCases.fieldMappingSecondCol',
   {
-    defaultMessage: 'Third-party incident field',
+    defaultMessage: 'External incident field',
   }
 );
 
