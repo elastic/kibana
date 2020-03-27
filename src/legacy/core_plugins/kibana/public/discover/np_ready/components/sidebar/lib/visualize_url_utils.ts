@@ -18,6 +18,7 @@
  */
 import uuid from 'uuid/v4';
 import rison from 'rison-node';
+import { parse, stringify } from 'query-string';
 import {
   IFieldType,
   IIndexPattern,
@@ -25,33 +26,30 @@ import {
   KBN_FIELD_TYPES,
 } from '../../../../../../../../../plugins/data/public';
 import { AppState } from '../../../angular/discover_state';
-import { getServices } from '../../../../kibana_services';
+import { VisualizationsStart } from '../../../../../../../visualizations/public/np_ready/public';
+import { DiscoverServices } from '../../../../build_services';
 
-function getMapsAppBaseUrl() {
-  const mapsAppVisAlias = getServices()
-    .visualizations.getAliases()
-    .find(({ name }) => {
-      return name === 'maps';
-    });
+function getMapsAppBaseUrl(visualizations: VisualizationsStart) {
+  const mapsAppVisAlias = visualizations.getAliases().find(({ name }) => {
+    return name === 'maps';
+  });
   return mapsAppVisAlias ? mapsAppVisAlias.aliasUrl : null;
 }
 
-export function isMapsAppRegistered() {
-  return getServices()
-    .visualizations.getAliases()
-    .some(({ name }) => {
-      return name === 'maps';
-    });
+export function isMapsAppRegistered(visualizations: VisualizationsStart) {
+  return visualizations.getAliases().some(({ name }) => {
+    return name === 'maps';
+  });
 }
 
-export function isFieldVisualizable(field: IFieldType) {
+export function isFieldVisualizable(field: IFieldType, visualizations: VisualizationsStart) {
   if (field.name === '_id') {
     // Else you'd get a 'Fielddata access on the _id field is disallowed' error on ES side.
     return false;
   }
   if (
     (field.type === KBN_FIELD_TYPES.GEO_POINT || field.type === KBN_FIELD_TYPES.GEO_SHAPE) &&
-    isMapsAppRegistered()
+    isMapsAppRegistered(visualizations)
   ) {
     return true;
   }
@@ -62,7 +60,8 @@ export function getMapsAppUrl(
   field: IFieldType,
   indexPattern: IIndexPattern,
   appState: AppState,
-  columns: string[]
+  columns: string[],
+  services: DiscoverServices
 ) {
   const mapAppParams = new URLSearchParams();
 
@@ -108,7 +107,9 @@ export function getMapsAppUrl(
     ])
   );
 
-  return getServices().addBasePath(`${getMapsAppBaseUrl()}?${mapAppParams.toString()}`);
+  return services.addBasePath(
+    `${getMapsAppBaseUrl(services.visualizations)}?${mapAppParams.toString()}`
+  );
 }
 
 export function getVisualizeUrl(
@@ -116,18 +117,16 @@ export function getVisualizeUrl(
   indexPattern: IIndexPattern,
   state: AppState,
   columns: string[],
-  aggsTermSize: string,
-  urlParams: Record<string, string>
+  services: DiscoverServices
 ) {
-  if (!state) {
-    return '';
-  }
+  const aggsTermSize = services.uiSettings.get('discover:aggs:terms:size');
+  const urlParams = parse(services.history.location.search) as Record<string, string>;
 
   if (
     (field.type === KBN_FIELD_TYPES.GEO_POINT || field.type === KBN_FIELD_TYPES.GEO_SHAPE) &&
-    isMapsAppRegistered()
+    isMapsAppRegistered(services.visualizations)
   ) {
-    return getMapsAppUrl(field, indexPattern, state, columns);
+    return getMapsAppUrl(field, indexPattern, state, columns, services);
   }
 
   let agg;
@@ -171,7 +170,7 @@ export function getVisualizeUrl(
       type,
       _a: rison.encode({
         filters: state.filters || [],
-        query: state.query || undefined,
+        query: state.query,
         vis: {
           type,
           aggs: [{ schema: 'metric', type: 'count', id: '2' }, agg],
@@ -179,7 +178,6 @@ export function getVisualizeUrl(
       } as any),
     },
   };
-  const mapAppParams = new URLSearchParams(linkUrlParams);
 
-  return '#/visualize/create?' + mapAppParams.toString();
+  return `#/visualize/create?${stringify(linkUrlParams)}`;
 }

@@ -38,9 +38,6 @@ export function DiscoverFieldDetails({
   onAddFilter,
 }: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
-  if (!details) {
-    return null;
-  }
 
   return (
     <div className="dscFieldDetails">

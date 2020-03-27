@@ -30,19 +30,23 @@ interface Props {
   fieldType: string;
   useShortDots?: boolean;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
+  scripted?: boolean;
 }
 
-export function FieldName({ fieldName, fieldType, useShortDots, fieldIconProps }: Props) {
-  const type = String(fieldType);
-  const typeName = getFieldTypeName(type);
-
-  const name = String(fieldName);
-  const displayName = useShortDots ? shortenDottedString(name) : name;
+export function FieldName({
+  fieldName,
+  fieldType,
+  useShortDots,
+  fieldIconProps,
+  scripted = false,
+}: Props) {
+  const typeName = getFieldTypeName(fieldType);
+  const displayName = useShortDots ? shortenDottedString(fieldName) : fieldName;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <FieldIcon type={type} label={typeName} scripted={false} {...fieldIconProps} />
+        <FieldIcon type={fieldType} label={typeName} scripted={scripted} {...fieldIconProps} />
       </EuiFlexItem>
       <EuiFlexItem className="eui-textTruncate">
         <EuiToolTip

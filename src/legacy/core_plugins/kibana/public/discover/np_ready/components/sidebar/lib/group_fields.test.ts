@@ -18,6 +18,7 @@
  */
 
 import { groupFields } from './group_fields';
+import { getDefaultFieldFilter } from './field_filter';
 
 describe('group_fields', function() {
   it('should group fields in selected, popular, unpopular group', function() {
@@ -60,7 +61,9 @@ describe('group_fields', function() {
       customer_birth_date: 1,
     };
 
-    const actual = groupFields(fields as any, ['currency'], 5, fieldCounts);
+    const fieldFilterState = getDefaultFieldFilter();
+
+    const actual = groupFields(fields as any, ['currency'], 5, fieldCounts, fieldFilterState);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "popular": Array [

@@ -16,33 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { parse } from 'query-string';
-import { getServices } from '../../../../kibana_services';
 import { getVisualizeUrl, isFieldVisualizable } from './visualize_url_utils';
 import { AppState } from '../../../angular/discover_state';
 // @ts-ignore
 import { fieldCalculator } from './field_calculator';
 import { IndexPatternField, IndexPattern } from '../../../../../../../../../plugins/data/public';
+import { DiscoverServices } from '../../../../build_services';
 
 export function getDetails(
   field: IndexPatternField,
   indexPattern: IndexPattern,
   state: AppState,
   columns: string[],
-  hits: Array<Record<string, unknown>>
+  hits: Array<Record<string, unknown>>,
+  services: DiscoverServices
 ) {
-  const { capabilities, history } = getServices();
   const details = {
     visualizeUrl:
-      capabilities.visualize.show && isFieldVisualizable(field)
-        ? getVisualizeUrl(
-            field,
-            indexPattern,
-            state,
-            columns,
-            getServices().uiSettings.get('discover:aggs:terms:size'),
-            parse(history.location.search) as Record<string, string>
-          )
+      services.capabilities.visualize.show && isFieldVisualizable(field, services.visualizations)
+        ? getVisualizeUrl(field, indexPattern, state, columns, services)
         : null,
     ...fieldCalculator.getFieldValueCounts({
       hits,

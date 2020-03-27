@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiTitle } from '@elastic/eui';
 import { sortBy } from 'lodash';
@@ -34,9 +34,9 @@ import {
 } from '../../../../../../../../plugins/data/public';
 import { AppState } from '../../angular/discover_state';
 import { getDetails } from './lib/get_details';
-import { getDefaultFieldFilter, setFieldFilterProp, filterFieldList } from './lib/field_filter';
-import { getServices } from '../../../kibana_services';
+import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
+import { getServices } from '../../../kibana_services';
 
 export interface DiscoverSidebarProps {
   /**
@@ -98,46 +98,69 @@ export function DiscoverSidebar({
   const [showFields, setShowFields] = useState(false);
   const [fields, setFields] = useState<IndexPatternFieldList | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
+  const services = getServices();
+
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits]);
 
+  const onShowDetails = useCallback(
+    (show: boolean, field: IndexPatternField) => {
+      if (!show) {
+        setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
+      } else {
+        setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
+        selectedIndexPattern.popularizeField(field.name, 1);
+      }
+    },
+    [openFieldMap, selectedIndexPattern]
+  );
+  const onChangeFieldSearch = useCallback(
+    (field: string, value: string | boolean | undefined) => {
+      const newState = setFieldFilterProp(fieldFilterState, field, value);
+      setFieldFilterState(newState);
+    },
+    [fieldFilterState]
+  );
+
+  const getDetailsByField = useCallback(
+    (ipField: IndexPatternField) =>
+      getDetails(ipField, selectedIndexPattern, state, columns, hits, services),
+    [selectedIndexPattern, state, columns, hits, services]
+  );
+
+  const popularLimit = services.uiSettings.get('fields:popularLimit');
+  const useShortDots = services.uiSettings.get('shortDots:enable');
+
+  const {
+    selected: selectedFields,
+    popular: popularFields,
+    unpopular: unpopularFields,
+  } = useMemo(() => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilterState), [
+    fields,
+    columns,
+    popularLimit,
+    fieldCounts,
+    fieldFilterState,
+  ]);
+
+  const fieldTypes = useMemo(() => {
+    const result = ['any'];
+    if (Array.isArray(fields)) {
+      for (const field of fields) {
+        if (result.indexOf(field.type) === -1) {
+          result.push(field.type);
+        }
+      }
+    }
+    return result;
+  }, [fields]);
+
   if (!selectedIndexPattern || !fields) {
     return null;
   }
 
-  const popularLimit = getServices().uiSettings.get('fields:popularLimit');
-  const useShortDots = getServices().uiSettings.get('shortDots:enable');
-  const onChangeFieldSearch = (field: string, value: string | boolean | undefined) => {
-    const newState = setFieldFilterProp(fieldFilterState, field, value);
-    setFieldFilterState(newState);
-  };
-
-  const groupedFields = groupFields(fields, columns, popularLimit, fieldCounts);
-
-  const fieldTypes = ['any'];
-  for (const field of fields) {
-    if (fieldTypes.indexOf(field.type) === -1) {
-      fieldTypes.push(field.type);
-    }
-  }
-
-  const onShowDetails = (show: boolean, field: IndexPatternField) => {
-    if (!show) {
-      setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
-    } else {
-      setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
-      selectedIndexPattern.popularizeField(field.name, 1);
-    }
-  };
-
-  const getDetailsByField = (ipField: IndexPatternField) =>
-    getDetails(ipField, selectedIndexPattern, state, columns, hits);
-
-  const selectedFields = filterFieldList(groupedFields.selected, fieldFilterState, fieldCounts);
-  const popularFields = filterFieldList(groupedFields.popular, fieldFilterState, fieldCounts);
-  const unpopularFields = filterFieldList(groupedFields.unpopular, fieldFilterState, fieldCounts);
   return (
     <section
       className="sidebar-list"

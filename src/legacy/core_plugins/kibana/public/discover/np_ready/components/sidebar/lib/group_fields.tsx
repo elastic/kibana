@@ -20,6 +20,7 @@ import {
   IndexPatternFieldList,
   IndexPatternField,
 } from '../../../../../../../../../plugins/data/public';
+import { FieldFilterState, isFieldFiltered } from './field_filter';
 
 interface GroupedFields {
   selected: IndexPatternField[];
@@ -28,13 +29,14 @@ interface GroupedFields {
 }
 
 /**
- * group the fields into selected, popular and unpopular
+ * group the fields into selected, popular and unpopular, filter by fieldFilterState
  */
 export function groupFields(
-  fields: IndexPatternFieldList,
+  fields: IndexPatternFieldList | null,
   columns: string[],
   popularLimit: number,
-  fieldCounts: Record<string, number>
+  fieldCounts: Record<string, number>,
+  fieldFilterState: FieldFilterState
 ): GroupedFields {
   const result: GroupedFields = {
     selected: [],
@@ -60,6 +62,9 @@ export function groupFields(
   const fieldsSorted = fields.sort(compareFn);
 
   for (const field of fieldsSorted) {
+    if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
+      continue;
+    }
     if (columns.includes(field.name)) {
       result.selected.push(field);
     } else if (popular.includes(field.name) && field.type !== '_source') {
@@ -68,5 +73,6 @@ export function groupFields(
       result.unpopular.push(field);
     }
   }
+
   return result;
 }

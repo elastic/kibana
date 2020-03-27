@@ -57,17 +57,6 @@ export function setFieldFilterProp(
   return newState;
 }
 
-export function filterFieldList(
-  fieldList: IndexPatternField[],
-  filterState: FieldFilterState,
-  fieldCount: Record<string, number>
-): IndexPatternField[] {
-  if (!Array.isArray(fieldList)) {
-    return [];
-  }
-  return fieldList.filter(field => isFieldFiltered(field, filterState, fieldCount));
-}
-
 export function isFieldFiltered(
   field: IndexPatternField,
   filterState: FieldFilterState,

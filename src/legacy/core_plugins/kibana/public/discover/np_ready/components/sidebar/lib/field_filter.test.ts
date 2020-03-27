@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getDefaultFieldFilter, setFieldFilterProp, filterFieldList } from './field_filter';
+import { getDefaultFieldFilter, setFieldFilterProp, isFieldFiltered } from './field_filter';
 import { IndexPatternField } from '../../../../../../../../../plugins/data/public';
 
 describe('field_filter', function() {
@@ -84,11 +84,12 @@ describe('field_filter', function() {
       { filter: { aggregatable: true, searchable: false }, result: [] },
       { filter: { type: 'string' }, result: ['extension'] },
     ].forEach(test => {
-      const filtered = filterFieldList(
-        fieldList,
-        { ...defaultState, ...test.filter },
-        { bytes: 1, extension: 1 }
-      ).map(field => field.name);
+      const filtered = fieldList
+        .filter(field =>
+          isFieldFiltered(field, { ...defaultState, ...test.filter }, { bytes: 1, extension: 1 })
+        )
+        .map(field => field.name);
+
       expect(filtered).toEqual(test.result);
     });
   });

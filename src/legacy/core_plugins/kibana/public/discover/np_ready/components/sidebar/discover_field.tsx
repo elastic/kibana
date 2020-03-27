@@ -107,7 +107,11 @@ export function DiscoverField({
         data-test-subj={`field-${field.name}-showDetails`}
       >
         <span className="dscSidebarField__fieldIcon">
-          <FieldIcon type={field.type} label={getFieldTypeName(field.type)} />
+          <FieldIcon
+            type={field.type}
+            label={getFieldTypeName(field.type)}
+            scripted={field.scripted}
+          />
         </span>
         <span className="dscSidebarField__name eui-textTruncate">
           <EuiToolTip
