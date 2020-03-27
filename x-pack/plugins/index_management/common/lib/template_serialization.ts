@@ -49,8 +49,8 @@ export function serializeV2Template(template: TemplateDeserialized): TemplateV2S
   };
 }
 
-export function deserializeV1Template(
-  templateEs: TemplateV1Serialized,
+export function deserializeV2Template(
+  templateEs: TemplateV2Serialized,
   managedTemplatePrefix?: string
 ): TemplateDeserialized {
   const {
@@ -58,29 +58,47 @@ export function deserializeV1Template(
     version,
     order,
     index_patterns: indexPatterns,
-    settings,
-    aliases,
-    mappings,
+    template,
+    priority,
+    composed_of: composedOf,
   } = templateEs;
+  const { settings } = template;
 
   const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
     order,
     indexPatterns: indexPatterns.sort(),
-    template: {
-      settings,
-      aliases,
-      mappings,
-    },
+    template,
     ilmPolicy: settings && settings.index && settings.index.lifecycle,
     isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
+    priority,
+    composedOf,
     _kbnMeta: {
       formatVersion: 1,
     },
   };
 
   return deserializedTemplate;
+}
+
+export function deserializeV1Template(
+  templateEs: TemplateV1Serialized,
+  managedTemplatePrefix?: string
+): TemplateDeserialized {
+  const { settings, aliases, mappings, ...rest } = templateEs;
+
+  const deserializedTemplateV2 = deserializeV2Template(
+    { ...rest, template: { aliases, settings, mappings } },
+    managedTemplatePrefix
+  );
+
+  return {
+    ...deserializedTemplateV2,
+    _kbnMeta: {
+      formatVersion: 1,
+    },
+  };
 }
 
 export function deserializeTemplateList(
