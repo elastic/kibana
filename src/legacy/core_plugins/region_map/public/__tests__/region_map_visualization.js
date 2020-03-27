@@ -23,12 +23,18 @@ import _ from 'lodash';
 import ChoroplethLayer from '../choropleth_layer';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
-import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
-import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
-import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
-import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
-import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
-import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_CATALOGUE from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_manifest.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_FILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_files.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_TILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_tiles.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_bright';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_desaturated';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_STYLE_DARK_MAP from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_dark';
 
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';

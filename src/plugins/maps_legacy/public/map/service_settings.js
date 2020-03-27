@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { ORIGIN } from '../../common/origin';
+import { ORIGIN } from '../common/origin';
 import { EMSClient } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import { getInjectedVarFunc } from '../kibana_services';
