@@ -17,8 +17,12 @@ import {
   setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
+  addNote as dispatchAddGlobalTimelineNote,
 } from '../../store/timeline/actions';
-import { addNotes as dispatchAddNotes } from '../../store/app/actions';
+import {
+  addNotes as dispatchAddNotes,
+  updateNote as dispatchUpdateNote,
+} from '../../store/app/actions';
 import {
   defaultTimelineToTimelineModel,
   getNotesCount,
@@ -29,10 +33,19 @@ import {
 } from './helpers';
 import { OpenTimelineResult, DispatchUpdateTimeline } from './types';
 import { KueryFilterQueryKind } from '../../store/model';
+import { Note } from '../../lib/note';
+import moment from 'moment';
+import sinon from 'sinon';
 
 jest.mock('../../store/inputs/actions');
 jest.mock('../../store/timeline/actions');
 jest.mock('../../store/app/actions');
+jest.mock('uuid', () => {
+  return {
+    v1: jest.fn(() => 'uuid.v1()'),
+    v4: jest.fn(() => 'uuid.v4()'),
+  };
+});
 
 describe('helpers', () => {
   let mockResults: OpenTimelineResult[];
@@ -664,10 +677,20 @@ describe('helpers', () => {
 
   describe('dispatchUpdateTimeline', () => {
     const dispatch = jest.fn() as Dispatch;
+    const anchor = '2020-03-27T20:34:51.337Z';
+    const unix = moment(anchor).valueOf();
+    let clock: sinon.SinonFakeTimers;
     let timelineDispatch: DispatchUpdateTimeline;
 
     beforeEach(() => {
+      jest.clearAllMocks();
+
+      clock = sinon.useFakeTimers(unix);
       timelineDispatch = dispatchUpdateTimeline(dispatch);
+    });
+
+    afterEach(function() {
+      clock.restore();
     });
 
     test('it invokes date range picker dispatch', () => {
@@ -792,7 +815,7 @@ describe('helpers', () => {
       });
     });
 
-    test('it invokes note dispatch if duplicate is false', () => {
+    test('it invokes dispatchAddNotes if duplicate is false', () => {
       timelineDispatch({
         duplicate: false,
         id: 'timeline-1',
@@ -809,6 +832,8 @@ describe('helpers', () => {
         timeline: mockTimelineModel,
       })();
 
+      expect(dispatchAddGlobalTimelineNote).not.toHaveBeenCalled();
+      expect(dispatchUpdateNote).not.toHaveBeenCalled();
       expect(dispatchAddNotes).toHaveBeenCalledWith({
         notes: [
           {
@@ -821,6 +846,34 @@ describe('helpers', () => {
             version: undefined,
           },
         ],
+      });
+    });
+
+    test('it invokes dispatch to create a timeline note if duplicate is true and ruleNote exists', () => {
+      timelineDispatch({
+        duplicate: true,
+        id: 'timeline-1',
+        from: 1585233356356,
+        to: 1585233716356,
+        notes: [],
+        timeline: mockTimelineModel,
+        ruleNote: '# this would be some markdown',
+      })();
+      const expectedNote: Note = {
+        created: new Date(anchor),
+        id: 'uuid.v4()',
+        lastEdit: null,
+        note: '# this would be some markdown',
+        saveObjectId: null,
+        user: 'elastic',
+        version: null,
+      };
+
+      expect(dispatchAddNotes).not.toHaveBeenCalled();
+      expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
+      expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
+        id: 'timeline-1',
+        noteId: 'uuid.v4()',
       });
     });
   });

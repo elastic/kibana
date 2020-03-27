@@ -2200,5 +2200,5 @@ export const defaultTimelineProps: CreateTimelineProps = {
     width: 1100,
   },
   to: 1541444605937,
-  ruleGuide: '# this is some markdown documentation',
+  ruleNote: '# this is some markdown documentation',
 };

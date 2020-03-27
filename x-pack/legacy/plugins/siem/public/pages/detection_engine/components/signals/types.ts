@@ -54,7 +54,7 @@ export interface CreateTimelineProps {
   from: number;
   timeline: TimelineModel;
   to: number;
-  ruleGuide?: string;
+  ruleNote?: string;
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;

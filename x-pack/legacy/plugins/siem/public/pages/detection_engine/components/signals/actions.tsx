@@ -154,7 +154,7 @@ export const sendSignalToTimelineAction = async ({
             show: true,
           },
           to,
-          ruleGuide: noteContent,
+          ruleNote: noteContent,
         });
       }
     } catch {
@@ -204,7 +204,7 @@ export const sendSignalToTimelineAction = async ({
         },
       },
       to,
-      ruleGuide: noteContent,
+      ruleNote: noteContent,
     });
   }
 };

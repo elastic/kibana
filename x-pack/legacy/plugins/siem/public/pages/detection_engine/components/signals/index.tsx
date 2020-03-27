@@ -114,7 +114,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
 
   // Callback for creating a new timeline -- utilized by row/batch actions
   const createTimelineCallback = useCallback(
-    ({ from: fromTimeline, timeline, to: toTimeline, ruleGuide }: CreateTimelineProps) => {
+    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
       updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
       updateTimeline({
         duplicate: true,
@@ -126,7 +126,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
           show: true,
         },
         to: toTimeline,
-        ruleGuide,
+        ruleNote,
       })();
     },
     [updateTimeline, updateTimelineIsLoading]

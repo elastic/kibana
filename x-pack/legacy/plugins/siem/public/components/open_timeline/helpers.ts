@@ -256,7 +256,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   notes,
   timeline,
   to,
-  ruleGuide,
+  ruleNote,
 }: UpdateTimeline): (() => void) => () => {
   dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
   dispatch(dispatchAddTimeline({ id, timeline }));
@@ -289,9 +289,9 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     );
   }
 
-  if (duplicate && ruleGuide && !isEmpty(ruleGuide)) {
+  if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
     const getNewNoteId = (): string => uuid.v4();
-    const newNote = createNote({ newNote: ruleGuide, getNewNoteId });
+    const newNote = createNote({ newNote: ruleNote, getNewNoteId });
     dispatch(dispatchUpdateNote({ note: newNote }));
     dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
   }
