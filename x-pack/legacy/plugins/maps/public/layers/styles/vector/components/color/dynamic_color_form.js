@@ -28,20 +28,12 @@ export function DynamicColorForm({
     };
     if (type === COLOR_MAP_TYPE.ORDINAL) {
       newColorOptions.useCustomColorRamp = useCustomColorMap;
-      if (customColorMap) {
-        newColorOptions.customColorRamp = customColorMap;
-      }
-      if (color) {
-        newColorOptions.color = color;
-      }
+      newColorOptions.customColorRamp = customColorMap;
+      newColorOptions.color = color;
     } else {
       newColorOptions.useCustomColorPalette = useCustomColorMap;
-      if (customColorMap) {
-        newColorOptions.customColorPalette = customColorMap;
-      }
-      if (color) {
-        newColorOptions.colorCategory = color;
-      }
+      newColorOptions.customColorPalette = customColorMap;
+      newColorOptions.colorCategory = color;
     }
 
     onDynamicStyleChange(styleProperty.getStyleName(), newColorOptions);
