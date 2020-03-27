@@ -44,6 +44,9 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
           full_name: {
             type: 'keyword',
           },
+          email: {
+            type: 'keyword',
+          },
         },
       },
       updated_at: {

@@ -45,6 +45,7 @@ import {
   EXTENDED_NUMERICAL_TYPES,
   toggleSelectedField,
   isKeywordAndTextType,
+  sortRegressionResultsFields,
 } from '../../../../common/fields';
 
 import {
@@ -134,79 +135,81 @@ export const ResultsTable: FC<Props> = React.memo(
       tableItems,
     } = useExploreData(jobConfig, selectedFields, setSelectedFields, setDocFields, setDepVarType);
 
-    const columns: Array<ColumnType<TableItem>> = selectedFields.map(field => {
-      const { type } = field;
-      const isNumber =
-        type !== undefined &&
-        (BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type));
+    const columns: Array<ColumnType<TableItem>> = selectedFields
+      .sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig))
+      .map(field => {
+        const { type } = field;
+        const isNumber =
+          type !== undefined &&
+          (BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type));
 
-      const column: ColumnType<TableItem> = {
-        field: field.name,
-        name: field.name,
-        sortable: true,
-        truncateText: true,
-      };
+        const column: ColumnType<TableItem> = {
+          field: field.name,
+          name: field.name,
+          sortable: true,
+          truncateText: true,
+        };
 
-      const render = (d: any, fullItem: EsDoc) => {
-        if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
-          // If the cells data is an array of strings, return as a comma separated list.
-          // The list will get limited to 5 items with `…` at the end if there's more in the original array.
-          return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
-        } else if (Array.isArray(d)) {
-          // If the cells data is an array of e.g. objects, display a 'array' badge with a
-          // tooltip that explains that this type of field is not supported in this table.
-          return (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.ml.dataframe.analytics.regressionExploration.indexArrayToolTipContent',
-                {
-                  defaultMessage:
-                    'The full content of this array based column cannot be displayed.',
-                }
-              )}
-            >
-              <EuiBadge>
-                {i18n.translate(
-                  'xpack.ml.dataframe.analytics.regressionExploration.indexArrayBadgeContent',
+        const render = (d: any, fullItem: EsDoc) => {
+          if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
+            // If the cells data is an array of strings, return as a comma separated list.
+            // The list will get limited to 5 items with `…` at the end if there's more in the original array.
+            return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
+          } else if (Array.isArray(d)) {
+            // If the cells data is an array of e.g. objects, display a 'array' badge with a
+            // tooltip that explains that this type of field is not supported in this table.
+            return (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.ml.dataframe.analytics.regressionExploration.indexArrayToolTipContent',
                   {
-                    defaultMessage: 'array',
+                    defaultMessage:
+                      'The full content of this array based column cannot be displayed.',
                   }
                 )}
-              </EuiBadge>
-            </EuiToolTip>
-          );
+              >
+                <EuiBadge>
+                  {i18n.translate(
+                    'xpack.ml.dataframe.analytics.regressionExploration.indexArrayBadgeContent',
+                    {
+                      defaultMessage: 'array',
+                    }
+                  )}
+                </EuiBadge>
+              </EuiToolTip>
+            );
+          }
+
+          return d;
+        };
+
+        if (isNumber) {
+          column.dataType = 'number';
+          column.render = render;
+        } else if (typeof type !== 'undefined') {
+          switch (type) {
+            case ES_FIELD_TYPES.BOOLEAN:
+              column.dataType = ES_FIELD_TYPES.BOOLEAN;
+              break;
+            case ES_FIELD_TYPES.DATE:
+              column.align = 'right';
+              column.render = (d: any) => {
+                if (d !== undefined) {
+                  return formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+                }
+                return d;
+              };
+              break;
+            default:
+              column.render = render;
+              break;
+          }
+        } else {
+          column.render = render;
         }
 
-        return d;
-      };
-
-      if (isNumber) {
-        column.dataType = 'number';
-        column.render = render;
-      } else if (typeof type !== 'undefined') {
-        switch (type) {
-          case ES_FIELD_TYPES.BOOLEAN:
-            column.dataType = ES_FIELD_TYPES.BOOLEAN;
-            break;
-          case ES_FIELD_TYPES.DATE:
-            column.align = 'right';
-            column.render = (d: any) => {
-              if (d !== undefined) {
-                return formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-              }
-              return d;
-            };
-            break;
-          default:
-            column.render = render;
-            break;
-        }
-      } else {
-        column.render = render;
-      }
-
-      return column;
-    });
+        return column;
+      });
 
     const docFieldsCount = docFields.length;
 

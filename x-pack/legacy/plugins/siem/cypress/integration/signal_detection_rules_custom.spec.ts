@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newRule } from '../objects/rule';
+import { newRule, totalNumberOfPrebuiltRules } from '../objects/rule';
 
 import {
   ABOUT_FALSE_POSITIVES,
   ABOUT_MITRE,
   ABOUT_RISK,
+  ABOUT_RULE_DESCRIPTION,
   ABOUT_SEVERITY,
   ABOUT_STEP,
   ABOUT_TAGS,
@@ -22,7 +23,6 @@ import {
   SCHEDULE_LOOPBACK,
   SCHEDULE_RUNS,
   SCHEDULE_STEP,
-  ABOUT_RULE_DESCRIPTION,
 } from '../screens/rule_details';
 import {
   CUSTOM_RULES_BTN,
@@ -31,6 +31,7 @@ import {
   RULES_ROW,
   RULES_TABLE,
   SEVERITY,
+  SHOWING_RULES_TEXT,
 } from '../screens/signal_detection_rules';
 
 import {
@@ -45,9 +46,12 @@ import {
 } from '../tasks/detections';
 import {
   changeToThreeHundredRowsPerPage,
+  deleteFirstRule,
+  deleteSelectedRules,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
+  selectNumberOfRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/signal_detection_rules';
@@ -83,7 +87,7 @@ describe('Signal detection rules, custom', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    const expectedNumberOfRules = 93;
+    const expectedNumberOfRules = totalNumberOfPrebuiltRules + 1;
     cy.get(RULES_TABLE).then($table => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
@@ -190,5 +194,69 @@ describe('Signal detection rules, custom', () => {
       .eq(SCHEDULE_LOOPBACK)
       .invoke('text')
       .should('eql', '1m');
+  });
+});
+
+describe('Deletes custom rules', () => {
+  beforeEach(() => {
+    esArchiverLoad('custom_rules');
+    loginAndWaitForPageWithoutDateRange(DETECTIONS);
+    waitForSignalsPanelToBeLoaded();
+    waitForSignalsIndexToBeCreated();
+    goToManageSignalDetectionRules();
+  });
+
+  after(() => {
+    esArchiverUnload('custom_rules');
+  });
+
+  it('Deletes one rule', () => {
+    cy.get(RULES_TABLE)
+      .find(RULES_ROW)
+      .then(rules => {
+        const initialNumberOfRules = rules.length;
+        const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
+
+        cy.get(SHOWING_RULES_TEXT)
+          .invoke('text')
+          .should('eql', `Showing ${initialNumberOfRules} rules`);
+
+        deleteFirstRule();
+        waitForRulesToBeLoaded();
+
+        cy.get(RULES_TABLE).then($table => {
+          cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
+        });
+        cy.get(SHOWING_RULES_TEXT)
+          .invoke('text')
+          .should('eql', `Showing ${expectedNumberOfRulesAfterDeletion} rules`);
+        cy.get(CUSTOM_RULES_BTN)
+          .invoke('text')
+          .should('eql', `Custom rules (${expectedNumberOfRulesAfterDeletion})`);
+      });
+  });
+
+  it('Deletes more than one rule', () => {
+    cy.get(RULES_TABLE)
+      .find(RULES_ROW)
+      .then(rules => {
+        const initialNumberOfRules = rules.length;
+        const numberOfRulesToBeDeleted = 3;
+        const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - numberOfRulesToBeDeleted;
+
+        selectNumberOfRules(numberOfRulesToBeDeleted);
+        deleteSelectedRules();
+        waitForRulesToBeLoaded();
+
+        cy.get(RULES_TABLE).then($table => {
+          cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
+        });
+        cy.get(SHOWING_RULES_TEXT)
+          .invoke('text')
+          .should('eql', `Showing ${expectedNumberOfRulesAfterDeletion} rule`);
+        cy.get(CUSTOM_RULES_BTN)
+          .invoke('text')
+          .should('eql', `Custom rules (${expectedNumberOfRulesAfterDeletion})`);
+      });
   });
 });

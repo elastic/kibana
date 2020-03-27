@@ -25,3 +25,6 @@ import { MapsPlugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new MapsPlugin();
 };
+
+export { RenderTooltipContentParams, ITooltipProperty } from './layers/tooltips/tooltip_property';
+export { MapEmbeddable, MapEmbeddableInput } from './embeddable';
