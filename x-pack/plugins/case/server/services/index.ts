@@ -75,13 +75,13 @@ interface PatchCasesArgs extends ClientArgs {
 }
 interface UpdateCommentArgs extends ClientArgs {
   commentId: string;
-  updatedAttributes: Partial<CommentAttributes & PushedArgs>;
+  updatedAttributes: Partial<CommentAttributes>;
   version?: string;
 }
 
 interface PatchComment {
   commentId: string;
-  updatedAttributes: Partial<CommentAttributes & PushedArgs>;
+  updatedAttributes: Partial<CommentAttributes>;
   version?: string;
 }
 
