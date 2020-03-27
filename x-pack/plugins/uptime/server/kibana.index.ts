@@ -6,7 +6,6 @@
 
 import { Request, Server } from 'hapi';
 import { PLUGIN } from '../../../legacy/plugins/uptime/common/constants';
-import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
@@ -25,19 +24,21 @@ export interface KibanaServer extends Server {
 }
 
 export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCorePlugins) => {
-  const { features, usageCollection } = plugins;
+  const { features } = plugins;
   const libs = compose(server);
-  KibanaTelemetryAdapter.registerUsageCollector(usageCollection);
 
   features.registerFeature({
     id: PLUGIN.ID,
     name: PLUGIN.NAME,
+    order: 1000,
     navLinkId: PLUGIN.ID,
     icon: 'uptimeApp',
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
     privileges: {
       all: {
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
         api: ['uptime-read', 'uptime-write'],
         savedObject: {
           all: [umDynamicSettings.name],
@@ -46,6 +47,8 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         ui: ['save', 'configureSettings', 'show'],
       },
       read: {
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
         api: ['uptime-read'],
         savedObject: {
           all: [],
