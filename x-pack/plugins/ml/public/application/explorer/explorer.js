@@ -58,13 +58,12 @@ import {
   DEFAULT_QUERY_LANG,
 } from './components/explorer_query_bar/explorer_query_bar';
 import {
+  getDateFormatTz,
   removeFilterFromQueryString,
   getQueryPattern,
   escapeParens,
   escapeDoubleQuotes,
-} from '../components/kql_filter_bar/utils';
-
-import { getDateFormatTz } from './explorer_utils';
+} from './explorer_utils';
 import { getSwimlaneContainerWidth } from './legacy_utils';
 
 import {
@@ -266,7 +265,7 @@ export class Explorer extends React.Component {
         explorerService.setInfluencerFilterSettings(settings);
       }
     } catch (e) {
-      console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
+      console.log('Invalid query syntax from table', e); // eslint-disable-line no-console
 
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
