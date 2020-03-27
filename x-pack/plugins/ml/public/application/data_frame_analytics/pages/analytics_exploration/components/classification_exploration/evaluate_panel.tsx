@@ -235,7 +235,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       hasIsTrainingClause[0] &&
       hasIsTrainingClause[0].match[`${resultsField}.is_training`];
 
-    const noTrainingQuery = isTrainingClause === false;
+    const noTrainingQuery = isTrainingClause === false || isTrainingClause === undefined;
 
     if (noTrainingQuery) {
       setDataSubsetTitle(SUBSET_TITLE.ENTIRE);
