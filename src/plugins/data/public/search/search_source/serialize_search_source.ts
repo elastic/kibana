@@ -58,7 +58,7 @@ export function serializeSearchSource(searchSource: ISearchSource) {
       id: indexId,
     });
     serializedSearchSourceFields = {
-      ...searchSourceFields,
+      ...serializedSearchSourceFields,
       indexRefName: refName,
       index: undefined,
     };
@@ -66,7 +66,7 @@ export function serializeSearchSource(searchSource: ISearchSource) {
   if (originalFilters) {
     const filters = getFilters(originalFilters);
     serializedSearchSourceFields = {
-      ...searchSourceFields,
+      ...serializedSearchSourceFields,
       filter: filters.map((filterRow, i) => {
         if (!filterRow.meta || !filterRow.meta.index) {
           return filterRow;
