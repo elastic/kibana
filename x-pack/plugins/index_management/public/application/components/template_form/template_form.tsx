@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 
 import { serializers } from '../../../shared_imports';
-import { TemplateDeserialized } from '../../../../common';
+import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../../common';
 import { TemplateSteps } from './template_steps';
 import { StepAliases, StepLogistics, StepMappings, StepSettings, StepReview } from './steps';
 import { StepProps, DataGetterFunc } from './types';
@@ -53,8 +53,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     template: {},
     isManaged: false,
     _kbnMeta: {
-      // When the V2 API will be ready, we will create V2 template format
-      formatVersion: 1,
+      formatVersion: DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
     },
   },
   onSave,

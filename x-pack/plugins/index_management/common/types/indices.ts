@@ -5,7 +5,7 @@
  */
 
 interface IndexModule {
-  number_of_shards: number;
+  number_of_shards: number | string;
   codec: string;
   routing_partition_size: number;
   load_fixed_bitset_filters_eagerly: boolean;

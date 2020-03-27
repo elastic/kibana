@@ -48,7 +48,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   // Filter out system index templates
   const filteredTemplates = useMemo(
-    () => (templates !== null ? templates.filter(template => !template.name.startsWith('.')) : []),
+    () => (templates ? templates.filter(template => !template.name.startsWith('.')) : []),
     [templates]
   );
 
