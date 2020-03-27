@@ -9,6 +9,7 @@ import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
 import { createAPIKey } from './security';
 
+export { invalidateAPIKey } from './security';
 export * from './enrollment_api_key';
 
 export async function generateOutputApiKey(
@@ -77,7 +78,7 @@ export async function getEnrollmentAPIKeyById(
   return enrollmentAPIKey;
 }
 
-export function parseApiKey(headers: KibanaRequest['headers']) {
+export function parseApiKeyFromHeaders(headers: KibanaRequest['headers']) {
   const authorizationHeader = headers.authorization;
 
   if (!authorizationHeader) {
@@ -93,9 +94,11 @@ export function parseApiKey(headers: KibanaRequest['headers']) {
   }
 
   const apiKey = authorizationHeader.split(' ')[1];
-  if (!apiKey) {
-    throw new Error('Authorization header is malformed');
-  }
+
+  return parseApiKey(apiKey);
+}
+
+export function parseApiKey(apiKey: string) {
   const apiKeyId = Buffer.from(apiKey, 'base64')
     .toString('utf8')
     .split(':')[0];

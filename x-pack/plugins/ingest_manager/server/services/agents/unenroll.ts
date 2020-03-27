@@ -7,6 +7,8 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentSOAttributes } from '../../types';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { getAgent } from './crud';
+import * as APIKeyService from '../api_keys';
 
 export async function unenrollAgents(
   soClient: SavedObjectsClientContract,
@@ -15,9 +17,7 @@ export async function unenrollAgents(
   const response = [];
   for (const id of toUnenrollIds) {
     try {
-      await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, id, {
-        active: false,
-      });
+      await unenrollAgent(soClient, id);
       response.push({
         id,
         success: true,
@@ -32,4 +32,23 @@ export async function unenrollAgents(
   }
 
   return response;
+}
+
+async function unenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
+  const agent = await getAgent(soClient, agentId);
+
+  await Promise.all([
+    agent.access_api_key_id
+      ? APIKeyService.invalidateAPIKey(soClient, agent.access_api_key_id)
+      : undefined,
+    agent.default_api_key
+      ? APIKeyService.invalidateAPIKey(
+          soClient,
+          APIKeyService.parseApiKey(agent.default_api_key).apiKeyId
+        )
+      : undefined,
+  ]);
+  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
+    active: false,
+  });
 }
