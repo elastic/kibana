@@ -250,7 +250,7 @@ export class TimeSeriesExplorer extends React.Component {
     if (operator === '+' && entity.fieldValue !== value) {
       resultValue = value;
     } else if (operator === '-' && entity.fieldValue === value) {
-      resultValue = '';
+      resultValue = null;
     } else {
       return;
     }
