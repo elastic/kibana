@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createBrowserHistory } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloProvider } from 'react-apollo';
@@ -41,8 +40,7 @@ export async function startApp(
   Router: AppRouter,
   triggersActionsUI: TriggersAndActionsUIPublicPluginSetup
 ) {
-  const { element, appBasePath } = params;
-  const history = createBrowserHistory({ basename: appBasePath });
+  const { element, history } = params;
   const libs$ = new BehaviorSubject(libs);
   const store = createStore({
     apolloClient: libs$.pipe(pluck('apolloClient')),

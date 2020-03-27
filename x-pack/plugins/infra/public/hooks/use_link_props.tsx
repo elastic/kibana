@@ -10,6 +10,7 @@ import url from 'url';
 import { url as urlUtils } from '../../../../../src/plugins/kibana_utils/public';
 import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
 import { useHistory } from '../utils/history_context';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 type Search = Record<string, string | string[]>;
 
@@ -30,29 +31,36 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
 
   const history = useHistory();
   const prefixer = usePrefixPathWithBasepath();
+  const navigateToApp = useKibana().services.application?.navigateToApp;
 
   const encodedSearch = useMemo(() => {
     return search ? encodeSearch(search) : undefined;
   }, [search]);
 
+  const mergedHash = useMemo(() => {
+    // The URI spec defines that the query should appear before the fragment
+    // https://tools.ietf.org/html/rfc3986#section-3 (e.g. url.format()). However, in Kibana, apps that use
+    // hash based routing expect the query to be part of the hash. This will handle that.
+    return hash && encodedSearch ? `${hash}?${encodedSearch}` : hash;
+  }, [hash, encodedSearch]);
+
+  const mergedPathname = useMemo(() => {
+    return pathname && encodedSearch ? `${pathname}?${encodedSearch}` : pathname;
+  }, [pathname, encodedSearch]);
+
   const internalLinkResult = useMemo(() => {
-    // When the logs / metrics apps are first mounted a history instance is setup with a 'basename' equal to the
-    // 'appBasePath' received from Core's 'AppMountParams', e.g. /BASE_PATH/s/SPACE_ID/app/APP_ID. With internal
-    // linking we are using 'createHref' and 'push' on top of this history instance. So a pathname of /inventory used within
+    // When the logs / metrics apps are first mounted a history instance is passed through with the app mount parameters,
+    // this is setup with a 'basename' in advance (E.g. /BASE_PATH/s/SPACE_ID/app/APP_ID). With internal
+    // linking we are using 'createAbsoluteHref' and 'push' on top of this history instance. So a pathname of /inventory used within
     // the metrics app will ultimatey end up as /BASE_PATH/s/SPACE_ID/app/metrics/inventory. React-router responds to this
     // as it is instantiated with the same history instance.
-    return history?.createHref({
+    return history?.createAbsoluteHref({
       pathname: pathname ? formatPathname(pathname) : undefined,
       search: encodedSearch,
     });
   }, [history, pathname, encodedSearch]);
 
   const externalLinkResult = useMemo(() => {
-    // The URI spec defines that the query should appear before the fragment
-    // https://tools.ietf.org/html/rfc3986#section-3 (e.g. url.format()). However, in Kibana, apps that use
-    // hash based routing expect the query to be part of the hash. This will handle that.
-    const mergedHash = hash && encodedSearch ? `${hash}?${encodedSearch}` : hash;
-
     const link = url.format({
       pathname,
       hash: mergedHash,
@@ -60,7 +68,7 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
     });
 
     return prefixer(app, link);
-  }, [hash, encodedSearch, pathname, prefixer, app]);
+  }, [mergedHash, hash, encodedSearch, pathname, prefixer, app]);
 
   const onClick = useMemo(() => {
     // If these results are equal we know we're trying to navigate within the same application
@@ -76,9 +84,25 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
         }
       };
     } else {
-      return undefined;
+      return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+        e.preventDefault();
+        if (navigateToApp) {
+          const navigationPath = mergedHash ? `#${mergedHash}` : mergedPathname;
+          navigateToApp(app, { path: navigationPath ? navigationPath : undefined });
+        }
+      };
     }
-  }, [internalLinkResult, externalLinkResult, history, pathname, encodedSearch]);
+  }, [
+    internalLinkResult,
+    externalLinkResult,
+    history,
+    pathname,
+    encodedSearch,
+    navigateToApp,
+    mergedHash,
+    mergedPathname,
+    app,
+  ]);
 
   return {
     href: externalLinkResult,

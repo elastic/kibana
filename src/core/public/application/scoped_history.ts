@@ -227,6 +227,16 @@ export class ScopedHistory<HistoryLocationState = unknown>
     return this.parentHistory.createHref(location);
   };
 
+  /**
+   * Creates an absolute href (string) to the location.
+   *
+   * @param location
+   */
+  public createAbsoluteHref = (location: LocationDescriptorObject<HistoryLocationState>): Href => {
+    this.verifyActive();
+    return this.parentHistory.createHref(this.prependBasePath(location));
+  };
+
   private prependBasePath(path: Path): Path;
   private prependBasePath(
     location: LocationDescriptorObject<HistoryLocationState>
