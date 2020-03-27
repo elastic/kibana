@@ -29,14 +29,16 @@ interface EntityControlProps {
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
   forceSelection: boolean;
-  options: EuiComboBoxOptionOption[];
+  options: Array<EuiComboBoxOptionOption<string>>;
 }
 
 interface EntityControlState {
-  selectedOptions: EuiComboBoxOptionOption[] | undefined;
+  selectedOptions: Array<EuiComboBoxOptionOption<string>> | undefined;
   isLoading: boolean;
-  options: EuiComboBoxOptionOption[] | undefined;
+  options: Array<EuiComboBoxOptionOption<string>> | undefined;
 }
+
+export const EMPTY_FIELD_VALUE_LABEL = '""';
 
 export class EntityControl extends Component<EntityControlProps, EntityControlState> {
   inputRef: any;
@@ -53,16 +55,16 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
 
     const { fieldValue } = entity;
 
-    let selectedOptionsUpdate: EuiComboBoxOptionOption[] | undefined = selectedOptions;
+    let selectedOptionsUpdate: Array<EuiComboBoxOptionOption<string>> | undefined = selectedOptions;
     if (
-      (selectedOptions === undefined && fieldValue.length > 0) ||
+      (selectedOptions === undefined && fieldValue !== null) ||
       (Array.isArray(selectedOptions) &&
-        // @ts-ignore
-        selectedOptions[0].label !== fieldValue &&
-        fieldValue.length > 0)
+      // @ts-ignore
+      selectedOptions[0].value !== fieldValue && // FIXME
+        fieldValue !== null)
     ) {
-      selectedOptionsUpdate = [{ label: fieldValue }];
-    } else if (Array.isArray(selectedOptions) && fieldValue.length === 0) {
+      selectedOptionsUpdate = [{ label: EMPTY_FIELD_VALUE_LABEL, value: fieldValue }];
+    } else if (Array.isArray(selectedOptions) && fieldValue === null) {
       selectedOptionsUpdate = undefined;
     }
 
@@ -84,14 +86,14 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     }
   }
 
-  onChange = (selectedOptions: EuiComboBoxOptionOption[]) => {
+  onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const options = selectedOptions.length > 0 ? selectedOptions : undefined;
     this.setState({
       selectedOptions: options,
     });
 
     const fieldValue =
-      Array.isArray(options) && options[0].label.length > 0 ? options[0].label : '';
+      Array.isArray(options) && options[0].value !== null ? options[0].value : null;
     this.props.entityFieldValueChanged(this.props.entity, fieldValue);
   };
 
