@@ -72,7 +72,6 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
           <EuiFlexItem grow={true}>
             <EuiButtonEmpty
               style={{ width: 100 }}
-              fullWidth={false}
               onClick={() => onClose()}
               disabled={isCreatingJob || isLoadingMLJob}
             >
