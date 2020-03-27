@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import pRetry from 'p-retry';
 import { IClusterClient, Logger } from 'src/core/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
@@ -34,27 +34,36 @@ export async function createOrUpdateIndex({
   logger: Logger;
 }) {
   try {
-    const { callAsInternalUser } = esClient;
-    const indexExists = await callAsInternalUser('indices.exists', { index });
-    const result = indexExists
-      ? await updateExistingIndex({
-          index,
-          callAsInternalUser,
-          mappings
-        })
-      : await createNewIndex({
-          index,
-          callAsInternalUser,
-          mappings
-        });
+    /* Some times Kibana starts before ES is ready. When it happens an error is thrown while creating an index.
+     * To make sure create index is called again when ES is ready, it keeps trying for more 10 times.
+     * After that, an error is thrown and the index is not created.
+     * More information here: https://github.com/elastic/kibana/issues/59420
+     */
+    await pRetry(async () => {
+      const { callAsInternalUser } = esClient;
+      const indexExists = await callAsInternalUser('indices.exists', { index });
+      const result = indexExists
+        ? await updateExistingIndex({
+            index,
+            callAsInternalUser,
+            mappings
+          })
+        : await createNewIndex({
+            index,
+            callAsInternalUser,
+            mappings
+          });
 
-    if (!result.acknowledged) {
-      const resultError =
-        result && result.error && JSON.stringify(result.error);
-      throw new Error(resultError);
-    }
+      if (!result.acknowledged) {
+        const resultError =
+          result && result.error && JSON.stringify(result.error);
+        throw new Error(resultError);
+      }
+    });
   } catch (e) {
-    logger.error(`Could not create APM index: '${index}'. Error: ${e.message}`);
+    logger.error(
+      `Could not create APM index: '${index}'. Error: ${e.message}.`
+    );
   }
 }
 
