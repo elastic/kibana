@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { addDefaultField } from '../lib/query_default_field';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
@@ -45,6 +46,25 @@ export function registerQueryDefaultFieldRoutes({ router }: RouteDependencies) {
             fieldTypes: string[];
             otherFields?: string[];
           };
+
+          let settings: any;
+          try {
+            settings = await adminClient.callAsCurrentUser('indices.getSettings', {
+              index: indexName,
+            });
+          } catch (e) {
+            return response.customError({
+              statusCode: e.statusCode,
+              body: e.message,
+            });
+          }
+
+          // Verify index.query.default_field is not already set.
+          if (get(settings, `${indexName}.settings.index.query.default_field`)) {
+            return response.badRequest({
+              body: `Index ${indexName} already has index.query.default_field set`,
+            });
+          }
 
           return response.ok({
             body: await addDefaultField(
