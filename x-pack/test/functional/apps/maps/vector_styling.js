@@ -15,14 +15,12 @@ export default function({ getPageObjects }) {
     });
 
     describe('categorical styling', () => {
-      before(async () => {
-        await PageObjects.maps.openLayerPanel('logstash');
-      });
-
       it('should provide auto complete suggestions', async () => {
+        await PageObjects.maps.openLayerPanel('logstash');
         await PageObjects.maps.setStyleByValue('fillColor', 'machine.os.raw');
         await PageObjects.maps.selectCustomColorRamp('fillColor');
         const suggestions = await PageObjects.maps.getCategorySuggestions();
+        await PageObjects.maps.closeLayerPanel();
         expect(
           suggestions
             .trim()
