@@ -18,6 +18,7 @@ import { FieldMappingRow } from './field_mapping_row';
 import * as i18n from './translations';
 
 import { defaultMapping } from '../../../../lib/connectors/config';
+import { setActionTypeToMapping, setThirdPartyToMapping } from './utils';
 
 const FieldRowWrapper = styled.div`
   margin-top: 8px;
@@ -57,14 +58,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   const onChangeActionType = useCallback(
     (caseField: CaseField, newActionType: ActionType) => {
       const myMapping = mapping ?? defaultMapping;
-      const findItemIndex = myMapping.findIndex(item => item.source === caseField);
-      if (findItemIndex >= 0) {
-        onChangeMapping([
-          ...myMapping.slice(0, findItemIndex),
-          { ...myMapping[findItemIndex], actionType: newActionType },
-          ...myMapping.slice(findItemIndex + 1),
-        ]);
-      }
+      onChangeMapping(setActionTypeToMapping(caseField, newActionType, myMapping));
     },
     [mapping]
   );
@@ -72,16 +66,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   const onChangeThirdParty = useCallback(
     (caseField: CaseField, newThirdPartyField: ThirdPartyField) => {
       const myMapping = mapping ?? defaultMapping;
-      onChangeMapping(
-        myMapping.map(item => {
-          if (item.source !== caseField && item.target === newThirdPartyField) {
-            return { ...item, target: 'not_mapped' };
-          } else if (item.source === caseField) {
-            return { ...item, target: newThirdPartyField };
-          }
-          return item;
-        })
-      );
+      onChangeMapping(setThirdPartyToMapping(caseField, newThirdPartyField, myMapping));
     },
     [mapping]
   );

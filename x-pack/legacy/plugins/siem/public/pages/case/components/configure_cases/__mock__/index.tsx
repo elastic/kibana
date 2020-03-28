@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Connector } from '../../../../../containers/case/configure/types';
+import {
+  Connector,
+  CasesConfigurationMapping,
+} from '../../../../../containers/case/configure/types';
 
 export const connectors: Connector[] = [
   {
@@ -60,5 +63,23 @@ export const connectors: Connector[] = [
         ],
       },
     },
+  },
+];
+
+export const mapping: CasesConfigurationMapping[] = [
+  {
+    source: 'title',
+    target: 'short_description',
+    actionType: 'overwrite',
+  },
+  {
+    source: 'description',
+    target: 'description',
+    actionType: 'append',
+  },
+  {
+    source: 'comments',
+    target: 'comments',
+    actionType: 'append',
   },
 ];
