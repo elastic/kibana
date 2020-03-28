@@ -23,6 +23,7 @@ exports[`ClosureOptions it renders 1`] = `
   >
     <Memo(ClosureOptionsRadioComponent)
       closureTypeSelected="close-by-user"
+      data-test-subj="case-closure-options-radio"
       disabled={false}
       onChangeClosureType={[MockFunction]}
     />

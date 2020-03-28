@@ -38,6 +38,7 @@ exports[`Connectors it renders 1`] = `
     >
       <Memo(ConnectorsDropdownComponent)
         connectors={Array []}
+        data-test-subj="case-connectors-dropdown"
         disabled={false}
         isLoading={false}
         onChange={[MockFunction]}

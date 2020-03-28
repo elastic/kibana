@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ClosureOptionsRadio  it renders 1`] = `
+exports[`ClosureOptionsRadio it renders 1`] = `
 <EuiRadioGroup
   data-test-subj="closure-options-radio-group"
   disabled={false}

@@ -38,6 +38,7 @@ const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({
           closureTypeSelected={closureTypeSelected}
           disabled={disabled}
           onChangeClosureType={onChangeClosureType}
+          data-test-subj="case-closure-options-radio"
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

@@ -45,6 +45,7 @@ describe('ClosureOptions', () => {
         .exists()
     ).toBe(true);
   });
+
   test('it shows the right side', () => {
     const wrapper = mount(
       <TestProviders>
@@ -59,6 +60,25 @@ describe('ClosureOptions', () => {
     expect(
       wrapper
         .find('[data-test-subj="case-closure-options-form-row"]')
+        .first()
+        .exists()
+    ).toBe(true);
+  });
+
+  test('it shows closure options', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ClosureOptions
+          disabled={false}
+          closureTypeSelected="close-by-user"
+          onChangeClosureType={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="case-closure-options-radio"]')
         .first()
         .exists()
     ).toBe(true);

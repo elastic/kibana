@@ -52,6 +52,7 @@ describe('Connectors', () => {
         .exists()
     ).toBe(true);
   });
+
   test('it shows the right side', () => {
     const wrapper = mount(
       <TestProviders>
@@ -69,6 +70,28 @@ describe('Connectors', () => {
     expect(
       wrapper
         .find('[data-test-subj="case-connectors-form-row"]')
+        .first()
+        .exists()
+    ).toBe(true);
+  });
+
+  test('it shows the connectors dropdown', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Connectors
+          connectors={[]}
+          disabled={false}
+          selectedConnector={'none'}
+          isLoading={false}
+          onChangeConnector={jest.fn()}
+          handleShowAddFlyout={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="case-connectors-dropdown"]')
         .first()
         .exists()
     ).toBe(true);
