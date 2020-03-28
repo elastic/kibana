@@ -42,7 +42,7 @@ export default function(kibana: any) {
               .required(),
           },
         },
-        async handler(request: CheckAADRequest) {
+        handler: (async (request: CheckAADRequest) => {
           let namespace: string | undefined;
           const spacesPlugin = server.plugins.spaces;
           if (spacesPlugin && request.payload.spaceId) {
@@ -52,7 +52,7 @@ export default function(kibana: any) {
             namespace,
           });
           return { success: true };
-        },
+        }) as Hapi.Lifecycle.Method,
       });
     },
   });

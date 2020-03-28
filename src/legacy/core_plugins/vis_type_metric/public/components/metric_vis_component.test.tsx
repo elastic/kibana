@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MetricVisComponent, MetricVisComponentProps } from './metric_vis_component';
-import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
+import { ExprVis } from '../../../../../plugins/visualizations/public';
 
 jest.mock('../services', () => ({
   getFormatService: () => ({
