@@ -5,6 +5,8 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Filter, Query } from 'src/plugins/data/public';
+import { AnyAction } from 'redux';
 import { LAYER_TYPE } from '../../common/constants';
 import { DataMeta, MapFilters } from '../../common/descriptor_types';
 
@@ -24,3 +26,45 @@ export function updateSourceProp(
   value: unknown,
   newLayerType?: LAYER_TYPE
 ): void;
+
+export interface MapCenter {
+  lat: number;
+  lon: number;
+  zoom: number;
+}
+
+export function setGotoWithCenter(config: MapCenter): AnyAction;
+
+export function replaceLayerList(layerList: unknown[]): AnyAction;
+
+export interface QueryGroup {
+  filters: Filter[];
+  query?: Query;
+  timeFilters: unknown;
+  refresh: unknown;
+}
+
+export function setQuery(query: QueryGroup): AnyAction;
+
+export interface RefreshConfig {
+  isPaused: boolean;
+  interval: number;
+}
+
+export function setRefreshConfig(config: RefreshConfig): AnyAction;
+
+export function disableScrollZoom(): AnyAction;
+
+export function disableInteractive(): AnyAction;
+
+export function disableTooltipControl(): AnyAction;
+
+export function hideToolbarOverlay(): AnyAction;
+
+export function hideLayerControl(): AnyAction;
+
+export function hideViewControl(): AnyAction;
+
+export function setHiddenLayers(hiddenLayerIds: string[]): AnyAction;
+
+export function addLayerWithoutDataSync(layerDescriptor: unknown): AnyAction;

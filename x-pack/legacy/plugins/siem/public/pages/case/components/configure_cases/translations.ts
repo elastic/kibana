@@ -104,7 +104,7 @@ export const FIELD_MAPPING_FIRST_COL = i18n.translate(
 export const FIELD_MAPPING_SECOND_COL = i18n.translate(
   'xpack.siem.case.configureCases.fieldMappingSecondCol',
   {
-    defaultMessage: 'Third-party incident field',
+    defaultMessage: 'External incident field',
   }
 );
 
@@ -190,3 +190,10 @@ export const FIELD_MAPPING_FIELD_COMMENTS = i18n.translate(
 export const UPDATE_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.updateConnector', {
   defaultMessage: 'Update connector',
 });
+
+export const UNSAVED_CHANGES = (unsavedChanges: number): string => {
+  return i18n.translate('xpack.siem.case.configureCases.unsavedChanges', {
+    values: { unsavedChanges },
+    defaultMessage: '{unsavedChanges} unsaved changes',
+  });
+};

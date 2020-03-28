@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from '../../../../../plugins/saved_objects/public';
-import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { createSavedSearchesLoader } from '../../../../../plugins/discover/public';
 
 /**
@@ -63,7 +62,7 @@ const services = {
 
 savedObjectManagementRegistry.register({
   id: 'savedVisualizations',
-  service: visualizations.savedVisualizationsLoader,
+  service: npStart.plugins.visualizations.savedVisualizationsLoader,
   title: 'visualizations',
 });
 
