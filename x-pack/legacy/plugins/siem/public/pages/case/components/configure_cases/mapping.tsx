@@ -45,20 +45,27 @@ const MappingComponent: React.FC<MappingProps> = ({
       fullWidth
       title={<h3>{i18n.FIELD_MAPPING_TITLE}</h3>}
       description={i18n.FIELD_MAPPING_DESC}
+      data-test-subj="case-mapping-form-group"
     >
-      <EuiFormRow fullWidth>
+      <EuiFormRow fullWidth data-test-subj="case-mapping-form-row">
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false} className="euiFormLabel">
             <EuiButtonEmptyExtended
               onClick={setEditFlyoutVisibility}
               disabled={updateConnectorDisabled}
+              data-test-subj="case-mapping-update-connector-button"
             >
               {i18n.UPDATE_CONNECTOR}
             </EuiButtonEmptyExtended>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <FieldMapping disabled={disabled} mapping={mapping} onChangeMapping={onChangeMapping} />
+      <FieldMapping
+        disabled={disabled}
+        mapping={mapping}
+        onChangeMapping={onChangeMapping}
+        data-test-subj="case-mapping-field"
+      />
     </EuiDescribedFormGroup>
   );
 };
