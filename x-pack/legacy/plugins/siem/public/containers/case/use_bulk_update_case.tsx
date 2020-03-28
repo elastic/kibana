@@ -66,10 +66,12 @@ export const useUpdateCases = (): UseUpdateCase => {
 
   const dispatchUpdateCases = useCallback((cases: BulkUpdateStatus[]) => {
     let cancel = false;
+    const abortCtrl = new AbortController();
+
     const patchData = async () => {
       try {
         dispatch({ type: 'FETCH_INIT' });
-        await patchCasesStatus(cases);
+        await patchCasesStatus(cases, abortCtrl.signal);
         if (!cancel) {
           dispatch({ type: 'FETCH_SUCCESS', payload: true });
         }
@@ -87,6 +89,7 @@ export const useUpdateCases = (): UseUpdateCase => {
     patchData();
     return () => {
       cancel = true;
+      abortCtrl.abort();
     };
   }, []);
 
