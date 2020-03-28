@@ -8,7 +8,7 @@ describe('verifyAccessToken', () => {
   beforeEach(() => {
     options = {
       accessToken: 'myAccessToken',
-      apiHostname: 'api.github.com',
+      githubApiBaseUrlV3: 'https://api.github.com',
       repoName: 'kibana',
       repoOwner: 'elastic',
     } as BackportOptions;

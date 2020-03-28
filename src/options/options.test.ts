@@ -50,7 +50,8 @@ describe('getOptions', () => {
     expect(options).toEqual({
       accessToken: 'myAccessToken',
       all: false,
-      apiHostname: 'api.github.com',
+      githubApiBaseUrlV3: 'https://api.github.com',
+      githubApiBaseUrlV4: 'https://api.github.com/graphql',
       author: 'sqren',
       backportCreatedLabels: [],
       branchChoices: [
@@ -79,7 +80,8 @@ describe('validateRequiredOptions', () => {
   const validOptions: OptionsFromCliArgs = {
     accessToken: 'myAccessToken',
     all: false,
-    apiHostname: 'api.github.com',
+    githubApiBaseUrlV3: 'https://api.github.com',
+    githubApiBaseUrlV4: 'https://api.github.com/graphql',
     author: undefined,
     backportCreatedLabels: [],
     branchChoices: [],

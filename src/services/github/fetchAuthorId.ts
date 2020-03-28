@@ -6,7 +6,7 @@ interface DataResponse {
 }
 
 export async function fetchAuthorId(options: BackportOptions) {
-  const { all, author, accessToken, apiHostname } = options;
+  const { all, author, accessToken, githubApiBaseUrlV4 } = options;
   if (all) {
     return null;
   }
@@ -20,7 +20,7 @@ export async function fetchAuthorId(options: BackportOptions) {
   `;
 
   const res = await gqlRequest<DataResponse>({
-    apiHostname,
+    githubApiBaseUrlV4,
     accessToken,
     query,
     variables: { login: author },

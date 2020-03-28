@@ -13,7 +13,7 @@ export async function fetchCommitsByAuthor(
 ): Promise<CommitChoice[]> {
   const {
     accessToken,
-    apiHostname,
+    githubApiBaseUrlV4,
     commitsCount,
     path,
     repoName,
@@ -95,7 +95,7 @@ export async function fetchCommitsByAuthor(
 
   const authorId = await fetchAuthorId(options);
   const res = await gqlRequest<DataResponse>({
-    apiHostname,
+    githubApiBaseUrlV4,
     accessToken,
     query,
     variables: {

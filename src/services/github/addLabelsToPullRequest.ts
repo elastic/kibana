@@ -4,7 +4,13 @@ import { handleGithubError } from './handleGithubError';
 import { logger } from '../logger';
 
 export async function addLabelsToPullRequest(
-  { apiHostname, repoName, repoOwner, accessToken, username }: BackportOptions,
+  {
+    githubApiBaseUrlV3,
+    repoName,
+    repoOwner,
+    accessToken,
+    username,
+  }: BackportOptions,
   pullNumber: number,
   labels: string[]
 ) {
@@ -12,7 +18,7 @@ export async function addLabelsToPullRequest(
 
   try {
     return await axios.post(
-      `https://${apiHostname}/repos/${repoOwner}/${repoName}/issues/${pullNumber}/labels`,
+      `${githubApiBaseUrlV3}/repos/${repoOwner}/${repoName}/issues/${pullNumber}/labels`,
       labels,
       {
         auth: {

@@ -7,7 +7,13 @@ import { HandledError } from '../HandledError';
 export async function fetchCommitByPullNumber(
   options: BackportOptions & { pullNumber: number }
 ): Promise<CommitSelected> {
-  const { apiHostname, repoName, repoOwner, pullNumber, accessToken } = options;
+  const {
+    githubApiBaseUrlV4,
+    repoName,
+    repoOwner,
+    pullNumber,
+    accessToken,
+  } = options;
   const query = /* GraphQL */ `
     query getCommitbyPullNumber(
       $repoOwner: String!
@@ -29,7 +35,7 @@ export async function fetchCommitByPullNumber(
   `;
 
   const res = await gqlRequest<DataResponse>({
-    apiHostname,
+    githubApiBaseUrlV4,
     accessToken,
     query,
     variables: {

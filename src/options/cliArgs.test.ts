@@ -6,7 +6,8 @@ describe('getOptionsFromCliArgs', () => {
     const configOptions = {
       accessToken: 'myAccessToken',
       all: false,
-      apiHostname: 'api.github.com',
+      githubApiBaseUrlV3: 'https://api.github.com',
+      githubApiBaseUrlV4: 'https://api.github.com/graphql',
       backportCreatedLabels: [],
       branchChoices: [],
       fork: true,
@@ -37,7 +38,8 @@ describe('getOptionsFromCliArgs', () => {
     expect(res).toEqual({
       accessToken: 'myAccessToken',
       all: true,
-      apiHostname: 'api.github.com',
+      githubApiBaseUrlV3: 'https://api.github.com',
+      githubApiBaseUrlV4: 'https://api.github.com/graphql',
       backportCreatedLabels: [],
       branches: ['6.0', '6.1'],
       branchChoices: [],
@@ -61,7 +63,7 @@ describe('getOptionsFromCliArgs', () => {
     const argv = [
       '--access-token',
       'my access token',
-      '--apiHostname',
+      '--githubApiBaseUrlV3',
       'my api hostname',
     ];
 
@@ -69,7 +71,7 @@ describe('getOptionsFromCliArgs', () => {
 
     expect(res.accessToken).toEqual('my access token');
     expect('access-token' in res).toEqual(false);
-    expect(res.apiHostname).toEqual('my api hostname');
+    expect(res.githubApiBaseUrlV3).toEqual('my api hostname');
     expect('api-hostname' in res).toEqual(false);
   });
 

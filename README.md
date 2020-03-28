@@ -91,30 +91,31 @@ The above commands will start an interactive prompt. You can use the `arrow keys
 
 ### CLI arguments
 
-| Option           | Description                                            | Default        | Type    |
-| ---------------- | ------------------------------------------------------ | -------------- | ------- |
-| --accesstoken    | Github access token                                    |                | string  |
-| --all            | Show commits from other than me                        | false          | boolean |
-| --api-hostname   | Hostname for the Github API                            | api.github.com | string  |
-| --author         | Filter commits by author                               | _Current user_ | string  |
-| --branch         | Branch to backport to                                  |                | string  |
-| --commits-count  | Number of commits to choose from                       | 10             | number  |
-| --editor         | Editor (eg. `code`) to open and solve conflicts        |                | string  |
-| --fork           | Create backports in fork (true) or origin repo (false) | true           | boolean |
-| --git-hostname   | Hostname for Git remotes                               | github.com     | string  |
-| --labels         | Pull request labels                                    |                | string  |
-| --multiple       | Select multiple commits/branches                       | false          | boolean |
-| --path           | Only list commits touching files under a specific path |                | string  |
-| --pr-description | Pull request description suffix                        |                | string  |
-| --pr-title       | Pull request title pattern                             |                | string  |
-| --pr             | Pull request to backport                               |                | number  |
-| --reset-author   | Set yourself as commit author                          |                | boolean |
-| --sha            | Sha of commit to backport                              |                | string  |
-| --sourceBranch   | Backport commits from a non-default branch             |                | string  |
-| --upstream       | Name of organization and repository                    |                | string  |
-| --username       | Github username                                        |                | string  |
-| --help           | Show help                                              |                |         |
-| -v, --version    | Show version number                                    |                |         |
+| Option                   | Description                                            | Default                        | Type    |
+| ------------------------ | ------------------------------------------------------ | ------------------------------ | ------- |
+| --accesstoken            | Github access token                                    |                                | string  |
+| --all                    | Show commits from other than me                        | false                          | boolean |
+| --author                 | Filter commits by author                               | _Current user_                 | string  |
+| --branch                 | Branch to backport to                                  |                                | string  |
+| --commits-count          | Number of commits to choose from                       | 10                             | number  |
+| --editor                 | Editor (eg. `code`) to open and solve conflicts        |                                | string  |
+| --fork                   | Create backports in fork (true) or origin repo (false) | true                           | boolean |
+| --git-hostname           | Hostname for Git remotes                               | github.com                     | string  |
+| --github-api-base-url-v3 | Base url for Github's Rest (v3) API                    | https://api.github.com         | string  |
+| --github-api-base-url-v4 | Base url for Github's GraphQL (v4) API                 | https://api.github.com/graphql | string  |
+| --labels                 | Pull request labels                                    |                                | string  |
+| --multiple               | Select multiple commits/branches                       | false                          | boolean |
+| --path                   | Only list commits touching files under a specific path |                                | string  |
+| --pr-description         | Pull request description suffix                        |                                | string  |
+| --pr-title               | Pull request title pattern                             |                                | string  |
+| --pr                     | Pull request to backport                               |                                | number  |
+| --reset-author           | Set yourself as commit author                          |                                | boolean |
+| --sha                    | Sha of commit to backport                              |                                | string  |
+| --sourceBranch           | Backport commits from a non-default branch             |                                | string  |
+| --upstream               | Name of organization and repository                    |                                | string  |
+| --username               | Github username                                        |                                | string  |
+| --help                   | Show help                                              |                                |         |
+| -v, --version            | Show version number                                    |                                |         |
 
 All of the CLI arguments can also be configured via the [configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md) in the config files.
 

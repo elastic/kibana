@@ -30,7 +30,6 @@ Please select the necessary access scopes:
 **For public and private repos (recommended)**
 ![image](https://user-images.githubusercontent.com/209966/67081197-fe93d380-f196-11e9-8891-c6ba8c4686a4.png)
 
-
 **For public repos only**
 ![image](https://user-images.githubusercontent.com/209966/67081207-018ec400-f197-11e9-86aa-4ae4a003fcbd.png)
 
@@ -66,17 +65,29 @@ Example:
 
 Github organization/user and repository name separated with forward slash.
 
-Example: "elastic/kibana"
-
 CLI: `--upstream elastic/kibana`
+
+Config:
+
+```json
+{
+  "upsteam": "elastic/kibana"
+}
+```
 
 #### `branches` **required**
 
 List of branches that will be available to backport to. The array can contain branch names as strings or objects that also contains the field `checked` which indicates whether the branch should be pre-selected. It is useful to pre-select branches you often backport to.
 
-Example: `[{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"]`
-
 CLI: `--branches 6.1 --branches 6.0`
+
+Config:
+
+```json
+{
+  "branches": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"]
+}
+```
 
 #### `all`
 
@@ -98,6 +109,14 @@ Default: `true`
 
 CLI: `--fork=false`
 
+Config:
+
+```json
+{
+  "fork": false
+}
+```
+
 #### `multipleCommits`
 
 `true`: you will be able to select multiple commits to backport. You will use `<space>` to select, and `<enter>` to confirm you selection.
@@ -118,20 +137,24 @@ Default: `true`
 
 Labels that will be added to the backport pull request. These are often useful if you want to filter for backport PRs.
 
-Example: `["backport", "apm-team"]`
+CLI: `--labels backport --labels apm-team`
 
-CLI: `--labels myLabel --labels myOtherLabel`
+Config:
+
+```json
+{
+  "labels": ["backport", "apm-team"]
+}
+```
 
 #### `prTitle`
 
 Pull request title pattern. You can access the base branch (`{baseBranch}`) and commit message (`{commitMessages}`) via the special accessors in quotes.
 Multiple commits will be concatenated and separated by pipes.
 
-Example: `"{commitMessages} backport for {baseBranch}"`
-
 Default: `"[{baseBranch}] {commitMessages}"`
 
-CLI: `--prTitle "My PR Title"`
+CLI: `--pr-title "{commitMessages} backport for {baseBranch}"`
 
 #### `prDescription`
 
@@ -144,30 +167,44 @@ For people who often need to add the same description to PRs they can create a b
 alias backport-skip-ci='backport --prDescription "[skip-ci]"'
 ```
 
-CLI: `--prDescription "skip-ci"`
+CLI: `--pr-description "skip-ci"`
 
 #### `sourceBranch`
 
 By default the list of commits will be sourced from the repository's default branch (mostly "master"). Use `sourceBranch` to list and backport commits from other branches than the default.
 
-CLI: `--sourceBranch 7.x`
+Default: master (unless the default branch on Github is changed)
+
+CLI: `--source-branch 7.x`
+
+Config:
+
+```json
+{
+  "sourceBranch": "7.x"
+}
+```
 
 #### `gitHostname`
 
 Hostname for Github.
 
-Example: `github.my-private-company.com`
-
 Default: `github.com`
 
-CLI: `--gitHostname "github.my-private-company.com"`
+CLI: `--git-hostname "github.my-private-company.com"`
 
-#### `apiHostname`
+#### `githubApiBaseUrlV3`
 
-Hostname for the Github API.
+Base url for Github's Rest (v3) API
 
-Example: `api.github.my-private-company.com`
+Default: `https://api.github.com`
 
-Default: `api.github.com`
+CLI: `--github-api-base-url-v3 "https://api.github.my-private-company.com"`
 
-CLI: `--apiHostname "api.github.my-private-company.com"`
+#### `githubApiBaseUrlV4`
+
+Base url for Github's Rest (v3) API
+
+Default: `https://api.github.com/graphql`
+
+CLI: `--github-api-base-url-v4 "https://github-enterprise.acme-inc.com/api"`

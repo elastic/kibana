@@ -11,7 +11,7 @@ export function consoleLog(...args: unknown[]) {
   console.log(...args);
 }
 
-const enabledVerboseLogging = argv.verbose || argv.v;
+const enabledVerboseLogging = argv.verbose;
 
 export let logger = ({
   info: () => {},

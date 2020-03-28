@@ -34,7 +34,7 @@ describe('cherrypickAndCreatePullRequest', () => {
       execSpy = (exec as any) as jest.SpyInstance;
 
       const options = {
-        apiHostname: 'api.github.com',
+        githubApiBaseUrlV3: 'https://api.github.com',
         fork: true,
         labels: ['backport'],
         prDescription: 'myPrSuffix',
@@ -104,7 +104,7 @@ myPrSuffix`
   describe('when commit does not have a pull request reference', () => {
     beforeEach(async () => {
       const options = {
-        apiHostname: 'api.github.com',
+        githubApiBaseUrlV3: 'https://api.github.com',
         fork: true,
         labels: ['backport'],
         prTitle: '[{baseBranch}] {commitMessages}',
@@ -166,7 +166,6 @@ myPrSuffix`
       spyOn(prompts, 'confirmPrompt').and.returnValue(didResolve);
 
       const options = {
-        apiHostname: 'api.github.com',
         fork: true,
         labels: ['backport'],
         prTitle: '[{baseBranch}] {commitMessages}',

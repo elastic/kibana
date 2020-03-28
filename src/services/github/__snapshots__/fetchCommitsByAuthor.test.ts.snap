@@ -2,9 +2,8 @@
 
 exports[`fetchCommitsByAuthor when commit has an associated pull request should call with correct args to fetch author id 1`] = `
 Array [
+  "https://api.github.com/graphql",
   Object {
-    "accessToken": "myAccessToken",
-    "apiHostname": "api.github.com",
     "query": "
     query getIdByLogin($login: String!) {
       user(login: $login) {
@@ -16,14 +15,19 @@ Array [
       "login": "sqren",
     },
   },
+  Object {
+    "headers": Object {
+      "Authorization": "bearer myAccessToken",
+      "Content-Type": "application/json",
+    },
+  },
 ]
 `;
 
 exports[`fetchCommitsByAuthor when commit has an associated pull request should call with correct args to fetch commits 1`] = `
 Array [
+  "https://api.github.com/graphql",
   Object {
-    "accessToken": "myAccessToken",
-    "apiHostname": "api.github.com",
     "query": "
     query getCommitsByAuthorQuery(
       $repoOwner: String!
@@ -102,6 +106,12 @@ Array [
       "repoName": "kibana",
       "repoOwner": "elastic",
       "sourceBranch": undefined,
+    },
+  },
+  Object {
+    "headers": Object {
+      "Authorization": "bearer myAccessToken",
+      "Content-Type": "application/json",
     },
   },
 ]

@@ -6,30 +6,31 @@ import dedent from 'dedent';
 describe('gqlRequest', () => {
   describe('when request succeeds', () => {
     let spy: jest.SpyInstance;
-    beforeEach(() => {
+    let res: unknown;
+    beforeEach(async () => {
       spy = jest.spyOn(axios, 'post').mockResolvedValue({
         data: {
           data: 'some data',
         },
       } as any);
+
+      res = await gqlRequest({
+        accessToken: 'myAccessToken',
+        githubApiBaseUrlV4: 'https://my-custom-api.com/graphql',
+        query: 'myQuery',
+        variables: {
+          foo: 'bar',
+        },
+      });
     });
 
     it('should return correct response', async () => {
-      expect(
-        await gqlRequest({
-          accessToken: 'myAccessToken',
-          apiHostname: 'myApiHostname',
-          query: 'myQuery',
-          variables: {
-            foo: 'bar',
-          },
-        })
-      ).toEqual('some data');
+      expect(res).toEqual('some data');
     });
 
     it('should call with correct args', async () => {
       expect(spy).toHaveBeenCalledWith(
-        'https://myApiHostname/graphql',
+        'https://my-custom-api.com/graphql',
         {
           query: 'myQuery',
           variables: { foo: 'bar' },
@@ -62,7 +63,7 @@ describe('gqlRequest', () => {
       return expect(
         gqlRequest({
           accessToken: 'myAccessToken',
-          apiHostname: 'myApiHostname',
+          githubApiBaseUrlV4: 'myApiHostname',
           query: 'myQuery',
           variables: {
             foo: 'bar',

@@ -17,12 +17,12 @@ interface GithubResponse<DataResponse> {
 }
 
 export async function gqlRequest<DataResponse>({
-  apiHostname,
+  githubApiBaseUrlV4,
   query,
   variables,
   accessToken,
 }: {
-  apiHostname: string;
+  githubApiBaseUrlV4: string;
   query: string;
   variables?: {
     [key: string]: string | number | null;
@@ -33,7 +33,7 @@ export async function gqlRequest<DataResponse>({
     logger.verbose(query);
     logger.verbose(variables as any);
     const response = await axios.post<GithubResponse<DataResponse>>(
-      `https://${apiHostname}/graphql`,
+      githubApiBaseUrlV4,
       { query, variables },
       {
         headers: {

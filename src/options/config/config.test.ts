@@ -12,7 +12,8 @@ describe('getOptionsFromConfigFiles', () => {
     expect(res).toEqual({
       accessToken: 'myAccessToken',
       all: false,
-      apiHostname: 'api.github.com',
+      githubApiBaseUrlV3: 'https://api.github.com',
+      githubApiBaseUrlV4: 'https://api.github.com/graphql',
       backportCreatedLabels: [],
       branchChoices: [
         { checked: false, name: '6.0' },

@@ -15,7 +15,7 @@ describe('getCommitBySha', () => {
       repoOwner: 'elastic',
       repoName: 'kibana',
       sha: 'myCommitSha',
-      apiHostname: 'api.github.com',
+      githubApiBaseUrlV3: 'https://api.github.com',
     } as BackportOptions & { sha: string });
 
     expect(commit).toEqual({
@@ -42,7 +42,7 @@ describe('getCommitBySha', () => {
         repoOwner: 'elastic',
         repoName: 'kibana',
         sha: 'myCommitSha',
-        apiHostname: 'api.github.com',
+        githubApiBaseUrlV3: 'https://api.github.com',
       } as BackportOptions & { sha: string })
     ).rejects.toThrowError('No commit found on master with sha "myCommitSha"');
   });

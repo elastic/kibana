@@ -29,7 +29,8 @@ export async function getOptionsFromConfigFiles() {
     labels: [] as string[],
     prTitle: '[{baseBranch}] {commitMessages}',
     gitHostname: 'github.com',
-    apiHostname: 'api.github.com',
+    githubApiBaseUrlV3: 'https://api.github.com',
+    githubApiBaseUrlV4: 'https://api.github.com/graphql',
     branchChoices: getBranchesAsObjects(branches),
     ...combinedConfig,
   };

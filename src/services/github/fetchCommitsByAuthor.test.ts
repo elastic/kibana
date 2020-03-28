@@ -1,4 +1,3 @@
-import * as gqlRequest from './gqlRequest';
 import { CommitSelected } from './Commit';
 import {
   PullRequestEdge,
@@ -7,16 +6,20 @@ import {
   TimelineItemEdge,
 } from './fetchCommitsByAuthor';
 import { commitsWithPullRequestsMock } from './mocks/commitsByAuthorMock';
+import { getExistingBackportPRsMock } from './mocks/getExistingBackportPRsMock';
 import { getDefaultOptions } from '../../test/getDefaultOptions';
+import axios from 'axios';
+
+const currentUserMock = { user: { id: 'myUserId' } } as const;
 
 describe('fetchCommitsByAuthor', () => {
   describe('when commit has an associated pull request', () => {
     let requestSpy: jasmine.Spy;
     let res: CommitSelected[];
     beforeEach(async () => {
-      requestSpy = spyOn(gqlRequest, 'gqlRequest').and.returnValues(
-        { user: { id: 'myUserId' } },
-        commitsWithPullRequestsMock
+      requestSpy = spyOn(axios, 'post').and.returnValues(
+        { data: { data: currentUserMock } },
+        { data: { data: commitsWithPullRequestsMock } }
       );
 
       const options = getDefaultOptions();
@@ -92,21 +95,21 @@ describe('fetchCommitsByAuthor', () => {
 
   describe('when a custom github api hostname is supplied', () => {
     it('should be used in gql requests', async () => {
-      const requestSpy = spyOn(gqlRequest, 'gqlRequest').and.returnValues(
-        { user: { id: 'myUserId' } },
-        commitsWithPullRequestsMock
+      const requestSpy = spyOn(axios, 'post').and.returnValues(
+        { data: { data: currentUserMock } },
+        { data: { data: commitsWithPullRequestsMock } }
       );
 
       const options = getDefaultOptions({
-        apiHostname: 'api.github.my-company.com',
+        githubApiBaseUrlV4: 'https://api.github.my-company.com',
       });
       await fetchCommitsByAuthor(options);
 
-      expect(requestSpy.calls.argsFor(0)[0].apiHostname).toBe(
-        'api.github.my-company.com'
+      expect(requestSpy.calls.argsFor(0)[0]).toBe(
+        'https://api.github.my-company.com'
       );
-      expect(requestSpy.calls.argsFor(1)[0].apiHostname).toBe(
-        'api.github.my-company.com'
+      expect(requestSpy.calls.argsFor(1)[0]).toBe(
+        'https://api.github.my-company.com'
       );
     });
   });
@@ -174,69 +177,11 @@ async function getExistingBackportsByRepoName(
   repoName1: string,
   repoName2: string
 ) {
-  const mock = {
-    repository: {
-      ref: {
-        target: {
-          history: {
-            edges: [
-              {
-                node: {
-                  oid: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
-                  message:
-                    'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
-                  associatedPullRequests: {
-                    edges: [
-                      {
-                        node: {
-                          repository: {
-                            name: repoName1,
-                            owner: {
-                              login: 'elastic',
-                            },
-                          },
-                          number: 80,
-                          timelineItems: {
-                            edges: [
-                              {
-                                node: {
-                                  source: {
-                                    __typename: 'PullRequest',
-                                    state: 'MERGED',
-                                    baseRefName: '6.3',
-                                    commits: {
-                                      edges: [
-                                        {
-                                          node: {
-                                            commit: {
-                                              message:
-                                                'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
-                                            },
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
-        },
-      },
-    },
-  };
+  const existingPrsMock = getExistingBackportPRsMock(repoName1);
 
-  spyOn(gqlRequest, 'gqlRequest').and.returnValues(
-    { user: { id: 'myUserId' } },
-    mock
+  spyOn(axios, 'post').and.returnValues(
+    { data: { data: currentUserMock } },
+    { data: { data: existingPrsMock } }
   );
 
   const options = getDefaultOptions({

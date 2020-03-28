@@ -11,7 +11,7 @@ export interface DataResponse {
 
 export async function getDefaultRepoBranch({
   accessToken,
-  apiHostname,
+  githubApiBaseUrlV4,
   repoName,
   repoOwner,
 }: ReturnType<typeof validateRequiredOptions>) {
@@ -26,7 +26,7 @@ export async function getDefaultRepoBranch({
   `;
 
   const res = await gqlRequest<DataResponse>({
-    apiHostname,
+    githubApiBaseUrlV4,
     accessToken,
     query,
     variables: {

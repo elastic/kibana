@@ -7,7 +7,8 @@ export function getDefaultOptions(options: Partial<BackportOptions> = {}) {
     accessToken: 'myAccessToken',
     username: 'sqren',
     author: 'sqren',
-    apiHostname: 'api.github.com',
+    githubApiBaseUrlV3: 'https://api.github.com',
+    githubApiBaseUrlV4: 'https://api.github.com/graphql',
     ...options,
   } as BackportOptions;
 }

@@ -21,7 +21,8 @@ describe('runWithOptions', () => {
     const options: BackportOptions = {
       accessToken: 'myAccessToken',
       all: false,
-      apiHostname: 'api.github.com',
+      githubApiBaseUrlV3: 'https://api.github.com',
+      githubApiBaseUrlV4: 'https://api.github.com/graphql',
       author: 'sqren',
       backportCreatedLabels: [],
       branches: [],
@@ -109,7 +110,7 @@ describe('runWithOptions', () => {
         repoName: 'kibana',
         repoOwner: 'elastic',
         username: 'sqren',
-        apiHostname: 'api.github.com',
+        githubApiBaseUrlV4: 'https://api.github.com/graphql',
       })
     );
   });
@@ -119,7 +120,7 @@ describe('runWithOptions', () => {
       expect.objectContaining({
         repoName: 'kibana',
         repoOwner: 'elastic',
-        apiHostname: 'api.github.com',
+        githubApiBaseUrlV4: 'https://api.github.com/graphql',
       }),
       {
         base: '6.x',

@@ -11,7 +11,7 @@ describe('fetchCommitBySha', () => {
       accessToken: 'myAccessToken',
       username: 'sqren',
       author: 'sqren',
-      apiHostname: 'api.github.com',
+      githubApiBaseUrlV3: 'https://api.github.com',
     } as BackportOptions;
 
     const axiosSpy = jest

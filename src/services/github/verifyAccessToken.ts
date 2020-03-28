@@ -15,13 +15,13 @@ function getSSOAuthUrl(ssoHeader?: string) {
 export async function verifyAccessToken({
   username,
   accessToken,
-  apiHostname,
+  githubApiBaseUrlV3,
   repoName,
   repoOwner,
 }: ReturnType<typeof validateRequiredOptions>) {
   try {
     return await axios.head(
-      `https://${apiHostname}/repos/${repoOwner}/${repoName}`,
+      `${githubApiBaseUrlV3}/repos/${repoOwner}/${repoName}`,
       {
         auth: {
           username: username,

@@ -18,10 +18,11 @@ export interface Config {
   // both
   all?: boolean;
   author?: string;
-  apiHostname?: string;
   backportCreatedLabels?: string[];
   commitsCount?: number;
   gitHostname?: string;
+  githubApiBaseUrlV3?: string;
+  githubApiBaseUrlV4?: string;
   labels?: string[];
   multiple?: boolean;
   multipleBranches?: boolean;

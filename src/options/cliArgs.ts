@@ -23,11 +23,6 @@ export function getOptionsFromCliArgs(
       description: 'List all commits',
       type: 'boolean',
     })
-    .option('apiHostname', {
-      default: configOptions.apiHostname,
-      description: 'Hostname for the Github API',
-      type: 'string',
-    })
     .option('author', {
       default: configOptions.author,
       description: 'Show commits by specific author',
@@ -63,6 +58,16 @@ export function getOptionsFromCliArgs(
     .option('gitHostname', {
       default: configOptions.gitHostname,
       description: 'Hostname for Github',
+      type: 'string',
+    })
+    .option('githubApiBaseUrlV3', {
+      default: configOptions.githubApiBaseUrlV3,
+      description: `Base url for Github's REST (v3) API`,
+      type: 'string',
+    })
+    .option('githubApiBaseUrlV4', {
+      default: configOptions.githubApiBaseUrlV4,
+      description: `Base url for Github's GraphQL (v4) API`,
       type: 'string',
     })
     .option('labels', {
@@ -135,8 +140,8 @@ export function getOptionsFromCliArgs(
       description: 'Show additional debug information',
       type: 'boolean',
     })
-    .alias('v', 'version')
-    .version()
+    .alias('version', 'v')
+    .alias('version', 'V')
     .help().argv;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
