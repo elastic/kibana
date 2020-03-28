@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 export default function({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps']);
 
-  describe('vector styling', () => {
+  describe.skip('vector styling', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('document example');
     });
