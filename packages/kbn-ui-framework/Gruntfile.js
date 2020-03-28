@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const sass = require('node-sass');
+const sass = require('sass');
 const postcss = require('postcss');
 const postcssConfig = require('../../src/optimize/postcss.config');
 const chokidar = require('chokidar');
@@ -205,7 +205,7 @@ module.exports = function (grunt) {
   function uiFrameworkWatch() {
     const debouncedCompile = debounce(
       () => {
-        // Compile the SCSS in a separate process because node-sass throws a fatal error if it fails
+        // Compile the SCSS in a separate process because sass throws a fatal error if it fails
         // to compile.
         grunt.util.spawn(
           {

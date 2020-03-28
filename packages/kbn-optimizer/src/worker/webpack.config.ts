@@ -254,12 +254,12 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                       )};\n`;
                     },
                     webpackImporter: false,
-                    implementation: require('node-sass'),
+                    implementation: require('sass'),
                     sassOptions(loaderContext: webpack.loader.LoaderContext) {
                       const darkMode = loaderContext.resourceQuery === '?dark';
 
                       return {
-                        outputStyle: 'nested',
+                        outputStyle: 'compressed',
                         includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                         sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                         importer: (url: string) => {

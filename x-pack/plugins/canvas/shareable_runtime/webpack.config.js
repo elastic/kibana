@@ -193,7 +193,7 @@ module.exports = {
               },
               webpackImporter: false,
               sassOptions: {
-                outputStyle: 'nested',
+                outputStyle: 'compressed',
                 includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
               },
             },

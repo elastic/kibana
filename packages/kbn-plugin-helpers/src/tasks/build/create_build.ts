@@ -22,7 +22,7 @@ import path from 'path';
 
 import { readFileSync, writeFileSync, unlinkSync, existsSync } from 'fs';
 import execa from 'execa';
-import sass from 'node-sass';
+import sass from 'sass';
 import del from 'del';
 import File from 'vinyl';
 import vfs from 'vinyl-fs';
@@ -143,10 +143,10 @@ export async function createBuild(
     }
 
     const outputFileName = path.basename(file, path.extname(file)) + '.css';
-    const output = path.join(buildRoot, path.dirname(plugin.styleSheetToCompile), outputFileName);
+    const outFile = path.join(buildRoot, path.dirname(plugin.styleSheetToCompile), outputFileName);
 
-    const rendered = sass.renderSync({ file, output });
-    writeFileSync(output, rendered.css);
+    const rendered = sass.renderSync({ file, outFile, outputStyle: 'compressed' });
+    writeFileSync(outFile, rendered.css);
 
     del.sync([path.join(buildRoot, '**', '*.s{a,c}ss')]);
   }

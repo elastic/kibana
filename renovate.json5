@@ -692,14 +692,6 @@
         ],
       },
       {
-        groupSlug: 'node-sass',
-        groupName: 'node-sass related packages',
-        packageNames: [
-          'node-sass',
-          '@types/node-sass',
-        ],
-      },
-      {
         groupSlug: 'nodemailer',
         groupName: 'nodemailer related packages',
         packageNames: [
@@ -846,6 +838,14 @@
         packageNames: [
           'request',
           '@types/request',
+        ],
+      },
+      {
+        groupSlug: 'sass',
+        groupName: 'sass related packages',
+        packageNames: [
+          'sass',
+          '@types/sass',
         ],
       },
       {

@@ -20,7 +20,7 @@
 import { resolve, relative, dirname, join } from 'path';
 import { promisify } from 'util';
 import fs from 'fs';
-import sass from 'node-sass';
+import sass from 'sass';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
 import postcssUrl from 'postcss-url';
@@ -89,7 +89,7 @@ export class Build {
       outFile: this.targetPath,
       importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined,
       sourceMap: true,
-      outputStyle: 'nested',
+      outputStyle: 'compressed',
       sourceMapEmbed: true,
       includePaths: [resolve(__dirname, '../../../../node_modules')],
     });
