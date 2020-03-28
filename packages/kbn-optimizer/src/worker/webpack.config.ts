@@ -269,6 +269,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
                           return { file: url };
                         },
+                        fiber: require('fibers'),
                       };
                     },
                   },

@@ -18,6 +18,7 @@
  */
 
 const sass = require('sass');
+const Fiber = require('fibers');
 const postcss = require('postcss');
 const postcssConfig = require('../../src/optimize/postcss.config');
 const chokidar = require('chokidar');
@@ -150,6 +151,7 @@ module.exports = function (grunt) {
       sass.render(
         {
           file: src,
+          fiber: Fiber,
         },
         function (error, result) {
           if (error) {
@@ -180,6 +182,7 @@ module.exports = function (grunt) {
       sass.render(
         {
           file: src,
+          fiber: Fiber,
         },
         function (error, result) {
           if (error) {

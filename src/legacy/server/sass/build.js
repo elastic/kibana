@@ -21,6 +21,7 @@ import { resolve, relative, dirname, join } from 'path';
 import { promisify } from 'util';
 import fs from 'fs';
 import sass from 'sass';
+import Fiber from 'fibers';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
 import postcssUrl from 'postcss-url';
@@ -92,6 +93,7 @@ export class Build {
       outputStyle: 'compressed',
       sourceMapEmbed: true,
       includePaths: [resolve(__dirname, '../../../../node_modules')],
+      fiber: Fiber,
     });
 
     const processor = postcss([autoprefixer]);
