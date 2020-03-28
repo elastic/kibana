@@ -9,18 +9,20 @@ import expect from '@kbn/expect';
 export default function({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps']);
 
-  describe.skip('vector styling', () => {
+  describe('vector styling', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('document example');
     });
 
     describe('categorical styling', () => {
-      it('should provide auto complete suggestions', async () => {
+      before(async () => {
         await PageObjects.maps.openLayerPanel('logstash');
+      });
+
+      it('should provide auto complete suggestions', async () => {
         await PageObjects.maps.setStyleByValue('fillColor', 'machine.os.raw');
         await PageObjects.maps.selectCustomColorRamp('fillColor');
         const suggestions = await PageObjects.maps.getCategorySuggestions();
-        await PageObjects.maps.closeLayerPanel();
         expect(
           suggestions
             .trim()

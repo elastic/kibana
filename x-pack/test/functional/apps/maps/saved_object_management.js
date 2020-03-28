@@ -13,7 +13,7 @@ export default function({ getPageObjects, getService }) {
   const browser = getService('browser');
   const inspector = getService('inspector');
 
-  describe.skip('map saved object management', () => {
+  describe('map saved object management', () => {
     const MAP_NAME_PREFIX = 'saved_object_management_test_';
     const MAP1_NAME = `${MAP_NAME_PREFIX}map1`;
     const MAP2_NAME = `${MAP_NAME_PREFIX}map2`;
