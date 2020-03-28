@@ -12,7 +12,10 @@ import { createRules } from '../../rules/create_rules';
 import { IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
 import { RuleAlertParamsRest } from '../../types';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import {
+  ruleStatusSavedObjectType,
+  ruleActionsSavedObjectType,
+} from '../../rules/saved_object_mappings';
 import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { createRulesSchema } from '../schemas/create_rules_schema';
@@ -23,6 +26,7 @@ import {
   validateLicenseForRuleType,
 } from '../utils';
 import { createNotifications } from '../../notifications/create_notifications';
+import { createRuleActionsSavedObject } from '../../rule_actions/create_rule_actions_saved_object';
 
 export const createRulesRoute = (router: IRouter): void => {
   router.post(
@@ -105,7 +109,6 @@ export const createRulesRoute = (router: IRouter): void => {
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
-          actions,
           anomalyThreshold,
           description,
           enabled,
@@ -129,7 +132,6 @@ export const createRulesRoute = (router: IRouter): void => {
           name,
           severity,
           tags,
-          throttle,
           to,
           type,
           threat,
@@ -139,15 +141,26 @@ export const createRulesRoute = (router: IRouter): void => {
           lists,
         });
 
-        if (throttle && actions.length) {
-          await createNotifications({
-            alertsClient,
-            enabled,
-            name,
-            interval,
-            actions,
-            ruleAlertId: createdRule.id,
-          });
+        const { alertThrottle } = await createRuleActionsSavedObject({
+          ruleAlertId: createdRule.id,
+          savedObjectsClient,
+          actions,
+          throttle,
+        });
+
+        if (actions.length) {
+          if (alertThrottle) {
+            await createNotifications({
+              alertsClient,
+              enabled,
+              name,
+              interval,
+              actions,
+              ruleAlertId: createdRule.id,
+            });
+          } else {
+            // update actions in rule
+          }
         }
 
         const ruleStatuses = await savedObjectsClient.find<

@@ -93,7 +93,6 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             const rule = await updateRules({
               alertsClient,
               actionsClient,
-              actions,
               anomalyThreshold,
               description,
               enabled,

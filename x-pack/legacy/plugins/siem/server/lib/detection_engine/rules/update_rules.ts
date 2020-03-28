@@ -12,11 +12,11 @@ import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion } from './utils';
 import { hasListsFeature } from '../feature_flags';
+import { getRuleActionsSavedObject } from '../signals/get_rule_actions_saved_object';
 
 export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
-  actions,
   savedObjectsClient,
   description,
   falsePositives,
@@ -40,7 +40,6 @@ export const updateRules = async ({
   severity,
   tags,
   threat,
-  throttle,
   to,
   type,
   references,
@@ -56,7 +55,6 @@ export const updateRules = async ({
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
-    actions,
     description,
     falsePositives,
     query,
@@ -76,7 +74,6 @@ export const updateRules = async ({
     severity,
     tags,
     threat,
-    throttle,
     to,
     type,
     references,
@@ -89,14 +86,19 @@ export const updateRules = async ({
   // TODO: Remove this and use regular lists once the feature is stable for a release
   const listsParam = hasListsFeature() ? { lists } : {};
 
+  const { actions, throttle } = await getRuleActionsSavedObject({
+    alertId: rule.id,
+    savedObjectsClient,
+  });
+
+  console.error('ruleActionsParams', actions, throttle);
+
   const update = await alertsClient.update({
     id: rule.id,
     data: {
       tags: addTags(tags, rule.params.ruleId, rule.params.immutable),
       name,
       schedule: { interval },
-      actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
-      throttle: throttle !== undefined ? throttle : rule.throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,

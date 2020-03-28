@@ -9,6 +9,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   UpdateRuleAlertParamsRest,
   IRuleSavedAttributesSavedObjectAttributes,
+  IRuleActionsAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
 import {
@@ -19,7 +20,10 @@ import {
 } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import {
+  ruleStatusSavedObjectType,
+  ruleActionsSavedObjectType,
+} from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
 import { updateNotifications } from '../../notifications/update_notifications';
 
@@ -90,7 +94,6 @@ export const updateRulesRoute = (router: IRouter) => {
         const rule = await updateRules({
           alertsClient,
           actionsClient,
-          actions,
           anomalyThreshold,
           description,
           enabled,
@@ -118,7 +121,6 @@ export const updateRulesRoute = (router: IRouter) => {
           to,
           type,
           threat,
-          throttle,
           references,
           note,
           version,
@@ -126,6 +128,38 @@ export const updateRulesRoute = (router: IRouter) => {
         });
 
         if (rule != null) {
+          const currentRuleActions = await savedObjectsClient.find<
+            IRuleActionsAttributesSavedObjectAttributes
+          >({
+            type: ruleActionsSavedObjectType,
+            perPage: 1,
+            search: rule.id,
+            searchFields: ['alertId'],
+          });
+
+          console.error('aaa', JSON.stringify(currentRuleActions, null, 2));
+
+          if (currentRuleActions.saved_objects[0]) {
+            await savedObjectsClient.update(
+              ruleActionsSavedObjectType,
+              currentRuleActions.saved_objects[0].id,
+              {
+                alertId: rule.id,
+                actions,
+                throttle,
+              },
+              {
+                references: [], // TODO: Add reference to rule SO
+              }
+            );
+          } else {
+            await savedObjectsClient.create(ruleActionsSavedObjectType, {
+              alertId: rule.id,
+              actions,
+              throttle,
+            });
+          }
+
           await updateNotifications({
             alertsClient,
             actions,
