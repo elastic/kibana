@@ -64,6 +64,7 @@ interface Props extends PingListProps {
   loading: boolean;
   locations: string[];
   pings: Ping[];
+  total: number;
 }
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -92,8 +93,18 @@ const statusOptions = [
 export const PingListComponent = (props: Props) => {
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [status, setStatus] = useState<string>('');
-  const [size, setSize] = useState(DEFAULT_PAGE_SIZE);
-  const { dateRangeStart, dateRangeEnd, getPings, loading, locations, monitorId, pings } = props;
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [pageIndex, setPageIndex] = useState(0);
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    getPings,
+    loading,
+    locations,
+    monitorId,
+    pings,
+    total,
+  } = props;
 
   useEffect(() => {
     getPings({
@@ -101,10 +112,10 @@ export const PingListComponent = (props: Props) => {
       dateRangeEnd,
       location: selectedLocation,
       monitorId,
-      size,
+      size: pageSize,
       status: status !== 'all' ? status : '',
     });
-  }, [dateRangeStart, dateRangeEnd, getPings, monitorId, selectedLocation, size, status]);
+  }, [dateRangeStart, dateRangeEnd, getPings, monitorId, selectedLocation, pageSize, status]);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
 
@@ -231,15 +242,15 @@ export const PingListComponent = (props: Props) => {
   ];
 
   const pagination: Pagination = {
-    initialPageSize: 20,
-    pageIndex: 0,
-    pageSize: size,
-    pageSizeOptions: [5, 10, 20, 50, 100],
+    initialPageSize: DEFAULT_PAGE_SIZE,
+    pageIndex,
+    pageSize,
+    pageSizeOptions: [10, 25, 50, 100],
     /**
      * we're not currently supporting pagination in this component
      * so the first page is the only page
      */
-    totalItemCount: size,
+    totalItemCount: total,
   };
 
   return (
@@ -300,7 +311,10 @@ export const PingListComponent = (props: Props) => {
         itemId="@timestamp"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         pagination={pagination}
-        onChange={(criteria: any) => setSize(criteria.page!.size)}
+        onChange={(criteria: any) => {
+          setPageSize(criteria.page!.size);
+          setPageIndex(criteria.page!.index);
+        }}
       />
     </EuiPanel>
   );

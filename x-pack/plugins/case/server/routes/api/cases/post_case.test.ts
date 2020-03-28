@@ -27,7 +27,6 @@ describe('POST cases', () => {
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
-        status: 'open',
         tags: ['defacement'],
       },
     });
@@ -43,6 +42,28 @@ describe('POST cases', () => {
     expect(response.payload.id).toEqual('mock-it');
     expect(response.payload.created_by.username).toEqual('awesome');
   });
+
+  it(`Error if you passing status for a new case`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'post',
+      body: {
+        description: 'This is a brand new case of a bad meanie defacing data',
+        title: 'Super Bad Security Issue',
+        status: 'open',
+        tags: ['defacement'],
+      },
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(400);
+  });
   it(`Returns an error if postNewCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases',
@@ -50,7 +71,6 @@ describe('POST cases', () => {
       body: {
         description: 'Throw an error',
         title: 'Super Bad Security Issue',
-        status: 'open',
         tags: ['error'],
       },
     });
@@ -74,7 +94,6 @@ describe('POST cases', () => {
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
-        status: 'open',
         tags: ['defacement'],
       },
     });

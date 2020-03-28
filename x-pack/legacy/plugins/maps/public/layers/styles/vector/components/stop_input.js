@@ -119,6 +119,7 @@ export class StopInput extends Component {
         isClearable={false}
         isLoading={this.state.isLoadingSuggestions}
         onFocus={this._onFocus}
+        data-test-subj={this.props.dataTestSubj}
         compressed
       />
     );

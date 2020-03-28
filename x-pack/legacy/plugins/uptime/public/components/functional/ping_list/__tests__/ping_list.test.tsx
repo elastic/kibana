@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PingListComponent, AllLocationOption, toggleDetails } from '../ping_list';
+import { PingListComponent, toggleDetails } from '../ping_list';
 import { ExpandedRowMap } from '../../monitor_list/types';
 import { Ping, PingsResponse } from '../../../../../common/runtime_types';
 
@@ -173,15 +173,8 @@ describe('PingList component', () => {
         loading={false}
         locations={[]}
         monitorId="foo"
-        onPageCountChange={jest.fn()}
-        onSelectedLocationChange={(_loc: any[]) => {}}
-        onSelectedStatusChange={jest.fn()}
-        pageSize={30}
         pings={response.pings}
-        size={10}
-        status="all"
-        selectedOption="down"
-        selectedLocation={AllLocationOption.value}
+        total={10}
       />
     );
     expect(component).toMatchSnapshot();

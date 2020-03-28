@@ -8,7 +8,6 @@
 // Scalars
 // ====================================================
 
-
 export type UnsignedInteger = any;
 
 // ====================================================
@@ -199,7 +198,6 @@ export interface SummaryHistogramPoint {
   /** The number of _down_ documents. */
   down: number;
 }
-
 
 export interface GetMonitorStatesQueryArgs {
   dateRangeStart: string;

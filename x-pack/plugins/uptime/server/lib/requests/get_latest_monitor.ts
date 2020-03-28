@@ -73,7 +73,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   const result = await callES('search', params);
 
   const decoded = PingType.decode(
-    result.aggregations.by_id.buckets?.[0]?.latest.hits?.hits?.[0]?._source ?? {}
+    result.aggregations?.by_id.buckets?.[0]?.latest.hits?.hits?.[0]._source ?? {}
   );
   if (isRight(decoded)) {
     return decoded.right;

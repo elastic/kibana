@@ -23,3 +23,5 @@ import { DataPublicPluginStart } from '../../../../plugins/data/public';
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('data.fieldFormats');
+
+export { npStart } from 'ui/new_platform';

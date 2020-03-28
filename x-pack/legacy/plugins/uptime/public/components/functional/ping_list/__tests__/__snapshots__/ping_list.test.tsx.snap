@@ -51,7 +51,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
               },
             ]
           }
-          value="down"
+          value=""
         />
       </EuiFormRow>
     </EuiFlexItem>
@@ -314,17 +314,16 @@ exports[`PingList component renders sorted list without errors 1`] = `
     onChange={[Function]}
     pagination={
       Object {
-        "initialPageSize": 20,
+        "initialPageSize": 10,
         "pageIndex": 0,
-        "pageSize": 30,
+        "pageSize": 10,
         "pageSizeOptions": Array [
-          5,
           10,
-          20,
+          25,
           50,
           100,
         ],
-        "totalItemCount": 30,
+        "totalItemCount": 10,
       }
     }
     responsive={true}
