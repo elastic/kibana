@@ -23,7 +23,7 @@ import { IUiSettingsClient } from 'kibana/public';
 import { ChartComponent } from './chart';
 import { VisParams } from '../timelion_vis_fn';
 import { TimelionSuccessResponse } from '../helpers/timelion_request_handler';
-import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
+import { ExprVis } from '../../../../../plugins/visualizations/public';
 
 export interface TimelionVisComponentProp {
   config: IUiSettingsClient;
