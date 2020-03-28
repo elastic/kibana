@@ -29,6 +29,10 @@ const TakeActionButton = memo(({ onClick }: { onClick: () => void }) => (
 export const TakeActionDropdown = memo(() => {
   const dispatch = useDispatch<(action: AlertAction) => void>();
   const alertDetails = useAlertListSelector(selectors.selectedAlertDetailsData);
+  const isSelectedAlertOpen = useAlertListSelector(selectors.isSelectedAlertOpen);
+  if (alertDetails === undefined) {
+    return null;
+  }
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -41,12 +45,17 @@ export const TakeActionDropdown = memo(() => {
   }, []);
 
   const closeAlert = useCallback(() => {
-    if (alertDetails) {
-      dispatch({
-        type: 'userClosedAlerts',
-        payload: [alertDetails.id],
-      });
-    }
+    dispatch({
+      type: 'userClosedAlerts',
+      payload: [alertDetails.id],
+    });
+  }, [alertDetails, dispatch]);
+
+  const openAlert = useCallback(() => {
+    dispatch({
+      type: 'userOpenedAlerts',
+      payload: [alertDetails.id],
+    });
   }, [alertDetails, dispatch]);
 
   return (
@@ -58,17 +67,31 @@ export const TakeActionDropdown = memo(() => {
       data-test-subj="alertListTakeActionDropdownContent"
     >
       <EuiFormRow>
-        <EuiButtonEmpty
-          data-test-subj="alertDetailTakeActionCloseAlertButton"
-          color="text"
-          iconType="folderCheck"
-          onClick={closeAlert}
-        >
-          <FormattedMessage
-            id="xpack.endpoint.application.endpoint.alertDetails.takeAction.close"
-            defaultMessage="Close Alert"
-          />
-        </EuiButtonEmpty>
+        {isSelectedAlertOpen === true ? (
+          <EuiButtonEmpty
+            data-test-subj="alertDetailTakeActionCloseAlertButton"
+            color="text"
+            iconType="folderCheck"
+            onClick={closeAlert}
+          >
+            <FormattedMessage
+              id="xpack.endpoint.application.endpoint.alertDetails.takeAction.close"
+              defaultMessage="Close Alert"
+            />
+          </EuiButtonEmpty>
+        ) : (
+          <EuiButtonEmpty
+            data-test-subj="alertDetailTakeActionOpenAlertButton"
+            color="text"
+            iconType="folderExclamation"
+            onClick={openAlert}
+          >
+            <FormattedMessage
+              id="xpack.endpoint.application.endpoint.alertDetails.takeAction.open"
+              defaultMessage="Open Alert"
+            />
+          </EuiButtonEmpty>
+        )}
       </EuiFormRow>
 
       <EuiFormRow>

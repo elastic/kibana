@@ -23,9 +23,15 @@ export const alertListData = (state: AlertListState) => state.alerts;
 
 export const selectedAlertDetailsData = (state: AlertListState) => state.alertDetails;
 
+export const closeSuccess = (state: AlertListState) => state.closedAlert.success;
+
 export const closeError = (state: AlertListState) => state.closedAlert.error;
 
-export const closeSuccess = (state: AlertListState) => state.closedAlert.success;
+export const openSuccess = (state: AlertListState) => state.openAlert.success;
+
+export const openError = (state: AlertListState) => state.openAlert.error;
+
+export const isSelectedAlertOpen = (state: AlertListState) => state.alertDetails?.state.active;
 
 /**
  * Returns the alert list pagination data from state

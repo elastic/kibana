@@ -96,6 +96,8 @@ export const AlertIndex = memo(() => {
   const selectedAlertData = useAlertListSelector(selectors.selectedAlertDetailsData);
   const closeSuccess = useAlertListSelector(selectors.closeSuccess);
   const closeError = useAlertListSelector(selectors.closeError);
+  const openSuccess = useAlertListSelector(selectors.openSuccess);
+  const openError = useAlertListSelector(selectors.openError);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => {
@@ -251,6 +253,50 @@ export const AlertIndex = memo(() => {
       });
     }
   }, [closeError, notifications.toasts]);
+
+  useEffect(() => {
+    if (openSuccess !== undefined) {
+      notifications.toasts.success({
+        title: (
+          <FormattedMessage
+            id="xpack.endpoint.alerts.openedAlert.successTitle"
+            defaultMessage="Alert Opened"
+          />
+        ),
+        body: (
+          <EuiLink
+            onClick={() => {
+              const { closed_alerts, ...paramsWithoutClosedAlerts } = queryParams;
+              history.push(urlFromQueryParams(paramsWithoutClosedAlerts));
+            }}
+          >
+            {i18n.translate('xpack.endpoint.alerts.openedAlert.successLink', {
+              defaultMessage: 'View all opened alerts',
+            })}
+          </EuiLink>
+        ),
+        toastLifeTimeMs: 10000,
+        iconType: 'check',
+      });
+      const { selected_alert, ...paramsWithoutSelectedAlert } = queryParams;
+      history.push(urlFromQueryParams(paramsWithoutSelectedAlert));
+    }
+  }, [closeSuccess, history, notifications.toasts, openSuccess, queryParams]);
+
+  useEffect(() => {
+    if (openError !== undefined) {
+      notifications.toasts.danger({
+        title: (
+          <FormattedMessage
+            id="xpack.endpoint.alerts.openedAlert.errorTitle"
+            defaultMessage="Failed to open alert"
+          />
+        ),
+        toastLifeTimeMs: 10000,
+        iconType: 'alert',
+      });
+    }
+  }, [closeError, notifications.toasts, openError]);
 
   return (
     <>

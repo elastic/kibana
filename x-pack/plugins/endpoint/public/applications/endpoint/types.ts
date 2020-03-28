@@ -206,6 +206,11 @@ export interface AlertListState {
     success?: boolean;
     error?: boolean;
   };
+
+  readonly openAlert: {
+    success?: boolean;
+    error?: boolean;
+  };
 }
 
 /**

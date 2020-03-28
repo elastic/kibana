@@ -26,6 +26,8 @@ import { TakeActionDropdown } from './take_action_dropdown';
 export const AlertDetailsOverview = styled(
   memo(() => {
     const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
+    const isSelectedAlertOpen = useAlertListSelector(selectors.isSelectedAlertOpen);
+
     if (alertDetailsData === undefined) {
       return null;
     }
@@ -103,14 +105,17 @@ export const AlertDetailsOverview = styled(
             </EuiHealth>
           </EuiText>
           <EuiText>
-            {' '}
-            <FormattedMessage
-              id="xpack.endpoint.application.endpoint.alertDetails.alert.status.open"
-              defaultMessage="Alert Status: {closedStatus}"
-              values={{
-                closedStatus: alertDetailsData.state.active === true ? 'Open' : 'Closed',
-              }}
-            />
+            {isSelectedAlertOpen === true ? (
+              <FormattedMessage
+                id="xpack.endpoint.application.endpoint.alertDetails.alert.status.open"
+                defaultMessage="Alert Status: Open"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.endpoint.application.endpoint.alertDetails.alert.status.closed"
+                defaultMessage="Alert Status: Closed"
+              />
+            )}
           </EuiText>
           <EuiSpacer />
           <TakeActionDropdown />

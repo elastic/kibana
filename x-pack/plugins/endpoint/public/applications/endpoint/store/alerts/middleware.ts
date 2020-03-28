@@ -57,9 +57,26 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
         await coreStart.http.patch(`/api/endpoint/alerts/${id}`, {
           body,
         });
-        api.dispatch({ type: 'serverSuccessfullyClosedAlert' });
+        api.dispatch({ type: 'serverSuccessfullyClosedAlerts' });
       } catch {
-        api.dispatch({ type: 'serverFailedToCloseAlert' });
+        api.dispatch({ type: 'serverFailedToCloseAlerts' });
+      }
+    }
+
+    if (action.type === 'userOpenedAlerts') {
+      const [id] = action.payload;
+      const body = JSON.stringify({
+        state: {
+          active: true,
+        },
+      });
+      try {
+        await coreStart.http.patch(`/api/endpoint/alerts/${id}`, {
+          body,
+        });
+        api.dispatch({ type: 'serverSuccessfullyOpenedAlerts' });
+      } catch {
+        api.dispatch({ type: 'serverFailedToOpenAlerts' });
       }
     }
   };

@@ -28,12 +28,25 @@ interface UserClosedAlerts {
   readonly payload: string[];
 }
 
-interface ServerSuccessfullyClosedAlert {
-  readonly type: 'serverSuccessfullyClosedAlert';
+interface UserOpenedAlerts {
+  readonly type: 'userOpenedAlerts';
+  readonly payload: string[];
 }
 
-interface ServerFailedToCloseAlert {
-  readonly type: 'serverFailedToCloseAlert';
+interface ServerSuccessfullyClosedAlerts {
+  readonly type: 'serverSuccessfullyClosedAlerts';
+}
+
+interface ServerFailedToCloseAlerts {
+  readonly type: 'serverFailedToCloseAlerts';
+}
+
+interface ServerSuccessfullyOpenedAlerts {
+  readonly type: 'serverSuccessfullyOpenedAlerts';
+}
+
+interface ServerFailedToOpenAlerts {
+  readonly type: 'serverFailedToOpenAlerts';
 }
 
 export type AlertAction =
@@ -41,5 +54,8 @@ export type AlertAction =
   | ServerReturnedAlertDetailsData
   | ServerReturnedSearchBarIndexPatterns
   | UserClosedAlerts
-  | ServerSuccessfullyClosedAlert
-  | ServerFailedToCloseAlert;
+  | UserOpenedAlerts
+  | ServerSuccessfullyClosedAlerts
+  | ServerFailedToCloseAlerts
+  | ServerSuccessfullyOpenedAlerts
+  | ServerFailedToOpenAlerts;

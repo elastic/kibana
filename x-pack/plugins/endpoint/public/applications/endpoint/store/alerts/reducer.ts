@@ -23,6 +23,10 @@ const initialState = (): AlertListState => {
       success: undefined,
       error: undefined,
     },
+    openAlert: {
+      success: undefined,
+      error: undefined,
+    },
   };
 };
 
@@ -54,6 +58,10 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
         success: undefined,
         error: undefined,
       },
+      openAlert: {
+        success: undefined,
+        error: undefined,
+      },
     };
   } else if (action.type === 'serverReturnedAlertDetailsData') {
     return {
@@ -68,7 +76,7 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
         patterns: action.payload,
       },
     };
-  } else if (action.type === 'serverSuccessfullyClosedAlert') {
+  } else if (action.type === 'serverSuccessfullyClosedAlerts') {
     return {
       ...state,
       closedAlert: {
@@ -76,11 +84,27 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
         success: true,
       },
     };
-  } else if (action.type === 'serverFailedToCloseAlert') {
+  } else if (action.type === 'serverFailedToCloseAlerts') {
     return {
       ...state,
       closedAlert: {
         ...state.closedAlert,
+        error: true,
+      },
+    };
+  } else if (action.type === 'serverSuccessfullyOpenedAlerts') {
+    return {
+      ...state,
+      openAlert: {
+        ...state.openAlert,
+        success: true,
+      },
+    };
+  } else if (action.type === 'serverFailedToOpenAlerts') {
+    return {
+      ...state,
+      openAlert: {
+        ...state.openAlert,
         error: true,
       },
     };
