@@ -27,7 +27,7 @@ export default function({ loadTestFile, getService }) {
       await esArchiver.unload('maps/kibana');
     });
 
-    describe('', function() {
+    describe.skip('', function() {
       this.tags('ciGroup7');
       loadTestFile(require.resolve('./documents_source'));
       loadTestFile(require.resolve('./blended_vector_layer'));
