@@ -22,9 +22,7 @@ import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { updateRuleActionsSavedObject } from '../../rule_actions/update_rule_actions_saved_object';
-import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
-import { updateRuleActions } from '../../rule_actions/update_rule_actions';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const patchRulesBulkRoute = (router: IRouter) => {
   router.patch(
@@ -127,25 +125,14 @@ export const patchRulesBulkRoute = (router: IRouter) => {
               machineLearningJobId,
             });
             if (rule != null) {
-              let ruleActions;
-              if (actions || throttle) {
-                ruleActions = await updateRuleActionsSavedObject({
-                  ruleAlertId: rule.id,
-                  savedObjectsClient,
-                  actions,
-                  throttle,
-                });
-                await updateRuleActions({
-                  alertsClient,
-                  savedObjectsClient,
-                  ruleAlertId: rule.id,
-                });
-              } else {
-                ruleActions = await getRuleActionsSavedObject({
-                  ruleAlertId: rule.id,
-                  savedObjectsClient,
-                });
-              }
+              const ruleActions = await updateRulesNotifications({
+                ruleAlertId: rule.id,
+                alertsClient,
+                savedObjectsClient,
+                enabled: rule.enabled!,
+                actions,
+                throttle,
+              });
               const ruleStatuses = await savedObjectsClient.find<
                 IRuleSavedAttributesSavedObjectAttributes
               >({

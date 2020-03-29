@@ -8,8 +8,8 @@ import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
 
 export const getThrottleOptions = (throttle = 'no_actions') => ({
-  ruleThrottle: throttle ?? 'no_actions',
-  alertThrottle: throttle && ['no_actions', 'rule'].includes(throttle) ? null : throttle,
+  ruleThrottle: throttle,
+  alertThrottle: ['no_actions', 'rule'].includes(throttle) ? null : throttle,
 });
 
 export const getRuleActionsFromSavedObject = (

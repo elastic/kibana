@@ -22,9 +22,7 @@ import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
-import { updateRuleActionsSavedObject } from '../../rule_actions/update_rule_actions_saved_object';
-import { updateRuleActions } from '../../rule_actions/update_rule_actions';
-import { updateNotifications } from '../../notifications/update_notifications';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const updateRulesBulkRoute = (router: IRouter) => {
   router.put(
@@ -130,26 +128,14 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               lists,
             });
             if (rule != null) {
-              const ruleActions = await updateRuleActionsSavedObject({
+              const ruleActions = await updateRulesNotifications({
                 ruleAlertId: rule.id,
+                alertsClient,
                 savedObjectsClient,
+                enabled,
                 actions,
                 throttle,
               });
-              await updateRuleActions({
-                alertsClient,
-                savedObjectsClient,
-                ruleAlertId: rule.id,
-              });
-              await updateNotifications({
-                alertsClient,
-                actions,
-                enabled,
-                ruleAlertId: rule.id,
-                interval: throttle,
-                name,
-              });
-
               const ruleStatuses = await savedObjectsClient.find<
                 IRuleSavedAttributesSavedObjectAttributes
               >({

@@ -5,8 +5,8 @@
  */
 
 import { AlertsClient, AlertServices } from '../../../../../../../plugins/alerting/server';
-import { getRuleActionsSavedObject } from './get_rule_actions_saved_object';
-import { readRules } from '../rules/read_rules';
+import { getRuleActionsSavedObject } from '../rule_actions/get_rule_actions_saved_object';
+import { readRules } from './read_rules';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
 interface UpdateRuleActions {
@@ -37,8 +37,10 @@ export const updateRuleActions = async ({
   return alertsClient.update({
     id: ruleAlertId,
     data: {
-      actions: ruleActions.actions.map(transformRuleToAlertAction),
-      throttle: ruleActions.alertThrottle,
+      actions: !ruleActions.alertThrottle
+        ? ruleActions.actions.map(transformRuleToAlertAction)
+        : [],
+      throttle: null,
       name: rule.name,
       tags: rule.tags,
       schedule: rule.schedule,

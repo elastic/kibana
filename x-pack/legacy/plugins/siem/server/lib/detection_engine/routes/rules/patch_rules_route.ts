@@ -21,9 +21,7 @@ import {
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { updateRuleActionsSavedObject } from '../../rule_actions/update_rule_actions_saved_object';
-import { updateRuleActions } from '../../rule_actions/update_rule_actions';
-import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const patchRulesRoute = (router: IRouter) => {
   router.patch(
@@ -124,25 +122,14 @@ export const patchRulesRoute = (router: IRouter) => {
           machineLearningJobId,
         });
         if (rule != null) {
-          let ruleActions;
-          if (actions || throttle) {
-            ruleActions = await updateRuleActionsSavedObject({
-              ruleAlertId: rule.id,
-              savedObjectsClient,
-              actions,
-              throttle,
-            });
-            await updateRuleActions({
-              alertsClient,
-              savedObjectsClient,
-              ruleAlertId: rule.id,
-            });
-          } else {
-            ruleActions = await getRuleActionsSavedObject({
-              ruleAlertId: rule.id,
-              savedObjectsClient,
-            });
-          }
+          const ruleActions = await updateRulesNotifications({
+            ruleAlertId: rule.id,
+            alertsClient,
+            savedObjectsClient,
+            enabled: rule.enabled!,
+            actions,
+            throttle,
+          });
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({

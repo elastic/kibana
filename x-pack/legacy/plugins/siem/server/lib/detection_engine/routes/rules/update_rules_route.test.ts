@@ -18,6 +18,8 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
+jest.mock('../../rules/update_rules_notifications');
 
 describe('update_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -45,6 +47,12 @@ describe('update_rules', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
+      (updateRulesNotifications as jest.Mock).mockResolvedValue({
+        id: 'id',
+        actions: [],
+        alertThrottle: null,
+        ruleThrottle: 'no_actions',
+      });
       const response = await server.inject(getUpdateRequest(), context);
       expect(response.status).toEqual(200);
     });

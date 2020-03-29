@@ -13,14 +13,14 @@ import { getThrottleOptions, getRuleActionsFromSavedObject } from './utils';
 interface CreateRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: AlertServices['savedObjectsClient'];
-  actions: RuleAlertAction[];
+  actions: RuleAlertAction[] | undefined;
   throttle: string | undefined;
 }
 
 export const createRuleActionsSavedObject = async ({
   ruleAlertId,
   savedObjectsClient,
-  actions,
+  actions = [],
   throttle,
 }: CreateRuleActionsSavedObject) => {
   const ruleActionsSavedObject = await savedObjectsClient.create<

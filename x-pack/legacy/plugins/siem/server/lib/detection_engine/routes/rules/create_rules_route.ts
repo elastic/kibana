@@ -22,9 +22,7 @@ import {
   buildSiemResponse,
   validateLicenseForRuleType,
 } from '../utils';
-import { createNotifications } from '../../notifications/create_notifications';
-import { createRuleActionsSavedObject } from '../../rule_actions/create_rule_actions_saved_object';
-import { updateRuleActions } from '../../rule_actions/update_rule_actions';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const createRulesRoute = (router: IRouter): void => {
   router.post(
@@ -139,32 +137,14 @@ export const createRulesRoute = (router: IRouter): void => {
           lists,
         });
 
-        const ruleActions = await createRuleActionsSavedObject({
+        const ruleActions = await updateRulesNotifications({
           ruleAlertId: createdRule.id,
+          alertsClient,
           savedObjectsClient,
+          enabled,
           actions,
           throttle,
         });
-
-        if (actions.length) {
-          // if exists it means it is not "per rule execution"
-          if (ruleActions.alertThrottle) {
-            await createNotifications({
-              alertsClient,
-              enabled,
-              name,
-              interval,
-              actions,
-              ruleAlertId: createdRule.id,
-            });
-          } else {
-            await updateRuleActions({
-              alertsClient,
-              savedObjectsClient,
-              ruleAlertId: createdRule.id,
-            });
-          }
-        }
 
         const ruleStatuses = await savedObjectsClient.find<
           IRuleSavedAttributesSavedObjectAttributes
