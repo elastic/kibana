@@ -307,13 +307,14 @@ def getTargetBranch() {
 def newPipeline(Closure closure = {}) {
   def config = [name: 'parallel-worker', label: 'tests-xxl', ramDisk: false]
 
-  def setupClosure = { processNumber ->
-      sh 'cp -R ${WORKSPACE}/kibana .'
-      sh 'ln -s ${WORKSPACE}/.es ./.es'
-  }
-
   workers.ci(config) {
-    withTaskQueue(parallel: 24) {
+
+    def setupClosure = {
+      sh 'cp -R ${WORKSPACE}/kibana/. .'
+      sh 'ln -s ${WORKSPACE}/.es ./.es || true'
+    }
+
+    withTaskQueue(parallel: 3, setup: setupClosure) {
       try {
         googleStorageDownload(
           credentialsId: 'kibana-ci-gcs-plugin',
@@ -332,9 +333,9 @@ def newPipeline(Closure closure = {}) {
             localDirectory: 'target',
             pathPrefix: getTargetBranch(),
           )
-        } catch (ex) {
+        } catch (innerEx) {
           // TODO fall back to master?
-          buildUtils.printStacktrace(ex)
+          buildUtils.printStacktrace(innerEx)
           print "Error reading previous functional test metrics. Will create a non-optimal test plan."
         }
       }
