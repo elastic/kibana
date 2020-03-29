@@ -97,6 +97,7 @@ export const updateRulesRoute = (router: IRouter) => {
           enabled,
           falsePositives,
           from,
+          immutable: false,
           query,
           language,
           machineLearningJobId,
