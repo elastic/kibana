@@ -189,25 +189,15 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  // return
   runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
 }
 
 def buildOss() {
-  // sh 'cp ./test-suites-for-ci.json ../kibana-oss/test-suites-for-ci.json'
-  // return
-  sh 'cp -R ./. ../kibana-oss'
-  dir('../kibana-oss') {
-    // runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
-  }
+  runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
 }
 
 def buildXpack() {
-  // return
-  sh 'cp -R ./. ../kibana-xpack'
-  dir('../kibana-xpack') {
-    runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
-  }
+  runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
 }
 
 def runErrorReporter() {
@@ -245,63 +235,52 @@ def call(Map params = [:], Closure closure) {
   }
 }
 
-def processFunctionalQueue(queue, finishedSuites, workerNumber, type) {
-  def testMetadataPath = pwd() + "target/test_metadata_${type}_${workerNumber}.json"
-  def iteration = 0
+def runFunctionalTestSuite(type, testSuite) {
+  // TODO add finishedSuites somewhere
+  def testMetadataPath = pwd() + "target/test_metadata_${type}_${env.TASK_QUEUE_PROCESS_ID}.json"
+  def byFile = [:]
+  testSuite.files.each { byFile[it.file] = it }
 
   withEnv([
-    "CI_GROUP=${workerNumber}",
-    "JOB=kibana-${type}-${workerNumber}",
+    "CI_GROUP=${env.TASK_QUEUE_PROCESS_ID}",
     "REMOVE_KIBANA_INSTALL_DIR=1",
     "TEST_METADATA_PATH=${testMetadataPath}"
   ]) {
-    while(!queue.isEmpty()) {
-      def testSuite
-      def byFile = [:]
-      try {
-        testSuite = queue.pop()
-        byFile = [:]
-        testSuite.files.each { byFile[it.file] = it }
-      } catch (ex) {
-        print ex.toString()
-        continue
-      }
 
-      iteration++
+    // TODO add install-dir back below, and ensure that this process has a copy of the required build from the workspace root
+    env.JOB = "kibana-functional-${type}-${env.TASK_QUEUE_PROCESS_ID}-${env.TASK_QUEUE_ITERATION_ID}"
 
-      catchErrorClean {
-        retryable("kibana-functional-${type}-${workerNumber}-${iteration}") {
-          if (testSuite.files && testSuite.files.size() > 0) {
-            try {
-              def filesString = testSuite.files.collect { "--include '${it.file}'" }.join(' ')
+    catchErrorClean {
+      retryable(env.JOB) {
+        if (testSuite.files && testSuite.files.size() > 0) {
+          try {
+            def filesString = testSuite.files.collect { "--include '${it.file}'" }.join(' ')
 
-              // TODO runbld
-              bash(
-                """
-                  export JOB=${env.JOB}-${iteration}
-                  source test/scripts/jenkins_test_setup_${type}.sh
-                  node scripts/functional_tests \
-                    --config '${testSuite.config}' \
-                    --debug \
-                    ${filesString}
-                """, "${type} tests: ${testSuite.config}"
-              )
+            // TODO runbld
+            bash(
+              """
+                source test/scripts/jenkins_test_setup_${type}.sh
+                node scripts/functional_tests \
+                  --config '${testSuite.config}' \
+                  --debug \
+                  ${filesString}
+              """, "${type} tests: ${testSuite.config}"
+            )
 
-              // --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
-            } finally {
-              catchErrorClean {
-                def suites = toJSON(readFile(file: testMetadataPath))
-                suites.each {
-                  catchErrorClean {
-                    if (byFile[it.file]) {
-                      it.previousDuration = byFile[it.file].duration
-                    }
-                    finishedSuites << it
+            // --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
+          } finally {
+            catchErrorClean {
+              def suites = toJSON(readFile(file: testMetadataPath))
+              suites.each {
+                catchErrorClean {
+                  if (byFile[it.file]) {
+                    it.previousDuration = byFile[it.file].duration
                   }
+                  // finishedSuites << it
                 }
-                testSuite.files = testSuite.files.findAll { suite -> !suites.find { finishedSuite -> finishedSuite.file == suite.file && finishedSuite.success } }
-                print testSuite.files
               }
+              testSuite.files = testSuite.files.findAll { suite -> !suites.find { finishedSuite -> finishedSuite.file == suite.file && finishedSuite.success } }
+              print testSuite.files
             }
           }
         }
@@ -320,56 +299,75 @@ def catchErrorClean(Closure closure) {
   }
 }
 
-def processOssQueue(queue, finishedSuites, workerNumber) {
-  return processFunctionalQueue(queue, finishedSuites, workerNumber, "oss")
-}
-
-def processXpackQueue(queue, finishedSuites, workerNumber) {
-  return processFunctionalQueue(queue, finishedSuites, workerNumber, "xpack")
-}
-
-def getFunctionalQueueWorker(queue, finishedSuites, workerNumber) {
-  return functionalTestProcess("functional-test-queue-" + workerNumber, {
-    dir('../kibana-oss') {
-
-      // Allocate a few workers in the middle of the pack for Firefox
-      // if (workerNumber >= 12 && workerNumber <= 15) {
-      //   processOssQueue(queue.ossFirefox, finishedSuites.ossFirefox, workerNumber)
-      // }
-
-      processOssQueue(queue.oss, finishedSuites.oss, workerNumber)
-    }
-
-    // TODO timeout?
-    while(!queue.containsKey('xpack')) {
-      sleep(60)
-    }
-
-    dir('../kibana-xpack') {
-      // if (workerNumber >= 12 && workerNumber <= 15) {
-      //   processXpackQueue(queue.xpackFirefox, finishedSuites.xpackFirefox, workerNumber)
-      // }
-
-      processXpackQueue(queue.xpack, finishedSuites.xpack, workerNumber)
-    }
-  })
-}
-
-def prepareOssTestQueue(queue) {
-  def items = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
-  queue.oss = items.oss.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
-  queue.ossFirefox = items.ossFirefox.reverse()
-}
-
-def prepareXpackTestQueue(queue) {
-  def items = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
-  queue.xpack = items.xpack.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
-  queue.xpackFirefox = items.xpackFirefox.reverse()
-}
-
 // Only works inside of a worker after scm checkout
 def getTargetBranch() {
   return env.ghprbTargetBranch ?: (env.GIT_BRANCH - ~/^[^\/]+\//)
+}
+
+def newPipeline(Closure closure = {}) {
+  def config = [name: 'parallel-worker', label: 'tests-xxl', ramDisk: false]
+
+  def setupClosure = { processNumber ->
+      sh 'cp -R ${WORKSPACE}/kibana .'
+      sh 'ln -s ${WORKSPACE}/.es ./.es'
+  }
+
+  workers.ci(config) {
+    withTaskQueue(parallel: 24) {
+      try {
+        googleStorageDownload(
+          credentialsId: 'kibana-ci-gcs-plugin',
+          bucketUri: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}/functional_test_suite_metrics.json",
+          localDirectory: 'target',
+          pathPrefix: kibanaPipeline.getTargetBranch(),
+        )
+      } catch (ex) {
+        // TODO fall back to master?
+        buildUtils.printStacktrace(ex)
+        print "Error reading previous functional test metrics. Will create a non-optimal test plan."
+      }
+
+      bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
+      def testPlan = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
+
+      task {
+        buildOss()
+        bash("mv build/oss/kibana-*-SNAPSHOT-linux-x86_64 ${env.WORKSPACE}/kibana-build-oss")
+
+        // Needs OSS build dir?
+        // kibanaPipeline.bash("test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn_tp_sample_panel_action")
+
+        tasks(testPlan.oss.collect { return { runFunctionalTestSuite('oss', it) } })
+
+        // Create oss tasks from testPlan
+        task {
+          bash("""
+            source test/scripts/jenkins_test_setup_oss.sh
+            yarn run grunt run:pluginFunctionalTestsRelease --from=source;
+            yarn run grunt run:exampleFunctionalTestsRelease --from=source;
+            yarn run grunt run:interpreterFunctionalTestsRelease;
+          """, "Run OSS plugin functional tests")
+        }
+      }
+
+      task {
+        buildXpack()
+        bash("mv install/kibana ${env.WORKSPACE}/kibana-build-xpack")
+
+        tasks(testPlan.xpack.collect { return { runFunctionalTestSuite('xpack', it) } })
+
+        // task(getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }))
+
+        task({ runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') })
+
+        whenChanged(['x-pack/legacy/plugins/siem/', 'x-pack/test/siem_cypress/']) {
+          task(functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'))
+        }
+      }
+    }
+
+    closure.call()
+  }
 }
 
 return this

@@ -149,13 +149,13 @@ def parallelProcesses(Map params) {
     try {
       parallel([
         parallelPrimary: {
-          config.setup()
+          config.setup.call()
           parallel(processes)
         },
         parallelExtra: config.parallelExtra,
       ])
     } finally {
-      config.postProcess()
+      config.postProcess.call()
     }
   }
 }
