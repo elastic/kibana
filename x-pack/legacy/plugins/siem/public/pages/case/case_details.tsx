@@ -5,22 +5,30 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Redirect } from 'react-router-dom';
 
-import { CaseView } from './components/case_view';
+import { useGetUrlSearch } from '../../components/navigation/use_get_url_search';
+import { useIsUserCanCrud } from '../../lib/kibana';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { getCaseUrl } from '../../components/link_to';
+import { navTabs } from '../home/home_navigations';
+import { CaseView } from './components/case_view';
 
 export const CaseDetailsPage = React.memo(() => {
+  const isUserCanCrud = useIsUserCanCrud();
   const { detailName: caseId } = useParams();
-  if (!caseId) {
-    return null;
+  const search = useGetUrlSearch(navTabs.case);
+
+  if (!isUserCanCrud) {
+    return <Redirect to={getCaseUrl(search)} />;
   }
-  return (
+
+  return caseId != null ? (
     <>
       <CaseView caseId={caseId} />
       <SpyRoute />
     </>
-  );
+  ) : null;
 });
 
 CaseDetailsPage.displayName = 'CaseDetailsPage';

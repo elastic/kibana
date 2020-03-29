@@ -81,3 +81,10 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   }, []);
   return user;
 };
+
+export const useIsUserCanCrud = () => {
+  const uiCapabilities = useKibana().services.application.capabilities;
+  const capabilitiesCanUserCRUD: boolean =
+    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
+  return capabilitiesCanUserCRUD;
+};

@@ -7,16 +7,24 @@
 import React from 'react';
 
 import { WrapperPage } from '../../components/wrapper_page';
-import { AllCases } from './components/all_cases';
+import { useIsUserCanCrud } from '../../lib/kibana';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { AllCases } from './components/all_cases';
+import { CaseSavedObjectNotAvailable } from './saved_object_not_available';
 
-export const CasesPage = React.memo(() => (
-  <>
-    <WrapperPage>
-      <AllCases />
-    </WrapperPage>
-    <SpyRoute />
-  </>
-));
+export const CasesPage = React.memo(() => {
+  const isUserCanCrud = useIsUserCanCrud();
+
+  return isUserCanCrud ? (
+    <>
+      <WrapperPage>
+        <AllCases />
+      </WrapperPage>
+      <SpyRoute />
+    </>
+  ) : (
+    <CaseSavedObjectNotAvailable />
+  );
+});
 
 CasesPage.displayName = 'CasesPage';

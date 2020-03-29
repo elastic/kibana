@@ -169,3 +169,10 @@ export const ADD_COMMENT_HELP_TEXT = i18n.translate(
 export const SAVE = i18n.translate('xpack.siem.case.caseView.description.save', {
   defaultMessage: 'Save',
 });
+
+export const GO_TO_DOCUMENTATION = i18n.translate(
+  'xpack.siem.case.caseView.goToDocumentationButton',
+  {
+    defaultMessage: 'View documentation',
+  }
+);
