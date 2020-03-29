@@ -1,4 +1,4 @@
-def withTaskQueue(Map options = [:], Closure closure) {
+def call(Map options = [:], Closure closure) {
   def config = [ parallel: 10 ] + options
 
   def queue = []
@@ -17,37 +17,41 @@ def withTaskQueue(Map options = [:], Closure closure) {
   for(def i = 1; i <= config.parallel; i++) {
     def j = i
     processes["task-queue-process-${j}"] = {
-      env.TASK_QUEUE_PROCESS_ID = j
-      env.TASK_QUEUE_ITERATION_ID = ++iterationId
+      catchErrors {
+        env.TASK_QUEUE_PROCESS_ID = j
+        env.TASK_QUEUE_ITERATION_ID = ++iterationId
 
-      dir("${WORKSPACE}/parallel/${processNumber}") {
-        if (config.setup) {
-          config.setup.call(j)
-        }
-
-        while(true) {
-          if (!queue.isEmpty()) {
-            processesExecuting++
-            try {
-              def task = queue.removeAt(0)
-              task.call()
-            } catch (ex) {
-              print ex.toString()
-            }
-            processesExecuting--
-            if (processesExecuting < 1 && queue.isEmpty()) {
-              taskNotify()
-            }
-            continue
+        dir("${WORKSPACE}/parallel/${processNumber}") {
+          if (config.setup) {
+            config.setup.call(j)
           }
 
-          if (processesExecuting > 0) {
-            taskSleep()
-            continue
-          }
+          while(true) {
+            catchErrors {
+              if (!queue.isEmpty()) {
+                processesExecuting++
+                try {
+                  def task = queue.removeAt(0)
+                  task.call()
+                } catch (ex) {
+                  print ex.toString()
+                }
+                processesExecuting--
+                if (processesExecuting < 1 && queue.isEmpty()) {
+                  taskNotify()
+                }
+                continue
+              }
 
-          // taskNotify()
-          break
+              if (processesExecuting > 0) {
+                taskSleep()
+                continue
+              }
+
+              // taskNotify()
+              break
+            }
+          }
         }
       }
     }

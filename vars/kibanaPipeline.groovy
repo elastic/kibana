@@ -189,15 +189,15 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+  // runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
 }
 
 def buildOss() {
-  runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  // runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
 }
 
 def buildXpack() {
-  runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+  // runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
 }
 
 def runErrorReporter() {
@@ -317,9 +317,9 @@ def newPipeline(Closure closure = {}) {
       try {
         googleStorageDownload(
           credentialsId: 'kibana-ci-gcs-plugin',
-          bucketUri: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}/functional_test_suite_metrics.json",
+          bucketUri: "gs://kibana-ci-functional-metrics/${getTargetBranch()}/functional_test_suite_metrics.json",
           localDirectory: 'target',
-          pathPrefix: kibanaPipeline.getTargetBranch(),
+          pathPrefix: getTargetBranch(),
         )
       } catch (ex) {
         // TODO fall back to master?
