@@ -35,7 +35,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['shield']);
-  // const screenshot = getService('screenshots');
 
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -47,10 +46,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     shouldAcceptAlert: boolean;
     useActualUrl: boolean;
   }
-  // interface LegacyUrl {
-  //   pathName: string;
-  //   hashName: string;
-  // }
 
   class CommonPage {
     /**
@@ -105,8 +100,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     private async loginIfPrompted(appUrl: string) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      // we won't find this kibanaChrome on the auth0 saml type login page
-      // await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
+      await testSubjects.find('kibanaChrome', 6 * defaultFindTimeout); // 60 sec waiting
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -127,7 +121,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         );
         await browser.get(appUrl);
         currentUrl = await browser.getCurrentUrl();
-        log.debug(`### Finished login process currentUrl = ${currentUrl}`);
+        log.debug(`Finished login process currentUrl = ${currentUrl}`);
       }
       return currentUrl;
     }
@@ -255,28 +249,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await delay(sleepMilliseconds);
       log.debug(`... sleep(${sleepMilliseconds}) end`);
     }
-
-    // kibServerConf(config: any) {
-    //   config.get('servers').kibana;
-    // }
-    //
-    // buildLegacyUrl(getKibServerUrl: any, basePath: String) {
-    //   return ({ pathName, hashName }: LegacyUrl) => {
-    //     getKibServerUrl({ pathname: `${basePath}${pathName}`, hashName });
-    //   }
-    // }
-    //
-    // buildUrl(getKibServerUrl:any , buildLegacyUrlWithPath: any, basePath:any, hash: any, appName: any) {
-    //
-    //   debugger;
-    //   return config.has(['apps', appName])
-    //     ? buildLegacyUrlWithPath(config.get(['apps', appName]))
-    //     : getKibServerUrl({ pathname: `${basePath}/app/${appName}`, hash });
-    //
-    // }
-    // kibServerUrl(getUrlNoAuth: any, config: any) {
-    //   return this.kibServerConf(config)
-    // }
 
     async navigateToApp(
       appName: string,

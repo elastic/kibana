@@ -269,9 +269,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         defaultFindTimeout * 2
       );
       return await Promise.all(
-        legendEntries.map(
-          async (chart: WebElementWrapper) => await chart.getAttribute('data-label')
-        )
+        legendEntries.map(async chart => await chart.getAttribute('data-label'))
       );
     }
 
