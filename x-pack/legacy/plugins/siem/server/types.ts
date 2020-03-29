@@ -19,6 +19,6 @@ export interface SiemRequestContext {
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    siem: SiemRequestContext;
+    siem?: SiemRequestContext;
   }
 }
