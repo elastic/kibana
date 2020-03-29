@@ -53,7 +53,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
           ),
         });
 
-        return response.ok({ body: 'true' });
+        return response.noContent();
       } catch (error) {
         return response.customError(wrapError(error));
       }
