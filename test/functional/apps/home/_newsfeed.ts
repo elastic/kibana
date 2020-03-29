@@ -25,15 +25,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'newsfeed']);
 
   describe('Newsfeed', function newsfeedTests() {
-    this.tags('testing');
-
     before(async () => {
-      // await PageObjects.newsfeed.resetPage();
+      await PageObjects.newsfeed.resetPage();
     });
 
-    it.only('passes', () => {
-      expect(true).to.be(true);
-    });
+    // it.only('passes', () => {
+    //   expect(true).to.be(true);
+    // });
 
     it('has red icon which is a sign of not checked news', async () => {
       const hasCheckedNews = await PageObjects.newsfeed.getRedButtonSign();

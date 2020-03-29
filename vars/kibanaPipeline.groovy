@@ -189,11 +189,13 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  // runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+  runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
 }
 
 def buildOss() {
-  // runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  sh 'rm -rf .es' // TODO
+  runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  sh "cp -R .es ${env.WORKSPACE}"
 }
 
 def buildXpack() {
@@ -241,10 +243,21 @@ def runFunctionalTestSuite(type, testSuite) {
   def byFile = [:]
   testSuite.files.each { byFile[it.file] = it }
 
+  def kibanaPort = "61${env.TASK_QUEUE_PROCESS_ID}1"
+  def esPort = "61${env.TASK_QUEUE_PROCESS_ID}2"
+  def esTransportPort = "61${env.TASK_QUEUE_PROCESS_ID}3"
+
   withEnv([
     "CI_GROUP=${env.TASK_QUEUE_PROCESS_ID}",
     "REMOVE_KIBANA_INSTALL_DIR=1",
-    "TEST_METADATA_PATH=${testMetadataPath}"
+    "TEST_METADATA_PATH=${testMetadataPath}",
+    "CI_PARALLEL_PROCESS_NUMBER=${env.TASK_QUEUE_PROCESS_ID}",
+    "TEST_KIBANA_HOST=localhost",
+    "TEST_KIBANA_PORT=${kibanaPort}",
+    "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
+    "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
+    "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
+    "KBN_NP_PLUGINS_BUILT=true",
   ]) {
 
     // TODO add install-dir back below, and ensure that this process has a copy of the required build from the workspace root
@@ -256,6 +269,15 @@ def runFunctionalTestSuite(type, testSuite) {
           try {
             def filesString = testSuite.files.collect { "--include '${it.file}'" }.join(' ')
 
+            if (type == 'oss') {
+              bash("""
+                if [[ ! -d build/oss ]]; then
+                  mkdir -p build/oss
+                  cp -R ${env.WORKSPACE}/kibana-build-oss/. build/oss/
+                fi
+              """, "Copy Kibana Build")
+            }
+
             // TODO runbld
             bash(
               """
@@ -263,11 +285,10 @@ def runFunctionalTestSuite(type, testSuite) {
                 node scripts/functional_tests \
                   --config '${testSuite.config}' \
                   --debug \
+                  --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
                   ${filesString}
               """, "${type} tests: ${testSuite.config}"
             )
-
-            // --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
           } finally {
             catchErrorClean {
               def suites = toJSON(readFile(file: testMetadataPath))
@@ -314,7 +335,9 @@ def newPipeline(Closure closure = {}) {
       sh 'ln -s ${WORKSPACE}/.es ./.es || true'
     }
 
-    withTaskQueue(parallel: 3, setup: setupClosure) {
+    withTaskQueue(parallel: 24, setup: setupClosure) {
+      sh 'mkdir -p target'
+
       try {
         googleStorageDownload(
           credentialsId: 'kibana-ci-gcs-plugin',
@@ -323,7 +346,6 @@ def newPipeline(Closure closure = {}) {
           pathPrefix: getTargetBranch(),
         )
       } catch (ex) {
-        // TODO fall back to master?
         buildUtils.printStacktrace(ex)
 
         try {
@@ -331,54 +353,49 @@ def newPipeline(Closure closure = {}) {
             credentialsId: 'kibana-ci-gcs-plugin',
             bucketUri: "gs://kibana-ci-functional-metrics/master/functional_test_suite_metrics.json",
             localDirectory: 'target',
-            pathPrefix: getTargetBranch(),
+            pathPrefix: 'master',
           )
         } catch (innerEx) {
-          // TODO fall back to master?
           buildUtils.printStacktrace(innerEx)
           print "Error reading previous functional test metrics. Will create a non-optimal test plan."
         }
       }
 
       // TODO
-      // bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
-      // def testPlan = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
-      def testPlan = [oss: [], xpack: []]
+      bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
+      def testPlan = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
+      // testPlan = [oss: testPlan.oss.reverse().take(1), xpack: []] // TODO
 
       task {
         buildOss()
-        // bash("mv build/oss/kibana-*-SNAPSHOT-linux-x86_64 ${env.WORKSPACE}/kibana-build-oss", "Move OSS build")
-
-        // Needs OSS build dir?
-        // kibanaPipeline.bash("test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn_tp_sample_panel_action")
+        bash("mkdir -p ${env.WORKSPACE}/kibana-build-oss; mv build/oss/kibana-*-SNAPSHOT-linux-x86_64 ${env.WORKSPACE}/kibana-build-oss/", "Move OSS build")
 
         tasks(testPlan.oss.collect { return { runFunctionalTestSuite('oss', it) } })
 
-        // Create oss tasks from testPlan
-        task {
-          bash("""
-            source test/scripts/jenkins_test_setup_oss.sh
-            yarn run grunt run:pluginFunctionalTestsRelease --from=source;
-            yarn run grunt run:exampleFunctionalTestsRelease --from=source;
-            yarn run grunt run:interpreterFunctionalTestsRelease;
-          """, "Run OSS plugin functional tests")
-        }
+        // Does this stuff require running out of the same workspace that the build happened in?
+        bash("test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn_tp_sample_panel_action")
+        bash("""
+          source test/scripts/jenkins_test_setup_oss.sh
+          yarn run grunt run:pluginFunctionalTestsRelease --from=source;
+          yarn run grunt run:exampleFunctionalTestsRelease --from=source;
+          yarn run grunt run:interpreterFunctionalTestsRelease;
+        """, "Run OSS plugin functional tests")
       }
 
-      task {
-        buildXpack()
-        // bash("mv install/kibana ${env.WORKSPACE}/kibana-build-xpack", "Move XPack Build")
+      // task {
+      //   buildXpack()
+      //   // bash("mv install/kibana ${env.WORKSPACE}/kibana-build-xpack", "Move XPack Build")
 
-        tasks(testPlan.xpack.collect { return { runFunctionalTestSuite('xpack', it) } })
+      //   tasks(testPlan.xpack.collect { return { runFunctionalTestSuite('xpack', it) } })
 
-        // task(getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }))
+      //   // task(getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }))
 
-        task({ runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') })
+      //   task({ runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') })
 
-        whenChanged(['x-pack/legacy/plugins/siem/', 'x-pack/test/siem_cypress/']) {
-          task(functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'))
-        }
-      }
+      //   whenChanged(['x-pack/legacy/plugins/siem/', 'x-pack/test/siem_cypress/']) {
+      //     task(functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'))
+      //   }
+      // }
     }
 
     closure.call()

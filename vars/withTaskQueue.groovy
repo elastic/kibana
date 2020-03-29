@@ -21,6 +21,7 @@ def call(Map options = [:], Closure closure) {
         env.TASK_QUEUE_PROCESS_ID = j
         env.TASK_QUEUE_ITERATION_ID = ++iterationId
 
+        // sh "rm -rf ${WORKSPACE}/parallel/${j}" // TODO
         dir("${WORKSPACE}/parallel/${j}") {
           if (config.setup) {
             config.setup.call(j)
@@ -31,11 +32,9 @@ def call(Map options = [:], Closure closure) {
             catchErrors {
               if (!queue.isEmpty()) {
                 processesExecuting++
-                try {
+                catchErrors {
                   def task = queue.removeAt(0)
                   task.call()
-                } catch (ex) { // TODO Handle Interrupt
-                  print ex.toString()
                 }
                 processesExecuting--
                 if (processesExecuting < 1 && queue.isEmpty()) {
