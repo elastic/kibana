@@ -17,6 +17,7 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
@@ -35,7 +36,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../components/utility_bar';
-import { getConfigureCasesUrl, getCreateCaseUrl } from '../../../../components/link_to';
+import { getCreateCaseUrl } from '../../../../components/link_to';
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
@@ -45,6 +46,10 @@ import { navTabs } from '../../../home/home_navigations';
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
 import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
+import { useGetActionLicense } from '../../../../containers/case/use_get_action_license';
+import { getActionLicenseError } from '../push_to_service/helpers';
+import { ErrorsPushServiceCallOut } from '../errors_push_service_callout';
+import { ConfigureCaseButton } from '../configure_cases/button';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -77,7 +82,7 @@ const getSortField = (field: string): SortFieldCase => {
 };
 export const AllCases = React.memo(() => {
   const urlSearch = useGetUrlSearch(navTabs.case);
-
+  const { actionLicense } = useGetActionLicense();
   const {
     countClosedCases,
     countOpenCases,
@@ -199,6 +204,8 @@ export const AllCases = React.memo(() => {
     [filterOptions.status, toggleDeleteModal, handleDispatchUpdate]
   );
 
+  const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
+
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
       let newQueryParams = queryParams;
@@ -259,8 +266,10 @@ export const AllCases = React.memo(() => {
     [loading]
   );
   const isDataEmpty = useMemo(() => data.total === 0, [data]);
+
   return (
     <>
+      {!isEmpty(actionsErrors) && <ErrorsPushServiceCallOut errors={actionsErrors} />}
       <CaseHeaderPage title={i18n.PAGE_TITLE}>
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={true}>
           <EuiFlexItem grow={false}>
@@ -278,9 +287,14 @@ export const AllCases = React.memo(() => {
             />
           </FlexItemDivider>
           <EuiFlexItem grow={false}>
-            <EuiButton href={getConfigureCasesUrl(urlSearch)} iconType="controlsHorizontal">
-              {i18n.CONFIGURE_CASES_BUTTON}
-            </EuiButton>
+            <ConfigureCaseButton
+              label={i18n.CONFIGURE_CASES_BUTTON}
+              isDisabled={!isEmpty(actionsErrors)}
+              showToolTip={!isEmpty(actionsErrors)}
+              msgTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].description : <></>}
+              titleTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].title : ''}
+              urlSearch={urlSearch}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton fill href={getCreateCaseUrl(urlSearch)} iconType="plusInCircle">

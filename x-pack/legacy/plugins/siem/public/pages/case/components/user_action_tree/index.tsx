@@ -178,7 +178,7 @@ export const UserActionTree = React.memo(
           markdown={MarkdownDescription}
           onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
           onQuote={handleManageQuote.bind(null, caseData.description)}
-          userName={caseData.createdBy.username ?? ''}
+          username={caseData.createdBy.username ?? ''}
         />
 
         {caseUserActions.map((action, index) => {
@@ -212,7 +212,7 @@ export const UserActionTree = React.memo(
                   onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
                   onQuote={handleManageQuote.bind(null, comment.comment)}
                   outlineComment={handleOutlineComment}
-                  userName={comment.createdBy.username ?? ''}
+                  username={comment.createdBy.username ?? ''}
                   updatedAt={comment.updatedAt}
                 />
               );
@@ -248,7 +248,7 @@ export const UserActionTree = React.memo(
                   index === lastIndexPushToService &&
                   index < caseUserActions.length - 1
                 }
-                userName={action.actionBy.username ?? ''}
+                username={action.actionBy.username ?? ''}
               />
             );
           }
@@ -268,7 +268,7 @@ export const UserActionTree = React.memo(
           isLoading={isLoadingIds.includes(NEW_ID)}
           fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
           markdown={MarkdownNewComment}
-          userName={currentUser != null ? currentUser.username ?? '' : ''}
+          username={currentUser != null ? currentUser.username ?? '' : ''}
         />
       </>
     );

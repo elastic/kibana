@@ -34,7 +34,7 @@ import { CaseStatus } from '../case_status';
 import { navTabs } from '../../../home/home_navigations';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
-import { usePushToService } from './push_to_service';
+import { usePushToService } from '../push_to_service';
 
 interface Props {
   caseId: string;
