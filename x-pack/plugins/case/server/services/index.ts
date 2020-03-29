@@ -107,7 +107,7 @@ export interface CaseServiceSetup {
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
   getTags(args: ClientArgs): Promise<string[]>;
   getReporters(args: ClientArgs): Promise<User[]>;
-  getUser(args: GetUserArgs): Promise<AuthenticatedUser>;
+  getUser(args: GetUserArgs): Promise<AuthenticatedUser | User>;
   postNewCase(args: PostCaseArgs): Promise<SavedObject<CaseAttributes>>;
   postNewComment(args: PostCommentArgs): Promise<SavedObject<CommentAttributes>>;
   patchCase(args: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseAttributes>>;
@@ -207,13 +207,22 @@ export class CaseService {
       }
     },
     getUser: async ({ request, response }: GetUserArgs) => {
-      this.log.debug(`Attempting to authenticate a user`);
-      const user = authentication!.getCurrentUser(request);
-      if (!user) {
-        this.log.debug(`Error on GET user: Bad User`);
-        throw new Error('Bad User - the user is not authenticated');
+      const noUser = {
+        username: null,
+        full_name: null,
+        email: null,
+      };
+      try {
+        this.log.debug(`Attempting to authenticate a user`);
+        const user = authentication!.getCurrentUser(request);
+        if (!user) {
+          return noUser;
+        }
+        return user;
+      } catch (error) {
+        this.log.debug(`Error on GET cases: ${error}`);
+        return noUser;
       }
-      return user;
     },
     postNewCase: async ({ client, attributes }: PostCaseArgs) => {
       try {

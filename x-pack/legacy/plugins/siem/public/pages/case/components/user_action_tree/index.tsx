@@ -174,11 +174,11 @@ export const UserActionTree = React.memo(
           labelEditAction={i18n.EDIT_DESCRIPTION}
           labelQuoteAction={i18n.QUOTE}
           labelTitle={<>{i18n.ADDED_DESCRIPTION}</>}
-          fullName={caseData.createdBy.fullName ?? caseData.createdBy.username}
+          fullName={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''}
           markdown={MarkdownDescription}
           onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
           onQuote={handleManageQuote.bind(null, caseData.description)}
-          username={caseData.createdBy.username}
+          userName={caseData.createdBy.username ?? ''}
         />
 
         {caseUserActions.map((action, index) => {
@@ -196,7 +196,7 @@ export const UserActionTree = React.memo(
                   labelEditAction={i18n.EDIT_COMMENT}
                   labelQuoteAction={i18n.QUOTE}
                   labelTitle={<>{i18n.ADDED_COMMENT}</>}
-                  fullName={comment.createdBy.fullName ?? comment.createdBy.username}
+                  fullName={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
                   markdown={
                     <UserActionMarkdown
                       id={comment.id}
@@ -212,7 +212,7 @@ export const UserActionTree = React.memo(
                   onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
                   onQuote={handleManageQuote.bind(null, comment.comment)}
                   outlineComment={handleOutlineComment}
-                  username={comment.createdBy.username}
+                  userName={comment.createdBy.username ?? ''}
                   updatedAt={comment.updatedAt}
                 />
               );
@@ -238,7 +238,7 @@ export const UserActionTree = React.memo(
                 linkId={
                   action.action === 'update' && action.commentId != null ? action.commentId : null
                 }
-                fullName={action.actionBy.fullName ?? action.actionBy.username}
+                fullName={action.actionBy.fullName ?? action.actionBy.username ?? ''}
                 outlineComment={handleOutlineComment}
                 showTopFooter={
                   action.action === 'push-to-service' && index === lastIndexPushToService
@@ -248,7 +248,7 @@ export const UserActionTree = React.memo(
                   index === lastIndexPushToService &&
                   index < caseUserActions.length - 1
                 }
-                username={action.actionBy.username}
+                userName={action.actionBy.username ?? ''}
               />
             );
           }
@@ -266,9 +266,9 @@ export const UserActionTree = React.memo(
           id={NEW_ID}
           isEditable={true}
           isLoading={isLoadingIds.includes(NEW_ID)}
-          fullName={currentUser != null ? currentUser.fullName : ''}
+          fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
           markdown={MarkdownNewComment}
-          username={currentUser != null ? currentUser.username : ''}
+          userName={currentUser != null ? currentUser.username ?? '' : ''}
         />
       </>
     );
