@@ -23,6 +23,7 @@ import {
 } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
+import { createRuleActionsSavedObject } from '../../rule_actions/create_rule_actions_saved_object';
 
 export const createRulesBulkRoute = (router: IRouter) => {
   router.post(
@@ -43,6 +44,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
       const alertsClient = context.alerting.getAlertsClient();
       const actionsClient = context.actions.getActionsClient();
       const clusterClient = context.core.elasticsearch.dataClient;
+      const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.siem.getSiemClient();
 
       if (!actionsClient || !alertsClient) {
@@ -115,7 +117,6 @@ export const createRulesBulkRoute = (router: IRouter) => {
               const createdRule = await createRules({
                 alertsClient,
                 actionsClient,
-                actions,
                 anomalyThreshold,
                 description,
                 enabled,
@@ -139,7 +140,6 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 name,
                 severity,
                 tags,
-                throttle,
                 to,
                 type,
                 threat,
@@ -148,7 +148,13 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 version,
                 lists,
               });
-              return transformValidateBulkError(ruleIdOrUuid, createdRule);
+              const ruleActions = await createRuleActionsSavedObject({
+                savedObjectsClient,
+                ruleAlertId: createdRule.id,
+                actions,
+                throttle,
+              });
+              return transformValidateBulkError(ruleIdOrUuid, createdRule, ruleActions);
             } catch (err) {
               return transformBulkError(ruleIdOrUuid, err);
             }

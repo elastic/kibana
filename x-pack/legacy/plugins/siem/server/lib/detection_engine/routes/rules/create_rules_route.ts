@@ -12,10 +12,7 @@ import { createRules } from '../../rules/create_rules';
 import { IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
 import { RuleAlertParamsRest } from '../../types';
-import {
-  ruleStatusSavedObjectType,
-  ruleActionsSavedObjectType,
-} from '../../rules/saved_object_mappings';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { createRulesSchema } from '../schemas/create_rules_schema';
@@ -27,6 +24,7 @@ import {
 } from '../utils';
 import { createNotifications } from '../../notifications/create_notifications';
 import { createRuleActionsSavedObject } from '../../rule_actions/create_rule_actions_saved_object';
+import { updateRuleActions } from '../../rule_actions/update_rule_actions';
 
 export const createRulesRoute = (router: IRouter): void => {
   router.post(
@@ -141,7 +139,7 @@ export const createRulesRoute = (router: IRouter): void => {
           lists,
         });
 
-        const { alertThrottle } = await createRuleActionsSavedObject({
+        const ruleActions = await createRuleActionsSavedObject({
           ruleAlertId: createdRule.id,
           savedObjectsClient,
           actions,
@@ -149,7 +147,8 @@ export const createRulesRoute = (router: IRouter): void => {
         });
 
         if (actions.length) {
-          if (alertThrottle) {
+          // if exists it means it is not "per rule execution"
+          if (ruleActions.alertThrottle) {
             await createNotifications({
               alertsClient,
               enabled,
@@ -159,7 +158,11 @@ export const createRulesRoute = (router: IRouter): void => {
               ruleAlertId: createdRule.id,
             });
           } else {
-            // update actions in rule
+            await updateRuleActions({
+              alertsClient,
+              savedObjectsClient,
+              ruleAlertId: createdRule.id,
+            });
           }
         }
 
@@ -173,7 +176,11 @@ export const createRulesRoute = (router: IRouter): void => {
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        const [validated, errors] = transformValidate(createdRule, ruleStatuses.saved_objects[0]);
+        const [validated, errors] = transformValidate(
+          createdRule,
+          ruleActions,
+          ruleStatuses.saved_objects[0]
+        );
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

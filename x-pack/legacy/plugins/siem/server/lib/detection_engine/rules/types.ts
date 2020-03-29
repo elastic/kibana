@@ -151,7 +151,7 @@ export interface Clients {
   actionsClient: ActionsClient;
 }
 
-export type PatchRuleParams = Partial<RuleAlertParams> & {
+export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'actions' | 'throttle'>> & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;

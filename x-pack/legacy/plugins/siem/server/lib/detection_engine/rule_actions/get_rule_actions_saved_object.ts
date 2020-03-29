@@ -7,6 +7,7 @@
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { ruleActionsSavedObjectType } from './saved_object_mappings';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
+import { getRuleActionsFromSavedObject } from './utils';
 
 interface GetRuleActionsSavedObject {
   ruleAlertId: string;
@@ -26,15 +27,9 @@ export const getRuleActionsSavedObject = async ({
     searchFields: ['ruleAlertId'],
   });
 
-  const {
-    id,
-    attributes: { actions, alertThrottle, ruleThrottle },
-  } = saved_objects[0];
+  if (!saved_objects[0]) {
+    return null;
+  }
 
-  return {
-    id,
-    actions,
-    alertThrottle,
-    ruleThrottle,
-  };
+  return getRuleActionsFromSavedObject(saved_objects[0]);
 };

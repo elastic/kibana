@@ -119,7 +119,6 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
   immutable: boolean;
-  throttle: string | undefined | null;
 };
 
 export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {

@@ -21,6 +21,8 @@ import {
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { updateRuleActionsSavedObject } from '../../rule_actions/update_rule_actions_saved_object';
+import { updateRuleActions } from '../../rule_actions/update_rule_actions';
 
 export const patchRulesRoute = (router: IRouter) => {
   router.patch(
@@ -89,7 +91,6 @@ export const patchRulesRoute = (router: IRouter) => {
         const rule = await patchRules({
           actionsClient,
           alertsClient,
-          actions,
           description,
           enabled,
           falsePositives,
@@ -115,7 +116,6 @@ export const patchRulesRoute = (router: IRouter) => {
           to,
           type,
           threat,
-          throttle,
           references,
           note,
           version,
@@ -123,6 +123,13 @@ export const patchRulesRoute = (router: IRouter) => {
           machineLearningJobId,
         });
         if (rule != null) {
+          const ruleActions = await updateRuleActionsSavedObject({
+            ruleAlertId: rule.id,
+            savedObjectsClient,
+            actions,
+            throttle,
+          });
+          await updateRuleActions({ alertsClient, savedObjectsClient, ruleAlertId: rule.id });
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({
@@ -134,7 +141,11 @@ export const patchRulesRoute = (router: IRouter) => {
             searchFields: ['alertId'],
           });
 
-          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleActions,
+            ruleStatuses.saved_objects[0]
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

@@ -22,6 +22,9 @@ import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
+import { updateRuleActionsSavedObject } from '../../rule_actions/update_rule_actions_saved_object';
+import { updateRuleActions } from '../../rule_actions/update_rule_actions';
+import { updateNotifications } from '../../notifications/update_notifications';
 
 export const updateRulesBulkRoute = (router: IRouter) => {
   router.put(
@@ -120,13 +123,32 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               to,
               type,
               threat,
-              throttle,
               references,
               note,
               version,
               lists,
             });
             if (rule != null) {
+              const ruleActions = await updateRuleActionsSavedObject({
+                ruleAlertId: rule.id,
+                savedObjectsClient,
+                actions,
+                throttle,
+              });
+              await updateRuleActions({
+                alertsClient,
+                savedObjectsClient,
+                ruleAlertId: rule.id,
+              });
+              await updateNotifications({
+                alertsClient,
+                actions,
+                enabled,
+                ruleAlertId: rule.id,
+                interval: throttle,
+                name,
+              });
+
               const ruleStatuses = await savedObjectsClient.find<
                 IRuleSavedAttributesSavedObjectAttributes
               >({
@@ -137,7 +159,12 @@ export const updateRulesBulkRoute = (router: IRouter) => {
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
+              return transformValidateBulkError(
+                rule.id,
+                rule,
+                ruleActions,
+                ruleStatuses.saved_objects[0]
+              );
             } else {
               return getIdBulkError({ id, ruleId });
             }

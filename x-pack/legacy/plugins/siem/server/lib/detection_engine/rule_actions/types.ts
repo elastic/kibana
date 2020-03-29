@@ -10,9 +10,17 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleActionsAttributes extends Record<string, any> {
-  alertId: string;
+  ruleAlertId: string;
   actions: RuleAlertAction[];
-  throttle: string;
+  ruleThrottle: string;
+  alertThrottle: string | null;
+}
+
+export interface RuleActions {
+  id: string;
+  actions: RuleAlertAction[];
+  ruleThrottle: string;
+  alertThrottle: string | null;
 }
 
 export interface IRuleActionsAttributesSavedObjectAttributes

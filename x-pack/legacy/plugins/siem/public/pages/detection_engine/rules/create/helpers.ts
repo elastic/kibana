@@ -8,10 +8,7 @@ import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 
-import {
-  NOTIFICATION_THROTTLE_RULE,
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
-} from '../../../../../common/constants';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../common/constants';
 import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
 import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 
@@ -144,11 +141,6 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
   };
 };
 
-export const getAlertThrottle = (throttle: string | null) =>
-  throttle && ![NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].includes(throttle)
-    ? throttle
-    : null;
-
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
   const {
     actions = [],
@@ -160,9 +152,8 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
   return {
     actions: actions.map(transformAlertToRuleAction),
     enabled,
-    throttle: actions.length ? getAlertThrottle(throttle) : null,
+    throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {
-      throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
       kibanaSiemAppUrl,
     },
   };

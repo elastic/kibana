@@ -7,6 +7,8 @@
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { ruleActionsSavedObjectType } from './saved_object_mappings';
+import { IRuleActionsAttributesSavedObjectAttributes } from './types';
+import { getThrottleOptions, getRuleActionsFromSavedObject } from './utils';
 
 interface CreateRuleActionsSavedObject {
   ruleAlertId: string;
@@ -21,14 +23,13 @@ export const createRuleActionsSavedObject = async ({
   actions,
   throttle,
 }: CreateRuleActionsSavedObject) => {
-  const ruleActionsSavedObject = await savedObjectsClient.create(ruleActionsSavedObjectType, {
+  const ruleActionsSavedObject = await savedObjectsClient.create<
+    IRuleActionsAttributesSavedObjectAttributes
+  >(ruleActionsSavedObjectType, {
     ruleAlertId,
     actions,
-    ruleThrottle: throttle ?? 'no_actions',
-    alertThrottle: throttle && ['no_actions', 'rule'].includes(throttle) ? null : throttle,
+    ...getThrottleOptions(throttle),
   });
 
-  console.error('ruleActionsSavedObject', JSON.stringify(ruleActionsSavedObject, null, 2));
-
-  return ruleActionsSavedObject;
+  return getRuleActionsFromSavedObject(ruleActionsSavedObject);
 };

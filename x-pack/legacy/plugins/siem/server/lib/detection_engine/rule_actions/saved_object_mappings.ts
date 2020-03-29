@@ -9,13 +9,13 @@ export const ruleActionsSavedObjectType = 'siem-detection-engine-rule-actions';
 export const ruleActionsSavedObjectMappings = {
   [ruleActionsSavedObjectType]: {
     properties: {
+      alertThrottle: {
+        type: 'keyword',
+      },
       ruleAlertId: {
         type: 'keyword',
       },
       ruleThrottle: {
-        type: 'keyword',
-      },
-      alertThrottle: {
         type: 'keyword',
       },
       actions: {

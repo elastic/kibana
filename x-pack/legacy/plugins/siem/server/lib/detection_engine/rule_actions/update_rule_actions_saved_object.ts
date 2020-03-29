@@ -8,11 +8,13 @@ import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { ruleActionsSavedObjectType } from './saved_object_mappings';
 import { getRuleActionsSavedObject } from './get_rule_actions_saved_object';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { getThrottleOptions } from './utils';
+import { IRuleActionsAttributesSavedObjectAttributes } from './types';
 
 interface DeleteRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: AlertServices['savedObjectsClient'];
-  actions: RuleAlertAction[];
+  actions: RuleAlertAction[] | undefined;
   throttle: string | undefined;
 }
 
@@ -22,14 +24,33 @@ export const updateRuleActionsSavedObject = async ({
   actions,
   throttle,
 }: DeleteRuleActionsSavedObject) => {
-  const { id } = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
+  const ruleActions = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
 
-  if (!id) return null;
+  if (!ruleActions) return null;
 
-  return savedObjectsClient.update(ruleActionsSavedObjectType, id, {
-    ruleAlertId,
-    actions,
-    ruleThrottle: throttle ?? 'no_actions',
-    alertThrottle: throttle && ['no_actions', 'rule'].includes(throttle) ? null : throttle,
-  });
+  const throttleOptions = throttle
+    ? getThrottleOptions(throttle)
+    : {
+        ruleThrottle: ruleActions.ruleThrottle,
+        alertThrottle: ruleActions.alertThrottle,
+      };
+
+  const options = {
+    actions: actions ?? ruleActions.actions,
+    ...throttleOptions,
+  };
+
+  await savedObjectsClient.update<IRuleActionsAttributesSavedObjectAttributes>(
+    ruleActionsSavedObjectType,
+    ruleActions.id,
+    {
+      ruleAlertId,
+      ...options,
+    }
+  );
+
+  return {
+    id: ruleActions.id,
+    ...options,
+  };
 };

@@ -5,14 +5,12 @@
  */
 
 import { PartialAlert } from '../../../../../../../plugins/alerting/server';
-import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { readRules } from './read_rules';
 import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion } from './utils';
 import { hasListsFeature } from '../feature_flags';
-import { getRuleActionsSavedObject } from '../signals/get_rule_actions_saved_object';
 
 export const updateRules = async ({
   alertsClient,
@@ -86,19 +84,14 @@ export const updateRules = async ({
   // TODO: Remove this and use regular lists once the feature is stable for a release
   const listsParam = hasListsFeature() ? { lists } : {};
 
-  const { actions, throttle } = await getRuleActionsSavedObject({
-    alertId: rule.id,
-    savedObjectsClient,
-  });
-
-  console.error('ruleActionsParams', actions, throttle);
-
   const update = await alertsClient.update({
     id: rule.id,
     data: {
       tags: addTags(tags, rule.params.ruleId, rule.params.immutable),
       name,
       schedule: { interval },
+      actions: rule.actions,
+      throttle: rule.throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,

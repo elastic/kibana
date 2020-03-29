@@ -71,7 +71,7 @@ export const mockRule = (id: string): Rule => ({
   to: 'now',
   type: 'saved_query',
   threat: [],
-  throttle: null,
+  throttle: 'no_actions',
   note: '# this is some markdown documentation',
   version: 1,
 });

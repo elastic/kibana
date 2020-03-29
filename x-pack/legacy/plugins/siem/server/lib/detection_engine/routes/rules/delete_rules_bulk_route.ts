@@ -70,7 +70,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
             ruleStatuses.saved_objects.forEach(async obj =>
               savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
             );
-            return transformValidateBulkError(idOrRuleIdOrUnknown, rule, ruleStatuses);
+            return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
           } else {
             return getIdBulkError({ id, ruleId });
           }

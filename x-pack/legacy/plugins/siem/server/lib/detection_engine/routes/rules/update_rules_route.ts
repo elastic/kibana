@@ -9,7 +9,6 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   UpdateRuleAlertParamsRest,
   IRuleSavedAttributesSavedObjectAttributes,
-  IRuleActionsAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
 import {
@@ -20,12 +19,11 @@ import {
 } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-import {
-  ruleStatusSavedObjectType,
-  ruleActionsSavedObjectType,
-} from '../../rules/saved_object_mappings';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
 import { updateNotifications } from '../../notifications/update_notifications';
+import { updateRuleActions } from '../../rule_actions/update_rule_actions';
+import { updateRuleActionsSavedObject } from '../../rule_actions/update_rule_actions_saved_object';
 
 export const updateRulesRoute = (router: IRouter) => {
   router.put(
@@ -128,38 +126,17 @@ export const updateRulesRoute = (router: IRouter) => {
         });
 
         if (rule != null) {
-          const currentRuleActions = await savedObjectsClient.find<
-            IRuleActionsAttributesSavedObjectAttributes
-          >({
-            type: ruleActionsSavedObjectType,
-            perPage: 1,
-            search: rule.id,
-            searchFields: ['alertId'],
+          const ruleActions = await updateRuleActionsSavedObject({
+            ruleAlertId: rule.id,
+            savedObjectsClient,
+            actions,
+            throttle,
           });
-
-          console.error('aaa', JSON.stringify(currentRuleActions, null, 2));
-
-          if (currentRuleActions.saved_objects[0]) {
-            await savedObjectsClient.update(
-              ruleActionsSavedObjectType,
-              currentRuleActions.saved_objects[0].id,
-              {
-                alertId: rule.id,
-                actions,
-                throttle,
-              },
-              {
-                references: [], // TODO: Add reference to rule SO
-              }
-            );
-          } else {
-            await savedObjectsClient.create(ruleActionsSavedObjectType, {
-              alertId: rule.id,
-              actions,
-              throttle,
-            });
-          }
-
+          await updateRuleActions({
+            alertsClient,
+            savedObjectsClient,
+            ruleAlertId: rule.id,
+          });
           await updateNotifications({
             alertsClient,
             actions,
@@ -179,7 +156,11 @@ export const updateRulesRoute = (router: IRouter) => {
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleActions,
+            ruleStatuses.saved_objects[0]
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

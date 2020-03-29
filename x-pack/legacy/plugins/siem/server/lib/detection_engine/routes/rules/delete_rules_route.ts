@@ -55,7 +55,10 @@ export const deleteRulesRoute = (router: IRouter) => {
         });
         if (rule != null) {
           await deleteNotifications({ alertsClient, ruleAlertId: rule.id });
-          await deleteRuleActionsSavedObject({ ruleAlertId: rule.id, savedObjectsClient });
+          await deleteRuleActionsSavedObject({
+            ruleAlertId: rule.id,
+            savedObjectsClient,
+          });
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({
@@ -67,7 +70,11 @@ export const deleteRulesRoute = (router: IRouter) => {
           ruleStatuses.saved_objects.forEach(async obj =>
             savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
           );
-          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          const [validated, errors] = transformValidate(
+            rule,
+            undefined,
+            ruleStatuses.saved_objects[0]
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

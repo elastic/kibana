@@ -25,17 +25,24 @@ export const updateRuleActions = async ({
     return null;
   }
 
-  const { actions, alertThrottle } = await getRuleActionsSavedObject({
+  const ruleActions = await getRuleActionsSavedObject({
     savedObjectsClient,
     ruleAlertId,
   });
 
+  if (!ruleActions) {
+    return null;
+  }
+
   return alertsClient.update({
     id: ruleAlertId,
     data: {
-      ...rule,
-      actions: actions?.map(transformRuleToAlertAction),
-      throttle: alertThrottle,
+      actions: ruleActions.actions.map(transformRuleToAlertAction),
+      throttle: ruleActions.alertThrottle,
+      name: rule.name,
+      tags: rule.tags,
+      schedule: rule.schedule,
+      params: rule.params,
     },
   });
 };

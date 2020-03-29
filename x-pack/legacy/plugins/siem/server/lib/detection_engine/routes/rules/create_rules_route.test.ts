@@ -21,7 +21,9 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesRoute } from './create_rules_route';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { createNotifications } from '../../notifications/create_notifications';
+import { createRuleActionsSavedObject } from '../../rule_actions/create_rule_actions_saved_object';
 jest.mock('../../notifications/create_notifications');
+jest.mock('../../rule_actions/create_rule_actions_saved_object');
 
 describe('create_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -86,8 +88,14 @@ describe('create_rules', () => {
     });
   });
 
-  describe('creating a Notification if throttle and actions were provided ', () => {
+  describe('creating a Notification if throttle and actions were provided', () => {
     it('is successful', async () => {
+      (createRuleActionsSavedObject as jest.Mock).mockResolvedValue({
+        id: getResult().id,
+        actions: [],
+        alertThrottle: '5m',
+        ruleThrottle: '5m',
+      });
       const response = await server.inject(createRuleWithActionsRequest(), context);
       expect(response.status).toEqual(200);
       expect(createNotifications).toHaveBeenCalledWith(
