@@ -54,6 +54,7 @@ export interface SavedObject {
   searchSource?: ISearchSource;
   showInRecentlyAccessed: boolean;
   title: string;
+  unresolvedIndexPatternReference?: SavedObjectReference;
 }
 
 export interface SavedObjectSaveOpts {

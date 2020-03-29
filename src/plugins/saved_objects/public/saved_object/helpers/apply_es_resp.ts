@@ -64,7 +64,24 @@ export async function applyESResp(
   savedObject.lastSavedTitle = savedObject.title;
 
   if (config.searchSource) {
-    savedObject.searchSource = await parseSearchSource(meta.searchSourceJSON, resp.references);
+    try {
+      savedObject.searchSource = await parseSearchSource(meta.searchSourceJSON, resp.references);
+    } catch (error) {
+      if (
+        error.constructor.name === 'SavedObjectNotFound' &&
+        error.savedObjectType === 'index-pattern'
+      ) {
+        // if parsing the search source fails because the index pattern wasn't found,
+        // remember the reference - this is required for error handling on legacy imports
+        savedObject.unresolvedIndexPatternReference = {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          id: JSON.parse(meta.searchSourceJSON).index,
+          type: 'index-pattern',
+        };
+      }
+
+      throw error;
+    }
   }
 
   if (injectReferences && resp.references && resp.references.length > 0) {

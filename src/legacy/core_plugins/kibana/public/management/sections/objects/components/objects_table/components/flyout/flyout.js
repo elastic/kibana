@@ -358,7 +358,8 @@ export class Flyout extends Component {
           importCount += await resolveIndexPatternConflicts(
             resolutions,
             conflictedIndexPatterns,
-            isOverwriteAllChecked
+            isOverwriteAllChecked,
+            this.props.indexPatterns
           );
         }
         this.setState({

@@ -18,12 +18,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OverlayStart } from 'src/core/public';
+import { cloneDeep } from 'lodash';
+import { OverlayStart, SavedObjectReference } from 'src/core/public';
 import {
   SavedObject,
   SavedObjectLoader,
 } from '../../../../../../../../plugins/saved_objects/public';
-import { IndexPatternsContract, IIndexPattern } from '../../../../../../../../plugins/data/public';
+import {
+  IndexPatternsContract,
+  IIndexPattern,
+  parseSearchSource,
+} from '../../../../../../../../plugins/data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
 
@@ -126,7 +131,7 @@ async function importIndexPattern(
 async function importDocument(obj: SavedObject, doc: SavedObjectsRawDoc, overwriteAll: boolean) {
   await obj.applyESResp({
     references: doc._references || [],
-    ...doc,
+    ...cloneDeep(doc),
   });
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }
@@ -160,41 +165,57 @@ async function awaitEachItemInParallel<T, R>(list: T[], op: (item: T) => R) {
 export async function resolveIndexPatternConflicts(
   resolutions: Array<{ oldId: string; newId: string }>,
   conflictedIndexPatterns: any[],
-  overwriteAll: boolean
+  overwriteAll: boolean,
+  indexPatterns: IndexPatternsContract
 ) {
   let importCount = 0;
 
-  await awaitEachItemInParallel(conflictedIndexPatterns, async ({ obj }) => {
-    // Resolve search index reference:
-    let oldIndexId = obj.searchSource.getOwnField('index');
-    // Depending on the object, this can either be the raw id or the actual index pattern object
-    if (typeof oldIndexId !== 'string') {
-      oldIndexId = oldIndexId.id;
-    }
-    let resolution = resolutions.find(({ oldId }) => oldId === oldIndexId);
-    if (resolution) {
-      const newIndexId = resolution.newId;
-      await obj.hydrateIndexPattern(newIndexId);
+  await awaitEachItemInParallel(conflictedIndexPatterns, async ({ obj, doc }) => {
+    const serializedSearchSource = JSON.parse(
+      doc._source.kibanaSavedObjectMeta?.searchSourceJSON || '{}'
+    );
+    const oldIndexId = serializedSearchSource.index;
+    let allResolved = true;
+    const inlineResolution = resolutions.find(({ oldId }) => oldId === oldIndexId);
+    if (inlineResolution) {
+      serializedSearchSource.index = inlineResolution.newId;
+    } else {
+      allResolved = false;
     }
 
     // Resolve filter index reference:
-    const filter = (obj.searchSource.getOwnField('filter') || []).map((f: any) => {
+    const filter = (serializedSearchSource.filter || []).map((f: any) => {
       if (!(f.meta && f.meta.index)) {
         return f;
       }
 
-      resolution = resolutions.find(({ oldId }) => oldId === f.meta.index);
+      const resolution = resolutions.find(({ oldId }) => oldId === f.meta.index);
       return resolution ? { ...f, ...{ meta: { ...f.meta, index: resolution.newId } } } : f;
     });
 
     if (filter.length > 0) {
-      obj.searchSource.setField('filter', filter);
+      serializedSearchSource.filter = filter;
     }
 
-    if (!resolution) {
+    const replacedReferences = (doc._references || []).map((reference: SavedObjectReference) => {
+      const resolution = resolutions.find(({ oldId }) => oldId === reference.id);
+      if (resolution) {
+        return { ...reference, id: resolution.newId };
+      } else {
+        allResolved = false;
+      }
+
+      return reference;
+    });
+
+    if (!allResolved) {
       // The user decided to skip this conflict so do nothing
       return;
     }
+    obj.searchSource = await parseSearchSource(indexPatterns)(
+      JSON.stringify(serializedSearchSource),
+      replacedReferences
+    );
     if (await saveObject(obj, overwriteAll)) {
       importCount++;
     }

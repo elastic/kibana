@@ -52,5 +52,9 @@ export function serializeSavedObject(
     references.push(...searchSourceReferences);
   }
 
+  if (savedObject.unresolvedIndexPatternReference) {
+    references.push(savedObject.unresolvedIndexPatternReference);
+  }
+
   return { attributes, references };
 }
