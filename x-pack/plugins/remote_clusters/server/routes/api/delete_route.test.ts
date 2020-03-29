@@ -85,6 +85,20 @@ describe('DELETE remote clusters', () => {
     deleteRemoteClustersTest('deletes remote cluster', {
       apiResponses: [
         async () => ({
+          persistent: {
+            cluster: {
+              remote: {
+                test: {
+                  seeds: ['127.0.0.1:9300'],
+                  skip_unavailable: false,
+                  mode: 'sniff',
+                },
+              },
+            },
+          },
+          transient: {},
+        }),
+        async () => ({
           test: {
             connected: true,
             mode: 'sniff',
@@ -143,7 +157,17 @@ describe('DELETE remote clusters', () => {
     deleteRemoteClustersTest(
       'returns errors array with 404 error if remote cluster does not exist',
       {
-        apiResponses: [async () => ({})],
+        apiResponses: [
+          async () => ({
+            persistent: {
+              cluster: {
+                remote: {},
+              },
+            },
+            transient: {},
+          }),
+          async () => ({}),
+        ],
         params: {
           nameOrNames: 'test',
         },
@@ -178,6 +202,20 @@ describe('DELETE remote clusters', () => {
       'returns errors array with 400 error if ES still returns cluster information',
       {
         apiResponses: [
+          async () => ({
+            persistent: {
+              cluster: {
+                remote: {
+                  test: {
+                    seeds: ['127.0.0.1:9300'],
+                    skip_unavailable: false,
+                    mode: 'sniff',
+                  },
+                },
+              },
+            },
+            transient: {},
+          }),
           async () => ({
             test: {
               connected: true,

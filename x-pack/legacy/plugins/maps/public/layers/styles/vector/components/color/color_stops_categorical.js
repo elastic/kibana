@@ -63,6 +63,7 @@ export const ColorStopsCategorical = ({
         getValueSuggestions={getValueSuggestions}
         value={stopValue}
         onChange={onStopChange}
+        dataTestSubj={`colorStopInput${index}`}
       />
     );
   };

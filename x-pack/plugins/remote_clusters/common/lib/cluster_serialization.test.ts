@@ -124,6 +124,7 @@ describe('cluster_serialization', () => {
         skipUnavailable: false,
         transportPingSchedule: '-1',
         transportCompress: false,
+        serverName: 'localhost',
       });
     });
 
@@ -155,6 +156,38 @@ describe('cluster_serialization', () => {
       expect(() => serializeCluster('foo')).toThrowError();
     });
 
+    it('should serialize a cluster that has a deprecated proxy setting', () => {
+      expect(
+        serializeCluster({
+          name: 'test_cluster',
+          proxyAddress: 'localhost:9300',
+          mode: 'proxy',
+          isConnected: true,
+          skipUnavailable: false,
+          proxySocketConnections: 18,
+          serverName: 'localhost',
+          hasDeprecatedProxySetting: true,
+        })
+      ).toEqual({
+        persistent: {
+          cluster: {
+            remote: {
+              test_cluster: {
+                mode: 'proxy',
+                proxy_socket_connections: 18,
+                proxy_address: 'localhost:9300',
+                skip_unavailable: false,
+                server_name: 'localhost',
+                proxy: null,
+                seeds: null,
+                node_connections: null,
+              },
+            },
+          },
+        },
+      });
+    });
+
     it('should serialize a complete cluster object to only dynamic properties', () => {
       expect(
         serializeCluster({
@@ -167,13 +200,14 @@ describe('cluster_serialization', () => {
           skipUnavailable: false,
           transportPingSchedule: '-1',
           transportCompress: false,
+          mode: 'sniff',
         })
       ).toEqual({
         persistent: {
           cluster: {
             remote: {
               test_cluster: {
-                mode: null,
+                mode: 'sniff',
                 node_connections: null,
                 proxy_address: null,
                 proxy_socket_connections: null,
