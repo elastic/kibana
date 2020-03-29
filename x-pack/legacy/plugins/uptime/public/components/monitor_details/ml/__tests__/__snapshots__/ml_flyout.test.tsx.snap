@@ -61,7 +61,6 @@ exports[`ML Flyout component renders without errors 1`] = `
       >
         <EuiButtonEmpty
           disabled={false}
-          fullWidth={false}
           onClick={[Function]}
           style={
             Object {
