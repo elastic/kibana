@@ -341,7 +341,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         },
       };
 
-      const { statusCode, body: createdAlert } = await supertest
+      const { status, body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
         .send({
@@ -369,7 +369,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       // will print the error body, if an error occurred
       // if (statusCode !== 200) console.log(createdAlert);
 
-      expect(statusCode).to.be(200);
+      expect(status).to.be(200);
 
       const alertId = createdAlert.id;
       objectRemover.add(Spaces.space1.id, alertId, 'alert');
