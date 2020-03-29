@@ -55,9 +55,11 @@ export const usePostComment = (caseId: string): UsePostComment => {
   const postMyComment = useCallback(
     async (data: CommentRequest, updateCase: (newCase: Case) => void) => {
       let cancel = false;
+      const abortCtrl = new AbortController();
+
       try {
         dispatch({ type: 'FETCH_INIT' });
-        const response = await postComment(data, caseId);
+        const response = await postComment(data, caseId, abortCtrl.signal);
         if (!cancel) {
           dispatch({ type: 'FETCH_SUCCESS' });
           updateCase(response);
@@ -73,6 +75,7 @@ export const usePostComment = (caseId: string): UsePostComment => {
         }
       }
       return () => {
+        abortCtrl.abort();
         cancel = true;
       };
     },
