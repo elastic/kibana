@@ -77,11 +77,7 @@ export const findRulesRoute = (router: IRouter) => {
           })
         );
 
-        const [validated, errors] = transformValidateFindAlerts(
-          rules,
-          ruleActions ? ruleActions : [],
-          ruleStatuses
-        );
+        const [validated, errors] = transformValidateFindAlerts(rules, ruleActions, ruleStatuses);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

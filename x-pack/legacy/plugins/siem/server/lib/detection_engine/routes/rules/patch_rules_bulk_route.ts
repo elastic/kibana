@@ -24,6 +24,7 @@ import { patchRules } from '../../rules/patch_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRuleActionsSavedObject } from '../../rule_actions/update_rule_actions_saved_object';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
+import { updateRuleActions } from '../../rule_actions/update_rule_actions';
 
 export const patchRulesBulkRoute = (router: IRouter) => {
   router.patch(
@@ -133,6 +134,11 @@ export const patchRulesBulkRoute = (router: IRouter) => {
                   savedObjectsClient,
                   actions,
                   throttle,
+                });
+                await updateRuleActions({
+                  alertsClient,
+                  savedObjectsClient,
+                  ruleAlertId: rule.id,
                 });
               } else {
                 ruleActions = await getRuleActionsSavedObject({

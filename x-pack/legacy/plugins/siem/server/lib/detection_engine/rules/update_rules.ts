@@ -29,6 +29,7 @@ export const updateRules = async ({
   filters,
   from,
   id,
+  immutable,
   ruleId,
   index,
   interval,
@@ -87,7 +88,7 @@ export const updateRules = async ({
   const update = await alertsClient.update({
     id: rule.id,
     data: {
-      tags: addTags(tags, rule.params.ruleId, rule.params.immutable),
+      tags: addTags(tags, rule.params.ruleId, immutable),
       name,
       schedule: { interval },
       actions: rule.actions,
@@ -97,7 +98,7 @@ export const updateRules = async ({
         ruleId: rule.params.ruleId,
         falsePositives,
         from,
-        immutable: rule.params.immutable,
+        immutable,
         query,
         language,
         outputIndex,

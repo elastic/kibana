@@ -24,6 +24,8 @@ import {
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { createRuleActionsSavedObject } from '../../rule_actions/create_rule_actions_saved_object';
+import { updateRuleActions } from '../../rule_actions/update_rule_actions';
+import { createNotifications } from '../../notifications/create_notifications';
 
 export const createRulesBulkRoute = (router: IRouter) => {
   router.post(
@@ -148,12 +150,34 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 version,
                 lists,
               });
+
               const ruleActions = await createRuleActionsSavedObject({
                 savedObjectsClient,
                 ruleAlertId: createdRule.id,
                 actions,
                 throttle,
               });
+
+              if (actions.length) {
+                // if exists it means it is not "per rule execution"
+                if (ruleActions.alertThrottle) {
+                  await createNotifications({
+                    alertsClient,
+                    enabled,
+                    name,
+                    interval,
+                    actions,
+                    ruleAlertId: createdRule.id,
+                  });
+                } else {
+                  await updateRuleActions({
+                    alertsClient,
+                    savedObjectsClient,
+                    ruleAlertId: createdRule.id,
+                  });
+                }
+              }
+
               return transformValidateBulkError(ruleIdOrUuid, createdRule, ruleActions);
             } catch (err) {
               return transformBulkError(ruleIdOrUuid, err);

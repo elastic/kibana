@@ -99,6 +99,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               anomalyThreshold,
               description,
               enabled,
+              immutable: false,
               falsePositives,
               from,
               query,
