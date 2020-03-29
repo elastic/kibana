@@ -93,7 +93,7 @@ export interface ElasticUser {
   readonly username: string;
 }
 
-export interface FetchCasesProps {
+export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
 }

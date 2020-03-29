@@ -76,11 +76,13 @@ export const useDeleteCases = (): UseDeleteCase => {
 
   const dispatchDeleteCases = useCallback((cases: DeleteCase[]) => {
     let cancel = false;
+    const abortCtrl = new AbortController();
+
     const deleteData = async () => {
       try {
         dispatch({ type: 'FETCH_INIT' });
         const caseIds = cases.map(theCase => theCase.id);
-        await deleteCases(caseIds);
+        await deleteCases(caseIds, abortCtrl.signal);
         if (!cancel) {
           dispatch({ type: 'FETCH_SUCCESS', payload: true });
           displaySuccessToast(
@@ -101,6 +103,7 @@ export const useDeleteCases = (): UseDeleteCase => {
     };
     deleteData();
     return () => {
+      abortCtrl.abort();
       cancel = true;
     };
   }, []);
