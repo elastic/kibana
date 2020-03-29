@@ -75,6 +75,7 @@ export function setStartServices(npStart: NpStart) {
   const savedVisualizationsLoader = createSavedVisLoader({
     savedObjectsClient: npStart.core.savedObjects.client,
     indexPatterns: npStart.plugins.data.indexPatterns,
+    search: npStart.plugins.data.search,
     chrome: npStart.core.chrome,
     overlays: npStart.core.overlays,
     visualizationTypes: visualizationsServices.getTypes(),

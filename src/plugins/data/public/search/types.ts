@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ISearchSource } from './search_source';
 import { CoreStart, SavedObjectReference } from 'kibana/public';
+import { ISearchSource } from './search_source';
 import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
