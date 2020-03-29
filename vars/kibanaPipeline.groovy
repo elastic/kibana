@@ -324,15 +324,29 @@ def newPipeline(Closure closure = {}) {
       } catch (ex) {
         // TODO fall back to master?
         buildUtils.printStacktrace(ex)
-        print "Error reading previous functional test metrics. Will create a non-optimal test plan."
+
+        try {
+          googleStorageDownload(
+            credentialsId: 'kibana-ci-gcs-plugin',
+            bucketUri: "gs://kibana-ci-functional-metrics/master/functional_test_suite_metrics.json",
+            localDirectory: 'target',
+            pathPrefix: getTargetBranch(),
+          )
+        } catch (ex) {
+          // TODO fall back to master?
+          buildUtils.printStacktrace(ex)
+          print "Error reading previous functional test metrics. Will create a non-optimal test plan."
+        }
       }
 
-      bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
-      def testPlan = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
+      // TODO
+      // bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
+      // def testPlan = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
+      def testPlan = [oss: [], xpack: []]
 
       task {
         buildOss()
-        bash("mv build/oss/kibana-*-SNAPSHOT-linux-x86_64 ${env.WORKSPACE}/kibana-build-oss")
+        // bash("mv build/oss/kibana-*-SNAPSHOT-linux-x86_64 ${env.WORKSPACE}/kibana-build-oss", "Move OSS build")
 
         // Needs OSS build dir?
         // kibanaPipeline.bash("test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn_tp_sample_panel_action")
@@ -352,7 +366,7 @@ def newPipeline(Closure closure = {}) {
 
       task {
         buildXpack()
-        bash("mv install/kibana ${env.WORKSPACE}/kibana-build-xpack")
+        // bash("mv install/kibana ${env.WORKSPACE}/kibana-build-xpack", "Move XPack Build")
 
         tasks(testPlan.xpack.collect { return { runFunctionalTestSuite('xpack', it) } })
 
