@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginInitializer } from '../../../../../../src/core/server';
 import { initRoutes } from './init_routes';
 
-export default function(kibana) {
-  return new kibana.Plugin({
-    name: 'oidcProvider',
-    id: 'oidcProvider',
-    require: ['elasticsearch'],
-
-    init(server) {
-      initRoutes(server);
-    },
-  });
-}
+export const plugin: PluginInitializer<void, void> = () => ({
+  setup: core => initRoutes(core.http.createRouter()),
+  start: () => {},
+  stop: () => {},
+});
