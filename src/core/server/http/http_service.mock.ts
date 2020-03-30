@@ -29,11 +29,16 @@ import { AuthToolkit } from './lifecycle/auth';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
+import { HttpResources } from './http_resources/';
+import { httpResourcesMock } from './http_resources/http_resources_service.mock';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
 export type HttpServiceSetupMock = jest.Mocked<InternalHttpServiceSetup> & {
   basePath: BasePathMocked;
+  resources: {
+    create: () => jest.Mocked<HttpResources>;
+  };
 };
 
 const createBasePathMock = (serverBasePath = '/mock-server-basepath'): BasePathMocked => ({
@@ -79,6 +84,7 @@ const createSetupContractMock = () => {
     getAuthHeaders: jest.fn(),
     isTlsEnabled: false,
     getServerInfo: jest.fn(),
+    resources: httpResourcesMock.createSetup(),
   };
   setupContract.createCookieSessionStorageFactory.mockResolvedValue(
     sessionStorageMock.createFactory()
@@ -134,4 +140,5 @@ export const httpServiceMock = {
   createOnPreResponseToolkit: createOnPreResponseToolkitMock,
   createAuthToolkit: createAuthToolkitMock,
   createRouter: mockRouter.create,
+  createHttpResources: httpResourcesMock.create,
 };
