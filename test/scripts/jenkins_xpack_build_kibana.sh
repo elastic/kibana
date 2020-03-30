@@ -35,7 +35,7 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   cd "$KIBANA_DIR"
   node scripts/build --debug --no-oss
   linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
-  installDir="$PARENT_DIR/install/kibana"
+  installDir="$KIBANA_DIR/install/kibana"
   mkdir -p "$installDir"
   tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 fi

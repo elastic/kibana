@@ -3,7 +3,7 @@
 source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$CODE_COVERAGE" ]]; then
-  installDir="$PARENT_DIR/install/kibana"
+  installDir="$KIBANA_DIR/install/kibana"
   destDir="${installDir}-${CI_PARALLEL_PROCESS_NUMBER}"
   cp -R "$installDir" "$destDir"
 
