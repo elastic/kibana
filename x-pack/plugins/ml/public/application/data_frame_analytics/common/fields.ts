@@ -286,9 +286,11 @@ export const getDefaultFieldsFromJobCaps = (
     ...featureImportanceFields,
   ].sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig));
 
-  let selectedFields = allFields
-    .slice(0, DEFAULT_REGRESSION_COLUMNS * 2)
-    .filter((field: any) => field.name === predictedField || !field.name.includes('.keyword'));
+  let selectedFields = allFields.filter(
+    (field: any) =>
+      field.name === predictedField ||
+      (!field.name.includes('.keyword') && !field.name.includes('.feature_importance.'))
+  );
 
   if (selectedFields.length > DEFAULT_REGRESSION_COLUMNS) {
     selectedFields = selectedFields.slice(0, DEFAULT_REGRESSION_COLUMNS);
