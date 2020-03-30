@@ -7,7 +7,7 @@
 import { compose, withProps } from 'recompose';
 import moment from 'moment';
 import { DateFormatArgInput as Component, Props as ComponentProps } from './date_format';
-import { AdvancedSettings } from '../../../../public/lib/kibana_advanced_settings';
+import { getAdvancedSettings } from '../../../../public/lib/kibana_advanced_settings';
 // @ts-ignore untyped local lib
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
@@ -15,19 +15,19 @@ import { ArgumentStrings } from '../../../../i18n';
 
 const { DateFormat: strings } = ArgumentStrings;
 
-const formatMap = {
-  DEFAULT: AdvancedSettings.get('dateFormat'),
-  NANOS: AdvancedSettings.get('dateNanosFormat'),
+const getFormatMap = () => ({
+  DEFAULT: getAdvancedSettings().get('dateFormat'),
+  NANOS: getAdvancedSettings().get('dateNanosFormat'),
   ISO8601: '',
   LOCAL_LONG: 'LLLL',
   LOCAL_SHORT: 'LLL',
   LOCAL_DATE: 'l',
   LOCAL_TIME_WITH_SECONDS: 'LTS',
-};
+});
 
 const now = moment();
 
-const dateFormats = Object.values(formatMap).map(format => ({
+const dateFormats = Object.values(getFormatMap()).map(format => ({
   value: format,
   text: moment.utc(now).format(format),
 }));
