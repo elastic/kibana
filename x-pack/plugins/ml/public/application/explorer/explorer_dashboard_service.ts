@@ -132,12 +132,6 @@ export const explorerService = {
       payload,
     });
   },
-  setSearchInput: (query: any) => {
-    explorerAction$.next({
-      type: EXPLORER_ACTION.SET_SEARCH_INPUT,
-      payload: query,
-    });
-  },
   setSelectedCells: (payload: AppStateSelectedCells | undefined) => {
     explorerAction$.next({
       type: EXPLORER_ACTION.SET_SELECTED_CELLS,

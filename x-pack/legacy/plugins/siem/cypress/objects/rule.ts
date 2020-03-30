@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const totalNumberOfPrebuiltRules = 92;
+
 interface Mitre {
   tactic: string;
   techniques: string[];
