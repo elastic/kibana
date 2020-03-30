@@ -145,7 +145,7 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
                 # this is some markdown documentation
               </div>
             </ForwardRef(Styled(EuiFlexItem))>,
-            "title": "Investigation notes",
+            "title": "Investigation guide",
           },
         ]
       }
@@ -287,7 +287,7 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
                 # this is some markdown documentation
               </div>
             </ForwardRef(Styled(EuiFlexItem))>,
-            "title": "Investigation notes",
+            "title": "Investigation guide",
           },
         ]
       }
@@ -430,7 +430,7 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
                 # this is some markdown documentation
               </div>
             </ForwardRef(Styled(EuiFlexItem))>,
-            "title": "Investigation notes",
+            "title": "Investigation guide",
           },
         ]
       }
