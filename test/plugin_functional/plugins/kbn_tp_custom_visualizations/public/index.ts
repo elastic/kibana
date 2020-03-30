@@ -17,25 +17,14 @@
  * under the License.
  */
 
-import React from 'react';
-import './initialize';
-import { npStart } from 'ui/new_platform';
+import { PluginInitializer } from 'kibana/public';
+import {
+  CustomVisualizationsPublicPlugin,
+  CustomVisualizationsSetup,
+  CustomVisualizationsStart,
+} from './plugin';
 
-export const AppWithTopNav = () => {
-  const { TopNavMenu } = npStart.plugins.navigation.ui;
-  const config = [
-    {
-      id: 'new',
-      label: 'New Button',
-      description: 'New Demo',
-      run() {},
-      testId: 'demoNewButton',
-    },
-  ];
+export { CustomVisualizationsPublicPlugin as Plugin };
 
-  return (
-    <TopNavMenu appName="demo-app" config={config}>
-      Hey
-    </TopNavMenu>
-  );
-};
+export const plugin: PluginInitializer<CustomVisualizationsSetup, CustomVisualizationsStart> = () =>
+  new CustomVisualizationsPublicPlugin();
