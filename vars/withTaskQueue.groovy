@@ -72,7 +72,7 @@ def taskSleep() {
         sleep 5
       fi
     done
-  """, label: "Waiting for new tasks..."
+  """, label: "Waiting for new tasks...")
 }
 
 def task(Closure closure) {
