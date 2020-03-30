@@ -295,7 +295,7 @@ def runFunctionalTestSuite(type, testSuite) {
                 node scripts/functional_tests \
                   --config '${testSuite.config}' \
                   --debug \
-                  --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
+                  --kibana-install-dir "\$(realpath build/oss/kibana-*-SNAPSHOT-linux-x86_64)" \
                   ${filesString}
               """, "${type} tests: ${testSuite.config}"
             )

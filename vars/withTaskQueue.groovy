@@ -18,38 +18,41 @@ def call(Map options = [:], Closure closure) {
     def j = i
     processes["task-queue-process-${j}"] = {
       catchErrors {
-        env.TASK_QUEUE_PROCESS_ID = j
-        env.TASK_QUEUE_ITERATION_ID = ++iterationId
+        withEnv([
+          "TASK_QUEUE_PROCESS_ID=${j}",
+          "TASK_QUEUE_ITERATION_ID=${++iterationId}"
+        ]) {
 
-        // sh "rm -rf ${WORKSPACE}/parallel/${j}" // TODO
-        dir("${WORKSPACE}/parallel/${j}") {
-          if (config.setup) {
-            config.setup.call(j)
-          }
+          // sh "rm -rf ${WORKSPACE}/parallel/${j}" // TODO
+          dir("${WORKSPACE}/parallel/${j}") {
+            if (config.setup) {
+              config.setup.call(j)
+            }
 
-          def isDone = false
-          while(!isDone) { // TODO some kind of timeout?
-            catchErrors {
-              if (!queue.isEmpty()) {
-                processesExecuting++
-                catchErrors {
-                  def task = queue.removeAt(0)
-                  task.call()
+            def isDone = false
+            while(!isDone) { // TODO some kind of timeout?
+              catchErrors {
+                if (!queue.isEmpty()) {
+                  processesExecuting++
+                  catchErrors {
+                    def task = queue.removeAt(0)
+                    task.call()
+                  }
+                  processesExecuting--
+                  if (processesExecuting < 1 && queue.isEmpty()) {
+                    taskNotify()
+                  }
+                  return
                 }
-                processesExecuting--
-                if (processesExecuting < 1 && queue.isEmpty()) {
-                  taskNotify()
+
+                if (processesExecuting > 0) {
+                  taskSleep()
+                  return
                 }
-                return
-              }
 
-              if (processesExecuting > 0) {
-                taskSleep()
-                return
+                // taskNotify()
+                isDone = true
               }
-
-              // taskNotify()
-              isDone = true
             }
           }
         }
