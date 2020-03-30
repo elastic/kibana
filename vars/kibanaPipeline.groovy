@@ -309,7 +309,7 @@ def runFunctionalTestSuite(type, testSuite) {
                   cp -R ${env.WORKSPACE}/kibana-build-xpack/kibana install/
                 fi
               """, "Copy XPack Kibana Build")
-              buildDir = '$(realpath install/kibana)'
+              buildDir = '$(realpath ../install/kibana)'
             }
 
             // TODO runbld
