@@ -49,7 +49,7 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-traefik.html',
       },
     }),
-    // euiIconType: 'logoTraefik',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/traefik.svg',
     artifacts: {
       dashboards: [
         {
