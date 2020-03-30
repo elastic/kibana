@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { getPivotQuery } from '../../../../common';
+import { getPivotQuery, isDefaultQuery } from '../../../../common';
 import { PivotPreview } from '../../../../components/pivot_preview';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
@@ -60,7 +60,7 @@ export const StepDefineSummary: FC<Props> = ({
                     <span>{searchString}</span>
                   </EuiFormRow>
                 )}
-                {typeof searchString === 'undefined' && (
+                {typeof searchString === 'undefined' && !isDefaultQuery(pivotQuery) && (
                   <EuiFormRow
                     label={i18n.translate('xpack.transform.stepDefineSummary.queryCodeBlockLabel', {
                       defaultMessage: 'Query',
@@ -74,7 +74,7 @@ export const StepDefineSummary: FC<Props> = ({
                       overflowHeight={300}
                       isCopyable
                     >
-                      {JSON.stringify(searchQuery, null, 2)}
+                      {JSON.stringify(pivotQuery, null, 2)}
                     </EuiCodeBlock>
                   </EuiFormRow>
                 )}
