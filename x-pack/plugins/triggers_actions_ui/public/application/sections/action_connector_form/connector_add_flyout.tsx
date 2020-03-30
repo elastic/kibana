@@ -19,9 +19,9 @@ import {
   EuiFlyoutBody,
   EuiBetaBadge,
   EuiCallOut,
-  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
@@ -32,6 +32,7 @@ import { createActionConnector } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { PLUGIN } from '../../constants/plugin';
+import { BASE_PATH as LICENSE_MANAGEMENT_BASE_PATH } from '../../../../../license_management/common/constants';
 
 export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
@@ -217,7 +218,13 @@ export const ConnectorAddFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
-        banner={!actionType && hasActionsDisabledByLicense && upgradeYourLicenseCallOut}
+        banner={
+          !actionType && hasActionsDisabledByLicense ? (
+            <UpgradeYourLicenseCallOut http={http} />
+          ) : (
+            <Fragment />
+          )
+        }
       >
         {currentForm}
       </EuiFlyoutBody>
@@ -269,7 +276,7 @@ export const ConnectorAddFlyout = ({
   );
 };
 
-const upgradeYourLicenseCallOut = (
+const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
   <EuiCallOut
     title={i18n.translate(
       'xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerTitle',
@@ -281,11 +288,32 @@ const upgradeYourLicenseCallOut = (
       defaultMessage="With an upgraded license, you have the option to connect to more 3rd party services."
     />
     <EuiSpacer size="xs" />
-    <EuiLink href={VIEW_LICENSE_OPTIONS_LINK} target="_blank">
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerLinkTitle"
-        defaultMessage="Upgrade now"
-      />
-    </EuiLink>
+    <EuiFlexGroup gutterSize="s" wrap={true}>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          href={VIEW_LICENSE_OPTIONS_LINK}
+          iconType="popout"
+          iconSide="right"
+          target="_blank"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerLinkTitle"
+            defaultMessage="Upgrade now"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          href={`${http.basePath.get()}/app/kibana#${LICENSE_MANAGEMENT_BASE_PATH}`}
+          iconType="gear"
+          target="_blank"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionConnectorAdd.manageLicensePlanBannerLinkTitle"
+            defaultMessage="Manage license"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiCallOut>
 );
