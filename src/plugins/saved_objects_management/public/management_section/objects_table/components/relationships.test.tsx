@@ -19,27 +19,23 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { Relationships, RelationshipsProps } from './relationships';
 
-jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => '',
-}));
-
-jest.mock('../../../../../lib/fetch_export_by_type_and_search', () => ({
+jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
   fetchExportByTypeAndSearch: jest.fn(),
 }));
 
-jest.mock('../../../../../lib/fetch_export_objects', () => ({
+jest.mock('../../../lib/fetch_export_objects', () => ({
   fetchExportObjects: jest.fn(),
 }));
 
-import { Relationships } from '../relationships';
-
 describe('Relationships', () => {
   it('should render index patterns normally', async () => {
-    const props = {
+    const props: RelationshipsProps = {
       goInspectObject: () => {},
+      canGoInApp: () => true,
+      basePath: httpServiceMock.createSetupContract().basePath,
       getRelationships: jest.fn().mockImplementation(() => [
         {
           type: 'search',
@@ -73,6 +69,8 @@ describe('Relationships', () => {
       savedObject: {
         id: '1',
         type: 'index-pattern',
+        attributes: {},
+        references: [],
         meta: {
           title: 'MyIndexPattern*',
           icon: 'indexPatternApp',
@@ -101,8 +99,10 @@ describe('Relationships', () => {
   });
 
   it('should render searches normally', async () => {
-    const props = {
+    const props: RelationshipsProps = {
       goInspectObject: () => {},
+      canGoInApp: () => true,
+      basePath: httpServiceMock.createSetupContract().basePath,
       getRelationships: jest.fn().mockImplementation(() => [
         {
           type: 'index-pattern',
@@ -136,6 +136,8 @@ describe('Relationships', () => {
       savedObject: {
         id: '1',
         type: 'search',
+        attributes: {},
+        references: [],
         meta: {
           title: 'MySearch',
           icon: 'search',
@@ -164,8 +166,10 @@ describe('Relationships', () => {
   });
 
   it('should render visualizations normally', async () => {
-    const props = {
+    const props: RelationshipsProps = {
       goInspectObject: () => {},
+      canGoInApp: () => true,
+      basePath: httpServiceMock.createSetupContract().basePath,
       getRelationships: jest.fn().mockImplementation(() => [
         {
           type: 'dashboard',
@@ -199,6 +203,8 @@ describe('Relationships', () => {
       savedObject: {
         id: '1',
         type: 'visualization',
+        attributes: {},
+        references: [],
         meta: {
           title: 'MyViz',
           icon: 'visualizeApp',
@@ -227,8 +233,10 @@ describe('Relationships', () => {
   });
 
   it('should render dashboards normally', async () => {
-    const props = {
+    const props: RelationshipsProps = {
       goInspectObject: () => {},
+      canGoInApp: () => true,
+      basePath: httpServiceMock.createSetupContract().basePath,
       getRelationships: jest.fn().mockImplementation(() => [
         {
           type: 'visualization',
@@ -262,6 +270,8 @@ describe('Relationships', () => {
       savedObject: {
         id: '1',
         type: 'dashboard',
+        attributes: {},
+        references: [],
         meta: {
           title: 'MyDashboard',
           icon: 'dashboardApp',
@@ -290,14 +300,18 @@ describe('Relationships', () => {
   });
 
   it('should render errors', async () => {
-    const props = {
+    const props: RelationshipsProps = {
       goInspectObject: () => {},
+      canGoInApp: () => true,
+      basePath: httpServiceMock.createSetupContract().basePath,
       getRelationships: jest.fn().mockImplementation(() => {
         throw new Error('foo');
       }),
       savedObject: {
         id: '1',
         type: 'dashboard',
+        attributes: {},
+        references: [],
         meta: {
           title: 'MyDashboard',
           icon: 'dashboardApp',

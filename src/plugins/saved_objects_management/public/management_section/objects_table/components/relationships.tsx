@@ -18,8 +18,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-
 import {
   EuiTitle,
   EuiFlyout,
@@ -34,25 +32,34 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import chrome from 'ui/chrome';
+import { FilterConfig } from '@elastic/eui/src/components/search_bar/filters/filters';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getDefaultTitle, getSavedObjectLabel } from '../../../../lib';
+import { IBasePath } from 'src/core/public';
+import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import { SavedObjectWithMetadata, SavedObjectRelation } from '../../../types';
 
-export class Relationships extends Component {
-  static propTypes = {
-    getRelationships: PropTypes.func.isRequired,
-    savedObject: PropTypes.object.isRequired,
-    close: PropTypes.func.isRequired,
-    goInspectObject: PropTypes.func.isRequired,
-    canGoInApp: PropTypes.func.isRequired,
-  };
+export interface RelationshipsProps {
+  basePath: IBasePath;
+  getRelationships: (type: string, id: string) => Promise<SavedObjectRelation[]>;
+  savedObject: SavedObjectWithMetadata;
+  close: () => void;
+  goInspectObject: (obj: SavedObjectWithMetadata) => void;
+  canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+}
 
-  constructor(props) {
+export interface RelationshipsState {
+  relationships: SavedObjectRelation[];
+  isLoading: boolean;
+  error?: string;
+}
+
+export class Relationships extends Component<RelationshipsProps, RelationshipsState> {
+  constructor(props: RelationshipsProps) {
     super(props);
 
     this.state = {
-      relationships: undefined,
+      relationships: [],
       isLoading: false,
       error: undefined,
     };
@@ -62,7 +69,7 @@ export class Relationships extends Component {
     this.getRelationshipData();
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: RelationshipsProps) {
     if (nextProps.savedObject.id !== this.props.savedObject.id) {
       this.getRelationshipData();
     }
@@ -104,7 +111,7 @@ export class Relationships extends Component {
   }
 
   renderRelationships() {
-    const { goInspectObject, savedObject } = this.props;
+    const { goInspectObject, savedObject, basePath } = this.props;
     const { relationships, isLoading, error } = this.state;
 
     if (error) {
@@ -128,7 +135,7 @@ export class Relationships extends Component {
           { defaultMessage: 'Type of the saved object' }
         ),
         sortable: false,
-        render: (type, object) => {
+        render: (type: string, object: SavedObjectWithMetadata) => {
           return (
             <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
               <EuiIcon
@@ -151,7 +158,7 @@ export class Relationships extends Component {
         sortable: false,
         width: '125px',
         'data-test-subj': 'directRelationship',
-        render: relationship => {
+        render: (relationship: string) => {
           if (relationship === 'parent') {
             return (
               <EuiText size="s">
@@ -185,8 +192,8 @@ export class Relationships extends Component {
         ),
         dataType: 'string',
         sortable: false,
-        render: (title, object) => {
-          const { path } = object.meta.inAppUrl || {};
+        render: (title: string, object: SavedObjectWithMetadata) => {
+          const { path = '' } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
           if (!canGoInApp) {
             return (
@@ -196,7 +203,7 @@ export class Relationships extends Component {
             );
           }
           return (
-            <EuiLink href={chrome.addBasePath(path)} data-test-subj="relationshipsTitle">
+            <EuiLink href={basePath.prepend(path)} data-test-subj="relationshipsTitle">
               {title || getDefaultTitle(object)}
             </EuiLink>
           );
@@ -220,8 +227,8 @@ export class Relationships extends Component {
             type: 'icon',
             icon: 'inspect',
             'data-test-subj': 'relationshipsTableAction-inspect',
-            onClick: object => goInspectObject(object),
-            available: object => !!object.meta.editUrl,
+            onClick: (object: SavedObjectWithMetadata) => goInspectObject(object),
+            available: (object: SavedObjectWithMetadata) => !!object.meta.editUrl,
           },
         ],
       },
@@ -277,7 +284,7 @@ export class Relationships extends Component {
           multiSelect: 'or',
           options: [...filterTypesMap.values()],
         },
-      ],
+      ] as FilterConfig[],
     };
 
     return (
@@ -301,7 +308,7 @@ export class Relationships extends Component {
         <EuiSpacer />
         <EuiInMemoryTable
           items={relationships}
-          columns={columns}
+          columns={columns as any}
           pagination={true}
           search={search}
           rowProps={() => ({

@@ -67,10 +67,9 @@ import {
   extractExportDetails,
   SavedObjectsExportResultDetails,
 } from '../../lib';
-// import { Relationships } from './components/relationships';
 import { SavedObjectWithMetadata } from '../../types';
 import { ISavedObjectsManagementServiceRegistry } from '../../services';
-import { Header, Table, Flyout } from './components';
+import { Header, Table, Flyout, Relationships } from './components';
 
 interface ExportAllOption {
   id: string;
@@ -470,18 +469,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
 
-    /* TODO
     return (
       <Relationships
-        savedObject={this.state.relationshipObject}
+        basePath={this.props.http.basePath}
+        savedObject={this.state.relationshipObject!}
         getRelationships={this.getRelationships}
         close={this.onHideRelationships}
-        getDashboardUrl={this.props.getDashboardUrl}
         goInspectObject={this.props.goInspectObject}
         canGoInApp={this.props.canGoInApp}
       />
     );
-     */
   }
 
   renderDeleteConfirmModal() {
