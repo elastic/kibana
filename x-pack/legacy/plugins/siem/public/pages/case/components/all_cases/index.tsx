@@ -21,7 +21,7 @@ import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
-import { Case, FilterOptions, SortFieldCase } from '../../../../containers/case/types';
+import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../../../containers/case/types';
 import { useGetCases, UpdateCase } from '../../../../containers/case/use_get_cases';
 import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
@@ -107,26 +107,36 @@ export const AllCases = React.memo(() => {
     isDisplayConfirmDeleteModal,
   } = useDeleteCases();
 
-  const { dispatchResetIsUpdated, isUpdated, updateBulkStatus } = useUpdateCases();
-
-  useEffect(() => {
-    if (isDeleted) {
-      refetchCases(filterOptions, queryParams);
-      fetchCasesStatus();
-      dispatchResetIsDeleted();
-    }
-    if (isUpdated) {
-      refetchCases(filterOptions, queryParams);
-      fetchCasesStatus();
-      dispatchResetIsUpdated();
-    }
-  }, [isDeleted, isUpdated, filterOptions, queryParams]);
-
+  // Update case
+  const {
+    dispatchResetIsUpdated,
+    isLoading: isUpdating,
+    isUpdated,
+    updateBulkStatus,
+  } = useUpdateCases();
   const [deleteThisCase, setDeleteThisCase] = useState({
     title: '',
     id: '',
   });
-  const [deleteBulk, setDeleteBulk] = useState<string[]>([]);
+  const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
+
+  const refreshCases = useCallback(() => {
+    refetchCases(filterOptions, queryParams);
+    fetchCasesStatus();
+    setSelectedCases([]);
+    setDeleteBulk([]);
+  }, [filterOptions, queryParams]);
+
+  useEffect(() => {
+    if (isDeleted) {
+      refreshCases();
+      dispatchResetIsDeleted();
+    }
+    if (isUpdated) {
+      refreshCases();
+      dispatchResetIsUpdated();
+    }
+  }, [isDeleted, isUpdated]);
   const confirmDeleteModal = useMemo(
     () => (
       <ConfirmDeleteCaseModal
@@ -136,7 +146,7 @@ export const AllCases = React.memo(() => {
         onCancel={handleToggleModal}
         onConfirm={handleOnDeleteConfirm.bind(
           null,
-          deleteBulk.length > 0 ? deleteBulk : [deleteThisCase.id]
+          deleteBulk.length > 0 ? deleteBulk : [deleteThisCase]
         )}
       />
     ),
@@ -148,10 +158,20 @@ export const AllCases = React.memo(() => {
     setDeleteThisCase(deleteCase);
   }, []);
 
-  const toggleBulkDeleteModal = useCallback((deleteCases: string[]) => {
-    handleToggleModal();
-    setDeleteBulk(deleteCases);
-  }, []);
+  const toggleBulkDeleteModal = useCallback(
+    (caseIds: string[]) => {
+      handleToggleModal();
+      if (caseIds.length === 1) {
+        const singleCase = selectedCases.find(theCase => theCase.id === caseIds[0]);
+        if (singleCase) {
+          return setDeleteThisCase({ id: singleCase.id, title: singleCase.title });
+        }
+      }
+      const convertToDeleteCases: DeleteCase[] = caseIds.map(id => ({ id }));
+      setDeleteBulk(convertToDeleteCases);
+    },
+    [selectedCases]
+  );
 
   const handleUpdateCaseStatus = useCallback(
     (status: string) => {
@@ -287,7 +307,7 @@ export const AllCases = React.memo(() => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
-      {(isCasesLoading || isDeleting) && !isDataEmpty && (
+      {(isCasesLoading || isDeleting || isUpdating) && !isDataEmpty && (
         <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
       )}
       <Panel loading={isCasesLoading}>
@@ -326,6 +346,10 @@ export const AllCases = React.memo(() => {
                     popoverContent={getBulkItemsPopoverContent}
                   >
                     {i18n.BULK_ACTIONS}
+                  </UtilityBarAction>
+
+                  <UtilityBarAction iconSide="left" iconType="refresh" onClick={refreshCases}>
+                    {i18n.REFRESH}
                   </UtilityBarAction>
                 </UtilityBarGroup>
               </UtilityBarSection>

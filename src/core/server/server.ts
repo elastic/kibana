@@ -74,6 +74,7 @@ export class Server {
   private readonly status: StatusService;
   private readonly coreApp: CoreApp;
 
+  private pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
 
   constructor(
@@ -167,6 +168,7 @@ export class Server {
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
+    this.pluginsInitialized = pluginsSetup.initialized;
 
     const renderingSetup = await this.rendering.setup({
       http: httpSetup,
@@ -187,7 +189,9 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
-    const savedObjectsStart = await this.savedObjects.start({});
+    const savedObjectsStart = await this.savedObjects.start({
+      pluginsInitialized: this.pluginsInitialized,
+    });
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const elasticsearchStart = await this.elasticsearch.start();

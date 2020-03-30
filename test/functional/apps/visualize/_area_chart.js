@@ -21,10 +21,12 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const log = getService('log');
+  const find = getService('find');
   const inspector = getService('inspector');
   const browser = getService('browser');
   const retry = getService('retry');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -463,6 +465,93 @@ export default function({ getService, getPageObjects }) {
         const paths = await PageObjects.visChart.getAreaChartPaths('Count');
         log.debug('actual chart data =     ' + paths);
         expect(paths.length).to.eql(numberOfSegments);
+      });
+    });
+
+    describe('date histogram when no date field', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('AreaChart [no date field]');
+        await PageObjects.visChart.waitForVisualization();
+
+        log.debug('Click X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+      });
+
+      it('should show error message for field', async () => {
+        const fieldErrorMessage = await find.byCssSelector(
+          '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
+        );
+        const errorMessage = await fieldErrorMessage.getVisibleText();
+        expect(errorMessage).to.be(
+          'The index pattern test_index* does not contain any of the following compatible field types: date'
+        );
+      });
+    });
+
+    describe('date histogram when no time filter', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('AreaChart [no time filter]');
+        await PageObjects.visChart.waitForVisualization();
+
+        log.debug('Click X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+      });
+
+      it('should not show error message on init when the field is not selected', async () => {
+        const fieldValues = await PageObjects.visEditor.getField();
+        expect(fieldValues[0]).to.be(undefined);
+        const isFieldErrorMessageExists = await find.existsByCssSelector(
+          '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
+        );
+        expect(isFieldErrorMessageExists).to.be(false);
+      });
+
+      describe('interval errors', () => {
+        before(async () => {
+          // to trigger displaying of error messages
+          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          // this will avoid issues with the play tooltip covering the interval field
+          await testSubjects.scrollIntoView('advancedParams-2');
+        });
+
+        it('should not fail during changing interval when the field is not selected', async () => {
+          await PageObjects.visEditor.setInterval('m');
+          const intervalValues = await PageObjects.visEditor.getInterval();
+          expect(intervalValues[0]).to.be('Millisecond');
+        });
+
+        it('should not fail during changing custom interval when the field is not selected', async () => {
+          await PageObjects.visEditor.setInterval('4d', { type: 'custom' });
+          const isInvalidIntervalExists = await find.existsByCssSelector(
+            '.euiComboBox-isInvalid[data-test-subj="visEditorInterval"]'
+          );
+          expect(isInvalidIntervalExists).to.be(false);
+        });
+
+        it('should show error when interval invalid', async () => {
+          await PageObjects.visEditor.setInterval('xx', { type: 'custom' });
+          const isIntervalErrorMessageExists = await find.existsByCssSelector(
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+          );
+          expect(isIntervalErrorMessageExists).to.be(true);
+        });
+
+        it('should show error when calendar interval invalid', async () => {
+          await PageObjects.visEditor.setInterval('14d', { type: 'custom' });
+          const intervalErrorMessage = await find.byCssSelector(
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+          );
+          let errorMessage = await intervalErrorMessage.getVisibleText();
+          expect(errorMessage).to.be('Invalid calendar interval: 2w, value must be 1');
+
+          await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
+          errorMessage = await intervalErrorMessage.getVisibleText();
+          expect(errorMessage).to.be('Invalid calendar interval: 3w, value must be 1');
+        });
       });
     });
   });

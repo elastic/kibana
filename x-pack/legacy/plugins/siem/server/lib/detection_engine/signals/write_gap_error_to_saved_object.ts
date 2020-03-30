@@ -48,6 +48,7 @@ export const writeGapErrorToSavedObject = async ({
       lastSuccessAt: currentStatusSavedObject.attributes.lastSuccessAt,
       lastFailureMessage: `Signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" has a time gap of ${gap.humanize()} (${gap.asMilliseconds()}ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.`,
       lastSuccessMessage: currentStatusSavedObject.attributes.lastSuccessMessage,
+      gap: gap.humanize(),
     });
 
     if (ruleStatusSavedObjects.saved_objects.length >= 6) {

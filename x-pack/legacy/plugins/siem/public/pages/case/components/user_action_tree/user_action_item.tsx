@@ -25,12 +25,14 @@ interface UserActionItemProps {
   isEditable: boolean;
   isLoading: boolean;
   labelEditAction?: string;
+  labelQuoteAction?: string;
   labelTitle?: JSX.Element;
   linkId?: string | null;
-  fullName: string;
+  fullName?: string | null;
   markdown?: React.ReactNode;
   onEdit?: (id: string) => void;
-  userName: string;
+  onQuote?: (id: string) => void;
+  username: string;
   updatedAt?: string | null;
   outlineComment?: (id: string) => void;
   showBottomFooter?: boolean;
@@ -113,23 +115,25 @@ export const UserActionItem = ({
   isEditable,
   isLoading,
   labelEditAction,
+  labelQuoteAction,
   labelTitle,
   linkId,
   fullName,
   markdown,
   onEdit,
+  onQuote,
   outlineComment,
   showBottomFooter,
   showTopFooter,
-  userName,
+  username,
   updatedAt,
 }: UserActionItemProps) => (
   <UserActionItemContainer gutterSize={'none'} direction="column">
     <EuiFlexItem>
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
-          {fullName.length > 0 || userName.length > 0 ? (
-            <UserActionAvatar name={fullName ?? userName} />
+          {(fullName && fullName.length > 0) || username.length > 0 ? (
+            <UserActionAvatar name={fullName ?? username} />
           ) : (
             <EuiLoadingSpinner className="userAction_loadingAvatar" />
           )}
@@ -147,11 +151,14 @@ export const UserActionItem = ({
                 id={id}
                 isLoading={isLoading}
                 labelEditAction={labelEditAction}
+                labelQuoteAction={labelQuoteAction}
                 labelTitle={labelTitle ?? <></>}
                 linkId={linkId}
-                userName={userName}
+                fullName={fullName}
+                username={username}
                 updatedAt={updatedAt}
                 onEdit={onEdit}
+                onQuote={onQuote}
                 outlineComment={outlineComment}
               />
               {markdown}

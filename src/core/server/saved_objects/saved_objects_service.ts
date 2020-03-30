@@ -273,7 +273,9 @@ interface WrappedClientFactoryWrapper {
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectsStartDeps {}
+export interface SavedObjectsStartDeps {
+  pluginsInitialized?: boolean;
+}
 
 export class SavedObjectsService
   implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
@@ -357,7 +359,7 @@ export class SavedObjectsService
   }
 
   public async start(
-    core: SavedObjectsStartDeps,
+    { pluginsInitialized = true }: SavedObjectsStartDeps,
     migrationsRetryDelay?: number
   ): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
@@ -384,9 +386,11 @@ export class SavedObjectsService
      * However, our build system optimize step and some tests depend on the
      * HTTP server running without an Elasticsearch server being available.
      * So, when the `migrations.skip` is true, we skip migrations altogether.
+     *
+     * We also cannot safely run migrations if plugins are not initialized since
+     * not plugin migrations won't be registered.
      */
-    const cliArgs = this.coreContext.env.cliArgs;
-    const skipMigrations = cliArgs.optimize || this.config.migration.skip;
+    const skipMigrations = this.config.migration.skip || !pluginsInitialized;
 
     if (skipMigrations) {
       this.logger.warn(

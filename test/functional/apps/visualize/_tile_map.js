@@ -57,7 +57,6 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('complete config', function describeIndexTests() {
-      this.tags(['skipCoverage']);
       before(async function() {
         await browser.setWindowSize(1280, 1000);
 
