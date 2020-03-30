@@ -88,8 +88,7 @@ export function buildSavedObject(
    * Serialize this object
    * @return {Object}
    */
-  savedObject._serialize = () =>
-    serializeSavedObject(savedObject, config, services.search.serializeSearchSource);
+  savedObject._serialize = () => serializeSavedObject(savedObject, config);
 
   /**
    * Returns true if the object's original title has been changed. New objects return false.

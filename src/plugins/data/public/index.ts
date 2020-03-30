@@ -367,7 +367,6 @@ export {
   ISearchSource,
   SearchSource,
   parseSearchSource,
-  serializeSearchSource,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,

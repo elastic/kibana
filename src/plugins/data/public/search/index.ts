@@ -55,7 +55,6 @@ export {
   EsQuerySortValue,
   SortDirection,
   parseSearchSource,
-  serializeSearchSource,
 } from './search_source';
 
 export { SearchInterceptor } from './search_interceptor';

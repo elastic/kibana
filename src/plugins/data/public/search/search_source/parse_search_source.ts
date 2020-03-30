@@ -26,7 +26,7 @@ import { SearchSourceFields } from './types';
 
 /**
  * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.
- * Use this method to re-create the search source serialized using `serializeSearchSource`.
+ * Use this method to re-create the search source serialized using `searchSource.serialize`.
  *
  * This function is a factory function that returns the actual utility when calling it with the
  * required service dependency (index patterns contract). A pre-wired version is also exposed in

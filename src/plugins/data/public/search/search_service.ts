@@ -26,7 +26,7 @@ import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
-import { parseSearchSource, serializeSearchSource } from './search_source';
+import { parseSearchSource } from './search_source';
 import { QuerySetup } from '../query/query_service';
 import { SearchInterceptor } from './search_interceptor';
 import {
@@ -145,7 +145,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         // TODO: should an intercepror have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
-      serializeSearchSource,
       parseSearchSource: parseSearchSource(indexPatterns),
       __LEGACY: {
         esClient: this.esClient!,

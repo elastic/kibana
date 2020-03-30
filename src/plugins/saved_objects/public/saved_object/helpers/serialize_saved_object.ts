@@ -19,13 +19,8 @@
 import _ from 'lodash';
 import { SavedObject, SavedObjectConfig } from '../../types';
 import { expandShorthand } from '../../../../kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../data/public';
 
-export function serializeSavedObject(
-  savedObject: SavedObject,
-  config: SavedObjectConfig,
-  serializeSearchSource: DataPublicPluginStart['search']['serializeSearchSource']
-) {
+export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {
   // mapping definition for the fields that this object will expose
   const mapping = expandShorthand(config.mapping);
   const attributes = {} as Record<string, any>;
@@ -45,9 +40,10 @@ export function serializeSavedObject(
   });
 
   if (savedObject.searchSource) {
-    const { searchSourceJSON, references: searchSourceReferences } = serializeSearchSource(
-      savedObject.searchSource
-    );
+    const {
+      searchSourceJSON,
+      references: searchSourceReferences,
+    } = savedObject.searchSource.serialize();
     attributes.kibanaSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
   }

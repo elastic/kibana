@@ -4,7 +4,9 @@
 
 ## parseSearchSource variable
 
-Deserializes a json string and a set of referenced objects to a `SearchSource` instance. Use this method to re-create the search source serialized using `serializeSearchSource`
+Deserializes a json string and a set of referenced objects to a `SearchSource` instance. Use this method to re-create the search source serialized using `searchSource.serialize`<!-- -->.
+
+This function is a factory function that returns the actual utility when calling it with the required service dependency (index patterns contract). A pre-wired version is also exposed in the start contract of the data plugin as part of the search service
 
 <b>Signature:</b>
 

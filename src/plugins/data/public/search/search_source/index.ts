@@ -19,5 +19,4 @@
 
 export * from './search_source';
 export { parseSearchSource } from './parse_search_source';
-export { serializeSearchSource } from './serialize_search_source';
 export { SortDirection, EsQuerySortValue, SearchSourceFields } from './types';
