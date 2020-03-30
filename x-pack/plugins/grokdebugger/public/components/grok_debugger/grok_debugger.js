@@ -73,7 +73,7 @@ export class GrokDebuggerComponent extends React.Component {
   };
 
   simulateGrok = async () => {
-    const notifications = this.props.kibana.notifications;
+    const notifications = this.props.kibana.services.notifications;
     try {
       const simulateResponse = await this.props.grokdebuggerService.simulate(
         this.grokdebuggerRequest
@@ -83,15 +83,13 @@ export class GrokDebuggerComponent extends React.Component {
       });
 
       if (!isEmpty(simulateResponse.error)) {
-        notifications.toasts.danger({
+        notifications.toasts.addDanger({
           body: simulateResponse.error,
-          toastLifeTimeMs: 4 * 1000,
         });
       }
     } catch (e) {
-      notifications.toasts.danger({
+      notifications.toasts.addDanger({
         body: e,
-        toastLifeTimeMs: 4 * 1000,
       });
     }
   };
