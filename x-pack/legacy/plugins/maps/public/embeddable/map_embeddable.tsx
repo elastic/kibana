@@ -83,7 +83,6 @@ export interface MapEmbeddableInput extends EmbeddableInput {
   mapCenter?: MapCenter;
   hiddenLayers?: string[];
   hideFilterActions?: boolean;
-  layerList?: unknown[];
 }
 
 export interface MapEmbeddableOutput extends EmbeddableOutput {

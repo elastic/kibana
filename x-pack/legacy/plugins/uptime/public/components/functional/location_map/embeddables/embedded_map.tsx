@@ -88,9 +88,12 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       }
       const embeddableObject = await factory.create({
         ...input,
-        layerList: getLayerList(upPoints, downPoints, colors),
         title: i18n.MAP_TITLE,
       });
+
+      if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
+        embeddableObject.setLayerList(getLayerList(upPoints, downPoints, colors));
+      }
 
       setEmbeddable(embeddableObject);
     }

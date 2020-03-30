@@ -62,7 +62,6 @@ export const createEmbeddable = async (
   }
 
   const input: MapEmbeddableInput = {
-    layerList: getLayerList(indexPatterns),
     title: i18n.MAP_TITLE,
     id: uuid.v4(),
     filters,
@@ -110,6 +109,7 @@ export const createEmbeddable = async (
 
   if (!isErrorEmbeddable(embeddableObject)) {
     embeddableObject.setRenderTooltipContent(renderTooltipContent);
+    embeddableObject.setLayerList(getLayerList(indexPatterns));
   }
 
   // Wire up to app refresh action
