@@ -9,6 +9,7 @@ import { areaChart } from './area_chart';
 import { bubbleChart } from './bubble_chart';
 import { debug } from './debug';
 import { dropdownFilter } from './dropdown_filter';
+import { filterDebug } from './filter_debug';
 import { horizontalBarChart } from './horizontal_bar_chart';
 import { horizontalProgressBar } from './horizontal_progress_bar';
 import { horizontalProgressPill } from './horizontal_progress_pill';
@@ -35,6 +36,7 @@ export const elementSpecs = applyElementStrings([
   bubbleChart,
   debug,
   dropdownFilter,
+  filterDebug,
   image,
   horizontalBarChart,
   horizontalProgressBar,

@@ -6,11 +6,11 @@
 
 import { ElementFactory } from '../../../types';
 
-export const debug: ElementFactory = () => ({
-  name: 'debug',
-  displayName: 'Debug data',
-  help: 'Just dumps the configuration of the element',
+export const filterDebug: ElementFactory = () => ({
+  name: 'filter debug',
+  displayName: 'Debug filter',
+  help: 'Shows the underlying global filters in a workpad',
   icon: 'bug',
-  expression: `demodata
+  expression: `filters
 | render as=debug`,
 });
