@@ -14,17 +14,10 @@ export const registerFeature = (homePlugin: HomePublicPluginSetup) => {
   homePlugin.featureCatalogue.register({
     id: 'grokdebugger',
     title: i18n.translate('xpack.grokDebugger.registryProviderTitle', {
-      defaultMessage: '{grokLogParsingTool} Debugger',
-      values: {
-        grokLogParsingTool: 'Grok',
-      },
+      defaultMessage: 'Grok Debugger',
     }),
     description: i18n.translate('xpack.grokDebugger.registryProviderDescription', {
-      defaultMessage:
-        'Simulate and debug {grokLogParsingTool} patterns for data transformation on ingestion.',
-      values: {
-        grokLogParsingTool: 'grok',
-      },
+      defaultMessage: 'Simulate and debug grok patterns for data transformation on ingestion.',
     }),
     icon: 'grokApp',
     path: '/app/kibana#/dev_tools/grokdebugger',
