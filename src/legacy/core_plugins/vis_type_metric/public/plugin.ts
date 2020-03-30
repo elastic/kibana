@@ -19,7 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 
 import { createMetricVisFn } from './metric_vis_fn';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
