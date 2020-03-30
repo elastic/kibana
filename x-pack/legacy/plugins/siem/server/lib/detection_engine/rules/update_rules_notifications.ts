@@ -17,6 +17,7 @@ interface UpdateRulesNotifications {
   actions: RuleAlertAction[] | undefined;
   throttle: string | undefined;
   enabled: boolean;
+  name: string;
 }
 
 export const updateRulesNotifications = async ({
@@ -25,6 +26,7 @@ export const updateRulesNotifications = async ({
   ruleAlertId,
   actions,
   enabled,
+  name,
   throttle,
 }: UpdateRulesNotifications) => {
   const ruleActions = await updateOrCreateRuleActionsSavedObject({

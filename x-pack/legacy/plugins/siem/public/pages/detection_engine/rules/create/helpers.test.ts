@@ -633,7 +633,7 @@ describe('helpers', () => {
         meta: {
           kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
         },
-        throttle: null,
+        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);

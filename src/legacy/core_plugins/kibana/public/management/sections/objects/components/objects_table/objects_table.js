@@ -85,12 +85,7 @@ export class ObjectsTable extends Component {
 
   constructor(props) {
     super(props);
-    this.savedObjectTypes = [
-      ...POSSIBLE_TYPES,
-      'alert',
-      'siem-detection-engine-rule-status',
-      'siem-detection-engine-rule-actions',
-    ];
+    this.savedObjectTypes = POSSIBLE_TYPES;
 
     this.state = {
       totalCount: 0,

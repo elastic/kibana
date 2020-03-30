@@ -95,7 +95,6 @@ export const updateRulesRoute = (router: IRouter) => {
           enabled,
           falsePositives,
           from,
-          immutable: false,
           query,
           language,
           machineLearningJobId,
@@ -132,6 +131,7 @@ export const updateRulesRoute = (router: IRouter) => {
             enabled,
             actions,
             throttle,
+            name,
           });
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes

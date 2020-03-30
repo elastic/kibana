@@ -156,7 +156,7 @@ export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'actions' | 'throttl
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
 
-export type UpdateRuleParams = Omit<RuleAlertParams, 'actions' | 'throttle'> & {
+export type UpdateRuleParams = Omit<RuleAlertParams, 'immutable' | 'actions' | 'throttle'> & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;

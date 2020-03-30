@@ -156,6 +156,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 enabled,
                 actions,
                 throttle,
+                name,
               });
 
               return transformValidateBulkError(ruleIdOrUuid, createdRule, ruleActions);

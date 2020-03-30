@@ -144,6 +144,7 @@ export const createRulesRoute = (router: IRouter): void => {
           enabled,
           actions,
           throttle,
+          name,
         });
 
         const ruleStatuses = await savedObjectsClient.find<

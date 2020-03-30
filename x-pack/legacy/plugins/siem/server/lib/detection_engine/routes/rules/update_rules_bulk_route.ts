@@ -97,7 +97,6 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               anomalyThreshold,
               description,
               enabled,
-              immutable: false,
               falsePositives,
               from,
               query,
@@ -135,6 +134,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
                 enabled,
                 actions,
                 throttle,
+                name,
               });
               const ruleStatuses = await savedObjectsClient.find<
                 IRuleSavedAttributesSavedObjectAttributes

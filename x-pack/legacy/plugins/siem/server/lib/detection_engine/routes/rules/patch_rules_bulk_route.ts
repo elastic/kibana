@@ -132,6 +132,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
                 enabled: rule.enabled!,
                 actions,
                 throttle,
+                name: rule.name!,
               });
               const ruleStatuses = await savedObjectsClient.find<
                 IRuleSavedAttributesSavedObjectAttributes
