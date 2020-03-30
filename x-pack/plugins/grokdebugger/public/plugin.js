@@ -9,42 +9,27 @@ import { first } from 'rxjs/operators';
 import { registerFeature } from './register_feature';
 import { PLUGIN } from '../common/constants';
 
-const inactiveLicenseMessage = i18n.translate('xpack.grokDebugger.clientInactiveLicenseError', {
-  defaultMessage: 'The Grok Debugger tool requires an active license.',
-});
-
 export class Plugin {
   setup(coreSetup, plugins) {
     registerFeature(plugins.home);
 
-    this.licensing = plugins.licensing;
-
-    this.licensing.license$.pipe(first()).subscribe(license => {
-      plugins.devTools.register({
-        order: 6,
-        title: i18n.translate('xpack.grokDebugger.displayName', {
-          defaultMessage: 'Grok Debugger',
-        }),
-        id: PLUGIN.ID,
-        enableRouting: false,
-        disabled: !license.isActive,
-        tooltipContent: !license.isActive ? inactiveLicenseMessage : null,
-        async mount(context, { element }) {
-          const [coreStart] = await coreSetup.getStartServices();
-          const { renderApp } = await import('./render_app');
-          return renderApp(element, coreStart);
-        },
-      });
+    plugins.devTools.register({
+      order: 6,
+      title: i18n.translate('xpack.grokDebugger.displayName', {
+        defaultMessage: 'Grok Debugger',
+      }),
+      id: PLUGIN.ID,
+      enableRouting: false,
+      async mount(context, { element }) {
+        const [coreStart] = await coreSetup.getStartServices();
+        const license = await plugins.licensing.license$.pipe(first()).toPromise();
+        const { renderApp } = await import('./render_app');
+        return renderApp(license, element, coreStart);
+      },
     });
   }
 
-  start(coreStart) {
-    this.licensing.license$.subscribe(license => {
-      coreStart.chrome.navLinks.update(PLUGIN.ID, {
-        hidden: !license.isActive,
-      });
-    });
-  }
+  start() {}
 
   stop() {}
 }

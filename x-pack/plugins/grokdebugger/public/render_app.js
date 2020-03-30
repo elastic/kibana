@@ -11,15 +11,26 @@ import { GrokDebugger } from './components/grok_debugger';
 import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_service';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+import { InactiveLicenseSlate } from './components/inactive_license';
 
-export function renderApp(element, coreStart) {
-  render(
-    <KibanaContextProvider services={{ ...coreStart }}>
+export function renderApp(license, element, coreStart) {
+  if (!license.isActive) {
+    render(
       <I18nProvider>
-        <GrokDebugger grokdebuggerService={new GrokdebuggerService(coreStart.http)} />
-      </I18nProvider>
-    </KibanaContextProvider>,
-    element
-  );
-  return () => unmountComponentAtNode(element);
+        <InactiveLicenseSlate license={license} />
+      </I18nProvider>,
+      element
+    );
+    return () => unmountComponentAtNode(element);
+  } else {
+    render(
+      <KibanaContextProvider services={{ ...coreStart }}>
+        <I18nProvider>
+          <GrokDebugger grokdebuggerService={new GrokdebuggerService(coreStart.http)} />
+        </I18nProvider>
+      </KibanaContextProvider>,
+      element
+    );
+    return () => unmountComponentAtNode(element);
+  }
 }
