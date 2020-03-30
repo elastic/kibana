@@ -30,7 +30,7 @@ export type Start = jest.Mocked<EmbeddableStart>;
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerEmbeddableFactory: jest.fn(),
-    setEmbeddableFactoryProvider: jest.fn(),
+    setCustomEmbeddableFactoryProvider: jest.fn(),
   };
   return setupContract;
 };

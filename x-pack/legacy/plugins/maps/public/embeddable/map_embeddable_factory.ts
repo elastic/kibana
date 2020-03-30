@@ -130,7 +130,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   create = async (input: MapEmbeddableInput, parent?: IContainer) => {
-    const layerList = input.layerList ?? getInitialLayers();
+    const layerList = getInitialLayers();
     const indexPatterns = await this._getIndexPatterns(layerList);
 
     return new MapEmbeddable(
