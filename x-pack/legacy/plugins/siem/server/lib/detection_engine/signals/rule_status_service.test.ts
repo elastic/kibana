@@ -109,6 +109,11 @@ describe('ruleStatusService', () => {
   });
 
   describe('error', () => {
+    beforeEach(() => {
+      // mock the creation of our new status
+      ruleStatusClient.create.mockResolvedValue(exampleRuleStatus());
+    });
+
     it('updates the current status to "failed"', async () => {
       await service.error('oh no, it broke');
 
@@ -169,6 +174,22 @@ describe('ruleStatusService', () => {
       expect(ruleStatusClient.delete).toHaveBeenCalledWith('status-index-5');
       // we should delete the 7th (index 6)
       expect(ruleStatusClient.delete).toHaveBeenCalledWith('status-index-6');
+    });
+
+    it('handles multiple error calls', async () => {
+      // max in store, meaning our new error will push one off the end
+      ruleStatusClient.find.mockResolvedValue(
+        exampleFindRuleStatusResponse(buildStatuses(MAX_RULE_STATUSES))
+      );
+      service = await ruleStatusServiceFactory({ alertId: 'mock-alert-id', ruleStatusClient });
+
+      await service.error('oh no, it broke');
+      await service.error('oh no, it broke');
+
+      expect(ruleStatusClient.delete).toHaveBeenCalledTimes(2);
+      // we should delete the 6th (index 5)
+      expect(ruleStatusClient.delete).toHaveBeenCalledWith('status-index-5');
+      expect(ruleStatusClient.delete).toHaveBeenCalledWith('status-index-5');
     });
   });
 });
