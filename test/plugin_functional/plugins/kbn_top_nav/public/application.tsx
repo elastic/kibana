@@ -17,8 +17,31 @@
  * under the License.
  */
 
-export default function({ loadTestFile }) {
-  describe('app plugins', () => {
-    loadTestFile(require.resolve('./app_navigation'));
-  });
-}
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { AppMountParameters } from 'kibana/public';
+import { AppPluginDependencies } from './types';
+
+export const renderApp = (
+  depsStart: AppPluginDependencies,
+  { appBasePath, element }: AppMountParameters
+) => {
+  const { TopNavMenu } = depsStart.navigation.ui;
+  const config = [
+    {
+      id: 'new',
+      label: 'New Button',
+      description: 'New Demo',
+      run() {},
+      testId: 'demoNewButton',
+    },
+  ];
+  render(
+    <TopNavMenu appName="demo-app" config={config}>
+      Hey
+    </TopNavMenu>,
+    element
+  );
+
+  return () => unmountComponentAtNode(element);
+};
