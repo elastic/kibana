@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-### Add verbose output if running in the CI
+### When running in the CI let's add some verbose output and install the required dependencies
 if [ -n "${JENKINS_URL}" ] ; then
+  # shellcheck disable=SC1091
+  source src/dev/ci_setup/setup_env.sh true
   set -x
 fi
 
@@ -65,7 +67,6 @@ fi
 
 # Start apm-integration-testing
 echo "Starting docker-compose"
-ls -ltrah ${APM_IT_DIR}
 ${APM_IT_DIR}/scripts/compose.py start master \
     --no-kibana \
     --elasticsearch-port $ELASTICSEARCH_PORT \
