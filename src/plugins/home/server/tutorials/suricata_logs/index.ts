@@ -50,7 +50,7 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-suricata.html',
       },
     }),
-    // euiIconType: 'logoSuricata',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/suricata.svg',
     artifacts: {
       dashboards: [
         {
