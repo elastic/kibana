@@ -23,10 +23,11 @@ import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
 import { History } from 'history';
 
-import { ViewMode } from 'src/plugins/embeddable/public';
 import { Filter, Query, TimefilterContract as Timefilter } from 'src/plugins/data/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { migrateLegacyQuery } from '../../kibana_legacy/public';
 
+import { ViewMode } from './embeddable_plugin';
 import { getAppStateDefaults, migrateAppState } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
 import { FilterUtils } from './lib/filter_utils';
@@ -97,12 +98,14 @@ export class DashboardStateManager {
     kibanaVersion,
     kbnUrlStateStorage,
     history,
+    usageCollection,
   }: {
     savedDashboard: SavedObjectDashboard;
     hideWriteControls: boolean;
     kibanaVersion: string;
     kbnUrlStateStorage: IKbnUrlStateStorage;
     history: History;
+    usageCollection: UsageCollectionSetup;
   }) {
     this.history = history;
     this.kibanaVersion = kibanaVersion;
@@ -111,8 +114,9 @@ export class DashboardStateManager {
 
     // get state defaults from saved dashboard, make sure it is migrated
     this.stateDefaults = migrateAppState(
-      getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
-      kibanaVersion
+      { ...getAppStateDefaults(this.savedDashboard, this.hideWriteControls) },
+      kibanaVersion,
+      usageCollection
     );
 
     this.kbnUrlStateStorage = kbnUrlStateStorage;
@@ -124,7 +128,8 @@ export class DashboardStateManager {
         ...this.stateDefaults,
         ...this.kbnUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY),
       },
-      kibanaVersion
+      kibanaVersion,
+      usageCollection
     );
 
     // setup state container using initial state both from defaults and from url
@@ -276,7 +281,8 @@ export class DashboardStateManager {
     // now.  TODO: revisit this!
     this.stateDefaults = migrateAppState(
       getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
-      this.kibanaVersion
+      this.kibanaVersion,
+      usageCollection
     );
     // The original query won't be restored by the above because the query on this.savedDashboard is applied
     // in place in order for it to affect the visualizations.

@@ -31,6 +31,7 @@ import {
   Plugin,
   SavedObjectsClientContract,
 } from 'src/core/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
@@ -83,8 +84,9 @@ interface SetupDependencies {
   embeddable: EmbeddableSetup;
   home: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
-  share?: SharePluginSetup;
+  share: SharePluginSetup;
   uiActions: UiActionsSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 interface StartDependencies {
@@ -120,21 +122,19 @@ export class DashboardEmbeddableContainerPublicPlugin
 
   public setup(
     core: CoreSetup<StartDependencies>,
-    { share, uiActions, embeddable, home, kibanaLegacy, data }: SetupDependencies
+    { share, uiActions, embeddable, home, kibanaLegacy, data, usageCollection }: SetupDependencies
   ): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
     const startServices = core.getStartServices();
 
-    if (share) {
-      share.urlGenerators.registerUrlGenerator(
-        createDirectAccessDashboardLinkGenerator(async () => ({
-          appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
-          useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
-        }))
-      );
-    }
+    share.urlGenerators.registerUrlGenerator(
+      createDirectAccessDashboardLinkGenerator(async () => ({
+        appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
+        useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
+      }))
+    );
 
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
@@ -237,6 +237,7 @@ export class DashboardEmbeddableContainerPublicPlugin
             mapsCapabilities: coreStart.application.capabilities.maps,
           },
           localStorage: new Storage(localStorage),
+          usageCollection,
         };
         const { renderApp } = await import('./application');
         const unmount = renderApp(params.element, params.appBasePath, deps);

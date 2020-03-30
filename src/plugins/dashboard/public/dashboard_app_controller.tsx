@@ -128,6 +128,7 @@ export class DashboardAppController {
     },
     history,
     kbnUrlStateStorage,
+    usageCollection,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
@@ -152,6 +153,7 @@ export class DashboardAppController {
       kibanaVersion: pluginInitializerContext.env.packageInfo.version,
       kbnUrlStateStorage,
       history,
+      usageCollection,
     });
 
     // sync initial app filters from state to filterManager

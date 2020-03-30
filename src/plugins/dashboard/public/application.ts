@@ -28,6 +28,7 @@ import {
   SavedObjectsClientContract,
   PluginInitializerContext,
 } from 'kibana/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Storage } from '../../../plugins/kibana_utils/public';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
@@ -64,6 +65,7 @@ export interface RenderDeps {
   localStorage: Storage;
   share: SharePluginStart;
   config: KibanaLegacyStart['config'];
+  usageCollection: UsageCollectionSetup;
 }
 
 let angularModuleInstance: IModule | null = null;

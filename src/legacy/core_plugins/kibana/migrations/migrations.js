@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { migrations730 as dashboardMigrations730 } from '../../../../plugins/dashboard/public';
+import { migrations730 as dashboardMigrations730 } from '../public/dashboard/migrations';
 
 function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');

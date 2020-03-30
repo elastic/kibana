@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter, Query } from '../../../../../../plugins/data/public';
+import { Filter, Query } from 'src/plugins/data/public';
 
 export interface Pre600FilterQuery {
   // pre 6.0.0 global query:queryString:options were stored per dashboard and would

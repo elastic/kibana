@@ -25,7 +25,7 @@
  */
 
 export { wrapInI18nContext } from 'ui/i18n';
-export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
+export { DashboardConstants } from '../../../../../plugins/dashboard/public';
 export {
   VisSavedObject,
   VISUALIZE_EMBEDDABLE_TYPE,

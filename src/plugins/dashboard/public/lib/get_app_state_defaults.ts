@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ViewMode } from 'src/plugins/embeddable/public';
+import { ViewMode } from '../embeddable_plugin';
 import { SavedObjectDashboard } from '../saved_dashboards';
 import { DashboardAppStateDefaults } from '../types';
 

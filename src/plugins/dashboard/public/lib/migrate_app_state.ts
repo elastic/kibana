@@ -19,10 +19,9 @@
 
 import semver from 'semver';
 import { i18n } from '@kbn/i18n';
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../src/legacy/core_plugins/ui_metric/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import {
   DashboardAppState,
   SavedDashboardPanelTo60,
@@ -33,7 +32,7 @@ import {
   SavedDashboardPanel620,
   SavedDashboardPanel,
 } from '../types';
-import { migratePanelsTo730 } from '../migrations/migrate_to_730_panels';
+import { migratePanelsTo730 } from '../../../../legacy/core_plugins/kibana/public/dashboard/migrations/migrate_to_730_panels';
 
 /**
  * Attempts to migrate the state stored in the URL into the latest version of it.
@@ -42,7 +41,8 @@ import { migratePanelsTo730 } from '../migrations/migrate_to_730_panels';
  */
 export function migrateAppState(
   appState: { [key: string]: unknown } & DashboardAppState,
-  kibanaVersion: string
+  kibanaVersion: string,
+  usageCollection: UsageCollectionSetup
 ): DashboardAppState {
   if (!appState.panels) {
     throw new Error(
@@ -65,7 +65,7 @@ export function migrateAppState(
     const version = (panel as SavedDashboardPanel730ToLatest).version;
 
     // This will help us figure out when to remove support for older style URLs.
-    createUiStatsReporter('DashboardPanelVersionInUrl')(METRIC_TYPE.LOADED, `${version}`);
+    usageCollection.reportUiStats('DashboardPanelVersionInUrl', METRIC_TYPE.LOADED, `${version}`);
 
     return semver.satisfies(version, '<7.3');
   });

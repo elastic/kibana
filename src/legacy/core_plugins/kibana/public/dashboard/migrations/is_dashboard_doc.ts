@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { DashboardDoc730ToLatest } from '../bwc';
-import { isDoc } from '../../../../legacy/core_plugins/kibana/migrations/is_doc';
+import { DashboardDoc730ToLatest } from '../../../../../../plugins/dashboard/public';
+import { isDoc } from '../../../migrations/is_doc';
 
 export function isDashboardDoc(
   doc: { [key: string]: unknown } | DashboardDoc730ToLatest
