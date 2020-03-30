@@ -36,9 +36,6 @@
   },
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
-    "test2": "yarn runWithNodeOptions --c 'yarn run merda1'",
-    "merda1": "node -e 'console.log(require(\"v8\").getHeapStatistics())'",
-    "merda2": "node -e 'console.log(process.env.NODE_OPTIONS)'",
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
     "es": "node scripts/es",
