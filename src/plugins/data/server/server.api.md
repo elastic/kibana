@@ -7,7 +7,6 @@
 import { APICaller as APICaller_2 } from 'kibana/server';
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
-import { CallCluster as CallCluster_2 } from 'src/legacy/core_plugins/elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
 import { CatCommonParams } from 'elasticsearch';
@@ -126,6 +125,7 @@ import { SearchResponse } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
 import { SearchTemplateParams } from 'elasticsearch';
 import { ShallowPromise } from '@kbn/utility-types';
+import { ShardsResponse } from 'elasticsearch';
 import { SnapshotCreateParams } from 'elasticsearch';
 import { SnapshotCreateRepositoryParams } from 'elasticsearch';
 import { SnapshotDeleteParams } from 'elasticsearch';
@@ -175,6 +175,8 @@ export enum ES_FIELD_TYPES {
     GEO_SHAPE = "geo_shape",
     // (undocumented)
     HALF_FLOAT = "half_float",
+    // (undocumented)
+    HISTOGRAM = "histogram",
     // (undocumented)
     _ID = "_id",
     // (undocumented)
@@ -329,11 +331,11 @@ export function getDefaultSearchParams(config: SharedGlobalConfig): {
     restTotalHitsAsInt: boolean;
 };
 
-// Warning: (ae-forgotten-export) The symbol "TStrategyTypes" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "ICancel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type ICancel<T extends TStrategyTypes> = (id: string) => Promise<void>;
+// @internal
+export function getTotalLoaded({ total, failed, successful }: ShardsResponse): {
+    total: number;
+    loaded: number;
+};
 
 // Warning: (ae-missing-release-tag) "IFieldFormatsRegistry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -507,10 +509,16 @@ export interface IResponseTypesMap {
     [ES_SEARCH_STRATEGY]: IEsSearchResponse;
 }
 
+// Warning: (ae-forgotten-export) The symbol "TStrategyTypes" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ISearch" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export type ISearch<T extends TStrategyTypes> = (request: IRequestTypesMap[T], options?: ISearchOptions) => Promise<IResponseTypesMap[T]>;
+
+// Warning: (ae-missing-release-tag) "ISearchCancel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type ISearchCancel<T extends TStrategyTypes> = (id: string) => Promise<void>;
 
 // Warning: (ae-missing-release-tag) "ISearchContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -546,6 +554,8 @@ export enum KBN_FIELD_TYPES {
     GEO_POINT = "geo_point",
     // (undocumented)
     GEO_SHAPE = "geo_shape",
+    // (undocumented)
+    HISTOGRAM = "histogram",
     // (undocumented)
     IP = "ip",
     // (undocumented)
@@ -727,12 +737,12 @@ export type TSearchStrategyProvider<T extends TStrategyTypes> = (context: ISearc
 // src/plugins/data/server/index.ts:102:26 - (ae-forgotten-export) The symbol "TruncateFormat" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:130:27 - (ae-forgotten-export) The symbol "isFilterable" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:130:27 - (ae-forgotten-export) The symbol "isNestedField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:181:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:182:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:183:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:184:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:185:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:188:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:182:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:183:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:184:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:185:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:186:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:189:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:64:14 - (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

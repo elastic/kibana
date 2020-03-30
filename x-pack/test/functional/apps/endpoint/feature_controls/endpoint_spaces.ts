@@ -31,7 +31,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('EEndpoint');
+        expect(navLinks).to.contain('Endpoint');
       });
 
       it(`endpoint app shows 'Hello World'`, async () => {
@@ -41,18 +41,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('welcomeTitle');
       });
 
-      it(`endpoint management shows 'Manage Endpoints'`, async () => {
-        await pageObjects.common.navigateToUrlWithBrowserHistory(
-          'endpoint',
-          '/management',
-          undefined,
-          {
-            basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('managementViewTitle');
+      it(`endpoint management shows 'Hosts'`, async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts', undefined, {
+          basePath: '/s/custom_space',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('hostListTitle');
       });
     });
 
@@ -74,7 +69,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).not.to.contain('EEndpoint');
+        expect(navLinks).not.to.contain('Endpoint');
       });
     });
   });

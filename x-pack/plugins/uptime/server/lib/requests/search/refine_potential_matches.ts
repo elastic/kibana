@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import { QueryContext } from './query_context';
 import { CursorDirection } from '../../../../../../legacy/plugins/uptime/common/graphql/types';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
@@ -96,7 +95,7 @@ export const mostRecentCheckGroups = async (
   potentialMatchMonitorIDs: string[]
 ): Promise<any> => {
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: queryContext.heartbeatIndices,
     body: {
       size: 0,
       query: {

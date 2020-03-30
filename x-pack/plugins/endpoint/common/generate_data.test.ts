@@ -21,8 +21,8 @@ describe('data generator', () => {
     const generator1 = new EndpointDocGenerator('seed');
     const generator2 = new EndpointDocGenerator('seed');
     const timestamp = new Date().getTime();
-    const metadata1 = generator1.generateEndpointMetadata(timestamp);
-    const metadata2 = generator2.generateEndpointMetadata(timestamp);
+    const metadata1 = generator1.generateHostMetadata(timestamp);
+    const metadata2 = generator2.generateHostMetadata(timestamp);
     expect(metadata1).toEqual(metadata2);
   });
 
@@ -30,14 +30,14 @@ describe('data generator', () => {
     const generator1 = new EndpointDocGenerator('seed');
     const generator2 = new EndpointDocGenerator('different seed');
     const timestamp = new Date().getTime();
-    const metadata1 = generator1.generateEndpointMetadata(timestamp);
-    const metadata2 = generator2.generateEndpointMetadata(timestamp);
+    const metadata1 = generator1.generateHostMetadata(timestamp);
+    const metadata2 = generator2.generateHostMetadata(timestamp);
     expect(metadata1).not.toEqual(metadata2);
   });
 
-  it('creates endpoint metadata documents', () => {
+  it('creates host metadata documents', () => {
     const timestamp = new Date().getTime();
-    const metadata = generator.generateEndpointMetadata(timestamp);
+    const metadata = generator.generateHostMetadata(timestamp);
     expect(metadata['@timestamp']).toEqual(timestamp);
     expect(metadata.event.created).toEqual(timestamp);
     expect(metadata.endpoint).not.toBeNull();

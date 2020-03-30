@@ -27,15 +27,20 @@ import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 import { tableVisTypeDefinition } from './table_vis_type';
-import { Vis } from '../../visualizations/public';
+import { Vis } from '../../../../plugins/visualizations/public';
 // eslint-disable-next-line
 import { stubFields } from '../../../../plugins/data/public/stubs';
 // eslint-disable-next-line
 import { tableVisResponseHandler } from './table_vis_response_handler';
 import { coreMock } from '../../../../core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createAggConfigs } from 'ui/agg_types';
-import { tabifyAggResponse, IAggConfig } from './legacy_imports';
+import { npStart } from './legacy_imports';
+import { IAggConfig, search } from '../../../../plugins/data/public';
+
+// should be mocked once get rid of 'ui/new_platform' legacy imports
+const { createAggConfigs } = npStart.plugins.data.search.aggs;
+
+const { tabifyAggResponse } = search;
 
 jest.mock('ui/new_platform');
 jest.mock('../../../../plugins/kibana_legacy/public/angular/angular_config', () => ({
@@ -113,20 +118,22 @@ describe('Table Vis - Controller', () => {
     return ({
       type: tableVisTypeDefinition,
       params: Object.assign({}, tableVisTypeDefinition.visConfig.defaults, params),
-      aggs: createAggConfigs(stubIndexPattern, [
-        { type: 'count', schema: 'metric' },
-        {
-          type: 'range',
-          schema: 'bucket',
-          params: {
-            field: 'bytes',
-            ranges: [
-              { from: 0, to: 1000 },
-              { from: 1000, to: 2000 },
-            ],
+      data: {
+        aggs: createAggConfigs(stubIndexPattern, [
+          { type: 'count', schema: 'metric' },
+          {
+            type: 'range',
+            schema: 'bucket',
+            params: {
+              field: 'bytes',
+              ranges: [
+                { from: 0, to: 1000 },
+                { from: 1000, to: 2000 },
+              ],
+            },
           },
-        },
-      ]),
+        ]),
+      },
     } as unknown) as Vis;
   }
 
@@ -146,11 +153,11 @@ describe('Table Vis - Controller', () => {
 
   // basically a parameterized beforeEach
   function initController(vis: Vis) {
-    vis.aggs.aggs.forEach((agg: IAggConfig, i: number) => {
+    vis.data.aggs!.aggs.forEach((agg: IAggConfig, i: number) => {
       agg.id = 'agg_' + (i + 1);
     });
 
-    tabifiedResponse = tabifyAggResponse(vis.aggs, oneRangeBucket);
+    tabifiedResponse = tabifyAggResponse(vis.data.aggs!, oneRangeBucket);
     $rootScope.vis = vis;
     $rootScope.visParams = vis.params;
     $rootScope.uiState = {

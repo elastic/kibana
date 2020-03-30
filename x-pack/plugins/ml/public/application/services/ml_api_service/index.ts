@@ -22,6 +22,7 @@ import {
   Datafeed,
   CombinedJob,
   Detector,
+  AnalysisConfig,
 } from '../../../../common/types/anomaly_detection_jobs';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { FieldRequestConfig } from '../../datavisualizer/index_based/common';
@@ -366,6 +367,7 @@ export const ml = {
     start,
     end,
     jobOverrides,
+    estimateModelMemory,
   }: {
     moduleId: string;
     prefix?: string;
@@ -377,6 +379,7 @@ export const ml = {
     start?: number;
     end?: number;
     jobOverrides?: Array<Partial<Job>>;
+    estimateModelMemory?: boolean;
   }) {
     const body = JSON.stringify({
       prefix,
@@ -388,6 +391,7 @@ export const ml = {
       start,
       end,
       jobOverrides,
+      estimateModelMemory,
     });
 
     return http<DataRecognizerConfigResponse>({
@@ -531,37 +535,31 @@ export const ml = {
     });
   },
 
-  calculateModelMemoryLimit({
+  calculateModelMemoryLimit$({
+    analysisConfig,
     indexPattern,
-    splitFieldName,
     query,
-    fieldNames,
-    influencerNames,
     timeFieldName,
     earliestMs,
     latestMs,
   }: {
+    analysisConfig: AnalysisConfig;
     indexPattern: string;
-    splitFieldName: string;
     query: any;
-    fieldNames: string[];
-    influencerNames: string[];
     timeFieldName: string;
     earliestMs: number;
     latestMs: number;
   }) {
     const body = JSON.stringify({
+      analysisConfig,
       indexPattern,
-      splitFieldName,
       query,
-      fieldNames,
-      influencerNames,
       timeFieldName,
       earliestMs,
       latestMs,
     });
 
-    return http<{ modelMemoryLimit: string }>({
+    return http$<{ modelMemoryLimit: string }>({
       path: `${basePath()}/validate/calculate_model_memory_limit`,
       method: 'POST',
       body,

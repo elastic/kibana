@@ -13,9 +13,12 @@ export interface PropertyActionButtonProps {
   label: string;
 }
 
+const ComponentId = 'property-actions';
+
 const PropertyActionButton = React.memo<PropertyActionButtonProps>(
   ({ onClick, iconType, label }) => (
     <EuiButtonEmpty
+      data-test-subj={`${ComponentId}-${iconType}`}
       aria-label={label}
       color="text"
       iconSide="left"
@@ -42,19 +45,19 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
 
   const onClosePopover = useCallback((cb?: () => void) => {
     setShowActions(false);
-    if (cb) {
+    if (cb != null) {
       cb();
     }
   }, []);
 
   return (
-    <EuiFlexGroup alignItems="flexStart" data-test-subj="properties-right" gutterSize="none">
+    <EuiFlexGroup alignItems="flexStart" data-test-subj={ComponentId} gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiPopover
           anchorPosition="downRight"
           button={
             <EuiButtonIcon
-              data-test-subj="ellipses"
+              data-test-subj={`${ComponentId}-ellipses`}
               aria-label="Actions"
               iconType="boxesHorizontal"
               onClick={onButtonClick}
@@ -64,7 +67,12 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
           isOpen={showActions}
           closePopover={onClosePopover}
         >
-          <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
+          <EuiFlexGroup
+            alignItems="flexStart"
+            data-test-subj={`${ComponentId}-group`}
+            direction="column"
+            gutterSize="none"
+          >
             {propertyActions.map((action, key) => (
               <EuiFlexItem grow={false} key={`${action.label}${key}`}>
                 <PropertyActionButton

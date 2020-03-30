@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import stringify from 'json-stable-stringify';
 import { sortBy } from 'lodash';
 
 import { RequestHandlerContext } from 'src/core/server';
-import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesSummaryBucket,
@@ -18,13 +16,10 @@ import {
   LogEntriesCursor,
   LogColumn,
 } from '../../../../common/http_api';
-import { InfraLogEntry, InfraLogMessageSegment } from '../../../graphql/types';
 import {
   InfraSourceConfiguration,
   InfraSources,
   SavedSourceConfigurationFieldColumnRuntimeType,
-  SavedSourceConfigurationMessageColumnRuntimeType,
-  SavedSourceConfigurationTimestampColumnRuntimeType,
 } from '../../sources';
 import { getBuiltinRules } from './builtin_rules';
 import { convertDocumentSourceToLogItemFields } from './convert_document_source_to_log_item_fields';
@@ -36,16 +31,16 @@ import {
 } from './message';
 
 export interface LogEntriesParams {
-  startDate: number;
-  endDate: number;
+  startTimestamp: number;
+  endTimestamp: number;
   size?: number;
   query?: JsonObject;
   cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
   highlightTerm?: string;
 }
 export interface LogEntriesAroundParams {
-  startDate: number;
-  endDate: number;
+  startTimestamp: number;
+  endTimestamp: number;
   size?: number;
   center: LogEntriesCursor;
   query?: JsonObject;
@@ -54,20 +49,20 @@ export interface LogEntriesAroundParams {
 
 export const LOG_ENTRIES_PAGE_SIZE = 200;
 
+const FIELDS_FROM_CONTEXT = ['log.file.path', 'host.name', 'container.id'] as const;
+
 export class InfraLogEntriesDomain {
   constructor(
     private readonly adapter: LogEntriesAdapter,
     private readonly libs: { sources: InfraSources }
   ) {}
 
-  /* Name is temporary until we can clean up the GraphQL implementation */
-  /* eslint-disable-next-line @typescript-eslint/camelcase */
-  public async getLogEntriesAround__new(
+  public async getLogEntriesAround(
     requestContext: RequestHandlerContext,
     sourceId: string,
     params: LogEntriesAroundParams
   ) {
-    const { startDate, endDate, center, query, size, highlightTerm } = params;
+    const { startTimestamp, endTimestamp, center, query, size, highlightTerm } = params;
 
     /*
      * For odd sizes we will round this value down for the first half, and up
@@ -80,8 +75,8 @@ export class InfraLogEntriesDomain {
     const halfSize = (size || LOG_ENTRIES_PAGE_SIZE) / 2;
 
     const entriesBefore = await this.getLogEntries(requestContext, sourceId, {
-      startDate,
-      endDate,
+      startTimestamp,
+      endTimestamp,
       query,
       cursor: { before: center },
       size: Math.floor(halfSize),
@@ -101,8 +96,8 @@ export class InfraLogEntriesDomain {
         : { time: center.time - 1, tiebreaker: 0 };
 
     const entriesAfter = await this.getLogEntries(requestContext, sourceId, {
-      startDate,
-      endDate,
+      startTimestamp,
+      endTimestamp,
       query,
       cursor: { after: cursorAfter },
       size: Math.ceil(halfSize),
@@ -110,71 +105,6 @@ export class InfraLogEntriesDomain {
     });
 
     return [...entriesBefore, ...entriesAfter];
-  }
-
-  /** @deprecated */
-  public async getLogEntriesAround(
-    requestContext: RequestHandlerContext,
-    sourceId: string,
-    key: TimeKey,
-    maxCountBefore: number,
-    maxCountAfter: number,
-    filterQuery?: LogEntryQuery,
-    highlightQuery?: LogEntryQuery
-  ): Promise<{ entriesBefore: InfraLogEntry[]; entriesAfter: InfraLogEntry[] }> {
-    if (maxCountBefore <= 0 && maxCountAfter <= 0) {
-      return {
-        entriesBefore: [],
-        entriesAfter: [],
-      };
-    }
-
-    const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
-      sourceId
-    );
-    const messageFormattingRules = compileFormattingRules(
-      getBuiltinRules(configuration.fields.message)
-    );
-    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
-
-    const documentsBefore = await this.adapter.getAdjacentLogEntryDocuments(
-      requestContext,
-      configuration,
-      requiredFields,
-      key,
-      'desc',
-      Math.max(maxCountBefore, 1),
-      filterQuery,
-      highlightQuery
-    );
-    const lastKeyBefore =
-      documentsBefore.length > 0
-        ? documentsBefore[documentsBefore.length - 1].key
-        : {
-            time: key.time - 1,
-            tiebreaker: 0,
-          };
-
-    const documentsAfter = await this.adapter.getAdjacentLogEntryDocuments(
-      requestContext,
-      configuration,
-      requiredFields,
-      lastKeyBefore,
-      'asc',
-      maxCountAfter,
-      filterQuery,
-      highlightQuery
-    );
-
-    return {
-      entriesBefore: (maxCountBefore > 0 ? documentsBefore : []).map(
-        convertLogDocumentToEntry(sourceId, configuration.logColumns, messageFormattingRules.format)
-      ),
-      entriesAfter: documentsAfter.map(
-        convertLogDocumentToEntry(sourceId, configuration.logColumns, messageFormattingRules.format)
-      ),
-    };
   }
 
   public async getLogEntries(
@@ -202,14 +132,14 @@ export class InfraLogEntriesDomain {
 
     const entries = documents.map(doc => {
       return {
-        id: doc.gid,
-        cursor: doc.key,
+        id: doc.id,
+        cursor: doc.cursor,
         columns: configuration.logColumns.map(
           (column): LogColumn => {
             if ('timestampColumn' in column) {
               return {
                 columnId: column.timestampColumn.id,
-                timestamp: doc.key.time,
+                timestamp: doc.cursor.time,
               };
             } else if ('messageColumn' in column) {
               return {
@@ -220,126 +150,24 @@ export class InfraLogEntriesDomain {
               return {
                 columnId: column.fieldColumn.id,
                 field: column.fieldColumn.field,
-                value: stringify(doc.fields[column.fieldColumn.field]),
+                value: doc.fields[column.fieldColumn.field],
                 highlights: doc.highlights[column.fieldColumn.field] || [],
               };
             }
           }
         ),
+        context: FIELDS_FROM_CONTEXT.reduce<LogEntry['context']>((ctx, field) => {
+          // Users might have different types here in their mappings.
+          const value = doc.fields[field];
+          if (typeof value === 'string') {
+            ctx[field] = value;
+          }
+          return ctx;
+        }, {}),
       };
     });
 
     return entries;
-  }
-
-  /** @deprecated */
-  public async getLogEntriesBetween(
-    requestContext: RequestHandlerContext,
-    sourceId: string,
-    startKey: TimeKey,
-    endKey: TimeKey,
-    filterQuery?: LogEntryQuery,
-    highlightQuery?: LogEntryQuery
-  ): Promise<InfraLogEntry[]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
-      sourceId
-    );
-    const messageFormattingRules = compileFormattingRules(
-      getBuiltinRules(configuration.fields.message)
-    );
-    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
-    const documents = await this.adapter.getContainedLogEntryDocuments(
-      requestContext,
-      configuration,
-      requiredFields,
-      startKey,
-      endKey,
-      filterQuery,
-      highlightQuery
-    );
-    const entries = documents.map(
-      convertLogDocumentToEntry(sourceId, configuration.logColumns, messageFormattingRules.format)
-    );
-    return entries;
-  }
-
-  /** @deprecated */
-  public async getLogEntryHighlights(
-    requestContext: RequestHandlerContext,
-    sourceId: string,
-    startKey: TimeKey,
-    endKey: TimeKey,
-    highlights: Array<{
-      query: string;
-      countBefore: number;
-      countAfter: number;
-    }>,
-    filterQuery?: LogEntryQuery
-  ): Promise<InfraLogEntry[][]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
-      sourceId
-    );
-    const messageFormattingRules = compileFormattingRules(
-      getBuiltinRules(configuration.fields.message)
-    );
-    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
-
-    const documentSets = await Promise.all(
-      highlights.map(async highlight => {
-        const highlightQuery = createHighlightQueryDsl(highlight.query, requiredFields);
-        const query = filterQuery
-          ? {
-              bool: {
-                filter: [filterQuery, highlightQuery],
-              },
-            }
-          : highlightQuery;
-        const [documentsBefore, documents, documentsAfter] = await Promise.all([
-          this.adapter.getAdjacentLogEntryDocuments(
-            requestContext,
-            configuration,
-            requiredFields,
-            startKey,
-            'desc',
-            highlight.countBefore,
-            query,
-            highlightQuery
-          ),
-          this.adapter.getContainedLogEntryDocuments(
-            requestContext,
-            configuration,
-            requiredFields,
-            startKey,
-            endKey,
-            query,
-            highlightQuery
-          ),
-          this.adapter.getAdjacentLogEntryDocuments(
-            requestContext,
-            configuration,
-            requiredFields,
-            endKey,
-            'asc',
-            highlight.countAfter,
-            query,
-            highlightQuery
-          ),
-        ]);
-        const entries = [...documentsBefore, ...documents, ...documentsAfter].map(
-          convertLogDocumentToEntry(
-            sourceId,
-            configuration.logColumns,
-            messageFormattingRules.format
-          )
-        );
-
-        return entries;
-      })
-    );
-
-    return documentSets;
   }
 
   public async getLogSummaryBucketsBetween(
@@ -368,8 +196,8 @@ export class InfraLogEntriesDomain {
   public async getLogSummaryHighlightBucketsBetween(
     requestContext: RequestHandlerContext,
     sourceId: string,
-    start: number,
-    end: number,
+    startTimestamp: number,
+    endTimestamp: number,
     bucketSize: number,
     highlightQueries: string[],
     filterQuery?: LogEntryQuery
@@ -396,8 +224,8 @@ export class InfraLogEntriesDomain {
         const summaryBuckets = await this.adapter.getContainedLogSummaryBuckets(
           requestContext,
           configuration,
-          start,
-          end,
+          startTimestamp,
+          endTimestamp,
           bucketSize,
           query
         );
@@ -445,17 +273,6 @@ interface LogItemHit {
 }
 
 export interface LogEntriesAdapter {
-  getAdjacentLogEntryDocuments(
-    requestContext: RequestHandlerContext,
-    sourceConfiguration: InfraSourceConfiguration,
-    fields: string[],
-    start: TimeKey,
-    direction: 'asc' | 'desc',
-    maxCount: number,
-    filterQuery?: LogEntryQuery,
-    highlightQuery?: LogEntryQuery
-  ): Promise<LogEntryDocument[]>;
-
   getLogEntries(
     requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
@@ -463,21 +280,11 @@ export interface LogEntriesAdapter {
     params: LogEntriesParams
   ): Promise<LogEntryDocument[]>;
 
-  getContainedLogEntryDocuments(
-    requestContext: RequestHandlerContext,
-    sourceConfiguration: InfraSourceConfiguration,
-    fields: string[],
-    start: TimeKey,
-    end: TimeKey,
-    filterQuery?: LogEntryQuery,
-    highlightQuery?: LogEntryQuery
-  ): Promise<LogEntryDocument[]>;
-
   getContainedLogSummaryBuckets(
     requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
-    start: number,
-    end: number,
+    startTimestamp: number,
+    endTimestamp: number,
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<LogSummaryBucket[]>;
@@ -492,49 +299,18 @@ export interface LogEntriesAdapter {
 export type LogEntryQuery = JsonObject;
 
 export interface LogEntryDocument {
+  id: string;
   fields: Fields;
-  gid: string;
   highlights: Highlights;
-  key: TimeKey;
+  cursor: LogEntriesCursor;
 }
 
 export interface LogSummaryBucket {
   entriesCount: number;
   start: number;
   end: number;
-  topEntryKeys: TimeKey[];
+  topEntryKeys: LogEntriesCursor[];
 }
-
-/** @deprecated */
-const convertLogDocumentToEntry = (
-  sourceId: string,
-  logColumns: InfraSourceConfiguration['logColumns'],
-  formatLogMessage: (fields: Fields, highlights: Highlights) => InfraLogMessageSegment[]
-) => (document: LogEntryDocument): InfraLogEntry => ({
-  key: document.key,
-  gid: document.gid,
-  source: sourceId,
-  columns: logColumns.map(logColumn => {
-    if (SavedSourceConfigurationTimestampColumnRuntimeType.is(logColumn)) {
-      return {
-        columnId: logColumn.timestampColumn.id,
-        timestamp: document.key.time,
-      };
-    } else if (SavedSourceConfigurationMessageColumnRuntimeType.is(logColumn)) {
-      return {
-        columnId: logColumn.messageColumn.id,
-        message: formatLogMessage(document.fields, document.highlights),
-      };
-    } else {
-      return {
-        columnId: logColumn.fieldColumn.id,
-        field: logColumn.fieldColumn.field,
-        highlights: document.highlights[logColumn.fieldColumn.field] || [],
-        value: stringify(document.fields[logColumn.fieldColumn.field] || null),
-      };
-    }
-  }),
-});
 
 const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>
   bucket.entriesCount > 0 && bucket.topEntryKeys.length > 0;
@@ -563,7 +339,9 @@ const getRequiredFields = (
   );
   const fieldsFromFormattingRules = messageFormattingRules.requiredFields;
 
-  return Array.from(new Set([...fieldsFromCustomColumns, ...fieldsFromFormattingRules]));
+  return Array.from(
+    new Set([...fieldsFromCustomColumns, ...fieldsFromFormattingRules, ...FIELDS_FROM_CONTEXT])
+  );
 };
 
 const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({

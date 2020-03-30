@@ -12,5 +12,6 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./time_series_query_endpoint'));
     loadTestFile(require.resolve('./fields_endpoint'));
     loadTestFile(require.resolve('./indices_endpoint'));
+    loadTestFile(require.resolve('./alert'));
   });
 }

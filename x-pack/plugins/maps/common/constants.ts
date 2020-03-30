@@ -43,12 +43,13 @@ export function createMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
-export const LAYER_TYPE = {
-  TILE: 'TILE',
-  VECTOR: 'VECTOR',
-  VECTOR_TILE: 'VECTOR_TILE',
-  HEATMAP: 'HEATMAP',
-};
+export enum LAYER_TYPE {
+  TILE = 'TILE',
+  VECTOR = 'VECTOR',
+  VECTOR_TILE = 'VECTOR_TILE',
+  HEATMAP = 'HEATMAP',
+  BLENDED_VECTOR = 'BLENDED_VECTOR',
+}
 
 export enum SORT_ORDER {
   ASC = 'asc',
@@ -155,15 +156,15 @@ export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabe
 
 export const COUNT_PROP_NAME = 'doc_count';
 
-export const STYLE_TYPE = {
-  STATIC: 'STATIC',
-  DYNAMIC: 'DYNAMIC',
-};
+export enum STYLE_TYPE {
+  STATIC = 'STATIC',
+  DYNAMIC = 'DYNAMIC',
+}
 
-export const LAYER_STYLE_TYPE = {
-  VECTOR: 'VECTOR',
-  HEATMAP: 'HEATMAP',
-};
+export enum LAYER_STYLE_TYPE {
+  VECTOR = 'VECTOR',
+  HEATMAP = 'HEATMAP',
+}
 
 export const COLOR_MAP_TYPE = {
   CATEGORICAL: 'CATEGORICAL',
@@ -187,4 +188,25 @@ export enum LABEL_BORDER_SIZES {
   LARGE = 'LARGE',
 }
 
-export const DEFAULT_ICON = 'airfield';
+export const DEFAULT_ICON = 'marker';
+
+export enum VECTOR_STYLES {
+  SYMBOLIZE_AS = 'symbolizeAs',
+  FILL_COLOR = 'fillColor',
+  LINE_COLOR = 'lineColor',
+  LINE_WIDTH = 'lineWidth',
+  ICON = 'icon',
+  ICON_SIZE = 'iconSize',
+  ICON_ORIENTATION = 'iconOrientation',
+  LABEL_TEXT = 'labelText',
+  LABEL_COLOR = 'labelColor',
+  LABEL_SIZE = 'labelSize',
+  LABEL_BORDER_COLOR = 'labelBorderColor',
+  LABEL_BORDER_SIZE = 'labelBorderSize',
+}
+
+export enum SCALING_TYPES {
+  LIMIT = 'LIMIT',
+  CLUSTERS = 'CLUSTERS',
+  TOP_HITS = 'TOP_HITS',
+}

@@ -337,7 +337,7 @@ export interface ChromeStart {
     getBrand$(): Observable<ChromeBrand>;
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
-    getIsCollapsed$(): Observable<boolean>;
+    getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
@@ -349,7 +349,6 @@ export interface ChromeStart {
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
     setHelpExtension(helpExtension?: ChromeHelpExtension): void;
     setHelpSupportUrl(url: string): void;
-    setIsCollapsed(isCollapsed: boolean): void;
     setIsVisible(isVisible: boolean): void;
 }
 
@@ -372,14 +371,15 @@ export interface CoreContext {
 }
 
 // @public
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     application: ApplicationSetup;
     // @deprecated (undocumented)
     context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
-    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+    // (undocumented)
+    getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpSetup;
     // @deprecated
@@ -562,7 +562,7 @@ export interface EnvironmentMode {
 }
 
 // @public
-export interface ErrorToastOptions {
+export interface ErrorToastOptions extends ToastOptions {
     title: string;
     toastMessage?: string;
 }
@@ -779,7 +779,7 @@ export interface ImageValidation {
 }
 
 // @public
-export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'>;
+export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 
 // @public
 export interface IUiSettingsClient {
@@ -807,7 +807,7 @@ export interface IUiSettingsClient {
 }
 
 // @public @deprecated
-export interface LegacyCoreSetup extends CoreSetup<any> {
+export interface LegacyCoreSetup extends CoreSetup<any, any> {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
     //
     // @deprecated (undocumented)
@@ -907,7 +907,7 @@ export interface PackageInfo {
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
-    setup(core: CoreSetup<TPluginsStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
     start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
     // (undocumented)
@@ -1237,6 +1237,9 @@ export class SimpleSavedObject<T = unknown> {
 }
 
 // @public
+export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+// @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
 
 // @public
@@ -1272,15 +1275,21 @@ export type ToastInputFields = Pick<EuiGlobalToastListToast, Exclude<keyof EuiGl
 };
 
 // @public
+export interface ToastOptions {
+    toastLifeTimeMs?: number;
+}
+
+// @public
 export class ToastsApi implements IToasts {
     constructor(deps: {
         uiSettings: IUiSettingsClient;
     });
     add(toastOrTitle: ToastInput): Toast;
-    addDanger(toastOrTitle: ToastInput): Toast;
+    addDanger(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
     addError(error: Error, options: ErrorToastOptions): Toast;
-    addSuccess(toastOrTitle: ToastInput): Toast;
-    addWarning(toastOrTitle: ToastInput): Toast;
+    addInfo(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
+    addSuccess(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
+    addWarning(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
     get$(): Rx.Observable<Toast[]>;
     remove(toastOrId: Toast | string): void;
     // @internal (undocumented)

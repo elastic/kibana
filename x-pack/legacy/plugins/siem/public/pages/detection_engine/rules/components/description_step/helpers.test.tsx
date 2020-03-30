@@ -22,6 +22,7 @@ import {
   buildSeverityDescription,
   buildUrlsDescription,
   buildNoteDescription,
+  buildRuleTypeDescription,
 } from './helpers';
 import { ListItems } from './types';
 
@@ -38,10 +39,7 @@ setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
 const mockFilterManager = new FilterManager(setupMock.uiSettings);
 
 const mockQueryBar = {
-  query: {
-    query: 'test query',
-    language: 'kuery',
-  },
+  query: 'test query',
   filters: [
     {
       $state: {
@@ -93,10 +91,7 @@ describe('helpers', () => {
   describe('buildQueryBarDescription', () => {
     test('returns empty array if no filters, query or savedId exist', () => {
       const emptyMockQueryBar = {
-        query: {
-          query: '',
-          language: 'kuery',
-        },
+        query: '',
         filters: [],
         saved_id: '',
       };
@@ -113,10 +108,7 @@ describe('helpers', () => {
     test('returns expected array of ListItems when filters exists, but no indexPatterns passed in', () => {
       const mockQueryBarWithFilters = {
         ...mockQueryBar,
-        query: {
-          query: '',
-          language: 'kuery',
-        },
+        query: '',
         saved_id: '',
       };
       const result: ListItems[] = buildQueryBarDescription({
@@ -135,10 +127,7 @@ describe('helpers', () => {
     test('returns expected array of ListItems when filters AND indexPatterns exist', () => {
       const mockQueryBarWithFilters = {
         ...mockQueryBar,
-        query: {
-          query: '',
-          language: 'kuery',
-        },
+        query: '',
         saved_id: '',
       };
       const result: ListItems[] = buildQueryBarDescription({
@@ -171,16 +160,13 @@ describe('helpers', () => {
         savedId: mockQueryBarWithQuery.saved_id,
       });
       expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL} </>);
-      expect(result[0].description).toEqual(<>{mockQueryBarWithQuery.query.query} </>);
+      expect(result[0].description).toEqual(<>{mockQueryBarWithQuery.query} </>);
     });
 
     test('returns expected array of ListItems when "savedId" exists', () => {
       const mockQueryBarWithSavedId = {
         ...mockQueryBar,
-        query: {
-          query: '',
-          language: 'kuery',
-        },
+        query: '',
         filters: [],
       };
       const result: ListItems[] = buildQueryBarDescription({
@@ -398,6 +384,32 @@ describe('helpers', () => {
       const result: ListItems[] = buildNoteDescription('Test label', '');
 
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('buildRuleTypeDescription', () => {
+    it('returns the label for a machine_learning type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'machine_learning');
+
+      expect(result.title).toEqual('Test label');
+    });
+
+    it('returns a humanized description for a machine_learning type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'machine_learning');
+
+      expect(result.description).toEqual('Machine Learning');
+    });
+
+    it('returns the label for a query type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'query');
+
+      expect(result.title).toEqual('Test label');
+    });
+
+    it('returns a humanized description for a query type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'query');
+
+      expect(result.description).toEqual('Query');
     });
   });
 });

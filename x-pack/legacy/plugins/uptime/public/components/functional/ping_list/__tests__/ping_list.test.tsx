@@ -8,7 +8,6 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PingResults, Ping } from '../../../../../common/graphql/types';
 import { PingListComponent, AllLocationOption, toggleDetails } from '../ping_list';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { ExpandedRowMap } from '../../monitor_list/types';
 
 describe('PingList component', () => {
@@ -205,9 +204,11 @@ describe('PingList component', () => {
         loading={false}
         data={{ allPings }}
         onPageCountChange={jest.fn()}
-        onSelectedLocationChange={(loc: EuiComboBoxOptionOption[]) => {}}
+        onPageIndexChange={jest.fn()}
+        onSelectedLocationChange={(_loc: any[]) => {}}
         onSelectedStatusChange={jest.fn()}
-        pageSize={30}
+        pageIndex={0}
+        pageSize={10}
         selectedOption="down"
         selectedLocation={AllLocationOption.value}
       />

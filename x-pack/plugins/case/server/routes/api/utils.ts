@@ -14,7 +14,7 @@ import {
 } from 'kibana/server';
 
 import {
-  CaseRequest,
+  CasePostRequest,
   CaseResponse,
   CasesFindResponse,
   CaseAttributes,
@@ -22,42 +22,52 @@ import {
   CommentsResponse,
   CommentAttributes,
 } from '../../../common/api';
-import { SortFieldCase } from './types';
+
+import { SortFieldCase, TotalCommentByCase } from './types';
 
 export const transformNewCase = ({
   createdDate,
-  newCase,
+  email,
   full_name,
+  newCase,
   username,
 }: {
   createdDate: string;
-  newCase: CaseRequest;
+  email?: string;
   full_name?: string;
+  newCase: CasePostRequest;
   username: string;
 }): CaseAttributes => ({
-  comment_ids: [],
+  ...newCase,
+  closed_at: null,
+  closed_by: null,
   created_at: createdDate,
-  created_by: { full_name, username },
+  created_by: { email, full_name, username },
+  external_service: null,
+  status: 'open',
   updated_at: null,
   updated_by: null,
-  ...newCase,
 });
 
 interface NewCommentArgs {
   comment: string;
   createdDate: string;
+  email?: string;
   full_name?: string;
   username: string;
 }
 export const transformNewComment = ({
   comment,
   createdDate,
+  email,
   full_name,
   username,
 }: NewCommentArgs): CommentAttributes => ({
   comment,
   created_at: createdDate,
-  created_by: { full_name, username },
+  created_by: { email, full_name, username },
+  pushed_at: null,
+  pushed_by: null,
   updated_at: null,
   updated_by: null,
 });
@@ -75,30 +85,41 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
 export const transformCases = (
   cases: SavedObjectsFindResponse<CaseAttributes>,
   countOpenCases: number,
-  countClosedCases: number
+  countClosedCases: number,
+  totalCommentByCase: TotalCommentByCase[]
 ): CasesFindResponse => ({
   page: cases.page,
   per_page: cases.per_page,
   total: cases.total,
-  cases: flattenCaseSavedObjects(cases.saved_objects),
+  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase),
   count_open_cases: countOpenCases,
   count_closed_cases: countClosedCases,
 });
 
 export const flattenCaseSavedObjects = (
-  savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects']
+  savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects'],
+  totalCommentByCase: TotalCommentByCase[]
 ): CaseResponse[] =>
   savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<CaseAttributes>) => {
-    return [...acc, flattenCaseSavedObject(savedObject, [])];
+    return [
+      ...acc,
+      flattenCaseSavedObject(
+        savedObject,
+        [],
+        totalCommentByCase.find(tc => tc.caseId === savedObject.id)?.totalComments ?? 0
+      ),
+    ];
   }, []);
 
 export const flattenCaseSavedObject = (
   savedObject: SavedObject<CaseAttributes>,
-  comments: Array<SavedObject<CommentAttributes>> = []
+  comments: Array<SavedObject<CommentAttributes>> = [],
+  totalComment: number = 0
 ): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
+  totalComment,
   ...savedObject.attributes,
 });
 
@@ -133,9 +154,9 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
     case 'createdAt':
     case 'created_at':
       return SortFieldCase.createdAt;
-    case 'updatedAt':
-    case 'updated_at':
-      return SortFieldCase.updatedAt;
+    case 'closedAt':
+    case 'closed_at':
+      return SortFieldCase.closedAt;
     default:
       return SortFieldCase.createdAt;
   }

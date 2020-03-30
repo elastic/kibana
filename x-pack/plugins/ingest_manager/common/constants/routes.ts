@@ -50,6 +50,7 @@ export const AGENT_API_ROUTES = {
   EVENTS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/events`,
   CHECKIN_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/checkin`,
   ACKS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/acks`,
+  ACTIONS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/actions`,
   ENROLL_PATTERN: `${FLEET_API_ROOT}/agents/enroll`,
   UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/unenroll`,
   STATUS_PATTERN: `${FLEET_API_ROOT}/agent-status`,

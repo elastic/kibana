@@ -15,10 +15,10 @@ import {
   Rule,
   FetchRuleProps,
   BasicFetchProps,
-  ImportRulesProps,
-  ExportRulesProps,
+  ImportDataProps,
+  ExportDocumentsProps,
   RuleStatusResponse,
-  ImportRulesResponse,
+  ImportDataResponse,
   PrePackagedRulesStatusResponse,
   BulkRuleResponse,
 } from './types';
@@ -204,11 +204,11 @@ export const importRules = async ({
   fileToImport,
   overwrite = false,
   signal,
-}: ImportRulesProps): Promise<ImportRulesResponse> => {
+}: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  return KibanaServices.get().http.fetch<ImportRulesResponse>(
+  return KibanaServices.get().http.fetch<ImportDataResponse>(
     `${DETECTION_ENGINE_RULES_URL}/_import`,
     {
       method: 'POST',
@@ -233,13 +233,11 @@ export const importRules = async ({
 export const exportRules = async ({
   excludeExportDetails = false,
   filename = `${i18n.EXPORT_FILENAME}.ndjson`,
-  ruleIds = [],
+  ids = [],
   signal,
-}: ExportRulesProps): Promise<Blob> => {
+}: ExportDocumentsProps): Promise<Blob> => {
   const body =
-    ruleIds.length > 0
-      ? JSON.stringify({ objects: ruleIds.map(rule => ({ rule_id: rule })) })
-      : undefined;
+    ids.length > 0 ? JSON.stringify({ objects: ids.map(rule => ({ rule_id: rule })) }) : undefined;
 
   return KibanaServices.get().http.fetch<Blob>(`${DETECTION_ENGINE_RULES_URL}/_export`, {
     method: 'POST',
@@ -272,6 +270,32 @@ export const getRuleStatusById = async ({
     query: { ids: JSON.stringify([id]) },
     signal,
   });
+
+/**
+ * Return rule statuses given list of alert ids
+ *
+ * @param ids array of string of Rule ID's (not rule_id)
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getRulesStatusByIds = async ({
+  ids,
+  signal,
+}: {
+  ids: string[];
+  signal: AbortSignal;
+}): Promise<RuleStatusResponse> => {
+  const res = await KibanaServices.get().http.fetch<RuleStatusResponse>(
+    DETECTION_ENGINE_RULES_STATUS_URL,
+    {
+      method: 'GET',
+      query: { ids: JSON.stringify(ids) },
+      signal,
+    }
+  );
+  return res;
+};
 
 /**
  * Fetch all unique Tags used by Rules

@@ -290,4 +290,270 @@ describe('OpenTimeline', () => {
 
     expect(props.actionTimelineToShow).not.toContain('delete');
   });
+
+  test('it renders an empty string when the query is an empty string', () => {
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline
+          deleteTimelines={jest.fn()}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isLoading={false}
+          itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          pageIndex={0}
+          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query={''}
+          searchResults={mockResults}
+          selectedItems={[]}
+          sortDirection={DEFAULT_SORT_DIRECTION}
+          sortField={DEFAULT_SORT_FIELD}
+          title={title}
+          totalSearchResultsCount={mockResults.length}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="selectable-query-text"]')
+        .first()
+        .text()
+    ).toEqual('');
+  });
+
+  test('it renders the expected message when the query just has spaces', () => {
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline
+          deleteTimelines={jest.fn()}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isLoading={false}
+          itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          pageIndex={0}
+          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query={'   '}
+          searchResults={mockResults}
+          selectedItems={[]}
+          sortDirection={DEFAULT_SORT_DIRECTION}
+          sortField={DEFAULT_SORT_FIELD}
+          title={title}
+          totalSearchResultsCount={mockResults.length}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="selectable-query-text"]')
+        .first()
+        .text()
+    ).toEqual('');
+  });
+
+  test('it echos the query when the query has non-whitespace characters', () => {
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline
+          deleteTimelines={jest.fn()}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isLoading={false}
+          itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          pageIndex={0}
+          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query="Would you like to go to Denver?"
+          searchResults={mockResults}
+          selectedItems={[]}
+          sortDirection={DEFAULT_SORT_DIRECTION}
+          sortField={DEFAULT_SORT_FIELD}
+          title={title}
+          totalSearchResultsCount={mockResults.length}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="selectable-query-text"]')
+        .first()
+        .text()
+    ).toContain('Would you like to go to Denver?');
+  });
+
+  test('trims whitespace from the ends of the query', () => {
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline
+          deleteTimelines={jest.fn()}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isLoading={false}
+          itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          pageIndex={0}
+          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query="   Is it starting to feel cramped in here?   "
+          searchResults={mockResults}
+          selectedItems={[]}
+          sortDirection={DEFAULT_SORT_DIRECTION}
+          sortField={DEFAULT_SORT_FIELD}
+          title={title}
+          totalSearchResultsCount={mockResults.length}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="selectable-query-text"]')
+        .first()
+        .text()
+    ).toContain('Is it starting to feel cramped in here?');
+  });
+
+  test('it renders the expected message when the query is an empty string', () => {
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline
+          deleteTimelines={jest.fn()}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isLoading={false}
+          itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          pageIndex={0}
+          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query=""
+          searchResults={mockResults}
+          selectedItems={[]}
+          sortDirection={DEFAULT_SORT_DIRECTION}
+          sortField={DEFAULT_SORT_FIELD}
+          title={title}
+          totalSearchResultsCount={mockResults.length}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="query-message"]')
+        .first()
+        .text()
+    ).toContain(`Showing: ${mockResults.length} timelines `);
+  });
+
+  test('it renders the expected message when the query just has whitespace', () => {
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline
+          deleteTimelines={jest.fn()}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isLoading={false}
+          itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          pageIndex={0}
+          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query="   "
+          searchResults={mockResults}
+          selectedItems={[]}
+          sortDirection={DEFAULT_SORT_DIRECTION}
+          sortField={DEFAULT_SORT_FIELD}
+          title={title}
+          totalSearchResultsCount={mockResults.length}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="query-message"]')
+        .first()
+        .text()
+    ).toContain(`Showing: ${mockResults.length} timelines `);
+  });
+
+  test('it includes the word "with" when the query has non-whitespace characters', () => {
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline
+          deleteTimelines={jest.fn()}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          isLoading={false}
+          itemIdToExpandedNotesRowMap={{}}
+          onAddTimelinesToFavorites={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onlyFavorites={false}
+          onOpenTimeline={jest.fn()}
+          onQueryChange={jest.fn()}
+          onSelectionChange={jest.fn()}
+          onTableChange={jest.fn()}
+          onToggleShowNotes={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          pageIndex={0}
+          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          query="How was your day?"
+          searchResults={mockResults}
+          selectedItems={[]}
+          sortDirection={DEFAULT_SORT_DIRECTION}
+          sortField={DEFAULT_SORT_FIELD}
+          title={title}
+          totalSearchResultsCount={mockResults.length}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="query-message"]')
+        .first()
+        .text()
+    ).toContain(`Showing: ${mockResults.length} timelines with "How was your day?"`);
+  });
 });

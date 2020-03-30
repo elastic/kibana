@@ -47,23 +47,25 @@ export function setServices(newServices: any) {
   services = newServices;
 }
 
+export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
+  setTrackedUrl: (url: string) => void;
+}>('urlTracker');
+
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
 import { search } from '../../../../../plugins/data/public';
+import { createGetterSetter } from '../../../../../plugins/kibana_utils/common';
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
-// @ts-ignore
-export { shortenDottedString } from '../../common/utils/shorten_dotted_string';
-// @ts-ignore
-export { intervalOptions } from 'ui/agg_types';
-export { subscribeWithScope } from '../../../../../plugins/kibana_legacy/public';
-// @ts-ignore
-export { timezoneProvider } from 'ui/vis/lib/timezone';
-export { unhashUrl, redirectWhenMissing } from '../../../../../plugins/kibana_utils/public';
 export {
+  unhashUrl,
+  redirectWhenMissing,
   ensureDefaultIndexPattern,
+} from '../../../../../plugins/kibana_utils/public';
+export {
   formatMsg,
   formatStack,
+  subscribeWithScope,
 } from '../../../../../plugins/kibana_legacy/public';
 
 // EXPORT types
@@ -78,7 +80,5 @@ export {
   EsQuerySortValue,
   SortDirection,
 } from '../../../../../plugins/data/public';
-export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

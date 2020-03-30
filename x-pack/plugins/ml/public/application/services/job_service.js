@@ -45,7 +45,7 @@ class JobService {
     this.jobStats = {
       activeNodes: {
         label: i18n.translate('xpack.ml.jobService.activeMLNodesLabel', {
-          defaultMessage: 'Active ML Nodes',
+          defaultMessage: 'Active ML nodes',
         }),
         value: 0,
         show: true,
@@ -383,6 +383,7 @@ class JobService {
       delete tempJob.datafeed_config.state;
       delete tempJob.datafeed_config.node;
       delete tempJob.datafeed_config.timing_stats;
+      delete tempJob.datafeed_config.assignment_explanation;
 
       // remove query_delay if it's between 60s and 120s
       // the back-end produces a random value between 60 and 120 and so
@@ -585,6 +586,7 @@ class JobService {
             const data = {
               index: job.datafeed_config.indices,
               body,
+              ...(job.datafeed_config.indices_options || {}),
             };
 
             ml.esSearch(data)
