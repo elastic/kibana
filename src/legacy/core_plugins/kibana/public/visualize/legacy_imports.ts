@@ -24,7 +24,6 @@
  * directly where they are needed.
  */
 
-export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
 export {
   VisSavedObject,
