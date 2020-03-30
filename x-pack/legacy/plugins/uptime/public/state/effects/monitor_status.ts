@@ -6,14 +6,11 @@
 
 import { takeLatest } from 'redux-saga/effects';
 import {
-  getSelectedMonitorAction,
-  getSelectedMonitorActionSuccess,
-  getSelectedMonitorActionFail,
   getMonitorStatusAction,
   getMonitorStatusActionSuccess,
   getMonitorStatusActionFail,
 } from '../actions';
-import { fetchSelectedMonitor, fetchMonitorStatus } from '../api';
+import { fetchMonitorStatus } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorStatusEffect() {

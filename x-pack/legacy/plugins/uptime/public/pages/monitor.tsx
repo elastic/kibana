@@ -13,7 +13,6 @@ import { UptimeRefreshContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { MonitorStatusDetails } from '../components/connected';
-import { Ping } from '../../common/graphql/types';
 import { monitorStatusSelector } from '../state/selectors';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
@@ -32,7 +31,7 @@ export const MonitorPage: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState(undefined);
   const [pingListIndex, setPingListIndex] = useState(0);
 
-  const selectedMonitor: Ping = useSelector(monitorStatusSelector);
+  const selectedMonitor = useSelector(monitorStatusSelector);
 
   const sharedVariables = {
     dateRangeStart,
