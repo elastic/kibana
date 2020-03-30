@@ -7,12 +7,13 @@
 import { getNestedProperty } from '../../util/object_utils';
 import {
   DataFrameAnalyticsConfig,
+  getNumTopFeatureImportanceValues,
   getPredictedFieldName,
   getDependentVar,
   getPredictionFieldName,
 } from './analytics';
 import { Field } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
 export type EsId = string;
@@ -253,6 +254,7 @@ export const getDefaultFieldsFromJobCaps = (
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const type = newJobCapsService.getFieldById(dependentVariable)?.type;
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
+  const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
   // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
 
@@ -260,6 +262,18 @@ export const getDefaultFieldsFromJobCaps = (
   const predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
+
+  const featureImportanceFields = [];
+
+  if (numTopFeatureImportanceValues > 0) {
+    featureImportanceFields.push(
+      ...fields.map(d => ({
+        id: `${resultsField}.feature_importance.${d.id}`,
+        name: `${resultsField}.feature_importance.${d.name}`,
+        type: KBN_FIELD_TYPES.NUMBER,
+      }))
+    );
+  }
 
   const allFields: any = [
     {
@@ -269,6 +283,7 @@ export const getDefaultFieldsFromJobCaps = (
     },
     { id: predictedField, name: predictedField, type },
     ...fields,
+    ...featureImportanceFields,
   ].sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig));
 
   let selectedFields = allFields

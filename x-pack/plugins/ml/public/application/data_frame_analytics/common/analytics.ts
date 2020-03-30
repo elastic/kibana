@@ -188,6 +188,23 @@ export const getPredictionFieldName = (analysis: AnalysisConfig) => {
   return predictionFieldName;
 };
 
+export const getNumTopFeatureImportanceValues = (analysis: AnalysisConfig) => {
+  // If undefined will be defaulted to dependent_variable when config is created
+  let numTopFeatureImportanceValues = 0;
+  if (
+    isRegressionAnalysis(analysis) &&
+    analysis.regression.num_top_feature_importance_values !== undefined
+  ) {
+    numTopFeatureImportanceValues = analysis.regression.num_top_feature_importance_values;
+  } else if (
+    isClassificationAnalysis(analysis) &&
+    analysis.classification.num_top_feature_importance_values !== undefined
+  ) {
+    numTopFeatureImportanceValues = analysis.classification.num_top_feature_importance_values;
+  }
+  return numTopFeatureImportanceValues;
+};
+
 export const getPredictedFieldName = (
   resultsField: string,
   analysis: AnalysisConfig,
