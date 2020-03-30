@@ -117,18 +117,6 @@ export const ProcessEventDot = styled(
 
       const labelYHeight = markerSize / 1.7647;
 
-      const levelAttribute = adjacentNodeMap?.level
-        ? {
-            'aria-level': adjacentNodeMap.level,
-          }
-        : {};
-
-      const flowToAttribute = adjacentNodeMap?.nextSibling
-        ? {
-            'aria-flowto': adjacentNodeMap.nextSibling,
-          }
-        : {};
-
       /**
        * An element that should be animated when the node is clicked.
        */
@@ -175,8 +163,8 @@ export const ProcessEventDot = styled(
             viewBox="-15 -15 90 30"
             preserveAspectRatio="xMidYMid meet"
             role="treeitem"
-            {...levelAttribute}
-            {...flowToAttribute}
+            aria-level={adjacentNodeMap.level}
+            aria-flowto={adjacentNodeMap.nextSibling}
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
