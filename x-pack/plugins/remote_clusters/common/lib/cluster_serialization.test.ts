@@ -124,6 +124,40 @@ describe('cluster_serialization', () => {
         skipUnavailable: false,
         transportPingSchedule: '-1',
         transportCompress: false,
+      });
+    });
+
+    it('should deserialize a cluster that contains a deprecated proxy address and is in cloud', () => {
+      expect(
+        deserializeCluster(
+          'test_cluster',
+          {
+            seeds: ['localhost:9300'],
+            connected: true,
+            num_nodes_connected: 1,
+            max_connections_per_cluster: 3,
+            initial_connect_timeout: '30s',
+            skip_unavailable: false,
+            transport: {
+              ping_schedule: '-1',
+              compress: false,
+            },
+          },
+          'localhost:9300',
+          true
+        )
+      ).toEqual({
+        name: 'test_cluster',
+        proxyAddress: 'localhost:9300',
+        mode: 'proxy',
+        hasDeprecatedProxySetting: true,
+        isConnected: true,
+        connectedNodesCount: 1,
+        maxConnectionsPerCluster: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+        transportPingSchedule: '-1',
+        transportCompress: false,
         serverName: 'localhost',
       });
     });
