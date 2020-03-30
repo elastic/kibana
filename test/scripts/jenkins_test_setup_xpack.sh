@@ -4,10 +4,10 @@ source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$CODE_COVERAGE" ]]; then
   installDir="$KIBANA_DIR/install/kibana"
-  destDir="${installDir}-${CI_PARALLEL_PROCESS_NUMBER}"
-  cp -R "$installDir" "$destDir"
+  # destDir="${installDir}-${CI_PARALLEL_PROCESS_NUMBER}"
+  # cp -R "$installDir" "$destDir"
 
-  export KIBANA_INSTALL_DIR="$destDir"
+  export KIBANA_INSTALL_DIR="$installDir"
 
   cd "$XPACK_DIR"
 fi
