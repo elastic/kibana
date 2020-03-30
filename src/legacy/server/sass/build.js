@@ -21,7 +21,6 @@ import { resolve, relative, dirname, join } from 'path';
 import { promisify } from 'util';
 import fs from 'fs';
 import sass from 'sass';
-import Fiber from 'fibers';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
 import postcssUrl from 'postcss-url';
@@ -29,7 +28,6 @@ import chalk from 'chalk';
 import isPathInside from 'is-path-inside';
 import { PUBLIC_PATH_PLACEHOLDER } from '../../../optimize/public_path_placeholder';
 
-const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
 const access = promisify(fs.access);
 const copyFile = promisify(fs.copyFile);
@@ -85,7 +83,7 @@ export class Build {
    */
 
   async build() {
-    const rendered = await renderSass({
+    const rendered = sass.renderSync({
       file: this.sourcePath,
       outFile: this.targetPath,
       importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined,
@@ -93,7 +91,6 @@ export class Build {
       outputStyle: 'compressed',
       sourceMapEmbed: true,
       includePaths: [resolve(__dirname, '../../../../node_modules')],
-      fiber: Fiber,
     });
 
     const processor = postcss([autoprefixer]);
