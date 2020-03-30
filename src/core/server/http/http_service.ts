@@ -33,6 +33,7 @@ import { Router } from './router';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
+import { HttpResourcesService } from './http_resources';
 
 import {
   RequestHandlerContextContainer,
@@ -60,6 +61,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
   private readonly env: Env;
   private notReadyServer?: Server;
   private requestHandlerContext?: RequestHandlerContextContainer;
+  private httpResourcesService: HttpResourcesService;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService, env } = coreContext;
@@ -73,6 +75,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
     ]).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
     this.httpServer = new HttpServer(logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
+    this.httpResourcesService = new HttpResourcesService();
   }
 
   public async setup(deps: SetupDeps) {
@@ -112,6 +115,8 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
         contextName: T,
         provider: RequestHandlerContextProvider<T>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
+
+      resources: this.httpResourcesService.setup(config),
     };
 
     return contract;

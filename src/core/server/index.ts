@@ -47,6 +47,8 @@ import {
 } from './elasticsearch';
 
 import { HttpServiceSetup } from './http';
+import { HttpResources } from './http/http_resources';
+
 import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
@@ -347,7 +349,9 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
-  http: HttpServiceSetup;
+  http: HttpServiceSetup & {
+    resources: HttpResources;
+  };
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
   /** {@link UiSettingsServiceSetup} */

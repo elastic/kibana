@@ -269,6 +269,7 @@ export class LegacyService implements CoreService {
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
 
+    const router = setupDeps.core.http.createRouter('', this.legacyId);
     const coreSetup: CoreSetup = {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
@@ -283,7 +284,8 @@ export class LegacyService implements CoreService {
           null,
           this.legacyId
         ),
-        createRouter: () => setupDeps.core.http.createRouter('', this.legacyId),
+        createRouter: () => router,
+        resources: setupDeps.core.http.resources.create(router),
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
