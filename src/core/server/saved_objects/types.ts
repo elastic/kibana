@@ -53,8 +53,8 @@ export {
  */
 export interface SavedObjectStatusMeta {
   migratedIndices: {
+    [status: string]: number;
     skipped: number;
-    patched: number;
     migrated: number;
   };
 }

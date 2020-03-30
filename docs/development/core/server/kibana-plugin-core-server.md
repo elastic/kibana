@@ -67,7 +67,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ContextSetup](./kibana-plugin-core-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-core-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-core-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
-|  [CoreStatus](./kibana-plugin-core-server.corestatus.md) | Status of core services. Only contains entries for backend services that could have a non-available <code>status</code>. For example, <code>context</code> cannot possibly be broken, so it is not included. |
+|  [CoreStatus](./kibana-plugin-core-server.corestatus.md) | Status of core services. |
 |  [CustomHttpResponseOptions](./kibana-plugin-core-server.customhttpresponseoptions.md) | HTTP response parameters for a response with adjustable status code. |
 |  [DeprecationAPIClientParams](./kibana-plugin-core-server.deprecationapiclientparams.md) |  |
 |  [DeprecationAPIResponse](./kibana-plugin-core-server.deprecationapiresponse.md) |  |
@@ -172,6 +172,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsTypeMappingDefinition](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) | Describe a saved object type mapping. |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-core-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-core-server.savedobjectsupdateresponse.md) |  |
+|  [ServiceStatus](./kibana-plugin-core-server.servicestatus.md) | The current status of a service at a point in time. |
 |  [SessionCookieValidationResult](./kibana-plugin-core-server.sessioncookievalidationresult.md) | Return type from a function to validate cookie contents. |
 |  [SessionStorage](./kibana-plugin-core-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageCookieOptions](./kibana-plugin-core-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
@@ -262,7 +263,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
 |  [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) | Describe a [saved object type mapping](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) field.<!-- -->Please refer to [elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html) For the mapping documentation |
 |  [ScopeableRequest](./kibana-plugin-core-server.scopeablerequest.md) | A user credentials container. It accommodates the necessary auth credentials to impersonate the current user.<!-- -->See [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md)<!-- -->. |
-|  [ServiceStatus](./kibana-plugin-core-server.servicestatus.md) | The current status of a service at a point in time. |
 |  [SharedGlobalConfig](./kibana-plugin-core-server.sharedglobalconfig.md) |  |
 |  [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. This should only be used inside handlers registered during <code>setup</code> that will only be executed after <code>start</code> lifecycle. |
 |  [StringValidation](./kibana-plugin-core-server.stringvalidation.md) | Allows regex objects or a regex string |

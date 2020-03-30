@@ -31,6 +31,7 @@ export const getSummaryStatus = (statuses: Record<string, ServiceStatus>): Servi
   if (highestSeverityLevel === ServiceStatusLevel.available) {
     return {
       level: ServiceStatusLevel.available,
+      summary: `All services are available`,
     };
   } else if (highestSeverityGroup.size === 1) {
     const [serviceName, status] = [...highestSeverityGroup.entries()][0];

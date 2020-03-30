@@ -326,7 +326,7 @@ export class SavedObjectsService
 
     return {
       status$: calculateStatus$(
-        this.migrator$.pipe(switchMap(migrator => migrator.getMigrationResult$())),
+        this.migrator$.pipe(switchMap(migrator => migrator.getStatus$())),
         setupDeps.elasticsearch.status$
       ),
       setClientFactoryProvider: provider => {

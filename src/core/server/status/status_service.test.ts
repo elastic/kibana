@@ -17,44 +17,209 @@
  * under the License.
  */
 
-import { of } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 
-import { ServiceStatus, ServiceStatusLevel } from './types';
+import { ServiceStatus, ServiceStatusLevel, CoreStatus } from './types';
 import { StatusService } from './status_service';
 import { first } from 'rxjs/operators';
 import { mockCoreContext } from '../core_context.mock';
 
 describe('StatusService', () => {
-  const available: ServiceStatus<any> = { level: ServiceStatusLevel.available };
+  const available: ServiceStatus<any> = {
+    level: ServiceStatusLevel.available,
+    summary: 'Available',
+  };
   const degraded: ServiceStatus<any> = {
     level: ServiceStatusLevel.degraded,
     summary: 'This is degraded!',
   };
 
   describe('setup', () => {
-    it('rolls up core status observables into single observable', async () => {
-      const setup = new StatusService(mockCoreContext.create()).setup({
-        coreStatuses: {
-          elasticsearch$: of(available),
-          savedObjects$: of(degraded),
-        },
+    describe('core$', () => {
+      it('rolls up core status observables into single observable', async () => {
+        const setup = new StatusService(mockCoreContext.create()).setup({
+          elasticsearch: {
+            status$: of(available),
+          },
+          savedObjects: {
+            status$: of(degraded),
+          },
+        });
+        expect(await setup.core$.pipe(first()).toPromise()).toEqual({
+          elasticsearch: available,
+          savedObjects: degraded,
+        });
       });
-      expect(await setup.core$.pipe(first()).toPromise()).toEqual({
-        elasticsearch: available,
-        savedObjects: degraded,
+
+      it('replays last event', async () => {
+        const setup = new StatusService(mockCoreContext.create()).setup({
+          elasticsearch: {
+            status$: of(available),
+          },
+          savedObjects: {
+            status$: of(degraded),
+          },
+        });
+        const subResult1 = await setup.core$.pipe(first()).toPromise();
+        const subResult2 = await setup.core$.pipe(first()).toPromise();
+        const subResult3 = await setup.core$.pipe(first()).toPromise();
+        expect(subResult1).toEqual({
+          elasticsearch: available,
+          savedObjects: degraded,
+        });
+        expect(subResult2).toEqual({
+          elasticsearch: available,
+          savedObjects: degraded,
+        });
+        expect(subResult3).toEqual({
+          elasticsearch: available,
+          savedObjects: degraded,
+        });
+      });
+
+      it('does not emit duplicate events', () => {
+        const elasticsearch$ = new BehaviorSubject(available);
+        const savedObjects$ = new BehaviorSubject(degraded);
+        const setup = new StatusService(mockCoreContext.create()).setup({
+          elasticsearch: {
+            status$: elasticsearch$,
+          },
+          savedObjects: {
+            status$: savedObjects$,
+          },
+        });
+
+        const statusUpdates: CoreStatus[] = [];
+        const subscription = setup.core$.subscribe(status => statusUpdates.push(status));
+
+        elasticsearch$.next(available);
+        elasticsearch$.next(available);
+        elasticsearch$.next({
+          level: ServiceStatusLevel.available,
+          summary: `Wow another summary`,
+        });
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(available);
+        subscription.unsubscribe();
+
+        expect(statusUpdates).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "elasticsearch": Object {
+                "level": 0,
+                "summary": "Available",
+              },
+              "savedObjects": Object {
+                "level": 1,
+                "summary": "This is degraded!",
+              },
+            },
+            Object {
+              "elasticsearch": Object {
+                "level": 0,
+                "summary": "Wow another summary",
+              },
+              "savedObjects": Object {
+                "level": 1,
+                "summary": "This is degraded!",
+              },
+            },
+            Object {
+              "elasticsearch": Object {
+                "level": 0,
+                "summary": "Wow another summary",
+              },
+              "savedObjects": Object {
+                "level": 0,
+                "summary": "Available",
+              },
+            },
+          ]
+        `);
       });
     });
 
-    it('exposes an overall summary', async () => {
-      const setup = new StatusService(mockCoreContext.create()).setup({
-        coreStatuses: {
-          elasticsearch$: of(degraded),
-          savedObjects$: of(degraded),
-        },
+    describe('overall$', () => {
+      it('exposes an overall summary', async () => {
+        const setup = new StatusService(mockCoreContext.create()).setup({
+          elasticsearch: {
+            status$: of(degraded),
+          },
+          savedObjects: {
+            status$: of(degraded),
+          },
+        });
+        expect(await setup.overall$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevel.degraded,
+          summary: '[2] services are degraded',
+        });
       });
-      expect(await setup.overall$.pipe(first()).toPromise()).toMatchObject({
-        level: ServiceStatusLevel.degraded,
-        summary: '[2] services are degraded',
+
+      it('replays last event', async () => {
+        const setup = new StatusService(mockCoreContext.create()).setup({
+          elasticsearch: {
+            status$: of(degraded),
+          },
+          savedObjects: {
+            status$: of(degraded),
+          },
+        });
+        const subResult1 = await setup.overall$.pipe(first()).toPromise();
+        const subResult2 = await setup.overall$.pipe(first()).toPromise();
+        const subResult3 = await setup.overall$.pipe(first()).toPromise();
+        expect(subResult1).toMatchObject({
+          level: ServiceStatusLevel.degraded,
+          summary: '[2] services are degraded',
+        });
+        expect(subResult2).toMatchObject({
+          level: ServiceStatusLevel.degraded,
+          summary: '[2] services are degraded',
+        });
+        expect(subResult3).toMatchObject({
+          level: ServiceStatusLevel.degraded,
+          summary: '[2] services are degraded',
+        });
+      });
+
+      it('does not emit duplicate events', () => {
+        const elasticsearch$ = new BehaviorSubject(available);
+        const savedObjects$ = new BehaviorSubject(degraded);
+        const setup = new StatusService(mockCoreContext.create()).setup({
+          elasticsearch: {
+            status$: elasticsearch$,
+          },
+          savedObjects: {
+            status$: savedObjects$,
+          },
+        });
+
+        const statusUpdates: ServiceStatus[] = [];
+        const subscription = setup.overall$.subscribe(status => statusUpdates.push(status));
+
+        elasticsearch$.next(available);
+        elasticsearch$.next(available);
+        elasticsearch$.next({
+          level: ServiceStatusLevel.available,
+          summary: `Wow another summary`,
+        });
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(available);
+        subscription.unsubscribe();
+
+        expect(statusUpdates).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": 1,
+              "summary": "[savedObjects]: This is degraded!",
+            },
+            Object {
+              "level": 0,
+              "summary": "All services are available",
+            },
+          ]
+        `);
       });
     });
   });

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { KibanaMigrator } from './kibana_migrator';
+import { KibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
 import { buildActiveMappings } from '../core';
 const { mergeTypes } = jest.requireActual('./kibana_migrator');
 import { SavedObjectsType } from '../../types';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [
   {
@@ -48,7 +48,20 @@ const createMigrator = (
     runMigrations: jest.fn(),
     getActiveMappings: jest.fn(),
     migrateDocument: jest.fn(),
-    getMigrationResult$: jest.fn(() => new Subject()),
+    getStatus$: jest.fn(
+      () =>
+        new BehaviorSubject<KibanaMigratorStatus>({
+          status: 'completed',
+          result: [
+            {
+              status: 'migrated',
+              destIndex: '.test-kibnaa_2',
+              sourceIndex: '.test-kibana_1',
+              elapsedMs: 10,
+            },
+          ],
+        })
+    ),
   };
 
   mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(mergeTypes(types)));

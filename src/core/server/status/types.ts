@@ -26,37 +26,29 @@ import { Observable } from 'rxjs';
  *                   field in a type-safe way.
  * @public
  */
-export type ServiceStatus<Meta extends Record<string, any> | unknown = unknown> =
-  | {
-      /**
-       * The current availability level of the service.
-       */
-      level: ServiceStatusLevel.available;
-      /**
-       * A high-level summary of the service status.
-       */
-      summary?: string;
-      /**
-       * A more detailed description of the service status.
-       */
-      detail?: string;
-      /**
-       * A URL to open in a new tab about how to resolve or troubleshoot the problem.
-       */
-      documentationUrl?: string;
-      /**
-       * Any JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained,
-       * machine-readable information about the service status. May include status information for underlying features.
-       */
-      meta?: Meta;
-    }
-  | {
-      level: ServiceStatusLevel;
-      summary: string; // required when level !== available
-      detail?: string;
-      documentationUrl?: string;
-      meta?: Meta;
-    };
+export interface ServiceStatus<Meta extends Record<string, any> | unknown = unknown> {
+  /**
+   * The current availability level of the service.
+   */
+  level: ServiceStatusLevel;
+  /**
+   * A high-level summary of the service status.
+   */
+  summary: string;
+  /**
+   * A more detailed description of the service status.
+   */
+  detail?: string;
+  /**
+   * A URL to open in a new tab about how to resolve or troubleshoot the problem.
+   */
+  documentationUrl?: string;
+  /**
+   * Any JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained,
+   * machine-readable information about the service status. May include status information for underlying features.
+   */
+  meta?: Meta;
+}
 
 /**
  * The current "level" of availability of a service.
@@ -77,14 +69,15 @@ export enum ServiceStatusLevel {
   unavailable,
   /**
    * Block all user functions and display the status page, reserved for Core services only.
-   * Note: In the real implementation, this will be split out to a different type. Kept as a single type here to make
-   * the RFC easier to follow.
    */
   critical,
 }
 
 /**
- * Status of core services. Only contains entries for backend services that could have a non-available `status`.
+ * Status of core services.
+ *
+ * @internalRemarks
+ * Only contains entries for backend services that could have a non-available `status`.
  * For example, `context` cannot possibly be broken, so it is not included.
  *
  * @public
@@ -92,13 +85,6 @@ export enum ServiceStatusLevel {
 export interface CoreStatus {
   elasticsearch: ServiceStatus;
   savedObjects: ServiceStatus;
-  // TODO
-  // http: ServiceStatus;
-  // uiSettings: ServiceStatus;
-  // metrics: ServiceStatus;
-
-  // Allows CoreStatus to be used as a Record in utility functions/
-  [serviceName: string]: ServiceStatus;
 }
 
 /**
@@ -113,12 +99,7 @@ export interface StatusServiceSetup {
 }
 
 /** @internal */
-export interface InternalStatusServiceSetup {
-  /**
-   * Current status for all Core services.
-   */
-  core$: Observable<CoreStatus>;
-
+export interface InternalStatusServiceSetup extends StatusServiceSetup {
   /**
    * Overall system status used for HTTP API
    */

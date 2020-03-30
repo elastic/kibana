@@ -77,6 +77,7 @@ describe('calculateStatus', () => {
       level: ServiceStatusLevel.degraded,
       summary: 'Some nodes are a different version',
       meta: {
+        incompatibleNodes: [],
         warningNodes: [nodeInfo],
       },
     });
@@ -101,8 +102,8 @@ describe('calculateStatus', () => {
       level: ServiceStatusLevel.critical,
       summary: 'Incompatible with Elasticsearch',
       meta: {
-        warningNodes: [nodeInfo],
         incompatibleNodes: [nodeInfo],
+        warningNodes: [nodeInfo],
       },
     });
   });
@@ -143,7 +144,8 @@ describe('calculateStatus', () => {
       incompatibleNodes: [],
     });
 
-    expect(statusUpdates.map(({ level, summary }) => ({ level, summary }))).toMatchInlineSnapshot(`
+    subscription.unsubscribe();
+    expect(statusUpdates).toMatchInlineSnapshot(`
       Array [
         Object {
           "level": 2,
@@ -151,14 +153,44 @@ describe('calculateStatus', () => {
         },
         Object {
           "level": 3,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "warningNodes": Array [],
+          },
           "summary": "Unable to retrieve version info",
         },
         Object {
           "level": 3,
+          "meta": Object {
+            "incompatibleNodes": Array [
+              Object {
+                "http": Object {
+                  "publish_address": "https://1.1.1.1:9200",
+                },
+                "ip": "1.1.1.1",
+                "name": "node1",
+                "version": "1.1.1",
+              },
+            ],
+            "warningNodes": Array [],
+          },
           "summary": "Incompatible with Elasticsearch",
         },
         Object {
           "level": 1,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "warningNodes": Array [
+              Object {
+                "http": Object {
+                  "publish_address": "https://1.1.1.1:9200",
+                },
+                "ip": "1.1.1.1",
+                "name": "node1",
+                "version": "1.1.1",
+              },
+            ],
+          },
           "summary": "Some nodes are incompatible",
         },
         Object {
@@ -167,52 +199,5 @@ describe('calculateStatus', () => {
         },
       ]
     `);
-
-    subscription.unsubscribe();
-  });
-
-  it('does not emit duplicate status updates', () => {
-    const nodeCompat$ = new Subject<NodesVersionCompatibility>();
-
-    const statusUpdates: ServiceStatus[] = [];
-    const subscription = calculateStatus$(nodeCompat$).subscribe(status =>
-      statusUpdates.push(status)
-    );
-
-    nodeCompat$.next({
-      isCompatible: false,
-      kibanaVersion: '2.1.1',
-      incompatibleNodes: [nodeInfo],
-      warningNodes: [],
-      message: 'Incompatible with Elasticsearch',
-    });
-    nodeCompat$.next({
-      isCompatible: false,
-      kibanaVersion: '2.1.1',
-      incompatibleNodes: [nodeInfo],
-      warningNodes: [],
-      message: 'Incompatible with Elasticsearch',
-    });
-    nodeCompat$.next({
-      isCompatible: false,
-      kibanaVersion: '2.1.1',
-      incompatibleNodes: [nodeInfo],
-      warningNodes: [],
-      message: 'Incompatible with Elasticsearch',
-    });
-
-    expect(statusUpdates.map(({ level, summary }) => ({ level, summary }))).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "level": 2,
-          "summary": "Waiting for Elasticsearch",
-        },
-        Object {
-          "level": 3,
-          "summary": "Incompatible with Elasticsearch",
-        },
-      ]
-    `);
-    subscription.unsubscribe();
   });
 });

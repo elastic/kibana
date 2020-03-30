@@ -8,8 +8,8 @@
 
 ```typescript
 migratedIndices: {
+        [status: string]: number;
         skipped: number;
-        patched: number;
         migrated: number;
     };
 ```

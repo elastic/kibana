@@ -149,10 +149,8 @@ export class Server {
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const statusSetup = this.status.setup({
-      coreStatuses: {
-        elasticsearch$: elasticsearchServiceSetup.status$,
-        savedObjects$: savedObjectsSetup.status$,
-      },
+      elasticsearch: elasticsearchServiceSetup,
+      savedObjects: savedObjectsSetup,
     });
 
     const coreSetup: InternalCoreSetup = {

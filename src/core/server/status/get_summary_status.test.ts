@@ -18,10 +18,10 @@
  */
 
 import { ServiceStatus, ServiceStatusLevel } from './types';
-import { getSummaryStatus } from './utils';
+import { getSummaryStatus } from './get_summary_status';
 
 describe('getSummaryStatus', () => {
-  const available: ServiceStatus = { level: ServiceStatusLevel.available };
+  const available: ServiceStatus = { level: ServiceStatusLevel.available, summary: 'Available' };
   const degraded: ServiceStatus = {
     level: ServiceStatusLevel.degraded,
     summary: 'This is degraded!',
@@ -42,7 +42,7 @@ describe('getSummaryStatus', () => {
         s2: available,
         s3: available,
       })
-    ).toEqual({
+    ).toMatchObject({
       level: ServiceStatusLevel.available,
     });
   });

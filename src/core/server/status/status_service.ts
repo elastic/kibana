@@ -20,21 +20,21 @@
 /* eslint-disable max-classes-per-file */
 
 import { Observable, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { isDeepStrictEqual } from 'util';
 
 import { CoreService } from '../../types';
-import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
-import { getSummaryStatus } from './utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { ElasticsearchStatusMeta } from '../elasticsearch';
-import { SavedObjectStatusMeta } from '../saved_objects';
+import { InternalElasticsearchServiceSetup } from '../elasticsearch';
+import { InternalSavedObjectsServiceSetup } from '../saved_objects';
+
+import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
+import { getSummaryStatus } from './get_summary_status';
 
 interface SetupDeps {
-  coreStatuses: {
-    elasticsearch$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
-    savedObjects$: Observable<ServiceStatus<SavedObjectStatusMeta>>;
-  };
+  elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
+  savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
 }
 
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
@@ -44,13 +44,16 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     this.logger = coreContext.logger.get('status');
   }
 
-  public setup({ coreStatuses }: SetupDeps) {
-    const core$ = this.setupCoreStatus(coreStatuses);
+  public setup(core: SetupDeps) {
+    const core$ = this.setupCoreStatus(core);
     const overall$: Observable<ServiceStatus> = core$.pipe(
       map(coreStatus => {
-        this.logger.debug('Recalculating overall status');
-        return getSummaryStatus(coreStatus);
-      })
+        const summary = getSummaryStatus(coreStatus as any);
+        this.logger.debug(`Recalculated overall status`, { status: summary });
+        return summary;
+      }),
+      distinctUntilChanged(isDeepStrictEqual),
+      shareReplay(1)
     );
 
     return {
@@ -63,12 +66,14 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
   public stop() {}
 
-  private setupCoreStatus(coreStatuses: SetupDeps['coreStatuses']): Observable<CoreStatus> {
-    return combineLatest(coreStatuses.elasticsearch$, coreStatuses.savedObjects$).pipe(
-      map(([elasticsearch, savedObjects]) => ({
-        elasticsearch,
-        savedObjects,
-      }))
+  private setupCoreStatus({ elasticsearch, savedObjects }: SetupDeps): Observable<CoreStatus> {
+    return combineLatest([elasticsearch.status$, savedObjects.status$]).pipe(
+      map(([elasticsearchStatus, savedObjectsStatus]) => ({
+        elasticsearch: elasticsearchStatus,
+        savedObjects: savedObjectsStatus,
+      })),
+      distinctUntilChanged(isDeepStrictEqual),
+      shareReplay(1)
     );
   }
 }

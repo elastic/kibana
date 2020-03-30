@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { first } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
@@ -87,19 +87,20 @@ describe('KibanaMigrator', () => {
 
       options.callCluster = clusterStub;
       const migrator = new KibanaMigrator(options);
-      const result = migrator
-        .getMigrationResult$()
-        .pipe(first())
+      const migratorStatus = migrator
+        .getStatus$()
+        .pipe(take(3))
         .toPromise();
       await migrator.runMigrations();
-      const [index1, index2] = await result;
-      expect(index1).toMatchObject({
+      const { status, result } = await migratorStatus;
+      expect(status).toEqual('completed');
+      expect(result![0]).toMatchObject({
         destIndex: '.my-index_1',
         elapsedMs: expect.any(Number),
         sourceIndex: '.my-index',
         status: 'migrated',
       });
-      expect(index2).toMatchObject({
+      expect(result![1]).toMatchObject({
         destIndex: 'other-index_1',
         elapsedMs: expect.any(Number),
         sourceIndex: 'other-index',

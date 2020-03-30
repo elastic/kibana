@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { of, Observable, Subject } from 'rxjs';
+import { of, Observable } from 'rxjs';
 import { ServiceStatus, ServiceStatusLevel } from '../status';
 import { calculateStatus$ } from './status';
 import { take } from 'rxjs/operators';
@@ -26,13 +26,13 @@ describe('calculateStatus$', () => {
   const expectUnavailableDueToEs = (status$: Observable<ServiceStatus>) =>
     expect(status$.pipe(take(1)).toPromise()).resolves.toEqual({
       level: ServiceStatusLevel.unavailable,
-      summary: `SavedObjects are not available without a healthy Elasticearch connection`,
+      summary: `SavedObjects service is not available without a healthy Elasticearch connection`,
     });
 
   const expectUnavailableDueToMigrations = (status$: Observable<ServiceStatus>) =>
     expect(status$.pipe(take(1)).toPromise()).resolves.toEqual({
       level: ServiceStatusLevel.unavailable,
-      summary: `SavedObject indices are migrating`,
+      summary: `SavedObjects service is waiting to start migrations`,
     });
 
   describe('when elasticsearch is unavailable', () => {
@@ -45,7 +45,9 @@ describe('calculateStatus$', () => {
       await expectUnavailableDueToEs(calculateStatus$(of<any>(), esStatus$));
     });
     it('is unavailable after migrations have ran', async () => {
-      await expectUnavailableDueToEs(calculateStatus$(of([{ status: 'skipped' }]), esStatus$));
+      await expectUnavailableDueToEs(
+        calculateStatus$(of({ status: 'completed', result: [] }), esStatus$)
+      );
     });
   });
 
@@ -61,7 +63,7 @@ describe('calculateStatus$', () => {
     it('is unavailable after migrations have ran', async () => {
       await expectUnavailableDueToEs(
         calculateStatus$(
-          of<any>([{ status: 'migrated' }]),
+          of({ status: 'completed', result: [{ status: 'migrated' } as any] }),
           esStatus$
         )
       );
@@ -69,22 +71,35 @@ describe('calculateStatus$', () => {
   });
 
   describe('when elasticsearch is available', () => {
-    const esStatus$ = of<ServiceStatus>({ level: ServiceStatusLevel.available });
+    const esStatus$ = of<ServiceStatus>({
+      level: ServiceStatusLevel.available,
+      summary: 'Available',
+    });
 
     it('is unavailable before migrations have ran', async () => {
       await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), esStatus$));
     });
+    it('is unavailable while migrations are running', async () => {
+      await expect(
+        calculateStatus$(of({ status: 'running' }), esStatus$)
+          .pipe(take(2))
+          .toPromise()
+      ).resolves.toEqual({
+        level: ServiceStatusLevel.unavailable,
+        summary: `SavedObjects service is running migrations`,
+      });
+    });
     it('is available after migrations have ran', async () => {
       await expect(
         calculateStatus$(
-          of<any>([{ status: 'skipped' }, { status: 'patched' }]),
+          of({ status: 'completed', result: [{ status: 'skipped' }, { status: 'patched' }] }),
           esStatus$
         )
           .pipe(take(2))
           .toPromise()
       ).resolves.toEqual({
         level: ServiceStatusLevel.available,
-        summary: `SavedObject indices have been migrated`,
+        summary: `SavedObjects service has completed migrations and is available`,
         meta: {
           migratedIndices: {
             migrated: 0,
@@ -112,45 +127,8 @@ describe('calculateStatus$', () => {
           .toPromise()
       ).resolves.toEqual({
         level: ServiceStatusLevel.degraded,
-        summary: 'xxx',
+        summary: 'SavedObjects service is degraded due to Elasticsearch: [xxx]',
       });
     });
-  });
-
-  it('does not emit duplicate statuses', () => {
-    const esStatus$ = new Subject<ServiceStatus>();
-    const migratorResult = new Subject<any>();
-
-    const statusUpdates: ServiceStatus[] = [];
-    const subscription = calculateStatus$(migratorResult, esStatus$).subscribe(status =>
-      statusUpdates.push(status)
-    );
-
-    esStatus$.next({ level: ServiceStatusLevel.available });
-    esStatus$.next({ level: ServiceStatusLevel.available });
-    migratorResult.next([{ status: 'skipped' }]);
-    migratorResult.next([{ status: 'skipped' }]);
-    esStatus$.next({ level: ServiceStatusLevel.available });
-    esStatus$.next({ level: ServiceStatusLevel.unavailable, summary: 'xxx' });
-    esStatus$.next({ level: ServiceStatusLevel.unavailable, summary: 'xxx' });
-
-    expect(statusUpdates.map(({ level, summary }) => ({ level, summary }))).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "level": 2,
-          "summary": "SavedObject indices are migrating",
-        },
-        Object {
-          "level": 0,
-          "summary": "SavedObject indices have been migrated",
-        },
-        Object {
-          "level": 2,
-          "summary": "SavedObjects are not available without a healthy Elasticearch connection",
-        },
-      ]
-    `);
-
-    subscription.unsubscribe();
   });
 });

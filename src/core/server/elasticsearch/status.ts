@@ -18,8 +18,7 @@
  */
 
 import { Observable, merge, of } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
-import { isDeepStrictEqual } from 'util';
+import { map } from 'rxjs/operators';
 
 import { ServiceStatus, ServiceStatusLevel } from '../status';
 import { ElasticsearchStatusMeta } from './types';
@@ -56,13 +55,13 @@ export const calculateStatus$ = (
               summary:
                 // Message should always be present, but this is a safe fallback
                 message ??
-                `Some Elasticsearch nodes are running differnt versions than this version of Kibana`,
-              meta: { warningNodes },
+                `Some Elasticsearch nodes are running different versions than this version of Kibana`,
+              meta: { warningNodes, incompatibleNodes },
             };
-          } else {
-            return { level: ServiceStatusLevel.available, summary: `Elasticsearch is available` };
           }
+
+          return { level: ServiceStatusLevel.available, summary: `Elasticsearch is available` };
         }
       )
     )
-  ).pipe(distinctUntilChanged(isDeepStrictEqual));
+  );

@@ -4,7 +4,7 @@
 
 ## CoreStatus interface
 
-Status of core services. Only contains entries for backend services that could have a non-available `status`<!-- -->. For example, `context` cannot possibly be broken, so it is not included.
+Status of core services.
 
 <b>Signature:</b>
 

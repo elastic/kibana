@@ -18,58 +18,67 @@
  */
 
 import { Observable, combineLatest } from 'rxjs';
-import { startWith, map, distinctUntilChanged } from 'rxjs/operators';
-import { isDeepStrictEqual } from 'util';
+import { startWith, map } from 'rxjs/operators';
 import { ServiceStatus, ServiceStatusLevel } from '../status';
-import { MigrationResult } from './migrations';
 import { SavedObjectStatusMeta } from './types';
+import { KibanaMigratorStatus } from './migrations/kibana';
 
 export const calculateStatus$ = (
-  migratorResult$: Observable<MigrationResult[]>,
+  rawMigratorStatus$: Observable<KibanaMigratorStatus>,
   elasticsearchStatus$: Observable<ServiceStatus>
 ): Observable<ServiceStatus<SavedObjectStatusMeta>> => {
-  const migratorStatus$: Observable<ServiceStatus<SavedObjectStatusMeta>> = migratorResult$.pipe(
-    map(migrationResult => {
-      const skipped = migrationResult.filter(({ status }) => status === 'skipped').length;
-      const patched = migrationResult.filter(({ status }) => status === 'patched').length;
-      const migrated = migrationResult.filter(({ status }) => status === 'migrated').length;
+  const migratorStatus$: Observable<ServiceStatus<SavedObjectStatusMeta>> = rawMigratorStatus$.pipe(
+    map(migrationStatus => {
+      if (migrationStatus.status === 'waiting') {
+        return {
+          level: ServiceStatusLevel.unavailable,
+          summary: `SavedObjects service is waiting to start migrations`,
+        };
+      } else if (migrationStatus.status === 'running') {
+        return {
+          level: ServiceStatusLevel.unavailable,
+          summary: `SavedObjects service is running migrations`,
+        };
+      }
+
+      const statusCounts: SavedObjectStatusMeta['migratedIndices'] = { migrated: 0, skipped: 0 };
+      if (migrationStatus.result) {
+        migrationStatus.result.forEach(({ status }) => {
+          statusCounts[status] = (statusCounts[status] ?? 0) + 1;
+        });
+      }
 
       return {
         level: ServiceStatusLevel.available,
-        summary: `SavedObject indices have been migrated`,
+        summary: `SavedObjects service has completed migrations and is available`,
         meta: {
-          migratedIndices: {
-            skipped,
-            patched,
-            migrated,
-          },
+          migratedIndices: statusCounts,
         },
       };
     }),
     startWith({
       level: ServiceStatusLevel.unavailable,
-      summary: `SavedObject indices are migrating`,
+      summary: `SavedObjects service is waiting to start migrations`,
     })
   );
 
-  return combineLatest(elasticsearchStatus$, migratorStatus$).pipe(
+  return combineLatest([elasticsearchStatus$, migratorStatus$]).pipe(
     map(([esStatus, migratorStatus]) => {
       if (esStatus.level >= ServiceStatusLevel.unavailable) {
         return {
           level: ServiceStatusLevel.unavailable,
-          summary: `SavedObjects are not available without a healthy Elasticearch connection`,
+          summary: `SavedObjects service is not available without a healthy Elasticearch connection`,
         };
       } else if (migratorStatus.level === ServiceStatusLevel.unavailable) {
         return migratorStatus;
       } else if (esStatus.level === ServiceStatusLevel.degraded) {
         return {
           level: esStatus.level,
-          summary: esStatus.summary,
+          summary: `SavedObjects service is degraded due to Elasticsearch: [${esStatus.summary}]`,
         };
       } else {
         return migratorStatus;
       }
-    }),
-    distinctUntilChanged(isDeepStrictEqual)
+    })
   );
 };

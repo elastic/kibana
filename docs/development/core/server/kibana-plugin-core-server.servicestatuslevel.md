@@ -17,7 +17,7 @@ export declare enum ServiceStatusLevel
 |  Member | Value | Description |
 |  --- | --- | --- |
 |  available | <code>0</code> | Everything is working! |
-|  critical | <code>3</code> | Block all user functions and display the status page, reserved for Core services only. Note: In the real implementation, this will be split out to a different type. Kept as a single type here to make the RFC easier to follow. |
+|  critical | <code>3</code> | Block all user functions and display the status page, reserved for Core services only. |
 |  degraded | <code>1</code> | Some features may not be working. |
 |  unavailable | <code>2</code> | The service is unavailable, but other functions that do not depend on this service should work. |
 

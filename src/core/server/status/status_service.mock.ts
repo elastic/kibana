@@ -25,20 +25,23 @@ import {
   ServiceStatus,
   CoreStatus,
 } from './types';
-import { of, Observable } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 
-const available: ServiceStatus = { level: ServiceStatusLevel.available };
-const mockCoreStatus: Observable<CoreStatus> = of({
+const available: ServiceStatus = {
+  level: ServiceStatusLevel.available,
+  summary: 'Service is working',
+};
+const availableCoreStatus: CoreStatus = {
   elasticsearch: available,
   http: available,
   metrics: available,
   savedObjects: available,
   uiSettings: available,
-});
+};
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<StatusServiceSetup> = {
-    core$: mockCoreStatus,
+    core$: new BehaviorSubject(availableCoreStatus),
   };
 
   return setupContract;
@@ -46,7 +49,7 @@ const createSetupContractMock = () => {
 
 const createInternalSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalStatusServiceSetup> = {
-    core$: mockCoreStatus,
+    core$: new BehaviorSubject(availableCoreStatus),
     overall$: of(available),
   };
 

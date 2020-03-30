@@ -660,8 +660,6 @@ export interface CoreStart {
 // @public
 export interface CoreStatus {
     // (undocumented)
-    [serviceName: string]: ServiceStatus;
-    // (undocumented)
     elasticsearch: ServiceStatus;
     // (undocumented)
     savedObjects: ServiceStatus;
@@ -2211,8 +2209,8 @@ export interface SavedObjectsServiceStart {
 export interface SavedObjectStatusMeta {
     // (undocumented)
     migratedIndices: {
+        [status: string]: number;
         skipped: number;
-        patched: number;
         migrated: number;
     };
 }
@@ -2286,19 +2284,13 @@ export class ScopedClusterClient implements IScopedClusterClient {
     }
 
 // @public
-export type ServiceStatus<Meta extends Record<string, any> | unknown = unknown> = {
-    level: ServiceStatusLevel.available;
-    summary?: string;
+export interface ServiceStatus<Meta extends Record<string, any> | unknown = unknown> {
     detail?: string;
     documentationUrl?: string;
-    meta?: Meta;
-} | {
     level: ServiceStatusLevel;
-    summary: string;
-    detail?: string;
-    documentationUrl?: string;
     meta?: Meta;
-};
+    summary: string;
+}
 
 // @public
 export enum ServiceStatusLevel {
