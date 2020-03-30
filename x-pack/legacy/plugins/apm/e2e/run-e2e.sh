@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-set -x
+
+### Add verbose output if running in the CI
+if [ -n "${JENKINS_URL}" ] ; then
+  set -x
+fi
 
 # variables
 KIBANA_PORT=5701
