@@ -24,7 +24,6 @@
  * directly where they are needed.
  */
 
-export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../../../../../plugins/dashboard/public';
 export {
   VisSavedObject,
