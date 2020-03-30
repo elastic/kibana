@@ -84,7 +84,7 @@ describe('resolveSavedObjects', () => {
         },
       } as unknown) as IndexPatternsContract;
 
-      const services = [
+      const services = ([
         {
           type: 'search',
           get: async () => {
@@ -124,7 +124,7 @@ describe('resolveSavedObjects', () => {
             };
           },
         },
-      ] as SavedObjectLoader[];
+      ] as unknown) as SavedObjectLoader[];
 
       const overwriteAll = false;
 
@@ -176,7 +176,7 @@ describe('resolveSavedObjects', () => {
         },
       } as unknown) as IndexPatternsContract;
 
-      const services = [
+      const services = ([
         {
           type: 'search',
           get: async () => {
@@ -217,7 +217,7 @@ describe('resolveSavedObjects', () => {
             };
           },
         },
-      ] as SavedObjectLoader[];
+      ] as unknown) as SavedObjectLoader[];
 
       const overwriteAll = false;
 
@@ -237,33 +237,38 @@ describe('resolveSavedObjects', () => {
 
   describe('resolveIndexPatternConflicts', () => {
     it('should resave resolutions', async () => {
-      const hydrateIndexPattern = jest.fn();
       const save = jest.fn();
 
-      const conflictedIndexPatterns = [
+      const conflictedIndexPatterns = ([
         {
           obj: {
-            searchSource: {
-              getOwnField: (field: string) => {
-                return field === 'index' ? '1' : undefined;
+            save,
+          },
+          doc: {
+            _source: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: '1',
+                }),
               },
             },
-            hydrateIndexPattern,
-            save,
           },
         },
         {
           obj: {
-            searchSource: {
-              getOwnField: (field: string) => {
-                return field === 'index' ? '3' : undefined;
-              },
-            },
-            hydrateIndexPattern,
             save,
           },
+          doc: {
+            _source: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: '3',
+                }),
+              },
+            },
+          },
         },
-      ];
+      ] as unknown) as Array<{ obj: SavedObject; doc: any }>;
 
       const resolutions = [
         {
@@ -282,43 +287,49 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      await resolveIndexPatternConflicts(resolutions, conflictedIndexPatterns, overwriteAll);
-      expect(hydrateIndexPattern.mock.calls.length).toBe(2);
+      await resolveIndexPatternConflicts(resolutions, conflictedIndexPatterns, overwriteAll, ({
+        get: (id: string) => Promise.resolve({ id }),
+      } as unknown) as IndexPatternsContract);
+      expect(conflictedIndexPatterns[0].obj.searchSource!.getField('index')!.id).toEqual('2');
+      expect(conflictedIndexPatterns[1].obj.searchSource!.getField('index')!.id).toEqual('4');
       expect(save.mock.calls.length).toBe(2);
       expect(save).toHaveBeenCalledWith({ confirmOverwrite: !overwriteAll });
-      expect(hydrateIndexPattern).toHaveBeenCalledWith('2');
-      expect(hydrateIndexPattern).toHaveBeenCalledWith('4');
     });
 
     it('should resolve filter index conflicts', async () => {
-      const hydrateIndexPattern = jest.fn();
       const save = jest.fn();
 
-      const conflictedIndexPatterns = [
+      const conflictedIndexPatterns = ([
         {
           obj: {
-            searchSource: {
-              getOwnField: (field: string) => {
-                return field === 'index' ? '1' : [{ meta: { index: 'filterIndex' } }];
-              },
-              setField: jest.fn(),
-            },
-            hydrateIndexPattern,
             save,
+          },
+          doc: {
+            _source: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: '1',
+                  filter: [{ meta: { index: 'filterIndex' } }],
+                }),
+              },
+            },
           },
         },
         {
           obj: {
-            searchSource: {
-              getOwnField: (field: string) => {
-                return field === 'index' ? '3' : undefined;
-              },
-            },
-            hydrateIndexPattern,
             save,
           },
+          doc: {
+            _source: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: '3',
+                }),
+              },
+            },
+          },
         },
-      ];
+      ] as unknown) as Array<{ obj: SavedObject; doc: any }>;
 
       const resolutions = [
         {
@@ -337,9 +348,11 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      await resolveIndexPatternConflicts(resolutions, conflictedIndexPatterns, overwriteAll);
+      await resolveIndexPatternConflicts(resolutions, conflictedIndexPatterns, overwriteAll, ({
+        get: (id: string) => Promise.resolve({ id }),
+      } as unknown) as IndexPatternsContract);
 
-      expect(conflictedIndexPatterns[0].obj.searchSource.setField).toHaveBeenCalledWith('filter', [
+      expect(conflictedIndexPatterns[0].obj.searchSource!.getField('filter')).toEqual([
         { meta: { index: 'newFilterIndex' } },
       ]);
       expect(save.mock.calls.length).toBe(2);

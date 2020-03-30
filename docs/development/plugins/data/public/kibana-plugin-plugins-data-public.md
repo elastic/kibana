@@ -45,6 +45,7 @@
 |  [getSearchErrorType({ message })](./kibana-plugin-plugins-data-public.getsearcherrortype.md) |  |
 |  [getTime(indexPattern, timeRange, forceNow)](./kibana-plugin-plugins-data-public.gettime.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-public.plugin.md) |  |
+|  [serializeSearchSource(searchSource)](./kibana-plugin-plugins-data-public.serializesearchsource.md) | Serializes a <code>SearchSource</code> instance to a JSON string and a set of referenced objects. Use this method to get a representation of the search source which can be stored in a saved object.<!-- -->The references returned by this function can be mixed with other references in the same object, however make sure there are no name-collisions. The references will be named <code>kibanaSavedObjectMeta.searchSourceJSON.index</code> and <code>kibanaSavedObjectMeta.searchSourceJSON.filter[&lt;number&gt;].meta.index</code>.<!-- -->Using <code>parseSearchSource</code>, the instance can be re-created. |
 
 ## Interfaces
 
@@ -110,6 +111,7 @@
 |  [FilterBar](./kibana-plugin-plugins-data-public.filterbar.md) |  |
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
+|  [parseSearchSource](./kibana-plugin-plugins-data-public.parsesearchsource.md) | Deserializes a json string and a set of referenced objects to a <code>SearchSource</code> instance. Use this method to re-create the search source serialized using <code>serializeSearchSource</code> |
 |  [QueryStringInput](./kibana-plugin-plugins-data-public.querystringinput.md) |  |
 |  [search](./kibana-plugin-plugins-data-public.search.md) |  |
 |  [SearchBar](./kibana-plugin-plugins-data-public.searchbar.md) |  |

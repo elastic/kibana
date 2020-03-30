@@ -38,6 +38,17 @@ function getFilters(filterField: SearchSourceFields['filter']): Filter[] {
   return [filterField];
 }
 
+/**
+ * Serializes a `SearchSource` instance to a JSON string and a set of referenced objects.
+ * Use this method to get a representation of the search source which can be stored in a saved object.
+ *
+ * The references returned by this function can be mixed with other references in the same object,
+ * however make sure there are no name-collisions. The references will be named `kibanaSavedObjectMeta.searchSourceJSON.index`
+ * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
+ *
+ * Using `parseSearchSource`, the instance can be re-created.
+ * @param searchSource The search source to serialize
+ * @public */
 export function serializeSearchSource(searchSource: ISearchSource) {
   const references: SavedObjectReference[] = [];
 

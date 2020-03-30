@@ -33,6 +33,8 @@ export const searchStartMock: jest.Mocked<ISearchStart> = {
   aggs: searchAggsStartMock(),
   setInterceptor: jest.fn(),
   search: jest.fn(),
+  parseSearchSource: jest.fn(),
+  serializeSearchSource: jest.fn(),
   __LEGACY: {
     AggConfig: jest.fn() as any,
     AggType: jest.fn(),
