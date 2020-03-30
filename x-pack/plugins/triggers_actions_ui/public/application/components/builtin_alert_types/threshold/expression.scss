@@ -1,3 +1,11 @@
 .actAlertVisualization__chart {
   height: $euiSize * 15;
 }
+
+.euiComboBoxOptionsList,
+.euiFilterSelectItem,
+.ReactVirtualized__List,
+.ReactVirtualized__Grid__innerScrollContainer {
+  width: auto;
+  min-width: $euiSize * 29;
+}
