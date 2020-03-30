@@ -5,7 +5,6 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
   disabledFields={Object {}}
   fields={
     Object {
-      "mode": "sniff",
       "name": "",
       "nodeConnections": 3,
       "proxyAddress": "",
@@ -805,6 +804,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                     data-test-subj="remoteClusterFormServerNameFormRow"
                     describedByIds={Array []}
                     display="row"
+                    error={null}
                     fullWidth={true}
                     hasChildLabel={true}
                     hasEmptyLabelSpace={false}
@@ -827,10 +827,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         }
                       />
                     }
+                    isInvalid={false}
                     label={
                       <FormattedMessage
                         defaultMessage="Server name (optional)"
-                        id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
+                        id="xpack.remoteClusters.remoteClusterForm.fieldServerNameOptionalLabel"
                         values={Object {}}
                       />
                     }
@@ -845,18 +846,21 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         className="euiFormRow__labelWrapper"
                       >
                         <EuiFormLabel
+                          aria-invalid={false}
                           className="euiFormRow__label"
                           htmlFor="mockId"
                           isFocused={false}
+                          isInvalid={false}
                           type="label"
                         >
                           <label
+                            aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
                             htmlFor="mockId"
                           >
                             <FormattedMessage
                               defaultMessage="Server name (optional)"
-                              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
+                              id="xpack.remoteClusters.remoteClusterForm.fieldServerNameOptionalLabel"
                               values={Object {}}
                             >
                               Server name (optional)
@@ -871,6 +875,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           aria-describedby="mockId-help"
                           fullWidth={true}
                           id="mockId"
+                          isInvalid={false}
                           onBlur={[Function]}
                           onChange={[Function]}
                           onFocus={[Function]}
@@ -886,7 +891,9 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               <div
                                 className="euiFormControlLayout__childrenWrapper"
                               >
-                                <EuiValidatableControl>
+                                <EuiValidatableControl
+                                  isInvalid={false}
+                                >
                                   <input
                                     aria-describedby="mockId-help"
                                     className="euiFieldText euiFieldText--fullWidth"
