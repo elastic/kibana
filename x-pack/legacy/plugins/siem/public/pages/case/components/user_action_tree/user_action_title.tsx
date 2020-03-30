@@ -34,7 +34,7 @@ interface UserActionTitleProps {
   labelTitle: JSX.Element;
   linkId?: string | null;
   updatedAt?: string | null;
-  userName: string;
+  username: string;
   onEdit?: (id: string) => void;
   onQuote?: (id: string) => void;
   outlineComment?: (id: string) => void;
@@ -48,7 +48,7 @@ export const UserActionTitle = ({
   labelQuoteAction,
   labelTitle,
   linkId,
-  userName,
+  username,
   updatedAt,
   onEdit,
   onQuote,
@@ -105,7 +105,7 @@ export const UserActionTitle = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
             <EuiFlexItem grow={false}>
-              <strong>{userName}</strong>
+              <strong>{username}</strong>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{labelTitle}</EuiFlexItem>
             <EuiFlexItem grow={false}>

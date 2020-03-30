@@ -140,7 +140,6 @@ export class VisualizePlugin implements Plugin {
           chrome: coreStart.chrome,
           data: dataStart,
           embeddable,
-          getBasePath: core.http.basePath.get,
           indexPatterns: dataStart.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
