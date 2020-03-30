@@ -29,6 +29,8 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/pl
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
 import { LogsRouter, MetricsRouter } from './routers';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
+import { getAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -38,6 +40,7 @@ export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   dataEnhanced: DataEnhancedSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ClientPluginsStart {
@@ -58,6 +61,8 @@ export class Plugin
   setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
 
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+
     core.application.register({
       id: 'logs',
       title: i18n.translate('xpack.infra.logs.pluginTitle', {
@@ -76,7 +81,8 @@ export class Plugin
           coreStart,
           plugins,
           params,
-          LogsRouter
+          LogsRouter,
+          pluginsSetup.triggers_actions_ui
         );
       },
     });
@@ -99,7 +105,8 @@ export class Plugin
           coreStart,
           plugins,
           params,
-          MetricsRouter
+          MetricsRouter,
+          pluginsSetup.triggers_actions_ui
         );
       },
     });

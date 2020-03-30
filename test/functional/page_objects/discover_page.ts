@@ -255,14 +255,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async clickFieldListPlusFilter(field: string, value: string) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await find.clickByCssSelector(`[data-test-subj="plus-${field}-${value}"]`);
+      await testSubjects.click(`plus-${field}-${value}`);
       await header.waitUntilLoadingHasFinished();
     }
 
     public async clickFieldListMinusFilter(field: string, value: string) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await find.clickByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]');
+      await testSubjects.click(`minus-${field}-${value}`);
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -299,6 +299,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         'data-render-complete',
         'true'
       );
+    }
+    public async getNrOfFetches() {
+      const el = await find.byCssSelector('[data-fetch-counter]');
+      const nr = await el.getAttribute('data-fetch-counter');
+      return Number(nr);
     }
   }
 

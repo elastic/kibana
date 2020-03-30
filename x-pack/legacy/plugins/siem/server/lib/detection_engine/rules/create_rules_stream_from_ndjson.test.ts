@@ -49,6 +49,7 @@ describe('create_rules_stream_from_ndjson', () => {
       ]);
       expect(result).toEqual([
         {
+          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -69,10 +70,12 @@ describe('create_rules_stream_from_ndjson', () => {
           max_signals: 100,
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
         {
+          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -93,6 +96,7 @@ describe('create_rules_stream_from_ndjson', () => {
           max_signals: 100,
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -135,6 +139,7 @@ describe('create_rules_stream_from_ndjson', () => {
       ]);
       expect(result).toEqual([
         {
+          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -155,10 +160,12 @@ describe('create_rules_stream_from_ndjson', () => {
           tags: [],
           lists: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
         {
+          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -179,6 +186,7 @@ describe('create_rules_stream_from_ndjson', () => {
           lists: [],
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -204,6 +212,7 @@ describe('create_rules_stream_from_ndjson', () => {
       ]);
       expect(result).toEqual([
         {
+          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -224,10 +233,12 @@ describe('create_rules_stream_from_ndjson', () => {
           lists: [],
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
         {
+          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -248,6 +259,7 @@ describe('create_rules_stream_from_ndjson', () => {
           lists: [],
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -273,6 +285,7 @@ describe('create_rules_stream_from_ndjson', () => {
       ]);
       const resultOrError = result as Error[];
       expect(resultOrError[0]).toEqual({
+        actions: [],
         rule_id: 'rule-1',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -293,11 +306,13 @@ describe('create_rules_stream_from_ndjson', () => {
         lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
       expect(resultOrError[1].message).toEqual('Unexpected token , in JSON at position 1');
       expect(resultOrError[2]).toEqual({
+        actions: [],
         rule_id: 'rule-2',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -318,6 +333,7 @@ describe('create_rules_stream_from_ndjson', () => {
         lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
@@ -342,6 +358,7 @@ describe('create_rules_stream_from_ndjson', () => {
       ]);
       const resultOrError = result as BadRequestError[];
       expect(resultOrError[0]).toEqual({
+        actions: [],
         rule_id: 'rule-1',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -362,6 +379,7 @@ describe('create_rules_stream_from_ndjson', () => {
         lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
@@ -369,6 +387,7 @@ describe('create_rules_stream_from_ndjson', () => {
         'child "description" fails because ["description" is required]'
       );
       expect(resultOrError[2]).toEqual({
+        actions: [],
         rule_id: 'rule-2',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -389,6 +408,7 @@ describe('create_rules_stream_from_ndjson', () => {
         lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });

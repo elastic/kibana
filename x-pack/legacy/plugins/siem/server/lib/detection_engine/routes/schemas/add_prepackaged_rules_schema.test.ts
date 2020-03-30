@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertAction } from '../../../../../../../../plugins/alerting/common';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { ThreatParams, PrepackagedRules } from '../../types';
 import { addPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
@@ -1282,6 +1284,200 @@ describe('add prepackaged rules schema', () => {
     ).toEqual(
       'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
     );
+  });
+
+  test('The default for "actions" will be an empty array', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        index: ['auditbeat-*'],
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.actions
+    ).toEqual([]);
+  });
+
+  test('You cannot send in an array of actions that are missing "group"', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<PrepackagedRules, 'actions'>> & {
+          actions: Array<Omit<RuleAlertAction, 'group'>>;
+        }
+      >({
+        actions: [
+          {
+            id: 'id',
+            action_type_id: 'actionTypeId',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "group" fails because ["group" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "id"', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<PrepackagedRules, 'actions'>> & {
+          actions: Array<Omit<RuleAlertAction, 'id'>>;
+        }
+      >({
+        actions: [
+          {
+            group: 'group',
+            action_type_id: 'action_type_id',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "id" fails because ["id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<PrepackagedRules, 'actions'>> & {
+          actions: Array<Omit<RuleAlertAction, 'action_type_id'>>;
+        }
+      >({
+        actions: [
+          {
+            group: 'group',
+            id: 'id',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "params"', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<PrepackagedRules, 'actions'>> & {
+          actions: Array<Omit<RuleAlertAction, 'params'>>;
+        }
+      >({
+        actions: [
+          {
+            group: 'group',
+            id: 'id',
+            action_type_id: 'action_type_id',
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "params" fails because ["params" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are including "actionTypeId', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<PrepackagedRules, 'actions'>> & {
+          actions: AlertAction[];
+        }
+      >({
+        actions: [
+          {
+            group: 'group',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
+    );
+  });
+
+  test('The default for "throttle" will be null', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        index: ['auditbeat-*'],
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.throttle
+    ).toEqual(null);
   });
 
   describe('note', () => {

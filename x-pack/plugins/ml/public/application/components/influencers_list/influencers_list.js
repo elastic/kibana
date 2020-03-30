@@ -57,7 +57,7 @@ function Influencer({ influencerFieldName, influencerFilter, valueData }) {
 
   return (
     <div data-test-subj={`mlInfluencerEntry field-${influencerFieldName}`}>
-      <div className="field-label">
+      <div className="field-label" data-test-subj="mlInfluencerEntryFieldLabel">
         {influencerFieldName !== 'mlcategory' ? (
           <EntityCell
             entityName={influencerFieldName}

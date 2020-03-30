@@ -23,7 +23,7 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
 import { ControlsTab, ControlsTabUiProps } from './controls_tab';
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from '../../../../../../plugins/visualizations/public';
 
 const indexPatternsMock = {
   get: getIndexPatternMock,

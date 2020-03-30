@@ -19,29 +19,29 @@
 
 import { get, isEmpty } from 'lodash';
 
-import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
-import { AggTypeState, AggParamsState } from './agg_params_state';
-import { AggParamEditorProps } from './agg_param_props';
-import { aggParamsMap } from './agg_params_map';
 import {
-  aggTypeFilters,
-  aggTypeFieldFilters,
-  aggTypes,
+  AggTypeFieldFilters,
   IAggConfig,
   AggParam,
   IFieldParamType,
   IAggType,
-} from '../legacy_imports';
+  IndexPattern,
+  IndexPatternField,
+} from 'src/plugins/data/public';
+import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
+import { AggTypeState, AggParamsState } from './agg_params_state';
+import { AggParamEditorProps } from './agg_param_props';
+import { aggParamsMap } from './agg_params_map';
 import { EditorConfig } from './utils';
 import { Schema, getSchemaByName } from '../schemas';
+import { search } from '../../../../../plugins/data/public';
+import { EditorVisState } from './sidebar/state/reducers';
 
 interface ParamInstanceBase {
   agg: IAggConfig;
   editorConfig: EditorConfig;
   metricAggs: IAggConfig[];
-  state: VisState;
+  state: EditorVisState;
   schemas: Schema[];
   hideCustomLabel?: boolean;
 }
@@ -53,14 +53,10 @@ export interface ParamInstance extends ParamInstanceBase {
   value: unknown;
 }
 
-function getAggParamsToRender({
-  agg,
-  editorConfig,
-  metricAggs,
-  state,
-  schemas,
-  hideCustomLabel,
-}: ParamInstanceBase) {
+function getAggParamsToRender(
+  { agg, editorConfig, metricAggs, state, schemas, hideCustomLabel }: ParamInstanceBase,
+  aggTypeFieldFilters: AggTypeFieldFilters
+) {
   const params = {
     basic: [] as ParamInstance[],
     advanced: [] as ParamInstance[],
@@ -136,13 +132,14 @@ function getAggParamsToRender({
 }
 
 function getAggTypeOptions(
+  aggTypes: any,
   agg: IAggConfig,
   indexPattern: IndexPattern,
   groupName: string,
   allowedAggs: string[]
 ): ComboBoxGroupedOptions<IAggType> {
-  const aggTypeOptions = aggTypeFilters.filter(
-    (aggTypes as any)[groupName],
+  const aggTypeOptions = search.aggs.aggTypeFilters.filter(
+    aggTypes[groupName],
     indexPattern,
     agg,
     allowedAggs

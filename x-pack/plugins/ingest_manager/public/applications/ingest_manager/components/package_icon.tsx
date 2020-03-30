@@ -25,7 +25,7 @@ export const PackageIcon: React.FunctionComponent<{
 
 const usePackageIcon = (packageName: string, version?: string, icons?: Package['icons']) => {
   const { toImage } = useLinks();
-  const [iconType, setIconType] = useState<string>('');
+  const [iconType, setIconType] = useState<string>(''); // FIXME: use `empty` icon during initialization - see: https://github.com/elastic/kibana/issues/60622
   const pkgKey = `${packageName}-${version ?? ''}`;
 
   // Generates an icon path or Eui Icon name based on an icon list from the package

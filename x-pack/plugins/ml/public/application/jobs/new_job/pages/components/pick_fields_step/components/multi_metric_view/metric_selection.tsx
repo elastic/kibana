@@ -79,7 +79,6 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     aggFieldPairList.forEach(pair => {
       jobCreator.addDetector(pair.agg, pair.field);
     });
-    jobCreator.calculateModelMemoryLimit();
     jobCreatorUpdate();
     loadCharts();
     setIsValid(aggFieldPairList.length > 0);
@@ -115,7 +114,6 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     } else {
       setFieldValues([]);
     }
-    jobCreator.calculateModelMemoryLimit();
   }, [splitField]);
 
   // watch for changes in the split field values

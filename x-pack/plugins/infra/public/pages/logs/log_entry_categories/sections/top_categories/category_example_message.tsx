@@ -44,11 +44,8 @@ export const CategoryExampleMessage: React.FunctionComponent<{
       <LogEntryColumn {...columnWidths[messageColumnId]}>
         <LogEntryMessageColumn
           columnValue={{
-            __typename: 'InfraLogEntryMessageColumn' as const,
             columnId: messageColumnId,
-            message: [
-              { __typename: 'InfraLogMessageFieldSegment', field: 'message', value: message },
-            ],
+            message: [{ field: 'message', value: message, highlights: [] }],
           }}
           highlights={noHighlights}
           isHovered={false}
@@ -60,10 +57,10 @@ export const CategoryExampleMessage: React.FunctionComponent<{
       <LogEntryColumn {...columnWidths[datasetColumnId]}>
         <LogEntryFieldColumn
           columnValue={{
-            __typename: 'InfraLogEntryFieldColumn' as const,
             columnId: datasetColumnId,
             field: 'event.dataset',
             value: encodedDatasetFieldValue,
+            highlights: [],
           }}
           highlights={noHighlights}
           isHovered={false}
@@ -103,19 +100,16 @@ const columnWidths = {
 
 export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
   {
-    __typename: 'InfraSourceTimestampLogColumn',
     timestampColumn: {
       id: timestampColumnId,
     },
   },
   {
-    __typename: 'InfraSourceMessageLogColumn',
     messageColumn: {
       id: messageColumnId,
     },
   },
   {
-    __typename: 'InfraSourceFieldLogColumn',
     fieldColumn: {
       field: 'event.dataset',
       id: datasetColumnId,

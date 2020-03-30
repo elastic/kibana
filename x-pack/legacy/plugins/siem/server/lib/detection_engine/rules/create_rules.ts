@@ -6,13 +6,15 @@
 
 import { Alert } from '../../../../../../../plugins/alerting/common';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { hasListsFeature } from '../feature_flags';
 
-export const createRules = ({
+export const createRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
+  actions,
   anomalyThreshold,
   description,
   enabled,
@@ -37,6 +39,7 @@ export const createRules = ({
   severity,
   tags,
   threat,
+  throttle,
   to,
   type,
   references,
@@ -82,8 +85,8 @@ export const createRules = ({
       },
       schedule: { interval },
       enabled,
-      actions: [], // TODO: Create and add actions here once we have email, etc...
-      throttle: null,
+      actions: actions?.map(transformRuleToAlertAction),
+      throttle,
     },
   });
 };
