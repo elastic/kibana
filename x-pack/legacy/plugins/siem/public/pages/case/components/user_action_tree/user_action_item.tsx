@@ -157,6 +157,7 @@ export const UserActionItem = ({
                 labelQuoteAction={labelQuoteAction}
                 labelTitle={labelTitle ?? <></>}
                 linkId={linkId}
+                fullName={fullName}
                 username={username}
                 updatedAt={updatedAt}
                 onEdit={onEdit}

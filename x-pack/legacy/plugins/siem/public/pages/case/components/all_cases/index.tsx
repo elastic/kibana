@@ -22,7 +22,7 @@ import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
-import { Case, FilterOptions, SortFieldCase } from '../../../../containers/case/types';
+import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../../../containers/case/types';
 import { useGetCases, UpdateCase } from '../../../../containers/case/use_get_cases';
 import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
@@ -117,11 +117,24 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     isDisplayConfirmDeleteModal,
   } = useDeleteCases();
 
-  const { dispatchResetIsUpdated, isUpdated, updateBulkStatus } = useUpdateCases();
+  // Update case
+  const {
+    dispatchResetIsUpdated,
+    isLoading: isUpdating,
+    isUpdated,
+    updateBulkStatus,
+  } = useUpdateCases();
+  const [deleteThisCase, setDeleteThisCase] = useState({
+    title: '',
+    id: '',
+  });
+  const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
 
   const refreshCases = useCallback(() => {
     refetchCases(filterOptions, queryParams);
     fetchCasesStatus();
+    setSelectedCases([]);
+    setDeleteBulk([]);
   }, [filterOptions, queryParams]);
 
   useEffect(() => {
@@ -134,11 +147,6 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       dispatchResetIsUpdated();
     }
   }, [isDeleted, isUpdated]);
-  const [deleteThisCase, setDeleteThisCase] = useState({
-    title: '',
-    id: '',
-  });
-  const [deleteBulk, setDeleteBulk] = useState<string[]>([]);
   const confirmDeleteModal = useMemo(
     () => (
       <ConfirmDeleteCaseModal
@@ -148,7 +156,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         onCancel={handleToggleModal}
         onConfirm={handleOnDeleteConfirm.bind(
           null,
-          deleteBulk.length > 0 ? deleteBulk : [deleteThisCase.id]
+          deleteBulk.length > 0 ? deleteBulk : [deleteThisCase]
         )}
       />
     ),
@@ -160,10 +168,20 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     setDeleteThisCase(deleteCase);
   }, []);
 
-  const toggleBulkDeleteModal = useCallback((deleteCases: string[]) => {
-    handleToggleModal();
-    setDeleteBulk(deleteCases);
-  }, []);
+  const toggleBulkDeleteModal = useCallback(
+    (caseIds: string[]) => {
+      handleToggleModal();
+      if (caseIds.length === 1) {
+        const singleCase = selectedCases.find(theCase => theCase.id === caseIds[0]);
+        if (singleCase) {
+          return setDeleteThisCase({ id: singleCase.id, title: singleCase.title });
+        }
+      }
+      const convertToDeleteCases: DeleteCase[] = caseIds.map(id => ({ id }));
+      setDeleteBulk(convertToDeleteCases);
+    },
+    [selectedCases]
+  );
 
   const handleUpdateCaseStatus = useCallback(
     (status: string) => {
@@ -315,7 +333,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
-      {(isCasesLoading || isDeleting) && !isDataEmpty && (
+      {(isCasesLoading || isDeleting || isUpdating) && !isDataEmpty && (
         <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
       )}
       <Panel loading={isCasesLoading}>
