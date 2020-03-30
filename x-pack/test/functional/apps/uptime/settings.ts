@@ -13,18 +13,18 @@ import {
 import { makeChecks } from '../../../api_integration/apis/uptime/graphql/helpers/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const { uptime } = getPageObjects(['uptime']);
-  const { settings } = getService('uptime');
+  const { uptime: uptimePage } = getPageObjects(['uptime']);
+  const uptime = getService('uptime');
 
   const es = getService('es');
 
   // Flaky https://github.com/elastic/kibana/issues/60866
   describe('uptime settings page', () => {
-    const settingsPage = () => settings;
+    const settingsPage = () => uptime.settings;
     beforeEach('navigate to clean app root', async () => {
       // make 10 checks
       await makeChecks(es, 'myMonitor', 1, 1, 1);
-      await uptime.goToRoot();
+      await uptimePage.goToRoot();
     });
 
     it('loads the default settings', async () => {
@@ -61,10 +61,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await settingsPage().changeHeartbeatIndicesInput(newFieldValues.heartbeatIndices);
       await settingsPage().apply();
 
-      await uptime.goToRoot();
+      await uptimePage.goToRoot();
 
       // We should no longer find any monitors since the new pattern matches nothing
-      await uptime.pageHasDataMissing();
+      await uptimePage.pageHasDataMissing();
 
       // Verify that the settings page shows the value we previously saved
       await settings.go();
