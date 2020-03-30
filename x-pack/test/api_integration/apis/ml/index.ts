@@ -26,5 +26,6 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./calculate_model_memory_limit'));
     loadTestFile(require.resolve('./categorization_field_examples'));
     loadTestFile(require.resolve('./get_module'));
+    loadTestFile(require.resolve('./recognize_module'));
   });
 }
