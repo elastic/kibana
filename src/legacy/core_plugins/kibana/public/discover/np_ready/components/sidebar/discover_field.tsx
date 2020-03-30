@@ -83,12 +83,25 @@ export function DiscoverField({
   useShortDots,
 }: DiscoverFieldProps) {
   const addLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
-    defaultMessage: 'Add {field} to table',
-    values: { field: field.name },
+    defaultMessage: 'Add',
   });
+  const addLabelAria = i18n.translate(
+    'kbn.discover.fieldChooser.discoverField.addButtonAriaLabel',
+    {
+      defaultMessage: 'Add {field} to table',
+      values: { field: field.name },
+    }
+  );
   const removeLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.removeButtonLabel', {
-    defaultMessage: 'Remove {field} from table',
+    defaultMessage: 'Remove',
   });
+  const removeLabelAria = i18n.translate(
+    'kbn.discover.fieldChooser.discoverField.removeButtonAriaLabel',
+    {
+      defaultMessage: 'Remove {field} from table',
+      values: { field: field.name },
+    }
+  );
 
   const toggleDisplay = (f: IndexPatternField) => {
     if (selected) {
@@ -138,6 +151,7 @@ export function DiscoverField({
                 toggleDisplay(field);
               }}
               data-test-subj={`fieldToggle-${field.name}`}
+              arial-label={addLabelAria}
             >
               {addLabel}
             </EuiButton>
@@ -152,6 +166,7 @@ export function DiscoverField({
                 toggleDisplay(field);
               }}
               data-test-subj={`fieldToggle-${field.name}`}
+              arial-label={removeLabelAria}
             >
               {removeLabel}
             </EuiButton>

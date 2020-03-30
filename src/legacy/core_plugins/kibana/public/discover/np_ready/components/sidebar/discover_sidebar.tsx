@@ -255,41 +255,44 @@ export function DiscoverSidebar({
           </>
         )}
         {popularFields.length > 0 && (
-          <ul
-            className={`dscFieldList dscFieldList--popular ${
-              !showFields ? 'hidden-sm hidden-xs' : ''
-            }`}
-            aria-labelledby="available_fields available_fields_popular"
-            data-test-subj={`fieldList-popular`}
-          >
-            <li className="dscSidebar__item">
-              <EuiTitle size="xxxs">
-                <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
-                  <FormattedMessage
-                    id="kbn.discover.fieldChooser.filter.popularTitle"
-                    defaultMessage="Popular"
-                  />
-                </h4>
-              </EuiTitle>
-            </li>
-            {popularFields.map((field: IndexPatternField, idx: number) => {
-              return (
-                <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
-                  <DiscoverField
-                    field={field}
-                    indexPattern={selectedIndexPattern}
-                    onAddField={onAddField}
-                    onRemoveField={onRemoveField}
-                    onAddFilter={onAddFilter}
-                    onShowDetails={onShowDetails}
-                    getDetails={getDetailsByField}
-                    showDetails={openFieldMap.get(field.name) || false}
-                    useShortDots={useShortDots}
-                  />
-                </li>
-              );
-            })}
-          </ul>
+          <div>
+            <EuiTitle
+              size="xxxs"
+              className={`dscFieldListHeader ${!showFields ? 'hidden-sm hidden-xs' : ''}`}
+            >
+              <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
+                <FormattedMessage
+                  id="kbn.discover.fieldChooser.filter.popularTitle"
+                  defaultMessage="Popular"
+                />
+              </h4>
+            </EuiTitle>
+            <ul
+              className={`dscFieldList dscFieldList--popular ${
+                !showFields ? 'hidden-sm hidden-xs' : ''
+              }`}
+              aria-labelledby="available_fields available_fields_popular"
+              data-test-subj={`fieldList-popular`}
+            >
+              {popularFields.map((field: IndexPatternField, idx: number) => {
+                return (
+                  <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
+                    <DiscoverField
+                      field={field}
+                      indexPattern={selectedIndexPattern}
+                      onAddField={onAddField}
+                      onRemoveField={onRemoveField}
+                      onAddFilter={onAddFilter}
+                      onShowDetails={onShowDetails}
+                      getDetails={getDetailsByField}
+                      showDetails={openFieldMap.get(field.name) || false}
+                      useShortDots={useShortDots}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         )}
 
         <ul

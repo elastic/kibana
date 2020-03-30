@@ -30,8 +30,12 @@
   padding-right: $euiSizeS;
 }
 
+.dscFieldListHeader {
+  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+  background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
+}
+
 .dscFieldList--popular {
-  padding-top: $euiSizeS;
   background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
 }
 
