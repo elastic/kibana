@@ -26,6 +26,6 @@ export function eventName(event: EndpointEvent | LegacyEndpointEvent): string {
   if (isLegacyEvent(event)) {
     return event.endgame.process_name ? event.endgame.process_name : '';
   } else {
-    return event.process.name;
+    return event.process.entity_id;
   }
 }

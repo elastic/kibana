@@ -46,6 +46,29 @@ export class EndpointAppConstants {
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
 }
 
+export interface NodeStats {
+  totalEvents: number;
+  totalAlerts: number;
+}
+
+export interface NodePagination {
+  nextChild?: string | null;
+  nextEvent?: string | null;
+  nextAncestor?: string | null;
+  nextAlert?: string | null;
+}
+
+export interface Node {
+  id: string;
+  children: Node[];
+  events: ResolverEvent[];
+  alerts: ResolverEvent[];
+  lifecycle: ResolverEvent[];
+  parent?: Node | null;
+  pagination: NodePagination;
+  stats?: NodeStats;
+}
+
 export interface AlertResultList {
   /**
    * The alerts restricted by page size.

@@ -5,34 +5,11 @@
  */
 
 import _ from 'lodash';
-import { ResolverEvent } from '../../../../common/types';
+import { ResolverEvent, Node, NodeStats, NodePagination } from '../../../../common/types';
 import { extractEntityID, extractParentEntityID } from './normalize';
 import { buildPaginationCursor } from './pagination';
 
-interface NodeStats {
-  totalEvents: number;
-  totalAlerts: number;
-}
-
-interface NodePagination {
-  nextChild?: string | null;
-  nextEvent?: string | null;
-  nextAncestor?: string | null;
-  nextAlert?: string | null;
-}
-
-interface Node {
-  id: string;
-  children: Node[];
-  events: ResolverEvent[];
-  alerts: ResolverEvent[];
-  lifecycle: ResolverEvent[];
-  parent?: Node | null;
-  pagination: NodePagination;
-  stats?: NodeStats;
-}
-
-type ExtractFunction = (event: ResolverEvent) => string;
+type ExtractFunction = (event: ResolverEvent) => string | undefined;
 
 function createNode(id: string): Node {
   return { id, children: [], pagination: {}, events: [], alerts: [], lifecycle: [] };
@@ -150,7 +127,6 @@ export class Tree {
   }
 
   public addAncestor(id: string, ...events: ResolverEvent[]) {
-    this.ensureCache(id);
     events.forEach(event => {
       const ancestorID = extractEntityID(event);
 
@@ -189,7 +165,9 @@ export class Tree {
       if (!this.cache[id]) {
         // these should maintain the ordering that elasticsearch hands back
         this.cache[id] = createNode(id);
-        this.cache[parent].children.push(this.cache[id]);
+        if (parent !== undefined) {
+          this.cache[parent].children.push(this.cache[id]);
+        }
       }
       this.cache[id].lifecycle.push(event);
     });
@@ -235,8 +213,8 @@ export class Tree {
     });
   }
 
-  private ensureCache(id: string) {
-    if (!this.cache[id]) {
+  private ensureCache(id: string | undefined) {
+    if (id === undefined || !this.cache[id]) {
       throw new Error('dangling node');
     }
   }

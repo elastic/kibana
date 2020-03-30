@@ -66,7 +66,9 @@ export class Fetcher {
     tree.addAncestor(node, ...results);
 
     const next = extractParentEntityID(results[0]);
-    await this.doAncestors(tree, id, next, levels - 1);
+    if (next !== undefined) {
+      await this.doAncestors(tree, next, id, levels - 1);
+    }
   }
 
   private async doAlerts(tree: Tree, limit: number, after?: string) {
