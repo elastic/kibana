@@ -18,19 +18,17 @@
  */
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { VisualizeListingTable } from './visualize_listing_table';
+import { withI18nContext } from './visualize_listing_table';
 
 import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
-import { wrapInI18nContext } from '../../legacy_imports';
-
 import { syncQueryStateWithUrl } from '../../../../../../../plugins/data/public';
 
-export function initListingDirective(app) {
+export function initListingDirective(app, I18nContext) {
   app.directive('visualizeListingTable', reactDirective =>
-    reactDirective(wrapInI18nContext(VisualizeListingTable))
+    reactDirective(withI18nContext(I18nContext))
   );
 }
 
