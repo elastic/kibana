@@ -239,7 +239,7 @@ def call(Map params = [:], Closure closure) {
 
 def runFunctionalTestSuite(type, testSuite) {
   // TODO add finishedSuites somewhere
-  def testMetadataPath = pwd() + "target/test_metadata_${type}_${env.TASK_QUEUE_PROCESS_ID}.json"
+  def testMetadataPath = pwd() + "/target/test_metadata_${type}_${env.TASK_QUEUE_PROCESS_ID}.json"
   def byFile = [:]
   testSuite.files.each { byFile[it.file] = it }
 
@@ -274,7 +274,7 @@ def runFunctionalTestSuite(type, testSuite) {
                 if [[ ! -d .es ]]; then
                   cp -R ${WORKSPACE}/.es ./
                 fi
-              """)
+              """, "Copy ES install cache")
             } catch (ex) {
               buildUtils.printStacktrace(ex)
             }
