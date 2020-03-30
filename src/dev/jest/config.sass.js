@@ -17,20 +17,21 @@
  * under the License.
  */
 
-// # Run Jest tests
-//
-// All args will be forwarded directly to Jest, e.g. to watch tests run:
-//
-//     node scripts/jest --watch
-//
-// or to build code coverage:
-//
-//     node scripts/jest --coverage
-//
-// See all cli options in https://facebook.github.io/jest/docs/cli.html
-
-var resolve = require('path').resolve;
-process.argv.push('--config', resolve(__dirname, '../src/dev/jest/projects.js'));
-
-require('../src/setup_node_env');
-require('../src/dev/jest/cli');
+export default {
+  rootDir: '../../..',
+  displayName: 'sass',
+  roots: ['<rootDir>/src/legacy/server/sass'],
+  moduleFileExtensions: ['js', 'json', 'ts', 'node'],
+  modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
+  setupFiles: ['<rootDir>/src/dev/jest/setup/babel_polyfill.js'],
+  testEnvironment: 'node',
+  testMatch: ['**/*.test.{js,ts}'],
+  transform: {
+    '^.+\\.(js|ts?)$': '<rootDir>/src/dev/jest/babel_transform.js',
+  },
+  transformIgnorePatterns: [
+    // ignore all node_modules except monaco-editor which requires babel transforms to handle dynamic import()
+    // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
+    '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
+  ],
+};

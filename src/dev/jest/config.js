@@ -85,6 +85,7 @@ export default {
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
+    '<rootDir>/src/legacy/server/sass',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],
   transform: {
