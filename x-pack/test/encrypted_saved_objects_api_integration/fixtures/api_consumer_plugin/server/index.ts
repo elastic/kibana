@@ -52,14 +52,15 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
       },
       async (context, request, response) => {
         const [, { encryptedSavedObjects }] = await core.getStartServices();
-        const namespace = deps.spaces.spacesService.getSpaceId(request);
+        const spaceId = deps.spaces.spacesService.getSpaceId(request);
+        const namespace = deps.spaces.spacesService.spaceIdToNamespace(spaceId);
 
         try {
           return response.ok({
             body: await encryptedSavedObjects.getDecryptedAsInternalUser(
               SAVED_OBJECT_WITH_SECRET_TYPE,
               request.params.id,
-              { namespace: namespace === 'default' ? undefined : namespace }
+              { namespace }
             ),
           });
         } catch (err) {
