@@ -42,7 +42,7 @@ interface EntityControlState {
 export const EMPTY_FIELD_VALUE_LABEL = i18n.translate(
   'xpack.ml.timeSeriesExplorer.emptyPartitionFieldLabel.',
   {
-    defaultMessage: 'blank (empty string)',
+    defaultMessage: '"" (empty string)',
   }
 );
 
