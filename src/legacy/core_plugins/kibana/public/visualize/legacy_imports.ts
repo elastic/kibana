@@ -24,8 +24,6 @@
  * directly where they are needed.
  */
 
-export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
 export {
   VisSavedObject,
