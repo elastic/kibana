@@ -61,7 +61,7 @@ def call(Map options = [:], Closure closure) {
 }
 
 def taskSleep() {
-  sh """#!/bin/bash
+  sh(script: """#!/bin/bash
     TIMESTAMP=\$(date '+%s' -d "0 seconds ago")
     for (( i=1; i<=240; i++ ))
     do
@@ -72,7 +72,7 @@ def taskSleep() {
         sleep 5
       fi
     done
-  """
+  """, label: "Waiting for new tasks..."
 }
 
 def task(Closure closure) {

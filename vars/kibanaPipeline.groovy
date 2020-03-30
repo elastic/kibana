@@ -269,6 +269,16 @@ def runFunctionalTestSuite(type, testSuite) {
           try {
             def filesString = testSuite.files.collect { "--include '${it.file}'" }.join(' ')
 
+            try {
+              bash("""
+                if [[ ! -d .es ]]; then
+                  cp -R ${WORKSPACE}/.es ./
+                fi
+              """)
+            } catch (ex) {
+              buildUtils.printStacktrace(ex)
+            }
+
             if (type == 'oss') {
               bash("""
                 if [[ ! -d build/oss ]]; then
@@ -332,7 +342,6 @@ def newPipeline(Closure closure = {}) {
 
     def setupClosure = {
       sh 'cp -R ${WORKSPACE}/kibana/. .'
-      sh 'ln -s ${WORKSPACE}/.es ./.es || true'
     }
 
     withTaskQueue(parallel: 24, setup: setupClosure) {
