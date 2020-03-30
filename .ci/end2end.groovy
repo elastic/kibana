@@ -58,7 +58,7 @@ pipeline {
       steps {
         notifyStatus('Preparing kibana', 'PENDING')
         dir("${BASE_DIR}"){
-          sh script: "${CYPRESS_DIR}/ci/prepare-kibana.sh"
+          sh script: "${E2E_DIR}/ci/prepare-kibana.sh"
         }
       }
       post {
@@ -105,7 +105,7 @@ pipeline {
   post {
     always {
       dir("${BASE_DIR}"){
-        archiveArtifacts(allowEmptyArchive: true, artifacts: "${CYPRESS_DIR}/ingest-data.log,kibana.log")
+        archiveArtifacts(allowEmptyArchive: true, artifacts: "./tmp/ingest-data.log,kibana.log")
       }
     }
   }
