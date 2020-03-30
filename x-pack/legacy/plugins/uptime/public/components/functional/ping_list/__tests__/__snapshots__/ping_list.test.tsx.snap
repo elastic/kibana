@@ -364,17 +364,16 @@ exports[`PingList component renders sorted list without errors 1`] = `
       onChange={[Function]}
       pagination={
         Object {
-          "initialPageSize": 20,
+          "initialPageSize": 25,
           "pageIndex": 0,
-          "pageSize": 30,
+          "pageSize": 10,
           "pageSizeOptions": Array [
-            5,
             10,
-            20,
+            25,
             50,
             100,
           ],
-          "totalItemCount": 30,
+          "totalItemCount": 9231,
         }
       }
       responsive={true}

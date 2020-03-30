@@ -6,9 +6,11 @@
 
 import { IRouter, ElasticsearchServiceSetup, IClusterClient } from 'kibana/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { CloudSetup } from '../../cloud/server';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
+  cloud: CloudSetup;
 }
 
 export interface RouteDependencies {
@@ -16,6 +18,9 @@ export interface RouteDependencies {
   getLicenseStatus: () => LicenseStatus;
   elasticsearchService: ElasticsearchServiceSetup;
   elasticsearch: IClusterClient;
+  config: {
+    isCloudEnabled: boolean;
+  };
 }
 
 export interface LicenseStatus {
