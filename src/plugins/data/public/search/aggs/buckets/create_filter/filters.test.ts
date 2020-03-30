@@ -17,25 +17,24 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { getFiltersBucketAgg } from '../filters';
+import { getFiltersBucketAgg, FiltersBucketAggDependencies } from '../filters';
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import { IBucketAggConfig } from '../_bucket_agg_type';
+import { coreMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('filters', () => {
-    beforeEach(() => {
-      mockDataServices();
-    });
+    let aggTypesDependencies: FiltersBucketAggDependencies;
 
-    const typesRegistry = mockAggTypesRegistry([
-      getFiltersBucketAgg({
-        uiSettings: coreMock.createSetup().uiSettings,
-      }),
-    ]);
+    beforeEach(() => {
+      const { uiSettings } = coreMock.createSetup();
+
+      aggTypesDependencies = {
+        uiSettings,
+      };
+    });
 
     const getAggConfigs = () => {
       const field = {
@@ -65,7 +64,7 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry }
+        { typesRegistry: mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]) }
       );
     };
     it('should return a filters filter', () => {

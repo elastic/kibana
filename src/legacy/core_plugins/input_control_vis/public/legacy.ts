@@ -26,21 +26,17 @@ import {
   InputControlVisPluginSetupDependencies,
   InputControlVisPluginStartDependencies,
 } from './plugin';
-import {
-  setup as visualizationsSetup,
-  start as visualizationsStart,
-} from '../../visualizations/public/np_ready/public/legacy';
 
 const setupPlugins: Readonly<InputControlVisPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   data: npSetup.plugins.data,
-  visualizations: visualizationsSetup,
+  visualizations: npSetup.plugins.visualizations,
 };
 
 const startPlugins: Readonly<InputControlVisPluginStartDependencies> = {
   expressions: npStart.plugins.expressions,
   data: npStart.plugins.data,
-  visualizations: visualizationsStart,
+  visualizations: npStart.plugins.visualizations,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);
