@@ -69,6 +69,13 @@ describe('update_rules_bulk', () => {
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
+    it('returns 404 if siem client is unavailable', async () => {
+      const { siem, ...contextWithoutSiem } = context;
+      const response = await server.inject(getUpdateBulkRequest(), contextWithoutSiem);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+
     test('returns an error if update throws', async () => {
       clients.alertsClient.update.mockImplementation(() => {
         throw new Error('Test error');
