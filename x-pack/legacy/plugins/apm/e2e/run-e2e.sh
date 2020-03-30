@@ -110,7 +110,7 @@ fi
 
 if [ -n "${JENKINS_URL}" ] ; then
   docker run --rm -t --user "$(id -u):$(id -g)" \
-    -v `pwd`:/app --network="host" \
+    -v `pwd`:/app -w /app --network="host" \
     --name cypress cypress
 else
   #
