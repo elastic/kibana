@@ -37,18 +37,13 @@ export const LogEntryCategoriesPageContent = () => {
     hasLogAnalysisSetupCapabilities,
   } = useLogAnalysisCapabilitiesContext();
 
-  const {
-    fetchJobStatus,
-    fetchModuleDefinition,
-    setupStatus,
-  } = useLogEntryCategoriesModuleContext();
+  const { fetchJobStatus, setupStatus } = useLogEntryCategoriesModuleContext();
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
-      fetchModuleDefinition();
       fetchJobStatus();
     }
-  }, [fetchJobStatus, fetchModuleDefinition, hasLogAnalysisReadCapabilities]);
+  }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
   if (isLoadingSource || isUninitialized) {
     return <SourceLoadingPage />;
@@ -58,7 +53,7 @@ export const LogEntryCategoriesPageContent = () => {
     return <MlUnavailablePrompt />;
   } else if (!hasLogAnalysisReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
-  } else if (setupStatus === 'initializing') {
+  } else if (setupStatus.type === 'initializing') {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
@@ -66,7 +61,7 @@ export const LogEntryCategoriesPageContent = () => {
         })}
       />
     );
-  } else if (setupStatus === 'unknown') {
+  } else if (setupStatus.type === 'unknown') {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isSetupStatusWithResults(setupStatus)) {
     return <LogEntryCategoriesResultsContent />;
