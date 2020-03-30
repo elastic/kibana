@@ -151,6 +151,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   to: 'now',
   type: 'query',
   threat: [],
+  throttle: 'no_actions',
   lists: [],
   version: 1,
 });
