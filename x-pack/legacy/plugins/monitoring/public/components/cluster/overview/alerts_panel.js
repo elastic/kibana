@@ -140,8 +140,8 @@ export function AlertsPanel({ alerts, changeUrl }) {
         }
 
         return (
-          <Fragment>
-            <EuiCallOut key={idx} {...callOutProps}>
+          <Fragment key={idx}>
+            <EuiCallOut {...callOutProps}>
               <p>{message}</p>
               <EuiText size="xs">
                 <p data-test-subj="alertMeta" className="monCallout--meta">
