@@ -211,13 +211,16 @@ export function useLoadIndexTemplates() {
   });
 }
 
-export async function deleteTemplates(names: Array<TemplateDeserialized['name']>) {
+export async function deleteTemplates(
+  templates: Array<{ name: string; formatVersion: IndexTemplateFormatVersion }>
+) {
   const result = sendRequest({
-    path: `${API_BASE_PATH}/templates/${names.map(name => encodeURIComponent(name)).join(',')}`,
-    method: 'delete',
+    path: `${API_BASE_PATH}/delete-templates`,
+    method: 'post',
+    body: { templates },
   });
 
-  const uimActionType = names.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
+  const uimActionType = templates.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
 
   uiMetricService.trackMetric('count', uimActionType);
 

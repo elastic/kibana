@@ -108,7 +108,9 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
     formatVersion
   );
   const isManaged = templateDetails?.isManaged;
-  const [templateToDelete, setTemplateToDelete] = useState<string[]>([]);
+  const [templateToDelete, setTemplateToDelete] = useState<
+    Array<{ name: string; formatVersion: IndexTemplateFormatVersion }>
+  >([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
@@ -295,7 +297,8 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                               }
                             ),
                             icon: 'trash',
-                            onClick: () => setTemplateToDelete([decodedTemplateName]),
+                            onClick: () =>
+                              setTemplateToDelete([{ name: decodedTemplateName, formatVersion }]),
                             disabled: isManaged,
                           },
                         ],

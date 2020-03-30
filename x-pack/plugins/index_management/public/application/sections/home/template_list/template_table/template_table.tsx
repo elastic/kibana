@@ -30,7 +30,9 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
 }) => {
   const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
-  const [templatesToDelete, setTemplatesToDelete] = useState<Array<TemplateListItem['name']>>([]);
+  const [templatesToDelete, setTemplatesToDelete] = useState<
+    Array<{ name: string; formatVersion: IndexTemplateFormatVersion }>
+  >([]);
 
   const columns: Array<EuiBasicTableColumn<TemplateListItem>> = [
     {
@@ -161,8 +163,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           icon: 'trash',
           color: 'danger',
           type: 'icon',
-          onClick: ({ name }: TemplateListItem) => {
-            setTemplatesToDelete([name]);
+          onClick: ({ name, _kbnMeta: { formatVersion } }: TemplateListItem) => {
+            setTemplatesToDelete([{ name, formatVersion }]);
           },
           isPrimary: true,
           enabled: ({ isManaged }: TemplateListItem) => !isManaged,
@@ -205,7 +207,12 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         <EuiButton
           data-test-subj="deleteTemplatesButton"
           onClick={() =>
-            setTemplatesToDelete(selection.map((selected: TemplateListItem) => selected.name))
+            setTemplatesToDelete(
+              selection.map(({ name, _kbnMeta: { formatVersion } }: TemplateListItem) => ({
+                name,
+                formatVersion,
+              }))
+            )
           }
           color="danger"
         >
