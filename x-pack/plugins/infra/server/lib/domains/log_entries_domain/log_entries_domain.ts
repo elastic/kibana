@@ -49,6 +49,8 @@ export interface LogEntriesAroundParams {
 
 export const LOG_ENTRIES_PAGE_SIZE = 200;
 
+const FIELDS_FROM_CONTEXT = ['log.file.path', 'host.name', 'container.id'] as const;
+
 export class InfraLogEntriesDomain {
   constructor(
     private readonly adapter: LogEntriesAdapter,
@@ -154,6 +156,14 @@ export class InfraLogEntriesDomain {
             }
           }
         ),
+        context: FIELDS_FROM_CONTEXT.reduce<LogEntry['context']>((ctx, field) => {
+          // Users might have different types here in their mappings.
+          const value = doc.fields[field];
+          if (typeof value === 'string') {
+            ctx[field] = value;
+          }
+          return ctx;
+        }, {}),
       };
     });
 
@@ -329,7 +339,9 @@ const getRequiredFields = (
   );
   const fieldsFromFormattingRules = messageFormattingRules.requiredFields;
 
-  return Array.from(new Set([...fieldsFromCustomColumns, ...fieldsFromFormattingRules]));
+  return Array.from(
+    new Set([...fieldsFromCustomColumns, ...fieldsFromFormattingRules, ...FIELDS_FROM_CONTEXT])
+  );
 };
 
 const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({

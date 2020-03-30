@@ -19,6 +19,7 @@ import { newJobCapsService } from '../../../../../services/new_job_capabilities_
 import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
 import { getNestedProperty } from '../../../../../util/object_utils';
 import { useMlContext } from '../../../../../contexts/ml';
+import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 
 import {
   getDefaultSelectableFields,
@@ -31,6 +32,7 @@ import {
 import { isKeywordAndTextType } from '../../../../common/fields';
 
 import { getOutlierScoreFieldName } from './common';
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
 export type TableItem = Record<string, any>;
 
@@ -40,6 +42,7 @@ interface UseExploreDataReturnType {
   errorMessage: string;
   indexPattern: IndexPattern | undefined;
   jobConfig: DataFrameAnalyticsConfig | undefined;
+  jobStatus: DATA_FRAME_TASK_STATE | undefined;
   pagination: Pagination;
   searchQuery: SavedSearchQuery;
   selectedFields: EsFieldName[];
@@ -74,6 +77,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
 
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
+  const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
 
@@ -90,6 +94,15 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
   useEffect(() => {
     (async function() {
       const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+      const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+      const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
+        ? analyticsStats.data_frame_analytics[0]
+        : undefined;
+
+      if (stats !== undefined && stats.state) {
+        setJobStatus(stats.state);
+      }
+
       if (
         Array.isArray(analyticsConfigs.data_frame_analytics) &&
         analyticsConfigs.data_frame_analytics.length > 0
@@ -215,6 +228,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
     errorMessage,
     indexPattern,
     jobConfig,
+    jobStatus,
     pagination,
     rowCount,
     searchQuery,
