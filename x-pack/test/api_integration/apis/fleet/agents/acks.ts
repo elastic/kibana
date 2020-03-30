@@ -15,11 +15,11 @@ export default function(providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
 
-  const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
-  const supertest = getService('supertest');
+  const supertest = getSupertestWithoutAuth(providerContext);
   let apiKey: { id: string; api_key: string };
 
-  describe('fleet_agents_acks', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/60471
+  describe.skip('fleet_agents_acks', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
@@ -50,7 +50,7 @@ export default function(providerContext: FtrProviderContext) {
     });
 
     it('should return a 401 if this a not a valid acks access', async () => {
-      await supertestWithoutAuth
+      await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set('Authorization', 'ApiKey NOT_A_VALID_TOKEN')
@@ -61,7 +61,7 @@ export default function(providerContext: FtrProviderContext) {
     });
 
     it('should return a 200 if this a valid acks request', async () => {
-      const { body: apiResponse } = await supertestWithoutAuth
+      const { body: apiResponse } = await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
@@ -91,15 +91,16 @@ export default function(providerContext: FtrProviderContext) {
           ],
         })
         .expect(200);
-
       expect(apiResponse.action).to.be('acks');
       expect(apiResponse.success).to.be(true);
-
       const { body: eventResponse } = await supertest
         .get(`/api/ingest_manager/fleet/agents/agent1/events`)
         .set('kbn-xsrf', 'xx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
         .expect(200);
-
       const expectedEvents = eventResponse.list.filter(
         (item: Record<string, string>) =>
           item.action_id === '48cebde1-c906-4893-b89f-595d943b72a1' ||
@@ -121,7 +122,7 @@ export default function(providerContext: FtrProviderContext) {
     });
 
     it('should return a 400 when request event list contains event for another agent id', async () => {
-      const { body: apiResponse } = await supertestWithoutAuth
+      const { body: apiResponse } = await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
@@ -148,7 +149,7 @@ export default function(providerContext: FtrProviderContext) {
     });
 
     it('should return a 400 when request event list contains action that does not belong to agent current actions', async () => {
-      const { body: apiResponse } = await supertestWithoutAuth
+      const { body: apiResponse } = await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(
@@ -182,7 +183,7 @@ export default function(providerContext: FtrProviderContext) {
     });
 
     it('should return a 400 when request event list contains action types that are not allowed for acknowledgement', async () => {
-      const { body: apiResponse } = await supertestWithoutAuth
+      const { body: apiResponse } = await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
         .set(

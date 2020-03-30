@@ -55,6 +55,7 @@ export const getActionsColumns = ({
     },
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.EXPORT_SELECTED,
+    'data-test-subj': 'export-timeline',
   };
 
   const deleteTimelineColumn = {
