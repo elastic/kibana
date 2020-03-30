@@ -93,7 +93,7 @@ export interface ElasticUser {
   readonly username: string;
 }
 
-export interface FetchCasesProps {
+export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
 }
@@ -113,4 +113,9 @@ export interface ActionLicense {
   enabled: boolean;
   enabledInConfig: boolean;
   enabledInLicense: boolean;
+}
+
+export interface DeleteCase {
+  id: string;
+  title?: string;
 }
