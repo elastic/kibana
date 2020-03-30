@@ -17,7 +17,7 @@ jest.mock('./alerts_client');
 const savedObjectsClient = savedObjectsClientMock.create();
 const securityPluginSetup = {
   authc: {
-    createAPIKey: jest.fn(),
+    grantAPIKeyAsInternalUser: jest.fn(),
     getCurrentUser: jest.fn(),
   },
 };
@@ -110,7 +110,7 @@ test('createAPIKey() returns { apiKeysEnabled: false } when security is enabled 
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.createAPIKey.mockResolvedValueOnce(null);
+  securityPluginSetup.authc.grantAPIKeyAsInternalUser.mockResolvedValueOnce(null);
   const createAPIKeyResult = await constructorCall.createAPIKey();
   expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
 });
@@ -124,7 +124,10 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.createAPIKey.mockResolvedValueOnce({ api_key: '123', id: 'abc' });
+  securityPluginSetup.authc.grantAPIKeyAsInternalUser.mockResolvedValueOnce({
+    api_key: '123',
+    id: 'abc',
+  });
   const createAPIKeyResult = await constructorCall.createAPIKey();
   expect(createAPIKeyResult).toEqual({
     apiKeysEnabled: true,
@@ -141,7 +144,9 @@ test('createAPIKey() throws when security plugin createAPIKey throws an error', 
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsClient);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.createAPIKey.mockRejectedValueOnce(new Error('TLS disabled'));
+  securityPluginSetup.authc.grantAPIKeyAsInternalUser.mockRejectedValueOnce(
+    new Error('TLS disabled')
+  );
   await expect(constructorCall.createAPIKey()).rejects.toThrowErrorMatchingInlineSnapshot(
     `"TLS disabled"`
   );

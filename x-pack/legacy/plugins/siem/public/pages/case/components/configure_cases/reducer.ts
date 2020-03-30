@@ -13,9 +13,19 @@ export interface State {
   mapping: CasesConfigurationMapping[] | null;
   connectorId: string;
   closureType: ClosureType;
+  currentConfiguration: CurrentConfiguration;
+}
+
+export interface CurrentConfiguration {
+  connectorId: State['connectorId'];
+  closureType: State['closureType'];
 }
 
 export type Action =
+  | {
+      type: 'setCurrentConfiguration';
+      currentConfiguration: CurrentConfiguration;
+    }
   | {
       type: 'setConnectorId';
       connectorId: string;
@@ -31,6 +41,12 @@ export type Action =
 
 export const configureCasesReducer = () => (state: State, action: Action) => {
   switch (action.type) {
+    case 'setCurrentConfiguration': {
+      return {
+        ...state,
+        currentConfiguration: { ...action.currentConfiguration },
+      };
+    }
     case 'setConnectorId': {
       return {
         ...state,

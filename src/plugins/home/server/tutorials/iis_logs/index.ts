@@ -49,7 +49,7 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iis.html',
       },
     }),
-    // euiIconType: 'logoIIS',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/iis.svg',
     artifacts: {
       dashboards: [
         {

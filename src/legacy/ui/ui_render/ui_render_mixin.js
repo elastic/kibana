@@ -23,8 +23,6 @@ import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { AppBootstrap } from './bootstrap';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { fromRoot } from '../../../core/server/utils';
 import { getApmConfig } from '../apm';
 import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 
@@ -42,11 +40,6 @@ import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
-
-  server.exposeStaticDir(
-    '/node_modules/@kbn/ui-framework/dist/{path*}',
-    fromRoot('node_modules/@kbn/ui-framework/dist')
-  );
 
   const translationsCache = { translations: null, hash: null };
   server.route({
