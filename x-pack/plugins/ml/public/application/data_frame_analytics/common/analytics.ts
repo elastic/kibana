@@ -62,6 +62,9 @@ export interface LoadExploreDataArg {
 
 export const SEARCH_SIZE = 1000;
 
+export const TRAINING_PERCENT_MIN = 1;
+export const TRAINING_PERCENT_MAX = 100;
+
 export const defaultSearchQuery = {
   match_all: {},
 };
@@ -170,6 +173,19 @@ export const getDependentVar = (analysis: AnalysisConfig) => {
     depVar = analysis.classification.dependent_variable;
   }
   return depVar;
+};
+
+export const getTrainingPercent = (analysis: AnalysisConfig) => {
+  let trainingPercent;
+
+  if (isRegressionAnalysis(analysis)) {
+    trainingPercent = analysis.regression.training_percent;
+  }
+
+  if (isClassificationAnalysis(analysis)) {
+    trainingPercent = analysis.classification.training_percent;
+  }
+  return trainingPercent;
 };
 
 export const getPredictionFieldName = (analysis: AnalysisConfig) => {
