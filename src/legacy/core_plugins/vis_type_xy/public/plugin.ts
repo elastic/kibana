@@ -26,7 +26,10 @@ import {
 } from 'kibana/public';
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../plugins/visualizations/public';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 
 export interface VisTypeXyDependencies {
