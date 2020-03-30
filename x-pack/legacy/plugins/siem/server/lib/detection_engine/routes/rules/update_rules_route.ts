@@ -11,11 +11,17 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import {
+  buildRouteValidation,
+  transformError,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
+import { updateNotifications } from '../../notifications/update_notifications';
 
 export const updateRulesRoute = (router: IRouter) => {
   router.put(
@@ -30,12 +36,15 @@ export const updateRulesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const {
+        actions,
+        anomaly_threshold: anomalyThreshold,
         description,
         enabled,
         false_positives: falsePositives,
         from,
         query,
         language,
+        machine_learning_job_id: machineLearningJobId,
         output_index: outputIndex,
         saved_id: savedId,
         timeline_id: timelineId,
@@ -54,13 +63,17 @@ export const updateRulesRoute = (router: IRouter) => {
         to,
         type,
         threat,
+        throttle,
         references,
         note,
         version,
+        lists,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
       try {
+        validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+
         if (!context.alerting || !context.actions) {
           return siemResponse.error({ statusCode: 404 });
         }
@@ -77,6 +90,8 @@ export const updateRulesRoute = (router: IRouter) => {
         const rule = await updateRules({
           alertsClient,
           actionsClient,
+          actions,
+          anomalyThreshold,
           description,
           enabled,
           falsePositives,
@@ -84,6 +99,7 @@ export const updateRulesRoute = (router: IRouter) => {
           immutable: false,
           query,
           language,
+          machineLearningJobId,
           outputIndex: finalIndex,
           savedId,
           savedObjectsClient,
@@ -103,11 +119,23 @@ export const updateRulesRoute = (router: IRouter) => {
           to,
           type,
           threat,
+          throttle,
           references,
           note,
           version,
+          lists,
         });
+
         if (rule != null) {
+          await updateNotifications({
+            alertsClient,
+            actions,
+            enabled,
+            ruleAlertId: rule.id,
+            interval: throttle,
+            name,
+          });
+
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({

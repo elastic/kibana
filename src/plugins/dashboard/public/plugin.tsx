@@ -21,13 +21,18 @@
 
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { SharePluginSetup } from 'src/plugins/share/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableSetup,
+  EmbeddableStart,
+} from '../../../plugins/embeddable/public';
+import { DataPublicPluginStart } from '../../../plugins/data/public';
+import { SharePluginSetup } from '../../../plugins/share/public';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
-import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
-import { ExpandPanelAction, ReplacePanelAction } from '.';
+import { ExpandPanelAction, ReplacePanelAction } from './actions';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
-import { getSavedObjectFinder } from '../../../plugins/saved_objects/public';
+import { getSavedObjectFinder, SavedObjectLoader } from '../../../plugins/saved_objects/public';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
@@ -39,6 +44,7 @@ import {
   DASHBOARD_APP_URL_GENERATOR,
   createDirectAccessDashboardLinkGenerator,
 } from './url_generator';
+import { createSavedDashboardLoader } from './saved_dashboards';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -47,19 +53,22 @@ declare module '../../share/public' {
 }
 
 interface SetupDependencies {
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   share?: SharePluginSetup;
 }
 
 interface StartDependencies {
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
   uiActions: UiActionsStart;
+  data: DataPublicPluginStart;
 }
 
 export type Setup = void;
-export type Start = void;
+export interface DashboardStart {
+  getSavedDashboardLoader: () => SavedObjectLoader;
+}
 
 declare module '../../../plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -69,10 +78,13 @@ declare module '../../../plugins/ui_actions/public' {
 }
 
 export class DashboardEmbeddableContainerPublicPlugin
-  implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
+  implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { share, uiActions }: SetupDependencies): Setup {
+  public setup(
+    core: CoreSetup<StartDependencies>,
+    { share, uiActions, embeddable }: SetupDependencies
+  ): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
@@ -86,25 +98,46 @@ export class DashboardEmbeddableContainerPublicPlugin
         }))
       );
     }
+
+    const getStartServices = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+
+      const useHideChrome = () => {
+        React.useEffect(() => {
+          coreStart.chrome.setIsVisible(false);
+          return () => coreStart.chrome.setIsVisible(true);
+        }, []);
+      };
+
+      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
+        useHideChrome();
+        return <ExitFullScreenButtonUi {...props} />;
+      };
+      return {
+        capabilities: coreStart.application.capabilities,
+        application: coreStart.application,
+        notifications: coreStart.notifications,
+        overlays: coreStart.overlays,
+        embeddable: deps.embeddable,
+        inspector: deps.inspector,
+        SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
+        ExitFullScreenButton,
+        uiActions: deps.uiActions,
+      };
+    };
+
+    const factory = new DashboardContainerFactory(getStartServices);
+    embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
-  public start(core: CoreStart, plugins: StartDependencies): Start {
-    const { application, notifications, overlays } = core;
-    const { embeddable, inspector, uiActions } = plugins;
+  public start(core: CoreStart, plugins: StartDependencies): DashboardStart {
+    const { notifications } = core;
+    const {
+      uiActions,
+      data: { indexPatterns },
+    } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
-
-    const useHideChrome = () => {
-      React.useEffect(() => {
-        core.chrome.setIsVisible(false);
-        return () => core.chrome.setIsVisible(true);
-      }, []);
-    };
-
-    const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
-      useHideChrome();
-      return <ExitFullScreenButtonUi {...props} />;
-    };
 
     const changeViewAction = new ReplacePanelAction(
       core,
@@ -114,19 +147,15 @@ export class DashboardEmbeddableContainerPublicPlugin
     );
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
-
-    const factory = new DashboardContainerFactory({
-      application,
-      notifications,
-      overlays,
-      embeddable,
-      inspector,
-      SavedObjectFinder,
-      ExitFullScreenButton,
-      uiActions,
+    const savedDashboardLoader = createSavedDashboardLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns,
+      chrome: core.chrome,
+      overlays: core.overlays,
     });
-
-    embeddable.registerEmbeddableFactory(factory.type, factory);
+    return {
+      getSavedDashboardLoader: () => savedDashboardLoader,
+    };
   }
 
   public stop() {}

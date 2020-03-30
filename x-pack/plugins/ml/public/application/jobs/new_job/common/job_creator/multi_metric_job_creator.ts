@@ -14,12 +14,7 @@ import {
 } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
-import {
-  JOB_TYPE,
-  CREATED_BY_LABEL,
-  DEFAULT_MODEL_MEMORY_LIMIT,
-} from '../../../../../../common/constants/new_job';
-import { ml } from '../../../../services/ml_api_service';
+import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
@@ -27,7 +22,7 @@ export class MultiMetricJobCreator extends JobCreator {
   // a multi metric job has one optional overall partition field
   // which is the same for all detectors.
   private _splitField: SplitField = null;
-  private _lastEstimatedModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+
   protected _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
 
   constructor(
@@ -84,63 +79,6 @@ export class MultiMetricJobCreator extends JobCreator {
 
   public removeDetector(index: number) {
     this._removeDetector(index);
-  }
-
-  // called externally to set the model memory limit based current detector configuration
-  public async calculateModelMemoryLimit() {
-    if (this._splitField === null) {
-      // not split field, use the default
-      this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-    } else {
-      const { modelMemoryLimit } = await ml.calculateModelMemoryLimit({
-        indexPattern: this._indexPatternTitle,
-        splitFieldName: this._splitField.name,
-        query: this._datafeed_config.query,
-        fieldNames: this.fields.map(f => f.id),
-        influencerNames: this._influencers,
-        timeFieldName: this._job_config.data_description.time_field,
-        earliestMs: this._start,
-        latestMs: this._end,
-      });
-
-      try {
-        if (this.modelMemoryLimit === null) {
-          this.modelMemoryLimit = modelMemoryLimit;
-        } else {
-          // To avoid overwriting a possible custom set model memory limit,
-          // it only gets set to the estimation if the current limit is either
-          // the default value or the value of the previous estimation.
-          // That's our best guess if the value hasn't been customized.
-          // It doesn't get it if the user intentionally for whatever reason (re)set
-          // the value to either the default or pervious estimate.
-          // Because the string based limit could contain e.g. MB/Mb/mb
-          // all strings get lower cased for comparison.
-          const currentModelMemoryLimit = this.modelMemoryLimit.toLowerCase();
-          const defaultModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT.toLowerCase();
-          if (
-            currentModelMemoryLimit === defaultModelMemoryLimit ||
-            currentModelMemoryLimit === this._lastEstimatedModelMemoryLimit
-          ) {
-            this.modelMemoryLimit = modelMemoryLimit;
-          }
-        }
-        this._lastEstimatedModelMemoryLimit = modelMemoryLimit.toLowerCase();
-      } catch (error) {
-        if (this.modelMemoryLimit === null) {
-          this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-        } else {
-          // To avoid overwriting a possible custom set model memory limit,
-          // the limit is reset to the default only if the current limit matches
-          // the previous estimated limit.
-          const currentModelMemoryLimit = this.modelMemoryLimit.toLowerCase();
-          if (currentModelMemoryLimit === this._lastEstimatedModelMemoryLimit) {
-            this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
-          }
-          // eslint-disable-next-line no-console
-          console.error('Model memory limit could not be calculated', error);
-        }
-      }
-    }
   }
 
   public get aggFieldPairs(): AggFieldPair[] {

@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+
   describe('jobs cloning supported by UI form', function() {
     this.tags(['smoke']);
 
@@ -171,7 +172,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('should create a clone job', async () => {
-          await ml.dataFrameAnalyticsCreation.createAnalyticsJob();
+          await ml.dataFrameAnalyticsCreation.createAnalyticsJob(cloneJobId);
         });
 
         it('should start the clone analytics job', async () => {
@@ -182,6 +183,10 @@ export default function({ getService }: FtrProviderContext) {
         it('should close the create job flyout', async () => {
           await ml.dataFrameAnalyticsCreation.assertCloseButtonExists();
           await ml.dataFrameAnalyticsCreation.closeCreateAnalyticsJobFlyout();
+        });
+
+        it('finishes analytics processing', async () => {
+          await ml.dataFrameAnalytics.waitForAnalyticsCompletion(cloneJobId);
         });
 
         it('displays the created job in the analytics table', async () => {

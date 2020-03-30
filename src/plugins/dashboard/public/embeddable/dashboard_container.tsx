@@ -30,7 +30,7 @@ import {
   ViewMode,
   EmbeddableFactory,
   IEmbeddable,
-  IEmbeddableStart,
+  EmbeddableStart,
 } from '../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -57,6 +57,7 @@ export interface DashboardContainerInput extends ContainerInput {
   panels: {
     [panelId: string]: DashboardPanelState;
   };
+  isEmptyState?: boolean;
 }
 
 interface IndexSignature {
@@ -77,7 +78,7 @@ export interface DashboardContainerOptions {
   application: CoreStart['application'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;

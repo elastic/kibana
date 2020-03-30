@@ -31,9 +31,8 @@ import {
 import { EuiSpacer } from '@elastic/eui';
 import { OverlayStart, CoreStart, SavedObjectsStart, IUiSettingsClient } from 'kibana/public';
 import {
-  GetEmbeddableFactory,
   EmbeddablePanel,
-  IEmbeddableStart,
+  EmbeddableStart,
   IEmbeddable,
 } from '../../../src/plugins/embeddable/public';
 import {
@@ -47,8 +46,8 @@ import { Start as InspectorStartContract } from '../../../src/plugins/inspector/
 import { getSavedObjectFinder } from '../../../src/plugins/saved_objects/public';
 
 interface Props {
-  getAllEmbeddableFactories: IEmbeddableStart['getEmbeddableFactories'];
-  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
   uiActionsApi: UiActionsStart;
   overlays: OverlayStart;
   notifications: CoreStart['notifications'];

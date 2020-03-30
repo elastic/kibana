@@ -15,7 +15,7 @@ import {
 import styled, { css } from 'styled-components';
 import { Redirect } from 'react-router-dom';
 
-import { CaseRequest } from '../../../../../../../../plugins/case/common/api';
+import { CasePostRequest } from '../../../../../../../../plugins/case/common/api';
 import { Field, Form, getUseField, useForm, UseField } from '../../../../shared_imports';
 import { usePostCase } from '../../../../containers/case/use_post_case';
 import { schema } from './schema';
@@ -45,9 +45,8 @@ const MySpinner = styled(EuiLoadingSpinner)`
   z-index: 99;
 `;
 
-const initialCaseValue: CaseRequest = {
+const initialCaseValue: CasePostRequest = {
   description: '',
-  status: 'open',
   tags: [],
   title: '',
 };
@@ -55,12 +54,12 @@ const initialCaseValue: CaseRequest = {
 export const Create = React.memo(() => {
   const { caseData, isLoading, postCase } = usePostCase();
   const [isCancel, setIsCancel] = useState(false);
-  const { form } = useForm<CaseRequest>({
+  const { form } = useForm<CasePostRequest>({
     defaultValue: initialCaseValue,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CaseRequest>(
+  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CasePostRequest>(
     form,
     'description'
   );
@@ -71,6 +70,10 @@ export const Create = React.memo(() => {
       await postCase(data);
     }
   }, [form]);
+
+  const handleSetIsCancel = useCallback(() => {
+    setIsCancel(true);
+  }, [isCancel]);
 
   if (caseData != null && caseData.id) {
     return <Redirect to={`/${SiemPageName.case}/${caseData.id}`} />;
@@ -137,7 +140,12 @@ export const Create = React.memo(() => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={() => setIsCancel(true)} iconType="cross">
+            <EuiButtonEmpty
+              data-test-subj="create-case-cancel"
+              size="s"
+              onClick={handleSetIsCancel}
+              iconType="cross"
+            >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>

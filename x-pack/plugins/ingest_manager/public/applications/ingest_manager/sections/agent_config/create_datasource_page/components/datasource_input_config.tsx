@@ -15,6 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { DatasourceInput, RegistryVarsEntry } from '../../../../types';
+import { isAdvancedVar } from '../services';
 import { DatasourceInputVarField } from './datasource_input_var_field';
 
 export const DatasourceInputConfig: React.FunctionComponent<{
@@ -30,10 +31,10 @@ export const DatasourceInputConfig: React.FunctionComponent<{
 
   if (packageInputVars) {
     packageInputVars.forEach(varDef => {
-      if (varDef.required && !varDef.default) {
-        requiredVars.push(varDef);
-      } else {
+      if (isAdvancedVar(varDef)) {
         advancedVars.push(varDef);
+      } else {
+        requiredVars.push(varDef);
       }
     });
   }
@@ -54,7 +55,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
           <p>
             <FormattedMessage
               id="xpack.ingestManager.createDatasource.stepConfigure.inputSettingsDescription"
-              defaultMessage="The following settings will be applied to all streams below."
+              defaultMessage="The following settings are applicable to all streams."
             />
           </p>
         </EuiText>
@@ -62,8 +63,8 @@ export const DatasourceInputConfig: React.FunctionComponent<{
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map(varDef => {
-            const varName = varDef.name;
-            const value = datasourceInput.streams[0].config![varName];
+            const { name: varName, type: varType } = varDef;
+            const value = datasourceInput.config![varName].value;
             return (
               <EuiFlexItem key={varName}>
                 <DatasourceInputVarField
@@ -71,13 +72,13 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                   value={value}
                   onChange={(newValue: any) => {
                     updateDatasourceInput({
-                      streams: datasourceInput.streams.map(stream => ({
-                        ...stream,
-                        config: {
-                          ...stream.config,
-                          [varName]: newValue,
+                      config: {
+                        ...datasourceInput.config,
+                        [varName]: {
+                          type: varType,
+                          value: newValue,
                         },
-                      })),
+                      },
                     });
                   }}
                 />
@@ -104,8 +105,8 @@ export const DatasourceInputConfig: React.FunctionComponent<{
               </EuiFlexItem>
               {isShowingAdvanced
                 ? advancedVars.map(varDef => {
-                    const varName = varDef.name;
-                    const value = datasourceInput.streams[0].config![varName];
+                    const { name: varName, type: varType } = varDef;
+                    const value = datasourceInput.config![varName].value;
                     return (
                       <EuiFlexItem key={varName}>
                         <DatasourceInputVarField
@@ -113,13 +114,13 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                           value={value}
                           onChange={(newValue: any) => {
                             updateDatasourceInput({
-                              streams: datasourceInput.streams.map(stream => ({
-                                ...stream,
-                                config: {
-                                  ...stream.config,
-                                  [varName]: newValue,
+                              config: {
+                                ...datasourceInput.config,
+                                [varName]: {
+                                  type: varType,
+                                  value: newValue,
                                 },
-                              })),
+                              },
                             });
                           }}
                         />

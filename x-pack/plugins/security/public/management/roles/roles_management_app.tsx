@@ -8,7 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, FatalErrorsSetup } from 'src/core/public';
+import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { SecurityLicense } from '../../../common/licensing';
 import { PluginStartDependencies } from '../../plugin';
@@ -23,7 +23,7 @@ import { PrivilegesAPIClient } from './privileges_api_client';
 interface CreateParams {
   fatalErrors: FatalErrorsSetup;
   license: SecurityLicense;
-  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 export const rolesManagementApp = Object.freeze({
@@ -36,7 +36,7 @@ export const rolesManagementApp = Object.freeze({
       async mount({ basePath, element, setBreadcrumbs }) {
         const [
           { application, docLinks, http, i18n: i18nStart, injectedMetadata, notifications },
-          { data },
+          { data, features },
         ] = await getStartServices();
 
         const rolesBreadcrumbs = [
@@ -77,6 +77,7 @@ export const rolesManagementApp = Object.freeze({
               userAPIClient={new UserAPIClient(http)}
               indicesAPIClient={new IndicesAPIClient(http)}
               privilegesAPIClient={new PrivilegesAPIClient(http)}
+              getFeatures={features.getFeatures}
               http={http}
               notifications={notifications}
               fatalErrors={fatalErrors}

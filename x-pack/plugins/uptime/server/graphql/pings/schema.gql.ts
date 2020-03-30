@@ -37,6 +37,8 @@ export const pingsSchema = gql`
       dateRangeEnd: String!
       "Optional: agent location to filter by."
       location: String
+      "Optional: current page."
+      page: Int
     ): PingResults!
   }
 

@@ -10,8 +10,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/57946
-  describe('Endpoint Policy List', function() {
+  // FIXME: Skipped until we can figure out how to load data for Ingest
+  describe.skip('Endpoint Policy List', function() {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');

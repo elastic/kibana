@@ -7,7 +7,6 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ChromeBreadcrumb } from 'kibana/public';
 import { connect, MapDispatchToPropsFunction, MapStateToPropsParam } from 'react-redux';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UptimeRefreshContext } from '../contexts';
@@ -17,8 +16,9 @@ import { MonitorStatusDetails } from '../components/connected';
 import { Ping } from '../../common/graphql/types';
 import { AppState } from '../state';
 import { selectSelectedMonitor } from '../state/selectors';
-import { getSelectedMonitor } from '../state/actions';
+import { getSelectedMonitorAction } from '../state/actions';
 import { PageHeader } from './page_header';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 
 interface StateProps {
   selectedMonitor: Ping | null;
@@ -51,6 +51,7 @@ export const MonitorPageComponent: React.FC<Props> = ({
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
   const [selectedLocation, setSelectedLocation] = useState(undefined);
+  const [pingListIndex, setPingListIndex] = useState(0);
 
   const sharedVariables = {
     dateRangeStart,
@@ -65,10 +66,10 @@ export const MonitorPageComponent: React.FC<Props> = ({
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
 
   const nameOrId = selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id || '';
-  const breadcrumbs: ChromeBreadcrumb[] = [{ text: nameOrId }];
+  useBreadcrumbs([{ text: nameOrId }]);
   return (
     <>
-      <PageHeader headingText={nameOrId} breadcrumbs={breadcrumbs} datePicker={true} />
+      <PageHeader headingText={nameOrId} datePicker={true} />
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
@@ -81,11 +82,14 @@ export const MonitorPageComponent: React.FC<Props> = ({
           updateUrlParams({ selectedPingStatus: selectedStatus || '' });
           refreshApp();
         }}
+        onPageIndexChange={(index: number) => setPingListIndex(index)}
+        pageIndex={pingListIndex}
         pageSize={pingListPageCount}
         selectedOption={selectedPingStatus}
         selectedLocation={selectedLocation}
         variables={{
           ...sharedVariables,
+          page: pingListIndex,
           size: pingListPageCount,
           status: selectedPingStatus,
         }}
@@ -102,7 +106,7 @@ const mapDispatchToProps: MapDispatchToPropsFunction<DispatchProps, {}> = (dispa
   return {
     dispatchGetMonitorStatus: (monitorId: string) => {
       dispatch(
-        getSelectedMonitor({
+        getSelectedMonitorAction({
           monitorId,
         })
       );

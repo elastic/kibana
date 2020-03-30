@@ -18,24 +18,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectMetaData } from '../../../saved_objects/public';
-import { SavedObjectAttributes } from '../../../../core/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { CoreStart } from '../../../../core/public';
 import {
   ContainerOutput,
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
 } from '../embeddable_plugin';
-import {
-  DashboardContainer,
-  DashboardContainerInput,
-  DashboardContainerOptions,
-} from './dashboard_container';
-import { DashboardCapabilities } from '../types';
+import { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import { Start as InspectorStartContract } from '../../../inspector/public';
 
-export interface DashboardOptions extends DashboardContainerOptions {
-  savedObjectMetaData?: SavedObjectMetaData<SavedObjectAttributes>;
+interface StartServices {
+  capabilities: CoreStart['application']['capabilities'];
+  application: CoreStart['application'];
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
+  embeddable: EmbeddableStart;
+  inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
+  ExitFullScreenButton: React.ComponentType<any>;
+  uiActions: UiActionsStart;
 }
 
 export class DashboardContainerFactory extends EmbeddableFactory<
@@ -45,23 +50,13 @@ export class DashboardContainerFactory extends EmbeddableFactory<
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
-  private readonly allowEditing: boolean;
-
-  constructor(private readonly options: DashboardOptions) {
-    super({ savedObjectMetaData: options.savedObjectMetaData });
-
-    const capabilities = (options.application.capabilities
-      .dashboard as unknown) as DashboardCapabilities;
-
-    if (!capabilities || typeof capabilities !== 'object') {
-      throw new TypeError('Dashboard capabilities not found.');
-    }
-
-    this.allowEditing = !!capabilities.createNew && !!capabilities.showWriteControls;
+  constructor(private readonly getStartServices: () => Promise<StartServices>) {
+    super();
   }
 
-  public isEditable() {
-    return this.allowEditing;
+  public async isEditable() {
+    const { capabilities } = await this.getStartServices();
+    return !!capabilities.createNew && !!capabilities.showWriteControls;
   }
 
   public getDisplayName() {
@@ -82,6 +77,7 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> {
-    return new DashboardContainer(initialInput, this.options, parent);
+    const services = await this.getStartServices();
+    return new DashboardContainer(initialInput, services, parent);
   }
 }

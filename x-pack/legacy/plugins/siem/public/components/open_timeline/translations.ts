@@ -6,6 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALL_ACTIONS = i18n.translate('xpack.siem.open.timeline.allActionsTooltip', {
+  defaultMessage: 'All actions',
+});
+
+export const BATCH_ACTIONS = i18n.translate('xpack.siem.open.timeline.batchActionsTitle', {
+  defaultMessage: 'Bulk actions',
+});
+
 export const CANCEL = i18n.translate('xpack.siem.open.timeline.cancelButton', {
   defaultMessage: 'Cancel',
 });
@@ -32,6 +40,14 @@ export const DESCRIPTION = i18n.translate('xpack.siem.open.timeline.descriptionT
 
 export const EXPAND = i18n.translate('xpack.siem.open.timeline.expandButton', {
   defaultMessage: 'Expand',
+});
+
+export const EXPORT_FILENAME = i18n.translate('xpack.siem.open.timeline.exportFileNameTitle', {
+  defaultMessage: 'timelines_export',
+});
+
+export const EXPORT_SELECTED = i18n.translate('xpack.siem.open.timeline.exportSelectedButton', {
+  defaultMessage: 'Export selected',
 });
 
 export const FAVORITE_SELECTED = i18n.translate('xpack.siem.open.timeline.favoriteSelectedButton', {
@@ -66,7 +82,7 @@ export const ONLY_FAVORITES = i18n.translate('xpack.siem.open.timeline.onlyFavor
 });
 
 export const OPEN_AS_DUPLICATE = i18n.translate('xpack.siem.open.timeline.openAsDuplicateTooltip', {
-  defaultMessage: 'Open as a duplicate timeline',
+  defaultMessage: 'Duplicate timeline',
 });
 
 export const OPEN_TIMELINE = i18n.translate('xpack.siem.open.timeline.openTimelineButton', {
@@ -83,6 +99,10 @@ export const PINNED_EVENTS = i18n.translate('xpack.siem.open.timeline.pinnedEven
 
 export const POSTED = i18n.translate('xpack.siem.open.timeline.postedLabel', {
   defaultMessage: 'Posted:',
+});
+
+export const REFRESH = i18n.translate('xpack.siem.open.timeline.refreshTitle', {
+  defaultMessage: 'Refresh',
 });
 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.siem.open.timeline.searchPlaceholder', {
@@ -107,3 +127,79 @@ export const ZERO_TIMELINES_MATCH = i18n.translate(
     defaultMessage: '0 timelines match the search criteria',
   }
 );
+
+export const SELECTED_TIMELINES = (selectedTimelines: number) =>
+  i18n.translate('xpack.siem.open.timeline.selectedTimelinesTitle', {
+    values: { selectedTimelines },
+    defaultMessage:
+      'Selected {selectedTimelines} {selectedTimelines, plural, =1 {timeline} other {timelines}}',
+  });
+
+export const SHOWING = i18n.translate('xpack.siem.open.timeline.showingLabel', {
+  defaultMessage: 'Showing:',
+});
+
+export const SUCCESSFULLY_EXPORTED_TIMELINES = (totalTimelines: number) =>
+  i18n.translate('xpack.siem.open.timeline.successfullyExportedTimelinesTitle', {
+    values: { totalTimelines },
+    defaultMessage:
+      'Successfully exported {totalTimelines, plural, =0 {all timelines} =1 {{totalTimelines} timeline} other {{totalTimelines} timelines}}',
+  });
+
+export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.importTimelineTitle',
+  {
+    defaultMessage: 'Import timeline',
+  }
+);
+
+export const SELECT_TIMELINE = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.selectTimelineDescription',
+  {
+    defaultMessage: 'Select a SIEM timeline (as exported from the Timeline view) to import',
+  }
+);
+
+export const INITIAL_PROMPT_TEXT = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.initialPromptTextDescription',
+  {
+    defaultMessage: 'Select or drag and drop a valid timelines_export.ndjson file',
+  }
+);
+
+export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.overwriteDescription',
+  {
+    defaultMessage: 'Automatically overwrite saved objects with the same timeline ID',
+  }
+);
+
+export const SUCCESSFULLY_IMPORTED_TIMELINES = (totalCount: number) =>
+  i18n.translate(
+    'xpack.siem.timelines.components.importTimelineModal.successfullyImportedTimelinesTitle',
+    {
+      values: { totalCount },
+      defaultMessage:
+        'Successfully imported {totalCount} {totalCount, plural, =1 {timeline} other {timelines}}',
+    }
+  );
+
+export const IMPORT_FAILED = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.importFailedTitle',
+  {
+    defaultMessage: 'Failed to import timelines',
+  }
+);
+
+export const IMPORT_TIMELINE = i18n.translate(
+  'xpack.siem.timelines.components.importTimelineModal.importTitle',
+  {
+    defaultMessage: 'Import timeline…',
+  }
+);
+
+export const IMPORT_FAILED_DETAILED = (id: string, statusCode: number, message: string) =>
+  i18n.translate('xpack.siem.timelines.components.importTimelineModal.importFailedDetailedTitle', {
+    values: { id, statusCode, message },
+    defaultMessage: 'Timeline ID: {id}\n Status Code: {statusCode}\n Message: {message}',
+  });
