@@ -6,10 +6,10 @@
 
 import { Store } from 'redux';
 import { MapState } from './map';
-import { UiState } from './ui';
+import { MapUiState } from './ui';
 
 export interface MapStoreState {
-  ui: UiState;
+  ui: MapUiState;
   map: MapState;
 }
 

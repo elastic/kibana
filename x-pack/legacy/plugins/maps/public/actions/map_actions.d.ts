@@ -35,12 +35,12 @@ export function setGotoWithCenter(config: MapCenterAndZoom): AnyAction;
 
 export function replaceLayerList(layerList: unknown[]): AnyAction;
 
-export interface QueryGroup {
+export type QueryGroup = {
   filters: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
   refresh?: boolean;
-}
+};
 
 export function setQuery(query: QueryGroup): AnyAction;
 

@@ -32,7 +32,7 @@ export enum INDEXING_STAGE {
   ERROR = 'ERROR',
 }
 
-export type UiState = {
+export type MapUiState = {
   flyoutDisplay: FLYOUT_STATE;
   isFullScreen: boolean;
   isReadOnly: boolean;
@@ -57,7 +57,7 @@ const INITIAL_STATE = {
 };
 
 // Reducer
-export function ui(state: UiState = INITIAL_STATE, action: any) {
+export function ui(state: MapUiState = INITIAL_STATE, action: any) {
   switch (action.type) {
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
