@@ -6,6 +6,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { DLL_OUTPUT, KIBANA_ROOT } = require('./constants');
 
@@ -73,7 +74,20 @@ module.exports = async ({ config }) => {
           path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
         },
       },
-      { loader: 'sass-loader' },
+      {
+        loader: 'sass-loader',
+        options: {
+          prependData(loaderContext) {
+            return `@import ${stringifyRequest(
+              loaderContext,
+              path.resolve(KIBANA_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss')
+            )};\n`;
+          },
+          sassOptions: {
+            includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
+          },
+        },
+      },
     ],
   });
 
@@ -86,8 +100,9 @@ module.exports = async ({ config }) => {
         loader: 'css-loader',
         options: {
           importLoaders: 2,
-          modules: true,
-          localIdentName: '[name]__[local]___[hash:base64:5]',
+          modules: {
+            localIdentName: '[name]__[local]___[hash:base64:5]',
+          },
         },
       },
       {
