@@ -17,36 +17,8 @@
  * under the License.
  */
 
-import React from 'react';
+import { PluginInitializer } from 'kibana/public';
+import { TopNavTestPlugin, TopNavTestPluginSetup, TopNavTestPluginStart } from './plugin';
 
-import { EuiBadge } from '@elastic/eui';
-
-export class SelfChangingComponent extends React.Component {
-  onClick = () => {
-    this.props.vis.params.counter++;
-    this.props.vis.updateState();
-  };
-
-  render() {
-    return (
-      <div>
-        <EuiBadge
-          data-test-subj="counter"
-          onClick={this.onClick}
-          onClickAriaLabel="Increase counter"
-          color="primary"
-        >
-          {this.props.vis.params.counter}
-        </EuiBadge>
-      </div>
-    );
-  }
-
-  componentDidMount() {
-    this.props.renderComplete();
-  }
-
-  componentDidUpdate() {
-    this.props.renderComplete();
-  }
-}
+export const plugin: PluginInitializer<TopNavTestPluginSetup, TopNavTestPluginStart> = () =>
+  new TopNavTestPlugin();

@@ -17,15 +17,32 @@
  * under the License.
  */
 
-export default function(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      app: {
-        title: 'Top Nav Menu test',
-        description: 'This is a sample plugin for the functional tests.',
-        main: 'plugins/kbn_tp_top_nav/app',
-      },
-      hacks: ['plugins/kbn_tp_top_nav/initialize'],
-    },
+import React, { useEffect } from 'react';
+
+import { EuiBadge } from '@elastic/eui';
+
+interface SelfChangingComponentProps {
+  renderComplete: () => {};
+  visParams: {
+    counter: number;
+  };
+}
+
+export function SelfChangingComponent(props: SelfChangingComponentProps) {
+  useEffect(() => {
+    props.renderComplete();
   });
+
+  return (
+    <div>
+      <EuiBadge
+        onClick={() => {}}
+        data-test-subj="counter"
+        onClickAriaLabel="Increase counter"
+        color="primary"
+      >
+        {props.visParams.counter}
+      </EuiBadge>
+    </div>
+  );
 }
