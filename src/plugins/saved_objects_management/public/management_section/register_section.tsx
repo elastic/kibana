@@ -103,10 +103,24 @@ const SavedObjectsEditionPage = ({
 
   const { search } = useLocation();
   const query = parse(search);
+  const service = serviceRegistry.get(serviceName);
 
   useEffect(() => {
-    setBreadcrumbs([]); // TODO: proper breadcrumb
-  }, [setBreadcrumbs]);
+    setBreadcrumbs([
+      {
+        text: i18n.translate('kbn.management.savedObjects.indexBreadcrumb', {
+          defaultMessage: 'Saved objects',
+        }),
+        href: '#/management/kibana/objects',
+      },
+      {
+        text: i18n.translate('kbn.management.savedObjects.editBreadcrumb', {
+          defaultMessage: 'Edit {savedObjectType}',
+          values: { savedObjectType: service?.service.type ?? 'object' },
+        }),
+      },
+    ]);
+  }, [setBreadcrumbs, service]);
 
   return (
     <SavedObjectEdition
