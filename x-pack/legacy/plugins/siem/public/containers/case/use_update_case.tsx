@@ -76,9 +76,16 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
   const dispatchUpdateCaseProperty = useCallback(
     async ({ fetchCaseUserActions, updateKey, updateValue, updateCase, version }: UpdateByKey) => {
       let cancel = false;
+      const abortCtrl = new AbortController();
+
       try {
         dispatch({ type: 'FETCH_INIT', payload: updateKey });
-        const response = await patchCase(caseId, { [updateKey]: updateValue }, version);
+        const response = await patchCase(
+          caseId,
+          { [updateKey]: updateValue },
+          version,
+          abortCtrl.signal
+        );
         if (!cancel) {
           if (fetchCaseUserActions != null) {
             fetchCaseUserActions(caseId);
@@ -100,6 +107,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
       }
       return () => {
         cancel = true;
+        abortCtrl.abort();
       };
     },
     []
