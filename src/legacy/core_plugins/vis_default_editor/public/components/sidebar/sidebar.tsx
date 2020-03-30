@@ -31,6 +31,7 @@ import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
 import { SavedSearch } from '../../../../../../plugins/discover/public';
+import { Schema } from '../../schemas';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
@@ -61,7 +62,7 @@ function DefaultEditorSideBar({
   const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
     state.data.aggs,
   ]);
-  const metricSchemas = (vis.type.schemas.metrics || []).map(s => s.name);
+  const metricSchemas = (vis.type.schemas.metrics || []).map((s: Schema) => s.name);
   const metricAggs = useMemo(
     () => responseAggs.filter(agg => metricSchemas.includes(get(agg, 'schema'))),
     [responseAggs, metricSchemas]
