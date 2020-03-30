@@ -158,9 +158,7 @@ export class EMSFileSource extends AbstractVectorSource {
 }
 
 registerSource({
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new EMSFileSource(sourceDescriptor, inspectorAdapters);
-  },
+  ConstructorFunction: EMSFileSource,
   type: EMS_FILE,
 });
 

@@ -130,9 +130,7 @@ const previewGeojsonFile = (onPreviewSource, inspectorAdapters) => {
 };
 
 registerSource({
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new GeojsonFileSource(sourceDescriptor, inspectorAdapters);
-  },
+  ConstructorFunction: GeojsonFileSource,
   type: GEOJSON_FILE,
 });
 

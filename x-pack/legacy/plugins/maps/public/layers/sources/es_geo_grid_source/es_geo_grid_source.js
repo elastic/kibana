@@ -413,9 +413,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
 }
 
 registerSource({
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
-  },
+  ConstructorFunction: ESGeoGridSource,
   type: ES_GEO_GRID,
 });
 

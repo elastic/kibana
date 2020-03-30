@@ -85,9 +85,7 @@ export class KibanaTilemapSource extends AbstractTMSSource {
 }
 
 registerSource({
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new KibanaTilemapSource(sourceDescriptor, inspectorAdapters);
-  },
+  ConstructorFunction: KibanaTilemapSource,
   type: KIBANA_TILEMAP,
 });
 

@@ -569,9 +569,7 @@ export class ESSearchSource extends AbstractESSource {
 }
 
 registerSource({
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new ESSearchSource(sourceDescriptor, inspectorAdapters);
-  },
+  ConstructorFunction: ESSearchSource,
   type: ES_SEARCH,
 });
 

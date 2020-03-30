@@ -147,9 +147,7 @@ export class EMSTMSSource extends AbstractTMSSource {
 }
 
 registerSource({
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new EMSTMSSource(sourceDescriptor, inspectorAdapters);
-  },
+  ConstructorFunction: EMSTMSSource,
   type: EMS_TMS,
 });
 

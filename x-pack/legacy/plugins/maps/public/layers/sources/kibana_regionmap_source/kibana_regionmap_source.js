@@ -98,9 +98,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 }
 
 registerSource({
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new KibanaRegionmapSource(sourceDescriptor, inspectorAdapters);
-  },
+  ConstructorFunction: KibanaRegionmapSource,
   type: REGIONMAP_FILE,
 });
 

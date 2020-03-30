@@ -9,7 +9,10 @@ import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { ISource } from './source';
 
 type SourceRegistryEntry = {
-  factory: (sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object) => ISource;
+  ConstructorFunction: new (
+    sourceDescriptor: AbstractSourceDescriptor,
+    inspectorAdapters: unknown
+  ) => ISource;
   type: string;
 };
 
@@ -26,10 +29,10 @@ function getSourceByType(sourceType: string): SourceRegistryEntry | undefined {
 export function createSourceInstance(
   sourceDescriptor: AbstractSourceDescriptor,
   inspectorAdapters: object
-) {
+): ISource {
   const source = getSourceByType(sourceDescriptor.type);
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
-  return source.factory(sourceDescriptor, inspectorAdapters);
+  return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
 }

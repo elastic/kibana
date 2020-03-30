@@ -231,9 +231,7 @@ export class ESPewPewSource extends AbstractESAggSource {
 }
 
 registerSource({
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new ESPewPewSource(sourceDescriptor, inspectorAdapters);
-  },
+  ConstructorFunction: ESPewPewSource,
   type: ES_PEW_PEW,
 });
 

@@ -91,9 +91,7 @@ export class WMSSource extends AbstractTMSSource {
 }
 
 registerSource({
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new WMSSource(sourceDescriptor, inspectorAdapters);
-  },
+  ConstructorFunction: WMSSource,
   type: WMS,
 });
 

@@ -166,9 +166,7 @@ class XYZTMSEditor extends React.Component {
 }
 
 registerSource({
-  factory: (sourceDescriptor, inspectorAdapters) => {
-    return new XYZTMSSource(sourceDescriptor, inspectorAdapters);
-  },
+  ConstructorFunction: XYZTMSSource,
   type: EMS_XYZ,
 });
 
