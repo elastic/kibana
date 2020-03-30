@@ -154,7 +154,9 @@ export default function({ getService }) {
           templateName
         );
 
-        const { body } = await deleteTemplates([templateName]).expect(200);
+        const { body } = await deleteTemplates([
+          { name: templateName, formatVersion: payload._kbnMeta.formatVersion },
+        ]).expect(200);
 
         expect(body.errors).to.be.empty;
         expect(body.templatesDeleted[0]).to.equal(templateName);
