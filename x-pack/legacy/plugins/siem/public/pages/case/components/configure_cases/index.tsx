@@ -57,8 +57,12 @@ const FormWrapper = styled.div`
       margin-top 40px;
     }
 
-    padding-top: ${theme.eui.paddingSizes.l};
-    padding-bottom: ${theme.eui.paddingSizes.l};
+    & > :first-child {
+      margin-top: 0;
+    }
+
+    padding-top: ${theme.eui.paddingSizes.xl};
+    padding-bottom: ${theme.eui.paddingSizes.xl};
   `}
 `;
 
