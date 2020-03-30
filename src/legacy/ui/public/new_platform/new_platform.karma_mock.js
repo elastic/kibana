@@ -20,20 +20,7 @@
 import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  setFieldFormats,
-  setIndexPatterns,
-  setInjectedMetadata,
-  setHttp,
-  setNotifications,
-  setOverlays,
-  setQueryService,
-  setSearchService,
-  setUiSettings,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../plugins/data/public/services';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setAggs } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/services';
+import { setSetupServices, setStartServices } from './set_services';
 import {
   AggTypesRegistry,
   getAggTypes,
@@ -76,14 +63,37 @@ export const mockUiSettings = {
   'format:defaultTypeMap': {},
 };
 
-const mockCore = {
+const mockCoreSetup = {
   chrome: {},
-  uiSettings: mockUiSettings,
   http: {
     basePath: {
       get: sinon.fake.returns(''),
     },
   },
+  injectedMetadata: {},
+  uiSettings: mockUiSettings,
+};
+
+const mockCoreStart = {
+  application: {
+    capabilities: {},
+  },
+  chrome: {
+    overlays: {
+      openModal: sinon.fake(),
+    },
+  },
+  http: {
+    basePath: {
+      get: sinon.fake.returns(''),
+    },
+  },
+  i18n: {},
+  overlays: {},
+  savedObjects: {
+    client: {},
+  },
+  uiSettings: mockUiSettings,
 };
 
 const querySetup = {
@@ -153,8 +163,8 @@ const mockAggTypesRegistry = () => {
   const registry = new AggTypesRegistry();
   const registrySetup = registry.setup();
   const aggTypes = getAggTypes({
-    uiSettings: mockCore.uiSettings,
-    notifications: mockCore.notifications,
+    uiSettings: mockCoreSetup.uiSettings,
+    notifications: mockCoreStart.notifications,
     query: querySetup,
   });
   aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
@@ -166,7 +176,7 @@ const mockAggTypesRegistry = () => {
 const aggTypesRegistry = mockAggTypesRegistry();
 
 export const npSetup = {
-  core: mockCore,
+  core: mockCoreSetup,
   plugins: {
     advancedSettings: {
       component: {
@@ -216,7 +226,7 @@ export const npSetup = {
           },
         },
       },
-      fieldFormats: getFieldFormatsRegistry(mockCore),
+      fieldFormats: getFieldFormatsRegistry(mockCoreSetup),
     },
     share: {
       register: () => {},
@@ -283,17 +293,17 @@ export const npSetup = {
     visTypeVega: {
       config: sinon.fake(),
     },
+    visualizations: {
+      createBaseVisualization: sinon.fake(),
+      createReactVisualization: sinon.fake(),
+      registerAlias: sinon.fake(),
+      hideTypes: sinon.fake(),
+    },
   },
 };
 
 export const npStart = {
-  core: {
-    chrome: {
-      overlays: {
-        openModal: sinon.fake(),
-      },
-    },
-  },
+  core: mockCoreStart,
   plugins: {
     management: {
       legacy: {
@@ -437,7 +447,7 @@ export const npStart = {
           },
         },
       },
-      fieldFormats: getFieldFormatsRegistry(mockCore),
+      fieldFormats: getFieldFormatsRegistry(mockCoreStart),
     },
     share: {
       toggleShareContextMenu: () => {},
@@ -458,6 +468,16 @@ export const npStart = {
       getTrigger: sinon.fake(),
       getTriggerActions: sinon.fake(),
       getTriggerCompatibleActions: sinon.fake(),
+    },
+    visualizations: {
+      get: sinon.fake(),
+      all: sinon.fake(),
+      getAliases: sinon.fake(),
+      savedVisualizationsLoader: {},
+      showNewVisModal: sinon.fake(),
+      createVis: sinon.fake(),
+      convertFromSerializedVis: sinon.fake(),
+      convertToSerializedVis: sinon.fake(),
     },
     navigation: {
       ui: {
@@ -485,23 +505,15 @@ export function __setup__(coreSetup) {
   // bootstrap an LP plugin outside of tests)
   npSetup.core.application.register = () => {};
 
-  // Services that need to be set in the legacy platform since the legacy data plugin
-  // which previously provided them has been removed.
-  setInjectedMetadata(npSetup.core.injectedMetadata);
+  // Services that need to be set in the legacy platform since the legacy data
+  // & vis plugins which previously provided them have been removed.
+  setSetupServices(npSetup);
 }
 
 export function __start__(coreStart) {
   npStart.core = coreStart;
 
-  // Services that need to be set in the legacy platform since the legacy data plugin
-  // which previously provided them has been removed.
-  setHttp(npStart.core.http);
-  setNotifications(npStart.core.notifications);
-  setOverlays(npStart.core.overlays);
-  setUiSettings(npStart.core.uiSettings);
-  setFieldFormats(npStart.plugins.data.fieldFormats);
-  setIndexPatterns(npStart.plugins.data.indexPatterns);
-  setQueryService(npStart.plugins.data.query);
-  setSearchService(npStart.plugins.data.search);
-  setAggs(npStart.plugins.data.search.aggs);
+  // Services that need to be set in the legacy platform since the legacy data
+  // & vis plugins which previously provided them have been removed.
+  setStartServices(npStart);
 }
