@@ -1,4 +1,5 @@
 {
+  "timestamp": "2019-09-11T03:40:34.371Z",
   "observer": {
     "geo": {
       "name": "mpls",
@@ -6,7 +7,6 @@
     },
     "hostname": "avc-x1x"
   },
-  "@timestamp": "2019-09-11T03:40:34.371Z",
   "monitor": {
     "duration": {
       "us": 24627
@@ -25,6 +25,5 @@
     "domain": "localhost",
     "query": "r=200x1",
     "full": "http://localhost:5678/pattern?r=200x1"
-  },
-  "timestamp": "2019-09-11T03:40:34.371Z"
+  }
 }

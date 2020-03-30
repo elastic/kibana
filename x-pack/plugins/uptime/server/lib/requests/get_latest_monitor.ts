@@ -54,9 +54,10 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
 
   const result = await callES('search', params);
   const ping: any = result.hits?.hits?.[0] ?? {};
+  const { '@timestamp': timestamp, ...monitorResult } = ping?._source ?? {};
 
   return {
-    ...ping?._source,
-    timestamp: ping?._source?.['@timestamp'],
+    timestamp,
+    ...monitorResult,
   };
 };
