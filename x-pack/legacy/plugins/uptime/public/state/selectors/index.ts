@@ -22,9 +22,7 @@ export const monitorLocationsSelector = (state: AppState, monitorId: string) => 
   return state.monitor.monitorLocationsList?.get(monitorId);
 };
 
-export const selectSelectedMonitor = (state: AppState) => state.monitorStatus.monitor;
-
-export const selectMonitorStatus = (state: AppState) => state.monitorStatus.status;
+export const monitorStatusSelector = (state: AppState) => state.monitorStatus.status;
 
 export const selectDynamicSettings = (state: AppState) => {
   return state.dynamicSettings;

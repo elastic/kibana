@@ -7,19 +7,7 @@
 import { QueryParams } from '../actions/types';
 import { Ping } from '../../../common/graphql/types';
 import { apiService } from './utils';
-import { API_URLS } from '../../../common/constants/rest_api';
-
-export interface APIParams {
-  monitorId: string;
-}
-
-export const fetchSelectedMonitor = async ({ monitorId }: APIParams): Promise<Ping> => {
-  const queryParams = {
-    monitorId,
-  };
-
-  return await apiService.get(API_URLS.MONITOR_SELECTED, queryParams);
-};
+import { API_URLS } from '../../../common/constants';
 
 export const fetchMonitorStatus = async ({
   monitorId,

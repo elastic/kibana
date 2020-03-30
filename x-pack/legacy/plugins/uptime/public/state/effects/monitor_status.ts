@@ -25,13 +25,4 @@ export function* fetchMonitorStatusEffect() {
       getMonitorStatusActionFail
     )
   );
-
-  yield takeLatest(
-    getSelectedMonitorAction,
-    fetchEffectFactory(
-      fetchSelectedMonitor,
-      getSelectedMonitorActionSuccess,
-      getSelectedMonitorActionFail
-    )
-  );
 }
