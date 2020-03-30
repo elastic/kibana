@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiText,
@@ -12,12 +12,18 @@ import {
   EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { ElasticUser } from '../../../../containers/case/types';
 
 interface UserListProps {
+  email: {
+    subject: string;
+    body: string;
+  };
   headline: string;
+  loading?: boolean;
   users: ElasticUser[];
 }
 
@@ -31,8 +37,11 @@ const MyFlexGroup = styled(EuiFlexGroup)`
   `}
 `;
 
-const renderUsers = (users: ElasticUser[]) => {
-  return users.map(({ fullName, username }, key) => (
+const renderUsers = (
+  users: ElasticUser[],
+  handleSendEmail: (emailAddress: string | undefined | null) => void
+) => {
+  return users.map(({ fullName, username, email }, key) => (
     <MyFlexGroup key={key} justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs">
@@ -50,7 +59,8 @@ const renderUsers = (users: ElasticUser[]) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          onClick={() => {}} // TO DO
+          data-test-subj="user-list-email-button"
+          onClick={handleSendEmail.bind(null, email)}
           iconType="email"
           aria-label="email"
         />
@@ -59,12 +69,27 @@ const renderUsers = (users: ElasticUser[]) => {
   ));
 };
 
-export const UserList = React.memo(({ headline, users }: UserListProps) => {
+export const UserList = React.memo(({ email, headline, loading, users }: UserListProps) => {
+  const handleSendEmail = useCallback(
+    (emailAddress: string | undefined | null) => {
+      if (emailAddress && emailAddress != null) {
+        window.open(`mailto:${emailAddress}?subject=${email.subject}&body=${email.body}`, '_blank');
+      }
+    },
+    [email.subject]
+  );
   return (
     <EuiText>
       <h4>{headline}</h4>
       <EuiHorizontalRule margin="xs" />
-      {renderUsers(users)}
+      {loading && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {renderUsers(users, handleSendEmail)}
     </EuiText>
   );
 });

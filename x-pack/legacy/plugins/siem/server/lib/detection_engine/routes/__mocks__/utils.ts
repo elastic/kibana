@@ -24,6 +24,21 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
 });
 
 /**
+ * This is a typical ML rule for testing
+ * @param ruleId
+ */
+export const getSimpleMlRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  name: 'Simple Rule Query',
+  description: 'Simple Rule Query',
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  type: 'machine_learning',
+  anomaly_threshold: 44,
+  machine_learning_job_id: 'some_job_id',
+});
+
+/**
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId
  */
@@ -82,6 +97,7 @@ export const getOutputRuleAlertForRest = (): Omit<
   OutputRuleAlertRest,
   'machine_learning_job_id' | 'anomaly_threshold'
 > => ({
+  actions: [],
   created_by: 'elastic',
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',

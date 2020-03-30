@@ -12,7 +12,12 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
-import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import {
+  buildRouteValidation,
+  transformError,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -30,6 +35,7 @@ export const patchRulesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const {
+        actions,
         description,
         enabled,
         false_positives: falsePositives,
@@ -54,13 +60,20 @@ export const patchRulesRoute = (router: IRouter) => {
         to,
         type,
         threat,
+        throttle,
         references,
         note,
         version,
+        anomaly_threshold: anomalyThreshold,
+        machine_learning_job_id: machineLearningJobId,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
       try {
+        if (type) {
+          validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+        }
+
         if (!context.alerting || !context.actions) {
           return siemResponse.error({ statusCode: 404 });
         }
@@ -76,6 +89,7 @@ export const patchRulesRoute = (router: IRouter) => {
         const rule = await patchRules({
           actionsClient,
           alertsClient,
+          actions,
           description,
           enabled,
           falsePositives,
@@ -101,9 +115,12 @@ export const patchRulesRoute = (router: IRouter) => {
           to,
           type,
           threat,
+          throttle,
           references,
           note,
           version,
+          anomalyThreshold,
+          machineLearningJobId,
         });
         if (rule != null) {
           const ruleStatuses = await savedObjectsClient.find<

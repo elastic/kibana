@@ -289,7 +289,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             <p>
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleDescription"
-                defaultMessage="Clicking {confirmSaveLabel} overwrites the existing {objectType}."
+                defaultMessage="Clicking {confirmSaveLabel} will save the {objectType} with this duplicate title."
                 values={{
                   objectType: this.props.objectType,
                   confirmSaveLabel: (

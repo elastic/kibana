@@ -9,31 +9,40 @@ import React, { useContext, useMemo } from 'react';
 import { pickTimeKey } from '../../../../common/time';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
 import { LogPositionState, LogPositionStateParams } from './log_position_state';
+import { isValidDatemath, datemathToEpochMillis } from '../../../utils/datemath';
 
 /**
  * Url State
  */
-
-interface LogPositionUrlState {
-  position: LogPositionStateParams['visibleMidpoint'] | undefined;
+export interface LogPositionUrlState {
+  position?: LogPositionStateParams['visibleMidpoint'];
   streamLive: boolean;
+  start?: string;
+  end?: string;
 }
+
+const ONE_HOUR = 3600000;
 
 export const WithLogPositionUrlState = () => {
   const {
     visibleMidpoint,
-    isAutoReloading,
+    isStreaming,
     jumpToTargetPosition,
-    jumpToTargetPositionTime,
     startLiveStreaming,
     stopLiveStreaming,
+    startDateExpression,
+    endDateExpression,
+    updateDateRange,
+    initialize,
   } = useContext(LogPositionState.Context);
   const urlState = useMemo(
     () => ({
       position: visibleMidpoint ? pickTimeKey(visibleMidpoint) : null,
-      streamLive: isAutoReloading,
+      streamLive: isStreaming,
+      start: startDateExpression,
+      end: endDateExpression,
     }),
-    [visibleMidpoint, isAutoReloading]
+    [visibleMidpoint, isStreaming, startDateExpression, endDateExpression]
   );
   return (
     <UrlStateContainer
@@ -41,28 +50,69 @@ export const WithLogPositionUrlState = () => {
       urlStateKey="logPosition"
       mapToUrlState={mapToUrlState}
       onChange={(newUrlState: LogPositionUrlState | undefined) => {
-        if (newUrlState && newUrlState.position) {
+        if (!newUrlState) {
+          return;
+        }
+
+        if (newUrlState.start || newUrlState.end) {
+          updateDateRange({
+            startDateExpression: newUrlState.start,
+            endDateExpression: newUrlState.end,
+          });
+        }
+
+        if (newUrlState.position) {
           jumpToTargetPosition(newUrlState.position);
         }
-        if (newUrlState && newUrlState.streamLive) {
+
+        if (newUrlState.streamLive) {
           startLiveStreaming();
-        } else if (
-          newUrlState &&
-          typeof newUrlState.streamLive !== 'undefined' &&
-          !newUrlState.streamLive
-        ) {
+        } else if (typeof newUrlState.streamLive !== 'undefined' && !newUrlState.streamLive) {
           stopLiveStreaming();
         }
       }}
       onInitialize={(initialUrlState: LogPositionUrlState | undefined) => {
-        if (initialUrlState && initialUrlState.position) {
-          jumpToTargetPosition(initialUrlState.position);
-        } else {
-          jumpToTargetPositionTime(Date.now());
+        if (initialUrlState) {
+          const initialPosition = initialUrlState.position;
+          let initialStartDateExpression = initialUrlState.start;
+          let initialEndDateExpression = initialUrlState.end;
+
+          if (!initialPosition) {
+            initialStartDateExpression = initialStartDateExpression || 'now-1d';
+            initialEndDateExpression = initialEndDateExpression || 'now';
+          } else {
+            const initialStartTimestamp = initialStartDateExpression
+              ? datemathToEpochMillis(initialStartDateExpression)
+              : undefined;
+            const initialEndTimestamp = initialEndDateExpression
+              ? datemathToEpochMillis(initialEndDateExpression, 'up')
+              : undefined;
+
+            // Adjust the start-end range if the target position falls outside or if it's not set.
+            if (!initialStartTimestamp || initialStartTimestamp > initialPosition.time) {
+              initialStartDateExpression = new Date(initialPosition.time - ONE_HOUR).toISOString();
+            }
+
+            if (!initialEndTimestamp || initialEndTimestamp < initialPosition.time) {
+              initialEndDateExpression = new Date(initialPosition.time + ONE_HOUR).toISOString();
+            }
+
+            jumpToTargetPosition(initialPosition);
+          }
+
+          if (initialStartDateExpression || initialEndDateExpression) {
+            updateDateRange({
+              startDateExpression: initialStartDateExpression,
+              endDateExpression: initialEndDateExpression,
+            });
+          }
+
+          if (initialUrlState.streamLive) {
+            startLiveStreaming();
+          }
         }
-        if (initialUrlState && initialUrlState.streamLive) {
-          startLiveStreaming();
-        }
+
+        initialize();
       }}
     />
   );
@@ -73,6 +123,8 @@ const mapToUrlState = (value: any): LogPositionUrlState | undefined =>
     ? {
         position: mapToPositionUrlState(value.position),
         streamLive: mapToStreamLiveUrlState(value.streamLive),
+        start: mapToDate(value.start),
+        end: mapToDate(value.end),
       }
     : undefined;
 
@@ -83,6 +135,7 @@ const mapToPositionUrlState = (value: any) =>
 
 const mapToStreamLiveUrlState = (value: any) => (typeof value === 'boolean' ? value : false);
 
+const mapToDate = (value: any) => (isValidDatemath(value) ? value : undefined);
 export const replaceLogPositionInQueryString = (time: number) =>
   Number.isNaN(time)
     ? (value: string) => value
@@ -91,5 +144,7 @@ export const replaceLogPositionInQueryString = (time: number) =>
           time,
           tiebreaker: 0,
         },
+        end: new Date(time + ONE_HOUR).toISOString(),
+        start: new Date(time - ONE_HOUR).toISOString(),
         streamLive: false,
       });

@@ -12,7 +12,12 @@ import {
 } from '../../rules/types';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
-import { buildRouteValidation, transformBulkError, buildSiemResponse } from '../utils';
+import {
+  buildRouteValidation,
+  transformBulkError,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
@@ -47,6 +52,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
           const {
+            actions,
             anomaly_threshold: anomalyThreshold,
             description,
             enabled,
@@ -73,6 +79,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             to,
             type,
             threat,
+            throttle,
             references,
             note,
             version,
@@ -81,9 +88,12 @@ export const updateRulesBulkRoute = (router: IRouter) => {
           const finalIndex = outputIndex ?? siemClient.signalsIndex;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
+            validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+
             const rule = await updateRules({
               alertsClient,
               actionsClient,
+              actions,
               anomalyThreshold,
               description,
               enabled,
@@ -112,6 +122,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               to,
               type,
               threat,
+              throttle,
               references,
               note,
               version,

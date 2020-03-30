@@ -74,10 +74,12 @@ export const useDeleteCases = (): UseDeleteCase => {
 
   const dispatchDeleteCases = useCallback((caseIds: string[]) => {
     let cancel = false;
+    const abortCtrl = new AbortController();
+
     const deleteData = async () => {
       try {
         dispatch({ type: 'FETCH_INIT' });
-        await deleteCases(caseIds);
+        await deleteCases(caseIds, abortCtrl.signal);
         if (!cancel) {
           dispatch({ type: 'FETCH_SUCCESS', payload: true });
         }
@@ -94,6 +96,7 @@ export const useDeleteCases = (): UseDeleteCase => {
     };
     deleteData();
     return () => {
+      abortCtrl.abort();
       cancel = true;
     };
   }, []);

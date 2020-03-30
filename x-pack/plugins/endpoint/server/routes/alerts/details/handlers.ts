@@ -9,6 +9,7 @@ import { AlertEvent, EndpointAppConstants } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
+import { getHostData } from '../../../routes/metadata';
 
 export const alertDetailsHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
@@ -33,10 +34,15 @@ export const alertDetailsHandlerWrapper = function(
         response
       );
 
+      const currentHostInfo = await getHostData(ctx, response._source.host.id);
+
       return res.ok({
         body: {
           id: response._id,
           ...response._source,
+          state: {
+            host_metadata: currentHostInfo,
+          },
           next: await pagination.getNextUrl(),
           prev: await pagination.getPrevUrl(),
         },

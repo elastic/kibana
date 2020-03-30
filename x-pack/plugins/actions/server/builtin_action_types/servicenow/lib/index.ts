@@ -6,7 +6,7 @@
 
 import axios, { AxiosInstance, Method, AxiosResponse } from 'axios';
 
-import { INCIDENT_URL, USER_URL, COMMENT_URL } from './constants';
+import { INCIDENT_URL, USER_URL, COMMENT_URL, VIEW_INCIDENT_URL } from './constants';
 import { Instance, Incident, IncidentResponse, UpdateIncident, CommentResponse } from './types';
 import { Comment } from '../types';
 
@@ -72,6 +72,10 @@ class ServiceNow {
     return `[Action][ServiceNow]: ${msg}`;
   }
 
+  private _getIncidentViewURL(id: string) {
+    return `${this.instance.url}/${VIEW_INCIDENT_URL}${id}`;
+  }
+
   async getUserID(): Promise<string> {
     try {
       const res = await this._request({ url: `${this.userUrl}${this.instance.username}` });
@@ -109,6 +113,7 @@ class ServiceNow {
         number: res.data.result.number,
         incidentId: res.data.result.sys_id,
         pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_created_on)).toISOString(),
+        url: this._getIncidentViewURL(res.data.result.sys_id),
       };
     } catch (error) {
       throw new Error(this._getErrorMessage(`Unable to create incident. Error: ${error.message}`));
@@ -126,6 +131,7 @@ class ServiceNow {
         number: res.data.result.number,
         incidentId: res.data.result.sys_id,
         pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_updated_on)).toISOString(),
+        url: this._getIncidentViewURL(res.data.result.sys_id),
       };
     } catch (error) {
       throw new Error(

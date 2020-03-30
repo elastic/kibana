@@ -8,6 +8,7 @@ import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
 import { ListsDefaultArraySchema } from './routes/schemas/types/lists_default_array';
+import { RuleAlertAction } from '../../../common/detection_engine/types';
 
 export type PartialFilter = Partial<Filter>;
 
@@ -30,6 +31,7 @@ export interface ThreatParams {
 export type RuleType = 'query' | 'saved_query' | 'machine_learning';
 
 export interface RuleAlertParams {
+  actions: RuleAlertAction[];
   anomalyThreshold: number | undefined;
   description: string;
   note: string | undefined | null;
@@ -50,7 +52,7 @@ export interface RuleAlertParams {
   query: string | undefined | null;
   references: string[];
   savedId?: string | undefined | null;
-  meta: Record<string, {}> | undefined | null;
+  meta: Record<string, {} | string> | undefined | null;
   severity: string;
   tags: string[];
   to: string;
@@ -59,11 +61,14 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: RuleType;
   version: number;
-  throttle?: string;
+  throttle: string | null;
   lists: ListsDefaultArraySchema | null | undefined;
 }
 
-export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
+export type RuleTypeParams = Omit<
+  RuleAlertParams,
+  'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
+>;
 
 export type RuleAlertParamsRest = Omit<
   RuleAlertParams,
@@ -114,6 +119,7 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
   immutable: boolean;
+  throttle: string | undefined | null;
 };
 
 export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {

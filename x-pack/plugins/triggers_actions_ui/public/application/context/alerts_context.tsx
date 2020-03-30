@@ -5,7 +5,7 @@
  */
 
 import React, { useContext, createContext } from 'react';
-import { HttpSetup, IUiSettingsClient, ToastsApi } from 'kibana/public';
+import { HttpSetup, IUiSettingsClient, ToastsApi, DocLinksStart } from 'kibana/public';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { TypeRegistry } from '../type_registry';
@@ -22,6 +22,7 @@ export interface AlertsContextValue<MetaData = Record<string, any>> {
   >;
   uiSettings?: IUiSettingsClient;
   charts?: ChartsPluginSetup;
+  docLinks: DocLinksStart;
   dataFieldsFormats?: DataPublicPluginSetup['fieldFormats'];
   metadata?: MetaData;
 }

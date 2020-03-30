@@ -23,7 +23,6 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const find = getService('find');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -58,7 +57,6 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('complete config', function describeIndexTests() {
-      this.tags(['skipCoverage']);
       before(async function() {
         await browser.setWindowSize(1280, 1000);
 
@@ -279,7 +277,7 @@ export default function({ getService, getPageObjects }) {
       it('should suppress zoom warning if suppress warnings button clicked', async () => {
         last = true;
         await PageObjects.visChart.waitForVisualization();
-        await find.clickByCssSelector('[data-test-subj="suppressZoomWarnings"]');
+        await testSubjects.click('suppressZoomWarnings');
         await PageObjects.tileMap.clickMapZoomOut(waitForLoading);
         await testSubjects.waitForDeleted('suppressZoomWarnings');
         await PageObjects.tileMap.clickMapZoomIn(waitForLoading);

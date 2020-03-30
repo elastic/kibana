@@ -59,6 +59,7 @@ export function DynamicIconForm({
         </EuiFlexItem>
         <EuiFlexItem>
           <FieldSelect
+            styleName={styleProperty.getStyleName()}
             fields={fields}
             selectedFieldName={_.get(styleOptions, 'field.name')}
             onChange={onFieldChange}
