@@ -115,7 +115,7 @@
   "dependencies": {
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.7.0",
-    "@elastic/charts": "^18.1.0",
+    "@elastic/charts": "^18.1.1",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "7.7.1",
     "@elastic/eui": "21.0.1",
