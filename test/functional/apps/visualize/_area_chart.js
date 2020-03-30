@@ -610,6 +610,11 @@ export default function({ getService, getPageObjects }) {
 
         it('should update scaled label text after custom interval is set and time range is changed', async () => {
           await PageObjects.visEditor.setInterval('10s', { type: 'custom' });
+          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(true);
           let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
           expect(helperScaledLabelText).to.include.string('to 10 minutes');
           const fromTime = 'Sep 20, 2015 @ 21:30:00.000';

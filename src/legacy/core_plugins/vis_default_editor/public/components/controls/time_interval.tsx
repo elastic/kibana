@@ -61,7 +61,7 @@ function validateInterval(
   timeBase?: string
 ) {
   if (definedOption) {
-    return { isValid: true };
+    return { isValid: true, interval: agg.buckets?.getInterval() };
   }
 
   if (!value) {
