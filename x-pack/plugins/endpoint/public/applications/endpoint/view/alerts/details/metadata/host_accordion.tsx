@@ -6,6 +6,8 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescriptionList } from '@elastic/eui';
+import { EuiHealth, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Immutable, AlertDetails } from '../../../../../../../common/types';
 
 export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDetails> }) => {
@@ -37,9 +39,17 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.status', {
-          defaultMessage: 'Status (Current)',
+          defaultMessage: 'Current Status',
         }),
-        description: 'TODO',
+        description: (
+          <EuiHealth color="success">
+            {' '}
+            <FormattedMessage
+              id="xpack.endpoint.application.endpoint.alertDetails.endpoint.status.online"
+              defaultMessage="Online"
+            />
+          </EuiHealth>
+        ),
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.osCurrent', {
