@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
-export const { createFiltersFromEvent } = npStart.plugins.data.actions;
 import { search } from '../../../../plugins/data/public';
 export const { tabifyAggResponse, tabifyGetColumns } = search;
+
 // @ts-ignore
 export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 // @ts-ignore
