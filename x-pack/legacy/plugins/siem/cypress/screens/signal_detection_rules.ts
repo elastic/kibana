@@ -43,4 +43,6 @@ export const RULES_ROW = '.euiTableRow';
 
 export const SEVERITY = '[data-test-subj="severity"]';
 
+export const SHOWING_RULES_TEXT = '[data-test-subj="showingRules"]';
+
 export const THREE_HUNDRED_ROWS = '[data-test-subj="tablePagination-300-rows"]';

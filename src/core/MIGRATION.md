@@ -43,6 +43,7 @@
         - [Core services](#core-services-1)
         - [Plugin services](#plugin-services)
       - [UI Exports](#ui-exports)
+      - [Plugin Spec](#plugin-spec)
   - [How to](#how-to)
     - [Configure plugin](#configure-plugin)
       - [Handle plugin configuration deprecations](#handle-plugin-configuration-deprecations)
@@ -1152,12 +1153,12 @@ _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-pl
 
 ##### Plugins for shared application services
 
-In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but for the time being, are only available in legacy. So if your plugin depends on any of the APIs below, you'll need build your plugin as a legacy plugin that shims the new platform. Once these API's have been moved to the new platform you can migrate your plugin and declare a dependency on the plugin that owns the API's you require.
+In client code, we have a series of plugins which house shared application services which are not technically part of `core`, but are often used in Kibana plugins.
 
-The contracts for these plugins are exposed for you to consume in your own plugin; we have created dedicated exports for the `setup` and `start` contracts in a file called `legacy`. By passing these contracts to your plugin's `setup` and `start` methods, you can mimic the functionality that will eventually be provided in the new platform.
+This table maps some of the most commonly used legacy items to their new platform locations.
 
 ```ts
-import { setup, start } from '../core_plugins/visualizations/public/legacy';
+import { npStart: { plugins } } from 'ui/new_platform';
 ```
 
 | Legacy Platform                                   | New Platform                                                 | Notes                                                                                                                                |
@@ -1264,40 +1265,19 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `visTypes`                   | `plugins.visualizations.types`                                                                                                                          |                                                                                                                                       |
 | `visualize`                  |                                                                                                                           |                                                                                                                                       |
 
-Examples:
-
-- **uiSettingDefaults**
-
-Before:
-
-```js
-uiExports: {
-  uiSettingDefaults: {
-    'my-plugin:my-setting': {
-      name: 'just-work',
-      value: true,
-      description: 'make it work',
-      category: ['my-category'],
-    },
-  }
-}
-```
-
-After:
-
-```ts
-// src/plugins/my-plugin/server/plugin.ts
-setup(core: CoreSetup){
-  core.uiSettings.register({
-    'my-plugin:my-setting': {
-      name: 'just-work',
-      value: true,
-      description: 'make it work',
-      category: ['my-category'],
-    },
-  })
-}
-```
+#### Plugin Spec
+| Legacy Platform               | New Platform                                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `id`                          | [`manifest.id`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)                  |
+| `require`                     | [`manifest.requiredPlugins`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)     |
+| `version`                     | [`manifest.version`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)             |
+| `kibanaVersion`               | [`manifest.kibanaVersion`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)       |
+| `configPrefix`                | [`manifest.configPath`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)          |
+| `config`                      | [export config](#configure-plugin)                                                                          |
+| `deprecations`                | [export config](#handle-plugin-configuration-deprecations)                                                  |
+| `uiExports`                   | `N/A`. Use platform & plugin public contracts                                                               |
+| `publicDir`                   | `N/A`. Platform serves static assets from `/public/assets` folder under `/plugins/{id}/assets/{path*}` URL. |
+| `preInit`, `init`, `postInit` | `N/A`. Use NP [lifecycle events](#services)                                                                 |
 
 ## How to
 
