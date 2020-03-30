@@ -42,7 +42,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
     {
       name: 'ml_ui_extras',
       elasticsearch: {
-        cluster: ['manage', 'manage_ingest_pipelines', 'monitor'],
+        cluster: ['manage_ingest_pipelines', 'monitor'],
       },
       kibana: [],
     },

@@ -20,9 +20,9 @@
 import { SelfChangingEditor } from './self_changing_editor';
 import { SelfChangingComponent } from './self_changing_components';
 
-import { setup as visualizations } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
+import { npSetup } from '../../../../../../src/legacy/ui/public/new_platform';
 
-visualizations.createReactVisualization({
+npSetup.plugins.visualizations.createReactVisualization({
   name: 'self_changing_vis',
   title: 'Self Changing Vis',
   icon: 'controlsHorizontal',

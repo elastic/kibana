@@ -47,12 +47,9 @@ export const RecentTimelines = React.memo<{
                   <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={t} />
                   <RecentTimelineCounts timeline={t} />
                   {t.description && t.description.length && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiText color="subdued" size="xs">
-                        {t.description}
-                      </EuiText>
-                    </>
+                    <EuiText color="subdued" size="xs">
+                      {t.description}
+                    </EuiText>
                   )}
                 </EuiFlexItem>
 

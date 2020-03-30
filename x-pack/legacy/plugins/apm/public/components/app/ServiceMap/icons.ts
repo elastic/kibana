@@ -5,9 +5,17 @@
  */
 
 import cytoscape from 'cytoscape';
+import {
+  AGENT_NAME,
+  SERVICE_NAME,
+  SPAN_TYPE,
+  SPAN_SUBTYPE
+} from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import databaseIcon from './icons/database.svg';
+import defaultIconImport from './icons/default.svg';
 import documentsIcon from './icons/documents.svg';
 import dotNetIcon from './icons/dot-net.svg';
+import elasticsearchIcon from './icons/elasticsearch.svg';
 import globeIcon from './icons/globe.svg';
 import goIcon from './icons/go.svg';
 import javaIcon from './icons/java.svg';
@@ -16,14 +24,13 @@ import phpIcon from './icons/php.svg';
 import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
 import rumJsIcon from './icons/rumjs.svg';
-import defaultIconImport from './icons/default.svg';
 
 export const defaultIcon = defaultIconImport;
 
 // The colors here are taken from the logos of the corresponding technologies
 const icons: { [key: string]: string } = {
   cache: databaseIcon,
-  database: databaseIcon,
+  db: databaseIcon,
   external: globeIcon,
   messaging: documentsIcon,
   resource: globeIcon
@@ -52,12 +59,17 @@ const serviceIcons: { [key: string]: string } = {
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export function iconForNode(node: cytoscape.NodeSingular) {
-  const type = node.data('type');
+  const type = node.data(SPAN_TYPE);
 
-  if (type === 'service') {
-    return serviceIcons[node.data('agentName') as string];
+  if (node.data(SERVICE_NAME)) {
+    return serviceIcons[node.data(AGENT_NAME) as string];
   } else if (isIE11) {
     return defaultIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'db' &&
+    node.data(SPAN_SUBTYPE) === 'elasticsearch'
+  ) {
+    return elasticsearchIcon;
   } else if (icons[type]) {
     return icons[type];
   } else {
