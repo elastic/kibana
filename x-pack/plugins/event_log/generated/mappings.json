@@ -1,12 +1,15 @@
 {
-    "dynamic": "strict",
+    "dynamic": "false",
     "properties": {
         "@timestamp": {
             "type": "date"
         },
         "tags": {
             "ignore_above": 1024,
-            "type": "keyword"
+            "type": "keyword",
+            "meta": {
+                "isArray": true
+            }
         },
         "message": {
             "norms": false,
@@ -18,8 +21,7 @@
                     "ignore_above": 1024,
                     "type": "keyword"
                 }
-            },
-            "dynamic": "strict"
+            }
         },
         "event": {
             "properties": {
@@ -40,8 +42,7 @@
                 "end": {
                     "type": "date"
                 }
-            },
-            "dynamic": "strict"
+            }
         },
         "error": {
             "properties": {
@@ -49,8 +50,7 @@
                     "norms": false,
                     "type": "text"
                 }
-            },
-            "dynamic": "strict"
+            }
         },
         "user": {
             "properties": {
@@ -58,8 +58,7 @@
                     "ignore_above": 1024,
                     "type": "keyword"
                 }
-            },
-            "dynamic": "strict"
+            }
         },
         "kibana": {
             "properties": {
@@ -86,11 +85,9 @@
                             "ignore_above": 1024
                         }
                     },
-                    "type": "nested",
-                    "dynamic": "strict"
+                    "type": "nested"
                 }
-            },
-            "dynamic": "strict"
+            }
         }
     }
 }
