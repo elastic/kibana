@@ -42,7 +42,7 @@ import { migratePanelsTo730 } from '../../../../legacy/core_plugins/kibana/publi
 export function migrateAppState(
   appState: { [key: string]: unknown } & DashboardAppState,
   kibanaVersion: string,
-  usageCollection: UsageCollectionSetup
+  usageCollection?: UsageCollectionSetup
 ): DashboardAppState {
   if (!appState.panels) {
     throw new Error(
@@ -64,8 +64,10 @@ export function migrateAppState(
 
     const version = (panel as SavedDashboardPanel730ToLatest).version;
 
-    // This will help us figure out when to remove support for older style URLs.
-    usageCollection.reportUiStats('DashboardPanelVersionInUrl', METRIC_TYPE.LOADED, `${version}`);
+    if (usageCollection) {
+      // This will help us figure out when to remove support for older style URLs.
+      usageCollection.reportUiStats('DashboardPanelVersionInUrl', METRIC_TYPE.LOADED, `${version}`);
+    }
 
     return semver.satisfies(version, '<7.3');
   });

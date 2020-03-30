@@ -50,7 +50,7 @@ export interface RenderDeps {
   data: DataPublicPluginStart;
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
-  savedDashboards: SavedObjectLoader;
+  savedDashboards?: SavedObjectLoader;
   dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
   embeddableCapabilities: {
@@ -65,7 +65,7 @@ export interface RenderDeps {
   localStorage: Storage;
   share: SharePluginStart;
   config: KibanaLegacyStart['config'];
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 let angularModuleInstance: IModule | null = null;
@@ -112,13 +112,11 @@ function mountDashboardApp(appBasePath: string, element: HTMLElement) {
 
 function createLocalAngularModule(core: AppMountContext['core'], navigation: NavigationStart) {
   createLocalI18nModule();
-  createLocalConfigModule(core);
   createLocalTopNavModule(navigation);
   createLocalIconModule();
 
   const dashboardAngularModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
-    'app/dashboard/Config',
     'app/dashboard/I18n',
     'app/dashboard/TopNav',
     'app/dashboard/icon',
@@ -130,16 +128,6 @@ function createLocalIconModule() {
   angular
     .module('app/dashboard/icon', ['react'])
     .directive('icon', reactDirective => reactDirective(EuiIcon));
-}
-
-function createLocalConfigModule(core: AppMountContext['core']) {
-  angular.module('app/dashboard/Config', []).provider('config', () => {
-    return {
-      $get: () => ({
-        get: core.uiSettings.get.bind(core.uiSettings),
-      }),
-    };
-  });
 }
 
 function createLocalTopNavModule(navigation: NavigationStart) {

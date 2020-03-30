@@ -84,6 +84,7 @@ export class DashboardStateManager {
   private readonly kbnUrlStateStorage: IKbnUrlStateStorage;
   private readonly stateSyncRef: ISyncStateRef;
   private readonly history: History;
+  private readonly usageCollection: UsageCollectionSetup | undefined;
 
   /**
    *
@@ -105,12 +106,13 @@ export class DashboardStateManager {
     kibanaVersion: string;
     kbnUrlStateStorage: IKbnUrlStateStorage;
     history: History;
-    usageCollection: UsageCollectionSetup;
+    usageCollection?: UsageCollectionSetup;
   }) {
     this.history = history;
     this.kibanaVersion = kibanaVersion;
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
+    this.usageCollection = usageCollection;
 
     // get state defaults from saved dashboard, make sure it is migrated
     this.stateDefaults = migrateAppState(
@@ -280,9 +282,9 @@ export class DashboardStateManager {
     // clone, but given how much code uses the state object, I determined that to be too risky of a change for
     // now.  TODO: revisit this!
     this.stateDefaults = migrateAppState(
-      getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
+      { ...getAppStateDefaults(this.savedDashboard, this.hideWriteControls) },
       this.kibanaVersion,
-      usageCollection
+      this.usageCollection
     );
     // The original query won't be restored by the above because the query on this.savedDashboard is applied
     // in place in order for it to affect the visualizations.

@@ -57,6 +57,7 @@ import {
   AngularRenderedAppUpdater,
   KibanaLegacySetup,
   KibanaLegacyStart,
+  initAngularBootstrap,
 } from '../../../plugins/kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
 
@@ -72,6 +73,7 @@ import {
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { RenderDeps } from './application';
+import { getSavedDashboardLoader, setSavedDashboardLoader } from './services';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -86,13 +88,12 @@ interface SetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 interface StartDependencies {
   data: DataPublicPluginStart;
-  dashboard: DashboardStart;
-  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
+  kibanaLegacy: KibanaLegacyStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
   navigation: NavigationStart;
@@ -206,15 +207,12 @@ export class DashboardEmbeddableContainerPublicPlugin
         const [coreStart, startDependencies] = await core.getStartServices();
         appMounted();
         const {
-          savedObjectsClient,
           embeddable: embeddableStart,
           navigation,
           share: shareStart,
           data: dataStart,
-          dashboardConfig,
-          dashboard: { getSavedDashboardLoader },
+          kibanaLegacy: { dashboardConfig },
         } = startDependencies;
-        const savedDashboards = getSavedDashboardLoader();
 
         const deps: RenderDeps = {
           pluginInitializerContext: this.initializerContext,
@@ -223,8 +221,8 @@ export class DashboardEmbeddableContainerPublicPlugin
           navigation,
           share: shareStart,
           data: dataStart,
-          savedObjectsClient,
-          savedDashboards,
+          savedObjectsClient: coreStart.savedObjects.client,
+          savedDashboards: getSavedDashboardLoader(),
           chrome: coreStart.chrome,
           addBasePath: coreStart.http.basePath.prepend,
           uiSettings: coreStart.uiSettings,
@@ -247,6 +245,9 @@ export class DashboardEmbeddableContainerPublicPlugin
         };
       },
     };
+
+    initAngularBootstrap();
+
     kibanaLegacy.registerLegacyApp({
       ...app,
       id: DashboardConstants.DASHBOARD_ID,
@@ -294,6 +295,7 @@ export class DashboardEmbeddableContainerPublicPlugin
       chrome: core.chrome,
       overlays: core.overlays,
     });
+    setSavedDashboardLoader(savedDashboardLoader);
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
     };

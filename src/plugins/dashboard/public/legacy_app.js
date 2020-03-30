@@ -94,7 +94,7 @@ export function initDashboardApp(app, deps) {
       .when(DashboardConstants.LANDING_PAGE_PATH, {
         ...defaults,
         template: dashboardListingTemplate,
-        controller($scope, kbnUrlStateStorage, history) {
+        controller: function($scope, kbnUrlStateStorage, history) {
           const service = deps.savedDashboards;
           const dashboardConfig = deps.dashboardConfig;
 
