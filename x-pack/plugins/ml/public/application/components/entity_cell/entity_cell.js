@@ -70,7 +70,7 @@ export const EntityCell = function EntityCell({
   filter,
   wrapText = false,
 }) {
-  let valueText = entityValue === '' ? EMPTY_FIELD_VALUE_LABEL : entityValue;
+  let valueText = entityValue === '' ? <i>{EMPTY_FIELD_VALUE_LABEL}</i> : entityValue;
   if (entityName === MLCATEGORY) {
     valueText = `${MLCATEGORY} ${valueText}`;
   }

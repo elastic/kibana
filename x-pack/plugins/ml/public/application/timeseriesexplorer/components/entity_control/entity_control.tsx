@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiToolTip,
 } from '@elastic/eui';
+import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
 export interface Entity {
   fieldName: string;
@@ -38,7 +39,12 @@ interface EntityControlState {
   options: Array<EuiComboBoxOptionOption<string>> | undefined;
 }
 
-export const EMPTY_FIELD_VALUE_LABEL = '""';
+export const EMPTY_FIELD_VALUE_LABEL = i18n.translate(
+  'xpack.ml.timeSeriesExplorer.emptyPartitionFieldLabel.',
+  {
+    defaultMessage: 'blank (empty string)',
+  }
+);
 
 export class EntityControl extends Component<EntityControlProps, EntityControlState> {
   inputRef: any;
@@ -107,6 +113,11 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     this.props.onSearchChange(this.props.entity, searchValue);
   };
 
+  renderOption = (option: EuiSelectableOption) => {
+    const { label } = option;
+    return label === EMPTY_FIELD_VALUE_LABEL ? <i>{label}</i> : label;
+  };
+
   render() {
     const { entity, forceSelection } = this.props;
     const { isLoading, options, selectedOptions } = this.state;
@@ -130,6 +141,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
         onChange={this.onChange}
         onSearchChange={this.onSearchChange}
         isClearable={false}
+        renderOption={this.renderOption}
       />
     );
 
