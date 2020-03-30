@@ -48,7 +48,7 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
         // skip the first emitted config (job cloning)
         skip(1),
         // don't call the endpoint with invalid payload
-        filter(value => jobValidator.isModelMemoryEstimationPayloadValid),
+        filter(() => jobValidator.isModelMemoryEstimationPayloadValid),
         switchMap(payload =>
           ml.calculateModelMemoryLimit$(payload).pipe(
             pluck('modelMemoryLimit'),
