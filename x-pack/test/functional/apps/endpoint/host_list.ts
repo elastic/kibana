@@ -11,8 +11,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  // const log = getService('log');
-  // const retry = getService('retry');
 
   describe('host list', function() {
     this.tags('ciGroup7');
