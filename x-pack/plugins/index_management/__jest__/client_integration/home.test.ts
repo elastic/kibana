@@ -304,7 +304,10 @@ describe('<IndexManagementHome />', () => {
 
             const templateId = rows[0].columns[2].value;
 
-            const { name: templateName } = template1;
+            const {
+              name: templateName,
+              _kbnMeta: { formatVersion },
+            } = template1;
             await actions.clickTemplateAction(templateName, 'delete');
 
             const modal = document.body.querySelector(
@@ -329,8 +332,11 @@ describe('<IndexManagementHome />', () => {
 
             const latestRequest = server.requests[server.requests.length - 1];
 
-            expect(latestRequest.method).toBe('DELETE');
-            expect(latestRequest.url).toBe(`${API_BASE_PATH}/templates/${template1.name}`);
+            expect(latestRequest.method).toBe('POST');
+            expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete-templates`);
+            expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
+              templates: [{ name: template1.name, formatVersion }],
+            });
           });
         });
 
