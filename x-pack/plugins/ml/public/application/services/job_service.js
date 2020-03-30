@@ -586,6 +586,7 @@ class JobService {
             const data = {
               index: job.datafeed_config.indices,
               body,
+              ...(job.datafeed_config.indices_options || {}),
             };
 
             ml.esSearch(data)
