@@ -9,7 +9,6 @@ import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { ApmRoute } from '@elastic/apm-rum-react';
 import styled from 'styled-components';
-import { metadata } from 'ui/metadata';
 import { i18n } from '@kbn/i18n';
 import { AlertType } from '../../../../../plugins/apm/common/alert_types';
 import {
@@ -124,14 +123,6 @@ export class ApmPlugin
     // Until then we use a shim to get it from legacy injectedMetadata:
     const config = getConfigFromInjectedMetadata();
 
-    // Once we're actually an NP plugin we'll get the package info from the
-    // initializerContext like:
-    //
-    //     const packageInfo = this.initializerContext.env.packageInfo
-    //
-    // Until then we use a shim to get it from legacy metadata:
-    const packageInfo = metadata as PackageInfo;
-
     // render APM feedback link in global help menu
     setHelpExtension(core);
     setReadonlyBadge(core);
@@ -140,7 +131,6 @@ export class ApmPlugin
     const apmPluginContextValue = {
       config,
       core,
-      packageInfo,
       plugins
     };
 

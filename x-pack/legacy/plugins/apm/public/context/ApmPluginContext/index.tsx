@@ -13,7 +13,6 @@ export type AppMountContextBasePath = AppMountContext['core']['http']['basePath'
 export interface ApmPluginContextValue {
   config: ConfigSchema;
   core: AppMountContext['core'];
-  packageInfo: PackageInfo;
   plugins: ApmPluginSetupDeps;
 }
 
