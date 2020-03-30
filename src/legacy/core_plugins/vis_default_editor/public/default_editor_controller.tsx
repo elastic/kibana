@@ -23,19 +23,18 @@ import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 
 import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
-import { Vis } from 'src/legacy/core_plugins/visualizations/public/';
+import { Vis, VisualizeEmbeddableContract } from '../../../../plugins/visualizations/public';
 import { Storage } from '../../../../plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../plugins/kibana_react/public';
 import { DefaultEditor } from './default_editor';
 import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
-import { VisualizeEmbeddable } from '../../visualizations/public/np_ready/public/embeddable';
 
 const localStorage = new Storage(window.localStorage);
 
 export interface DefaultEditorControllerState {
   vis: Vis;
   eventEmitter: EventEmitter;
-  embeddableHandler: VisualizeEmbeddable;
+  embeddableHandler: VisualizeEmbeddableContract;
   optionTabs: OptionTab[];
 }
 

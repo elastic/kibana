@@ -17,21 +17,29 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { setUiSettings } from '../../../../public/services';
 import { AggConfigs } from '../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { IBucketHistogramAggConfig, histogramBucketAgg, AutoBounds } from './histogram';
+import {
+  IBucketHistogramAggConfig,
+  getHistogramBucketAgg,
+  AutoBounds,
+  HistogramBucketAggDependencies,
+} from './histogram';
 import { BucketAggType } from './_bucket_agg_type';
 
 describe('Histogram Agg', () => {
-  beforeEach(() => {
-    mockDataServices();
-  });
+  let aggTypesDependencies: HistogramBucketAggDependencies;
 
-  const typesRegistry = mockAggTypesRegistry([histogramBucketAgg]);
+  beforeEach(() => {
+    const { uiSettings, notifications } = coreMock.createSetup();
+
+    aggTypesDependencies = {
+      uiSettings,
+      notifications,
+    };
+  });
 
   const getAggConfigs = (params: Record<string, any>) => {
     const indexPattern = {
@@ -58,7 +66,7 @@ describe('Histogram Agg', () => {
           params,
         },
       ],
-      { typesRegistry }
+      { typesRegistry: mockAggTypesRegistry([getHistogramBucketAgg(aggTypesDependencies)]) }
     );
   };
 
@@ -76,7 +84,7 @@ describe('Histogram Agg', () => {
     let histogramType: BucketAggType<IBucketHistogramAggConfig>;
 
     beforeEach(() => {
-      histogramType = histogramBucketAgg;
+      histogramType = getHistogramBucketAgg(aggTypesDependencies);
     });
 
     it('is ordered', () => {
@@ -150,6 +158,14 @@ describe('Histogram Agg', () => {
           params?: Record<string, any>,
           autoBounds?: AutoBounds
         ) => {
+          aggTypesDependencies = {
+            ...aggTypesDependencies,
+            uiSettings: {
+              ...aggTypesDependencies.uiSettings,
+              get: () => maxBars as any,
+            },
+          };
+
           const aggConfigs = getAggConfigs({
             ...params,
             field: {
@@ -162,15 +178,7 @@ describe('Histogram Agg', () => {
             aggConfig.setAutoBounds(autoBounds);
           }
 
-          const core = coreMock.createStart();
-          setUiSettings({
-            ...core.uiSettings,
-            get: () => maxBars as any,
-          });
-
-          const interval = aggConfig.write(aggConfigs).params;
-          setUiSettings(core.uiSettings); // clean up
-          return interval;
+          return aggConfig.write(aggConfigs).params;
         };
 
         it('will respect the histogram:maxBars setting', () => {
