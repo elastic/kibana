@@ -176,7 +176,7 @@ export function DiscoverSidebar({
         setIndexPattern={setIndexPattern}
         indexPatternList={sortBy(indexPatternList, o => o.attributes.title)}
       />
-      <div className="dscSidebar__item" role="presentation">
+      <div className="dscSidebar__item">
         <form>
           <DiscoverFieldSearch
             onChange={onChangeFieldSearch}
