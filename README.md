@@ -5,7 +5,7 @@
 [![dependencies Status](https://david-dm.org/sqren/backport/status.svg)](https://david-dm.org/sqren/backport)
 [![Coverage Status](https://coveralls.io/repos/github/sqren/backport/badge.svg?branch=master)](https://coveralls.io/github/sqren/backport?branch=master)
 
-A simple CLI tool that automates the process of backporting commits
+A simple CLI tool that automates the process of backporting commits on a GitHub repo.
 
 ![Demonstration gif](https://i.makeagif.com/media/10-05-2017/kEJLqe.gif)
 
