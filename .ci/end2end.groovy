@@ -87,10 +87,11 @@ pipeline {
             archiveArtifacts(allowEmptyArchive: false, artifacts: "${E2E_DIR}/**/screenshots/**,${E2E_DIR}/**/videos/**,${E2E_DIR}/**/test-results/*e2e-tests.xml")
             junit(allowEmptyResults: true, testResults: "${E2E_DIR}/**/test-results/*e2e-tests.xml")
             dir('./tmp/apm-integration-testing'){
-              sh 'docker-compose logs > apm-its.log || true'
+              sh 'docker-compose logs > apm-its-docker.log || true'
               sh 'docker-compose down -v || true'
-              archiveArtifacts(allowEmptyArchive: true, artifacts: 'apm-its.log')
+              archiveArtifacts(allowEmptyArchive: true, artifacts: 'apm-its-docker.log')
             }
+            archiveArtifacts(allowEmptyArchive: true, artifacts: './tmp/*.log')
           }
         }
         unsuccessful {
@@ -105,7 +106,7 @@ pipeline {
   post {
     always {
       dir("${BASE_DIR}"){
-        archiveArtifacts(allowEmptyArchive: true, artifacts: "./tmp/ingest-data.log,kibana.log")
+        archiveArtifacts(allowEmptyArchive: true, artifacts: 'kibana.log')
       }
     }
   }
