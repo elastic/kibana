@@ -196,11 +196,21 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
     context: [
       {
         name: 'message',
-        description: 'A generated message summarizing the currently down monitors',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
+          {
+            defaultMessage: 'A generated message summarizing the currently down monitors',
+          }
+        ),
       },
       {
         name: 'completeIdList',
-        description: 'A complete list of all the down monitors',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.context.idList.description',
+          {
+            defaultMessage: 'A complete list of all the down monitors',
+          }
+        ),
       },
     ],
   },
