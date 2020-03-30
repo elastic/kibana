@@ -14,7 +14,7 @@ import { AttributesMap, ElementsPositionAndAttribute } from './types';
 export const getElementPositionAndAttributes = async (
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<ElementsPositionAndAttribute[] | null> => {
   const endTrace = startTrace('get_element_position_data', 'read');
   const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container
