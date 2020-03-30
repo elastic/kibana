@@ -11,12 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { npSetup, npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import { IIndexPattern } from 'src/plugins/data/public';
-import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  IContainer,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { EmbeddableFactory, ErrorEmbeddable, IContainer } from 'src/plugins/embeddable/public';
 import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
 import { getIndexPatternService } from '../kibana_services';
 
@@ -171,4 +166,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
   }
 }
 
-setup.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+npSetup.plugins.embeddable.registerEmbeddableFactory(
+  MAP_SAVED_OBJECT_TYPE,
+  new MapEmbeddableFactory()
+);
