@@ -5,11 +5,18 @@
  */
 
 import { notFound, notImplemented } from 'boom';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
 import { cryptoFactory } from '../../../../server/lib';
-import { CreateJobFactory, ImmediateCreateJobFn, Logger, RequestFacade } from '../../../../types';
+import {
+  CreateJobFactory,
+  ImmediateCreateJobFn,
+  Logger,
+  RequestFacade,
+  ServerFacade,
+} from '../../../../types';
 import {
   JobDocPayloadPanelCsv,
   JobParamsPanelCsv,
@@ -30,9 +37,13 @@ interface VisData {
 
 export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
->> = async function createJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
-  const config = await reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
+>> = function createJobFactoryFn(
+  reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
+) {
+  const crypto = cryptoFactory(server);
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(

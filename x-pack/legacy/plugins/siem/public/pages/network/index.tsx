@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
-import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
+import { useMlCapabilities } from '../../components/ml_popover/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
 import { FlowTarget } from '../../graphql/types';
 
@@ -24,7 +24,7 @@ const networkPagePath = `/:pageName(${SiemPageName.network})`;
 const ipDetailsPageBasePath = `${networkPagePath}/ip/:detailName`;
 
 const NetworkContainerComponent: React.FC<Props> = () => {
-  const capabilities = useContext(MlCapabilitiesContext);
+  const capabilities = useMlCapabilities();
   const capabilitiesFetched = capabilities.capabilitiesFetched;
   const userHasMlUserPermissions = useMemo(() => hasMlUserPermissions(capabilities), [
     capabilities,
