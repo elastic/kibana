@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { ServerFacade } from '../../../../types';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
@@ -18,7 +17,7 @@ export const getNumberOfItems = async (
   layout: LayoutInstance,
   logger: LevelLogger
 ): Promise<number> => {
-  const apmSpan = apm.startSpan('get_number_of_items', 'read');
+  const endTrace = startTrace('get_number_of_items', 'read');
   const config = server.config();
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;
@@ -73,6 +72,7 @@ export const getNumberOfItems = async (
     itemsCount = 1;
   }
 
-  if (apmSpan) apmSpan.end();
+  endTrace();
+
   return itemsCount;
 };

@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { Screenshot, ElementsPositionAndAttribute } from './types';
 
 export const getScreenshots = async (
@@ -24,7 +23,7 @@ export const getScreenshots = async (
   const screenshots: Screenshot[] = [];
 
   for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
-    const apmSpan = apm.startSpan('get_screenshots', 'read');
+    const endTrace = startTrace('get_screenshots', 'read');
     const item = elementsPositionAndAttributes[i];
     const base64EncodedData = (await browser.screenshot(item.position)).toString('base64');
 
@@ -34,7 +33,7 @@ export const getScreenshots = async (
       description: item.attributes.description,
     });
 
-    if (apmSpan) apmSpan.end();
+    endTrace();
   }
 
   logger.info(

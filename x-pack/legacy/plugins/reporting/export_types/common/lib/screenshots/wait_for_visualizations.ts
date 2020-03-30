@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import { ServerFacade } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
@@ -30,7 +29,7 @@ export const waitForVisualizations = async (
   layout: LayoutInstance,
   logger: LevelLogger
 ): Promise<void> => {
-  const apmSpan = apm.startSpan('wait_for_visualizations', 'wait');
+  const endTrace = startTrace('wait_for_visualizations', 'wait');
   const config = server.config();
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
@@ -67,5 +66,5 @@ export const waitForVisualizations = async (
     );
   }
 
-  if (apmSpan) apmSpan.end();
+  endTrace();
 };

@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import { promisify } from 'util';
-import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { Layout } from '../../layouts/layout';
 import { CONTEXT_INJECTCSS } from './constants';
 
@@ -20,7 +19,7 @@ export const injectCustomCss = async (
   layout: Layout,
   logger: LevelLogger
 ): Promise<void> => {
-  const apmSpan = apm.startSpan('inject_css', 'correction');
+  const endTrace = startTrace('inject_css', 'correction');
   logger.debug(
     i18n.translate('xpack.reporting.screencapture.injectingCss', {
       defaultMessage: 'injecting custom css',
@@ -52,5 +51,5 @@ export const injectCustomCss = async (
     );
   }
 
-  if (apmSpan) apmSpan.end();
+  endTrace();
 };

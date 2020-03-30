@@ -12,3 +12,4 @@ export { oncePerServer } from './once_per_server';
 export { runValidations } from './validate';
 export { createQueueFactory } from './create_queue';
 export { enqueueJobFactory } from './enqueue_job';
+export { startTrace } from './trace';

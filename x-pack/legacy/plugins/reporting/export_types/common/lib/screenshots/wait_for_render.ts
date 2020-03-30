@@ -5,10 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import apm from 'elastic-apm-node';
 import { CaptureConfig } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_WAITFORRENDER } from './constants';
 
@@ -18,7 +17,7 @@ export const waitForRenderComplete = async (
   captureConfig: CaptureConfig,
   logger: LevelLogger
 ) => {
-  const apmSpan = apm.startSpan('wait_for_render', 'wait');
+  const endTrace = startTrace('wait_for_render', 'wait');
 
   logger.debug(
     i18n.translate('xpack.reporting.screencapture.waitingForRenderComplete', {
@@ -80,6 +79,6 @@ export const waitForRenderComplete = async (
         })
       );
 
-      if (apmSpan) apmSpan.end();
+      endTrace();
     });
 };

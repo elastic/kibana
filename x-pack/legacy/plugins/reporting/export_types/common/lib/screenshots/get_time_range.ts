@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import apm from 'elastic-apm-node';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_GETTIMERANGE } from './constants';
 import { TimeRange } from './types';
@@ -16,7 +15,7 @@ export const getTimeRange = async (
   layout: LayoutInstance,
   logger: LevelLogger
 ): Promise<TimeRange | null> => {
-  const apmSpan = apm.startSpan('get_time_range', 'read');
+  const endTrace = startTrace('get_time_range', 'read');
   logger.debug('getting timeRange');
 
   const timeRange: TimeRange | null = await browser.evaluate(
@@ -47,6 +46,7 @@ export const getTimeRange = async (
     logger.debug('no timeRange');
   }
 
-  if (apmSpan) apmSpan.end();
+  endTrace();
+
   return timeRange;
 };

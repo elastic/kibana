@@ -5,9 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import apm from 'elastic-apm-node';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { ConditionalHeaders, ServerFacade } from '../../../../types';
 import { PAGELOAD_SELECTOR } from '../../constants';
 
@@ -18,7 +17,7 @@ export const openUrl = async (
   conditionalHeaders: ConditionalHeaders,
   logger: LevelLogger
 ): Promise<void> => {
-  const apmSpan = apm.startSpan('open_url', 'wait');
+  const endTrace = startTrace('open_url', 'wait');
   const config = server.config();
   try {
     await browser.open(
@@ -38,5 +37,6 @@ export const openUrl = async (
       })
     );
   }
-  if (apmSpan) apmSpan.end();
+
+  endTrace();
 };
