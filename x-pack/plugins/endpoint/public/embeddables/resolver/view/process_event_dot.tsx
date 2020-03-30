@@ -82,7 +82,7 @@ export const ProcessEventDot = styled(
       /**
        * map of what nodes are "adjacent" to this one in "up, down, previous, next" directions
        */
-      adjacentNodeMap?: AdjacentProcessMap;
+      adjacentNodeMap: AdjacentProcessMap;
     }) => {
       /**
        * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -91,7 +91,7 @@ export const ProcessEventDot = styled(
 
       const [magFactorX] = projectionMatrix;
 
-      const selfId = adjacentNodeMap?.self;
+      const selfId = adjacentNodeMap.self;
 
       const nodeViewportStyle = useMemo(
         () => ({
@@ -129,15 +129,21 @@ export const ProcessEventDot = styled(
           }
         : {};
 
-      const nodeType = getNodeType(event);
-      const clickTargetRef: { current: SVGAnimationElement | null } = React.createRef();
-      const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[nodeType];
-      const resolverNodeIdGenerator = htmlIdGenerator('resolverNode');
-      const [nodeId, labelId, descriptionId] = [
-        !!selfId ? resolverNodeIdGenerator(String(selfId)) : resolverNodeIdGenerator(),
-        resolverNodeIdGenerator(),
-        resolverNodeIdGenerator(),
-      ] as string[];
+      /**
+       * An element that should be animated when the node is clicked.
+       */
+      const animationTarget: { current: SVGAnimationElement | null } = React.createRef();
+      const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[
+        nodeType(event)
+      ];
+      const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
+
+      const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
+        resolverNodeIdGenerator,
+        selfId,
+      ]);
+      const labelId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
+      const descriptionId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
 
       const dispatch = useResolverDispatch();
 
@@ -154,14 +160,12 @@ export const ProcessEventDot = styled(
         [dispatch, nodeId]
       );
 
-      const handleClick = useCallback(
-        (clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-          if (clickTargetRef.current !== null) {
-            (clickTargetRef.current as any).beginElement();
-          }
-        },
-        [clickTargetRef]
-      );
+      const handleClick = useCallback(() => {
+        if (animationTarget.current !== null) {
+          // Use undocumented `beginElement` API on SVG element
+          (animationTarget.current as any).beginElement();
+        }
+      }, [animationTarget]);
 
       return (
         <EuiKeyboardAccessible>
@@ -202,7 +206,7 @@ export const ProcessEventDot = styled(
                   begin="click"
                   repeatCount="1"
                   className="squish"
-                  ref={clickTargetRef}
+                  ref={animationTarget}
                 />
               </use>
               <use
@@ -273,7 +277,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = 
   unknownEvent: 'runningProcessCube',
 };
 
-function getNodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
+function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
   const processType = processModel.eventType(processEvent);
 
   if (processType in processTypeToCube) {
