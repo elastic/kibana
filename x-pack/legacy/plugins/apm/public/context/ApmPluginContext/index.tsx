@@ -5,7 +5,7 @@
  */
 
 import { createContext } from 'react';
-import { AppMountContext, PackageInfo } from 'kibana/public';
+import { AppMountContext } from 'kibana/public';
 import { ApmPluginSetupDeps, ConfigSchema } from '../../new-platform/plugin';
 
 export type AppMountContextBasePath = AppMountContext['core']['http']['basePath'];

@@ -14,7 +14,6 @@ import { AlertType } from '../../../../../plugins/apm/common/alert_types';
 import {
   CoreSetup,
   CoreStart,
-  PackageInfo,
   Plugin,
   PluginInitializerContext
 } from '../../../../../../src/core/public';
