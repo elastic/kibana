@@ -8,6 +8,7 @@ import { SavedObjectsClientContract, SavedObject, KibanaRequest } from 'src/core
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
 import { createAPIKey } from './security';
+import { escapeSearchQueryPhrase } from '../saved_object';
 
 export * from './enrollment_api_key';
 
@@ -70,9 +71,13 @@ export async function getEnrollmentAPIKeyById(
     await soClient.find<EnrollmentAPIKeySOAttributes>({
       type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
       searchFields: ['api_key_id'],
-      search: apiKeyId,
+      search: escapeSearchQueryPhrase(apiKeyId),
     })
   ).saved_objects.map(_savedObjectToEnrollmentApiKey);
+
+  if (enrollmentAPIKey?.id !== apiKeyId) {
+    throw new Error('find enrollmentKeyById returned an incorrect key');
+  }
 
   return enrollmentAPIKey;
 }
