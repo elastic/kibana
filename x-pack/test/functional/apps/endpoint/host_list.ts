@@ -104,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const hostDetailTitleInitial = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
       // select the same host in the host list
       await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-      await sleep(1000); // give page time to refresh
+      await sleep(500); // give page time to refresh and verify it did not change
       const hostDetailTitleNew = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
       expect(hostDetailTitleNew).to.eql(hostDetailTitleInitial);
     });
@@ -120,9 +120,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await esArchiver.load('endpoint/metadata/api_feature');
       });
       it('displays no items found when empty', async () => {
-        // get the table data and verify no entries appear
-        const tableData = await pageObjects.endpoint.getEndpointAppTableData('hostListTable');
-        expect(tableData[1][0]).to.equal('No items found');
+        // get the host list table data and verify message
+        const [, [noItemsFoundMessage]] = await pageObjects.endpoint.getEndpointAppTableData(
+          'hostListTable'
+        );
+        expect(noItemsFoundMessage).to.equal('No items found');
       });
     });
 

@@ -73,10 +73,7 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
     async waitForVisibleTextToChange(dataTestSubj: string, currentText: string) {
       await retry.waitForWithTimeout('visible text to change', 2000, async () => {
         const detailFlyoutTitle = await testSubjects.getVisibleText(dataTestSubj);
-        if (detailFlyoutTitle === currentText) {
-          return false;
-        }
-        return true;
+        return detailFlyoutTitle !== currentText;
       });
     },
 
