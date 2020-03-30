@@ -140,4 +140,21 @@ describe('dedupeConnections', () => {
     // @ts-ignore
     expect(nodejsNode?.data[SPAN_SUBTYPE]).toBe('aa');
   });
+
+  it('processes connections without a matching "service" aggregation', () => {
+    const response: ServiceMapResponse = {
+      services: [javaService],
+      discoveredServices: [],
+      connections: [
+        {
+          source: javaService,
+          destination: nodejsService
+        }
+      ]
+    };
+
+    const { elements } = dedupeConnections(response);
+
+    expect(elements.length).toBe(3);
+  });
 });
