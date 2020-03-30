@@ -37,14 +37,13 @@ export const LogEntryRatePageContent = () => {
     hasLogAnalysisSetupCapabilities,
   } = useLogAnalysisCapabilitiesContext();
 
-  const { fetchJobStatus, fetchModuleDefinition, setupStatus } = useLogEntryRateModuleContext();
+  const { fetchJobStatus, setupStatus } = useLogEntryRateModuleContext();
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
-      fetchModuleDefinition();
       fetchJobStatus();
     }
-  }, [fetchJobStatus, fetchModuleDefinition, hasLogAnalysisReadCapabilities]);
+  }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
   if (isLoadingSource || isUninitialized) {
     return <SourceLoadingPage />;
@@ -54,7 +53,7 @@ export const LogEntryRatePageContent = () => {
     return <MlUnavailablePrompt />;
   } else if (!hasLogAnalysisReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
-  } else if (setupStatus === 'initializing') {
+  } else if (setupStatus.type === 'initializing') {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
@@ -62,7 +61,7 @@ export const LogEntryRatePageContent = () => {
         })}
       />
     );
-  } else if (setupStatus === 'unknown') {
+  } else if (setupStatus.type === 'unknown') {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isSetupStatusWithResults(setupStatus)) {
     return <LogEntryRateResultsContent />;

@@ -20,8 +20,8 @@ export const ABOUT_TEXT = i18n.translate(
 );
 
 export const ABOUT_PANEL_NOTES_TAB = i18n.translate(
-  'xpack.siem.detectionEngine.details.stepAboutRule.investigationNotesLabel',
+  'xpack.siem.detectionEngine.details.stepAboutRule.investigationGuideLabel',
   {
-    defaultMessage: 'Investigation notes',
+    defaultMessage: 'Investigation guide',
   }
 );

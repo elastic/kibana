@@ -25,7 +25,7 @@ export function initPlugin(server: Hapi.Server, path: string) {
         }),
       },
     },
-    handler: slackHandler,
+    handler: slackHandler as Hapi.Lifecycle.Method,
   });
 }
 // Slack simulator: create a slack action pointing here, and you can get
