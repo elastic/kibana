@@ -199,7 +199,7 @@ def buildOss() {
 }
 
 def buildXpack() {
-  // runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+  runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
 }
 
 def runErrorReporter() {
@@ -290,6 +290,8 @@ def runFunctionalTestSuite(type, testSuite) {
               buildUtils.printStacktrace(ex)
             }
 
+            def buildDir = ''
+
             if (type == 'oss') {
               bash("""
                 if [[ ! -d build/oss ]]; then
@@ -297,6 +299,17 @@ def runFunctionalTestSuite(type, testSuite) {
                   cp -R ${env.WORKSPACE}/kibana-build-oss/. build/oss/
                 fi
               """, "Copy Kibana Build")
+              buildDir = '$(realpath build/oss/kibana-*-SNAPSHOT-linux-x86_64)'
+            }
+
+            if (type == 'xpack') {
+              bash("""
+                if [[ ! -d install/kibana ]]; then
+                  mkdir -p install
+                  cp -R ${env.WORKSPACE}/kibana-build-xpack/. install/
+                fi
+              """, "Copy XPack Kibana Build")
+              buildDir = '$(realpath install/kibana)'
             }
 
             // TODO runbld
@@ -306,7 +319,7 @@ def runFunctionalTestSuite(type, testSuite) {
                 node scripts/functional_tests \
                   --config '${testSuite.config}' \
                   --debug \
-                  --kibana-install-dir "\$(realpath build/oss/kibana-*-SNAPSHOT-linux-x86_64)" \
+                  --kibana-install-dir "${buildDir}" \
                   ${filesString}
               """, "${type} tests: ${testSuite.config}"
             )
@@ -402,20 +415,20 @@ def newPipeline(Closure closure = {}) {
         """, "Run OSS plugin functional tests")
       }
 
-      // task {
-      //   buildXpack()
-      //   // bash("mv install/kibana ${env.WORKSPACE}/kibana-build-xpack", "Move XPack Build")
+      task {
+        buildXpack()
+        bash("mkdir -p ${env.WORKSPACE}/kibana-build-xpack; mv install/kibana ${env.WORKSPACE}/kibana-build-xpack/", "Move XPack build")
 
-      //   tasks(testPlan.xpack.collect { return { runFunctionalTestSuite('xpack', it) } })
+        tasks(testPlan.xpack.collect { return { runFunctionalTestSuite('xpack', it) } })
 
-      //   // task(getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }))
+        // task(getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }))
 
-      //   task({ runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') })
+        task({ runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') })
 
-      //   whenChanged(['x-pack/legacy/plugins/siem/', 'x-pack/test/siem_cypress/']) {
-      //     task(functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'))
-      //   }
-      // }
+        whenChanged(['x-pack/legacy/plugins/siem/', 'x-pack/test/siem_cypress/']) {
+          task(functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'))
+        }
+      }
     }
 
     closure.call()
