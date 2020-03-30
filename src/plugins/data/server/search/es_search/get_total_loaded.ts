@@ -16,8 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import 'ui/autoload/all';
 
-import chrome from 'ui/chrome';
+import { ShardsResponse } from 'elasticsearch';
 
-chrome.setRootTemplate('<div data-test-subj="pluginContent">Super simple app plugin</div>');
+/**
+ * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
+ * not included as it is already included in `successful`.
+ * @internal
+ */
+export function getTotalLoaded({ total, failed, successful }: ShardsResponse) {
+  const loaded = failed + successful;
+  return { total, loaded };
+}

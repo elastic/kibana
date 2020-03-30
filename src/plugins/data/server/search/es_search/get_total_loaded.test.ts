@@ -17,8 +17,20 @@
  * under the License.
  */
 
-export default function({ loadTestFile }) {
-  describe('app plugins', () => {
-    loadTestFile(require.resolve('./app_navigation'));
+import { getTotalLoaded } from './get_total_loaded';
+
+describe('getTotalLoaded', () => {
+  it('returns the total/loaded, not including skipped', () => {
+    const result = getTotalLoaded({
+      successful: 10,
+      failed: 5,
+      skipped: 5,
+      total: 100,
+    });
+
+    expect(result).toEqual({
+      total: 100,
+      loaded: 15,
+    });
   });
-}
+});
