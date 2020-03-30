@@ -17,7 +17,6 @@ import uuid from 'uuid/v4';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { registerSource } from '../source_registry';
-import { registerLayerWizard } from '../../layer_wizard_registry';
 
 export class GeojsonFileSource extends AbstractVectorSource {
   static type = GEOJSON_FILE;
@@ -137,11 +136,10 @@ registerSource({
   type: GEOJSON_FILE,
 });
 
-registerLayerWizard({
+export const uploadLayerWizardConfig = {
   id: GEOJSON_FILE,
-  order: 0,
   description: i18n.translate('xpack.maps.source.geojsonFileDescription', {
-    defaultMessage: 'Upload and index GeoJSON data in Elasticsearch',
+    defaultMessage: 'Index GeoJSON data in Elasticsearch',
   }),
   icon: 'importAction',
   isIndexingSource: true,
@@ -171,6 +169,6 @@ registerLayerWizard({
     );
   },
   title: i18n.translate('xpack.maps.source.geojsonFileTitle', {
-    defaultMessage: 'Uploaded GeoJSON',
+    defaultMessage: 'Upload GeoJSON',
   }),
-});
+};

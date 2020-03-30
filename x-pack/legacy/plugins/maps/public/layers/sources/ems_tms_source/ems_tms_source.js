@@ -17,7 +17,6 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { EMS_TMS } from '../../../../common/constants';
 import { getInjectedVarFunc, getUiSettings } from '../../../kibana_services';
 import { registerSource } from '../source_registry';
-import { registerLayerWizard } from '../../layer_wizard_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
   defaultMessage: 'EMS Basemaps',
@@ -154,9 +153,8 @@ registerSource({
   type: EMS_TMS,
 });
 
-registerLayerWizard({
+export const emsBaseMapLayerWizardConfig = {
   id: EMS_TMS,
-  order: 21,
   description: i18n.translate('xpack.maps.source.emsTileDescription', {
     defaultMessage: 'Tile map service from Elastic Maps Service',
   }),
@@ -171,4 +169,4 @@ registerLayerWizard({
     return <TileServiceSelect onTileSelect={onSourceConfigChange} />;
   },
   title: sourceTitle,
-});
+};

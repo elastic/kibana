@@ -15,7 +15,6 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
 import { registerSource } from '../source_registry';
-import { registerLayerWizard } from '../../layer_wizard_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
   defaultMessage: 'EMS Boundaries',
@@ -165,9 +164,8 @@ registerSource({
   type: EMS_FILE,
 });
 
-registerLayerWizard({
+export const emsBoundariesLayerWizardConfig = {
   id: EMS_FILE,
-  order: 20,
   description: i18n.translate('xpack.maps.source.emsFileDescription', {
     defaultMessage: 'Administrative boundaries from Elastic Maps Service',
   }),
@@ -181,4 +179,4 @@ registerLayerWizard({
     return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,
-});
+};

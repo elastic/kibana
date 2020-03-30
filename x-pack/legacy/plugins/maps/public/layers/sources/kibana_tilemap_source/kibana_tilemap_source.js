@@ -13,7 +13,6 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import _ from 'lodash';
 import { KIBANA_TILEMAP } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
-import { registerLayerWizard } from '../../layer_wizard_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.kbnTMSTitle', {
   defaultMessage: 'Configured Tile Map Service',
@@ -92,9 +91,8 @@ registerSource({
   type: KIBANA_TILEMAP,
 });
 
-registerLayerWizard({
+export const kibanaBasemapLayerWizardConfig = {
   id: KIBANA_TILEMAP,
-  order: 31,
   description: i18n.translate('xpack.maps.source.kbnTMSDescription', {
     defaultMessage: 'Tile map service configured in kibana.yml',
   }),
@@ -108,4 +106,4 @@ registerLayerWizard({
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,
-});
+};

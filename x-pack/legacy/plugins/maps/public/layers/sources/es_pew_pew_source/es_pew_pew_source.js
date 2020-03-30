@@ -27,7 +27,6 @@ import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_sty
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 import { registerSource } from '../source_registry';
-import { registerLayerWizard } from '../../layer_wizard_registry';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -238,9 +237,8 @@ registerSource({
   type: ES_PEW_PEW,
 });
 
-registerLayerWizard({
+export const point2PointLayerWizardConfig = {
   id: ES_PEW_PEW,
-  order: 13,
   description: i18n.translate('xpack.maps.source.pewPewDescription', {
     defaultMessage: 'Aggregated data paths between the source and destination',
   }),
@@ -260,4 +258,4 @@ registerLayerWizard({
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,
-});
+};

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { KibanaTilemapSource } from './kibana_tilemap_source';
+export { KibanaTilemapSource, kibanaBasemapLayerWizardConfig } from './kibana_tilemap_source';

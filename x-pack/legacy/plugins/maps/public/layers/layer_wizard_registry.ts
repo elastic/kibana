@@ -10,7 +10,6 @@ type LayerWizard = {
   icon: string;
   id: string;
   isIndexingSource?: boolean;
-  order: number; // number to control display order in UI. Lower numbers display first
   renderWizard({
     onPreviewSource,
     inspectorAdapters,
@@ -29,9 +28,7 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
 }
 
 export function getLayerWizards(): LayerWizard[] {
-  return registry.sort(function(a: LayerWizard, b: LayerWizard) {
-    return a.order - b.order;
-  });
+  return [...registry];
 }
 
 export function getLayerWizard(id: string): LayerWizard | undefined {

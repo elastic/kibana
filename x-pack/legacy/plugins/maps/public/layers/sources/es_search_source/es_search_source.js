@@ -33,7 +33,6 @@ import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { getField, addFieldToDSL } from '../../util/es_agg_utils';
 import { registerSource } from '../source_registry';
-import { registerLayerWizard } from '../../layer_wizard_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -576,9 +575,8 @@ registerSource({
   type: ES_SEARCH,
 });
 
-registerLayerWizard({
+export const esDocumentsLayerWizardConfig = {
   id: ES_SEARCH,
-  order: 10,
   description: i18n.translate('xpack.maps.source.esSearchDescription', {
     defaultMessage: 'Vector data from a Kibana index pattern',
   }),
@@ -602,4 +600,4 @@ registerLayerWizard({
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,
-});
+};

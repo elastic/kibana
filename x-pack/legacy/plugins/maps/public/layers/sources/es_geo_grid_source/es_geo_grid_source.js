@@ -33,7 +33,6 @@ import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_sty
 import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
-import { registerLayerWizard } from '../../layer_wizard_registry';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -420,9 +419,8 @@ registerSource({
   type: ES_GEO_GRID,
 });
 
-registerLayerWizard({
+export const clustersLayerWizardConfig = {
   id: `${ES_GEO_GRID}_clusters`,
-  order: 11,
   description: i18n.translate('xpack.maps.source.esGridClustersDescription', {
     defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
   }),
@@ -447,11 +445,10 @@ registerLayerWizard({
     );
   },
   title: clustersTitle,
-});
+};
 
-registerLayerWizard({
+export const heatmapLayerWizardConfig = {
   id: `${ES_GEO_GRID}_heatmap`,
-  order: 12,
   description: i18n.translate('xpack.maps.source.esGridHeatmapDescription', {
     defaultMessage: 'Geospatial data grouped in grids to show density',
   }),
@@ -476,4 +473,4 @@ registerLayerWizard({
     );
   },
   title: heatmapTitle,
-});
+};

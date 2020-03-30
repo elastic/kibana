@@ -13,7 +13,6 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { FIELD_ORIGIN, REGIONMAP_FILE } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 import { registerSource } from '../source_registry';
-import { registerLayerWizard } from '../../layer_wizard_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
   defaultMessage: 'Configured GeoJSON',
@@ -105,9 +104,8 @@ registerSource({
   type: REGIONMAP_FILE,
 });
 
-registerLayerWizard({
+export const kibanaRegionMapLayerWizardConfig = {
   id: REGIONMAP_FILE,
-  order: 30,
   description: i18n.translate('xpack.maps.source.kbnRegionMapDescription', {
     defaultMessage: 'Vector data from hosted GeoJSON configured in kibana.yml',
   }),
@@ -122,4 +120,4 @@ registerLayerWizard({
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,
-});
+};

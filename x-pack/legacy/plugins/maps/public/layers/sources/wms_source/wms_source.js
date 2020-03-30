@@ -14,7 +14,6 @@ import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters
 import { WmsClient } from './wms_client';
 import { WMS } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
-import { registerLayerWizard } from '../../layer_wizard_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
   defaultMessage: 'Web Map Service',
@@ -98,9 +97,8 @@ registerSource({
   type: WMS,
 });
 
-registerLayerWizard({
+export const wmsLayerWizardConfig = {
   id: WMS,
-  order: 41,
   description: i18n.translate('xpack.maps.source.wmsDescription', {
     defaultMessage: 'Maps from OGC Standard WMS',
   }),
@@ -119,4 +117,4 @@ registerLayerWizard({
     return <WMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,
-});
+};

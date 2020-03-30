@@ -14,7 +14,6 @@ import { getDataSourceLabel, getUrlLabel } from '../../../common/i18n_getters';
 import _ from 'lodash';
 import { EMS_XYZ } from '../../../common/constants';
 import { registerSource } from './source_registry';
-import { registerLayerWizard } from '../layer_wizard_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',
@@ -173,9 +172,8 @@ registerSource({
   type: EMS_XYZ,
 });
 
-registerLayerWizard({
+export const tmsLayerWizardConfig = {
   id: EMS_XYZ,
-  order: 40,
   description: i18n.translate('xpack.maps.source.ems_xyzDescription', {
     defaultMessage: 'Tile map service configured in interface',
   }),
@@ -189,4 +187,4 @@ registerLayerWizard({
     return <XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,
-});
+};
