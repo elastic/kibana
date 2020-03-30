@@ -34,6 +34,12 @@ const StyledGraphControls = styled(GraphControls)`
   right: 5px;
 `;
 
+const StyledResolverContainer = styled.div`
+  display: flex;
+  flex-grow: 1;
+  contain: layout;
+`;
+
 const bgColor = NamedColors.resolverBackground;
 
 export const Resolver = styled(
@@ -67,7 +73,7 @@ export const Resolver = styled(
             <EuiLoadingSpinner size="xl" />
           </div>
         ) : (
-          <div
+          <StyledResolverContainer
             className="resolver-graph kbn-resetFocusState"
             onMouseDown={onMouseDown}
             ref={ref}
@@ -98,7 +104,7 @@ export const Resolver = styled(
                 />
               );
             })}
-          </div>
+          </StyledResolverContainer>
         )}
         <StyledPanel />
         <StyledGraphControls />
@@ -129,5 +135,6 @@ export const Resolver = styled(
    * Prevent partially visible components from showing up outside the bounds of Resolver.
    */
   overflow: hidden;
+  contain: strict;
   background-color: ${bgColor};
 `;
