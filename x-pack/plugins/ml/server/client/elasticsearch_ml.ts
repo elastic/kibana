@@ -671,7 +671,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     },
     method: 'DELETE',
   });
-  // Currently the endpoint uses a default size of 10 unless a size is supplied. So until paging is supported in the UI, explicitly supply a size of 1000
+  // Currently the endpoint uses a default size of 100 unless a size is supplied. So until paging is supported in the UI, explicitly supply a size of 1000
   ml.filters = ca({
     urls: [
       {
