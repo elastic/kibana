@@ -17,68 +17,62 @@
  * under the License.
  */
 
+import {
+  importFileMock,
+  importLegacyFileMock,
+  resolveImportErrorsMock,
+  resolveIndexPatternConflictsMock,
+  resolveSavedObjectsMock,
+  resolveSavedSearchesMock,
+  saveObjectsMock,
+} from './flyout.test.mocks';
+
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { mockManagementPlugin } from '../../../../../../../../../../management/public/np_ready/mocks';
-import { Flyout } from '../flyout';
+import { coreMock } from '../../../../../../core/public/mocks';
+import { serviceRegistryMock } from '../../../services/service_registry.mock';
+import { Flyout, FlyoutProps, FlyoutState } from './flyout';
+import { ShallowWrapper } from 'enzyme';
 
-jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
-
-jest.mock('../../../../../lib/import_file', () => ({
-  importFile: jest.fn(),
-}));
-
-jest.mock('../../../../../lib/resolve_import_errors', () => ({
-  resolveImportErrors: jest.fn(),
-}));
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => {},
-  getInjected: () => ['index-pattern', 'visualization', 'dashboard', 'search'],
-}));
-
-jest.mock('../../../../../lib/import_legacy_file', () => ({
-  importLegacyFile: jest.fn(),
-}));
-
-jest.mock('../../../../../lib/resolve_saved_objects', () => ({
-  resolveSavedObjects: jest.fn(),
-  resolveSavedSearches: jest.fn(),
-  resolveIndexPatternConflicts: jest.fn(),
-  saveObjects: jest.fn(),
-}));
-
-jest.mock('../../../../../../../../../../management/public/legacy', () => ({
-  setup: mockManagementPlugin.createSetupContract(),
-  start: mockManagementPlugin.createStartContract(),
-}));
-
-jest.mock('ui/notify', () => ({}));
-
-const defaultProps = {
-  close: jest.fn(),
-  done: jest.fn(),
-  services: [],
-  newIndexPatternUrl: '',
-  getConflictResolutions: jest.fn(),
-  confirmModalPromise: jest.fn(),
-  indexPatterns: {
-    getFields: jest.fn().mockImplementation(() => [{ id: '1' }, { id: '2' }]),
-  },
-};
-
-const mockFile = {
+const mockFile = ({
   name: 'foo.ndjson',
   path: '/home/foo.ndjson',
-};
-const legacyMockFile = {
+} as unknown) as File;
+const legacyMockFile = ({
   name: 'foo.json',
   path: '/home/foo.json',
-};
+} as unknown) as File;
 
 describe('Flyout', () => {
+  let defaultProps: FlyoutProps;
+
+  const shallowRender = (props: FlyoutProps) => {
+    return (shallowWithI18nProvider(<Flyout {...props} />) as unknown) as ShallowWrapper<
+      FlyoutProps,
+      FlyoutState,
+      Flyout
+    >;
+  };
+
+  beforeEach(() => {
+    const { http, overlays } = coreMock.createStart();
+
+    defaultProps = {
+      close: jest.fn(),
+      done: jest.fn(),
+      newIndexPatternUrl: '',
+      indexPatterns: {
+        getFields: jest.fn().mockImplementation(() => [{ id: '1' }, { id: '2' }]),
+      } as any,
+      overlays,
+      http,
+      allowedTypes: ['search', 'index-pattern', 'visualization'],
+      serviceRegistry: serviceRegistryMock.create(),
+    };
+  });
+
   it('should render import step', async () => {
-    const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+    const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -89,7 +83,7 @@ describe('Flyout', () => {
   });
 
   it('should toggle the overwrite all control', async () => {
-    const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+    const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -102,7 +96,7 @@ describe('Flyout', () => {
   });
 
   it('should allow picking a file', async () => {
-    const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+    const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -115,7 +109,7 @@ describe('Flyout', () => {
   });
 
   it('should allow removing a file', async () => {
-    const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+    const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
     await Promise.resolve();
@@ -130,22 +124,21 @@ describe('Flyout', () => {
   });
 
   it('should handle invalid files', async () => {
-    const { importLegacyFile } = require('../../../../../lib/import_legacy_file');
-    const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+    const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
-    importLegacyFile.mockImplementation(() => {
+    importLegacyFileMock.mockImplementation(() => {
       throw new Error('foobar');
     });
 
     await component.instance().legacyImport();
     expect(component.state('error')).toBe('The file could not be processed.');
 
-    importLegacyFile.mockImplementation(() => ({
+    importLegacyFileMock.mockImplementation(() => ({
       invalid: true,
     }));
 
@@ -156,11 +149,8 @@ describe('Flyout', () => {
   });
 
   describe('conflicts', () => {
-    const { importFile } = require('../../../../../lib/import_file');
-    const { resolveImportErrors } = require('../../../../../lib/resolve_import_errors');
-
     beforeEach(() => {
-      importFile.mockImplementation(() => ({
+      importFileMock.mockImplementation(() => ({
         success: false,
         successCount: 0,
         errors: [
@@ -180,7 +170,7 @@ describe('Flyout', () => {
           },
         ],
       }));
-      resolveImportErrors.mockImplementation(() => ({
+      resolveImportErrorsMock.mockImplementation(() => ({
         status: 'success',
         importCount: 1,
         failedImports: [],
@@ -188,7 +178,7 @@ describe('Flyout', () => {
     });
 
     it('should figure out unmatchedReferences', async () => {
-      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+      const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -198,7 +188,7 @@ describe('Flyout', () => {
       component.setState({ file: mockFile, isLegacyFile: false });
       await component.instance().import();
 
-      expect(importFile).toHaveBeenCalledWith(mockFile, true);
+      expect(importFileMock).toHaveBeenCalledWith(defaultProps.http, mockFile, true);
       expect(component.state()).toMatchObject({
         conflictedIndexPatterns: undefined,
         conflictedSavedObjectsLinkedToSavedSearches: undefined,
@@ -223,7 +213,7 @@ describe('Flyout', () => {
     });
 
     it('should allow conflict resolution', async () => {
-      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+      const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -239,7 +229,7 @@ describe('Flyout', () => {
 
       // Ensure we can change the resolution
       component.instance().onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
-      expect(component.state('unmatchedReferences')[0].newIndexPatternId).toBe('2');
+      expect(component.state('unmatchedReferences')![0].newIndexPatternId).toBe('2');
 
       // Let's resolve now
       await component
@@ -247,18 +237,18 @@ describe('Flyout', () => {
         .simulate('click');
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
-      expect(resolveImportErrors).toMatchSnapshot();
+      expect(resolveImportErrorsMock).toMatchSnapshot();
     });
 
     it('should handle errors', async () => {
-      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+      const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
-      resolveImportErrors.mockImplementation(() => ({
+      resolveImportErrorsMock.mockImplementation(() => ({
         status: 'success',
         importCount: 0,
         failedImports: [
@@ -303,18 +293,15 @@ describe('Flyout', () => {
   });
 
   describe('errors', () => {
-    const { importFile } = require('../../../../../lib/import_file');
-    const { resolveImportErrors } = require('../../../../../lib/resolve_import_errors');
-
     it('should display unsupported type errors properly', async () => {
-      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+      const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
       await Promise.resolve();
       // Ensure the state changes are reflected
       component.update();
 
-      importFile.mockImplementation(() => ({
+      importFileMock.mockImplementation(() => ({
         success: false,
         successCount: 0,
         errors: [
@@ -328,7 +315,7 @@ describe('Flyout', () => {
           },
         ],
       }));
-      resolveImportErrors.mockImplementation(() => ({
+      resolveImportErrorsMock.mockImplementation(() => ({
         status: 'success',
         importCount: 0,
         failedImports: [
@@ -372,14 +359,6 @@ describe('Flyout', () => {
   });
 
   describe('legacy conflicts', () => {
-    const { importLegacyFile } = require('../../../../../lib/import_legacy_file');
-    const {
-      resolveSavedObjects,
-      resolveSavedSearches,
-      resolveIndexPatternConflicts,
-      saveObjects,
-    } = require('../../../../../lib/resolve_saved_objects');
-
     const mockData = [
       {
         _id: '1',
@@ -406,7 +385,7 @@ describe('Flyout', () => {
         },
         obj: {
           searchSource: {
-            getOwnField: field => {
+            getOwnField: (field: string) => {
               if (field === 'index') {
                 return 'MyIndexPattern*';
               }
@@ -426,8 +405,8 @@ describe('Flyout', () => {
     const mockConflictedSearchDocs = [3];
 
     beforeEach(() => {
-      importLegacyFile.mockImplementation(() => mockData);
-      resolveSavedObjects.mockImplementation(() => ({
+      importLegacyFileMock.mockImplementation(() => mockData);
+      resolveSavedObjectsMock.mockImplementation(() => ({
         conflictedIndexPatterns: mockConflictedIndexPatterns,
         conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
         conflictedSearchDocs: mockConflictedSearchDocs,
@@ -437,7 +416,7 @@ describe('Flyout', () => {
     });
 
     it('should figure out unmatchedReferences', async () => {
-      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+      const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -447,14 +426,14 @@ describe('Flyout', () => {
       component.setState({ file: legacyMockFile, isLegacyFile: true });
       await component.instance().legacyImport();
 
-      expect(importLegacyFile).toHaveBeenCalledWith(legacyMockFile);
+      expect(importLegacyFileMock).toHaveBeenCalledWith(legacyMockFile);
       // Remove the last element from data since it should be filtered out
-      expect(resolveSavedObjects).toHaveBeenCalledWith(
+      expect(resolveSavedObjectsMock).toHaveBeenCalledWith(
         mockData.slice(0, 2).map(doc => ({ ...doc, _migrationVersion: {} })),
         true,
-        defaultProps.services,
+        defaultProps.serviceRegistry.all().map(s => s.service),
         defaultProps.indexPatterns,
-        defaultProps.confirmModalPromise
+        defaultProps.overlays.openConfirm
       );
 
       expect(component.state()).toMatchObject({
@@ -492,7 +471,7 @@ describe('Flyout', () => {
     });
 
     it('should allow conflict resolution', async () => {
-      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+      const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -508,7 +487,7 @@ describe('Flyout', () => {
 
       // Ensure we can change the resolution
       component.instance().onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
-      expect(component.state('unmatchedReferences')[0].newIndexPatternId).toBe('2');
+      expect(component.state('unmatchedReferences')![0].newIndexPatternId).toBe('2');
 
       // Let's resolve now
       await component
@@ -516,32 +495,32 @@ describe('Flyout', () => {
         .simulate('click');
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
-      expect(resolveIndexPatternConflicts).toHaveBeenCalledWith(
+      expect(resolveIndexPatternConflictsMock).toHaveBeenCalledWith(
         component.instance().resolutions,
         mockConflictedIndexPatterns,
         true
       );
-      expect(saveObjects).toHaveBeenCalledWith(
+      expect(saveObjectsMock).toHaveBeenCalledWith(
         mockConflictedSavedObjectsLinkedToSavedSearches,
         true
       );
-      expect(resolveSavedSearches).toHaveBeenCalledWith(
+      expect(resolveSavedSearchesMock).toHaveBeenCalledWith(
         mockConflictedSearchDocs,
-        defaultProps.services,
+        defaultProps.serviceRegistry.all().map(s => s.service),
         defaultProps.indexPatterns,
         true
       );
     });
 
     it('should handle errors', async () => {
-      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+      const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
-      resolveIndexPatternConflicts.mockImplementation(() => {
+      resolveIndexPatternConflictsMock.mockImplementation(() => {
         throw new Error('foobar');
       });
 

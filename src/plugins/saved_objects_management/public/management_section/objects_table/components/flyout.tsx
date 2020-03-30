@@ -18,7 +18,6 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { take, get as getField } from 'lodash';
 import {
   EuiFlyout,
@@ -32,6 +31,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
+  // @ts-ignore
   EuiFilePicker,
   EuiInMemoryTable,
   EuiSelect,
@@ -47,34 +47,62 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
+import { OverlayStart, HttpStart } from 'src/core/public';
+import { IndexPatternsContract, IIndexPattern } from '../../../../../data/public';
 import {
   importFile,
   importLegacyFile,
   resolveImportErrors,
   logLegacyImport,
   getDefaultTitle,
-} from '../../../../lib';
-import { processImportResponse } from '../../../../lib/process_import_response';
+  processImportResponse,
+  ProcessedImportResponse,
+} from '../../../lib';
 import {
   resolveSavedObjects,
   resolveSavedSearches,
   resolveIndexPatternConflicts,
   saveObjects,
-} from '../../../../lib/resolve_saved_objects';
-import { POSSIBLE_TYPES } from '../../objects_table';
+} from '../../../lib/resolve_saved_objects';
+import { ISavedObjectsManagementServiceRegistry } from '../../../services';
 
-export class Flyout extends Component {
-  static propTypes = {
-    close: PropTypes.func.isRequired,
-    done: PropTypes.func.isRequired,
-    services: PropTypes.array.isRequired,
-    newIndexPatternUrl: PropTypes.string.isRequired,
-    indexPatterns: PropTypes.object.isRequired,
-    confirmModalPromise: PropTypes.func.isRequired,
-  };
+export interface FlyoutProps {
+  serviceRegistry: ISavedObjectsManagementServiceRegistry;
+  allowedTypes: string[];
+  close: () => void;
+  done: () => void;
+  newIndexPatternUrl: string;
+  indexPatterns: IndexPatternsContract;
+  overlays: OverlayStart;
+  http: HttpStart;
+}
 
-  constructor(props) {
+export interface FlyoutState {
+  conflictedIndexPatterns?: any[]; // TODO
+  conflictedSavedObjectsLinkedToSavedSearches?: any[]; // TODO
+  conflictedSearchDocs?: any[]; // TODO
+  unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
+  failedImports?: ProcessedImportResponse['failedImports'];
+  conflictingRecord?: ConflictingRecord;
+  error?: string;
+  file?: File;
+  importCount: number;
+  indexPatterns?: IIndexPattern[];
+  isOverwriteAllChecked: boolean;
+  loadingMessage?: string;
+  isLegacyFile: boolean;
+  status: string; // TODO: improve type
+}
+
+interface ConflictingRecord {
+  id: string;
+  type: string;
+  title: string;
+  done: (success: boolean) => void;
+}
+
+export class Flyout extends Component<FlyoutProps, FlyoutState> {
+  constructor(props: FlyoutProps) {
     super(props);
 
     this.state = {
@@ -100,7 +128,7 @@ export class Flyout extends Component {
 
   fetchIndexPatterns = async () => {
     const indexPatterns = await this.props.indexPatterns.getFields(['id', 'title']);
-    this.setState({ indexPatterns });
+    this.setState({ indexPatterns } as any);
   };
 
   changeOverwriteAll = () => {
@@ -109,11 +137,12 @@ export class Flyout extends Component {
     }));
   };
 
-  setImportFile = ([file]) => {
-    if (!file) {
+  setImportFile = (files: FileList | null) => {
+    if (!files || !files[0]) {
       this.setState({ file: undefined, isLegacyFile: false });
       return;
     }
+    const file = files[0];
     this.setState({
       file,
       isLegacyFile: /\.json$/i.test(file.name) || file.type === 'application/json',
@@ -126,13 +155,20 @@ export class Flyout extends Component {
    * Does the initial import of a file, resolveImportErrors then handles errors and retries
    */
   import = async () => {
+    const { http } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
-    let response;
     try {
-      response = await importFile(file, isOverwriteAllChecked);
+      const response = await importFile(http, file!, isOverwriteAllChecked);
+      this.setState(processImportResponse(response), () => {
+        // Resolve import errors right away if there's no index patterns to match
+        // This will ask about overwriting each object, etc
+        if (this.state.unmatchedReferences?.length === 0) {
+          this.resolveImportErrors();
+        }
+      });
     } catch (e) {
       this.setState({
         status: 'error',
@@ -142,14 +178,6 @@ export class Flyout extends Component {
       });
       return;
     }
-
-    this.setState(processImportResponse(response), () => {
-      // Resolve import errors right away if there's no index patterns to match
-      // This will ask about overwriting each object, etc
-      if (this.state.unmatchedReferences.length === 0) {
-        this.resolveImportErrors();
-      }
-    });
   };
 
   /**
@@ -160,10 +188,10 @@ export class Flyout extends Component {
    * @param {array} objects List of objects to request the user if they wish to overwrite it
    * @return {Promise<array>} An object with the key being "type:id" and value the resolution chosen by the user
    */
-  getConflictResolutions = async objects => {
-    const resolutions = {};
+  getConflictResolutions = async (objects: any[]) => {
+    const resolutions: Record<string, boolean> = {};
     for (const { type, id, title } of objects) {
-      const overwrite = await new Promise(resolve => {
+      const overwrite = await new Promise<boolean>(resolve => {
         this.setState({
           conflictingRecord: {
             id,
@@ -193,6 +221,7 @@ export class Flyout extends Component {
 
     try {
       const updatedState = await resolveImportErrors({
+        http: this.props.http,
         state: this.state,
         getConflictResolutions: this.getConflictResolutions,
       });
@@ -209,17 +238,17 @@ export class Flyout extends Component {
   };
 
   legacyImport = async () => {
-    const { services, indexPatterns, confirmModalPromise } = this.props;
+    const { serviceRegistry, indexPatterns, overlays, http, allowedTypes } = this.props;
     const { file, isOverwriteAllChecked } = this.state;
 
     this.setState({ status: 'loading', error: undefined });
 
     // Log warning on server, don't wait for response
-    logLegacyImport();
+    logLegacyImport(http);
 
     let contents;
     try {
-      contents = await importLegacyFile(file);
+      contents = await importLegacyFile(file!);
     } catch (e) {
       this.setState({
         status: 'error',
@@ -243,7 +272,7 @@ export class Flyout extends Component {
     }
 
     contents = contents
-      .filter(content => POSSIBLE_TYPES.includes(content._type))
+      .filter(content => allowedTypes.includes(content._type))
       .map(doc => ({
         ...doc,
         // The server assumes that documents with no migrationVersion are up to date.
@@ -263,18 +292,18 @@ export class Flyout extends Component {
     } = await resolveSavedObjects(
       contents,
       isOverwriteAllChecked,
-      services,
+      serviceRegistry.all().map(e => e.service),
       indexPatterns,
-      confirmModalPromise
+      overlays.openConfirm
     );
 
-    const byId = {};
+    const byId: Record<string, any[]> = {};
     conflictedIndexPatterns
       .map(({ doc, obj }) => {
         return { doc, obj: obj._serialize() };
       })
       .forEach(({ doc, obj }) =>
-        obj.references.forEach(ref => {
+        obj.references.forEach((ref: Record<string, any>) => {
           byId[ref.id] = byId[ref.id] != null ? byId[ref.id].concat({ doc, obj }) : [{ doc, obj }];
         })
       );
@@ -291,7 +320,7 @@ export class Flyout extends Component {
         });
         return accum;
       },
-      []
+      [] as any[]
     );
 
     this.setState({
@@ -305,12 +334,12 @@ export class Flyout extends Component {
     });
   };
 
-  get hasUnmatchedReferences() {
+  public get hasUnmatchedReferences() {
     return this.state.unmatchedReferences && this.state.unmatchedReferences.length > 0;
   }
 
-  get resolutions() {
-    return this.state.unmatchedReferences.reduce(
+  public get resolutions() {
+    return this.state.unmatchedReferences!.reduce(
       (accum, { existingIndexPatternId, newIndexPatternId }) => {
         if (newIndexPatternId) {
           accum.push({
@@ -320,7 +349,7 @@ export class Flyout extends Component {
         }
         return accum;
       },
-      []
+      [] as Array<{ oldId: string; newId: string }>
     );
   }
 
@@ -333,7 +362,7 @@ export class Flyout extends Component {
       failedImports,
     } = this.state;
 
-    const { services, indexPatterns } = this.props;
+    const { serviceRegistry, indexPatterns } = this.props;
 
     this.setState({
       error: undefined,
@@ -357,7 +386,7 @@ export class Flyout extends Component {
         if (resolutions.length) {
           importCount += await resolveIndexPatternConflicts(
             resolutions,
-            conflictedIndexPatterns,
+            conflictedIndexPatterns!,
             isOverwriteAllChecked
           );
         }
@@ -368,7 +397,7 @@ export class Flyout extends Component {
           ),
         });
         importCount += await saveObjects(
-          conflictedSavedObjectsLinkedToSavedSearches,
+          conflictedSavedObjectsLinkedToSavedSearches!,
           isOverwriteAllChecked
         );
         this.setState({
@@ -378,8 +407,8 @@ export class Flyout extends Component {
           ),
         });
         importCount += await resolveSavedSearches(
-          conflictedSearchDocs,
-          services,
+          conflictedSearchDocs!,
+          serviceRegistry.all().map(e => e.service),
           indexPatterns,
           isOverwriteAllChecked
         );
@@ -390,7 +419,7 @@ export class Flyout extends Component {
           ),
         });
         importCount += await saveObjects(
-          failedImports.map(({ obj }) => obj),
+          failedImports!.map(({ obj }) => obj) as any[],
           isOverwriteAllChecked
         );
       } catch (e) {
@@ -406,26 +435,26 @@ export class Flyout extends Component {
     this.setState({ status: 'success', importCount });
   };
 
-  onIndexChanged = (id, e) => {
+  onIndexChanged = (id: string, e: any) => {
     const value = e.target.value;
     this.setState(state => {
-      const conflictIndex = state.unmatchedReferences.findIndex(
+      const conflictIndex = state.unmatchedReferences?.findIndex(
         conflict => conflict.existingIndexPatternId === id
       );
-      if (conflictIndex === -1) {
+      if (conflictIndex === undefined || conflictIndex === -1) {
         return state;
       }
 
       return {
         unmatchedReferences: [
-          ...state.unmatchedReferences.slice(0, conflictIndex),
+          ...state.unmatchedReferences!.slice(0, conflictIndex),
           {
-            ...state.unmatchedReferences[conflictIndex],
+            ...state.unmatchedReferences![conflictIndex],
             newIndexPatternId: value,
           },
-          ...state.unmatchedReferences.slice(conflictIndex + 1),
+          ...state.unmatchedReferences!.slice(conflictIndex + 1),
         ],
-      };
+      } as any;
     });
   };
 
@@ -459,7 +488,7 @@ export class Flyout extends Component {
           'kbn.management.objects.objectsTable.flyout.renderConflicts.columnCountDescription',
           { defaultMessage: 'How many affected objects' }
         ),
-        render: list => {
+        render: (list: any[]) => {
           return <Fragment>{list.length}</Fragment>;
         },
       },
@@ -473,7 +502,7 @@ export class Flyout extends Component {
           'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsDescription',
           { defaultMessage: 'Sample of affected objects' }
         ),
-        render: list => {
+        render: (list: any[]) => {
           return (
             <ul style={{ listStyle: 'none' }}>
               {take(list, 3).map((obj, key) => (
@@ -489,12 +518,15 @@ export class Flyout extends Component {
           'kbn.management.objects.objectsTable.flyout.renderConflicts.columnNewIndexPatternName',
           { defaultMessage: 'New index pattern' }
         ),
-        render: id => {
-          const options = this.state.indexPatterns.map(indexPattern => ({
-            text: indexPattern.title,
-            value: indexPattern.id,
-            ['data-test-subj']: `indexPatternOption-${indexPattern.title}`,
-          }));
+        render: (id: string) => {
+          const options = this.state.indexPatterns!.map(
+            indexPattern =>
+              ({
+                text: indexPattern.title,
+                value: indexPattern.id,
+                'data-test-subj': `indexPatternOption-${indexPattern.title}`,
+              } as { text: string; value: string; 'data-test-subj'?: string })
+          );
 
           options.unshift({
             text: '-- Skip Import --',
@@ -517,7 +549,11 @@ export class Flyout extends Component {
     };
 
     return (
-      <EuiInMemoryTable items={unmatchedReferences} columns={columns} pagination={pagination} />
+      <EuiInMemoryTable
+        items={unmatchedReferences as any[]}
+        columns={columns}
+        pagination={pagination}
+      />
     );
   }
 
@@ -627,7 +663,7 @@ export class Flyout extends Component {
                     }
                   );
                 }
-                return getField(error, 'body.message', error.message || '');
+                return getField(error, 'body.message', (error as any).message ?? '');
               })
               .join(' ')}
           </p>
@@ -866,11 +902,11 @@ export class Flyout extends Component {
   }
 
   overwriteConfirmed() {
-    this.state.conflictingRecord.done(true);
+    this.state.conflictingRecord!.done(true);
   }
 
   overwriteSkipped() {
-    this.state.conflictingRecord.done(false);
+    this.state.conflictingRecord!.done(false);
   }
 
   render() {

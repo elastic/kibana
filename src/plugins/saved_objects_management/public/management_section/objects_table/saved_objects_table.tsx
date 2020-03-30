@@ -67,11 +67,10 @@ import {
   extractExportDetails,
   SavedObjectsExportResultDetails,
 } from '../../lib';
-// import { Flyout } from './components/flyout';
 // import { Relationships } from './components/relationships';
 import { SavedObjectWithMetadata } from '../../types';
 import { ISavedObjectsManagementServiceRegistry } from '../../services';
-import { Header, Table } from './components';
+import { Header, Table, Flyout } from './components';
 
 interface ExportAllOption {
   id: string;
@@ -452,19 +451,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
 
-    /* TODO
     return (
       <Flyout
         close={this.hideImportFlyout}
         done={this.finishImport}
-        services={this.props.services}
+        http={this.props.http}
+        serviceRegistry={this.props.serviceRegistry}
         indexPatterns={this.props.indexPatterns}
-        newIndexPatternUrl={this.props.newIndexPatternUrl}
-        savedObjectTypes={this.props.savedObjectTypes}
-        confirmModalPromise={this.props.confirmModalPromise}
+        newIndexPatternUrl={''} // TODO: fix
+        allowedTypes={this.props.allowedTypes}
+        overlays={this.props.overlays}
       />
     );
-     */
   }
 
   renderRelationships() {

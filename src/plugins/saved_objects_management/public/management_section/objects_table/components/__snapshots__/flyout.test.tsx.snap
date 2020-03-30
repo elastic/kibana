@@ -164,6 +164,30 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
     Array [
       Object {
         "getConflictResolutions": [Function],
+        "http": Object {
+          "addLoadingCountSource": [MockFunction],
+          "anonymousPaths": Object {
+            "isAnonymous": [MockFunction],
+            "register": [MockFunction],
+          },
+          "basePath": BasePath {
+            "basePath": "",
+            "get": [Function],
+            "prepend": [Function],
+            "remove": [Function],
+            "serverBasePath": "",
+          },
+          "delete": [MockFunction],
+          "fetch": [MockFunction],
+          "get": [MockFunction],
+          "getLoadingCount$": [MockFunction],
+          "head": [MockFunction],
+          "intercept": [MockFunction],
+          "options": [MockFunction],
+          "patch": [MockFunction],
+          "post": [MockFunction],
+          "put": [MockFunction],
+        },
         "state": Object {
           "conflictedIndexPatterns": undefined,
           "conflictedSavedObjectsLinkedToSavedSearches": undefined,
