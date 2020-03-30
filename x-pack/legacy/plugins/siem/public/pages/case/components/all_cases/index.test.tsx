@@ -202,7 +202,7 @@ describe('AllCases', () => {
       .last()
       .simulate('click');
     expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual(
-      useGetCasesMockState.data.cases.map(theCase => theCase.id)
+      useGetCasesMockState.data.cases.map(({ id }) => ({ id }))
     );
   });
   it('Bulk close status update', () => {
