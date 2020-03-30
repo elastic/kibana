@@ -417,7 +417,7 @@ def newPipeline(Closure closure = {}) {
 
       task {
         buildXpack()
-        bash("mkdir -p ${env.WORKSPACE}/kibana-build-xpack; mv install/kibana ${env.WORKSPACE}/kibana-build-xpack/", "Move XPack build")
+        bash("mkdir -p ${env.WORKSPACE}/kibana-build-xpack; mv ../install/kibana ${env.WORKSPACE}/kibana-build-xpack/", "Move XPack build")
 
         tasks(testPlan.xpack.collect { return { runFunctionalTestSuite('xpack', it) } })
 
