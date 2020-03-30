@@ -12,25 +12,34 @@ export type IndexAlias = 'auditbeat' | 'filebeat' | 'packetbeat' | 'ecs' | 'winl
  */
 
 export interface SchemaFields {
+  default_field: boolean;
   definition: string;
+  deprecated: string;
   description: string;
   doc_values: boolean;
-  example: string | number | object;
+  example: string | number | object | boolean;
   footnote: string;
   format: string;
   group: number;
   index: boolean;
+  ignore_above: number;
   input_format: string;
   level: string;
   migration: boolean;
   multi_fields: object[];
   name: string;
+  norms: boolean;
   object_type: string;
+  object_type_mapping_type: string;
+  output_format: string;
+  output_precision: number;
+  overwrite: boolean;
   path: string;
   possible_values: string[] | number[];
   release: string;
   required: boolean;
   reusable: object;
+  short: string;
   title: string;
   type: string;
   fields: Array<Partial<SchemaFields>>;
