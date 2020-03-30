@@ -192,6 +192,18 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       name: MONITOR_STATUS.name,
     },
   ],
+  actionVariables: {
+    context: [
+      {
+        name: 'message',
+        description: 'A generated message summarizing the currently down monitors',
+      },
+      {
+        name: 'completeIdList',
+        description: 'A complete list of all the down monitors',
+      },
+    ],
+  },
   async executor(options: AlertExecutorOptions) {
     const { params: rawParams } = options;
     const decoded = StatusCheckExecutorParamsType.decode(rawParams);
@@ -227,7 +239,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       });
       alertInstance.scheduleActions(MONITOR_STATUS.id, {
         message: contextMessage(Array.from(uniqueIds.keys()), DEFAULT_MAX_MESSAGE_ROWS),
-        server,
         completeIdList: fullListByIdAndLocation(monitorsByLocation),
       });
     }
