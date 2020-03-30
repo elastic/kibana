@@ -161,6 +161,12 @@ export class HeadlessChromiumDriver {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
 
+      if (!interceptedResponse.ok()) {
+        logger.warn(
+          `Chromium received a non-OK response (${interceptedResponse.status()}) for request ${interceptedUrl}`
+        );
+      }
+
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
         this.page.browser().close();
