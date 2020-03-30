@@ -23,7 +23,11 @@ export const readIndexRoute = (router: IRouter) => {
 
       try {
         const clusterClient = context.core.elasticsearch.dataClient;
-        const siemClient = context.siem.getSiemClient();
+        const siemClient = context.siem?.getSiemClient();
+
+        if (!siemClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
 
         const index = siemClient.signalsIndex;
         const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, index);
