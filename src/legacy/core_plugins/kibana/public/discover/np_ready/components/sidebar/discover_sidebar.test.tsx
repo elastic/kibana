@@ -111,7 +111,7 @@ describe('discover sidebar', function() {
     const popular = findTestSubject(comp, 'fieldList-popular');
     const selected = findTestSubject(comp, 'fieldList-selected');
     const unpopular = findTestSubject(comp, 'fieldList-unpopular');
-    expect(popular.children().length).toBe(2);
+    expect(popular.children().length).toBe(1);
     expect(unpopular.children().length).toBe(7);
     expect(selected.children().length).toBe(1);
   });
