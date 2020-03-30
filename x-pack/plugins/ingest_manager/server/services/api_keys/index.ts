@@ -75,7 +75,7 @@ export async function getEnrollmentAPIKeyById(
     })
   ).saved_objects.map(_savedObjectToEnrollmentApiKey);
 
-  if (enrollmentAPIKey?.id !== apiKeyId) {
+  if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
     throw new Error('find enrollmentKeyById returned an incorrect key');
   }
 
