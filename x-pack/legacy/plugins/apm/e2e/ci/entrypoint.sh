@@ -13,7 +13,6 @@ export CYPRESS_BASE_URL=http://${kibana}:5701
 export HOME=/tmp
 npm config set cache ${HOME}
 
-cd /app/x-pack/legacy/plugins/apm/e2e
 ## Install dependencies for cypress
 CI=true npm install
 yarn
