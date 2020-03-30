@@ -83,10 +83,11 @@ export function DiscoverField({
   useShortDots,
 }: DiscoverFieldProps) {
   const addLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
-    defaultMessage: 'Add',
+    defaultMessage: 'Add {field} to table',
+    values: { field: field.name },
   });
   const removeLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.removeButtonLabel', {
-    defaultMessage: 'Remove',
+    defaultMessage: 'Remove {field} from table',
   });
 
   const toggleDisplay = (f: IndexPatternField) => {

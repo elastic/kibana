@@ -20,7 +20,6 @@ import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
-import { getBucketAriaLabel } from './lib/get_bucket_aria_label';
 import { Bucket } from './types';
 import { IndexPatternField } from '../../../../../../../../plugins/data/public';
 
@@ -37,20 +36,22 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
   const addLabel = i18n.translate(
     'kbn.discover.fieldChooser.detailViews.filterValueButtonAriaLabel',
     {
-      defaultMessage: 'Filter for this value',
+      defaultMessage: 'Filter for {field}: "{value}"',
+      values: { value: bucket.value, field: field.name },
     }
   );
   const removeLabel = i18n.translate(
     'kbn.discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel',
     {
-      defaultMessage: 'Filter out this value',
+      defaultMessage: 'Filter out {field}: "{value}"',
+      values: { value: bucket.value, field: field.name },
     }
   );
 
   return (
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false}>
-        <EuiFlexItem aria-label={getBucketAriaLabel(bucket)} className="eui-textTruncate">
+        <EuiFlexItem className="eui-textTruncate">
           <EuiText size="xs" className="eui-textTruncate">
             {bucket.display === '' ? emptyTxt : bucket.display}
           </EuiText>

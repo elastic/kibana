@@ -38,7 +38,7 @@ export function StringFieldProgressBar(props: Props) {
             value={props.percent}
             max={100}
             color="secondary"
-            aria-label={`${props.percent}%`}
+            aria-hidden={true}
             size="l"
           />
         </EuiFlexItem>

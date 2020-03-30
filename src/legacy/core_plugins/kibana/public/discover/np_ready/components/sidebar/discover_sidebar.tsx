@@ -176,7 +176,7 @@ export function DiscoverSidebar({
         setIndexPattern={setIndexPattern}
         indexPatternList={sortBy(indexPatternList, o => o.attributes.title)}
       />
-      <div className="dscSidebar__item">
+      <div className="dscSidebar__item" role="presentation">
         <form>
           <DiscoverFieldSearch
             onChange={onChangeFieldSearch}
@@ -259,12 +259,12 @@ export function DiscoverSidebar({
             className={`dscFieldList dscFieldList--popular ${
               !showFields ? 'hidden-sm hidden-xs' : ''
             }`}
-            aria-labelledby="available_fields"
+            aria-labelledby="available_fields available_fields_popular"
             data-test-subj={`fieldList-popular`}
           >
             <li className="dscSidebar__item">
               <EuiTitle size="xxxs">
-                <h4 style={{ fontWeight: 'normal' }}>
+                <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
                   <FormattedMessage
                     id="kbn.discover.fieldChooser.filter.popularTitle"
                     defaultMessage="Popular"
