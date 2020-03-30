@@ -17,25 +17,8 @@
  * under the License.
  */
 
-import React from 'react';
-import './initialize';
-import { npStart } from 'ui/new_platform';
+import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 
-export const AppWithTopNav = () => {
-  const { TopNavMenu } = npStart.plugins.navigation.ui;
-  const config = [
-    {
-      id: 'new',
-      label: 'New Button',
-      description: 'New Demo',
-      run() {},
-      testId: 'demoNewButton',
-    },
-  ];
-
-  return (
-    <TopNavMenu appName="demo-app" config={config}>
-      Hey
-    </TopNavMenu>
-  );
-};
+export interface AppPluginDependencies {
+  navigation: NavigationPublicPluginStart;
+}
