@@ -10,7 +10,7 @@ import { action } from '@storybook/addon-actions';
 import { ElementGrid } from '../element_grid';
 import { testElements, testCustomElements } from './fixtures/test_elements';
 
-storiesOf('components/Elements/ElementGrid', module)
+storiesOf('components/SavedElementsModal/ElementGrid', module)
   .addDecorator(story => (
     <div
       style={{

@@ -9,7 +9,7 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { ElementControls } from '../element_controls';
 
-storiesOf('components/Elements/ElementControls', module)
+storiesOf('components/SavedElementsModal/ElementControls', module)
   .addDecorator(story => (
     <div
       style={{
