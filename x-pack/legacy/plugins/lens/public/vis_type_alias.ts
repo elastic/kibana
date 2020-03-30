@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { VisTypeAlias } from 'src/plugins/visualizations/public';
 import { getBasePath, getEditPath } from '../../../../plugins/lens/common';
-import { VisTypeAlias } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/vis_types';
 
 export const getLensAliasConfig = (): VisTypeAlias => ({
   aliasUrl: getBasePath(),
