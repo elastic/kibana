@@ -17,23 +17,5 @@
  * under the License.
  */
 
-export function initYAxis(chart) {
-  const y = chart.aspects.y;
-
-  if (Array.isArray(y)) {
-    // TODO: vis option should allow choosing this format
-    chart.yAxisFormat = y[0].format;
-    chart.yAxisLabel = y.length > 1 ? '' : y[0].title;
-  }
-
-  const z = chart.aspects.series;
-  if (z) {
-    if (Array.isArray(z)) {
-      chart.zAxisFormat = z[0].format;
-      chart.zAxisLabel = '';
-    } else {
-      chart.zAxisFormat = z.format;
-      chart.zAxisLabel = z.title;
-    }
-  }
-}
+// @ts-ignore
+export { buildPointSeriesData } from './point_series';

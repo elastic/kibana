@@ -18,8 +18,7 @@
  */
 
 import { getFormatService } from '../services';
-import { buildHierarchicalData } from './helpers/build_hierarchical_data';
-import { buildPointSeriesData } from './helpers/point_series';
+import { buildHierarchicalData, buildPointSeriesData } from './helpers';
 
 function tableResponseHandler(table, dimensions) {
   const converted = { tables: [] };

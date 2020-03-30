@@ -76,7 +76,6 @@
     }
   },
   "messages": {
-    "common.ui.aggResponse.allDocsTitle": "所有文档",
     "common.ui.errorAutoCreateIndex.breadcrumbs.errorText": "错误",
     "common.ui.errorAutoCreateIndex.errorDescription": "似乎 Elasticsearch 集群的 {autoCreateIndexActionConfig} 设置使 Kibana 无法自动创建用于存储已保存对象的索引。Kibana 将使用此 Elasticsearch 功能，因为这是确保已保存对象索引使用正确映射/架构的最好方式，而且其允许 Kibana 较少地轮询 Elasticsearch。",
     "common.ui.errorAutoCreateIndex.errorDisclaimer": "但是，只有解决了此问题后，您才能在 Kibana 保存内容。",
@@ -2195,6 +2194,7 @@
     "home.welcomeDescription": "您了解 Elastic Stack 的窗口",
     "home.welcomeHomePageHeader": "Kibana 主页",
     "home.welcomeTitle": "欢迎使用 Kibana",
+    "visTypeVislib.aggResponse.allDocsTitle": "所有文档",
     "visTypeVislib.area.areaDescription": "突出折线图下方的数量",
     "visTypeVislib.area.areaTitle": "面积图",
     "visTypeVislib.area.countText": "计数",

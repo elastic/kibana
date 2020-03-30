@@ -18,7 +18,7 @@
  */
 
 import { toArray } from 'lodash';
-import { getFormatService } from '../../services';
+import { getFormatService } from '../../../services';
 
 export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
   let slices;

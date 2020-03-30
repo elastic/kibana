@@ -21,8 +21,7 @@ import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { aggResponseIndex } from 'ui/agg_response';
+import helpers from '../helpers';
 
 import { vislibSeriesResponseHandler } from '../response_handler';
 
@@ -56,7 +55,7 @@ describe.skip('renderbot#buildChartData', function() {
   describe('for hierarchical vis', function() {
     it('defers to hierarchical aggResponse converter', function() {
       const football = {};
-      const stub = sinon.stub(aggResponseIndex, 'hierarchical').returns(football);
+      const stub = sinon.stub(helpers, 'hierarchical').returns(football);
       expect(vislibSeriesResponseHandler(football)).to.be(football);
       expect(stub).to.have.property('callCount', 1);
       expect(stub.firstCall.args[1]).to.be(football);
@@ -66,7 +65,7 @@ describe.skip('renderbot#buildChartData', function() {
   describe('for point plot', function() {
     it('calls tabify to simplify the data into a table', function() {
       const football = { tables: [], hits: { total: 1 } };
-      const stub = sinon.stub(aggResponseIndex, 'tabify').returns(football);
+      const stub = sinon.stub(helpers, 'tabify').returns(football);
       expect(vislibSeriesResponseHandler(football)).to.eql({ rows: [], hits: 1 });
       expect(stub).to.have.property('callCount', 1);
       expect(stub.firstCall.args[1]).to.be(football);
@@ -77,7 +76,7 @@ describe.skip('renderbot#buildChartData', function() {
       const esResp = { hits: { total: 1 } };
       const tabbed = { tables: [{}] };
 
-      sinon.stub(aggResponseIndex, 'tabify').returns(tabbed);
+      sinon.stub(helpers, 'tabify').returns(tabbed);
       expect(vislibSeriesResponseHandler(esResp)).to.eql(chart);
     });
 
@@ -86,7 +85,7 @@ describe.skip('renderbot#buildChartData', function() {
       const esResp = { hits: { total: 1 } };
       const tables = [{}, {}, {}, {}];
 
-      sinon.stub(aggResponseIndex, 'tabify').returns({
+      sinon.stub(helpers, 'tabify').returns({
         tables: [
           {
             aggConfig: { params: { row: true } },

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 export function makeFakeXAspect() {
   return {
     accessor: -1,
-    title: i18n.translate('common.ui.aggResponse.allDocsTitle', {
+    title: i18n.translate('visTypeVislib.aggResponse.allDocsTitle', {
       defaultMessage: 'All docs',
     }),
     params: {
