@@ -47,9 +47,10 @@ import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
 import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
 import { useGetActionLicense } from '../../../../containers/case/use_get_action_license';
-import { getActionLicenseError } from '../push_to_service/helpers';
-import { ErrorsPushServiceCallOut } from '../errors_push_service_callout';
+import { getActionLicenseError } from '../use_push_to_service/helpers';
+import { CaseCallOut } from '../callout';
 import { ConfigureCaseButton } from '../configure_cases/button';
+import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -80,7 +81,11 @@ const getSortField = (field: string): SortFieldCase => {
   }
   return SortFieldCase.createdAt;
 };
-export const AllCases = React.memo(() => {
+
+interface AllCasesProps {
+  userCanCrud: boolean;
+}
+export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   const urlSearch = useGetUrlSearch(navTabs.case);
   const { actionLicense } = useGetActionLicense();
   const {
@@ -240,10 +245,10 @@ export const AllCases = React.memo(() => {
     [filterOptions, queryParams]
   );
 
-  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions, filterOptions.status), [
-    actions,
-    filterOptions.status,
-  ]);
+  const memoizedGetCasesColumns = useMemo(
+    () => getCasesColumns(userCanCrud ? actions : [], filterOptions.status, userCanCrud),
+    [actions, filterOptions.status, userCanCrud]
+  );
   const memoizedPagination = useMemo(
     () => ({
       pageIndex: queryParams.page - 1,
@@ -269,7 +274,9 @@ export const AllCases = React.memo(() => {
 
   return (
     <>
-      {!isEmpty(actionsErrors) && <ErrorsPushServiceCallOut errors={actionsErrors} />}
+      {!isEmpty(actionsErrors) && (
+        <CaseCallOut title={ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={actionsErrors} />
+      )}
       <CaseHeaderPage title={i18n.PAGE_TITLE}>
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={true}>
           <EuiFlexItem grow={false}>
@@ -289,7 +296,7 @@ export const AllCases = React.memo(() => {
           <EuiFlexItem grow={false}>
             <ConfigureCaseButton
               label={i18n.CONFIGURE_CASES_BUTTON}
-              isDisabled={!isEmpty(actionsErrors)}
+              isDisabled={!isEmpty(actionsErrors) || !userCanCrud}
               showToolTip={!isEmpty(actionsErrors)}
               msgTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].description : <></>}
               titleTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].title : ''}
@@ -297,7 +304,12 @@ export const AllCases = React.memo(() => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill href={getCreateCaseUrl(urlSearch)} iconType="plusInCircle">
+            <EuiButton
+              isDisabled={!userCanCrud}
+              fill
+              href={getCreateCaseUrl(urlSearch)}
+              iconType="plusInCircle"
+            >
               {i18n.CREATE_TITLE}
             </EuiButton>
           </EuiFlexItem>
@@ -335,15 +347,16 @@ export const AllCases = React.memo(() => {
                   <UtilityBarText data-test-subj="case-table-selected-case-count">
                     {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
                   </UtilityBarText>
-                  <UtilityBarAction
-                    data-test-subj="case-table-bulk-actions"
-                    iconSide="right"
-                    iconType="arrowDown"
-                    popoverContent={getBulkItemsPopoverContent}
-                  >
-                    {i18n.BULK_ACTIONS}
-                  </UtilityBarAction>
-
+                  {userCanCrud && (
+                    <UtilityBarAction
+                      data-test-subj="case-table-bulk-actions"
+                      iconSide="right"
+                      iconType="arrowDown"
+                      popoverContent={getBulkItemsPopoverContent}
+                    >
+                      {i18n.BULK_ACTIONS}
+                    </UtilityBarAction>
+                  )}
                   <UtilityBarAction iconSide="left" iconType="refresh" onClick={refreshCases}>
                     {i18n.REFRESH}
                   </UtilityBarAction>
@@ -353,7 +366,7 @@ export const AllCases = React.memo(() => {
             <EuiBasicTable
               columns={memoizedGetCasesColumns}
               data-test-subj="cases-table"
-              isSelectable
+              isSelectable={userCanCrud}
               itemId="id"
               items={data.cases}
               noItemsMessage={
@@ -375,7 +388,7 @@ export const AllCases = React.memo(() => {
               }
               onChange={tableOnChangeCallback}
               pagination={memoizedPagination}
-              selection={euiBasicTableSelectionProps}
+              selection={userCanCrud ? euiBasicTableSelectionProps : {}}
               sorting={sorting}
             />
           </Div>

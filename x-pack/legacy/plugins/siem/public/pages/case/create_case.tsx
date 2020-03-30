@@ -10,7 +10,7 @@ import { Redirect } from 'react-router-dom';
 import { getCaseUrl } from '../../components/link_to';
 import { useGetUrlSearch } from '../../components/navigation/use_get_url_search';
 import { WrapperPage } from '../../components/wrapper_page';
-import { useIsUserCanCrud } from '../../lib/kibana';
+import { useGetUserSavedObjectPermissions } from '../../lib/kibana';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { navTabs } from '../home/home_navigations';
 import { CaseHeaderPage } from './components/case_header_page';
@@ -18,7 +18,7 @@ import { Create } from './components/create';
 import * as i18n from './translations';
 
 export const CreateCasePage = React.memo(() => {
-  const isUserCanCrud = useIsUserCanCrud();
+  const userPermissions = useGetUserSavedObjectPermissions();
   const search = useGetUrlSearch(navTabs.case);
 
   const backOptions = useMemo(
@@ -29,7 +29,7 @@ export const CreateCasePage = React.memo(() => {
     [search]
   );
 
-  if (!isUserCanCrud) {
+  if (userPermissions != null && !userPermissions.crud) {
     return <Redirect to={getCaseUrl(search)} />;
   }
 

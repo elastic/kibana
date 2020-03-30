@@ -8,24 +8,30 @@ import React from 'react';
 import { useParams, Redirect } from 'react-router-dom';
 
 import { useGetUrlSearch } from '../../components/navigation/use_get_url_search';
-import { useIsUserCanCrud } from '../../lib/kibana';
+import { useGetUserSavedObjectPermissions } from '../../lib/kibana';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { getCaseUrl } from '../../components/link_to';
 import { navTabs } from '../home/home_navigations';
 import { CaseView } from './components/case_view';
+import { getSavedObjectReadOnly, CaseCallOut } from './components/callout';
+
+const infoReadSavedObject = getSavedObjectReadOnly();
 
 export const CaseDetailsPage = React.memo(() => {
-  const isUserCanCrud = useIsUserCanCrud();
+  const userPermissions = useGetUserSavedObjectPermissions();
   const { detailName: caseId } = useParams();
   const search = useGetUrlSearch(navTabs.case);
 
-  if (!isUserCanCrud) {
+  if (userPermissions != null && !userPermissions.read) {
     return <Redirect to={getCaseUrl(search)} />;
   }
 
   return caseId != null ? (
     <>
-      <CaseView caseId={caseId} />
+      {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
+        <CaseCallOut title={infoReadSavedObject.title} message={infoReadSavedObject.description} />
+      )}
+      <CaseView caseId={caseId} userCanCrud={userPermissions?.crud ?? false} />
       <SpyRoute />
     </>
   ) : null;

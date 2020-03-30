@@ -10,7 +10,7 @@ import { EmptyPage } from '../../components/empty_page';
 import * as i18n from './translations';
 import { useKibana } from '../../lib/kibana';
 
-export const CaseSavedObjectNotAvailable = React.memo(() => {
+export const CaseSavedObjectNoPermissions = React.memo(() => {
   const docLinks = useKibana().services.docLinks;
 
   return (
@@ -19,11 +19,11 @@ export const CaseSavedObjectNotAvailable = React.memo(() => {
       actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
       actionPrimaryUrl={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${docLinks.DOC_LINK_VERSION}s`}
       actionPrimaryTarget="_blank"
-      message={'comming soon'}
-      data-test-subj="no_saved_objects"
-      title={'comming soon'}
+      message={i18n.SAVED_OBJECT_NO_PERMISSIONS_MSG}
+      data-test-subj="no_saved_objects_permissions"
+      title={i18n.SAVED_OBJECT_NO_PERMISSIONS_TITLE}
     />
   );
 });
 
-CaseSavedObjectNotAvailable.displayName = 'CaseSavedObjectNotAvailable';
+CaseSavedObjectNoPermissions.displayName = 'CaseSavedObjectNoPermissions';

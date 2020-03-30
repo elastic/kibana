@@ -95,7 +95,7 @@ interface GetUserArgs {
 }
 
 interface CaseServiceDeps {
-  authentication: SecurityPluginSetup['authc'];
+  authentication: SecurityPluginSetup['authc'] | null;
 }
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
@@ -207,21 +207,27 @@ export class CaseService {
       }
     },
     getUser: async ({ request, response }: GetUserArgs) => {
-      const noUser = {
-        username: null,
-        full_name: null,
-        email: null,
-      };
       try {
         this.log.debug(`Attempting to authenticate a user`);
-        const user = authentication!.getCurrentUser(request);
-        if (!user) {
-          return noUser;
+        if (authentication != null) {
+          const user = authentication.getCurrentUser(request);
+          if (!user) {
+            return {
+              username: null,
+              full_name: null,
+              email: null,
+            };
+          }
+          return user;
         }
-        return user;
+        return {
+          username: null,
+          full_name: null,
+          email: null,
+        };
       } catch (error) {
         this.log.debug(`Error on GET cases: ${error}`);
-        return noUser;
+        throw error;
       }
     },
     postNewCase: async ({ client, attributes }: PostCaseArgs) => {

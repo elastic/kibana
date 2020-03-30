@@ -29,6 +29,7 @@ export interface UserActionTreeProps {
   lastIndexPushToService: number;
   onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
   updateCase: (newCase: Case) => void;
+  userCanCrud: boolean;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -49,6 +50,7 @@ export const UserActionTree = React.memo(
     lastIndexPushToService,
     onUpdateField,
     updateCase,
+    userCanCrud,
   }: UserActionTreeProps) => {
     const { commentId } = useParams();
     const handlerTimeoutId = useRef(0);
@@ -168,6 +170,7 @@ export const UserActionTree = React.memo(
       <>
         <UserActionItem
           createdAt={caseData.createdAt}
+          disabled={!userCanCrud}
           id={DESCRIPTION_ID}
           isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
           isLoading={isLoadingDescription}
@@ -189,6 +192,7 @@ export const UserActionTree = React.memo(
                 <UserActionItem
                   key={action.actionId}
                   createdAt={comment.createdAt}
+                  disabled={!userCanCrud}
                   id={comment.id}
                   idToOutline={selectedOutlineCommentId}
                   isEditable={manageMarkdownEditIds.includes(comment.id)}
@@ -231,6 +235,7 @@ export const UserActionTree = React.memo(
               <UserActionItem
                 key={action.actionId}
                 createdAt={action.actionAt}
+                disabled={!userCanCrud}
                 id={action.actionId}
                 isEditable={false}
                 isLoading={false}
@@ -263,6 +268,7 @@ export const UserActionTree = React.memo(
         )}
         <UserActionItem
           createdAt={new Date().toISOString()}
+          disabled={!userCanCrud}
           id={NEW_ID}
           isEditable={true}
           isLoading={isLoadingIds.includes(NEW_ID)}

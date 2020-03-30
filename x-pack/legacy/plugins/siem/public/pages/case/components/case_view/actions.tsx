@@ -16,9 +16,10 @@ import { Case } from '../../../../containers/case/types';
 
 interface CaseViewActions {
   caseData: Case;
+  disabled?: boolean;
 }
 
-const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData }) => {
+const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData, disabled = false }) => {
   // Delete case
   const {
     handleToggleModal,
@@ -43,6 +44,7 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData }) => {
   const propertyActions = useMemo(
     () => [
       {
+        disabled,
         iconType: 'trash',
         label: i18n.DELETE_CASE,
         onClick: handleToggleModal,
@@ -57,7 +59,7 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData }) => {
           ]
         : []),
     ],
-    [handleToggleModal, caseData]
+    [disabled, handleToggleModal, caseData]
   );
 
   if (isDeleted) {

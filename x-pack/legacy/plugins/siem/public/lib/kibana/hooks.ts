@@ -53,9 +53,11 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     let didCancel = false;
     const fetchData = async () => {
       try {
-        const response = await security.authc.getCurrentUser();
-        if (!didCancel) {
-          setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
+        if (security != null) {
+          const response = await security.authc.getCurrentUser();
+          if (!didCancel) {
+            setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
+          }
         }
       } catch (error) {
         if (!didCancel) {
@@ -82,9 +84,28 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   return user;
 };
 
-export const useIsUserCanCrud = () => {
+export interface UseGetUserSavedObjectPermissions {
+  crud: boolean;
+  read: boolean;
+}
+
+export const useGetUserSavedObjectPermissions = () => {
+  const [
+    savedObjectsPermissions,
+    setSavedObjectsPermissions,
+  ] = useState<UseGetUserSavedObjectPermissions | null>(null);
   const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean =
-    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
-  return capabilitiesCanUserCRUD;
+
+  useEffect(() => {
+    const capabilitiesCanUserCRUD: boolean =
+      typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
+    const capabilitiesCanUserRead: boolean =
+      typeof uiCapabilities.siem.show === 'boolean' ? uiCapabilities.siem.show : false;
+    setSavedObjectsPermissions({
+      crud: capabilitiesCanUserCRUD,
+      read: capabilitiesCanUserRead,
+    });
+  }, [uiCapabilities]);
+
+  return savedObjectsPermissions;
 };

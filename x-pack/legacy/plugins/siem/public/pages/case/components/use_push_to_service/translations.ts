@@ -6,6 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ERROR_PUSH_SERVICE_CALLOUT_TITLE = i18n.translate(
+  'xpack.siem.case.caseView.errorsPushServiceCallOutTitle',
+  {
+    defaultMessage: 'To send cases to external systems, you need to:',
+  }
+);
+
 export const PUSH_SERVICENOW = i18n.translate('xpack.siem.case.caseView.pushAsServicenowIncident', {
   defaultMessage: 'Push as ServiceNow incident',
 });
