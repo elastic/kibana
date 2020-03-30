@@ -638,6 +638,22 @@ export function GisPageProvider({ getService, getPageObjects }) {
         }
       });
     }
+
+    async setStyleByValue(styleName, fieldName) {
+      await testSubjects.selectValue(`staticDynamicSelect_${styleName}`, 'DYNAMIC');
+      await comboBox.set(`styleFieldSelect_${styleName}`, fieldName);
+    }
+
+    async selectCustomColorRamp(styleName) {
+      // open super select menu
+      await testSubjects.click(`colorMapSelect_${styleName}`);
+      // Click option
+      await testSubjects.click(`colorMapSelectOption_CUSTOM_COLOR_MAP`);
+    }
+
+    async getCategorySuggestions() {
+      return await comboBox.getOptionsList(`colorStopInput1`);
+    }
   }
   return new GisPage();
 }
