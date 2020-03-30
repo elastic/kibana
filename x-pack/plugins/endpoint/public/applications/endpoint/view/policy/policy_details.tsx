@@ -156,6 +156,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiButton
           fill={true}
           iconType="save"
+          // FIXME: need to disable if User has no write permissions to ingest - see: https://github.com/elastic/endpoint-app-team/issues/296
           onClick={handleSaveOnClick}
           isLoading={isPolicyLoading}
         >

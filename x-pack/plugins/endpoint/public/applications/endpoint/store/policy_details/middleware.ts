@@ -35,8 +35,8 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
         return;
       }
 
-      // FIXME: remove this code once the Default Policy is available in the endpoint package
-      // Until we get the Default configuration into the Enpoint package so that the datasource has
+      // FIXME: remove this code once the Default Policy is available in the endpoint package - see: https://github.com/elastic/endpoint-app-team/issues/295
+      // Until we get the Default configuration into the Endpoint package so that the datasource has
       // the expected data structure, we will add it here manually.
       if (!policyItem.inputs.length) {
         policyItem.inputs = [
@@ -57,26 +57,12 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
         type: 'serverReturnedPolicyDetailsData',
         payload: {
           policyItem,
-          policyConfig: {
-            // FIXME: remove this
-            windows: {
-              malware: {
-                mode: 'detect',
-              },
-              eventing: {
-                process: true,
-                network: true,
-              },
-            },
-            mac: {},
-            linux: {},
-          },
         },
       });
 
       // Agent summary is secondary data, so its ok for it to come after the details
       // page is populated with the main content
-      // FIXME: need to only do this IF fleet is enabled
+      // FIXME: need to only do this IF fleet is enabled - see: https://github.com/elastic/endpoint-app-team/issues/296
       if (policyItem.config_id) {
         const { results } = await sendGetFleetAgentStatusForConfig(http, policyItem.config_id);
         dispatch({
